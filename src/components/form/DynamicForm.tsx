@@ -38,6 +38,7 @@ import { getFormData } from "./getFormData";
 import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
+import { formSubmit } from "~/components/form/formSubmit";
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -76,7 +77,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   const [popup, setPopup] = createSignal(false);
   const [discradPopup, setDiscradPopup] = createSignal(false);
-  let submit: boolean;
   let onConfirmExit: () => void;
 
   const navigateToParentRoute = () => {
@@ -163,67 +163,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   }
 
   const onSubmit = async () => {
-    const isValid = true;
-    const isRealTime = false;
-    let data;
-    if (isValid) {
-      // TODO: add validation on form that AttrsTableData keys should not available.
-      // !!!TODO!!! Handle Error Received From server when commit
-      if (!isRealTime) {
-        data = commitTxn(txnId, graph);
-        if (!data) {
-          if (props.closePopUp) {
-            props.closePopUp();
-          } else {
-            navigateToParentRoute();
-          }
-          showWarningToast("Internal Server Error");
-          return;
-        }
-
-        const name = formData?.formData?.P.name;
-
-        const res = await checkIfNameExistsMGCall(
-          props.formId,
-          name,
-          id() as Id,
-        );
-
-        if (res.error) {
-          showErrorToast(res.message);
-          return;
-        }
-
-        const label = formData.formData.L[0].replace(/([A-Z])/g, ' $1').trim();
-        await showLoadingToast({
-          promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
-          loadMessage: `Saving ${label}...`,
-          successMessage: `${label} Saved Successfully`,
-          onSuccess: (value) => {
-            graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
-            // currently we are navigating back.
-            if (props.closePopUp) {
-              props.closePopUp();
-            } else {
-              navigateToParentRoute();
-            }
-          },
-        });
-      }
-      submit = true;
-    } else {
-      showWarningToast("please fix all errors");
-    }
-    if (!data) {
-      if (props.closePopUp) {
-        props.closePopUp();
-      } else {
-        navigateToParentRoute();
-      }
-      return;
-    }
-
-    return isValid;
+    return formSubmit(formData, id() as Id, txnId, graph, setGraph, showLoadingToast, showWarningToast, showErrorToast, navigateToParentRoute, props.closePopUp);
   };
 
   const onCancel = () => {
@@ -323,7 +263,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (submit || !txnHasSteps(formData.txnId, graph)) {
+    // TODO: only consider not submitted steps
+    if (!txnHasSteps(formData.txnId, graph)) {
       return;
     }
     e.preventDefault();

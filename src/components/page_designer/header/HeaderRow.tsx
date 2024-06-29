@@ -6,12 +6,11 @@ import { CustomModal } from "~/components/CommonDialog";
 import { ShareSection } from "./PageShare";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
-import { ProcessStatus, commitTxn, getNewTxnId } from "~/lib/graph/transaction";
-import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
-import { submitDataCall } from "~/lib/api/api_functions";
-import { GraphContext, IdAttr, } from "~/lib/graph/graph";
+import { getNewTxnId } from "~/lib/graph/transaction";
+import { GraphContext, } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
+import {formSubmit} from "~/components/form/formSubmit";
 export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
@@ -26,58 +25,8 @@ export function HeaderRow() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
-    // const result = validationGroup.validate();
-    const isValid = true;
-    const isRealTime = false;
-    let data;
-
-    if (isValid) {
-      // !!!TODO!!! Handle Error Received From server when commit
-      if (!isRealTime) {
-        data = commitTxn(txnId, graph);
-        if (!data) {
-          showWarningToast("Internal Server Error");
-          setTimeout(() => navigate(-1), 0);
-          return;
-        }
-
-        const name = layoutStore.formData.formData.P[IdAttr];
-        const res = await checkIfNameExistsMGCall(
-          layoutStore.formData.formData.P[IdAttr],
-          name,
-          layoutStore.formData.formData.id
-        );
-
-        if (res.error) {
-          showErrorToast(res.message);
-          return;
-        }
-
-        await showLoadingToast({
-          promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
-          loadMessage: "Submitting Data...",
-          successMessage: "Data submitted successfully",
-          onSuccess: () => {
-            graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
-            // currently we are navigating back.
-            // setTimeout(() => navigate(-1), 500);
-          },
-          onError: () => {
-            showErrorToast("Data submission failed");
-           },
-        });
-      }
-    } else {
-      showWarningToast("Please fix all errors");
-    }
-
-    if (!data) {
-      setTimeout(() => navigate(-1), 0);
-    }
-
-    return isValid;
+  const onSubmit = async () => {
+    return formSubmit(layoutStore.formData, layoutStore.formData.formData.id, txnId, graph, setGraph, showLoadingToast, showWarningToast, showErrorToast, () => navigate(-1));
   };
   const LeftIcons = () => (<div class="flex ai:center">
     <div
@@ -164,7 +113,7 @@ export function HeaderRow() {
           </div>
           <div class="ai:center justify-content:space-between flex gap:5">
             <Tooltip content={"Save"} position={"s"}>
-              <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer" onClick={handleSubmit}>
+              <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer" onClick={onSubmit}>
                 <Icon icon={"bi:floppy"} height={22} width={22} />
               </div>
             </Tooltip>
