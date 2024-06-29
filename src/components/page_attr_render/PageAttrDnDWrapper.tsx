@@ -18,7 +18,7 @@ import {
   HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
-  PageConfigContext, SelectedCollContext, SelectedComponentContext,
+  SelectedCollContext, SelectedComponentContext,
   SelectedIdContext,
   ShowDrawerContext
 } from "~/lib/contexts";
@@ -33,6 +33,7 @@ import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { useToast } from "../Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { deleteLayoutGlobal } from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
+import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element; }) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -46,7 +47,7 @@ export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element;
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext
   );
-  const [pageConfig, __] = useContext(PageConfigContext);
+  const [pageConfig, __] = useDesignerLayoutStore();
 
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);

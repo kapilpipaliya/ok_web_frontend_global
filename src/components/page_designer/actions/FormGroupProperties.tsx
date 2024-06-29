@@ -7,12 +7,13 @@ import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEd
 import { Icon } from "@iconify-icon/solid";
 import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
 import { ValidationConfig } from "./ValidationConfig";
-import { PageConfigContext, SelectedComponentContext } from "~/lib/contexts";
+import { SelectedComponentContext } from "~/lib/contexts";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
 import { getMetaProps } from "~/lib/graph/get/sync/graph_functions";
 import { FormMetaData } from "~/lib/formMetaData";
 import { createWritableMemo } from "@solid-primitives/memo";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 
 interface FormGroupPropertiesProps {
@@ -27,7 +28,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
-  const [pageConfig, __] = useContext(PageConfigContext);
+  const [pageConfig, __] = useDesignerLayoutStore();
 
   const nameVertexId = `nameVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;

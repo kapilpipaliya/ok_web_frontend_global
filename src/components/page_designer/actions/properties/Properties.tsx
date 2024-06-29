@@ -30,7 +30,6 @@ export function Properties(props: { setShowDrawer?: any }) {
 // } from "~/components/solid_blocks";
 // import type { FieldAttribute } from "~/lib/FormMetadataType";
 // import {
-//   PageConfigContext,
 //   SelectedIdContext,
 //   SelectedComponentContext,
 // } from "~/lib/contexts";
@@ -60,7 +59,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 // }
 
 // export function Properties(props: { setShowDrawer?: any }) {
-//   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+//   const [pageConfig, setPageConfig] = useDesignerLayoutStore();
 //   const [graph, setGraph] = useContext(GraphContext)!;
 //   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
 //   const [selectedComponent, setSelectedComponent] = useContext(

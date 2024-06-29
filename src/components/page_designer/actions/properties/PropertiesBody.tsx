@@ -4,7 +4,7 @@ import { getChildVertex, getChildVertexes, getTreeData } from "~/lib/graph/get/s
 import { GenericField } from "~/components/fields/GenericField";
 import { ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 
-import { PageConfigContext, SelectedIdContext, SelectedComponentContext } from "~/lib/contexts";
+import { SelectedIdContext, SelectedComponentContext } from "~/lib/contexts";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { CollAndData } from "./CollAndData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
@@ -17,12 +17,13 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { FormGroupProperties } from "../FormGroupProperties";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function PropertiesBody(props: any) {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
   const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+  const [pageConfig, setPageConfig] = useDesignerLayoutStore();
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
   const setPropertyValue = (meta: Vertex, value: any) => {

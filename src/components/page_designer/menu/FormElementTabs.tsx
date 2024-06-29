@@ -6,15 +6,17 @@ import {
 } from "solid-js";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function FormElementTabs(props: Readonly<{ columns: { title: string; collection: string; }[]; }>) {
-  const [selectedTab, setSelectedTab] = createSignal(props.columns[0]);
+export function FormElementTabs() {
+  const [layoutStore] = useDesignerLayoutStore();
+  const [selectedTab, setSelectedTab] = createSignal(layoutStore.leftMenuTabs[0]);
 
   const Tabs = () => (
     <div class="position:sticky top:0 p:4 bg:white z:1">
       <div class="f:0.875rem mb:10 lh:1rem font-weight:500 text-align:center color:rgb(107,114,128) border-bottom-width:1px border-color:rgb(229,231,235)">
         <ul class="jc:space-around flex flex-wrap:wrap margin-bottom:-1px">
-          <For each={props.columns}>
+          <For each={layoutStore.leftMenuTabs}>
             {(data) => (
               <li class="me-2 cursor:pointer">
                 <button

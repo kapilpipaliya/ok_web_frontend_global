@@ -26,7 +26,7 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { FormContext, FormSettingsContext, type IFormContext, PageConfigContext } from "~/lib/contexts";
+import { FormContext, FormSettingsContext, type IFormContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
@@ -36,6 +36,7 @@ import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { getFormData } from "./getFormData";
 import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
+import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -62,7 +63,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
+  const [pageConfig, setPageConfig] = useDesignerLayoutStore() || [];
   const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
 
   const [formData, setFormData] = createStore({

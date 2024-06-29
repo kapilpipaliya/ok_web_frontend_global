@@ -60,11 +60,6 @@ export interface IFormContext {
   changedIds: { vertexIds: Id[], edgeIds: Id[] };
 }
 
-export interface IPageConfig { formData: IFormContext }
-
-export const PageConfigContext = createContext(
-  createStore({} as IPageConfig),
-);
 
 export interface IIndicatorPosition {
   activeItem: null | Id;

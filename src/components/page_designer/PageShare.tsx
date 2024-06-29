@@ -1,12 +1,10 @@
-import { createEffect, createSignal, useContext } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { PageConfigContext } from "~/lib/contexts";
-import { useNavigate } from "@solidjs/router";
+import { useDesignerLayoutStore } from "./LayoutContext";
 
 export function ShareSection() {
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
-  const navigate = useNavigate();
+  const [pageConfig] = useDesignerLayoutStore() || [];
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);

@@ -11,7 +11,6 @@ import { useToast } from "~/components/Toast";
 import { Checkbox } from "~/components/solid_blocks";
 import {
   DraggedVertexContext,
-  PageConfigContext,
   SelectedIdContext,
 } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
@@ -23,12 +22,13 @@ import { iconMap } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { OpenComponentSettings } from "../OpenComponentSettings";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
+  const [pageConfig, setPageConfig] = useDesignerLayoutStore() || [];
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as
   const [isFetchingData, setIsFetchingData] = createSignal(true);

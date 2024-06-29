@@ -1,11 +1,11 @@
 
-import { type Accessor, Show, useContext } from "solid-js";
+import { type Accessor, Show, } from "solid-js";
 import { ResizableContainer } from "~/components/ResizableDivView";
-import { PageConfigContext } from "~/lib/contexts";
 import { PageView } from "~/components/page_attr_render/PageView";
+import { useDesignerLayoutStore } from "./LayoutContext";
 
-export function ContentDragAndDrop(props: { view: Accessor<string> }) {
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+export function ContentDragAndDrop(props: Readonly<{ view: Accessor<string> }>) {
+  const [pageConfig] = useDesignerLayoutStore();
 
   return (
       <Show when={pageConfig.formData}>

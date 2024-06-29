@@ -1,5 +1,6 @@
 import {createContext, useContext} from "solid-js";
 import type { createStore } from "solid-js/store";
+import type { IFormContext } from "~/lib/contexts";
 
 export function getInitialDesignerLayoutStore() {
   return ({
@@ -21,6 +22,7 @@ export function getInitialDesignerLayoutStore() {
     })),
     isLeftOpen: true,
     isRightOpen: true,
+    formData: {} as IFormContext
   });
 }
 

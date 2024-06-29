@@ -4,7 +4,6 @@ import {Drawer} from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
 import {
-  PageConfigContext,
   HoverIdContext,
   HiddenNodesContext,
   SelectedIdContext,
@@ -32,11 +31,12 @@ import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { nameExpr } from "./utils/nameExpr";
 import {deleteLayoutGlobal} from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
 import {useToast} from "~/components/Toast";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function LayoutPart(props: {}) {
   const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+  const [pageConfig, setPageConfig] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);

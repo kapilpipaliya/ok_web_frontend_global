@@ -3,18 +3,19 @@ import {
   createSignal,
   useContext, Show, onCleanup
 } from "solid-js";
-import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
+import { DraggedVertexContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { onClickAddComponent } from "~/lib/drag_drop/onClickAddComponent";
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId,] = useContext(SelectedIdContext);
-  const [pageConfig,] = useContext(PageConfigContext) || [];
+  const [pageConfig,] = useDesignerLayoutStore() || [];
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(

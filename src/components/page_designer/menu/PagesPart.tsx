@@ -8,7 +8,6 @@ import {
   Switch,
 } from "solid-js";
 import { useToast } from "~/components/Toast";
-import { PageConfigContext } from "~/lib/contexts";
 import { GraphContext, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 import { getTreeData, type NavItem } from "~/lib/graph/get/sync/traverse";
@@ -17,10 +16,11 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { PageItemComponent } from "./PageItemComponent";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PagesPart(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [pageConfig] = useContext(PageConfigContext) || [];
+  const [pageConfig] = useDesignerLayoutStore() || [];
   const { showErrorToast } = useToast();
   let originalData: any[] = [];
   const [isFetchingData, setIsFetchingData] = createSignal(true);

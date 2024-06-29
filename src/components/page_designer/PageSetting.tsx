@@ -25,7 +25,7 @@ export function PageSetting() {
       >
         <For each={menuItems}>
           {(item) => (
-            <div
+            <button
               onClick={() => setSelected(item.id)}
               style={{
                 padding: "10px 20px",
@@ -40,7 +40,7 @@ export function PageSetting() {
             >
               <span style={{"margin-right": "10px"}}>{item.icon}</span>
               <span>{item.label}</span>
-            </div>
+            </button>
           )}
         </For>
       </div>

@@ -3,7 +3,7 @@ import { FormElementTabs } from "./FormElementTabs";
 import { Icon } from "@iconify-icon/solid";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-function CloseIconTopRight(props: { onClick: () => void }) {
+function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
   return <div class="flex ai:center jc:space-between position:relative">
     <Icon
       class="cursor:pointer bg:white:hover position:absolute top:0 right:0 z:2"
@@ -17,7 +17,7 @@ function CloseIconTopRight(props: { onClick: () => void }) {
 }
 
 export function FormElementsWrapper() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [_, setLayoutStore] = useDesignerLayoutStore();
   return (
     <nav
     >
@@ -31,8 +31,7 @@ export function FormElementsWrapper() {
           }}
         >
           <CloseIconTopRight onClick={() => setLayoutStore("isLeftOpen", false)} />
-          <FormElementTabs
-            columns={layoutStore.leftMenuTabs} />
+          <FormElementTabs/>
         </div>
       </div>
     </nav>

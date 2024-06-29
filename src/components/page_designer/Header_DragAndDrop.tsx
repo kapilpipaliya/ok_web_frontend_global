@@ -9,22 +9,22 @@ import { useToast } from "~/components/Toast";
 import { ProcessStatus, commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { PageConfigContext } from "~/lib/contexts";
 import { GraphContext, IdAttr, } from "~/lib/graph/graph";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
+import { useDesignerLayoutStore } from "./LayoutContext";
 
-export function HeaderDragAndDrop(props: {
+export function HeaderDragAndDrop(props: Readonly<{
   view: Accessor<string>;
   setView: Setter<string>;
   selectedSection: Accessor<string>;
   setSelectedSection: Setter<string>;
-}) {
+}>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
+  const [pageConfig] = useDesignerLayoutStore() || [];
   const views = [
     { key: "prime:mobile", value: "Mobile", icon: true },
     { key: "uil:tablet", value: "Tablet", icon: true },

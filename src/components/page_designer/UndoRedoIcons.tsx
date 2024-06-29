@@ -1,11 +1,11 @@
-import { For, useContext } from "solid-js";
+import { For, } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import { PageConfigContext } from "~/lib/contexts";
 import { Tooltip } from "~/components/solid_blocks";
 import { redo, undo } from "~/lib/graph/transaction";
+import { useDesignerLayoutStore } from "./LayoutContext";
 
 export function UndoRedoIcons() {
-  const [pageConfig, __] = useContext(PageConfigContext);
+  const [pageConfig, __] = useDesignerLayoutStore();
   const icons = [
     { icon: "ci:arrow-undo-up-left", tooltip: "Undo", onClick: () => undo(pageConfig.formData.txnId) },
     { icon: "ci:arrow-undo-up-right", tooltip: "Redo", onClick: () => redo(pageConfig.formData.txnId) },

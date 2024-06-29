@@ -11,7 +11,7 @@ export const OpenComponentSettings = (props: { id: Id; class?: string }) => {
         .join("/")}/Comp/${props.id}`;
       window.open(navigateUrl, "_blank");
     }}
-    class={`${props.class || ""}`}
+    class={`${props.class ?? ""}`}
     icon={"solar:settings-linear"}
     width={21}
     height={21} />;
