@@ -117,7 +117,7 @@ export function addNewRow(
     type,
     properties
   );
-  if (isRealTime) commitTxn(txnId, Ws, graph);
+  if (isRealTime) commitTxn(txnId, graph);
   return newRowResult;
 }
 export function cloneRowProps(

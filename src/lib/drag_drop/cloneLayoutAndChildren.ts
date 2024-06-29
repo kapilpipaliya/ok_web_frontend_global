@@ -1,12 +1,12 @@
 import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { getParentVertex } from "../../graph/get/sync/traverse";
+import { getParentVertex } from "../graph/get/sync/traverse";
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 
 
-export function clone(layoutVertex: Vertex, toExternalVertex: Vertex | undefined, externalTxnId: number | undefined, txnId: number, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
+export function cloneLayoutAndChildren(layoutVertex: Vertex, toExternalVertex: Vertex | undefined, externalTxnId: number | undefined, txnId: number, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
   let fromVertex = layoutVertex;
   const toVertex = toExternalVertex ?? layoutVertex;
   const txnId2 = externalTxnId ?? txnId;

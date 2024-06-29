@@ -6,7 +6,7 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import { deleteLayoutGlobal } from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
+import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/deleteLayoutGlobal";
 import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 

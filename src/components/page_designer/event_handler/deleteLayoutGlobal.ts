@@ -2,7 +2,7 @@ import {
   batch
 } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { deleteNestedLayout } from "../../graph/mutate/deleteNestedLayout";
+import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";

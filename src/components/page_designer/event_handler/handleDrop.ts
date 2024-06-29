@@ -1,19 +1,17 @@
-import type { Accessor } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+
+import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
-import { PageDesignerLabels } from "../constant";
-import type { IIndicatorPosition } from "../../contexts";
+import { PageDesignerLabels } from "../../../lib/drag_drop/constant";
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
-
-export async function handleDrop(e: DragEvent, draggedVertex: () => (Vertex[] | []), indicatorPosition: Accessor<IIndicatorPosition>, graph: GraphInterface, showErrorToast: (message: string) => void, setGraph: SetStoreFunction<GraphInterface>, txnId: number, formData: Vertex) {
+export async function handleDrop(e: DragEvent,layoutStore: Store<PageLayoutObject>, graph: GraphInterface, showErrorToast: (message: string) => void, setGraph: SetStoreFunction<GraphInterface>, txnId: number, formData: Vertex) {
   e.stopPropagation();
-  for (const vertex of draggedVertex()) {
+  for (const vertex of layoutStore.draggedVertices) {
     const fromVertex = vertex;
 
-    const toVertexId = indicatorPosition().activeItem!;
-    const toVertex = graph.vertexes[toVertexId]; // layoutVertex;
+    const toVertex = graph.vertexes[layoutStore.activeItem!]; // layoutVertex;
     if (!fromVertex) {
       showErrorToast("from Vertex not found when dropping ");
       return;
@@ -23,8 +21,7 @@ export async function handleDrop(e: DragEvent, draggedVertex: () => (Vertex[] | 
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
 
-    const position = indicatorPosition().position;
-    if (!position) {
+    if (!layoutStore.position) {
       showErrorToast("Position not found when dropping");
       return;
     }
@@ -36,7 +33,7 @@ export async function handleDrop(e: DragEvent, draggedVertex: () => (Vertex[] | 
       formData,
       fromVertex,
       toVertex,
-      position
+      layoutStore.position
     );
   }
 }

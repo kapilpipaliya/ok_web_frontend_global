@@ -1,116 +1,124 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext, createSignal, createSelector, For, Show, onMount, createMemo, type Setter } from "solid-js";
-import {Drawer} from "~/components/Drawer";
+import { Drawer } from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
-import {
-  IndicatorPositionContext,
-  IsPreviewContext,
-} from "~/lib/contexts";
+import { IsPreviewContext } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { handleDragStart } from "~/lib/drag_drop/event_handler/handleDragStart";
-import { handleDragOverAndSetDropPosition } from "~/lib/drag_drop/event_handler/handleDragOverAndSetDropPosition";
-import { handleDrop } from "~/lib/drag_drop/event_handler/handleDrop";
-import { clone } from "~/lib/drag_drop/event_handler/clone";
-import { onLayoutItemClick } from "~/lib/drag_drop/event_handler/onLayoutItemClick";
-import { resetDragDropState } from "~/lib/drag_drop/resetDragDropState";
+import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
+import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
+import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
+import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
+import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
+import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { Properties } from "./properties/Properties";
 import { iconMap } from "~/lib/constants";
-
 import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { nameExpr } from "./utils/nameExpr";
-import {deleteLayoutGlobal} from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
-import {useToast} from "~/components/Toast";
+import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/deleteLayoutGlobal";
+import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function LayoutPart(props: {}) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [indicatorPosition, setIndicatorPosition] = useContext(
-    IndicatorPositionContext,
-  );
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
-  const isSelectedLayoutId = createSelector(()=>layoutStore.selectedId);
-  const isSelectedHoverId = createSelector(()=>layoutStore.hoverId);
-
-  const { showErrorToast, showSuccessToast } = useToast()
-    const [isPreview] = useContext(IsPreviewContext);
+  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
+  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
+  const { showErrorToast, showSuccessToast } = useToast();
+  const [isPreview] = useContext(IsPreviewContext);
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
-        : [...prev, itemId],
+        : [...prev, itemId]
     );
   }
+
   function toggleHidden(itemId: Id) {
-    setLayoutStore('hiddenNodes', (prev) =>
+    setLayoutStore("hiddenNodes", (prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
-        : [...prev, itemId],
+        : [...prev, itemId]
     );
   }
+
   const TreeView = (props: { metaVertex: Vertex }) => {
-    const activeItemChanged = createSelector<any, Vertex>(
-      indicatorPosition,
-      (a, b) => a.id === b.activeItem,
-    );
-    const isActiveTargetItem = () => activeItemChanged(props.metaVertex);
-
+    const activeItemChanged = createSelector(() => layoutStore.activeItem);
+    const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
     const children = createMemo(() =>
-      getChildrenAttrs(graph, setGraph, props.metaVertex),
+      getChildrenAttrs(graph, setGraph, props.metaVertex)
     );
-
     const getComponent: any = () =>
       getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name;
 
     // TODO: remove this function after testing
     onMount(() => {
-      const layoutPropRows = getRowProps(
-        graph,
-        setGraph,
-        props.metaVertex,
-      );
-      // console.log("adding old properties", getComponent(), layoutPropRows);
+      const layoutPropRows = getRowProps(graph, setGraph, props.metaVertex);
       if (Object.keys(layoutPropRows).length) {
-        mergeVertexProperties(layoutStore.formData.txnId, props.metaVertex.id, graph, setGraph, layoutPropRows);
+        mergeVertexProperties(
+          layoutStore.formData.txnId,
+          props.metaVertex.id,
+          graph,
+          setGraph,
+          layoutPropRows
+        );
       }
     });
 
     let startTime = 0;
-    const endTime = 0;
+
     const handleDragEnter = (e: DragEvent) => {
       startTime = Date.now();
-      // e.stopPropagation();
-      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, layoutStore.formData.formData);
-
+      handleDragOverAndSetDropPosition(
+        e,
+        layoutStore,
+        setLayoutStore,
+        props.metaVertex,
+        isPreview(),
+        collapsedKeys,
+        children,
+        graph,
+        setGraph,
+        layoutStore.formData.formData
+      );
     };
 
     const handleDragOver = (e: DragEvent) => {
       e.stopPropagation();
-      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, layoutStore.formData.formData);
+      handleDragOverAndSetDropPosition(
+        e,
+        layoutStore,
+        setLayoutStore,
+        props.metaVertex,
+        isPreview(),
+        collapsedKeys,
+        children,
+        graph,
+        setGraph,
+        layoutStore.formData.formData
+      );
 
-  
-      const position = indicatorPosition().position;
+      const position = layoutStore.position;
       if (!position) {
         // Don't allow drag and drop
         return;
       }
-      if (position === "center") {
-        if (Date.now() - startTime > 1000) {
-          if (collapsedKeys().includes(props.metaVertex.id)) {
-            toggleExpand(props.metaVertex.id);
-          }
+
+      if (position === "center" && Date.now() - startTime > 1000) {
+        if (collapsedKeys().includes(props.metaVertex.id)) {
+          toggleExpand(props.metaVertex.id);
         }
       }
-  
-      for (const vertex of draggedVertex()) {
+
+      for (const vertex of layoutStore.draggedVertices) {
         const fromVertex = vertex;
-        const toVertexId = indicatorPosition().activeItem!;
+        const toVertexId = layoutStore.activeItem!;
         if (!fromVertex) {
           // Don't allow drag and drop
           return;
@@ -123,7 +131,7 @@ export function LayoutPart(props: {}) {
             fromVertex,
             toVertexId,
             layoutStore.formData.formData,
-            position,
+            position
           )
         ) {
           // Don't allow drag and drop
@@ -134,73 +142,97 @@ export function LayoutPart(props: {}) {
       // This is necessary to allow the drop action to proceed
       e.preventDefault();
     };
+
     const handleDragLeave = (e: DragEvent) => {
       // e.stopPropagation();
-      setIndicatorPosition({ activeItem: null, position: null });
+      setLayoutStore({ activeItem: null, position: null });
       // console.log('leave',layoutVertex.id)
       // Do not uncomment this, because drag is called before on drop
       // setDraggedVertex(null);
       // resetDragDropState();
     };
+
+    const handleDropEvent = async (e: DragEvent) => {
+      await handleDrop(
+        e,
+        layoutStore,
+        graph,
+        showErrorToast,
+        setGraph,
+        layoutStore.formData.txnId,
+        layoutStore.formData.formData
+      );
+      resetDragDropState(setLayoutStore);
+    };
+
+    const handleClick = () => {
+      onLayoutItemClick(setLayoutStore, props.metaVertex, graph, setGraph);
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      e.stopPropagation();
+      setLayoutStore("hoverId", props.metaVertex.id);
+    };
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      e.stopPropagation();
+      setLayoutStore("hoverId", -1);
+    };
+
     return (
       <div>
         <div
           draggable={true}
-          onDragStart={(e)=>handleDragStart(e, setDraggedVertex, props.metaVertex)}
+          onDragStart={(e) =>
+            handleDragStart(e, setLayoutStore, props.metaVertex)
+          }
           onDragOver={handleDragOver}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
-          onDrop={async (e)=>{
-            await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
-            resetDragDropState(setDraggedVertex, setIndicatorPosition, setDragOverTargetId);
-          }}
+          onDrop={handleDropEvent}
           class={`${isSelectedLayoutId(props.metaVertex.id)
               ? "bg:rgb(197,221,255)"
               : isSelectedHoverId(props.metaVertex.id)
                 ? "bg:#F2EDED"
                 : ""
-            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"}
+            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"
             }`}
           classList={{
             "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
-              isActiveTargetItem() && indicatorPosition().position === "center",
+              isActiveTargetItem() && layoutStore.position === "center",
             "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
-              isActiveTargetItem() && indicatorPosition().position === "before",
+              isActiveTargetItem() && layoutStore.position === "before",
             "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
-              isActiveTargetItem() && indicatorPosition().position === "after",
-            "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!indicatorPosition().position,
+              isActiveTargetItem() && layoutStore.position === "after",
+            "box-shadow:1px|1px|1px|1px#F2EDED":
+              !!children().length && !isActiveTargetItem() && !!layoutStore.position,
           }}
-          onClick={() => {
-            onLayoutItemClick(setLayoutStore, props.metaVertex, graph, setGraph);
-          }}
-          onMouseOver={(e) => {
-            e.stopPropagation();
-            setLayoutStore('hoverId', props.metaVertex.id);
-          }}
-          onmouseleave={(e) => {
-            e.stopPropagation();
-            setLayoutStore('hoverId', -1);
-          }}
+          onClick={handleClick}
+          onMouseOver={handleMouseOver}
+          onmouseleave={handleMouseLeave}
           style={{
             "font-size": "14px",
             height: "25px",
             "font-weight": children().length ? "bold" : "normal",
-            "box-shadow": !(isActiveTargetItem() && indicatorPosition().position === "center") && children().length
-              ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
-              : undefined,
+            "box-shadow":
+              !(isActiveTargetItem() && layoutStore.position === "center") &&
+                children().length
+                ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
+                : undefined,
             "align-items": "center",
             "justify-content": "space-between",
             display: "flex",
           }}
         >
-          <div style="display: flex;align-items: center;" class={`${!children().length ? "bl:1px|dashed|black pl:10" : ""}`}>
+          <div
+            style="display: flex;align-items: center;"
+            class={`${!children().length ? "bl:1px|dashed|black pl:10" : ""}`}
+          >
             &nbsp;
             <Show when={children().length}>
               <button
                 class="cursor:pointer"
-                style={{
-                  "z-index": "1",
-                }}
+                style={{ "z-index": "1" }}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleExpand(props.metaVertex.id);
@@ -235,15 +267,17 @@ export function LayoutPart(props: {}) {
           {/* When root element, dont display icons */}
           <div class="flex ai:center mt:4">
             <Show
-              when={(
-                isSelectedLayoutId(props.metaVertex.id) ||
-                isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
+              when={
+                (isSelectedLayoutId(props.metaVertex.id) ||
+                  isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
               }
             >
               <Tooltip content={"Properties"} nowrap>
                 <Icon
                   icon={"mingcute:settings-5-line"}
-                  onclick={() => setShowPropertiesDrawer(!showPropertiesDrawer())}
+                  onclick={() =>
+                    setLayoutStore("showDrawer", !layoutStore.showDrawer)
+                  }
                   height={22}
                   width={22}
                   class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
@@ -256,48 +290,66 @@ export function LayoutPart(props: {}) {
                 when={
                   isSelectedLayoutId(props.metaVertex.id) ||
                   isSelectedHoverId(props.metaVertex.id) ||
-                  hiddenNodes().includes(props.metaVertex.id)
+                  layoutStore.hiddenNodes.includes(props.metaVertex.id)
                 }
               >
-              <Tooltip content={"Duplicate"} nowrap>
-                <Icon
-                  icon={"mage:copy"}
-                  height={18}
-                  width={18}
-                  color={"black"}
-                  class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                  onclick={e=>{
-                    clone(props.metaVertex, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData);
-                  }}
-                />
-              </Tooltip>
-              <Tooltip content={"Delete"} nowrap>
-                <GenericField
-                  meta={
-                    {
-                      P: {
-                        component: "Icon",
-
-                        style: { color: "red" },
-                        onClick: () => {
-                          const name = getComponent();
-                          deleteLayoutGlobal(layoutStore, setLayoutStore, props.metaVertex, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
+                <Tooltip content={"Duplicate"} nowrap>
+                  <Icon
+                    icon={"mage:copy"}
+                    height={18}
+                    width={18}
+                    color={"black"}
+                    class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                    onclick={(e) => {
+                      cloneLayoutAndChildren(
+                        props.metaVertex,
+                        undefined,
+                        undefined,
+                        layoutStore.formData.txnId,
+                        graph,
+                        setGraph,
+                        layoutStore.formData.formData
+                      );
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip content={"Delete"} nowrap>
+                  <GenericField
+                    meta={
+                      {
+                        P: {
+                          component: "Icon",
+                          style: { color: "red" },
+                          onClick: () => {
+                            const name = getComponent();
+                            deleteLayoutGlobal(
+                              layoutStore,
+                              setLayoutStore,
+                              props.metaVertex,
+                              graph,
+                              setGraph,
+                              layoutStore.formData.txnId,
+                              name,
+                              showSuccessToast
+                            );
+                          },
+                          width: 18,
+                          height: 18,
+                          class:
+                            "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
+                          icon: "mage:trash",
                         },
-                        width: 18,
-                        height: 18,
-                        class:
-                          "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
-                        icon: "mage:trash",
+                      } as any
+                    }
+                  />
+                </Tooltip>
 
-                      },
-                    } as any
-                  }
-                />
-              </Tooltip>
-              
                 <Tooltip
-                  content={`${!hiddenNodes().includes(props.metaVertex.id) ? "Show" : "Show"
-                    }`}
+                  content={`${
+                    !layoutStore.hiddenNodes.includes(props.metaVertex.id)
+                      ? "Show"
+                      : "Show"
+                  }`}
                   nowrap
                 >
                   <button
@@ -308,7 +360,7 @@ export function LayoutPart(props: {}) {
                     }}
                   >
                     <Show
-                      when={!hiddenNodes().includes(props.metaVertex.id)}
+                      when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
                       fallback={
                         <Icon
                           height={18}
@@ -331,12 +383,12 @@ export function LayoutPart(props: {}) {
               </Show>
             </Show>
           </div>
-
         </div>
 
         <Show
           when={
-            !collapsedKeys().includes(props.metaVertex.id) && children().length > 0
+            !collapsedKeys().includes(props.metaVertex.id) &&
+            children().length > 0
           }
         >
           <ul class="pl:8 pt:3 pb:5">
@@ -356,20 +408,38 @@ export function LayoutPart(props: {}) {
   const steps = createMemo<Vertex[]>(() =>
     getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData)
   );
-  const isFormRootVertetx = () => layoutStore.formData?.formData?.L?.[0] === "Form";
+
+  const isFormRootVertetx = () =>
+    layoutStore.formData?.formData?.L?.[0] === "Form";
+
   const rootVertexes = () => {
     if (isFormRootVertetx()) {
-      return layoutStore.activeStepId ? [graph.vertexes[layoutStore.activeStepId]] : (steps()[0] ? [steps()[0]] : [])
+      return layoutStore.activeStepId
+        ? [graph.vertexes[layoutStore.activeStepId]]
+        : steps()[0]
+          ? [steps()[0]]
+          : [];
     }
-    return layoutStore.formData?.formData ? [layoutStore.formData.formData] : [];
-  }; // Starting point(s)
+    return layoutStore.formData?.formData
+      ? [layoutStore.formData.formData]
+      : [];
+  };
 
   return (
     <>
       <Show when={layoutStore.showDrawer}>
-        <Drawer customButton={() => false}
-          drawerStyle={'padding: 10px'} open={() => layoutStore.showDrawer} setIsOpen={((v:boolean)=>setLayoutStore('showDrawer', v)) as Setter<boolean>}>
-          <Properties setShowDrawer={()=>setLayoutStore('showDrawer', !layoutStore.showDrawer)} />
+        <Drawer
+          customButton={() => false}
+          drawerStyle={"padding: 10px"}
+          open={() => layoutStore.showDrawer}
+          setIsOpen={((v: boolean) =>
+            setLayoutStore("showDrawer", v)) as Setter<boolean>}
+        >
+          <Properties
+            setShowDrawer={() =>
+              setLayoutStore("showDrawer", !layoutStore.showDrawer)
+            }
+          />
         </Drawer>
       </Show>
       <For each={rootVertexes()}>

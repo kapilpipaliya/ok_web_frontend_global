@@ -5,13 +5,11 @@ import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosition";
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
-export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: undefined | boolean, collapsedKeys: (() => Id[]), children: Accessor<Vertex[]>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex, indicatorPosition: Accessor<IIndicatorPosition>) {
+export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: undefined | boolean, collapsedKeys: (() => Id[]), children: Accessor<Vertex[]>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
   e.stopPropagation();
   handleDragOverAndSetDropPosition(e, layoutStore, setLayoutStore, layoutVertex, isPreview, collapsedKeys, children, graph, setGraph, formData);
 
-
-  const position = indicatorPosition().position;
-  if (!position) {
+  if (!layoutStore.position) {
     // Don't allow drag and drop
     return;
   }
@@ -30,7 +28,7 @@ export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject
       fromVertex,
       toVertexId,
       formData,
-      position
+      layoutStore.position
     )) {
       // Don't allow drag and drop
       return;
