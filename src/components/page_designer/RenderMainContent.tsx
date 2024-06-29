@@ -3,10 +3,10 @@ import { ContentDragAndDrop } from "./Content_DragAndDrop";
 import { Drawer } from "~/components/Drawer";
 import { ActionsDragAndDrops } from "./actions/Actions_DragAndDrops";
 import { FormElementsWrapper } from "./menu/FormElementsWrapper";
-import { useStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderMainContent() {
-  const [store, setStore] = useStore();
+  const [store, setStore] = useDesignerLayoutStore();
   return (
     <div style={{
       'grid-template-columns': (!store.isLeftOpen && !store.isRightOpen)

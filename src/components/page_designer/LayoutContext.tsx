@@ -24,10 +24,10 @@ export function getInitialDesignerLayoutStore() {
   });
 }
 
-export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
-export type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>
-export const InitialLayoutStoreContext = createContext<PageLayoutStore>();
+type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
+type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>
+export const DesignerLayoutStoreContext = createContext<PageLayoutStore>();
 
-export function useStore() {
-  return useContext(InitialLayoutStoreContext);
+export function useDesignerLayoutStore() {
+  return useContext(DesignerLayoutStoreContext)!;
 }

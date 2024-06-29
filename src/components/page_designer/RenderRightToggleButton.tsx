@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { useStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderRightToggleButton() {
-  const [store, setStore] = useStore();
+  const [store, setStore] = useDesignerLayoutStore();
   return (
     <div class={`rel flex jc:end h:50px r:0|15|15|0 p:2 cursor:pointer`}>
       <button
