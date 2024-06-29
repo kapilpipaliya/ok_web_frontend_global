@@ -6,7 +6,7 @@ export const LoadingContext = createContext(createSignal(false));
 export const IsPreviewContext = createContext(createSignal(false));
 
 
-export const HoverIdContext = createContext(createSignal<Id | number>(-1));
+
 
 export const SelectedCollContext = createContext(
   createSignal({ vertexId: -1 as Id | number }),

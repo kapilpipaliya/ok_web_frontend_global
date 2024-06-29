@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import {
-  HoverIdContext,
+
   SelectedCollContext,
   SelectedIdContext,
   DragOverTargetIdContext,
@@ -31,7 +31,7 @@ export  function PageDesignerContext(props: any) {
   const draggedVertices = createSignal<Vertex[] | []>([]);
   return (
 
-      <HoverIdContext.Provider value={hoverId}>
+
         <SelectedCollContext.Provider value={selectedColl}>
           <SelectedIdContext.Provider value={selectedId}>
             <DragOverTargetIdContext.Provider value={dragOverTargetId}>
@@ -53,7 +53,6 @@ export  function PageDesignerContext(props: any) {
             </DragOverTargetIdContext.Provider>
           </SelectedIdContext.Provider>
         </SelectedCollContext.Provider>
-      </HoverIdContext.Provider>
   );
 }
 

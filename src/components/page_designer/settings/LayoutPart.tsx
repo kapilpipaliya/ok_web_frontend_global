@@ -1,10 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For, Show, onMount, createMemo } from "solid-js";
+import { useContext, createSignal, createSelector, For, Show, onMount, createMemo, Setter } from "solid-js";
 import {Drawer} from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
 import {
-  HoverIdContext,
   HiddenNodesContext,
   SelectedIdContext,
   IndicatorPositionContext,
@@ -34,10 +33,9 @@ import {useToast} from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function LayoutPart(props: {}) {
-  const [layoutStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
@@ -45,7 +43,7 @@ export function LayoutPart(props: {}) {
   );
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
   const isSelectedLayoutId = createSelector(selectedId);
-  const isSelectedHoverId = createSelector(hoverId);
+  const isSelectedHoverId = createSelector(()=>layoutStore.hoverId);
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const [, setSelectedColl] = useContext(SelectedCollContext);
   const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
@@ -191,11 +189,11 @@ export function LayoutPart(props: {}) {
           }}
           onMouseOver={(e) => {
             e.stopPropagation();
-            setHoverId(props.metaVertex.id);
+            setLayoutStore('hoverId', props.metaVertex.id);
           }}
           onmouseleave={(e) => {
             e.stopPropagation();
-            setHoverId(-1);
+            setLayoutStore('hoverId', -1);
           }}
           style={{
             "font-size": "14px",
@@ -297,7 +295,7 @@ export function LayoutPart(props: {}) {
                         style: { color: "red" },
                         onClick: () => {
                           const name = getComponent();
-                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
+                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, ()=> layoutStore.hoverId, ((id: Id)=> setLayoutStore('hoverId', id)) as Setter<Id | number>, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
 
                         },
                         width: 18,
@@ -378,7 +376,7 @@ export function LayoutPart(props: {}) {
     if (isFormRootVertetx()) {
       return layoutStore.activeStepId ? [graph.vertexes[layoutStore.activeStepId]] : (steps()[0] ? [steps()[0]] : [])
     }
-    return layoutStore.formData?.formData ? [layoutStore.formData.formData!] : [];
+    return layoutStore.formData?.formData ? [layoutStore.formData.formData] : [];
   }; // Starting point(s)
 
   return (

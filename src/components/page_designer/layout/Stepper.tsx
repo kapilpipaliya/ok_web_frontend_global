@@ -1,8 +1,8 @@
-import { createMemo, For, Show, useContext } from "solid-js";
+import { createMemo, For, Setter, Show, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import {  HoverIdContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import {  SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
+import { GraphContext, Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
@@ -20,9 +20,8 @@ export const Stepper = () => {
     getChildrenAttrs(graph, setGraph, pageConfigStore.formData?.formData)
   );
 
-  const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [selectedComponent, setSelectedComponent] = useContext(
+  const [_, setSelectedComponent] = useContext(
     SelectedComponentContext,
   );
   const [, setSelectedColl] = useContext(SelectedCollContext);
@@ -111,7 +110,7 @@ export const Stepper = () => {
         setLayoutStore('activeStepId', steps()[currentStep - 1].id);
       }
     }
-    deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfigStore.formData.txnId, item.P.name, showSuccessToast);
+    deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, ()=> layoutStore.hoverId, ((id: Id)=> setLayoutStore('hoverId', id)) as Setter<Id | number>, graph, setGraph, pageConfigStore.formData.txnId, item.P.name, showSuccessToast);
   };
 
   const moveStep = (fromIndex: number, toIndex: number) => {
@@ -123,7 +122,7 @@ export const Stepper = () => {
       setGraph,
       pageConfigStore.formData.txnId,
       fromVertex,
-      pageConfigStore.formData.formData!,
+      pageConfigStore.formData.formData,
       toVertex,
       position
     );

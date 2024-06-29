@@ -28,7 +28,12 @@ export function getInitialDesignerLayoutStore() {
     labelColor: "black", // Default label color
     inputBackground: "white",
     activeStepId: 0 as Id | number,
-    prevTxnIds: [] as Array<Id | number>
+    prevTxnIds: [] as Array<Id | number>,
+    hoverId: -1 as Id | number,
+    selectedId: -1 as Id | number,
+    selectedColl: "Comp" as "Comp" | "Page" | "TemplatePage" | "Form" | "ThankYouPage" | "ErrorPages" | "EmailTemplate",
+    selectedComponent: "Text" as "Text" | "Image" | "Button" | "Form" | "Stepper" | "Step",
+    dragOverTargetId: -1 as Id | number,
   });
 }
 

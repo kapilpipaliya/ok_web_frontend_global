@@ -1,5 +1,5 @@
-import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX } from "solid-js";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX, Setter } from "solid-js";
+import { GraphContext, Id, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { handleDragOver } from "~/lib/drag_drop/event_handler/handleDragOver";
 import { handleDragStart } from "~/lib/drag_drop/event_handler/handleDragStart";
@@ -15,7 +15,6 @@ import {
   DraggedVertexContext,
   DragOverTargetIdContext,
   FormContext,
-  HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
   SelectedCollContext, SelectedComponentContext,
@@ -35,25 +34,25 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { deleteLayoutGlobal } from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
-export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element; }) {
+export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX.Element; }>) {
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const { txnId } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
-  const [dragOverTargetId, _] = useContext(DragOverTargetIdContext);
+  const [dragOverTargetId] = useContext(DragOverTargetIdContext);
   const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
-  const [isPreview, setIsPreview] = useContext(IsPreviewContext);
+  const [isPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext
   );
   const [pageConfig, __] = useDesignerLayoutStore();
 
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
-  const isSelectedHoverId = createSelector(hoverId);
+  const isSelectedHoverId = createSelector(()=>pageConfig.hoverId);
   const [, setSelectedColl] = useContext(SelectedCollContext);
   const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
-  const [selectedComponent, setSelectedComponent] = useContext(
+  const [_, setSelectedComponent] = useContext(
     SelectedComponentContext
   );
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
@@ -72,7 +71,7 @@ export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element;
     let nameInputRef: HTMLInputElement;
     const [templateName, setTemplateName] = createSignal("");
     const [error, setError] = createSignal("");
-    const { showSuccessToast, showWarningToast, showErrorToast } = useToast();
+    const { showSuccessToast, showWarningToast } = useToast();
     const saveTemplate = async () => {
       const newFormTxnId = getNewTxnId(graph, setGraph);
       console.log(newFormTxnId);
@@ -210,7 +209,7 @@ export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element;
         <Tooltip content={"Delete"}>
           <Icon
             onClick={() => {
-              deleteLayoutGlobal(selectedId, props.item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, txnId, getComponentName(), showSuccessToast);
+              deleteLayoutGlobal(selectedId, props.item, setSelectedId, setSelectedComponent, setSelectedColl, ()=> layoutStore.hoverId, ((id: Id)=> setLayoutStore('hoverId', id)) as Setter<Id | number>, graph, setGraph, txnId, getComponentName(), showSuccessToast);
             }}
             icon={"fluent:delete-20-regular"}
             height={20}
@@ -287,11 +286,11 @@ export function PageAttrDnDWrapper(props: { item: Vertex; children: JSX.Element;
         class={`contents ${getBorder() || ""} `}
         onMouseOver={(e) => {
           e.stopPropagation();
-          setHoverId(props.item.id);
+          setLayoutStore('hoverId', props.item.id);
         }}
         onmouseleave={(e) => {
           e.stopPropagation();
-          setHoverId(-1);
+          setLayoutStore('hoverId', -1);
         }}
         onClick={(e) => {
           e.stopPropagation();
