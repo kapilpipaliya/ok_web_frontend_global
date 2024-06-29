@@ -3,7 +3,7 @@ import { Portal } from "solid-js/web";
 import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 
-export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { parentRef: HTMLDivElement, onClickOutside: () => void }) {
+export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { parentRef: HTMLElement, onClickOutside: () => void }) {
     let dropdownRef: HTMLDivElement;
 
     const [reference, setReference] = createSignal<HTMLElement | null>(null);

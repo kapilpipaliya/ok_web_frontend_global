@@ -1,7 +1,7 @@
 import { toTitle } from "case-switcher-js";
 import {
   createSignal,
-  useContext, Show
+  useContext, Show, onCleanup
 } from "solid-js";
 import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
@@ -21,7 +21,7 @@ export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageI
     new Set<Vertex>()
   );
 
-  let menuRef: HTMLDivElement;
+  let menuRef: HTMLButtonElement;
 
   const baseStyle = {
     "border-radius": ".2rem",
@@ -46,52 +46,65 @@ export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageI
   const itemStyle: any = () => hoverPageId() === props.child.id ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
   let timeoutId: NodeJS.Timeout;
+
+  const handleMouseEnter = () => {
+    if (props.previewPageId !== props.child.id) {
+      props.setPreviewPageId(null);
+    }
+    setHoverPageId(props.child.id);
+    timeoutId = setTimeout(() => {
+      props.setPreviewPageId(props.child.id);
+    }, 1000);
+  };
+
+  const handleMouseLeave = () => {
+    clearTimeout(timeoutId);
+    setHoverPageId(null);
+  };
+
+  const handleDragStart = (e: DragEvent) => {
+    e.stopPropagation();
+    setDraggedVertex([]);
+    clearTimeout(timeoutId);
+    props.setPreviewPageId(null);
+    const dataTransfer = selectedComponents().size > 0
+      ? Array.from(selectedComponents())
+      : [graph.vertexes[props.child.id]];
+    setDraggedVertex((prev) => [...prev, ...dataTransfer]);
+    setSelectedComponents(new Set<Vertex>());
+  };
+
+  const handleDoubleClick = () => {
+    setDraggedVertex([graph.vertexes[props.child.id]]);
+    onClickAddComponent(
+      graph,
+      setGraph,
+      pageConfig.formData.txnId,
+      draggedVertex()[0],
+      pageConfig.formData || {},
+      selectedId() !== -1
+        ? selectedId()
+        : pageConfig.formData.formData.id
+    );
+    setDraggedVertex([]);
+  };
+
+  onCleanup(() => {
+    clearTimeout(timeoutId);
+  });
+
   return (
     <Show when={props.child.name}>
-      <div
+      <button
+        type="button"
         ref={menuRef!}
         class="relative"
         style={itemStyle()}
-        onMouseEnter={() => {
-          if (props.previewPageId !== props.child.id) {
-            props.setPreviewPageId(null);
-          }
-          setHoverPageId(props.child.id);
-          timeoutId = setTimeout(() => {
-            props.setPreviewPageId(props.child.id);
-          }, 1000);
-        }}
-        onMouseLeave={() => {
-          clearTimeout(timeoutId);
-
-          setHoverPageId(null);
-        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         draggable={true}
-        onDragStart={(e) => {
-          e.stopPropagation();
-          setDraggedVertex([]);
-          clearTimeout(timeoutId);
-          props.setPreviewPageId(null);
-          const dataTransfer = selectedComponents().size > 0
-            ? Array.from(selectedComponents())
-            : [graph.vertexes[props.child.id]];
-          setDraggedVertex((prev) => [...prev, ...dataTransfer]);
-          setSelectedComponents(new Set<Vertex>());
-        }}
-        ondblclick={() => {
-          setDraggedVertex([graph.vertexes[props.child.id]]);
-          onClickAddComponent(
-            graph,
-            setGraph,
-            pageConfig.formData.txnId,
-            draggedVertex()[0],
-            pageConfig.formData || {},
-            selectedId() !== -1
-              ? selectedId()
-              : pageConfig.formData.formData.id
-          );
-          setDraggedVertex([]);
-        }}
+        onDragStart={handleDragStart}
+        ondblclick={handleDoubleClick}
       >
         <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
         <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
@@ -101,8 +114,8 @@ export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageI
             <PageViewWrapper formId={props.child.id} />
           </DropdownMenu>
         </Show>
-      </div>
-
+      </button>
     </Show>
   );
 }
+
