@@ -1,4 +1,4 @@
-import { type JSX, onMount, type Setter } from "solid-js";
+import { type JSX, onMount, } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
 import { createStore } from "solid-js/store";
 import { PageSetting } from "../PageSetting";
@@ -32,12 +32,7 @@ export function LayoutDragAndDrop(): JSX.Element {
 
   return (
     <DesignerLayoutStoreContext.Provider value={[layoutStore, setLayoutStore]}>
-      <HeaderDragAndDrop
-        selectedSection={() => layoutStore.selectedSection}
-        setSelectedSection={((value: string) => setLayoutStore("selectedSection", value)) as Setter<string>}
-        view={() => layoutStore.view}
-        setView={((value: string) => setLayoutStore("view", value)) as Setter<string>}
-      />
+      <HeaderDragAndDrop/>
       <div classList={{ 'display:none': layoutStore.selectedSection === 'setting' }}>
         <LayoutGridRowOne />
         <RenderMainContent />

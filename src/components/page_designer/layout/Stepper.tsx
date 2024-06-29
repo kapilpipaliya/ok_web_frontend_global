@@ -10,13 +10,12 @@ import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/del
 import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export const Stepper = () => {
+export function Stepper() {
   const [pageConfigStore] = useDesignerLayoutStore();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
 
-  const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, pageConfigStore.formData?.formData)
+  const steps = createMemo<Vertex[]>(() => getChildrenAttrs(graph, setGraph, pageConfigStore.formData?.formData)
   );
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -27,7 +26,7 @@ export const Stepper = () => {
       graph,
       "Comp",
       IdAttr,
-      "Form",
+      "Form"
     );
     const layoutRowId = componentDrop(
       pageConfigStore.formData.formData,
@@ -35,7 +34,7 @@ export const Stepper = () => {
       formVertex!,
       pageConfigStore.formData.formData,
       graph,
-      setGraph,
+      setGraph
     );
 
 
@@ -50,7 +49,7 @@ export const Stepper = () => {
       fromVertex,
       pageConfigStore.formData.formData,
       toVertex,
-      "before",
+      "before"
     );
 
     setLayoutStore('activeStepId', layoutRowId);
@@ -62,7 +61,7 @@ export const Stepper = () => {
       graph,
       "Comp",
       IdAttr,
-      "Form",
+      "Form"
     );
     const layoutRowId = componentDrop(
       pageConfigStore.formData.formData,
@@ -70,7 +69,7 @@ export const Stepper = () => {
       formVertex!,
       pageConfigStore.formData.formData,
       graph,
-      setGraph,
+      setGraph
     );
 
     if (layoutRowId === -1) return;
@@ -84,7 +83,7 @@ export const Stepper = () => {
       fromVertex,
       pageConfigStore.formData.formData,
       toVertex,
-      "after",
+      "after"
     );
 
     setLayoutStore('activeStepId', layoutRowId);
@@ -135,7 +134,7 @@ export const Stepper = () => {
               onClick={(e) => {
                 e.stopPropagation();
                 addStepBefore(step);
-              }} />
+              } } />
             <li
               style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${layoutStore.activeStepId === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
               onClick={() => setLayoutStore('activeStepId', step.id)}
@@ -156,7 +155,7 @@ export const Stepper = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   deleteStep(step);
-                }}
+                } }
               >
                 &times;
               </button>
@@ -165,7 +164,7 @@ export const Stepper = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (index() > 0) moveStep(index(), index() - 1);
-                }}
+                } }
               >
                 ↑
               </button>
@@ -174,7 +173,7 @@ export const Stepper = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (index() < steps().length - 1) moveStep(index(), index() + 1);
-                }}
+                } }
               >
                 ↓
               </button>
@@ -191,11 +190,11 @@ export const Stepper = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   addStepAfter(step);
-                }} />
+                } } />
             </Show>
           </>
         )}
       </For>
     </ul>
   );
-};
+}

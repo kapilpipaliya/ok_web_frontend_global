@@ -12,17 +12,12 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, IdAttr, } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function HeaderDragAndDrop(props: Readonly<{
-  view: Accessor<string>;
-  setView: Setter<string>;
-  selectedSection: Accessor<string>;
-  setSelectedSection: Setter<string>;
-}>) {
+export function HeaderDragAndDrop() {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
-  const [pageConfig] = useDesignerLayoutStore() || [];
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const views = [
     { key: "prime:mobile", value: "Mobile", icon: true },
     { key: "uil:tablet", value: "Tablet", icon: true },
@@ -59,11 +54,11 @@ export function HeaderDragAndDrop(props: Readonly<{
           return;
         }
 
-        const name = pageConfig.formData.formData.P[IdAttr];
+        const name = layoutStore.formData.formData.P[IdAttr];
         const res = await checkIfNameExistsMGCall(
-          pageConfig.formData.formData.P[IdAttr],
+          layoutStore.formData.formData.P[IdAttr],
           name,
-          pageConfig.formData.formData.id
+          layoutStore.formData.formData.id
         );
 
         if (res.error) {
@@ -119,10 +114,10 @@ export function HeaderDragAndDrop(props: Readonly<{
         <Tooltip content={view.value} position={"s"}>
           <button
             style={{
-              "background-color": view.value === props.view() ? "#E0E7F3" : "",
-              color: view.value === props.view() ? "#5252F1" : "grey",
+              "background-color": view.value === layoutStore.view ? "#E0E7F3" : "",
+              color: view.value === layoutStore.view ? "#5252F1" : "grey",
             }}
-            onclick={() => props.setView(view.value)}
+            onclick={() => setLayoutStore("view", view.value)}
             type="button"
             class={`rel d:inline-flex ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""
               }`}
@@ -140,7 +135,7 @@ export function HeaderDragAndDrop(props: Readonly<{
           <Tooltip content={section} position={"s"}>
             <button
               style={{ "background-color": section === "Build" ? "" : "#E0E7F3", color: section === "Build" ? "grey" : "#5252F1" }}
-              onclick={() => props.setSelectedSection(section.toLowerCase())}
+              onclick={() => setLayoutStore("selectedSection", section.toLowerCase())}
               type="button"
               class={`rel d:inline-flex ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${section === "Build" ? "r:5|0|0|5" : "r:0|5|5|0"}`}
             >
@@ -162,7 +157,7 @@ export function HeaderDragAndDrop(props: Readonly<{
         <div class="ai:center align-items:center bg:#f3f3f4 display:flex flex h:49px jc:space-between mb:5 p:10 r:7 w:99%">
           <LeftIcons />
           <div>
-            <Show when={props.selectedSection() === "build"}>
+            <Show when={layoutStore.selectedSection === "build"}>
               <div class="flex ai:center w:150 ml:38%">
                 <ResizeViewButtons />
                 <Icon
@@ -170,11 +165,11 @@ export function HeaderDragAndDrop(props: Readonly<{
                   icon="solar:settings-linear"
                   height={22}
                   width={22}
-                  onClick={() => props.setSelectedSection("setting")}
+                  onClick={() => setLayoutStore("selectedSection", "setting")}
                 />
               </div>
             </Show>
-            <Show when={props.selectedSection() === "setting"}>
+            <Show when={layoutStore.selectedSection === "setting"}>
               <MiddleSectionButtons />
             </Show>
           </div>
@@ -185,7 +180,7 @@ export function HeaderDragAndDrop(props: Readonly<{
               </div>
             </Tooltip>
             <Tooltip content={"Preview"} position={"s"}>
-              <div onClick={() => window.open(`/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/preview`)} class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
+              <div onClick={() => window.open(`/view/${layoutStore.formData.formData.L[0]}/${layoutStore.formData.formData.P.name}/preview`)} class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
                 <Icon icon={"ph:eye"} height={22} width={22} />
               </div>
             </Tooltip>            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />

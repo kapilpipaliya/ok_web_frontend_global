@@ -1,7 +1,7 @@
-import { type Accessor, type JSX, createEffect, createSignal } from "solid-js";
+import { type JSX, createEffect, createSignal } from "solid-js";
 
 export function ResizableContainer(props: {
-  view: Accessor<string>;
+  view: string;
   children: JSX.Element;
 }) {
   const [width, setWidth] = createSignal("");
@@ -13,10 +13,10 @@ export function ResizableContainer(props: {
   };
 
   createEffect(() => {
-    if (props.view() === "Mobile") {
+    if (props.view === "Mobile") {
       setWidth(DIMENSIONS.mobile.width);
       setHeight(DIMENSIONS.mobile.height);
-    } else if (props.view() === "Tablet") {
+    } else if (props.view === "Tablet") {
       setWidth(DIMENSIONS.tablet.width);
       setHeight(DIMENSIONS.tablet.height);
     } else {
@@ -55,9 +55,9 @@ export function ResizableContainer(props: {
   return (
     <div class="grid overflow:auto"
       classList={{
-        "jc:center": props.view() !== "Desktop",
-        "min-h:80%": props.view() === "Mobile",
-        "min-h:100%": props.view() === "Tablet"
+        "jc:center": props.view !== "Desktop",
+        "min-h:80%": props.view === "Mobile",
+        "min-h:100%": props.view === "Tablet"
       }}>
       <div
         class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"

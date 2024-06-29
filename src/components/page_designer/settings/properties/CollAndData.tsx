@@ -11,7 +11,7 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function CollAndData(props: any) {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [pageConfig] = useDesignerLayoutStore();
+    const [layoutStore] = useDesignerLayoutStore();
 
     const metaVertexId = getNewGraphId();
     const txnId = getNewTxnId(graph, setGraph);
@@ -59,28 +59,28 @@ export function CollAndData(props: any) {
         <>
             <br />
             <SelectInputField
-                data={graph.vertexes[selectedId()!]}
+                data={graph.vertexes[layoutStore.selectedId]}
                 meta={collMetaVertex.vertexes?.[0]!}
                 disabled={false}
                 title={"Collection:"}
                 component={"SelectBox"}
-                txnId={pageConfig.formData.txnId}
+                txnId={layoutStore.formData.txnId}
                 isRealTime={false}
             />
             <SelectInputField
-                data={graph.vertexes[selectedId()!]}
+                data={graph.vertexes[layoutStore.selectedId]}
                 meta={collMetaVertex.vertexes?.[1]!}
                 disabled={false}
                 title={"Data:"}
                 component={"SelectBox"}
-                txnId={pageConfig.formData.txnId}
+                txnId={layoutStore.formData.txnId}
                 isRealTime={false}
             />
             <span class="float:left mt:5">Expression:</span>
             <GenericInputField
                 txnId={txnId}
                 title={""}
-                data={graph.vertexes[selectedId()!]}
+                data={graph.vertexes[layoutStore.selectedId]}
                 meta={collMetaVertex.vertexes?.[2]!}
                 disabled={false}
                 component={"TextBox"}

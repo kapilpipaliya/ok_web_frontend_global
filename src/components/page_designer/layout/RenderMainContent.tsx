@@ -1,9 +1,10 @@
 import { type Setter, Show } from "solid-js";
-import { ContentDragAndDrop } from "../Content_DragAndDrop";
 import { Drawer } from "~/components/Drawer";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { ResizableContainer } from "~/components/ResizableDivView";
+import { PageView } from "~/components/page_attr_render/PageView";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -33,7 +34,11 @@ export function RenderMainContent() {
           </Show>
         </div>
       </Show>
-      <ContentDragAndDrop view={() => layoutStore.view} />
+      <Show when={layoutStore.formData}>
+        <ResizableContainer view={layoutStore.view}>
+          <PageView metaVertex={layoutStore.formData?.formData} isPreview={false} />
+        </ResizableContainer>
+      </Show>
       <Show
         when={!layoutStore.isSmallScreen}
         fallback={<Drawer
