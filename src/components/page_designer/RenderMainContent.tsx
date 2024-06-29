@@ -1,63 +1,53 @@
 import { type Setter, Show } from "solid-js";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
 import { Drawer } from "~/components/Drawer";
-import { ActionsDragAndDrops } from "./actions/Actions_DragAndDrops";
+import { SettingsWrapper } from "./actions/SettingsWrapper";
 import { FormElementsWrapper } from "./menu/FormElementsWrapper";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderMainContent() {
-  const [store, setStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <div style={{
-      'grid-template-columns': (!store.isLeftOpen && !store.isRightOpen)
+      'grid-template-columns': (!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
         ? 'repeat(1, 1fr)'
-        : (store.isLeftOpen && store.isRightOpen)
+        : (layoutStore.isLeftOpen && layoutStore.isRightOpen)
           ? 'repeat(3, 22% 53% 25%)'
-          : `repeat(2, ${!store.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
+          : `repeat(2, ${!layoutStore.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
     }} class={`grid gap:4px`}>
       <Show
-        when={!store.isSmallScreen}
+        when={!layoutStore.isSmallScreen}
         fallback={<Drawer
           customButton={() => false}
           drawerStyle={'padding: 10px'}
-          open={() => store.isLeftOpen}
-          setIsOpen={((v: boolean) => setStore("isLeftOpen", v)) as Setter<boolean>}
+          open={() => layoutStore.isLeftOpen}
+          setIsOpen={((v: boolean) => setLayoutStore("isLeftOpen", v)) as Setter<boolean>}
           width="75%"
         >
-          <FormElementsWrapper
-            toggleIsLeftOpen={((isOpen: boolean) => setStore("isLeftOpen", isOpen)) as Setter<boolean>}
-            leftColumns={store.leftMenuTabs} />
+          <FormElementsWrapper />
         </Drawer>}
       >
-        <div class={`${!store.isLeftOpen ? 'd:none' : ''}`}>
-          <Show when={store.isLeftOpen}>
-            <FormElementsWrapper
-              toggleIsLeftOpen={((isOpen: boolean) => setStore("isLeftOpen", isOpen)) as Setter<boolean>}
-              leftColumns={store.leftMenuTabs} />
+        <div class={`${!layoutStore.isLeftOpen ? 'd:none' : ''}`}>
+          <Show when={layoutStore.isLeftOpen}>
+            <FormElementsWrapper />
           </Show>
         </div>
       </Show>
-      <ContentDragAndDrop view={() => store.view} />
+      <ContentDragAndDrop view={() => layoutStore.view} />
       <Show
-        when={!store.isSmallScreen}
+        when={!layoutStore.isSmallScreen}
         fallback={<Drawer
           customButton={() => false}
           drawerStyle={'padding: 10px'}
-          open={() => store.isRightOpen}
-          setIsOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
+          open={() => layoutStore.isRightOpen}
+          setIsOpen={((isOpen: boolean) => setLayoutStore("isRightOpen", isOpen)) as Setter<boolean>}
           width="75%"
         >
-          <ActionsDragAndDrops
-            isRightOpen={() => store.isRightOpen}
-            toggleIsRightOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
-            rightColumns={() => store.rightMenuTabs} />
+          <SettingsWrapper />
         </Drawer>}
       >
-        <div class={`${!store.isRightOpen ? "hidden" : "contents"}`}>
-          <ActionsDragAndDrops
-            isRightOpen={() => store.isRightOpen}
-            toggleIsRightOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
-            rightColumns={() => store.rightMenuTabs} />
+        <div class={`${!layoutStore.isRightOpen ? "hidden" : "contents"}`}>
+          <SettingsWrapper />
         </div>
       </Show>
     </div>

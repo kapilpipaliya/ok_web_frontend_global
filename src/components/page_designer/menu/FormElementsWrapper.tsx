@@ -1,14 +1,9 @@
 
 import { FormElementTabs } from "./FormElementTabs";
-import type { Setter } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
-export interface MenuProps {
-  leftColumns: { title: string; collection: string }[];
-  toggleIsLeftOpen: Setter<boolean>;
-}
-
-function CloseIconTopRight(props: { onClick: () => boolean }) {
+function CloseIconTopRight(props: { onClick: () => void }) {
   return <div class="flex ai:center jc:space-between position:relative">
     <Icon
       class="cursor:pointer bg:white:hover position:absolute top:0 right:0 z:2"
@@ -21,7 +16,8 @@ function CloseIconTopRight(props: { onClick: () => boolean }) {
   </div>;
 }
 
-export function FormElementsWrapper(props: MenuProps) {
+export function FormElementsWrapper() {
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <nav
     >
@@ -34,9 +30,9 @@ export function FormElementsWrapper(props: MenuProps) {
             "scrollbar-color": "lightgrey",
           }}
         >
-          <CloseIconTopRight onClick={() => props.toggleIsLeftOpen(false)} />
+          <CloseIconTopRight onClick={() => setLayoutStore("isLeftOpen", false)} />
           <FormElementTabs
-            columns={props.leftColumns} />
+            columns={layoutStore.leftMenuTabs} />
         </div>
       </div>
     </nav>

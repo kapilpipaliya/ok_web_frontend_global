@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderRightToggleButton() {
-  const [store, setStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <div class={`rel flex jc:end h:50px r:0|15|15|0 p:2 cursor:pointer`}>
       <button
@@ -14,7 +14,7 @@ export function RenderRightToggleButton() {
           gap: "10px",
           'align-items': "center",
         }}
-        onClick={() => setStore("isRightOpen", !store.isRightOpen)}
+        onClick={() => setLayoutStore("isRightOpen", !layoutStore.isRightOpen)}
         class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
       >
         <span class="font:14 cursor:pointer d:none@<sm ml:10 ">View Form Settings</span>

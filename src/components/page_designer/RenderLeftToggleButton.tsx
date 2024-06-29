@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderLeftToggleButton() {
-  const [store, setStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <div class={`rel flex jc:start h:50px r:0|15|15|0 p:2 cursor:pointer`}>
       <button
@@ -14,7 +14,7 @@ export function RenderLeftToggleButton() {
           gap: "10px",
           'align-items': "center",
         }}
-        onClick={() => setStore("isLeftOpen", !store.isLeftOpen)}
+        onClick={() => setLayoutStore("isLeftOpen", !layoutStore.isLeftOpen)}
         class="outline:2px|solid|transparent outline:offset|2px:focus"
       >
         <Icon

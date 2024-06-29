@@ -5,16 +5,15 @@ import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext
 import { RenderLeftToggleButton } from "./RenderLeftToggleButton";
 import { RenderRightToggleButton } from "./RenderRightToggleButton";
 
-
 export function LayoutGridRowOne(): JSX.Element {
-  const [store, setStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <div class={`grid ${(store.isLeftOpen && store.isRightOpen)
+    <div class={`grid ${(layoutStore.isLeftOpen && layoutStore.isRightOpen)
       ? 'grid-cols:1'
-      : (!store.isLeftOpen && !store.isRightOpen)
+      : (!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
         ? 'grid-cols:3'
         : 'grid-cols:2'} gap:4px`}>
-      <Show when={!store.isLeftOpen || store.isSmallScreen}>
+      <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
         <RenderLeftToggleButton />
       </Show>
       <div class="ai:center flex gap:5 p:8 jc:center">
@@ -23,7 +22,7 @@ export function LayoutGridRowOne(): JSX.Element {
           <Stepper />
         </Show>
       </div>
-      <Show when={!store.isRightOpen || store.isSmallScreen}>
+      <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
         <RenderRightToggleButton />
       </Show>
     </div>

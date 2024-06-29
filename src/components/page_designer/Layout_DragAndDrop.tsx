@@ -1,4 +1,4 @@
-import { type JSX, onCleanup, onMount, type Setter } from "solid-js";
+import { type JSX, onMount, type Setter } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
 import { createStore } from "solid-js/store";
 import { type IFormContext, PageConfigContext, } from "~/lib/contexts";
@@ -11,11 +11,11 @@ import { debounce } from "@solid-primitives/scheduled";
 import { makeEventListener } from "@solid-primitives/event-listener";
 
 export function LayoutDragAndDrop(): JSX.Element {
-  const [store, setStore] = createStore(getInitialDesignerLayoutStore());
+  const [layoutStore, setLayoutStore] = createStore(getInitialDesignerLayoutStore());
 
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;
-    setStore({
+    setLayoutStore({
       isSmallScreen,
       isLeftOpen: !isSmallScreen,
       isRightOpen: !isSmallScreen,
@@ -32,21 +32,21 @@ export function LayoutDragAndDrop(): JSX.Element {
   });
 
   return (
-    <DesignerLayoutStoreContext.Provider value={[store, setStore]}>
+    <DesignerLayoutStoreContext.Provider value={[layoutStore, setLayoutStore]}>
       <PageConfigContext.Provider
         value={createStore({} as { formData: IFormContext })}
       >
         <HeaderDragAndDrop
-          selectedSection={() => store.selectedSection}
-          setSelectedSection={((value: string) => setStore("selectedSection", value)) as Setter<string>}
-          view={() => store.view}
-          setView={((value: string) => setStore("view", value)) as Setter<string>}
+          selectedSection={() => layoutStore.selectedSection}
+          setSelectedSection={((value: string) => setLayoutStore("selectedSection", value)) as Setter<string>}
+          view={() => layoutStore.view}
+          setView={((value: string) => setLayoutStore("view", value)) as Setter<string>}
         />
-        <div classList={{ 'display:none': store.selectedSection === 'setting' }}>
+        <div classList={{ 'display:none': layoutStore.selectedSection === 'setting' }}>
           <LayoutGridRowOne />
           <RenderMainContent />
         </div>
-        <div classList={{ 'display:none': store.selectedSection === 'build' }}>
+        <div classList={{ 'display:none': layoutStore.selectedSection === 'build' }}>
           <PageSetting />
         </div>
       </PageConfigContext.Provider>
