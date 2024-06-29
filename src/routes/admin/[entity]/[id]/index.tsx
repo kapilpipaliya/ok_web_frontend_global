@@ -5,7 +5,7 @@ import { clientOnly } from "@solidjs/start";
 import { GraphContext } from "~/lib/graph/graph";
 
 import { PageDesignerLabels } from "~/lib/drag_drop/constant";
-import { LayoutDragAndDrop } from "~/components/page_designer/layout/Layout_DragAndDrop";
+import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
 
 const DynamicForm = clientOnly(() => import("~/components/form/DynamicForm"));
 
@@ -16,7 +16,7 @@ export default function FormEdit() {
   return (
     <Switch>
       <Match when={PageDesignerLabels.includes(params.entity)}>
-        <LayoutDragAndDrop />
+        <PageDesignerWrapper />
       </Match>
       <Match when={true}>
         <DynamicForm

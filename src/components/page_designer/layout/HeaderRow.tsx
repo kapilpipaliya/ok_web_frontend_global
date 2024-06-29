@@ -12,7 +12,7 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, IdAttr, } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function HeaderDragAndDrop() {
+export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
