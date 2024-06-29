@@ -1,12 +1,12 @@
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Show, useContext } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { GraphContext, GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { useNavigate } from "@solidjs/router";
 import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { FormContext } from "~/lib/contexts";
-import { Store, createStore } from "solid-js/store";
+import { type Store, createStore } from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";

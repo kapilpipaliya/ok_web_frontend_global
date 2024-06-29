@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 export const OpenComponentSettings = (props: { id: Id; class?: string }) => {
   return <Icon

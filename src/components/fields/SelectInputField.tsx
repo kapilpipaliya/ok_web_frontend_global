@@ -30,7 +30,6 @@ import { FormContext } from "~/lib/contexts";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { selectedValue } from "./selectedValue";
 import { isValidResponse } from "./isValidResponse";
-import { ifNotNull } from "~/lib/utils";
 import { ensureArray } from "./ensureArray";
 
 // displayExpr is required when meta.P.collection is complex

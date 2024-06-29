@@ -1,6 +1,6 @@
-import { createSignal, type JSX, Show, onMount, onCleanup, } from "solid-js";
+import { createSignal, type JSX, Show, onMount, onCleanup, type Accessor, type Setter } from "solid-js";
 
-export function Drawer(props: {
+interface DrawerProps {
   customButton?: (props: {
     onClick: () => void;
     isOpen: boolean;
@@ -8,10 +8,12 @@ export function Drawer(props: {
   children: JSX.Element;
   drawerStyle?: string;
   width?: string;
-  open?: any;
-  setIsOpen?: any;
-}) {
-  const [isOpen, setIsOpen] = props.open
+  open?: Accessor<boolean>;
+  setIsOpen?: Setter<boolean>;
+}
+
+export function Drawer(props: DrawerProps) {
+  const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]
     : createSignal(false);
   const [drawerWidth, setDrawerWidth] = createSignal(props.width || "450px");
@@ -20,7 +22,6 @@ export function Drawer(props: {
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
   };
-
 
   let initialX: number;
   let initialWidth: number;

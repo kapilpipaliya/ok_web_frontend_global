@@ -2,9 +2,9 @@
 import { getDriver } from "~/cypher/driver";
 import { writeFileSync, mkdirSync } from "fs";
 import { format } from "date-fns";
-import { Node, Relationship } from "neo4j-driver";
+import type { Node, Relationship } from "neo4j-driver";
 import { getSubDomain } from "~/server/getSubDomain";
-import { APIEvent } from "@solidjs/start/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 export async function saveGraphToCypherQL() {
   const subdomain = "default"; // Adjust this as needed

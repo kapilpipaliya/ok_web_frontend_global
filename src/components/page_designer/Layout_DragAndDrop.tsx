@@ -1,6 +1,5 @@
-import { type JSX, Show, createSignal, onCleanup, onMount, For, useContext } from "solid-js";
+import { type JSX, Show, onCleanup, onMount, type Setter } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
-
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
 import {
@@ -9,44 +8,44 @@ import {
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
 import { PageSetting } from "./PageSetting";
-import { Tooltip } from "~/components/solid_blocks";
-import {Drawer} from "~/components/Drawer";
+import { Drawer } from "~/components/Drawer";
 import { isServer } from "solid-js/web";
 import { Stepper } from "./Stepper";
 import { useLocation } from "@solidjs/router";
 import { ActionsDragAndDrops } from "./actions/Actions_DragAndDrops";
-import { MenuDragAndDrop } from "./menu/Menu_DragAndDrop";
-import { redo, undo } from "~/lib/graph/transaction";
+import { FormElementsWrapper } from "./menu/FormElementsWrapper";
+import { UndoRedoIcons } from "./UndoRedoIcons";
 
 export function LayoutDragAndDrop(): JSX.Element {
   const location = useLocation();
-  const [view, setView] = createSignal("Tablet");
-  const [isLeftOpen, setIsLeftOpen] = createSignal(true);
-  const [isRightOpen, setIsRightOpen] = createSignal(true);
-  const [selectedSection, setSelectedSection] = createSignal("build");
-  const [isSmallScreen, setIsSmallScreen] = createSignal(false);
-  const [leftColumns, setLeftColumns] = createSignal(
-    ["components", "pages", "templates", "forms", "thankyou", "error", "emailtemplate"].map((column) => ({
+  const [store, setStore] = createStore({
+    view: "Tablet",
+    selectedSection: "build",
+    isSmallScreen: false,
+    leftMenuTabs: [
+      { title: "Components", collection: "Comp" },
+      { title: "Pages", collection: "Page" },
+      { title: "Templates", collection: "TemplatePage" },
+      { title: "Forms", collection: "Form" },
+      { title: "Thank You", collection: "ThankYouPage" },
+      { title: "Error Pages", collection: "ErrorPages" },
+      { title: "Email Template", collection: "EmailTemplate" }
+    ],
+    rightMenuTabs: ["layout", "form"].map((column) => ({
       id: column,
       name: column,
     })),
-  );
-  const [rightColumns, setRightColumns] = createSignal(
-    ["layout", "form", "formSetting"].map((column) => ({
-      id: column,
-      name: column,
-    })),
-  );
+    isLeftOpen: true,
+    isRightOpen: true,
+  });
 
   const handleResize = () => {
-    setIsSmallScreen(window.innerWidth < 840);
-    if (window.innerWidth < 840) {
-      setIsLeftOpen(false);
-      setIsRightOpen(false);
-    } else {
-      setIsLeftOpen(true);
-      setIsRightOpen(true);
-    }
+    const isSmallScreen = window.innerWidth < 840;
+    setStore({
+      isSmallScreen,
+      isLeftOpen: !isSmallScreen,
+      isRightOpen: !isSmallScreen,
+    });
   };
 
   const debounce = (func: Function, wait: number) => {
@@ -70,49 +69,23 @@ export function LayoutDragAndDrop(): JSX.Element {
     });
   });
 
-  const UndoRedoIcons = () => {
-    const [pageConfig, __] = useContext(PageConfigContext);
-    const icons = [
-      { icon: "ci:arrow-undo-up-left", tooltip: "Undo", onClick: () => undo(pageConfig.formData.txnId) },
-      { icon: "ci:arrow-undo-up-right", tooltip: "Redo", onClick: () => redo(pageConfig.formData.txnId) },
-    ];
-
-    return (
-      <>
-        <For each={icons}>
-          {(item) => (
-            <Tooltip content={item.tooltip} position={"n"}>
-              <div
-                class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
-                onClick={item.onClick}
-              >
-                <Icon icon={item.icon} height={22} width={22}/>
-              </div>
-            </Tooltip>
-          )}
-        </For>
-      </>
-    );
-  }
-
   return (
     <PageConfigContext.Provider
       value={createStore({} as { formData: IFormContext })}
     >
       <HeaderDragAndDrop
-        selectedSection={selectedSection}
-        setSelectedSection={setSelectedSection}
-        view={view}
-        setView={setView}
+        selectedSection={() => store.selectedSection}
+        setSelectedSection={((value: string) => setStore("selectedSection", value)) as Setter<string>}
+        view={() => store.view}
+        setView={((value: string) => setStore("view", value)) as Setter<string>}
       />
-
-      <div classList={{'display:none': selectedSection() === 'setting'}}>
-        <div class={`grid ${(isLeftOpen() && isRightOpen())
+      <div classList={{ 'display:none': store.selectedSection === 'setting' }}>
+        <div class={`grid ${(store.isLeftOpen && store.isRightOpen)
           ? 'grid-cols:1'
-          : (!isLeftOpen() && !isRightOpen())
+          : (!store.isLeftOpen && !store.isRightOpen)
             ? 'grid-cols:3'
             : 'grid-cols:2'} gap:4px`}>
-          <Show when={!isLeftOpen() || isSmallScreen()}>
+          <Show when={!store.isLeftOpen || store.isSmallScreen}>
             <div
               class={`rel flex jc:start h:50px r:0|15|15|0 p:2 cursor:pointer`}
             >
@@ -126,7 +99,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   'align-items': "center",
                 }}
                 // variant="soft"
-                onClick={setIsLeftOpen}
+                onClick={() => setStore("isLeftOpen", !store.isLeftOpen)}
                 class="outline:2px|solid|transparent outline:offset|2px:focus"
               >
                 <Icon
@@ -134,7 +107,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   height={22}
                   class="cursor:pointer"
                   width={22}
-                  style={{color: "#37c"}}
+                  style={{ color: "#37c" }}
                 />
 
                 <span class={`font:14 cursor:pointer d:none@<sm`}>Add Form Element</span>
@@ -142,13 +115,13 @@ export function LayoutDragAndDrop(): JSX.Element {
             </div>
           </Show>
           <div class="ai:center flex gap:5 p:8 jc:center">
-            <UndoRedoIcons/>
+            <UndoRedoIcons />
             <Show when={location.pathname.includes("/admin/Form/")}>
-              <Stepper/>
+              <Stepper />
             </Show>
           </div>
 
-          <Show when={!isRightOpen() || isSmallScreen()}>
+          <Show when={!store.isRightOpen || store.isSmallScreen}>
             <div
               class={`rel flex jc:end h:50px r:0|15|15|0 p:2 cursor:pointer`}
             >
@@ -162,7 +135,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   'align-items': "center",
                 }}
                 // variant="soft"
-                onClick={setIsRightOpen}
+                onClick={() => setStore("isRightOpen", !store.isRightOpen)}
                 class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
               >
                 <span class="font:14 cursor:pointer d:none@<sm ml:10 ">View Form Settings</span>
@@ -171,7 +144,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   height={22}
                   class="cursor:pointer"
                   width={22}
-                  style={{color: "#37c"}}
+                  style={{ color: "#37c" }}
                 />
               </button>
             </div>
@@ -181,71 +154,70 @@ export function LayoutDragAndDrop(): JSX.Element {
         </div>
         <div style={{
           'grid-template-columns':
-            (!isLeftOpen() && !isRightOpen())
+            (!store.isLeftOpen && !store.isRightOpen)
               ? 'repeat(1, 1fr)'
-              : (isLeftOpen() && isRightOpen())
+              : (store.isLeftOpen && store.isRightOpen)
                 ? 'repeat(3, 22% 53% 25%)'
-                : `repeat(2, ${!isLeftOpen() ? '70% 30%' : '30% 70%'} )`,
+                : `repeat(2, ${!store.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
         }} class={`grid gap:4px`}>
 
           <Show
-            when={!isSmallScreen()}
+            when={!store.isSmallScreen}
             fallback={
               <Drawer
                 customButton={() => false}
                 drawerStyle={'padding: 10px'}
-                open={isLeftOpen}
-                setIsOpen={setIsLeftOpen}
+                open={() => store.isLeftOpen}
+                setIsOpen={((v: boolean) => setStore("isLeftOpen", v)) as Setter<boolean>}
                 width="75%"
               >
-                <MenuDragAndDrop
-
-                  isLeftOpen={isLeftOpen}
-                  toggleIsLeftOpen={setIsLeftOpen}
-                  leftColumns={leftColumns}
+                <FormElementsWrapper
+                  toggleIsLeftOpen={((isOpen: boolean) => setStore("isLeftOpen", isOpen)) as Setter<boolean>}
+                  leftColumns={store.leftMenuTabs}
                 />
               </Drawer>
             }
           >
-            <div class={`${!isLeftOpen() ? 'd:none' : 'd:contents'}`}>
-              <MenuDragAndDrop
-                isLeftOpen={isLeftOpen}
-                toggleIsLeftOpen={setIsLeftOpen}
-                leftColumns={leftColumns}
-              />
+            <div class={`${!store.isLeftOpen ? 'd:none' : ''}`}>
+              <Show when={store.isLeftOpen}>
+                <FormElementsWrapper
+                  toggleIsLeftOpen={((isOpen: boolean) => setStore("isLeftOpen", isOpen)) as Setter<boolean>}
+                  leftColumns={store.leftMenuTabs}
+                />
+              </Show>
             </div>
           </Show>
-          <ContentDragAndDrop view={view}/>
+          <ContentDragAndDrop view={() => store.view} />
           <Show
-            when={!isSmallScreen()}
+            when={!store.isSmallScreen}
             fallback={
               <Drawer
                 customButton={() => false}
                 drawerStyle={'padding: 10px'}
-                open={isRightOpen}
-                setIsOpen={setIsRightOpen}
+                open={() => store.isRightOpen}
+                setIsOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
                 width="75%"
               >
                 <ActionsDragAndDrops
-                  isRightOpen={isRightOpen}
-                  toggleIsRightOpen={setIsRightOpen}
-                  rightColumns={rightColumns}
+                  isRightOpen={() => store.isRightOpen}
+                  toggleIsRightOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
+                  rightColumns={() => store.rightMenuTabs}
                 />
               </Drawer>
             }
           >
-            <div class={`${!isRightOpen() ? "hidden" : "contents"}`}>
+            <div class={`${!store.isRightOpen ? "hidden" : "contents"}`}>
               <ActionsDragAndDrops
-                isRightOpen={isRightOpen}
-                toggleIsRightOpen={setIsRightOpen}
-                rightColumns={rightColumns}
+                isRightOpen={() => store.isRightOpen}
+                toggleIsRightOpen={((isOpen: boolean) => setStore("isRightOpen", isOpen)) as Setter<boolean>}
+                rightColumns={() => store.rightMenuTabs}
               />
             </div>
           </Show>
         </div>
       </div>
-      <div classList={{'display:none': selectedSection() === 'build'}}>
-        <PageSetting/>
+      <div classList={{ 'display:none': store.selectedSection === 'build' }}>
+        <PageSetting />
       </div>
     </PageConfigContext.Provider>
   );
