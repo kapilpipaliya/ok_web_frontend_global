@@ -34,7 +34,7 @@ export function getInitialDesignerLayoutStore() {
     selectedColl: -1 as Id | number,
     selectedComponent: -1 as Id | number,
     dragOverTargetId: -1 as Id | number,
-    showDrawer: false, // properties drawer
+    showPropertiesDrawer: false, // properties drawer
     hiddenNodes: [] as Array<Id | number>,
     draggedVertices: [] as Array<Vertex>,
     activeItem: null as Id | number | null,

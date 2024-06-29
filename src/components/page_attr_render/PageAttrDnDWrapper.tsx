@@ -101,7 +101,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
       <Tooltip content={"Properties"} nowrap>
         <Icon
           icon={"mingcute:settings-5-line"}
-          onclick={() => setLayoutStore('showDrawer', !layoutStore.showDrawer)}
+          onclick={() => setLayoutStore('showPropertiesDrawer', !layoutStore.showPropertiesDrawer)}
           height={22}
           width={22}
           class="cursor:pointer flex ai:center" />

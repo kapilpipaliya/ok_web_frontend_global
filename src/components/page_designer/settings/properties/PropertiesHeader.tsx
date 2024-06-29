@@ -4,9 +4,9 @@ import { GraphContext } from "~/lib/graph/graph";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
-export function PropertiesHeader(props: Readonly<{ setShowDrawer: (show: boolean) => void }>) {
+export function PropertiesHeader() {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [layoutStore] = useDesignerLayoutStore();
+    const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
     
     const getComponentName = () =>
         (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) ? graph.vertexes[layoutStore.selectedComponent].P.name || "" : "";
@@ -26,7 +26,7 @@ export function PropertiesHeader(props: Readonly<{ setShowDrawer: (show: boolean
                 {getComponentName()} Properties <OpenComponentSettings id={layoutStore.selectedComponent as string} />
             </div>
             <Icon
-                onclick={() => props.setShowDrawer(false)}
+                onclick={()=>setLayoutStore('showPropertiesDrawer', false)}
                 icon={"iconamoon:close-light"}
                 class="bg:#ededed:hover r:50%"
                 height={24}

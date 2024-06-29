@@ -276,7 +276,7 @@ export function LayoutPart(props: {}) {
                 <Icon
                   icon={"mingcute:settings-5-line"}
                   onclick={() =>
-                    setLayoutStore("showDrawer", !layoutStore.showDrawer)
+                    setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer)
                   }
                   height={22}
                   width={22}
@@ -427,19 +427,15 @@ export function LayoutPart(props: {}) {
 
   return (
     <>
-      <Show when={layoutStore.showDrawer}>
+      <Show when={layoutStore.showPropertiesDrawer}>
         <Drawer
           customButton={() => false}
           drawerStyle={"padding: 10px"}
-          open={() => layoutStore.showDrawer}
+          open={() => layoutStore.showPropertiesDrawer}
           setIsOpen={((v: boolean) =>
-            setLayoutStore("showDrawer", v)) as Setter<boolean>}
+            setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}
         >
-          <Properties
-            setShowDrawer={() =>
-              setLayoutStore("showDrawer", !layoutStore.showDrawer)
-            }
-          />
+          <Properties />
         </Drawer>
       </Show>
       <For each={rootVertexes()}>

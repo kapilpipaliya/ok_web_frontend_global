@@ -1,12 +1,12 @@
 import { PropertiesHeader } from './PropertiesHeader';
 import { PropertiesBody } from './PropertiesBody';
 
-export function Properties(props: { setShowDrawer?: any }) {
+export function Properties() {
   return (
     <div class="ml:5 mr:5 ">
-      <PropertiesHeader setShowDrawer={props.setShowDrawer} />
+      <PropertiesHeader />
       <hr class={"color:lightgrey m:.4rem|0"} />
-      <PropertiesBody setShowDrawer={props.setShowDrawer} />
+      <PropertiesBody  />
     </div>
   );
 }
