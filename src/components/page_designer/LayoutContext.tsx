@@ -8,19 +8,6 @@ export function getInitialDesignerLayoutStore() {
     view: "Tablet",
     selectedSection: "build",
     isSmallScreen: false,
-    leftMenuTabs: [
-      { title: "Components", collection: "Comp" },
-      { title: "Pages", collection: "Page" },
-      { title: "Templates", collection: "TemplatePage" },
-      { title: "Forms", collection: "Form" },
-      { title: "Thank You", collection: "ThankYouPage" },
-      { title: "Error Pages", collection: "ErrorPages" },
-      { title: "Email Template", collection: "EmailTemplate" }
-    ],
-    rightMenuTabs: ["layout", "form"].map((column) => ({
-      id: column,
-      name: column,
-    })),
     isLeftOpen: true,
     isRightOpen: true,
     formData: {} as IFormContext,
