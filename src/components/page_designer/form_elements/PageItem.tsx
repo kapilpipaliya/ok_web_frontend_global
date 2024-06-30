@@ -11,7 +11,7 @@ import { onClickAddComponent } from "~/lib/drag_drop/onClickAddComponent";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
+export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);

@@ -15,7 +15,7 @@ import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import { PageItemComponent } from "./PageItemComponent";
+import { PageItem } from "./PageItem";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
@@ -121,7 +121,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 </div>
               }
             >
-              {(item) => <PageItemComponent child={item} previewPageId={previewPageId()} setPreviewPageId={setPreviewPageId} />}
+              {(item) => <PageItem child={item} previewPageId={previewPageId()} setPreviewPageId={setPreviewPageId} />}
             </For>
           </div>
         </>

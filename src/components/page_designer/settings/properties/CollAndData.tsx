@@ -6,7 +6,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { GraphContext } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function CollAndData() {
@@ -31,14 +31,16 @@ export function CollAndData() {
     {
       name: "coll",
       displayName: "Collection",
+      // TODO: The value should be saved in the vertex not in the edge
       component: "SelectBox",
-      collection: "g:'Coll'",
+      collection: "g:'ALL_LABELS'",
       parentLabel: "Coll",
     },
     {
       name: "data",
       component: "SelectBox",
-      collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
+      // collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
+      collection: `g:'{{::'P.coll'}}'`,
     },
     {
       name: "data",
@@ -58,6 +60,7 @@ export function CollAndData() {
   return (
     <>
       <br />
+      <span class="float:left mt:5">Collection:</span>
       <SelectInputField
         data={graph.vertexes[layoutStore.selectedId]}
         meta={collMetaVertex.vertexes?.[0]!}
@@ -67,6 +70,7 @@ export function CollAndData() {
         txnId={layoutStore.formData.txnId}
         isRealTime={false}
       />
+      <span class="float:left mt:5">Data:</span>
       <SelectInputField
         data={graph.vertexes[layoutStore.selectedId]}
         meta={collMetaVertex.vertexes?.[1]!}
