@@ -10,6 +10,7 @@ import type { Config } from "@master/css";
 import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
+import { ReactiveMap } from "@solid-primitives/map";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -34,7 +35,7 @@ export default function App() {
     isSideBarOpen: true,
     isSubSideBarOpen: true,
     componentIdMap: {},
-    transactions: new Map(),
+    transactions: new ReactiveMap(),
   });
 
   return (

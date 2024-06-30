@@ -64,7 +64,7 @@ export function getNewTxnId(
 
 export function getExistingOrDefaultTxnValue(txnId: number, graph: Store<GraphInterface>) {
   return (
-    graph.transactions.get(txnId) || {
+    graph.transactions.has(txnId) ? {...graph.transactions.get(txnId)!} : {
       status: ProcessStatus.Unset,
       undoStep: 0,
       submittedStep: 0,
