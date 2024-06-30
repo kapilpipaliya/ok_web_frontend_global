@@ -3,9 +3,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
-import {
- getAttrVertex
-} from "~/components/page_attr_render/utils/getAttrVertex";
 
 export function getComponent(
  graph: Store<GraphInterface>,
@@ -16,7 +13,6 @@ export function getComponent(
  const currentComp = getChildVertex(graph, ["$0Comp"], item).vertex;
  if (currentComp) return currentComp;
 
- const attrVertex = getAttrVertex(graph, item);
- if (!attrVertex) return;
- return getCompFallbackToString(attrVertex, graph);
+
+ return getCompFallbackToString(item, graph);
 }

@@ -152,7 +152,9 @@ export function GenericField(
         </Match>
         <Match when={PageDesignerLabels.filter(label => label !== "Form").includes(component())}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageViewWrapper pageVertexLabel={component()} expression={props.meta.P.data} />
+          {/* <Show when={props.meta.P.data} keyed> */}
+           <PageViewWrapper pageVertexLabel={component()} expression={props.meta.P.data} />
+          {/* </Show> */}
         </Match>
         <Match when={component() === "Image"}>
           <img

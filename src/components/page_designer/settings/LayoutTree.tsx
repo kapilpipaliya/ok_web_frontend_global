@@ -184,7 +184,7 @@ export function LayoutTree() {
         <Show
           when={
             (isSelectedLayoutId(props.metaVertex.id) ||
-              isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
+              isSelectedHoverId(props.metaVertex.id))
           }
         >
           <Tooltip content={"Properties"} nowrap>

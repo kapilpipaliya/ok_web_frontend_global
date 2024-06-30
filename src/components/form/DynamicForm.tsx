@@ -55,7 +55,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
-  const [_, setLayoutStore] = useDesignerLayoutStore();
+  const [_, setLayoutStore] = useDesignerLayoutStore() || [];
 
   const [formData, setFormData] = createStore({
     txnId,
