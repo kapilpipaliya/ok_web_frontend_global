@@ -14,7 +14,6 @@ export function getInitialDesignerLayoutStore() {
     prevTxnIds: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     selectedId: -1 as Id | number,
-    selectedColl: -1 as Id | number,
     selectedComponent: -1 as Id | number,
     dragOverTargetId: -1 as Id | number,
     showPropertiesDrawer: false, // properties drawer

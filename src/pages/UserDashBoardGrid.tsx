@@ -19,11 +19,9 @@ export function UserDashBoardGrid() {
   }
   const allFormTableLayouts =
     getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
-  const allCollTableLayouts =
-    getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
 
   const allTableLayouts = () => [
-    ...new Set([...allCollTableLayouts, ...allFormTableLayouts]),
+    ...new Set([...allFormTableLayouts]),
   ];
   return (
     <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">

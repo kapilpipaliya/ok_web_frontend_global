@@ -18,10 +18,6 @@ export function getComponentFromLayoutRow(layoutRowId: string | number,
   if (compVertex[0]) {
     return compVertex[0];
   }
-  const collVertex = getChildVertex(graph, ["$0Coll"], currentVertex);
-  if (collVertex.vertex?.P.name === "Form") {
-    return findVertexByLabelAndUniqueId(graph, "Comp", IdAttr, "Form");
-  }
 
   return getStringComponent(graph);
 }

@@ -4,9 +4,7 @@ import {
   PageAttrRender
 } from "~/components/page_attr_render/PageAttrRender";
 import {  IsPreviewContext, } from "~/lib/contexts";
-import {
-  getCollection
-} from "~/components/page_attr_render/utils/getCollection";
+
 import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
@@ -22,9 +20,6 @@ export function PageView(props: Readonly<{
   const [graph, setGraph] = useContext(GraphContext)!;
   const [layoutStore] = useDesignerLayoutStore() || [];
   
-  const collection = createMemo(() =>
-    getCollection(graph, props.metaVertex)
-  );
   const dataVertex = createMemo(() =>
     getDataVertex(graph, props.metaVertex)
   );

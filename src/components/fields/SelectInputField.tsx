@@ -46,7 +46,6 @@ export function SelectInputField(
   const [options, setOptions] = createSignal([] as any[]);
 
   const getCollection = () => (
-    getChildVertex(graph, ["$0Coll"], props.meta).vertex?.P?.name ||
     props.meta.P.collection
   );
 

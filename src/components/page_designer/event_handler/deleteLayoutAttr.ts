@@ -13,7 +13,6 @@ export function deleteLayoutAttr(layoutStore: Store<PageLayoutObject>, setLayout
 
       setLayoutStore('selectedId', -1);
       setLayoutStore('selectedComponent', -1);
-      setLayoutStore('selectedColl', -1);
     }
     if (layoutStore.hoverId === layoutVertex.id) {
       setLayoutStore('hoverId', -1);

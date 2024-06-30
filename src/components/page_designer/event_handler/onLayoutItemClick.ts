@@ -10,15 +10,9 @@ export function onLayoutItemClick( setLayoutStore: SetStoreFunction<PageLayoutOb
   batch(() => {
     setLayoutStore('selectedId', -1);
     setLayoutStore('selectedComponent', -1);
-    setLayoutStore('selectedColl', -1);
 
     setLayoutStore('selectedId', layoutVertex.id);
-    const collVertex = getChildVertex(
-      graph,
-      ["$0Coll"],
-      graph.vertexes[(layoutVertex.id)]
-    );
-    setLayoutStore('selectedColl', collVertex?.vertex?.id ?? -1);
+   
     const componentVertex = getComponentFromLayoutRow(
       (layoutVertex.id),
       graph,
