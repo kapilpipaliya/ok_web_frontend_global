@@ -23,7 +23,7 @@ import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/del
 import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function LayoutPart() {
+export function LayoutTree() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
@@ -179,9 +179,131 @@ export function LayoutPart() {
       setLayoutStore("hoverId", -1);
     };
 
+    const SelectedAttrConfigIcons = () => {
+      return <div class="flex ai:center mt:4">
+        <Show
+          when={
+            (isSelectedLayoutId(props.metaVertex.id) ||
+              isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
+          }
+        >
+          <Tooltip content={"Properties"} nowrap>
+            <Icon
+              icon={"mingcute:settings-5-line"}
+              onclick={() =>
+                setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer)
+              }
+              height={22}
+              width={22}
+              class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+            />
+          </Tooltip>
+        </Show>
+
+        <Show when={!rootVertexes().includes(props.metaVertex)}>
+          <Show
+            when={
+              isSelectedLayoutId(props.metaVertex.id) ||
+              isSelectedHoverId(props.metaVertex.id) ||
+              layoutStore.hiddenNodes.includes(props.metaVertex.id)
+            }
+          >
+            <Tooltip content={"Duplicate"} nowrap>
+              <Icon
+                icon={"mage:copy"}
+                height={18}
+                width={18}
+                color={"black"}
+                class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                onclick={(e) => {
+                  cloneLayoutAndChildren(
+                    props.metaVertex,
+                    undefined,
+                    undefined,
+                    layoutStore.formData.txnId,
+                    graph,
+                    setGraph,
+                    layoutStore.formData.formData
+                  );
+                }}
+              />
+            </Tooltip>
+            <Tooltip content={"Delete"} nowrap>
+              <GenericField
+                meta={
+                  {
+                    P: {
+                      component: "Icon",
+                      style: { color: "red" },
+                      onClick: () => {
+                        const name = getComponent();
+                        deleteLayoutGlobal(
+                          layoutStore,
+                          setLayoutStore,
+                          props.metaVertex,
+                          graph,
+                          setGraph,
+                          layoutStore.formData.txnId,
+                          name,
+                          showSuccessToast
+                        );
+                      },
+                      width: 18,
+                      height: 18,
+                      class:
+                        "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
+                      icon: "mage:trash",
+                    },
+                  } as any
+                }
+              />
+            </Tooltip>
+
+            <Tooltip
+              content={`${
+                !layoutStore.hiddenNodes.includes(props.metaVertex.id)
+                  ? "Show"
+                  : "Show"
+              }`}
+              nowrap
+            >
+              <button
+                class="opacity:.5 opacity:1:hover"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleHidden(props.metaVertex.id);
+                }}
+              >
+                <Show
+                  when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
+                  fallback={
+                    <Icon
+                      height={18}
+                      width={18}
+                      icon="mdi:eye-off-outline"
+                      class="transition: 0.5s ease-in-out;"
+                    />
+                  }
+                >
+                  <Icon
+                    height={18}
+                    width={18}
+                    icon="mdi:eye-outline"
+                    class="transition: 0.5s ease-in-out;"
+                  />
+                </Show>
+              </button>
+            </Tooltip>
+            &nbsp;
+          </Show>
+        </Show>
+      </div>
+    }
+
     return (
       <div>
-        <div
+        <button
+          type="button"
           draggable={true}
           onDragStart={(e) =>
             handleDragStart(e, setLayoutStore, props.metaVertex)
@@ -264,126 +386,8 @@ export function LayoutPart() {
             &nbsp;&nbsp;
             {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}
           </div>
-          {/* When root element, dont display icons */}
-          <div class="flex ai:center mt:4">
-            <Show
-              when={
-                (isSelectedLayoutId(props.metaVertex.id) ||
-                  isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
-              }
-            >
-              <Tooltip content={"Properties"} nowrap>
-                <Icon
-                  icon={"mingcute:settings-5-line"}
-                  onclick={() =>
-                    setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer)
-                  }
-                  height={22}
-                  width={22}
-                  class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                />
-              </Tooltip>
-            </Show>
-
-            <Show when={!rootVertexes().includes(props.metaVertex)}>
-              <Show
-                when={
-                  isSelectedLayoutId(props.metaVertex.id) ||
-                  isSelectedHoverId(props.metaVertex.id) ||
-                  layoutStore.hiddenNodes.includes(props.metaVertex.id)
-                }
-              >
-                <Tooltip content={"Duplicate"} nowrap>
-                  <Icon
-                    icon={"mage:copy"}
-                    height={18}
-                    width={18}
-                    color={"black"}
-                    class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                    onclick={(e) => {
-                      cloneLayoutAndChildren(
-                        props.metaVertex,
-                        undefined,
-                        undefined,
-                        layoutStore.formData.txnId,
-                        graph,
-                        setGraph,
-                        layoutStore.formData.formData
-                      );
-                    }}
-                  />
-                </Tooltip>
-                <Tooltip content={"Delete"} nowrap>
-                  <GenericField
-                    meta={
-                      {
-                        P: {
-                          component: "Icon",
-                          style: { color: "red" },
-                          onClick: () => {
-                            const name = getComponent();
-                            deleteLayoutGlobal(
-                              layoutStore,
-                              setLayoutStore,
-                              props.metaVertex,
-                              graph,
-                              setGraph,
-                              layoutStore.formData.txnId,
-                              name,
-                              showSuccessToast
-                            );
-                          },
-                          width: 18,
-                          height: 18,
-                          class:
-                            "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
-                          icon: "mage:trash",
-                        },
-                      } as any
-                    }
-                  />
-                </Tooltip>
-
-                <Tooltip
-                  content={`${
-                    !layoutStore.hiddenNodes.includes(props.metaVertex.id)
-                      ? "Show"
-                      : "Show"
-                  }`}
-                  nowrap
-                >
-                  <button
-                    class="opacity:.5 opacity:1:hover"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleHidden(props.metaVertex.id);
-                    }}
-                  >
-                    <Show
-                      when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
-                      fallback={
-                        <Icon
-                          height={18}
-                          width={18}
-                          icon="mdi:eye-off-outline"
-                          class="transition: 0.5s ease-in-out;"
-                        />
-                      }
-                    >
-                      <Icon
-                        height={18}
-                        width={18}
-                        icon="mdi:eye-outline"
-                        class="transition: 0.5s ease-in-out;"
-                      />
-                    </Show>
-                  </button>
-                </Tooltip>
-                &nbsp;
-              </Show>
-            </Show>
-          </div>
-        </div>
+          <SelectedAttrConfigIcons/>
+        </button>
 
         <Show
           when={

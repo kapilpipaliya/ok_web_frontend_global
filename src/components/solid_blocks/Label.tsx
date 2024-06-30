@@ -11,13 +11,13 @@ interface LabeledFieldProps {
 }
 
 export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) {
-  const [pageConfig] = useDesignerLayoutStore();
+  const [layoutStore] = useDesignerLayoutStore() || [];
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label ?? "");
 
   const getFlexDirection = () => {
-    const position = props.position === "system" ? pageConfig.labelPosition : props.position;
+    const position = props.position === "system" ? layoutStore?.labelPosition : props.position;
     switch (position) {
       case "top":
         return "column";
@@ -50,14 +50,14 @@ export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
 
   const handleBlur = (e: FocusEvent) => {
     setIsEditing(false);
-    if (pageConfig.formData?.txnId) {
-      mergeVertexProperties(pageConfig.formData.txnId, props.meta.id, graph, setGraph, {label: (e.currentTarget as HTMLInputElement).value});
+    if (layoutStore.formData?.txnId) {
+      mergeVertexProperties(layoutStore.formData.txnId, props.meta.id, graph, setGraph, {label: (e.currentTarget as HTMLInputElement).value});
     }
   };
 
   const handleLabelClick = (e: MouseEvent) => {
-    if (!pageConfig.formData?.txnId) return;
-    setInputValue(props.label || "");
+    if (!layoutStore.formData?.txnId) return;
+    setInputValue(props.label ?? "");
     setIsEditing(true);
   };
 

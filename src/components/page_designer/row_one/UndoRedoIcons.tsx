@@ -12,19 +12,18 @@ export function UndoRedoIcons() {
   ];
 
   return (
-    <>
-      <For each={icons}>
-        {(item) => (
-          <Tooltip content={item.tooltip} position={"n"}>
-            <div
-              class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
-              onClick={item.onClick}
-            >
-              <Icon icon={item.icon} height={22} width={22} />
-            </div>
-          </Tooltip>
-        )}
-      </For>
-    </>
+    <For each={icons}>
+      {(item) => (
+        <Tooltip content={item.tooltip} position={"n"}>
+          <button
+            type="button"
+            class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
+            onClick={item.onClick}
+          >
+            <Icon icon={item.icon} height={22} width={22} />
+          </button>
+        </Tooltip>
+      )}
+    </For>
   );
 }

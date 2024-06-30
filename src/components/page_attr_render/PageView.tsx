@@ -14,13 +14,13 @@ import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { FormWrapper } from "../fields/FormWrapper";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
-export function PageView(props: {
+export function PageView(props: Readonly<{
   metaVertex?: Vertex;
   data?: Vertex;
   isPreview?: boolean
-}) {
+}>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [layoutStore] = useDesignerLayoutStore();
+  const [layoutStore] = useDesignerLayoutStore() || [];
   
   const collection = createMemo(() =>
     getCollection(graph, props.metaVertex)

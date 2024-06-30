@@ -3,12 +3,10 @@ import { klona } from "klona";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import {
-  getNewGraphId,
   transactionDetailAdd,
 } from "../transaction";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useToast } from "~/components/Toast";
 
 // return a new Vertex

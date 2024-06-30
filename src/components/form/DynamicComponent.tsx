@@ -69,7 +69,7 @@ export function DynamicComponent(props: Readonly<{
   applyDefaults?: boolean;
 }>) {
   const [graph] = useContext(GraphContext)!;
-  const [layoutStore] = useDesignerLayoutStore();
+  const [layoutStore] = useDesignerLayoutStore() || [];
 
   const component = createMemo(() => {
     switch (props.component) {
@@ -94,7 +94,7 @@ export function DynamicComponent(props: Readonly<{
     <Switch>
       <Match when={!component()}>NO INPUT</Match>
       <Match when={component()} keyed>
-        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
+        <Show when={!layoutStore?.hiddenNodes.includes(props.meta?.id)}>
           <Dynamic
           component={component()!}
           {...(props.applyDefaults && isApplyDefault() && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}

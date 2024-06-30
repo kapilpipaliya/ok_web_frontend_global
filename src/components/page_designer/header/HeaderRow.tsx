@@ -1,94 +1,16 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, type Setter, createSignal, Show, useContext } from "solid-js";
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-import logo from "~/assets/graphics/sidebarLogo.svg";
-import { CustomModal } from "~/components/CommonDialog";
-import { ShareSection } from "./PageShare";
-import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
-import { getNewTxnId } from "~/lib/graph/transaction";
-import { GraphContext, } from "~/lib/graph/graph";
+import { createSignal, Show } from "solid-js";
 import { useDesignerLayoutStore } from "../LayoutContext";
-import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
-import {formSubmit} from "~/components/form/formSubmit";
+import { LeftIcons } from "./LeftIcons";
+import { ResizeViewButtons } from "./ResizeViewButtons";
+import { MiddleSectionButtons } from "./MiddleSectionButtons";
+import { SaveButton } from "./SaveButton";
+import { PreviewButton } from "./PreviewButton";
+import { ExportSection } from "./ExportSection";
+
 export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);
-  const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const txnId = getNewTxnId(graph, setGraph);
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const views = [
-    { key: "prime:mobile", value: "Mobile", icon: true },
-    { key: "uil:tablet", value: "Tablet", icon: true },
-    { key: "humbleicons:desktop", value: "Desktop", icon: true },
-  ];
-
-  const navigate = useNavigate();
-
-  const onSubmit = async () => {
-    return formSubmit(layoutStore.formData, layoutStore.formData.formData.id, txnId, graph, setGraph, showLoadingToast, showWarningToast, showErrorToast, () => navigate(-1));
-  };
-  const LeftIcons = () => (<div class="flex ai:center">
-    <div
-      class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
-      onclick={() => navigate(removeLastPathSegment())}
-      title="Back"
-    >
-      <Icon
-        icon={"flowbite:caret-left-outline"}
-        class={"color:black:hover color:lightgrey"}
-        height={30}
-        width={30}
-      />
-    </div>
-    <a href="/">
-      <img style="height: 35px;" src={logo} alt="logo" />
-    </a>
-  </div>
-  );
-  const ResizeViewButtons = () => (
-    <For each={views}>
-      {(view, index) => (
-        <Tooltip content={view.value} position={"s"}>
-          <button
-            style={{
-              "background-color": view.value === layoutStore.view ? "#E0E7F3" : "",
-              color: view.value === layoutStore.view ? "#5252F1" : "grey",
-            }}
-            onclick={() => setLayoutStore("view", view.value)}
-            type="button"
-            class={`rel d:inline-flex ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""
-              }`}
-          >
-            <Icon icon={view.key} height={22} width={22} />
-          </button>
-        </Tooltip>
-      )}
-    </For>
-  );
-  const MiddleSectionButtons = () => (
-    <>
-      <For each={["Build", "Setting"]}>
-        {(section) => (
-          <Tooltip content={section} position={"s"}>
-            <button
-              style={{ "background-color": section === "Build" ? "" : "#E0E7F3", color: section === "Build" ? "grey" : "#5252F1" }}
-              onclick={() => setLayoutStore("selectedSection", section.toLowerCase())}
-              type="button"
-              class={`rel d:inline-flex ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${section === "Build" ? "r:5|0|0|5" : "r:0|5|5|0"}`}
-            >
-              <Icon
-                icon={section === "Build" ? "material-symbols-light:build-circle-outline-rounded" : "solar:settings-linear"}
-                height={22}
-                width={22}
-              />
-            </button>
-          </Tooltip>
-        )}
-      </For>
-    </>
-  );
-
   return (
     <header class="h:50px" style={{ "grid-area": "header" }}>
       <div class="flex-grow:1 min-w:400 grid ji:center">
@@ -112,53 +34,12 @@ export function HeaderRow() {
             </Show>
           </div>
           <div class="ai:center justify-content:space-between flex gap:5">
-            <Tooltip content={"Save"} position={"s"}>
-              <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer" onClick={onSubmit}>
-                <Icon icon={"bi:floppy"} height={22} width={22} />
-              </div>
-            </Tooltip>
-            <Tooltip content={"Preview"} position={"s"}>
-              <div onClick={() => window.open(`/view/${layoutStore.formData.formData.L[0]}/${layoutStore.formData.formData.P.name}/preview`)} class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
-                <Icon icon={"ph:eye"} height={22} width={22} />
-              </div>
-            </Tooltip>            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
+            <SaveButton />
+            <PreviewButton />
+            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
           </div>
         </div>
       </div>
     </header>
   );
 }
-
-const ExportSection = (props: Readonly<{
-  setOpenDialog: Setter<boolean>;
-  openDialog: Accessor<boolean>;
-}>) => {
-  return (
-    <CustomModal
-      dialogClass=""
-      title={"Code"}
-      openButton={false}
-      buttonLabel={
-        <Tooltip content={"Share"} position={"s"}>
-          <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
-            <Icon icon={"basil:share-box-outline"} height={22} width={22} />
-          </div>
-        </Tooltip>
-      }
-      body={<ShareSection />}
-      footer={(toggle) => (
-        <div class="flex ai:center jc:flex-end">
-          <button
-            onClick={() => {
-              toggle(false);
-            }}
-          >
-            Close
-          </button>
-        </div>
-      )}
-      setOpen={props.setOpenDialog}
-      open={props.openDialog()}
-    />
-  );
-};

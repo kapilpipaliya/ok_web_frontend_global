@@ -1,9 +1,9 @@
 import { type JSX, Show } from "solid-js";
-import { Stepper } from "./Stepper";
+import { FormStepper } from "./form_stepper/FormStepper";
 import { UndoRedoIcons } from "./UndoRedoIcons";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { RenderLeftToggleButton } from "./RenderLeftToggleButton";
-import { RenderRightToggleButton } from "./RenderRightToggleButton";
+import { LeftToggleButton } from "./LeftToggleButton";
+import { RightToggleButton } from "./RightToggleButton";
 
 export function LayoutGridRowOne(): JSX.Element {
   const [layoutStore] = useDesignerLayoutStore();
@@ -14,16 +14,16 @@ export function LayoutGridRowOne(): JSX.Element {
         ? 'grid-cols:3'
         : 'grid-cols:2'} gap:4px`}>
       <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
-        <RenderLeftToggleButton />
+        <LeftToggleButton />
       </Show>
       <div class="ai:center flex gap:5 p:8 jc:center">
         <UndoRedoIcons />
         <Show when={location.pathname.includes("/admin/Form/")}>
-          <Stepper />
+          <FormStepper />
         </Show>
       </div>
       <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
-        <RenderRightToggleButton />
+        <RightToggleButton />
       </Show>
     </div>
 

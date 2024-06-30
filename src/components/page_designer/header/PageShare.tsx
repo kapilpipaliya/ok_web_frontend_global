@@ -38,53 +38,9 @@ export function ShareSection() {
     }
   };
 
-  const inlineStyles = {
-    shareSection: {
-      padding: "20px",
-      "border-radius": "10px",
-    },
-    shareLink: {
-      display: "flex",
-      "margin-bottom": "20px",
-    },
-    button: {
-      padding: "10px",
-      border: "none",
-      "background-color": "#f5f5f5",
-      "border-left": "1px solid #ddd",
-      cursor: "pointer",
-    },
-    accessToggle: {
-      "margin-bottom": "20px",
-    },
-    accessButton: {
-      padding: "10px 20px",
-      border: "none",
-      "border-radius": "6px",
-      "background-color": "#f5f5f5",
-      "margin-right": "10px",
-      cursor: "pointer",
-    },
-    activeButton: {
-      "background-color": "#554FDC",
-      "border-radius": "6px",
-      color: "white",
-    },
-    invitePeople: {
-      "margin-bottom": "20px 0px",
-      "border-radius": "6px",
-    },
-    shareOther: {
-      button: {
-        "margin-right": "10px",
-        cursor: "pointer",
-      },
-    },
-  };
-
   return (
-    <div style={inlineStyles.shareSection}>
-      <div style={inlineStyles.shareLink}>
+    <div class="p:20px r:10px">
+      <div class="flex mb:20px">
         <input
           type="text"
           value={getLink()}
@@ -94,8 +50,7 @@ export function ShareSection() {
         <Tooltip content={"Preview link"}>
           <button
             onClick={previewLink}
-            style={inlineStyles.button}
-            class={"r:0|5|5|0 p:10"}
+            class={"p:10 border:none bg:rgb(245,245,245) border-l:1px_solid_#ddd cursor:pointer r:0|5|5|0"}
           >
             🚀
           </button>
@@ -103,38 +58,37 @@ export function ShareSection() {
         <Tooltip content={showCopiedTooltip() ? "Copied" : "Click to copy"} nowrap>
           <button
             onClick={copyToClipboard}
-            style={inlineStyles.button}
-            class={"r:0|5|5|0 p:10"}
+            class={"p:10 border:none bg:rgb(245,245,245) border-l:1px_solid_#ddd cursor:pointer r:0|5|5|0"}
           >
             📋
           </button>
         </Tooltip>
       </div>
-      <div style={inlineStyles.accessToggle}>
+      <div class="mb:20px">
         <button
           onClick={() => {
             setAccess("everyone");
           }}
-          style={
+          class={
             access() === "everyone"
-              ? {...inlineStyles.accessButton, ...inlineStyles.activeButton}
-              : inlineStyles.accessButton
+              ? "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer bg:#554FDC color:white"
+              : "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer"
           }
         >
           Everyone
         </button>
         <button
           onClick={() => setAccess("invite")}
-          style={
+          class={
             access() === "invite"
-              ? {...inlineStyles.accessButton, ...inlineStyles.activeButton}
-              : inlineStyles.accessButton
+              ? "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer bg:#554FDC color:white"
+              : "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer"
           }
         >
           Invite only
         </button>
       </div>
-      <div style={inlineStyles.shareLink}>
+      <div class="flex mb:20px">
         <button onClick={copyToClipboard} class={"r:5|0|0|5 p:10 bg:#F5F5F5"}>
           <Icon icon={"system-uicons:mail"} height={25} width={25}/>
         </button>
@@ -149,11 +103,11 @@ export function ShareSection() {
           placeholder="Enter email, for multiple email use';' separate"
         />
       </div>
-      <div style={inlineStyles.shareOther}>
-        <button style={inlineStyles.shareOther.button}>🌐</button>
-        <button style={inlineStyles.shareOther.button}>💬</button>
-        <button style={inlineStyles.shareOther.button}>✉️</button>
-        <button style={inlineStyles.shareOther.button}>🔗</button>
+      <div class="flex">
+        <button class="mr:10px cursor:pointer">🌐</button>
+        <button class="mr:10px cursor:pointer">💬</button>
+        <button class="mr:10px cursor:pointer">✉️</button>
+        <button class="mr:10px cursor:pointer">🔗</button>
       </div>
     </div>
   );
