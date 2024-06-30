@@ -7,7 +7,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
-export function deleteLayoutGlobal(layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
+export function deleteLayoutAttr(layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
   batch(() => {
     if (layoutStore.selectedId === layoutVertex.id) {
 

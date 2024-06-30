@@ -19,7 +19,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { nameExpr } from "./utils/nameExpr";
-import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/deleteLayoutGlobal";
+import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
@@ -237,7 +237,7 @@ export function LayoutTree() {
                       style: { color: "red" },
                       onClick: () => {
                         const name = getComponent();
-                        deleteLayoutGlobal(
+                        deleteLayoutAttr(
                           layoutStore,
                           setLayoutStore,
                           props.metaVertex,

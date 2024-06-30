@@ -22,7 +22,7 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { useToast } from "../Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/deleteLayoutGlobal";
+import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX.Element; }>) {
@@ -158,7 +158,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
         </Tooltip>
         <Tooltip content={"Delete"}>
           <Icon
-            onClick={() => deleteLayoutGlobal(layoutStore, setLayoutStore, props.item, graph, setGraph, txnId, getComponentName(), showSuccessToast)}
+            onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, txnId, getComponentName(), showSuccessToast)}
             icon={"fluent:delete-20-regular"}
             height={20}
             width={20}

@@ -24,10 +24,6 @@ export function getInitialDesignerLayoutStore() {
     isLeftOpen: true,
     isRightOpen: true,
     formData: {} as IFormContext,
-    labelPosition: "top", // Default position
-    labelColor: "black", // Default label color
-    inputBackground: "white",
-    activeStepId: 0 as Id | number,
     prevTxnIds: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     selectedId: -1 as Id | number,
@@ -39,6 +35,11 @@ export function getInitialDesignerLayoutStore() {
     draggedVertices: [] as Array<Vertex>,
     activeItem: null as Id | number | null,
     position: null as "before" | "after" | "center" | "left" | "right" | null,
+    // this propes may required on preview too
+    labelPosition: "top", // Default position
+    labelColor: "black", // Default label color
+    inputBackground: "white",
+    activeStepId: 0 as Id | number,
   });
 }
 

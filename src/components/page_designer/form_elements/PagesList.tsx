@@ -18,7 +18,7 @@ import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { PageItemComponent } from "./PageItemComponent";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function PagesPart(props: Readonly<{ coll: string }>) {
+export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [pageConfig] = useDesignerLayoutStore() || [];
   const { showErrorToast } = useToast();

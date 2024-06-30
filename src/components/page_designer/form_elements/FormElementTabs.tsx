@@ -4,8 +4,8 @@ import {
   Switch,
   createSignal,
 } from "solid-js";
-import { ComponentPart } from "./ComponentPart";
-import { PagesPart } from "./PagesPart";
+import { ComponentList } from "./ComponentList";
+import { PagesList } from "./PagesList";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function FormElementTabs() {
@@ -41,7 +41,7 @@ export function FormElementTabs() {
         <Tabs/>
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
-            <ComponentPart />
+            <ComponentList />
           </Match>
           <Match when={[
             "Page",
@@ -51,7 +51,7 @@ export function FormElementTabs() {
             "ErrorPage",
             "EmailTemplate"
           ].find((v)=> v ===selectedTab().collection)} keyed>
-            <PagesPart coll={selectedTab().collection} />
+            <PagesList coll={selectedTab().collection} />
           </Match>
         </Switch>
       </div>

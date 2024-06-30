@@ -20,7 +20,7 @@ import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { OpenComponentSettings } from "../OpenComponentSettings";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function ComponentPart() {
+export function ComponentList() {
   const [graph, setGraph] = useContext(GraphContext)!;
 
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];

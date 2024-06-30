@@ -3,7 +3,6 @@ import { For, createSignal } from "solid-js";
 import { LayoutTree } from "./LayoutTree";
 import { FormConfig } from "./FormConfig";
 import { capitalizeFirstLetter } from "~/lib/utils";
-import { FormSetting } from "./FormSetting";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function SettingTabs() {
@@ -53,12 +52,6 @@ export function SettingTabs() {
         class="p:5"
       >
         <FormConfig />
-      </div>
-      <div
-        classList={{ "display:none": selectedTab() !== "formSetting" }}
-        class="p:5"
-      >
-        <FormSetting />
       </div>
     </div>
   );

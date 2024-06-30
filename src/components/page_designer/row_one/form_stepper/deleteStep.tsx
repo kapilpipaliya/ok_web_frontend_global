@@ -1,5 +1,5 @@
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/deleteLayoutGlobal";
+import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import type { PageLayoutObject } from "../../LayoutContext";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
@@ -16,5 +16,5 @@ export function deleteStep(graph: Store<GraphInterface>, setGraph: SetStoreFunct
       setLayoutStore('activeStepId', steps[currentStep - 1].id);
     }
   }
-  deleteLayoutGlobal(layoutStore, setLayoutStore, item, graph, setGraph, layoutStore.formData.txnId, item.P.name, showSuccessToast);
+  deleteLayoutAttr(layoutStore, setLayoutStore, item, graph, setGraph, layoutStore.formData.txnId, item.P.name, showSuccessToast);
 }
