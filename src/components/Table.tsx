@@ -138,7 +138,7 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 }
 
-const TableActions = (props: {
+const TableActions = (props: Readonly<{
   rowsPerPageOptions?: number[];
   data: any;
   displayedRows: Accessor<any[]>;
@@ -150,7 +150,7 @@ const TableActions = (props: {
   handleNextPage: () => void;
   handleLastPage: () => void;
   totalPages: Accessor<number>;
-}) => {
+}>) => {
   return (
     <Show when={props.displayedRows().length > 0}>
       <div style="display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem;">

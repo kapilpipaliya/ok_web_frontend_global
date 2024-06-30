@@ -2,7 +2,7 @@ import type { Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
-import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
+import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import {
  getAttrVertex
 } from "~/components/page_attr_render/utils/getAttrVertex";
@@ -18,5 +18,5 @@ export function getComponent(
 
  const attrVertex = getAttrVertex(graph, item);
  if (!attrVertex) return;
- return getCollAttrComp(attrVertex, graph);
+ return getCompFallbackToString(attrVertex, graph);
 }

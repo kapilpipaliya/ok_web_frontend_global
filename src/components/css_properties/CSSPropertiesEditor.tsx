@@ -10,7 +10,7 @@ import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
 import { DisplaySelector } from "./components/DisplaySelector";
 import { cssStateToString, type CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
 
-export function CSSPropertiesEditor(props: {
+export function CSSPropertiesEditor(props: Readonly<{
   component: string;
   meta: Vertex;
   title?: string;
@@ -19,7 +19,7 @@ export function CSSPropertiesEditor(props: {
   disabled?: boolean;
   isRealTime?: boolean;
   txnId?: number;
-}) {
+}>) {
   const [cssState, setCssState] = createStore({} as CSSStore);
   const [cssDefaultState, setCssDefaultCssState] = createStore({} as CSSStore);
   const [state, setState] = createSignal('');

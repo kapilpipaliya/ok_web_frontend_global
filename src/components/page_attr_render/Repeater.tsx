@@ -20,7 +20,7 @@ import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
 
-export const Repeater = (props: { data: any; meta: any }) => {
+export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [options, setOptions] = createSignal([]);
   const [isFetching, setIsFetching] = createSignal(false);

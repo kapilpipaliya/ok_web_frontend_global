@@ -138,7 +138,7 @@ export function ComponentPart() {
   };
 
 
-  function ListItemComponent(props: { child: Vertex }) {
+  function ListItemComponent(props: Readonly<{ child: Vertex }>) {
     const [isHovered, setIsHovered] = createSignal(false);
 
     const baseStyle = {

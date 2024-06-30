@@ -1,5 +1,4 @@
 import { batch } from "solid-js";
-import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
@@ -13,7 +12,6 @@ export function deleteRow(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  Ws: ServerEventsDispatcher,
 ) {
   const { showErrorToast } = useToast();
 

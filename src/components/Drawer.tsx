@@ -1,10 +1,10 @@
 import { createSignal, type JSX, Show, onMount, onCleanup, type Accessor, type Setter } from "solid-js";
 
 interface DrawerProps {
-  customButton?: (props: {
+  customButton?: (props: Readonly<{
     onClick: () => void;
     isOpen: boolean;
-  }) => JSX.Element;
+  }>) => JSX.Element;
   children: JSX.Element;
   drawerStyle?: string;
   width?: string;
@@ -12,7 +12,7 @@ interface DrawerProps {
   setIsOpen?: Setter<boolean>;
 }
 
-export function Drawer(props: DrawerProps) {
+export function Drawer(props: Readonly<DrawerProps>) {
   const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]
     : createSignal(false);

@@ -247,37 +247,3 @@ export function updateVertexId(
   );
   return { error: "" };
 }
-
-export function findOrCreateNewVertex(
-  txnId: number,
-  label: string,
-  lookupId: string,
-  lookUpUniqueValue: string,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  const { showErrorToast } = useToast();
-
-  if (!lookUpUniqueValue) {
-    showErrorToast("lookup Unique Value must not be empty");
-    return;
-  }
-  let existingVertex = findVertexByLabelAndUniqueId(
-    graph,
-    label,
-    lookupId,
-    lookUpUniqueValue,
-  );
-
-  if (!existingVertex) {
-    const vertexId = getNewGraphId();
-    addNewVertex(
-      txnId,
-      newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }),
-      graph,
-      setGraph,
-    );
-    existingVertex = graph.vertexes[vertexId];
-  }
-  return existingVertex;
-}

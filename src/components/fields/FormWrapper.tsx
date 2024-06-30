@@ -1,6 +1,5 @@
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Show, useContext } from "solid-js";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { useNavigate } from "@solidjs/router";
@@ -19,7 +18,6 @@ export function FormWrapper(
     label?: string;
   },
 ) {
-  const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const { showLoadingToast } = useToast();
   const navigate = useNavigate();
@@ -49,12 +47,12 @@ export function FormWrapper(
 
   // if (!props.data?.id) {
 
-  const form = getFormMetaData(graph as Store<GraphInterface>, () => { }, props.meta!);
+  const form = getFormMetaData(graph as Store<GraphInterface>, () => { }, props.meta);
   const defaultValues = form.attributes.reduce((acc, attr) => {
     acc[attr.name] = attr.defaultValue;
     return acc;
   }, {} as { [key: string]: any });
-  const createResult = createForm(graph, setGraph, txnId, Ws, props.label ?? props.meta!.P[IdAttr], defaultValues);
+  const createResult = createForm(graph, setGraph, txnId, props.label ?? props.meta.P[IdAttr], defaultValues);
   if (createResult.error) return createResult.error;
   setFormData('formData', createResult.vertex!);
 

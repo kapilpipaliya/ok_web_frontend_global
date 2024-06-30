@@ -13,13 +13,13 @@ export const collapsibleContext = createContext<
 >(null);
 
 // Parent component for the collapsible section
-export function Collapsible(props: {
+export function Collapsible(props: Readonly<{
   isOpen?: Accessor<boolean>;
   setOpen?: Setter<boolean>;
   title: any;
   children: JSX.Element;
   class?: string;
-}) {
+}>) {
   const [state, setState] = createSignal(props.isOpen ?? false);
 
   const toggleState = () => {

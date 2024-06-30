@@ -9,14 +9,12 @@ import {
 } from "../../transaction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 
 
 export function createForm(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  ws: ServerEventsDispatcher,
   label: string,
   properties?: {
     [key: string]: any;

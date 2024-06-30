@@ -15,11 +15,11 @@ import { Table, TableHeadCell, TableBodyCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
 import type { Id } from "~/lib/graph/graph";
 
-export const SupportTicketSection = (props: {
+export const SupportTicketSection = (props: Readonly<{
   setIsMainScreenLoad: SetStoreFunction<boolean>;
   contactList: any;
   setContactList: SetStoreFunction<any>;
-}) => {
+}>) => {
   const [messages, setMessages] = createSignal<any>([]);
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
@@ -61,7 +61,7 @@ export const SupportTicketSection = (props: {
     setMessages([...messages()!, reply]);
   };
 
-  const Chat = (props: { id: number }) => {
+  const Chat = (props: Readonly<{ id: number }>) => {
     let messageContainer: HTMLDivElement;
 
     const getMessages = async () => {
@@ -148,7 +148,7 @@ export const SupportTicketSection = (props: {
     );
   };
 
-  const OpenDialog = (props: { id: number }) => {
+  const OpenDialog = (props: Readonly<{ id: number }>) => {
     return (
       <CustomModal
         bodyStyle={{ "max-height": "none", overflow: "auto" }}

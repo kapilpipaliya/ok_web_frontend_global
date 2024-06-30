@@ -2,7 +2,7 @@ import type {SetStoreFunction, Store} from "solid-js/store";
 import {type GraphInterface, IdAttr} from "~/lib/graph/graph";
 import {getChildVertex, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
 import {findVertexByLabelAndUniqueId} from "~/lib/graph/get/sync/findVertex";
-import {getStringComponent} from "~/lib/graph/get/sync/graph_functions";
+import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 
 export function getComponentFromLayoutRow(layoutRowId: string | number,
   graph: Store<GraphInterface>,

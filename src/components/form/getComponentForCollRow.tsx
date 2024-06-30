@@ -1,6 +1,6 @@
 import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
-import {getCollAttrComp} from "~/lib/graph/get/sync/graph_functions";
+import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
 
 export function getComponentForCollRow(
@@ -10,7 +10,7 @@ export function getComponentForCollRow(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!metaVertex.P.component) {
-    return getCollAttrComp(metaVertex, graph)?.P[IdAttr];
+    return getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
   }
   if (metaVertex.P.component.includes("-")) {
     return getSelectionOptions(graph, setGraph, [data], metaVertex.P.component)

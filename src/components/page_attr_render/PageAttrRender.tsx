@@ -18,7 +18,7 @@ import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { PageAttrDnDWrapper } from "./PageAttrDnDWrapper";
 
-export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
+export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vertex }>) {
   const parentItems = useContext(PageRenderVertexContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const { txnId } = useContext(FormContext);

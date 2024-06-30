@@ -1,9 +1,9 @@
 import type { Edge, Vertex } from "~/lib/graph/graph";
 import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
-import { replaceExpressionToLabel } from "~/cypher/get/traverse";
 import type { ServerResult } from "./ServerResult";
 import type { TransactionPromise } from "neo4j-driver-core";
+import { replaceExpressionToLabel } from "./replaceExpressionToLabel";
 
 
 export async function getSelectionOptionsBase(

@@ -139,10 +139,10 @@ export function Settings() {
     </>
   );
 }
-const TabSection = (props: {
+const TabSection = (props: Readonly<{
   setSelectedTab: Setter<string>;
   selectedTab: Accessor<string>;
-}) => {
+}>) => {
   return (
     <div class="radio-inputs m:20">
       <label class="radio" onClick={() => props.setSelectedTab("General")}>

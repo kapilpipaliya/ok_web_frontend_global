@@ -16,11 +16,11 @@ export function useRuntimeCSS() {
 }
 
 // https://github.com/master-co/css/blob/beta/packages/react/src/CSSProvider.tsx
-export function CSSRuntimeProvider(props: {
+export function CSSRuntimeProvider(props: Readonly<{
   children: JSX.Element;
   config?: Config | Promise<any>;
   root?: Document | ShadowRoot;
-}) {
+}>) {
   const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(
     undefined,
   );

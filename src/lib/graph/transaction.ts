@@ -3,7 +3,7 @@ import type { GraphInterface, Id } from "./graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 // temporary we start from 500000 because newId should not conflict with existing Ids
-export let uniqueId = -50000;
+let uniqueId = -50000;
 
 export type Revert = { revert: () => any };
 export type InsertFn = {

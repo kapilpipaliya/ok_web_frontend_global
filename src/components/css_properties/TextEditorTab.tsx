@@ -1,9 +1,9 @@
 import { createEffect, createSignal } from "solid-js";
 
-export const TextEditorTab = (props: {
+export function TextEditorTab(props: Readonly<{
   getCssValue: any;
   parseAndApplyCssRules: (valueString: string) => void;
-}) => {
+}>) {
   const [text, setText] = createSignal(props.getCssValue);
   createEffect(() => {
     setText(props.getCssValue);
@@ -27,8 +27,7 @@ export const TextEditorTab = (props: {
         setText(e.target.value);
         props.parseAndApplyCssRules(e.target.value);
         // props.setValue?.(e.target.value);
-      }}
-      placeholder="Start typing..."
-    />
+      } }
+      placeholder="Start typing..." />
   );
-};
+}

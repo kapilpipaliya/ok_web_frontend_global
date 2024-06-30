@@ -48,7 +48,7 @@ export function FAQSection() {
   );
 }
 
-const AccordionItem = (props: { question: string; answer: string }) => {
+const AccordionItem = (props: Readonly<{ question: string; answer: string }>) => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const toggleOpen = () => {

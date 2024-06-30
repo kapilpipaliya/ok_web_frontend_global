@@ -1,5 +1,4 @@
 import { Show, createMemo, For, Match, Switch, useContext, createUniqueId, onCleanup } from "solid-js";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -9,7 +8,7 @@ import { getComponentForCollRow } from "~/components/form/getComponentForCollRow
 import { ValidationConfig } from "./ValidationConfig";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
-import { getMetaProps } from "~/lib/graph/get/sync/graph_functions";
+import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { FormMetaData } from "~/lib/formMetaData";
 import { createWritableMemo } from "@solid-primitives/memo";
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -23,8 +22,7 @@ interface FormGroupPropertiesProps {
   setValue(meta: Vertex, data: any): void;
 }
 
-export function FormGroupProperties(props: FormGroupPropertiesProps) {
-  const { Ws } = useContext(WsContext);
+export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [layoutStore, __] = useDesignerLayoutStore();
 
@@ -105,7 +103,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
               setGraph,
             ),
           );
-          const metaProps = getMetaProps(graph, setGraph, meta(), meta());
+          const metaProps = getPropsFromMetaExpression(graph, setGraph, meta(), meta());
           const P = {
             ...meta().P,
             ...metaProps

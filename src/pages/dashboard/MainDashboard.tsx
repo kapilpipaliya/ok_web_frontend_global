@@ -27,7 +27,7 @@ import { API } from "~/lib/api/endpoints";
 import { APP_BASE_URL } from "~/lib/constants";
 import { isPageDesignerPath } from "~/lib/utils";
 
-export function MainDashboard(props: { children?: JSX.Element }) {
+export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   const border = "|solid|rgb(212,219,231)";
 
   const [graph, setGraph] = useContext(GraphContext)!;

@@ -55,12 +55,12 @@ export function HeroSection() {
 };
 
 
-export const IconCard = (props: {
+export const IconCard = (props: Readonly<{
   icon: any;
   text: string;
   subtext: string;
   altText: string;
-}) => {
+}>) => {
   return (
     <div class="iconcard">
       <div

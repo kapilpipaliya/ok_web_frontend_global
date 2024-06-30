@@ -56,12 +56,12 @@ export const StyleEditorTab = () => {
   );
   const length = createMemo(() => Object.keys(filteredSections()).length);
 
-  const CollapsibleSection = (props: {
+  const CollapsibleSection = (props: Readonly<{
     index: any;
     title: any;
     properties: any;
     isOpen: boolean;
-  }) => {
+  }>) => {
     const [isOpen, setIsOpen] = createSignal(props.isOpen ?? false);
 
     return (

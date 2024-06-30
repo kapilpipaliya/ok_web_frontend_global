@@ -1,14 +1,14 @@
 import { Popover } from '@kobalte/core/popover';
 import type { JSX } from 'solid-js';
 
-export function CustomPopover(props: {
+export function CustomPopover(props: Readonly<{
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   trigger: JSX.Element;
   children: JSX.Element;
   title?: string;
   description?: string;
-}) {
+}>) {
   return (
     <Popover placement='right' open={props.isOpen} onOpenChange={props.setIsOpen}>
       <Popover.Trigger>

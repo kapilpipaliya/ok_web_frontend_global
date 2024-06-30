@@ -135,12 +135,12 @@ function PricingContent() {
   );
 }
 
-function PricingPlan(props: {
+function PricingPlan(props: Readonly<{
   title: string;
   price: string | number;
   features: string[];
   recommended: boolean;
-}) {
+}>) {
   return (
     <div
       class={`plan text-align-last:left ${props.recommended ? "recommended" : ""}`}
@@ -161,7 +161,7 @@ function PricingPlan(props: {
   );
 }
 
-function PricingFeatures(props: { title: string; features: string[] }) {
+function PricingFeatures(props: Readonly<{ title: string; features: string[] }>) {
   const [isOpen, setIsOpen] = createSignal(true);
   return (
     <div class="plan" style={{ display: "block" }}>

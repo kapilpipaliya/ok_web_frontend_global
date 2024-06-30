@@ -15,7 +15,6 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   getChildVertex,
   getSelectionOptions,
@@ -41,7 +40,6 @@ export function SelectInputField(
     isRealTime?: boolean;
   },
 ) {
-  const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const formData = useContext(FormContext);
   const [loading, setLoading] = createSignal(false);
@@ -134,7 +132,6 @@ export function SelectInputField(
               props.meta,
               props.data!,
               parsedValue,
-              Ws,
               false,
             );
         } else {

@@ -47,13 +47,13 @@ export function TestimonialSection() {
   );
 }
 
-function Testimonial(props: {
+function Testimonial(props: Readonly<{
   rating: number;
   title: string;
   feedback: string;
   name: string;
   profession: string;
-}) {
+}>) {
   return (
     <div class="personaltestimonial" aria-label={`Testimonial from ${props.name}, ${props.profession}`}>
       <p class="ratestar" aria-label={`Rating: ${props.rating} stars`}>

@@ -6,7 +6,7 @@ import { useToast } from "~/components/Toast";
 import { GraphContext } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validations";
 
-export const PasswordSection = (props: { profileData: any }) => {
+export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
 

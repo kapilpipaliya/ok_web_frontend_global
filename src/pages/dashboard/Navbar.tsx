@@ -5,7 +5,7 @@ import "~/css/sideBarSearch.css";
 
 import type { DisplayComponentProps } from "~/components/fields/ComponentType";
 
-function NavToggleBtn(props: { toggleSidebar: () => void }) {
+function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
   return (
     <>
       <input type="checkbox" id="checkbox" onClick={props.toggleSidebar} />

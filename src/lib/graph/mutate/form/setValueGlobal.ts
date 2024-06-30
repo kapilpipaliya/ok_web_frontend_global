@@ -5,7 +5,6 @@ import {
 import { commitTxn, getNewTxnId } from "../../transaction";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { onChangeHandler } from "./onChangeHandler";
 import { validateInput } from "~/components/page_designer/settings/validateInput";
 import { batch } from "solid-js";
@@ -18,7 +17,6 @@ export function setValueGlobal(
   metaVertex: Vertex,
   dataVertex: Vertex,
   data: any,
-  ws: ServerEventsDispatcher,
   isRealTime: boolean
 ) {
   if (!dataVertex) {

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import type { Id } from "~/lib/graph/graph";
 
-export const OpenComponentSettings = (props: { id: Id; class?: string }) => {
+export const OpenComponentSettings = (props: Readonly<{ id: Id; class?: string }>) => {
   return <Icon
     onClick={() => {
       const currentURL = window.location.href;

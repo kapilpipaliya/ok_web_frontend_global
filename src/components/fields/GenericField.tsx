@@ -27,7 +27,7 @@ import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/pag
 import { APP_BASE_URL } from "~/lib/constants";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { FormWrapper } from "~/components/fields/FormWrapper";
-import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
+import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { deNullify } from "~/lib/utils";
 import { mergeCSS } from "~/components/css_properties/cssUtils";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";

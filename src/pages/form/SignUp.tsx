@@ -14,7 +14,6 @@ import {
 import { APP_BASE_URL } from "~/lib/constants";
 
 export function SignUp() {
-  // const {Ws} = useContext(WsContext);
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);

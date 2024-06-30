@@ -15,7 +15,6 @@ export function getInitialState(graph: Store<GraphInterface>, setGraph: SetStore
       graph,
       setGraph,
       txnId,
-      {} as any,
       label
     );
 

@@ -26,7 +26,7 @@ export async function getSelectionOptionsMGCall(
       }
     }
     return await getSelectionOptionsBase(vertex, collection, tx);
-    }, maxRetries || 10);
+    }, maxRetries ?? 10);
   } catch (e) {
     console.error("getSelectionOptionsMGCall", e, vertex, collection);
     return { error: true };

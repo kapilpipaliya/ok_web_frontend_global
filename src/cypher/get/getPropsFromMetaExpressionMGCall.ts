@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { TransactionPromise } from "neo4j-driver-core";
 import {retryTransaction} from "~/cypher/mutate/mutate_api/retryTransaction";
 
-export async function getMetaPropsMGCall(
+export async function getPropsFromMetaExpressionMGCall(
   metaVertex: Vertex,
   data: Vertex[],
   mutationData?: any,

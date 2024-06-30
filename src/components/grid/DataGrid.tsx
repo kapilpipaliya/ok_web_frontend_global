@@ -16,7 +16,6 @@ import { createStore } from "solid-js/store";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import type { ColumnDef } from "@tanstack/solid-table";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { IFormMetaData } from "~/lib/FormMetadataType";
 import { PageContext } from "~/lib/contexts";
 
@@ -40,7 +39,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
-  const { Ws } = useContext(WsContext);
 
   if (!props.tableId) {
     return <>Incorrect Configuration</>;
@@ -161,7 +159,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <Show when={deleteRowId()}>
           <DeleteDialog
             open={true}
-            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate, Ws)}
+            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate)}
             title="Delete Item"
             message="Are you sure you want to delete this item?"
           />

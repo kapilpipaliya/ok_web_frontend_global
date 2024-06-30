@@ -1,6 +1,6 @@
 import "~/css/modal.css";
 
-export function LoaderNew(props: { class?: string; loaderHeight?: string }) {
+export function LoaderNew(props: Readonly<{ class?: string; loaderHeight?: string }>) {
   return (
     <div
       style={`height:${

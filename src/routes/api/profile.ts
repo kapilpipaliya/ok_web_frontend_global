@@ -6,7 +6,7 @@ import { newRowMGCall } from "~/cypher/mutate/newRow";
 import { getSubDomain } from "~/server/getSubDomain";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import { getHttpsSession } from "~/server/getHttpsSession";
-import { getChildVertexesMGCall } from "~/cypher/get/traverse";
+import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -252,11 +252,8 @@ const supportTicket = async (
       }
       case "get": {
         const result = await findVertexesMGCall({ id: parentVertexId });
-        const message = await getChildVertexesMGCall(
-          ["SupportUser"],
-          [result.vertexes!],
-        );
-        return message;
+        const messagesResult = await getSelectionOptionsMGCall([result.vertexes!], "->SupportUser", undefined, 10);
+        return messagesResult.result;
       }
     }
   }

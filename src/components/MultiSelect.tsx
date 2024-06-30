@@ -13,20 +13,20 @@ import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
-export function MultiSelectField(props: {
-  readonly selectedValues: () => any;
-  readonly options: any[];
-  readonly onRemove: (arg0: any, arg1: any) => void;
-  readonly onSelect: (arg0: any, arg1: any) => void;
-  readonly placeholder?: string;
-  readonly disable?: boolean;
-  readonly displayValueParent?: string;
-  readonly displayValueChild?: string;
-  readonly selectionLimit?: number;
-  readonly renderLabel?: ((arg0: any) => JSX.Element);
-  readonly isLoadingOptions?: boolean;
-  readonly loadOptions?: () => Promise<void>;
-}) {
+export function MultiSelectField(props: Readonly<{
+   selectedValues: () => any;
+   options: any[];
+   onRemove: (arg0: any, arg1: any) => void;
+   onSelect: (arg0: any, arg1: any) => void;
+   placeholder?: string;
+   disable?: boolean;
+   displayValueParent?: string;
+   displayValueChild?: string;
+   selectionLimit?: number;
+   renderLabel?: ((arg0: any) => JSX.Element);
+   isLoadingOptions?: boolean;
+   loadOptions?: () => Promise<void>;
+}>) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
 

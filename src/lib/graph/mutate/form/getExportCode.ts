@@ -3,7 +3,7 @@ import { klona } from "klona/json";
 import type { Store } from "solid-js/store";
 import { useToast } from "~/components/Toast";
 import { getToEdge } from "../../get/sync/traverse";
-import { getPkForCollection } from "../../get/sync/graph_functions";
+import { getPkForCollection } from "../../get/sync/getPkForCollection";
 import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";

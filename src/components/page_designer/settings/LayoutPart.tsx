@@ -14,7 +14,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { Properties } from "./properties/Properties";
 import { iconMap } from "~/lib/constants";
-import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
+import { getRowProps } from "~/lib/graph/get/sync/getProps";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
@@ -23,7 +23,7 @@ import { deleteLayoutGlobal } from "~/components/page_designer/event_handler/del
 import { useToast } from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
-export function LayoutPart(props: {}) {
+export function LayoutPart() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
@@ -48,7 +48,7 @@ export function LayoutPart(props: {}) {
     );
   }
 
-  const TreeView = (props: { metaVertex: Vertex }) => {
+  const TreeView = (props: Readonly<{ metaVertex: Vertex }>) => {
     const activeItemChanged = createSelector(() => layoutStore.activeItem);
     const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
     const children = createMemo(() =>

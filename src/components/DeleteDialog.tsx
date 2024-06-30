@@ -2,7 +2,7 @@
 import {CustomModal} from "./CommonDialog";
 import type { JSX } from "solid-js";
 
-export function DeleteDialog(props: {
+export function DeleteDialog(props: Readonly<{
   onConfirm: () => void;
   title?: string;
   message?: string;
@@ -10,7 +10,7 @@ export function DeleteDialog(props: {
   onCancel?: () => void;
   open?: boolean;
   setOpen?: (open: boolean) => void;
-}) {
+}>) {
   const handleConfirm = () => {
     props.onConfirm();
   };

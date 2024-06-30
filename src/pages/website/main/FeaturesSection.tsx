@@ -83,13 +83,13 @@ export function FeaturesSection() {
   );
 };
 
-const FeatureBox = (props: {
+const FeatureBox = (props: Readonly<{
   icon: string;
   title: string;
   subtitle1: string;
   subtitle2: string;
   description: string;
-}) => {
+}>) => {
   return (
     <div class="featurebox d-flex p-relative">
       <div class="iconbg" />

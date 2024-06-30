@@ -1,5 +1,5 @@
 import { Title } from "@solidjs/meta";
 
-export function SiteTitle(props: { children: string }) {
+export function SiteTitle(props: Readonly<{ children: string }>) {
   return <Title>{`${props.children.trim()} | EasyFormForge`}</Title>;
 }

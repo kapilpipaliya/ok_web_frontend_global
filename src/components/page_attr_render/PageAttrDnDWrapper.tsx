@@ -52,7 +52,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
 
     const saveTemplate = async () => {
       const newFormTxnId = getNewTxnId(graph, setGraph);
-      const createResult = createForm(graph, setGraph, newFormTxnId, {} as any, "TemplatePage", { name: templateName() });
+      const createResult = createForm(graph, setGraph, newFormTxnId, "TemplatePage", { name: templateName() });
       const dataVertex = createResult.vertex!;
       cloneLayoutAndChildren(props.item, dataVertex, newFormTxnId, txnId, graph, setGraph, pageConfig.formData.formData);
       const data = commitTxn(newFormTxnId, graph);
@@ -96,7 +96,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
     );
   };
 
-  const PropertyDrawer = (props: { itemId: any; }) => (
+  const PropertyDrawer = (props: Readonly<{ itemId: any; }>) => (
     <Show when={isSelectedLayoutId(props.itemId)}>
       <Tooltip content={"Properties"} nowrap>
         <Icon

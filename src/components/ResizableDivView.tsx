@@ -1,9 +1,9 @@
 import { type JSX, createEffect, createSignal } from "solid-js";
 
-export function ResizableContainer(props: {
+export function ResizableContainer(props: Readonly<{
   view: string;
   children: JSX.Element;
-}) {
+}>) {
   const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(100vh - 70px)");
   const DIMENSIONS = {

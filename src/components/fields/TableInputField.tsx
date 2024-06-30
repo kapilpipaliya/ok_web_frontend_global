@@ -18,7 +18,6 @@ import {
   mergeVertexProperties, replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 import {
@@ -35,9 +34,9 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 
 import {
-  getMetaProps,
-  getStringComponent,
-} from "~/lib/graph/get/sync/graph_functions";
+  getPropsFromMetaExpression,
+} from "~/lib/graph/get/sync/getProps";
+import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { useToast } from "~/components/Toast";
 import { FormContext, } from "~/lib/contexts";
 import {
@@ -52,7 +51,7 @@ import { commitTxn } from "~/lib/graph/transaction";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { isValidResponse } from "./isValidResponse";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
-import { getMetaPropsMGCall } from "~/cypher/get/getMetaPropsMGCall";
+import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
 
 export function TableInputField(
   props: ComponentProps & {
@@ -61,7 +60,6 @@ export function TableInputField(
     isTableInside?: boolean;
   },
 ) {
-  const { Ws } = useContext(WsContext);
   const { showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   // if there is no parent FormContext, it should still work.
@@ -143,10 +141,10 @@ export function TableInputField(
           // this is used to add props to meta when meta is configured in json
           if (metaVertex().P.meta) {
             // TODO: when meta changed realtime its not updating.
-            createComputed(on(() => getMetaProps(graph, setGraph, metaVertex(), p.joinVertex), async (v) => {
+            createComputed(on(() => getPropsFromMetaExpression(graph, setGraph, metaVertex(), p.joinVertex), async (v) => {
               if (metaVertex().P.meta) {
                 const mutationData = formTxnId ? commitTxn(formTxnId, graph) : undefined;
-                const metaData = await getMetaPropsMGCall(metaVertex(), [p.joinVertex], mutationData, 10);
+                const metaData = await getPropsFromMetaExpressionMGCall(metaVertex(), [p.joinVertex], mutationData, 10);
                 const metaDataVal = removeUndefinedProperties(metaData, false, 10);
 
                 const newMetaData = Object.assign(
@@ -271,9 +269,9 @@ export function TableInputField(
               <button class="cursor: pointer;" onClick={() => setExpanded(!expanded())}>
                 <Icon icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} class={"transform 2s ease-in-out"} style={{ "margin-top": "7px" }} />
               </button>
-              <Icon height={20} width={20} icon="mingcute:delete-line" class="cursor:pointer m:5px" style={{ color: "red" }} onClick={() => deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!, Ws)} />
+              <Icon height={20} width={20} icon="mingcute:delete-line" class="cursor:pointer m:5px" style={{ color: "red" }} onClick={() => deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!)} />
               <Show when={expandVertex()}>
-                <Icon height={20} width={20} icon="icon-park-outline:plus" class="cursor:pointer " style={{ color: "green" }} onClick={() => addNewRow(props.txnId || 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, props.isRealTime ?? false, Ws)} />
+                <Icon height={20} width={20} icon="icon-park-outline:plus" class="cursor:pointer " style={{ color: "green" }} onClick={() => addNewRow(props.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, props.isRealTime ?? false)} />
               </Show>
             </div>
             {/*<Show when={!disabled}>*/}

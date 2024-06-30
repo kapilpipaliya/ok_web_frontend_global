@@ -129,10 +129,10 @@ export function HeaderRow() {
   );
 }
 
-const ExportSection = (props: {
+const ExportSection = (props: Readonly<{
   setOpenDialog: Setter<boolean>;
   openDialog: Accessor<boolean>;
-}) => {
+}>) => {
   return (
     <CustomModal
       dialogClass=""

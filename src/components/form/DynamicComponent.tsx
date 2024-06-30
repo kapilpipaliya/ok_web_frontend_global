@@ -4,7 +4,7 @@ import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/TableInputField";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { GenericField } from "~/components/fields/GenericField";
-import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
+import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { Dynamic } from "solid-js/web";
 

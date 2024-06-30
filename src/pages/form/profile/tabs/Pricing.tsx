@@ -8,7 +8,7 @@ const icons: any = {
   "Advanced Pro":
     "streamline:money-graph-arrow-increase-ascend-growth-up-arrow-stats-graph-right-grow",
 };
-export const PricingPlans = (props: { plans: any }) => {
+export const PricingPlans = (props: Readonly<{ plans: any }>) => {
   const [selectedPlan, setSelectedPlan] = createSignal("");
   const isSelected = (planName: string) => selectedPlan() === planName;
   return (

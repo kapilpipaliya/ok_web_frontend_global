@@ -4,7 +4,6 @@ import { Icon } from "@iconify-icon/solid";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { binops, unops } from "~/lib/expression_eval";
 import { createStore } from "solid-js/store";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 import {CustomModal} from "./CommonDialog";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -46,7 +45,7 @@ type Option =
 //     }
 // }
 
-export function ExpressionBuilder(props: {
+export function ExpressionBuilder(props: Readonly<{
   content: string;
   title: string;
   component: string;
@@ -54,7 +53,7 @@ export function ExpressionBuilder(props: {
   setValue: (data: any) => void;
   txnId?: number;
   data?: any;
-}) {
+}>) {
   const state = props.content.split("+").map(
     (value) =>
       ({ value }) as {
@@ -77,7 +76,6 @@ export function ExpressionBuilder(props: {
   // console.log(data);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [contentList, setContentList] = createStore(state);
-  const { Ws } = useContext(WsContext);
   const handleInsert = () => {
     setContentList((prev) => [...prev, { value: "", error: false }]);
   };
@@ -137,9 +135,8 @@ export function ExpressionBuilder(props: {
         setGraph,
         props.txnId!,
         props.meta,
-        props.data!,
+        props.data,
         finalExpression,
-        Ws,
         false,
       );
     }

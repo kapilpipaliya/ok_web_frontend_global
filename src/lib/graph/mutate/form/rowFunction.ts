@@ -10,16 +10,13 @@ import {
 } from "../../transaction";
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { batch, onCleanup } from "solid-js";
-import { getChildVertex, getChildVertexes } from "../../get/sync/traverse";
+import { getChildVertex, getChildVertexes, getToEdge } from "../../get/sync/traverse";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/Toast";
-import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
-import { getToEdge } from "../../get/sync/traverse";
 import { newEdge, addNewEdge } from "../edge";
 import { klona } from "klona/json";
-import { getCollAttrComp } from "../../get/sync/graph_functions";
+import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
 import { getUniqueName } from "~/lib/drag_drop/getChildrenAttrs";
-
 
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
@@ -100,7 +97,6 @@ export function addNewRow(
   parentVertex: Vertex,
   properties: { [key: string]: any; },
   isRealTime: boolean,
-  Ws: ServerEventsDispatcher
 ) {
   if (isRealTime) {
     txnId = getNewTxnId(graph, setGraph);
@@ -132,7 +128,6 @@ export function cloneRowProps(
   delete props.pos;
   const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {id: 0} as unknown as Vertex);
   mergeVertexProperties(txnId, toVertex.id, graph, setGraph, {...props, name: uniqueName});
-  return;
 }
 
 export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
@@ -140,7 +135,7 @@ export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
   P.templateId = attrColumn.id;
 
   if (!P.component) {
-    const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
+    const component = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
     if (component) P.component = component;
   }
   return P;
@@ -234,7 +229,7 @@ export function rowMetaInitialize(
       P.templateId = attrColumn.id;
 
       if (!P.component) {
-        const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
+        const component = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
         if (component) P.component = component;
       }
       mergeVertexProperties(
