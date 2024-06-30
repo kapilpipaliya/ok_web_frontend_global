@@ -4,7 +4,7 @@ import { Tooltip } from "~/components/solid_blocks";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function ShareSection() {
-  const [pageConfig] = useDesignerLayoutStore() || [];
+  const [layoutStore] = useDesignerLayoutStore() || [];
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
@@ -15,11 +15,11 @@ export function ShareSection() {
   });
 
   const getLink = () => {
-    if (pageConfig) {
+    if (layoutStore) {
       const hostname = window.location.hostname;
       const protocol = window.location.protocol;
       const port = window.location.port ? `:${window.location.port}` : '';
-      return `${protocol}//${hostname}${port}/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
+      return `${protocol}//${hostname}${port}/view/${layoutStore.formData.formData.L[0]}/${layoutStore.formData.formData.P.name}/new`;
     }
     return ""
   };

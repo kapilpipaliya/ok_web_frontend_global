@@ -20,7 +20,7 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [pageConfig] = useDesignerLayoutStore() || [];
+  const [layoutStore] = useDesignerLayoutStore() || [];
   const { showErrorToast } = useToast();
   let originalData: any[] = [];
   const [isFetchingData, setIsFetchingData] = createSignal(true);
@@ -55,14 +55,14 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-          if (result.graph.vertexes[pageConfig.formData.formData.id]) {
-            delete result.graph.vertexes[pageConfig.formData.formData.id];
+          if (result.graph.vertexes[layoutStore.formData.formData.id]) {
+            delete result.graph.vertexes[layoutStore.formData.formData.id];
           }
           setGraphData(graph, setGraph, result.graph);
 
           const data2 = getTreeData(graph, setGraph, {
             collection: paginationExpression({ coll: props.coll }),
-          }).filter((item) => item.id !== pageConfig.formData.formData.id);
+          }).filter((item) => item.id !== layoutStore.formData.formData.id);
           originalData = data2;
           setFilteredData(data2);
           setIsFetchingData(false);

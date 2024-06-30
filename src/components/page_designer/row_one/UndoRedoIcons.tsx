@@ -5,10 +5,10 @@ import { redo, undo } from "~/lib/graph/transaction";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function UndoRedoIcons() {
-  const [pageConfig, __] = useDesignerLayoutStore();
+  const [layoutStore, __] = useDesignerLayoutStore();
   const icons = [
-    { icon: "ci:arrow-undo-up-left", tooltip: "Undo", onClick: () => undo(pageConfig.formData.txnId) },
-    { icon: "ci:arrow-undo-up-right", tooltip: "Redo", onClick: () => redo(pageConfig.formData.txnId) },
+    { icon: "ci:arrow-undo-up-left", tooltip: "Undo", onClick: () => undo(layoutStore.formData.txnId) },
+    { icon: "ci:arrow-undo-up-right", tooltip: "Redo", onClick: () => redo(layoutStore.formData.txnId) },
   ];
 
   return (

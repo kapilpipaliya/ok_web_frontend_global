@@ -28,12 +28,10 @@ import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX.Element; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const { txnId } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const [isPreview] = useContext(IsPreviewContext);
-  const [pageConfig, __] = useDesignerLayoutStore();
   const isSelectedDragOverTargetId = createSelector(() => layoutStore.dragOverTargetId);
-  const isSelectedHoverId = createSelector(() => pageConfig.hoverId);
+  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast, showSuccessToast } = useToast();
 
   const getComponentName = () => getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
@@ -54,7 +52,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
       const newFormTxnId = getNewTxnId(graph, setGraph);
       const createResult = createForm(graph, setGraph, newFormTxnId, "TemplatePage", { name: templateName() });
       const dataVertex = createResult.vertex!;
-      cloneLayoutAndChildren(props.item, dataVertex, newFormTxnId, txnId, graph, setGraph, pageConfig.formData.formData);
+      cloneLayoutAndChildren(props.item, dataVertex, newFormTxnId, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData);
       const data = commitTxn(newFormTxnId, graph);
 
       if (!data) {
@@ -145,7 +143,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
             height={20}
             width={20}
             class="cursor:pointer flex"
-            onClick={() => cloneLayoutAndChildren(props.item, undefined, undefined, txnId, graph, setGraph, pageConfig.formData.formData)} />
+            onClick={() => cloneLayoutAndChildren(props.item, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData)} />
         </Tooltip>
         <Tooltip content={"Save as Template"}>
           <Icon
@@ -158,7 +156,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
         </Tooltip>
         <Tooltip content={"Delete"}>
           <Icon
-            onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, txnId, getComponentName(), showSuccessToast)}
+            onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, layoutStore.formData.txnId, getComponentName(), showSuccessToast)}
             icon={"fluent:delete-20-regular"}
             height={20}
             width={20}
@@ -236,11 +234,11 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
           e.stopPropagation();
           onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
         }}
-        onDragOver={(e) => handleDragOver(e, layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, pageConfig.formData.formData)}
-        onDragEnter={(e) => handleDragOverAndSetDropPosition(e,layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, pageConfig.formData.formData)}
+        onDragOver={(e) => handleDragOver(e, layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
+        onDragEnter={(e) => handleDragOverAndSetDropPosition(e,layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
         onDragLeave={() => handleDragLeave(setLayoutStore)}
-        onDrop={async (e) => {
-          await handleDrop(e, layoutStore, graph, showErrorToast, setGraph, txnId, pageConfig.formData.formData);
+        onDrop={async (e) => {debugger
+          await handleDrop(e, layoutStore, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
           resetDragDropState(setLayoutStore);
         }}
       >
