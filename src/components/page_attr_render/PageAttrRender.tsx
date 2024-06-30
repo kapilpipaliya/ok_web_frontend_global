@@ -68,7 +68,7 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
               ).vertexes ||
               getDataVertex(graph, item)
             }
-            title={toTitle(getId(graph, item) || "")}
+            title={toTitle(getId(graph, item) ?? "")}
             // setValue={props.setValue}
             disabled={false}
             component={component()}

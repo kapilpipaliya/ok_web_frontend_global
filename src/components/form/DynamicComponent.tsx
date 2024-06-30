@@ -1,4 +1,4 @@
-import { Match, Show, Switch, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo, useContext } from "solid-js";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/TableInputField";
@@ -6,6 +6,7 @@ import { GenericInputField } from "~/components/fields/GenericInputField";
 import { GenericField } from "~/components/fields/GenericField";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
+import { Dynamic } from "solid-js/web";
 
 export const genericInputComponents = [
   // "Autocomplete",
@@ -67,81 +68,52 @@ export function DynamicComponent(props: Readonly<{
   txnId?: number;
   applyDefaults?: boolean;
 }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph] = useContext(GraphContext)!;
   const [layoutStore] = useDesignerLayoutStore();
+
+  const component = createMemo(() => {
+    switch (props.component) {
+      case "SelectBox":
+      case "TagBox":
+        return SelectInputField;
+      case "DynamicTable":
+        return TableInputField;
+      default:
+        if (genericInputComponents.includes(props.component)) {
+          return GenericInputField;
+        }
+        if (genericComponents2.includes(props.component)) {
+          return GenericField;
+        }
+        return null;
+    }
+  });
+  const isApplyDefault = () => component() !== GenericInputField && component() !== GenericField;
 
   return (
     <Switch>
-      <Match when={!props.component}>NO INPUT</Match>
-      <Match
-        when={props.component === "SelectBox" || props.component === "TagBox"}
-        keyed
-      >
+      <Match when={!component()}>NO INPUT</Match>
+      <Match when={component()} keyed>
         <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
-          <SelectInputField
-            {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-            data={props.data}
-            meta={props.meta}
-            title={props.title ?? ""}
-            // passed setValue when we have a string value in select field
-            setValue={props.setValue}
-            disabled={props.disabled!}
-            component={props.component}
-            txnId={props.txnId}
-            isRealTime={props.isRealTime}
-          />
-        </Show>
-      </Match>
-      <Match when={props.component === "DynamicTable"}>
-        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
-          
-            <TableInputField
-             {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              meta={props.meta}
-              data={props.data}
-              isTableInside={props.isTableInside}
-              disabled={props.disabled!}
-              txnId={props.txnId}
-              setValue={props.setValue}
-              isRealTime={props.isRealTime}
-            />
-          </Show>
-      </Match>
-      <Match
-        when={
-          genericInputComponents.includes(props.component) && props.component
-        }
-        keyed
-      >
-        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
-          <GenericInputField
-            applyDefaults={props.applyDefaults}
-            data={props.data}
-            meta={props.meta}
-            title={props.title ?? ""}
-            txnId={props.txnId!}
-            component={props.component}
-            setValue={props.setValue}
-            disabled={props.disabled!}
-          />
-        </Show>
-      </Match>
-      <Match
-        when={genericComponents2.includes(props.component) && props.component}
-        keyed
-      >
-        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
-          <GenericField
-            applyDefaults={props.applyDefaults}
-            data={props.data}
-            meta={props.meta}
-            txnId={props.txnId}
-            component={props.component}
-            setValue={props.setValue}
-            disabled={props.disabled!}
+          <Dynamic
+          component={component()!}
+          {...(props.applyDefaults && isApplyDefault() && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+          data={props.data}
+          meta={props.meta}
+          title={props.title ?? ""}
+          // passed setValue when we have a string value in select field
+          setValue={props.setValue}
+          disabled={props.disabled}
+          componentName={props.component}
+          txnId={props.txnId}
+          isRealTime={props.isRealTime}
+
+          isTableInside={props.isTableInside}
+          applyDefaults={props.applyDefaults}
           />
         </Show>
       </Match>
     </Switch>
   );
 }
+

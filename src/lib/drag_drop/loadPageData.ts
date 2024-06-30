@@ -3,7 +3,8 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "../websocket/setGraphData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
-import {getFormMetaDataAsync} from "~/cypher/get/getFormMetaDataAsync";
+import { FormMetaData } from "../formMetaData";
+import { FormMetaDataAuth } from "../formMetaDataAuth";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,
@@ -11,15 +12,15 @@ export async function loadPageData(
   fromVertex: Vertex,
   showErrorToast: any,
 ) {
-  const form: any = await getFormMetaDataAsync(
-    fromVertex.L[0],
-  );
-  if (form.error) {
-    showErrorToast(form.error);
+  const form =
+  FormMetaData[fromVertex.L[0]] ||
+  FormMetaDataAuth[fromVertex.L[0]];
+  if (!form) {
+    showErrorToast("Form not found");
     return;
   }
   const { incoming, outgoing } =
-    getEdgesFromRowsAttr(form.form.attributes);
+    getEdgesFromRowsAttr(form.attributes);
   const result = await getDataMGCall({
     expression: `id:'${fromVertex.id}'`,
     incoming,

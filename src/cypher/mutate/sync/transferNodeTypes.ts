@@ -1,8 +1,9 @@
 import type { Session} from "neo4j-driver";
-import {getFormMetaDataAsync} from "~/cypher/get/getFormMetaDataAsync";
 import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
 
 import {processNodeSync} from "~/cypher/mutate/sync/processNodeSync";
+import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 
 export async function transferNodeTypes(
   sessionSource: Session,
@@ -10,12 +11,13 @@ export async function transferNodeTypes(
   nodesToTransfer: string[],
 ) {
   for (const nodeType of nodesToTransfer) {
-    const form = await getFormMetaDataAsync(
-      nodeType,
-    );
-    if (form.error) return "Error";
+    const form =
+    FormMetaData[nodeType] ||
+    FormMetaDataAuth[nodeType];
+
+    if (!form) return "Error";
     const {incoming, outgoing} =
-      getEdgesFromRowsAttr(form.form!.attributes);
+      getEdgesFromRowsAttr(form.attributes);
 
     const result = await processNodeSync(sessionSource, sessionTarget, {
       expression: `g:'${nodeType}'`,

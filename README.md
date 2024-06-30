@@ -21,3 +21,7 @@ so set state inside it will not set when page is reloaded.
 problem with conflicts in transactions:
 https://stackoverflow.com/questions/77824245/problem-with-cannot-resolve-conflicting-transactions-error-in-memgraph
 https://memgraph.com/docs/help-center/errors/transactions#conflicting-transaction
+
+
+Great hooks:
+https://primitives.solidjs.community/package/memo#createLatest

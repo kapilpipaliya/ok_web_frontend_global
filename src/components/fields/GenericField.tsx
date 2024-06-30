@@ -67,7 +67,8 @@ export function getUrl(
 
 export function GenericField(
   props: ComponentProps & {
-    component?: string;
+    component?: string; // depricated
+    componentName?: string;
     disabled?: boolean;
     txnId?: number;
     children?: JSXElement;
@@ -77,7 +78,7 @@ export function GenericField(
 ) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const parentItems = useContext(PageRenderVertexContext);
-  const component = createMemo(() => props.component || props.meta.P.component);
+  const component = createMemo(() => props.component ?? props.componentName ?? props.meta.P.component);
   const parentComponent = createMemo(() => getComponent(graph, getLastItem(parentItems, 2))?.P[IdAttr]);
   const repeaterContext = useContext(RepeaterVertexContext);
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});

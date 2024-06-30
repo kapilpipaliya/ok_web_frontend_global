@@ -22,7 +22,8 @@ import { Signature } from "../SignatureBox";
 
 export function GenericInputField(
   props: ComponentProps & {
-    component: string;
+    component?: string; // depricated
+    componentName?: string;
     title: string;
     txnId: number;
     applyDefaults?: boolean;
@@ -30,10 +31,10 @@ export function GenericInputField(
 ) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const component = () => props.component;
+  const component = () => props.component ?? props.componentName ?? props.meta.P.component;
 
   // todo: make a common onChange if possible.
-  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {});
+  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
   const Error = () => <Show when={props.meta.P.error}>
     <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
   </Show>
