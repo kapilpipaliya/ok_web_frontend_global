@@ -16,7 +16,6 @@ import {
 } from "~/lib/graph/graph";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import {
-  getChildVertex,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -112,7 +111,7 @@ export function SelectInputField(
         if (props.isRealTime) {
           props.txnId = getNewTxnId(graph, setGraph);
         }
-        if (props.meta.P.options) {
+        if (props.meta.P.options || props.meta.P.saveValue) {
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
@@ -201,7 +200,7 @@ export function SelectInputField(
           displayValueChild={!isCommaSeparated() ? "displayName" : undefined}
           displayValueParent={!isCommaSeparated() ? "P" : undefined}
           selectedValues={() => {
-            if (!props.meta.P.options) {
+            if (!props.meta.P.options && !props.meta.P.saveValue) {
               return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
                 return graph.vertexes[id];
               });
@@ -209,7 +208,7 @@ export function SelectInputField(
               const value = props.data?.P[props.meta.P[IdAttr]];
               if(!value) return [];
               if (!Array.isArray(value) && isCommaSeparated() && getComponent() === "SelectBox") {
-                const option = getStaticOptions(props.meta.P.options).find((option) => (value?.value || value) === option.value);
+                const option = options().find((option) => (value?.value || value) === (option?.value || option));
                 return option ? [option] : [{label: value, value}];
               }
               return ensureArray(value);

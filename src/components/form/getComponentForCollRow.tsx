@@ -8,13 +8,17 @@ export function getComponentForCollRow(
   data: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-) {
+): string {
+  const getComponentName = () => {
+    return getChildVertex(graph, ["$0Comp"], metaVertex).vertex?.P[IdAttr];
+  };
+
   if (!metaVertex.P.component) {
-    return getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
+    return getComponentName() || getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
   }
+
   if (metaVertex.P.component.includes("-")) {
-    const component = getSelectionOptions(graph, setGraph, [data], metaVertex.P.component)
-      .vertexes;
+    const component = getSelectionOptions(graph, setGraph, [data], metaVertex.P.component).vertexes;
     if (!component) {
       return getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
     }
@@ -23,7 +27,6 @@ export function getComponentForCollRow(
     }
     return component.P[IdAttr];
   }
-  const currentComp = getChildVertex(graph, ["$0Comp"], metaVertex).vertex;
-  if (currentComp) return currentComp;
-  return metaVertex.P.component as string;
+
+  return getComponentName() || metaVertex.P.component;
 }

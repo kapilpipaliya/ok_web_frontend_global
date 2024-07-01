@@ -26,7 +26,9 @@ export async function findVertexMGCallId(
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
     params.id = int(id);
   } else if (label) {
-    if (name) {
+    if (label === "ALL_LABELS") {
+      query = "MATCH (n) RETURN DISTINCT labels(n)";
+    } else if (name) {
       query = `MATCH (n:${label}) WHERE n.name = $name RETURN n`;
       params.name = name;
     } else {
@@ -48,7 +50,10 @@ export async function findVertexMGCallId(
   }
   const session = context.tx ? null : (context.session || await getSessionForSubdomain());
   try {
-    const result = await (context.tx ? context.tx!.run(query, params) : session!.run(query, params));
+    const result = await (context.tx ? context.tx.run(query, params) : session!.run(query, params));
+    if (label === "ALL_LABELS") {
+      return result.records.map(record => record.get(0));
+    }
     return result.records.map((record) => {
       const vertex = convertNodeToJson(record.get("n"));
       if (context.nodes) {
