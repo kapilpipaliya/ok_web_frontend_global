@@ -34,6 +34,7 @@ export const parseAndApplyCssRules = (valueString: string) => {
 };
 
 export function cssStateToString(cssState: CSSStore) {
+  // validate string generated with: https://www.npmjs.com/package/@master/css-validator?activeTab=readme
   if(!cssState) return "";
   return Object.entries(cssState)
     .map(([state, value]) => {
