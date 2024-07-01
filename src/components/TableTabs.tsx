@@ -8,7 +8,7 @@ interface TableTabProps {
   tabs: string[];
 }
 
-export function TableTabs(props: TableTabProps) {
+export function TableTabs(props: Readonly<TableTabProps>) {
   const [currentTab, setCurrentTab] = createSignal<string>(props.tabs[0]);
 
   const dynamicIcon = (name: string) => {
@@ -35,13 +35,14 @@ export function TableTabs(props: TableTabProps) {
     <div class="flex bb:#E0E0E0 border-bottom:0.7 flex:row gap-x:30 mt:1rem overflow:auto">
       <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
-          <div
+          <button
             class={`${currentTab() === item ? 'f:16' : 'color:slategray f:14'} bb:2px|solid|lightgrey:hover cursor:pointer p:5|0`}
             id={`tabletab-${item}`}
             onClick={() => handleTabClick(item)}
             style={{
               "border-bottom": currentTab() === item ? "2px solid #37c" : '',
             }}
+            type="button"
           >
             <div
               class={"f-15"}
@@ -54,7 +55,7 @@ export function TableTabs(props: TableTabProps) {
             >
               {dynamicIcon(item)}&nbsp;{item}
             </div>
-          </div>
+          </button>
         )}
       </For>
     </div>

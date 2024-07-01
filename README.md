@@ -25,3 +25,7 @@ https://memgraph.com/docs/help-center/errors/transactions#conflicting-transactio
 
 Great hooks:
 https://primitives.solidjs.community/package/memo#createLatest
+
+
+To fix eslint errors:
+npx eslint --fix src
