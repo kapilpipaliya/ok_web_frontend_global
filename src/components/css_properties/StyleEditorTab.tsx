@@ -3,7 +3,7 @@ import { For, Show, createMemo, createSignal } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
-import { JSONSchema } from "./CssPropertiesMap";
+import { JSONSchema } from "./constants/CssPropertiesMap";
 
 type Property = typeof JSONSchema[keyof typeof JSONSchema]
 
