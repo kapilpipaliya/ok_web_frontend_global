@@ -1,10 +1,10 @@
-import { createMemo, type JSX, splitProps } from "solid-js";
+import { type JSX, createMemo, splitProps } from "solid-js";
 
 import "./message.css";
 
 export type MessageProps = {
-  type: "success" | "info" | "warning" | "error";
   inline?: boolean;
+  type: "error" | "info" | "success" | "warning";
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function Message(props: MessageProps) {

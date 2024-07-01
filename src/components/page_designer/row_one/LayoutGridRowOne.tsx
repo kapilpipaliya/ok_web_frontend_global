@@ -1,9 +1,11 @@
 import { type JSX, Show } from "solid-js";
-import { FormStepper } from "./form_stepper/FormStepper";
-import { UndoRedoIcons } from "./UndoRedoIcons";
+
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+
 import { LeftToggleButton } from "./LeftToggleButton";
 import { RightToggleButton } from "./RightToggleButton";
+import { UndoRedoIcons } from "./UndoRedoIcons";
+import { FormStepper } from "./form_stepper/FormStepper";
 
 export function LayoutGridRowOne(): JSX.Element {
   const [layoutStore] = useDesignerLayoutStore();

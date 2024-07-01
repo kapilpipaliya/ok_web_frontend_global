@@ -1,12 +1,17 @@
-import { onCleanup, } from "solid-js";
-import type { Store, SetStoreFunction } from "solid-js/store";
-import type { GraphInterface, Vertex } from "../../graph";
-import { addNewVertex, newVertex } from "../vertex";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import { klona } from "klona/json";
-import { useToast } from "~/components/Toast";
+import { onCleanup, } from "solid-js";
+
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
+
+import { useToast } from "~/components/Toast";
+
+import type { GraphInterface, Vertex } from "../../graph";
+
+import { getNewGraphId, getNewTxnId, revertTransaction } from "../../transaction";
+import { addNewVertex, newVertex } from "../vertex";
 import { newRow } from "./rowFunction";
-import { getNewTxnId, getNewGraphId, revertTransaction } from "../../transaction";
 
 export function addMetaVertexes(
   graph: Store<GraphInterface>,
@@ -55,7 +60,7 @@ export function addMetaVertexes(
   form: IFormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>
-): { error: boolean; vertex?: Vertex; txnId?: number; } {
+): { error: boolean; txnId?: number; vertex?: Vertex; } {
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
@@ -77,6 +82,6 @@ export function addMetaVertexes(
     // TODO: Remove all the meta
   });
 
-  return { error: false, vertex: metaVertex, txnId: metaTxnId };
+  return { error: false, txnId: metaTxnId, vertex: metaVertex };
 }
 

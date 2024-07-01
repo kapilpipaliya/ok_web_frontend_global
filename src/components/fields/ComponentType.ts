@@ -1,13 +1,13 @@
 import type { Vertex } from "~/lib/graph/graph";
 
 export interface ComponentProps {
-  meta: Vertex;
   data?: Vertex;
   disabled?: boolean;
+  meta: Vertex;
   setValue?(data: any): void;
 }
 
 export interface DisplayComponentProps {
-  meta?: Vertex;
   data?: Vertex;
+  meta?: Vertex;
 }

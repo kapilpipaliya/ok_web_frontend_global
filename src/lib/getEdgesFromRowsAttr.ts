@@ -1,7 +1,8 @@
 
 import type { NestedExpression } from "~/cypher/get/NestedExpression";
-import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 import type { Vertex } from "~/lib/graph/graph";
+
+import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 
 export function getEdgesFromRowsAttr(attrs: any): {
  incoming: NestedExpression[];

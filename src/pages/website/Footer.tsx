@@ -1,11 +1,12 @@
-import "~/pages/website/style.css";
-import "~/pages/website/krd.css";
 import { Icon } from "@iconify-icon/solid";
 import { For } from "solid-js";
 
+import "~/pages/website/krd.css";
+import "~/pages/website/style.css";
+
 interface FooterLinkProps {
-  href: string;
   children: string;
+  href: string;
 }
 
 interface SocialIconProps {
@@ -14,8 +15,8 @@ interface SocialIconProps {
 }
 
 interface FooterSectionProps {
-  title: string;
   links: { href: string; text: string }[];
+  title: string;
 }
 
 const FooterLink = (props: FooterLinkProps) => (
@@ -25,8 +26,8 @@ const FooterLink = (props: FooterLinkProps) => (
 );
 
 const SocialIcon = (props: SocialIconProps) => (
-  <a href={props.href} aria-label={`Follow us on ${props.icon.split(":")[1]}`}>
-    <Icon icon={props.icon} height={30} width={30} />
+  <a aria-label={`Follow us on ${props.icon.split(":")[1]}`} href={props.href}>
+    <Icon height={30} icon={props.icon} width={30} />
   </a>
 );
 
@@ -66,18 +67,18 @@ export function Footer() {
   ];
 
   return (
-    <section class="footer" aria-labelledby="footer-heading">
-      <h2 id="footer-heading" class="sr-only">Footer</h2>
+    <section aria-labelledby="footer-heading" class="footer">
+      <h2 class="sr-only" id="footer-heading">Footer</h2>
       <div class="pb-3 flex jc:space-around ai:center flex-direction:row">
         <div class="info d-grid align-content-spacebetween">
           <div>
-            <a href="/" aria-label="EasyFormForge Home">
-              <img class="headerLogo" src="graphics/logo.png" alt="EasyFormForge Logo" />
+            <a aria-label="EasyFormForge Home" href="/">
+              <img alt="EasyFormForge Logo" class="headerLogo" src="graphics/logo.png" />
             </a>
             <p>Design and publish forms faster, smoother</p>
           </div>
 
-          <a class="pb-1 btn-underline" href="#" aria-label="Get Easy Form Forge">
+          <a aria-label="Get Easy Form Forge" class="pb-1 btn-underline" href="#">
             Get Easy Form Forge <Icon icon="fa-solid:arrow-right" />
           </a>
           <div class="footericon">
@@ -88,9 +89,9 @@ export function Footer() {
             </For>
           </div>
         </div>
-        <FooterSection title="Company" links={companyLinks} />
-        <FooterSection title="Links" links={links} />
-        <FooterSection title="Privacy" links={companyLinks} />
+        <FooterSection links={companyLinks} title="Company" />
+        <FooterSection links={links} title="Links" />
+        <FooterSection links={companyLinks} title="Privacy" />
       </div>
       <div class="copyrightandsocial container d-flex pt-2 justify-content-center">
         <div>
@@ -101,7 +102,7 @@ export function Footer() {
         <div>
           <For each={socialIcons}>
             {(icon) => (
-              <Icon icon={icon.icon} height={30} width={30} aria-label={`Follow us on ${icon.icon.split(":")[1]}`} />
+              <Icon aria-label={`Follow us on ${icon.icon.split(":")[1]}`} height={30} icon={icon.icon} width={30} />
             )}
           </For>
         </div>

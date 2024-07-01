@@ -1,4 +1,5 @@
 import { useParams } from "@solidjs/router";
+
 import { AbstractGrid } from "~/components/grid/AbstractGrid";
 
 export default function TablePage() {

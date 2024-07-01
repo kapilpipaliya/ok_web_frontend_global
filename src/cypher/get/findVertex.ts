@@ -1,15 +1,17 @@
+import { int } from "neo4j-driver";
+import { getRequestURL } from "vinxi/http";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import { getDriver } from "~/cypher/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
-import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/server/getSubDomain";
-import type { Vertex } from "~/lib/graph/graph";
-import { int } from "neo4j-driver";
 
 export async function findVertexesMGCall(options: {
-  label?: string;
   attribute?: string;
+  id?: number | string;
+  label?: string;
   value?: number | string;
-  id?: string | number;
 }): Promise<{ error?: boolean; message?: string; vertexes?: Vertex }> {
   "use server";
   const host = getRequestURL().hostname;

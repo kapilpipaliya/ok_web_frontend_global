@@ -1,15 +1,17 @@
-import { getDriver } from "~/cypher/driver";
+import { int } from "neo4j-driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/getSubDomain";
+
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
+import { getDriver } from "~/cypher/driver";
 import {
   convertNodeToJson,
   convertRelationshipToJson,
 } from "~/lib/convertNodeToJson";
-import type { Edge, Vertex } from "~/lib/graph/graph";
-import { int } from "neo4j-driver";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function getOutEdges(
-  fromId: string | any,
+  fromId: any | string,
   type: string,
   options: {
     isInward?: boolean;

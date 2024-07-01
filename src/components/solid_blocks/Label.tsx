@@ -1,16 +1,19 @@
-import { type JSX, Show, useContext, splitProps, createSignal, onMount } from "solid-js";
+import { type JSX, Show, createSignal, onMount, splitProps, useContext } from "solid-js";
+
 import { GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import type { ComponentProps } from "../fields/ComponentType";
+
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 interface LabeledFieldProps {
-  label?: string;
-  position?: "top" | "left" | "right" | "bottom" | "system";
   children: JSX.Element;
+  label?: string;
+  position?: "bottom" | "left" | "right" | "system" | "top";
 }
 
-export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) {
+export function Label(props: ComponentProps & JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & LabeledFieldProps) {
   const [layoutStore] = useDesignerLayoutStore() || [];
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
@@ -33,9 +36,9 @@ export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
   };
 
   const containerStyle = () => ({
+    "align-items": props.position === "left" || props.position === "right" ? "center" : "flex-start",
     display: "flex",
     "flex-direction": getFlexDirection(),
-    "align-items": props.position === "left" || props.position === "right" ? "center" : "flex-start",
     margin: "10px 0",
     padding: "0px 10px",
     width: "100%",
@@ -43,9 +46,9 @@ export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
 
   const labelStyle = () => ({
     "margin-bottom": props.position === "top" ? "5px" : "0",
-    "margin-top": props.position === "bottom" ? "5px" : "0",
-    "margin-right": props.position === "left" ? "5px" : "0",
     "margin-left": props.position === "right" ? "5px" : "0",
+    "margin-right": props.position === "left" ? "5px" : "0",
+    "margin-top": props.position === "bottom" ? "5px" : "0",
   });
 
   const handleBlur = (e: FocusEvent) => {
@@ -65,20 +68,20 @@ export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
   return (
     <div style={containerStyle()}>
       <Show when={props.label}>
-        <Show when={!isEditing()} fallback={
+        <Show fallback={
           <input
-            type="text"
+            onBlur={handleBlur}
+            onInput={(e) => setInputValue(e.currentTarget.value)}
             ref={el => {
               onMount(() => {
                 el.focus();
               })
             }}
+            style={{background: "transparent", border: "none", outline: "none", width: "100%"}}
+            type="text"
             value={inputValue()}
-            onInput={(e) => setInputValue(e.currentTarget.value)}
-            onBlur={handleBlur}
-            style={{border: "none", outline: "none", background: "transparent", width: "100%"}}
           />
-        }>
+        } when={!isEditing()}>
           <label style={labelStyle()} {...restProps} onClick={handleLabelClick}>
             {props.label}
           </label>

@@ -1,15 +1,18 @@
 import { onCleanup, useContext, } from "solid-js";
-import { SelectInputField } from "~/components/fields/SelectInputField";
-import { GenericInputField } from "~/components/fields/GenericInputField";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
-import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+
 import type { FieldAttribute } from "~/lib/FormMetadataType";
+
+import { ExpressionBuilder } from "~/components/ExpressionBuilder";
+import { GenericInputField } from "~/components/fields/GenericInputField";
+import { SelectInputField } from "~/components/fields/SelectInputField";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { ExpressionBuilder } from "~/components/ExpressionBuilder";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+
+import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
 
 export function CollAndData() {
@@ -22,9 +25,9 @@ export function CollAndData() {
   addNewVertex(
     metaTxnId,
     newVertex(metaVertexId, ["MetaAttr"], {
+      label: "Attr",
       name: "Attr",
       type: "Attr",
-      label: "Attr",
     }),
     graph,
     setGraph,
@@ -32,21 +35,21 @@ export function CollAndData() {
 
   const attributes: FieldAttribute[] = [
     {
-      name: "collection",
-      displayName: "Collection",
-      component: "SelectBox",
       collection: "g:'ALL_LABELS'",
+      component: "SelectBox",
+      displayName: "Collection",
+      name: "collection",
       saveValue: true
     },
     {
-      name: "data",
-      component: "SelectBox",
       collection: () => graph.vertexes[layoutStore.selectedId]?.P?.collection ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'` : "",
+      component: "SelectBox",
+      name: "data",
     },
     {
-      name: "data",
+      class: PROPERTIES.Css.TextBox,
       component: "TextBox",
-      class: PROPERTIES.Css.TextBox
+      name: "data"
     },
   ];
 
@@ -87,20 +90,18 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex flex:1 f:15 ai:center">
           <GenericInputField
-            txnId={layoutStore.formData.txnId}
-            title={""}
-            meta={collMetaVertex.vertexes?.[2]!}
+            component={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
-            component={"TextBox"}
-          />
-          <ExpressionBuilder
-            content={graph.vertexes[layoutStore.selectedId]?.P.data || ""}
             meta={collMetaVertex.vertexes?.[2]!}
-            data={graph.vertexes[layoutStore.selectedId]}
             title={""}
             txnId={layoutStore.formData.txnId}
+          />
+          <ExpressionBuilder
             component={"TextBox"}
+            content={graph.vertexes[layoutStore.selectedId]?.P.data || ""}
+            data={graph.vertexes[layoutStore.selectedId]}
+            meta={collMetaVertex.vertexes?.[2]!}
             setValue={(value) =>
               setValueGlobal(
                 graph,
@@ -112,6 +113,8 @@ export function CollAndData() {
                 false,
               )
             }
+            title={""}
+            txnId={layoutStore.formData.txnId}
           />
           {/* <Tooltip content="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used." trigger="hover" class="z:21!">
           <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" />
@@ -123,24 +126,24 @@ export function CollAndData() {
       <div class="text-center mt:2 mb:2">OR</div>
       <span class="flex.5 mt:5">Collection:</span>
       <SelectInputField
-        txnId={layoutStore.formData.txnId}
-        title={"Collection:"}
-        meta={collMetaVertex.vertexes?.[0]!}
+        component={"SelectBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
-        component={"SelectBox"}
         isRealTime={false}
+        meta={collMetaVertex.vertexes?.[0]!}
         setValue={handleCollectionChange}
+        title={"Collection:"}
+        txnId={layoutStore.formData.txnId}
       />
       <span class="flex.5 mt:5">Data:</span>
       <SelectInputField
-        txnId={layoutStore.formData.txnId}
-        title={"Data:"}
-        meta={collMetaVertex.vertexes?.[1]!}
+        component={"SelectBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
-        component={"SelectBox"}
         isRealTime={false}
+        meta={collMetaVertex.vertexes?.[1]!}
+        title={"Data:"}
+        txnId={layoutStore.formData.txnId}
       />
     </>
   );

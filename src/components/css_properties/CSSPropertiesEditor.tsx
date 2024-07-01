@@ -1,22 +1,25 @@
-import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
 import { Icon } from "@iconify-icon/solid";
-import type { Vertex } from "~/lib/graph/graph";
 import { Show, createSignal } from "solid-js";
 import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
-import { Container } from "~/components/css_properties/components/CssUtils";
-import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
+import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
+import { Container } from "~/components/css_properties/components/CssUtils";
+import { type CSSStore, cssStateToString, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
+import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
+
 import { DisplaySelector } from "./components/DisplaySelector";
-import { cssStateToString, type CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 
 export function CSSPropertiesEditor(props: Readonly<{
-  meta: Vertex;
-  title?: string;
   data?: Vertex; // temp vertex
-  setValue?: (data: any) => void;
   disabled?: boolean;
   isRealTime?: boolean;
+  meta: Vertex;
+  setValue?: (data: any) => void;
+  title?: string;
   txnId?: number;
 }>) {
   const [cssState, setCssState] = createStore({} as CSSStore);
@@ -65,15 +68,15 @@ export function CSSPropertiesEditor(props: Readonly<{
         <Container>
           <div class="block w:inherit p:20px|10px|0px|10px">
             <DisplaySelector
-              value={state()}
-              onRemoveIconClick={() => setState('')}
+              infoLink=":target"
               isAddToClass={false}
               isLabelOnTop={false}
               label="Select State"
               name="state"
-              infoLink=":target"
+              onChangeInput={(name, v) => setState(v)}
+              onRemoveIconClick={() => setState('')}
               options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']}
-              onChangeInput={(name, v) => setState(v)} />
+              value={state()} />
             <StyleEditorTab />
           </div>
         </Container>

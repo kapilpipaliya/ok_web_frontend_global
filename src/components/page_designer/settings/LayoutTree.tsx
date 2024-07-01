@@ -1,27 +1,29 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For, Show, onMount, createMemo, type Setter } from "solid-js";
+import { For, type Setter, Show, createMemo, createSelector, createSignal, onMount, useContext } from "solid-js";
+
 import { Drawer } from "~/components/Drawer";
+import { useToast } from "~/components/Toast";
 import { GenericField } from "~/components/fields/GenericField";
-import { Tooltip } from "~/components/solid_blocks";
-import { IsPreviewContext } from "~/lib/contexts";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
+import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
+import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
-import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { Properties } from "./properties/Properties";
+import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
-import { getRowProps } from "~/lib/graph/get/sync/getProps";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { IsPreviewContext } from "~/lib/contexts";
+import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { nameExpr } from "./utils/nameExpr";
-import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
-import { useToast } from "~/components/Toast";
+import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { getRowProps } from "~/lib/graph/get/sync/getProps";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import { useDesignerLayoutStore } from "../LayoutContext";
+import { Properties } from "./properties/Properties";
+import { nameExpr } from "./utils/nameExpr";
 
 export function LayoutTree() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -189,13 +191,13 @@ export function LayoutTree() {
         >
           <Tooltip content={"Properties"} nowrap>
             <Icon
+              class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+              height={22}
               icon={"mingcute:settings-5-line"}
               onclick={() =>
                 setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer)
               }
-              height={22}
               width={22}
-              class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
             />
           </Tooltip>
         </Show>
@@ -210,11 +212,10 @@ export function LayoutTree() {
           >
             <Tooltip content={"Duplicate"} nowrap>
               <Icon
-                icon={"mage:copy"}
-                height={18}
-                width={18}
-                color={"black"}
                 class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                color={"black"}
+                height={18}
+                icon={"mage:copy"}
                 onclick={(e) => {
                   cloneLayoutAndChildren(
                     props.metaVertex,
@@ -226,6 +227,7 @@ export function LayoutTree() {
                     layoutStore.formData.formData
                   );
                 }}
+                width={18}
               />
             </Tooltip>
             <Tooltip content={"Delete"} nowrap>
@@ -233,8 +235,11 @@ export function LayoutTree() {
                 meta={
                   {
                     P: {
+                      class:
+                        "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
                       component: "Icon",
-                      style: { color: "red" },
+                      height: 18,
+                      icon: "mage:trash",
                       onClick: () => {
                         const name = getComponent();
                         deleteLayoutAttr(
@@ -248,11 +253,8 @@ export function LayoutTree() {
                           showSuccessToast
                         );
                       },
+                      style: { color: "red" },
                       width: 18,
-                      height: 18,
-                      class:
-                        "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
-                      icon: "mage:trash",
                     },
                   } as any
                 }
@@ -275,21 +277,21 @@ export function LayoutTree() {
                 }}
               >
                 <Show
-                  when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
                   fallback={
                     <Icon
-                      height={18}
-                      width={18}
-                      icon="mdi:eye-off-outline"
                       class="transition: 0.5s ease-in-out;"
+                      height={18}
+                      icon="mdi:eye-off-outline"
+                      width={18}
                     />
                   }
+                  when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
                 >
                   <Icon
-                    height={18}
-                    width={18}
-                    icon="mdi:eye-outline"
                     class="transition: 0.5s ease-in-out;"
+                    height={18}
+                    icon="mdi:eye-outline"
+                    width={18}
                   />
                 </Show>
               </button>
@@ -303,83 +305,83 @@ export function LayoutTree() {
     return (
       <div>
         <button
-          type="button"
-          draggable={true}
-          onDragStart={(e) =>
-            handleDragStart(e, setLayoutStore, props.metaVertex)
-          }
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDropEvent}
           classList={{
-            "w:100%": true,
-            "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
             "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
-            "r:5|5|5|5": !!children().length,
-            "r:0|5|5|0": !children().length,
+            "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
+            "box-shadow:1px|1px|1px|1px#F2EDED":
+              !!children().length && !isActiveTargetItem() && !!layoutStore.position,
+            "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
+              isActiveTargetItem() && layoutStore.position === "after",
             "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
               isActiveTargetItem() && layoutStore.position === "center",
             "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
               isActiveTargetItem() && layoutStore.position === "before",
-            "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
-              isActiveTargetItem() && layoutStore.position === "after",
-            "box-shadow:1px|1px|1px|1px#F2EDED":
-              !!children().length && !isActiveTargetItem() && !!layoutStore.position,
+            "r:0|5|5|0": !children().length,
+            "r:5|5|5|5": !!children().length,
+            "w:100%": true,
           }}
+          draggable={true}
           onClick={handleClick}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDragStart={(e) =>
+            handleDragStart(e, setLayoutStore, props.metaVertex)
+          }
+          onDrop={handleDropEvent}
           onMouseOver={handleMouseOver}
           onmouseleave={handleMouseLeave}
           style={{
-            "font-size": "14px",
-            height: "25px",
-            "font-weight": children().length ? "bold" : "normal",
+            "align-items": "center",
             "box-shadow":
               !(isActiveTargetItem() && layoutStore.position === "center") &&
                 children().length
                 ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
                 : undefined,
-            "align-items": "center",
-            "justify-content": "space-between",
             display: "flex",
+            "font-size": "14px",
+            "font-weight": children().length ? "bold" : "normal",
+            height: "25px",
+            "justify-content": "space-between",
           }}
+          type="button"
         >
           <div
-            style="display: flex;align-items: center;"
             class={`${!children().length ? "bl:1px|dashed|black pl:10" : ""}`}
+            style="display: flex;align-items: center;"
           >
             &nbsp;
             <Show when={children().length}>
               <button
                 class="cursor:pointer"
-                style={{ "z-index": "1" }}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleExpand(props.metaVertex.id);
                 }}
+                style={{ "z-index": "1" }}
               >
                 <Icon
-                  icon="mingcute:down-fill"
                   class={"transform 2s ease-in-out"}
+                  icon="mingcute:down-fill"
                   style={{
-                    transition: "transform 0.2s linear",
                     "margin-top": "7px",
                     transform: `${collapsedKeys().includes(props.metaVertex.id)
                         ? "rotate(0deg)"
                         : "rotate(180deg)"
                       }`,
+                    transition: "transform 0.2s linear",
                   }}
                 />
               </button>
             </Show>
             &nbsp;
             <Icon
+              height={17}
               icon={
                 iconMap[getComponent()] ??
                 "material-symbols:widgets-outline-rounded"
               }
               width={17}
-              height={17}
             />
             &nbsp;&nbsp;
             {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}

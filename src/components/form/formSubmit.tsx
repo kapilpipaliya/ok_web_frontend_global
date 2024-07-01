@@ -1,9 +1,11 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { IFormContext } from "~/lib/contexts";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { commitTxn, ProcessStatus } from "~/lib/graph/transaction";
+
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
+import { ProcessStatus, commitTxn } from "~/lib/graph/transaction";
 
 export async function formSubmit(formData: IFormContext, id: Id, txnId: number, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, showLoadingToast: any, showWarningToast: any, showErrorToast: any, navigateToParentRoute: () => void, closePopUp?: () => void) {
   const isValid = true;
@@ -39,9 +41,7 @@ export async function formSubmit(formData: IFormContext, id: Id, txnId: number, 
 
       const label = formData.formData.L[0].replace(/([A-Z])/g, ' $1').trim();
       await showLoadingToast({
-        promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
         loadMessage: `Saving ${label}...`,
-        successMessage: `${label} Saved Successfully`,
         onSuccess: (value) => {
           graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
           // currently we are navigating back.
@@ -51,6 +51,8 @@ export async function formSubmit(formData: IFormContext, id: Id, txnId: number, 
             navigateToParentRoute();
           }
         },
+        promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
+        successMessage: `${label} Saved Successfully`,
       });
     }
   } else {

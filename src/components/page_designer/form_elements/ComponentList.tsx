@@ -7,13 +7,15 @@ import {
   createSignal,
   useContext
 } from "solid-js";
+
+import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
+import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
+
 import { ComonentItem } from "./ComonentItem";
 
 export function ComponentList() {
@@ -25,18 +27,18 @@ export function ComponentList() {
 
   let defaultData = [] as any[];
   const componentTreeMetaData = {
-    collection: paginationExpression({ coll: "CompCategory" }),
     child: { collection: "->CompCategoryComp" },
+    collection: paginationExpression({ coll: "CompCategory" }),
   };
   // Fetch data function
   async function fetchData(): Promise<{
-    graph?: any;
     data?: any;
     error?: string;
+    graph?: any;
   }> {
     try {
       const data = await getTreeDataMGCall(componentTreeMetaData);
-      return { graph: data.graph, data: data };
+      return { data: data, graph: data.graph };
     } catch (error: any) {
       return { error: error.message };
     }
@@ -81,8 +83,8 @@ export function ComponentList() {
 
   const listBoxStyle = {
     display: "grid",
-    "grid-template-columns": "repeat(2, 1fr)",
     gap: "5px",
+    "grid-template-columns": "repeat(2, 1fr)",
   };
 
   // Function to get icon by category
@@ -128,25 +130,25 @@ export function ComponentList() {
             style={{ color: "#9e9ea7" }}
           />
           <input
-            placeholder="Search Component..."
-            type="search"
             class="inputSearch f:14"
-            value={searchQuery()}
             onInput={(e) => {
               setSearchQuery(e.target.value);
               updateFilteredData(); // Update filteredData when searchQuery changes
             }}
+            placeholder="Search Component..."
+            type="search"
+            value={searchQuery()}
           />
         </div>
       </nav>
       <div
         class="overflow:auto h:full"
         style={{
-          "scrollbar-width": "thin",
           "scrollbar-color": "lightgrey",
+          "scrollbar-width": "thin",
         }}
       >
-        <Show when={!isFetchingData()} fallback={<LoaderNew loaderHeight="55vh" />}>
+        <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isFetchingData()}>
           <For
             each={filteredData()}
             fallback={

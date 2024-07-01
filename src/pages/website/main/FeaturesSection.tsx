@@ -4,51 +4,51 @@ import { For } from "solid-js";
 export function FeaturesSection() {
   const featureData = [
     {
-      icon: "ri:spam-line",
-      title: "Spam Protection",
-      subtitle1: "Google reCAPTCHA",
-      subtitle2: "Spam Protection",
       description:
         "This will prevent spam entries and ensures acquiring real data from users",
+      icon: "ri:spam-line",
+      subtitle1: "Google reCAPTCHA",
+      subtitle2: "Spam Protection",
+      title: "Spam Protection",
     },
     {
-      icon: "iconamoon:move-light",
-      title: "Builder",
-      subtitle1: "Drag & Drop",
-      subtitle2: "Builder",
       description:
         "Fully functional drag & drop form builder. And so many widgets in addition",
+      icon: "iconamoon:move-light",
+      subtitle1: "Drag & Drop",
+      subtitle2: "Builder",
+      title: "Builder",
     },
     {
-      icon: "ic:baseline-payment",
-      title: "Payment Methods",
-      subtitle1: "Wide Range of Payment",
-      subtitle2: "Methods",
       description:
         "Supports popular payment gateway integration like Paypal, Stripe, Gpay and more!",
+      icon: "ic:baseline-payment",
+      subtitle1: "Wide Range of Payment",
+      subtitle2: "Methods",
+      title: "Payment Methods",
     },
     {
-      icon: "material-symbols:mark-email-read-outline",
-      title: "Confirmation Email",
-      subtitle1: "Confirmation Email to",
-      subtitle2: "Form Users",
       description:
         "Set email notifications to users as a confirmation once form submission is successful",
+      icon: "material-symbols:mark-email-read-outline",
+      subtitle1: "Confirmation Email to",
+      subtitle2: "Form Users",
+      title: "Confirmation Email",
     },
     {
+      description: "Add short codes to show custom fields in the forms",
       icon: "gridicons:code",
-      title: "Shortcode",
       subtitle1: "Shortcode Support for",
       subtitle2: "Customization",
-      description: "Add short codes to show custom fields in the forms",
+      title: "Shortcode",
     },
     {
-      icon: "tabler:cards",
-      title: "Visual Styler",
-      subtitle1: "Choose form look from",
-      subtitle2: "hundreds of ready made style",
       description:
         "Getting your forms to look amazing in your desired color is no longer difficult.",
+      icon: "tabler:cards",
+      subtitle1: "Choose form look from",
+      subtitle2: "hundreds of ready made style",
+      title: "Visual Styler",
     },
   ];
 
@@ -70,11 +70,11 @@ export function FeaturesSection() {
         <For each={featureData}>
           {(feature) => (
             <FeatureBox
+              description={feature.description}
               icon={feature.icon}
-              title={feature.title}
               subtitle1={feature.subtitle1}
               subtitle2={feature.subtitle2}
-              description={feature.description}
+              title={feature.title}
             />
           )}
         </For>
@@ -84,17 +84,17 @@ export function FeaturesSection() {
 };
 
 const FeatureBox = (props: Readonly<{
+  description: string;
   icon: string;
-  title: string;
   subtitle1: string;
   subtitle2: string;
-  description: string;
+  title: string;
 }>) => {
   return (
     <div class="featurebox d-flex p-relative">
       <div class="iconbg" />
       <div class="iconsvg d-flex justify-content-center align-item-center">
-        <Icon icon={props.icon} height={50} width={50} />
+        <Icon height={50} icon={props.icon} width={50} />
       </div>
       <h3>{props.title}</h3>
       <h4 class="text-left">

@@ -1,11 +1,13 @@
-import { createMemo, For, Show, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { For, Show, createMemo, useContext } from "solid-js";
+
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
+
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { addStepBefore } from "./addStepBefore";
-import { addStepAfter } from "./addStepAfter";
 import { Step } from "./Step";
+import { addStepAfter } from "./addStepAfter";
+import { addStepBefore } from "./addStepBefore";
 
 export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -23,29 +25,29 @@ export function FormStepper() {
   };
 
   return (
-    <div style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap" class="w:50%@>md w:100% m:0|10">
+    <div class="w:50%@>md w:100% m:0|10" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
       <For each={steps()}>
         {(step, index) => (
           <>
             <Icon
-              style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
-              icon="mdi:plus"
               height={20}
-              width={20}
+              icon="mdi:plus"
               onClick={(e) => handleAddStepBefore(e, step)}
+              style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
+              width={20}
             />
             <Step
-              step={step}
               index={index}
+              step={step}
               steps={steps()}
             />
             <Show when={index() === steps().length - 1}>
               <Icon
-                style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
-                icon="mdi:plus"
                 height={20}
-                width={20}
+                icon="mdi:plus"
                 onClick={(e) => handleAddStepAfter(e, step)}
+                style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
+                width={20}
               />
             </Show>
           </>

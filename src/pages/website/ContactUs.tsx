@@ -1,24 +1,26 @@
-import { Footer } from "~/pages/website/Footer";
-import "~/pages/website/style.css";
-import "~/pages/website/krd.css";
-import { createSignal, useContext } from "solid-js";
-import { Header } from "./Header";
-import { SiteTitle } from "./SiteTitle";
-import { contactUsCall } from "~/lib/api/api_functions";
 import { useNavigate } from "@solidjs/router";
+import { createSignal, useContext } from "solid-js";
+
 import { useToast } from "~/components/Toast";
 import "~/css/base.css";
+import { contactUsCall } from "~/lib/api/api_functions";
 import { LoadingContext } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
+import { Footer } from "~/pages/website/Footer";
+import "~/pages/website/krd.css";
+import "~/pages/website/style.css";
+
+import { Header } from "./Header";
+import { SiteTitle } from "./SiteTitle";
 
 export function ContactUs() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [formData, setFormData] = createSignal({
     email: "",
+    message: "",
     name: "",
     subject: "",
-    message: "",
   });
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
 
@@ -30,17 +32,17 @@ export function ContactUs() {
     } else {
       setLoadingSite(true);
       await showLoadingToast({
-        promise: contactUsCall(formData),
         loadMessage: "Sending message...",
-        successMessage: "Message Sent Successfully",
         onSuccess: (value) => {
           setFormData({
             email: "",
+            message: "",
             name: "",
             subject: "",
-            message: "",
           });
         },
+        promise: contactUsCall(formData),
+        successMessage: "Message Sent Successfully",
       });
       setLoadingSite(false);
     }
@@ -60,10 +62,10 @@ export function ContactUs() {
       <div
         class="@fade|.5s"
         style={{
-          flex: "auto",
-          display: "flex",
-          "flex-direction": "column",
           "align-items": "center",
+          display: "flex",
+          flex: "auto",
+          "flex-direction": "column",
           "justify-content": "center",
           padding: "43px",
         }}
@@ -72,16 +74,16 @@ export function ContactUs() {
           class="m:10px w:inherit bg:white jc:center r:10"
           onSubmit={handleSubmit}
           style={{
+            "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
             display: "flex",
             padding: "20px 30px",
-            "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           }}
         >
           <div class="d:none@<md flex jc:center w:-webkit-fill-available">
             <img
-              src={"../../public/graphics/contact-us.jpg"}
               alt="Contact Us"
               class="w:25rem "
+              src={"../../public/graphics/contact-us.jpg"}
             />
           </div>
           <div class="mt:25 w:-webkit-fill-available w:100%@<md grid align-content:center m:0|30@lg">
@@ -95,124 +97,124 @@ export function ContactUs() {
             <div class="grid grid-template-columns:1fr|50%@>md gap:10 ">
               <div>
                 <label
-                  for="fullname"
                   class="f:14"
+                  for="fullname"
                   style={{ display: "block", "margin-bottom": "5px" }}
                 >
                   Full Name
                 </label>
                 <input
-                  type="text"
                   id="name"
                   name="name"
-                  value={formData().name}
                   onInput={(e) =>
                     setFormData({ ...formData(), name: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Your name"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type="text"
+                  value={formData().name}
                 />
               </div>
               <div>
                 <label
-                  for="email"
                   class="f:14"
+                  for="email"
                   style={{ display: "block", "margin-bottom": "10px" }}
                 >
                   Email Address
                 </label>
                 <input
-                  type="email"
                   id="email"
                   name="email"
-                  value={formData().email}
                   onInput={(e) =>
                     setFormData({ ...formData(), email: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Your email"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type="email"
+                  value={formData().email}
                 />
               </div>
             </div>
             <div style={{ margin: "10px 0" }}>
               <label
-                for="subject"
                 class="f:14"
+                for="subject"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Subject
               </label>
               <input
-                name="subject"
                 id="subject"
-                type="text"
-                value={formData().subject}
+                name="subject"
                 onInput={(e) =>
                   setFormData({ ...formData(), subject: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="What's the subject?"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="text"
+                value={formData().subject}
               />
             </div>
             <div style={{ "margin-bottom": "10px 0" }}>
               <label
-                for="username"
                 class="f:14"
+                for="username"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Message
               </label>
               <textarea
-                id="message"
-                rows="4"
-                typeof="textarea"
                 aria-multiline="true"
-                name="text"
                 class="max-h:10rem"
-                value={formData().message}
+                id="message"
+                name="text"
                 onInput={(e) =>
                   setFormData({ ...formData(), message: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Write your message.."
                 required
+                rows="4"
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                typeof="textarea"
+                value={formData().message}
               />
             </div>
 
             <button
-              type="submit"
               style={{
-                width: "100%",
-                padding: "10px",
                 background: "rgb(226,65,74)",
-                color: "white",
                 border: "none",
                 "border-radius": "4px",
+                color: "white",
                 cursor: "pointer",
+                padding: "10px",
+                width: "100%",
               }}
+              type="submit"
             >
               Send Message
             </button>
@@ -235,9 +237,9 @@ const ContactForm = () => {
     e.preventDefault();
     // Handle form submission
     console.log({
+      email: email(),
       firstName: firstName(),
       lastName: lastName(),
-      email: email(),
       phone: phone(),
       subject: subject(),
     });
@@ -248,20 +250,20 @@ const ContactForm = () => {
       <div class="form-inline">
         <label for="fname">First Name</label>
         <input
-          type="text"
           id="fname"
           name="firstname"
-          placeholder="First name.."
           onInput={(e) => setFirstName(e.target.value)}
+          placeholder="First name.."
+          type="text"
         />
 
         <label for="lname">Last Name</label>
         <input
-          type="text"
           id="lname"
           name="lastname"
-          placeholder="Last name.."
           onInput={(e) => setLastName(e.target.value)}
+          placeholder="Last name.."
+          type="text"
         />
       </div>
 
@@ -270,20 +272,20 @@ const ContactForm = () => {
           <b>Email</b>
         </label>
         <input
-          type="text"
-          placeholder="Email"
           name="email"
-          required
           onInput={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+          type="text"
         />
 
         <label for="phone">Enter your phone number:</label>
         <input
-          type="text"
           id="phone"
           name="phone"
-          placeholder="Phone Number"
           onInput={(e) => setPhone(e.target.value)}
+          placeholder="Phone Number"
+          type="text"
         />
       </div>
 
@@ -291,9 +293,9 @@ const ContactForm = () => {
       <textarea
         id="subject"
         name="subject"
+        onInput={(e) => setSubject(e.target.value)}
         placeholder="Your message.."
         style="height:200px"
-        onInput={(e) => setSubject(e.target.value)}
       />
 
       <input

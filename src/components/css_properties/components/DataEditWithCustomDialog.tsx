@@ -1,31 +1,33 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
-  type JSXElement,
-  type Setter,
-  useContext,
-  createSignal,
-  Show,
   For,
-  Switch,
+  type JSX,
+  type JSXElement,
   Match,
-  createMemo, type JSX,
+  type Setter,
+  Show,
+  Switch,
+  createMemo,
+  createSignal, useContext,
 } from "solid-js";
+
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { ContainerLabel } from "./CssUtils";
+
 export const DataEditWithCustomDialog = (props: {
+  centerComponent?: JSXElement;
+  children: JSX.Element;
+  dialogLabel: any;
+  fallback?: any;
+  infoLink?: string;
   label: any;
   name: string;
   openMenu: Accessor<any>;
   setOpenMenu: Setter<any>;
-  infoLink?: string;
-  centerComponent?: JSXElement;
-  dialogLabel: any;
-  children: JSX.Element;
-  fallback?: any;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);
@@ -35,36 +37,36 @@ export const DataEditWithCustomDialog = (props: {
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
   interface CssProperties {
+    blur: string;
+    color: string;
+    spread: string;
+    type: string;
     "x-offset": string;
     "y-offset": string;
-    blur: string;
-    spread: string;
-    color: string;
-    type: string;
   }
 
   // Function to parse CSS parts
   function getCssParts(option: string): CssProperties {
     const parts = option.split("|");
     return {
+      blur: parts[2] || "",
+      color: parts[4] || "",
+      spread: parts[3] || "",
+      type: parts[5] || "",
       "x-offset": parts[0] || "",
       "y-offset": parts[1] || "",
-      blur: parts[2] || "",
-      spread: parts[3] || "",
-      color: parts[4] || "",
-      type: parts[5] || "",
     };
   }
 
   function createCssOption(css: CssProperties) {
     // Deconstruct the cssProperties object to extract each property
     const {
+      blur = "0",
+      color = "#000",
+      spread = "0",
+      type = "",
       "x-offset": xOffset = "0",
       "y-offset": yOffset = "0",
-      blur = "0",
-      spread = "0",
-      color = "#000",
-      type = "",
     } = css;
     setCssState(state(),
       {[props.name]:
@@ -154,8 +156,8 @@ export const DataEditWithCustomDialog = (props: {
   };
   const renderPopup = (option: any, index: number) => {
     const setCssStateFromProperties = (property: {
-      name: keyof CssProperties;
       children?: any[];
+      name: keyof CssProperties;
     }) => {
       const data = getCssParts(option);
 
@@ -188,35 +190,35 @@ export const DataEditWithCustomDialog = (props: {
       return {
         ...properties,
         isAddToClass: false,
-        value: () => getValueOfInput(properties.name),
         onChangeInput: (value: any) => {
           setChangedData({ ...changedData(), [properties.name]: value });
           createCssOption(changedData());
           setCssState(state(), {[properties.name]: value});
         },
+        value: () => getValueOfInput(properties.name),
       };
     };
 
     return (
       <Show when={props.openMenu() === index} >
         <div
+          class={"popup"}
           style={{
-            position: "absolute",
-            width: "280px",
-            "border-radius": "10px",
             "background-color": "#fff",
             border: "1px solid #ccc",
-            padding: "10px",
+            "border-radius": "10px",
             "margin-right": "100px",
+            padding: "10px",
+            position: "absolute",
+            width: "280px",
             "z-index": 1000,
           }}
-          class={"popup"}
         >
           <div class={"flex ai:center jc:space-between mb:5"}>
             <div class={"f:15 font-weight:bold"}>{props.dialogLabel}</div>
             <Icon
-              onClick={closePopup}
               icon={"mdi:close"}
+              onClick={closePopup}
               style={{ color: "grey" }}
             />
           </div>
@@ -230,6 +232,7 @@ export const DataEditWithCustomDialog = (props: {
           </For>
         </div>
         <div
+          onClick={closePopup}
           style={`
           position: fixed;
           top: 0;
@@ -239,7 +242,6 @@ export const DataEditWithCustomDialog = (props: {
           z-index: 10;
           display: ${props.openMenu() ? "block" : "none"};
         `}
-          onClick={closePopup}
         />
       </Show>
     );
@@ -248,7 +250,7 @@ export const DataEditWithCustomDialog = (props: {
     setCssState(state(), {[props.name]: cssDefault[state() ?? '']?.[props.name]});
     setChangedData({});
   };
-  const Component = (p: { option: any; i: any }) => {
+  const Component = (p: { i: any; option: any }) => {
     return (
       <Switch>
         <Match when={props.label.includes("Shadow")}>
@@ -320,9 +322,9 @@ export const DataEditWithCustomDialog = (props: {
     <div
       class={"b:1px|solid|lightgray r:5 p:.2rem|.3rem"}
       style={{
-        position: "relative",
         color: "#333",
         margin: "10px",
+        position: "relative",
         width: "-webkit-fill-available",
       }}
     >
@@ -331,17 +333,17 @@ export const DataEditWithCustomDialog = (props: {
           getOptions().length > 0 ? "bb:1|solid|lightgrey m:1 pb:5" : ""
         }`}
         style={{
+          "align-items": "center",
           display: "flex",
           "justify-content": "space-between",
-          "align-items": "center",
           "margin-bottom": "6px",
         }}
       >
-        <ContainerLabel info={props.name} title={props.label} onIconClick={resetValues} showIcon={isDefaultValue()} />
+        <ContainerLabel info={props.name} onIconClick={resetValues} showIcon={isDefaultValue()} title={props.label} />
         <Icon
           class={"cursor:pointer"}
-          onClick={addOption}
           icon={"lets-icons:add-round"}
+          onClick={addOption}
         />
       </div>
       <For each={getOptions()}>
@@ -349,25 +351,25 @@ export const DataEditWithCustomDialog = (props: {
           <div
           id={`option${i()}`}
             style={{
-              display: "flex",
               "align-items": "center",
-              cursor: "pointer",
-              "margin-bottom": "3px",
               border: "1px solid #ccc",
-              padding: "5px",
               "border-radius": "4px",
+              cursor: "pointer",
+              display: "flex",
+              "margin-bottom": "3px",
+              padding: "5px",
             }}
           >
             <Icon
               class={"cursor:pointer mr:8"}
-              onClick={() => openPopup(i())}
               icon={"icon-park-outline:more-one"}
+              onClick={() => openPopup(i())}
             />
-            <Component option={option} i={i} />
+            <Component i={i} option={option} />
             <Icon
               class={"cursor:pointer mr:8"}
-              onClick={() => deleteOption(i())}
               icon={"mdi:close"}
+              onClick={() => deleteOption(i())}
               style={{ color: "red" }}
             />
             {renderPopup(option, i())}

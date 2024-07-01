@@ -1,19 +1,21 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import jsep from "jsep";
+
+import { evaluate } from "~/lib/expression_eval";
+import {
+ replaceExpressionToLabel
+} from "~/lib/graph/get/sync/replaceExpressionToLabel";
 import {
   type GraphInterface,
   type Id,
   IdAttr,
   type Vertex,
 } from "~/lib/graph/graph";
-import { evaluate } from "~/lib/expression_eval";
-import jsep from "jsep";
 import {
   capitalizeFirstLetter,
   
 } from "~/lib/utils";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import {
- replaceExpressionToLabel
-} from "~/lib/graph/get/sync/replaceExpressionToLabel";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
   if (meta.P.type) return meta.P.type;
@@ -128,7 +130,7 @@ export function calculateFilter(input: string) {
     if (limitMatch) {
       limit = Number.parseInt(limitMatch[1], 10);
     }
-    return { skip, limit };
+    return { limit, skip };
   };
 
   const parseFilter = (input: string, startChar: string, endChar: string) => {
@@ -138,7 +140,7 @@ export function calculateFilter(input: string) {
       const filterEnd = input.indexOf(endChar, filterStart);
       if (filterEnd > filterStart) {
         filter = input.slice(filterStart + 1, filterEnd);
-        const { skip: s, limit: l } = parseSkipLimit(filter);
+        const { limit: l, skip: s } = parseSkipLimit(filter);
         skip = s;
         limit = l;
         filter = filter
@@ -158,14 +160,14 @@ export function calculateFilter(input: string) {
     type = input;
   }
 
-  return { type, filter, skip, limit, isMultiple };
+  return { filter, isMultiple, limit, skip, type };
 }
 export interface NavItem {
-  name: string;
-  expanded: boolean;
-  id: string;
   P: any;
   children?: NavItem[];
+  expanded: boolean;
+  id: string;
+  name: string;
 }
 
 export function getTreeData(
@@ -174,17 +176,17 @@ export function getTreeData(
   treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
   options?: {
-    nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
+    nameExpr?: (child: Vertex) => string;
   },
 ): NavItem[] {
   const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]): NavItem[] => {
     const result: NavItem[] = [];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
-      vertexes: vertexes,
       graph,
       setGraph,
+      vertexes: vertexes,
     });
     for (const child of (children || []).sort(
       (a: any, b: any) => a.P.pos - b.P.pos,
@@ -192,10 +194,10 @@ export function getTreeData(
       const name =
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem: NavItem = {
-        name: name,
+        P: child.P,
         expanded: true,
         id: child.id,
-        P: child.P,
+        name: name,
       };
       if (
         levels.child &&
@@ -231,9 +233,9 @@ export function getSelectionOptions(
   collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
   try {
     const value = evaluate(jsep(collection), {
-      vertexes: vertex,
       graph,
       setGraph,
+      vertexes: vertex,
     });
     if (value) {
       return { error: false, vertexes: value };

@@ -1,10 +1,13 @@
 
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { loadPageData } from "~/lib/drag_drop/loadPageData";
-import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
-import { PageDesignerLabels } from "../../../lib/drag_drop/constant";
+
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
+import { loadPageData } from "~/lib/drag_drop/loadPageData";
+
+import { PageDesignerLabels } from "../../../lib/drag_drop/constant";
 
 export async function handleDrop(e: DragEvent,layoutStore: Store<PageLayoutObject>, graph: GraphInterface, showErrorToast: (message: string) => void, setGraph: SetStoreFunction<GraphInterface>, txnId: number, formData: Vertex) {
   e.stopPropagation();

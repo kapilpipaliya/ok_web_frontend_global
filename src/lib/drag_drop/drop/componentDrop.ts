@@ -1,15 +1,19 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { batch } from "solid-js";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { useToast } from "~/components/Toast";
-import { addNewRow } from "../../graph/mutate/form/rowFunction";
-import { PageDesignerLabels } from "../constant";
 import { createAttrCompMetaVertex } from "~/lib/drag_drop/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/lib/drag_drop/drop/createAttrMetaVertex";
-import { processChildrenAttrs } from "~/lib/drag_drop/drop/processChildrenAttrs";
 import { handleAttrVertex } from "~/lib/drag_drop/drop/handleAttrVertex";
 import { handleCompVertex } from "~/lib/drag_drop/drop/handleCompVertex";
+import { processChildrenAttrs } from "~/lib/drag_drop/drop/processChildrenAttrs";
+
+import { addNewRow } from "../../graph/mutate/form/rowFunction";
+import { PageDesignerLabels } from "../constant";
 import { getUniqueName } from "../getChildrenAttrs";
-import { batch } from "solid-js";
 
 // @Note:
 // From Component To Layout drag:
@@ -48,7 +52,7 @@ export function componentDrop(
 
   const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
 
-  let rowResult: { error: boolean; vertexId?: string | undefined; edgeId?: string | undefined; }
+  let rowResult: { edgeId?: string | undefined;; error: boolean; vertexId?: string | undefined }
   batch(() => {
     rowResult = addNewRow(
       txnId,
@@ -56,7 +60,7 @@ export function componentDrop(
       graph,
       setGraph,
       toParentVertex,
-      toIndex ? { pos: toIndex, name: uniqueName } : { name: uniqueName },
+      toIndex ? { name: uniqueName, pos: toIndex } : { name: uniqueName },
       false,
       {} as any
     );

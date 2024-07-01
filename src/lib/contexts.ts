@@ -1,23 +1,24 @@
 import { createContext, createSignal } from "solid-js";
+
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 export const LoadingContext = createContext(createSignal(false));
 export const IsPreviewContext = createContext(createSignal(false));
 
 export interface IFormContext {
+ changedIds: { edgeIds: Id[], vertexIds: Id[] };
  cleanUpConfig: () => { [key: string]: any };
- validationGroup?: {};
- txnId: number;
- metaTxnId: number;
- formMeta: Vertex;
  formData: Vertex;
- tabs: string[];
-  groupByTabsAndGroup: {
+ formMeta: Vertex;
+ groupByTabsAndGroup: {
     [tab: string]: {
       [group: string]: Vertex[];
     };
   };
-  changedIds: { vertexIds: Id[], edgeIds: Id[] };
+ metaTxnId: number;
+ tabs: string[];
+  txnId: number;
+  validationGroup?: {};
 }
 
 export const FormContext = createContext({} as IFormContext);

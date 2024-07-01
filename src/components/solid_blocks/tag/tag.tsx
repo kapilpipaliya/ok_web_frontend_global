@@ -1,11 +1,10 @@
-import { type JSX, mergeProps, Show, splitProps } from "solid-js";
+import { type JSX, Show, mergeProps, splitProps } from "solid-js";
 
 import { getRandom } from "../tools";
-
 import "./tag.css";
 
-export type TagProps = (JSX.HTMLAttributes<HTMLSpanElement> &
-  Partial<JSX.AnchorHTMLAttributes<HTMLAnchorElement>>) & { plain?: boolean };
+export type TagProps = { plain?: boolean } & (JSX.HTMLAttributes<HTMLSpanElement> &
+  Partial<JSX.AnchorHTMLAttributes<HTMLAnchorElement>>);
 
 export function Tag(props: TagProps) {
   const [local, tagProps] = splitProps(props, ["plain"]);
@@ -19,8 +18,8 @@ export function Tag(props: TagProps) {
   );
   return (
     <Show
-      when={typeof mergedProps.href === "string"}
       fallback={<span {...mergedProps} />}
+      when={typeof mergedProps.href === "string"}
     >
       <a {...mergedProps} />
     </Show>

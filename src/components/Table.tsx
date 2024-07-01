@@ -1,24 +1,26 @@
-import {
-  createSignal,
-  For,
-  Show,
-  Switch,
-  Match,
-  type Accessor, type JSX,
-} from "solid-js";
-import { Icon } from "@iconify-icon/solid";
-import { Tooltip } from "~/components/solid_blocks";
 import type { ColumnDef } from "@tanstack/solid-table";
 
+import { Icon } from "@iconify-icon/solid";
+import {
+  type Accessor,
+  For,
+  type JSX,
+  Match,
+  Show,
+  Switch, createSignal,
+} from "solid-js";
+
+import { Tooltip } from "~/components/solid_blocks";
+
 type TableProps = {
-  headers: ColumnDef<any>[];
   data: any[];
-  rowsPerPageOptions?: number[];
   defaultRowsPerPage?: number;
-  onLoadMore: (skip: number, limit: number) => void;
-  totalItems: number;
+  headers: ColumnDef<any>[];
   isSearching: boolean;
   isShowLoadMore?: boolean;
+  onLoadMore: (skip: number, limit: number) => void;
+  rowsPerPageOptions?: number[];
+  totalItems: number;
 };
 
 export function CommonTable(props: Readonly<TableProps>) {
@@ -88,14 +90,14 @@ export function CommonTable(props: Readonly<TableProps>) {
                   <Switch>
                     <Match when={header === "Edit"}>
                       {header.cell?.({
-                        row: { original: row },
                         getValue: () => getValue(header, row),
+                        row: { original: row },
                       })}
                     </Match>
                     <Match when={true}>
                       {header.cell?.({
-                        row: { original: row },
                         getValue: () => getValue(header, row),
+                        row: { original: row },
                       })}
                     </Match>
                   </Switch>
@@ -106,17 +108,17 @@ export function CommonTable(props: Readonly<TableProps>) {
         </For>
       </Table>
       <TableActions
-        totalPages={totalPages}
         currentPage={currentPage}
-        displayedRows={displayedRows}
-        handleRowsPerPageChange={handleRowsPerPageChange}
-        handleFirstPage={handleFirstPage}
-        handlePreviousPage={handlePreviousPage}
-        handleNextPage={handleNextPage}
-        handleLastPage={handleLastPage}
         data={props.data}
+        displayedRows={displayedRows}
+        handleFirstPage={handleFirstPage}
+        handleLastPage={handleLastPage}
+        handleNextPage={handleNextPage}
+        handlePreviousPage={handlePreviousPage}
+        handleRowsPerPageChange={handleRowsPerPageChange}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={props.rowsPerPageOptions}
+        totalPages={totalPages}
       />
       <Show
         when={
@@ -139,16 +141,16 @@ export function CommonTable(props: Readonly<TableProps>) {
 }
 
 const TableActions = (props: Readonly<{
-  rowsPerPageOptions?: number[];
+  currentPage: Accessor<number>;
   data: any;
   displayedRows: Accessor<any[]>;
-  currentPage: Accessor<number>;
-  rowsPerPage: Accessor<number>;
-  handleRowsPerPageChange: (e: Event) => void;
   handleFirstPage: () => void;
-  handlePreviousPage: () => void;
-  handleNextPage: () => void;
   handleLastPage: () => void;
+  handleNextPage: () => void;
+  handlePreviousPage: () => void;
+  handleRowsPerPageChange: (e: Event) => void;
+  rowsPerPage: Accessor<number>;
+  rowsPerPageOptions?: number[];
   totalPages: Accessor<number>;
 }>) => {
   return (
@@ -159,15 +161,15 @@ const TableActions = (props: Readonly<{
           <select
             id="rowsPerPage"
             onChange={props.handleRowsPerPageChange}
-            value={props.rowsPerPage()}
             style="margin-left: 0.5rem;"
+            value={props.rowsPerPage()}
           >
             <For each={props.rowsPerPageOptions || [10,20,50,100]}>
               {(option) => <option value={option}>{option}</option>}
             </For>
           </select>
         </div>
-        <div style="margin-right: 1rem;" class="font-weight:500">
+        <div class="font-weight:500" style="margin-right: 1rem;">
           <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
             (props.currentPage() + 1) * props.rowsPerPage(),
             props.data.length,
@@ -176,60 +178,60 @@ const TableActions = (props: Readonly<{
         <div class="flex gap:10px">
           <Tooltip content="Move first">
             <button
-              onClick={props.handleFirstPage}
+              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               disabled={props.currentPage() === 0}
+              onClick={props.handleFirstPage}
               style={{
                 color: props.currentPage() === 0 ? "lightgrey" : "black",
               }}
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
             >
               <Icon
                 height={22}
-                width={22}
                 icon={"icon-park-outline:go-start"}
+                width={22}
               />
             </button>
           </Tooltip>
           <Tooltip content="Previous">
             <button
-              onClick={props.handlePreviousPage}
+              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               disabled={props.currentPage() === 0}
+              onClick={props.handlePreviousPage}
               style={{
                 color: props.currentPage() === 0 ? "lightgrey" : "black",
               }}
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
             >
-              <Icon height={22} width={22} icon={"icon-park-outline:left"} />
+              <Icon height={22} icon={"icon-park-outline:left"} width={22} />
             </button>
           </Tooltip>
           <Tooltip content="Next">
             <button
-              onClick={props.handleNextPage}
+              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               disabled={props.currentPage() === props.totalPages() - 1}
+              onClick={props.handleNextPage}
               style={{
                 color:
                   props.currentPage() === props.totalPages() - 1
                     ? "lightgrey"
                     : "black",
               }}
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
             >
-              <Icon height={22} width={22} icon={"icon-park-outline:right"} />
+              <Icon height={22} icon={"icon-park-outline:right"} width={22} />
             </button>
           </Tooltip>
           <Tooltip content="Move last">
             <button
-              onClick={props.handleLastPage}
+              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               disabled={props.currentPage() === props.totalPages() - 1}
+              onClick={props.handleLastPage}
               style={{
                 color:
                   props.currentPage() === props.totalPages() - 1
                     ? "lightgrey"
                     : "black",
               }}
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
             >
-              <Icon height={22} width={22} icon={"icon-park-outline:go-end"} />
+              <Icon height={22} icon={"icon-park-outline:go-end"} width={22} />
             </button>
           </Tooltip>
         </div>
@@ -238,7 +240,7 @@ const TableActions = (props: Readonly<{
   );
 };
 
-export function Table(props: Readonly<{ headers: number; children: JSX.Element; class?: string }>) {
+export function Table(props: Readonly<{ children: JSX.Element; class?: string; headers: number }>) {
   return (
     <div
       class="overflow:visible rel r:10"
@@ -266,16 +268,16 @@ export function TableHeadCell(props: any) {
 }
 
 export function TableBodyCell(props: Readonly<{
-  index?: number;
   children: JSX.Element;
   class?: string;
+  index?: number;
 }>) {
   return (
     <div
-      style="padding: 7px; align-content: center;"
       class={`h:50 text:center bg:${
         props.index ? (props.index % 2 === 0 ? "white" : "#3478cc0d") : ""
       } @fade|.4s ${props.class}`}
+      style="padding: 7px; align-content: center;"
     >
       {props.children}
     </div>

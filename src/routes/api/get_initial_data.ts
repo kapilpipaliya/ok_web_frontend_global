@@ -1,11 +1,13 @@
 import type {APIEvent} from "@solidjs/start/dist/server";
-import {getSubDomain} from "~/server/getSubDomain";
-import {getDriver} from "~/cypher/driver";
+
 import {type Session, types} from "neo4j-driver";
+
+import {getDriver} from "~/cypher/driver";
+import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import {getSubDomain} from "~/server/getSubDomain";
 
 type JsonData = Record<string, any>;
 // exporting this function breaks the api
@@ -48,9 +50,9 @@ async function getInitialData(args: {
 
   await session.close();
   return {
+    edges: relationshipObj,
     timestamp: new Date().getTime(),
     vertexes: nodeObj,
-    edges: relationshipObj,
   };
 }
 

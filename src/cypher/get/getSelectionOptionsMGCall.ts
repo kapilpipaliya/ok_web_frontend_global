@@ -3,10 +3,12 @@
 //  key else Primary Keys will be used.
 // TODO:
 import type { Vertex } from "~/lib/graph/graph";
+
 import type { ServerResult } from "./ServerResult";
+
+import { retryTransaction } from "../mutate/mutate_api/retryTransaction";
 import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
 import { handleMutationData } from "./handleMutationData";
-import { retryTransaction } from "../mutate/mutate_api/retryTransaction";
 
 export async function getSelectionOptionsMGCall(
   vertex: Vertex[],
@@ -14,7 +16,7 @@ export async function getSelectionOptionsMGCall(
   mutationData?: any,
   maxRetries?: number,
   strict?: boolean,
-): Promise<Partial<ServerResult> & { error: boolean }> {
+): Promise<{ error: boolean } & Partial<ServerResult>> {
   "use server";
 
   try{

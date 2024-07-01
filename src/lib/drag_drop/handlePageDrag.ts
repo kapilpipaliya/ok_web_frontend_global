@@ -1,5 +1,7 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 

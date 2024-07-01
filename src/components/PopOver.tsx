@@ -1,16 +1,17 @@
-import { Popover } from '@kobalte/core/popover';
 import type { JSX } from 'solid-js';
 
+import { Popover } from '@kobalte/core/popover';
+
 export function CustomPopover(props: Readonly<{
+  children: JSX.Element;
+  description?: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  trigger: JSX.Element;
-  children: JSX.Element;
   title?: string;
-  description?: string;
+  trigger: JSX.Element;
 }>) {
   return (
-    <Popover placement='right' open={props.isOpen} onOpenChange={props.setIsOpen}>
+    <Popover onOpenChange={props.setIsOpen} open={props.isOpen} placement='right'>
       <Popover.Trigger>
         <div onMouseEnter={() => {
           props.setIsOpen(true)
@@ -19,15 +20,15 @@ export function CustomPopover(props: Readonly<{
         </div>
       </Popover.Trigger>
       <Popover.Content style={{
-        width: '50vw',
-        "max-height": '90vh'
-        ,
-        "max-width": '90vw',
         'background-color': 'white',
+        border: '1px solid #e5e7eb'
+        ,
         'border-radius': '0.25rem',
-        border: '1px solid #e5e7eb',
-        "z-index": 10,
-        overflow: 'auto'
+        "max-height": '90vh',
+        "max-width": '90vw',
+        overflow: 'auto',
+        width: '50vw',
+        "z-index": 10
       }}>
 
         <div style={{padding: '1rem'}}>
@@ -39,19 +40,19 @@ export function CustomPopover(props: Readonly<{
           {props.children}
         </div>
         <button
+          onClick={() => props.setIsOpen(false)}
           style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            'margin-top': '0.25rem',
-            'margin-right': '0.25rem',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             'font-size': '1.5rem',
             'line-height': 1,
+            'margin-right': '0.25rem',
+            'margin-top': '0.25rem',
+            position: 'absolute',
+            right: '1rem',
+            top: '1rem',
           }}
-          onClick={() => props.setIsOpen(false)}
         > &times;
         </button>
       </Popover.Content>

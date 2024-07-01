@@ -3,21 +3,22 @@
  * \todo Implement drag and drop from: Svelte-FileField-Upload-Component
  * https://github.com/vipero07/svelte-file-upload-component
  */
-import { createSignal, type JSX, splitProps } from "solid-js";
+import { type JSX, createSignal, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
+
 import { useToast } from "~/components/Toast";
 
 interface Properties
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
-  name?: string;
-  disabled?: boolean;
-  value?: string;
-  dom?: HTMLInputElement;
   class?: string;
+  disabled?: boolean;
+  dom?: HTMLInputElement;
   error?: string;
-  onchange?: (value: string) => void;
-  label: string;
   help?: string;
+  label: string;
+  name?: string;
+  onchange?: (value: string) => void;
+  value?: string;
 }
 
 /* Work In Progress */
@@ -116,20 +117,20 @@ export function FileField(props: Properties) {
   return (
     <>
       <progress
-        value={progressBar.value}
         max={progressBar.max}
         style="width: 300px;"
+        value={progressBar.value}
       />
       <span>{percentageText()}</span>
       <span>{speedText()}</span>
       <input
         name={props.label || ""}
-        type="file"
         ref={props.dom}
+        type="file"
         {...customProps}
       />
-      <input type="button" onClick={UploadFile} value="Upload" />
-      <input type="button" onClick={cancelUploadFile} value="Cancel" />
+      <input onClick={UploadFile} type="button" value="Upload" />
+      <input onClick={cancelUploadFile} type="button" value="Cancel" />
 
       <span>{props.error}</span>
       <span>{state.error}</span>

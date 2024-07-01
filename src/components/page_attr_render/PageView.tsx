@@ -1,21 +1,22 @@
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { createMemo, createSignal, Match, Show, Switch, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo, createSignal, useContext } from "solid-js";
+
 import {
   PageAttrRender
 } from "~/components/page_attr_render/PageAttrRender";
-import {  IsPreviewContext, } from "~/lib/contexts";
-
 import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
+import {  IsPreviewContext, } from "~/lib/contexts";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
+
 import { FormWrapper } from "../fields/FormWrapper";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export function PageView(props: Readonly<{
-  metaVertex?: Vertex;
   data?: Vertex;
   isPreview?: boolean
+  metaVertex?: Vertex;
 }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [layoutStore] = useDesignerLayoutStore() || [];
@@ -47,7 +48,7 @@ export function PageView(props: Readonly<{
   return (
     <IsPreviewContext.Provider value={createSignal(props.isPreview ?? false)}>
       {/* <PageContext.Provider value={{ events: {} }}> */}
-      <Show when={props.metaVertex} keyed>
+      <Show keyed when={props.metaVertex}>
         <Switch>
           {/* <Match when={collection() && !dataVertex()}> */}
           {/* <For
@@ -77,10 +78,10 @@ export function PageView(props: Readonly<{
                 <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
               </div>
             </Show>
-            <FormWrapper meta={selectedFormVertex()} data={props.data} label={props.metaVertex?.P.name} />
+            <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} />
           </Match>
           <Match when={true}>
-            <PageAttrRender metaVertex={props.metaVertex!} data={props.data} />
+            <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
           </Match>
         </Switch>
       </Show>

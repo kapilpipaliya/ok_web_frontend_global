@@ -1,5 +1,7 @@
 import type {Store} from "solid-js/store";
+
 import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
+
 import {getChildVertexes} from "~/lib/graph/get/sync/traverse";
 
 export function addPropsToLayoutRow(

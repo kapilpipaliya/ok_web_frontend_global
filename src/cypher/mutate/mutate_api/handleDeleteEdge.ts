@@ -12,9 +12,9 @@ export async function handleDeleteEdge(deleteEdge: any, tx: any, clientToServerV
 
   try {
     const result = await tx.run(query, {
+      endId: int(endId),
       id: int(id),
       startId: int(startId),
-      endId: int(endId),
     });
     if (result.records.length > 0) {
       const oldId = deleteEdge.id;

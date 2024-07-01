@@ -1,5 +1,7 @@
-import type { Store, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
 import { handleComponentDrag } from "~/lib/drag_drop/handleComponentDrag";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 

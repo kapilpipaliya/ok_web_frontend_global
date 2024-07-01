@@ -1,15 +1,16 @@
 
-import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import "~/css/sideBarSearch.css";
+import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
 
 import type { DisplayComponentProps } from "~/components/fields/ComponentType";
+
+import "~/css/sideBarSearch.css";
 
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
   return (
     <>
-      <input type="checkbox" id="checkbox" onClick={props.toggleSidebar} />
-      <label for="checkbox" class="toggle">
+      <input id="checkbox" onClick={props.toggleSidebar} type="checkbox" />
+      <label class="toggle" for="checkbox">
         <div class="bars" id="bar1" />
         <div class="bars" id="bar2" />
         <div class="bars" id="bar3" />
@@ -19,12 +20,12 @@ function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
 }
 
 export function Navbar(
-  p: DisplayComponentProps & {
+  p: {
     left?: JSXElement;
     right?: JSXElement;
     showCloseDrawerBtn: boolean;
     toggleSidebar: () => void;
-  },
+  } & DisplayComponentProps,
 ) {
   const [field, others] = splitProps(p, [
     "showCloseDrawerBtn",
@@ -39,13 +40,13 @@ export function Navbar(
   const navigate = useNavigate();
   const navbarStyle = () =>
     ({
-      "background-color": "white",
-      padding: "6px",
-      display: "flex",
-      "box-shadow": "3px -1px 4px 3px lightgrey",
-      width: "-webkit-fill-available",
-      "justify-content": "space-between",
       "align-items": "center",
+      "background-color": "white",
+      "box-shadow": "3px -1px 4px 3px lightgrey",
+      display: "flex",
+      "justify-content": "space-between",
+      padding: "6px",
+      width: "-webkit-fill-available",
     }) as JSX.CSSProperties;
   return (
     <div

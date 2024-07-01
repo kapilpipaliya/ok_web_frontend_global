@@ -1,13 +1,7 @@
-import { createMemo, For, Match, Show, Switch, useContext, } from "solid-js";
 import { toTitle } from "case-switcher-js";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { For, Match, Show, Switch, createMemo, useContext, } from "solid-js";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { Tab, TabContainer } from "~/components/solid_blocks";
-import {
-  FormContext,
-  IsPreviewContext
-  } from "~/lib/contexts";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
@@ -15,10 +9,18 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
+import { Tab, TabContainer } from "~/components/solid_blocks";
+import {
+  FormContext,
+  IsPreviewContext
+  } from "~/lib/contexts";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+
 import { PageAttrDnDWrapper } from "./PageAttrDnDWrapper";
 
-export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vertex }>) {
+export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vertex }>) {
   const parentItems = useContext(PageRenderVertexContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const { txnId } = useContext(FormContext);
@@ -55,8 +57,9 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
 
         const Content = () => (
           <DynamicComponent
-            meta={item}
+            applyDefaults={true}
             // NOTE: For repeater we cant use parentData
+            component={component()}
             // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || getDataVertex(item) || parentData()}
             data={
               props.data ||
@@ -68,12 +71,11 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
               ).vertexes ||
               getDataVertex(graph, item)
             }
-            title={toTitle(getId(graph, item) ?? "")}
             // setValue={props.setValue}
             disabled={false}
-            component={component()}
+            meta={item}
+            title={toTitle(getId(graph, item) ?? "")}
             txnId={txnId}
-            applyDefaults={true}
           />
         );
 
@@ -89,7 +91,7 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
           <Switch>
             <Match when={parentComponent() === "TabList"}>
               <Tab style={item.P}>
-                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
                   <PageAttrDnDWrapper item={item}>
                     <Content />
                   </PageAttrDnDWrapper>
@@ -98,7 +100,7 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
             </Match>
             <Match when={parentComponent() === "TabContainer"}>
               <TabContainer>
-                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
 
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -108,7 +110,7 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
             </Match>
             <Match when={parentComponent() === "TreeViewChild"}>
               <li>
-                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
 
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -117,7 +119,7 @@ export function PageAttrRender(props: Readonly<{ metaVertex: Vertex; data?: Vert
               </li>
             </Match>
             <Match when={true}>
-              <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+              <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
 
                 <PageAttrDnDWrapper item={item}>
                   <Content />

@@ -1,6 +1,8 @@
-import { createMemo, createSignal, For, Show } from "solid-js";
-import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { Icon } from "@iconify-icon/solid";
+import { For, Show, createMemo, createSignal } from "solid-js";
+
+import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
+
 import {JSONSchema} from "./CssPropertiesMap";
 
 export const StyleEditorTab = () => {
@@ -36,7 +38,7 @@ export const StyleEditorTab = () => {
             return acc;
           }, {});
         return {
-          [sectionName]: { properties: filteredProperties, isOpen: isOpen },
+          [sectionName]: { isOpen: isOpen, properties: filteredProperties },
         };
       })
       .reduce((acc, section) => {
@@ -58,15 +60,15 @@ export const StyleEditorTab = () => {
 
   const CollapsibleSection = (props: Readonly<{
     index: any;
-    title: any;
-    properties: any;
     isOpen: boolean;
+    properties: any;
+    title: any;
   }>) => {
     const [isOpen, setIsOpen] = createSignal(props.isOpen ?? false);
 
     return (
       <div
-        class={`p:5|10 w:full b:1px|solid|lightgray ${
+        class={`${
           props.index === 0 && length() === 1
             ? "r:5"
             : props.index === length() - 1
@@ -74,24 +76,23 @@ export const StyleEditorTab = () => {
               : props.index === 0 && length() > 1
                 ? "r:5|5|0|0"
                 : ""
-        }
-
+        } b:1px|solid|lightgray p:5|10 w:full
 `}
       >
         <div
-          onClick={() => setIsOpen(!isOpen())}
           class={"cursor:pointer flex ai:center jc:space-between"}
+          onClick={() => setIsOpen(!isOpen())}
         >
           <span class={"f:15 font-weight:600"}>{props.title}</span>
           <Icon
-            icon="uil:angle-up"
-            height={25}
-            width={25}
             class={"cursor:pointer transform 1s ease-in-out"}
+            height={25}
+            icon="uil:angle-up"
             style={{
-              transition: "transform 0.2s linear",
               transform: `${isOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
+              transition: "transform 0.2s linear",
             }}
+            width={25}
           />
         </div>
         <Show when={isOpen()}>
@@ -124,27 +125,27 @@ export const StyleEditorTab = () => {
               style={{ color: "#9e9ea7" }}
             />
             <input
-              placeholder="Search Style..."
-              type="search"
               class="inputSearch f:14"
-              value={search()}
               onInput={(e) => {
                 handleSearch(e.target.value);
               }}
+              placeholder="Search Style..."
+              type="search"
+              value={search()}
             />
           </div>
         </nav>
         <For each={Object.entries(filteredSections())} fallback={""}>
           {(section, index) => {
-            const [sectionName, { properties, isOpen }] = section;            
+            const [sectionName, { isOpen, properties }] = section;            
 
             return (
               <Show when={Object.keys(properties).length > 0}>
                 <CollapsibleSection
-                  title={sectionName}
-                  properties={properties}
                   index={index()}
                   isOpen={isOpen}
+                  properties={properties}
+                  title={sectionName}
                 />
               </Show>
             );

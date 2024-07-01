@@ -1,5 +1,7 @@
-import { createContext } from "solid-js";
 import type { createStore } from "solid-js/store";
+
+import { createContext } from "solid-js";
+
 import type {ProcessStatus, TransactionValue} from "~/lib/graph/transaction";
 
 export type Id = string;
@@ -7,21 +9,21 @@ export type Id = string;
 export const IdAttr = "name";
 
 export interface Vertex {
-  id: Id;
+  IN: { [key: string]: Id[] };
   L: string[];
+  OUT: { [key: string]: Id[] };
   P: {
     [key: string]: any;
   };
-  IN: { [key: string]: Id[] };
-  OUT: { [key: string]: Id[] };
+  id: Id;
 }
 
 export interface Edge {
-  id: Id;
-  P: { [key: string]: any };
-  T: string;
-  S: Id;
   E: Id;
+  P: { [key: string]: any };
+  S: Id;
+  T: string;
+  id: Id;
 }
 
 export type VertexMap = { [key: string]: Vertex };
@@ -35,26 +37,26 @@ export type EdgeMap = { [key: string]: Edge };
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {
-  vertexes: VertexMap;
+  componentIdMap: { [key: string]: string };
   edges: EdgeMap;
-  vertexLabelIdMap: { [key: string]: Id[] };
-  member?: { [key: string]: any } | null;
-  txnId: number;
-  navigationData?: { [key: string]: any }[];
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  componentIdMap: { [key: string]: string };
+  member?: { [key: string]: any } | null;
+  navigationData?: { [key: string]: any }[];
   transactions: Map<
     number,
     {
+      revertSteps: TransactionValue[];
       status: ProcessStatus;
       steps: TransactionValue[];
-      undoStep: number;
       submittedStep: number;
-      revertSteps: TransactionValue[];
       undoPoints: number[];
+      undoStep: number;
     }
   >
+  txnId: number;
+  vertexLabelIdMap: { [key: string]: Id[] };
+  vertexes: VertexMap;
 }
 
 export const GraphContext = createContext<

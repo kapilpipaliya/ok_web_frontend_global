@@ -1,31 +1,33 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  useContext,
-  createSignal,
-  createEffect,
-  onCleanup,
-  Show,
   For,
   type JSXElement,
+  Show,
+  createEffect,
   createMemo,
+  createSignal,
+  onCleanup,
+  useContext,
 } from "solid-js";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext, sizeTypes } from "../context";
-import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
+
 import "~/css/componentUtilCSS.css";
 
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext, sizeTypes } from "../context";
+import { CenterDiv, Container, ContainerLabel } from "./CssUtils";
+
 export const TextFieldWithSelect = (props: {
-  name: string;
-  options?: string[];
-  value?: () => any;
-  onChangeInput?: any;
   infoLink?: string;
-  leftIcon?: JSXElement;
+  inputType?: string;
+  isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label?: string;
-  showInside?: boolean;
-  inputType?: string;
+  leftIcon?: JSXElement;
+  name: string;
+  onChangeInput?: any;
+  options?: string[];
   placeholder?: string;
-  isAddToClass?: boolean;
+  showInside?: boolean;
+  value?: () => any;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);
@@ -137,60 +139,60 @@ export const TextFieldWithSelect = (props: {
       <div class={"flex ai:center"} style={{ flex: "1" }}>
         <Show when={props.leftIcon || props.inputType === "number"}>
           <Show
-            when={props.inputType !== "number"}
             fallback={
               <button
                 onMouseDown={downIncrement}
                 style={{
-                  border: "none",
                   background: "transparent",
+                  border: "none",
                   cursor: "ns-resize",
                 }}
               >
                 <Icon icon="gg:scroll-v" style={{ color: "grey" }} />
               </button>
             }
+            when={props.inputType !== "number"}
           >
             {props.leftIcon}
           </Show>
         </Show>
         <Show
-          when={props.showInside}
           fallback={
             <label>{props.label}<input
-              step="any"
-              type={props.inputType || "text"}
+              class={"f:14"}
+              onInput={handleChange}
               placeholder={`${
                 props.inputType === "number" ? "0" : props.placeholder
               }`}
-              value={getValueWithoutUnits(selected())}
-              onInput={handleChange}
-              class={"f:14"}
+              step="any"
               style={{ width: "100%" }} // Set width to 100%
+              type={props.inputType || "text"}
+              value={getValueWithoutUnits(selected())}
             /></label>
           }
+          when={props.showInside}
         >
           <input
-            step="any"
-            type={props.inputType || "text"}
+            class="f:14 outline:none p:5"
+            onInput={handleChange}
             placeholder={`${
               props.inputType === "number" ? "0" : props.placeholder
             }`}
+            step="any"
+            style={{ width: "100%" }}
+            type={props.inputType || "text"}
             value={getValueWithoutUnits(
               props.value ? props.value() : selected(),
             )}
-            class="f:14 outline:none p:5"
-            onInput={handleChange}
-            style={{ width: "100%" }}
           />
         </Show>
       </div>
       <Show when={props.options}>
         <span
-          onClick={toggleDropdown}
           class={
             "color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none"
           }
+          onClick={toggleDropdown}
         >
           {selectedOption?.()}
         </span>
@@ -203,12 +205,12 @@ export const TextFieldWithSelect = (props: {
             <For each={props.options}>
               {(option) => (
                 <div
-                  onClick={() => selectOption(option)}
                   class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${
                     selectedOption?.() === option
                       ? "bg:rgb(229,234,253) font-weight:medium"
                       : "bg:transparent"
                   } r:5`}
+                  onClick={() => selectOption(option)}
                 >
                   {option}
                   <Show when={selectedOption?.() === option}>
@@ -234,9 +236,8 @@ export const TextFieldWithSelect = (props: {
   return (
     <Container>
       <Show
-        when={props.isLabelOnTop}
         fallback={
-          <Show when={props.label} fallback={<Content />}>
+          <Show fallback={<Content />} when={props.label}>
             <CenterDiv>
               <ContainerLabel info={props.name} onIconClick={resetValue}
                 showIcon={isDefaultValue()} title={props.label} />
@@ -244,6 +245,7 @@ export const TextFieldWithSelect = (props: {
             </CenterDiv>
           </Show>
         }
+        when={props.isLabelOnTop}
       >
         <div class={"w:full"}>
           <ContainerLabel info={props.name} onIconClick={resetValue}

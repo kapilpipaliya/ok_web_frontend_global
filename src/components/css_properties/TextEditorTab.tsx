@@ -10,24 +10,24 @@ export function TextEditorTab(props: Readonly<{
   });
 
   const style = {
-    color: "black",
     border: "1px solid #ccc",
-    padding: "10px",
-    margin: "5px",
-    width: "100%",
-    "min-height": "5rem",
     "border-radius": "6px",
+    color: "black",
+    margin: "5px",
+    "min-height": "5rem",
+    padding: "10px",
+    width: "100%",
   };
 
   return (
     <textarea
-      style={style}
-      value={text()}
       onInput={(e) => {
         setText(e.target.value);
         props.parseAndApplyCssRules(e.target.value);
         // props.setValue?.(e.target.value);
       } }
-      placeholder="Start typing..." />
+      placeholder="Start typing..."
+      style={style}
+      value={text()} />
   );
 }

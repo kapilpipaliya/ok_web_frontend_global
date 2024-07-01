@@ -1,12 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, Show } from "solid-js";
+import { Show, createSignal } from "solid-js";
+
 import { useDesignerLayoutStore } from "../LayoutContext";
-import { LeftIcons } from "./LeftIcons";
-import { ResizeViewButtons } from "./ResizeViewButtons";
-import { MiddleSectionButtons } from "./MiddleSectionButtons";
-import { SaveButton } from "./SaveButton";
-import { PreviewButton } from "./PreviewButton";
 import { ExportSection } from "./ExportSection";
+import { LeftIcons } from "./LeftIcons";
+import { MiddleSectionButtons } from "./MiddleSectionButtons";
+import { PreviewButton } from "./PreviewButton";
+import { ResizeViewButtons } from "./ResizeViewButtons";
+import { SaveButton } from "./SaveButton";
 
 export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);
@@ -22,10 +23,10 @@ export function HeaderRow() {
                 <ResizeViewButtons />
                 <Icon
                   class="ml:10"
-                  icon="solar:settings-linear"
                   height={22}
-                  width={22}
+                  icon="solar:settings-linear"
                   onClick={() => setLayoutStore("selectedSection", "setting")}
+                  width={22}
                 />
               </div>
             </Show>
@@ -36,7 +37,7 @@ export function HeaderRow() {
           <div class="ai:center justify-content:space-between flex gap:5">
             <SaveButton />
             <PreviewButton />
-            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
+            <ExportSection openDialog={openDialog} setOpenDialog={setOpenDialog} />
           </div>
         </div>
       </div>

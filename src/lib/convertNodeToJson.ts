@@ -1,5 +1,6 @@
 import type { Node, Relationship } from "neo4j-driver";
-import type { Vertex, Edge } from "~/lib/graph/graph";
+
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
 function unwrapProperties(
   properties: Record<string, any>,
@@ -50,27 +51,27 @@ function unwrapProperties(
 export function convertNodeToJson(node: Node): Vertex {
   return {
     // @ts-ignore
-    id: node.elementId,
+    IN: node.IN || {},
     L: node.labels,
-    P: unwrapProperties(node.properties),
     // @ts-ignore
     OUT: node.OUT || {},
+    P: unwrapProperties(node.properties),
     // @ts-ignore
-    IN: node.IN || {},
+    id: node.elementId,
   };
 }
 
 export function convertRelationshipToJson(relationship: Relationship): Edge {
   return {
     // @ts-ignore
-    id: relationship.elementId,
-    T: relationship.type,
-    // @ts-ignore
-    S: relationship.startNodeElementId,
-    // @ts-ignore
     E: relationship.endNodeElementId,
-    // when disableLosslessIntegers is false, we get object in number property.
     // Todo: data is not handled as properly, object is returned from server
     P: unwrapProperties(relationship.properties),
+    // @ts-ignore
+    S: relationship.startNodeElementId,
+    T: relationship.type,
+    // when disableLosslessIntegers is false, we get object in number property.
+    // @ts-ignore
+    id: relationship.elementId,
   };
 }

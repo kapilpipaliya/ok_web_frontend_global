@@ -1,9 +1,9 @@
-import { auth, driver as createDriver, type Driver } from "neo4j-driver";
+import { type Driver, auth, driver as createDriver } from "neo4j-driver";
 
 const drivers = {} as { [port: string]: Driver };
 
 export async function getDriverWithPort(
-  port: string | number,
+  port: number | string,
   username?: string,
   password?: string,
 ) {

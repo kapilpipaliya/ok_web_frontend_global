@@ -1,13 +1,17 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { klona } from "klona/json";
 import type { Store } from "solid-js/store";
+
+import { klona } from "klona/json";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { useToast } from "~/components/Toast";
-import { getToEdge } from "../../get/sync/traverse";
-import { getPkForCollection } from "../../get/sync/getPkForCollection";
-import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
-import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
-import { getSublistRowsForType, getSublistRows } from "./rowFunction";
+import { FormMetaData } from "~/lib/formMetaData";
+
+import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
+import { getPkForCollection } from "../../get/sync/getPkForCollection";
+import { getToEdge } from "../../get/sync/traverse";
+import { getSublistRows, getSublistRowsForType } from "./rowFunction";
 
 
 export function getExportCode(
@@ -103,11 +107,11 @@ export function getExportCode(
 
         const out = childVertexes.map((v) => getChildren(metaVertex, v, {
           ...klona(v),
-          L: v.L[0],
+          D: undefined,
           IN: undefined,
+          L: v.L[0],
           OUT: undefined,
           id: undefined,
-          D: undefined,
         })
         );
         if (out.length > 0) {
@@ -125,10 +129,10 @@ export function getExportCode(
 
   return getChildren(meta, data, {
     ...klona(data),
-    L: data.L[0],
+    D: undefined,
     IN: undefined,
+    L: data.L[0],
     OUT: undefined,
     id: undefined,
-    D: undefined,
   });
 }

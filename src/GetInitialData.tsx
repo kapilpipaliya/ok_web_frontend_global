@@ -1,4 +1,5 @@
-import { type JSX, createSignal, onMount, useContext, Switch, Match } from "solid-js";
+import { type JSX, Match, Switch, createSignal, onMount, useContext } from "solid-js";
+
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 import { GraphContext } from "~/lib/graph/graph";
@@ -6,7 +7,7 @@ import { GraphContext } from "~/lib/graph/graph";
 export function GetInitialData(props: Readonly<{ children: JSX.Element; }>) {
   const graph = useContext(GraphContext)!;
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);
-  const [error, setError] = createSignal<string | null>(null);
+  const [error, setError] = createSignal<null | string>(null);
 
   onMount(async () => {
     try {

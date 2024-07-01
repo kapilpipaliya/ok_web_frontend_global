@@ -1,44 +1,25 @@
+import { Icon } from "@iconify-icon/solid";
+import { createWritableMemo } from "@solid-primitives/memo";
+import { toTitle } from "case-switcher-js";
 import {
+  For,
+  Match,
+  Show,
+  Switch,
   createComputed,
   createEffect,
   createMemo,
   createSignal,
-  For,
   getOwner,
-  Match,
   on,
   runWithOwner,
-  Show,
-  Switch,
   useContext,
 } from "solid-js";
-import { createWritableMemo } from "@solid-primitives/memo";
-import { toTitle } from "case-switcher-js";
-import {
-  mergeVertexProperties, replaceVertexProperties,
-} from "~/lib/graph/mutate/vertex";
-import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { DynamicComponent } from "~/components/form/DynamicComponent";
 
-import {
-  getChildVertex,
-  getChildVertexes,
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/traverse";
-import {
-  addNewRow, getColumnProps,
-  getSublistRows, rowMetaInitialize
-} from "~/lib/graph/mutate/form/rowFunction";
-import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import type { ComponentProps } from "~/components/fields/ComponentType";
-import { Icon } from "@iconify-icon/solid";
 
-import {
-  getPropsFromMetaExpression,
-} from "~/lib/graph/get/sync/getProps";
-import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { useToast } from "~/components/Toast";
-import { FormContext, } from "~/lib/contexts";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
   PageRenderVertexContext, RepeaterVertexContext
 } from "~/components/page_attr_render/Context";
@@ -46,24 +27,44 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
-import { AddNewButton } from "../grid/AddNew";
-import { commitTxn } from "~/lib/graph/transaction";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
-import { isValidResponse } from "./isValidResponse";
-import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
+import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { FormContext, } from "~/lib/contexts";
+import {
+  getPropsFromMetaExpression,
+} from "~/lib/graph/get/sync/getProps";
+import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
+import {
+  getChildVertex,
+  getChildVertexes,
+  getSelectionOptions,
+} from "~/lib/graph/get/sync/traverse";
+import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { deleteRow } from "~/lib/graph/mutate/deleteRow";
+import {
+  addNewRow, getColumnProps,
+  getSublistRows, rowMetaInitialize
+} from "~/lib/graph/mutate/form/rowFunction";
+import {
+  mergeVertexProperties, replaceVertexProperties,
+} from "~/lib/graph/mutate/vertex";
+import { commitTxn } from "~/lib/graph/transaction";
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+
+import { AddNewButton } from "../grid/AddNew";
+import { isValidResponse } from "./isValidResponse";
 
 export function TableInputField(
-  props: ComponentProps & {
-    txnId?: number;
+  props: {
     isRealTime?: boolean;
     isTableInside?: boolean;
-  },
+    txnId?: number;
+  } & ComponentProps,
 ) {
   const { showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   // if there is no parent FormContext, it should still work.
-  const { txnId: formTxnId, cleanUpConfig } = useContext(FormContext);
+  const { cleanUpConfig, txnId: formTxnId } = useContext(FormContext);
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
@@ -83,8 +84,8 @@ export function TableInputField(
     setSortedVertexes(vertexes);
   });
 
-  const [dragToIndex, setDragToIndex] = createSignal<number | null>(null);
-  const [dragFromIndex, setDragFromIndex] = createSignal<number | null>(null);
+  const [dragToIndex, setDragToIndex] = createSignal<null | number>(null);
+  const [dragFromIndex, setDragFromIndex] = createSignal<null | number>(null);
 
   const handleDrop = () => {
     if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
@@ -101,7 +102,7 @@ export function TableInputField(
   };
 
   // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
+  const SortableRow = (p: { index: number; joinVertex: Vertex }) => {
     createComputed(on(tableColumnsTemplate, (columns) => {
       const metaTxnId = rowMetaInitialize(graph, setGraph, p.joinVertex, props.meta, columns);
       if (metaTxnId && cleanUpConfig) {
@@ -197,16 +198,16 @@ export function TableInputField(
             <>
               <Show when={component() === "Error"}>Error</Show>
               <DynamicComponent
-                title={toTitle(column.P.displayName || column.P[IdAttr] || "")}
-                isTableInside={false}
                 component={component()}
+                data={p.joinVertex}
+                disabled={disabled()}
+                isRealTime={props.isRealTime}
+                isTableInside={false}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={component() === "DynamicTable" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
-                data={p.joinVertex}
                 setValue={props.setValue}
-                disabled={disabled()}
+                title={toTitle(column.P.displayName || column.P[IdAttr] || "")}
                 txnId={props.txnId}
-                isRealTime={props.isRealTime}
               />
             </>
           );
@@ -247,31 +248,31 @@ export function TableInputField(
     return (
       <>
         <tr
-          draggable={true}
-          onDragStart={() => setDragFromIndex(p.index)}
-          onDragOver={(event) => event.preventDefault()}
-          onDragEnter={() => setDragToIndex(p.index)}
-          onDrop={handleDrop}
           class="border-radius:10px border-bottom:1px|solid|#dddddd"
+          draggable={true}
+          onDragEnter={() => setDragToIndex(p.index)}
+          onDragOver={(event) => event.preventDefault()}
+          onDragStart={() => setDragFromIndex(p.index)}
+          onDrop={handleDrop}
           style={{
-            "text-align": "center",
-            width: "50px",
             "background-color": getBackgroundColor(p.index, dragFromIndex(), dragToIndex()),
-            transition: "background-color 0.2s ease",
             border: getBorder(p.index, dragToIndex()),
+            "text-align": "center",
+            transition: "background-color 0.2s ease",
+            width: "50px",
           }}
         >
           <td>
             <div class={"flex ai:center jc:center"}>
               <button class="cursor: grab;">
-                <Icon icon="material-symbols:drag-indicator" class={"transform 2s ease-in-out"} />
+                <Icon class={"transform 2s ease-in-out"} icon="material-symbols:drag-indicator" />
               </button>
               <button class="cursor: pointer;" onClick={() => setExpanded(!expanded())}>
-                <Icon icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} class={"transform 2s ease-in-out"} style={{ "margin-top": "7px" }} />
+                <Icon class={"transform 2s ease-in-out"} icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} style={{ "margin-top": "7px" }} />
               </button>
-              <Icon height={20} width={20} icon="mingcute:delete-line" class="cursor:pointer m:5px" style={{ color: "red" }} onClick={() => deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!)} />
+              <Icon class="cursor:pointer m:5px" height={20} icon="mingcute:delete-line" onClick={() => deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!)} style={{ color: "red" }} width={20} />
               <Show when={expandVertex()}>
-                <Icon height={20} width={20} icon="icon-park-outline:plus" class="cursor:pointer " style={{ color: "green" }} onClick={() => addNewRow(props.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, props.isRealTime ?? false)} />
+                <Icon class="cursor:pointer " height={20} icon="icon-park-outline:plus" onClick={() => addNewRow(props.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, props.isRealTime ?? false)} style={{ color: "green" }} width={20} />
               </Show>
             </div>
             {/*<Show when={!disabled}>*/}
@@ -287,14 +288,14 @@ export function TableInputField(
             <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
                 component={"DynamicTable"}
+                data={p.joinVertex}
+                disabled={disabled()}
+                isRealTime={props.isRealTime}
+                isTableInside={false}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={expandVertex()!}
-                isTableInside={false}
-                data={p.joinVertex}
                 setValue={props.setValue}
-                disabled={disabled()}
                 txnId={props.txnId}
-                isRealTime={props.isRealTime}
               />
             </td>
           </tr>
@@ -331,7 +332,7 @@ export function TableInputField(
           <table class="border-collapse:collapse font-size:0.9em b:none box-shadow:0|0|20px|rgba(0,0,0,0.15) border-radius:0.4rem" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
             <Show when={sortedVertexes().length}>
               <thead>
-                <tr style={{ width: "max-content" }} class="background-color:#37c   height:35px color:#ffffff text-align:center ">
+                <tr class="background-color:#37c   height:35px color:#ffffff text-align:center " style={{ width: "max-content" }}>
                   <td class={"font-weight:medium p:0px|10px color:#ffffff text-align:left align-items:center align-content:center"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
@@ -358,7 +359,7 @@ export function TableInputField(
               <For each={sortedVertexes()}>
                 {(vertex, index) => (
                   <RepeaterVertexContext.Provider value={[vertex, ...useContext(RepeaterVertexContext)]}>
-                    <SortableRow joinVertex={vertex} index={index()} />
+                    <SortableRow index={index()} joinVertex={vertex} />
                   </RepeaterVertexContext.Provider>
                 )}
               </For>
@@ -388,13 +389,13 @@ const getComponentClass = (component: string) => {
   }
 };
 
-const getBackgroundColor = (index: number, dragFromIndex: number | null, dragToIndex: number | null) => {
+const getBackgroundColor = (index: number, dragFromIndex: null | number, dragToIndex: null | number) => {
   if (dragFromIndex === index) return "#e0e0e0";
   if (dragToIndex === index) return "#f0f0f0";
   return "white";
 };
 
-const getBorder = (index: number, dragToIndex: number | null) => {
+const getBorder = (index: number, dragToIndex: null | number) => {
   if (dragToIndex === index) return "2px solid green";
   return "1px solid #ddd";
 };

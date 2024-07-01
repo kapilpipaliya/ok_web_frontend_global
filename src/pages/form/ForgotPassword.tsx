@@ -1,11 +1,12 @@
-import { createSignal, Match, Show, Switch } from "solid-js";
-import { A } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
 import { Icon } from "@iconify-icon/solid";
+import { A } from "@solidjs/router";
+import { Match, Show, Switch, createSignal } from "solid-js";
+
 import logo from "~/assets/graphics/logo.png";
-import {sendEmail} from "~/server/sendEmail";
-import { validatePassword } from "~/lib/validations";
+import { useToast } from "~/components/Toast";
 import "~/css/base.css";
+import { validatePassword } from "~/lib/validations";
+import {sendEmail} from "~/server/sendEmail";
 export function ForgotPassword() {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
@@ -60,22 +61,22 @@ export function ForgotPassword() {
     <div
       class="@fade|.5s"
       style={{
-        flex: "auto",
-        "background-size": "cover",
+        "align-items": "center",
+        "background-color": "rgb(239,235,233)",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-size": "cover",
         display: "flex",
-        "background-color": "rgb(239,235,233)",
+        flex: "auto",
         "flex-direction": "column",
-        "align-items": "center",
-        "justify-content": "center",
         height: "100vh",
+        "justify-content": "center",
       }}
     >
       <img
-        src={logo}
         alt="logo"
         class="h:70px mb:100px"
+        src={logo}
         style={{ "justify-self": "center" }}
       />
       <Switch>
@@ -90,10 +91,10 @@ export function ForgotPassword() {
               class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
               onSubmit={handleEmailSubmit}
               style={{
+                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
                 display: "grid",
                 "max-width": "600px",
                 padding: "20px 30px",
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
               }}
             >
               <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
@@ -105,38 +106,38 @@ export function ForgotPassword() {
               </div>
               <div style={{ margin: "10px 0" }}>
                 <label
-                  for="username"
                   class="f:14"
+                  for="username"
                   style={{ display: "block", "margin-bottom": "5px" }}
                 >
                   Email Address
                 </label>
                 <input
                   name="email"
-                  type="text"
-                  value={username()}
                   onInput={(e) => setUsername(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Your email"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type="text"
+                  value={username()}
                 />
               </div>
               <button
-                type="submit"
                 style={{
-                  width: "100%",
-                  padding: "10px",
                   background: "rgb(226,65,74)",
-                  color: "white",
                   border: "none",
                   "border-radius": "4px",
+                  color: "white",
                   cursor: "pointer",
+                  padding: "10px",
+                  width: "100%",
                 }}
+                type="submit"
               >
                 Confirm
               </button>
@@ -155,10 +156,10 @@ export function ForgotPassword() {
               class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw@<md w:40vw@lg w:28vw@>xl"
               onSubmit={handleOtpSubmit}
               style={{
+                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
                 display: "grid",
                 "max-width": "600px",
                 padding: "20px 30px",
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
               }}
             >
               <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
@@ -170,37 +171,37 @@ export function ForgotPassword() {
               </div>
               <div style={{ margin: "10px 0" }}>
                 <label
-                  for="username"
                   class="f:14"
+                  for="username"
                   style={{ display: "block", "margin-bottom": "5px" }}
                 >
                   One Time Password (OTP)
                 </label>
                 <input
                   maxlength={6}
-                  value={otp()}
                   onInput={(e) => setOtp(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Enter 6 digit code"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  value={otp()}
                 />
               </div>
               <button
-                type="submit"
                 style={{
-                  width: "100%",
-                  padding: "10px",
                   background: "rgb(226,65,74)",
-                  color: "white",
                   border: "none",
                   "border-radius": "4px",
+                  color: "white",
                   cursor: "pointer",
+                  padding: "10px",
+                  width: "100%",
                 }}
+                type="submit"
               >
                 Submit
               </button>
@@ -219,10 +220,10 @@ export function ForgotPassword() {
               class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
               onSubmit={handlePasswordResetSubmit}
               style={{
+                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
                 display: "grid",
                 "max-width": "600px",
                 padding: "20px 30px",
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
               }}
             >
               <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
@@ -233,80 +234,80 @@ export function ForgotPassword() {
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>
                 <label
-                  for="username"
                   class="f:14"
+                  for="username"
                   style={{ display: "block", "margin-bottom": "5px" }}
                 >
                   New Password
                 </label>
                 <input
-                  type={`${showNewPassword() ? "text" : "password"}`}
-                  value={newPassword()}
                   onInput={(e) => setNewPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="New Password"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type={`${showNewPassword() ? "text" : "password"}`}
+                  value={newPassword()}
                 />
                 <Icon
-                  onClick={() => setNewShowPassword(!showNewPassword())}
-                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
+                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   icon={`${
                     showNewPassword()
                       ? "iconamoon:eye-light"
                       : "iconamoon:eye-off"
                   }`}
+                  onClick={() => setNewShowPassword(!showNewPassword())}
                 />
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>
                 <label
-                  for="username"
                   class="f:14"
+                  for="username"
                   style={{ display: "block", "margin-bottom": "5px" }}
                 >
                   Confirm Password
                 </label>
                 <input
-                  type={`${showConfirmPassword() ? "text" : "password"}`}
-                  value={confirmPassword()}
                   onInput={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Confirm Password"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type={`${showConfirmPassword() ? "text" : "password"}`}
+                  value={confirmPassword()}
                 />
                 <Icon
-                  onClick={() => setConfirmShowPassword(!showConfirmPassword())}
-                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
+                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   icon={`${
                     showConfirmPassword()
                       ? "iconamoon:eye-light"
                       : "iconamoon:eye-off"
                   }`}
+                  onClick={() => setConfirmShowPassword(!showConfirmPassword())}
                 />
               </div>
 
               <button
-                type="submit"
                 style={{
-                  width: "100%",
-                  padding: "10px",
                   background: "rgb(226,65,74)",
-                  color: "white",
                   border: "none",
                   "border-radius": "4px",
+                  color: "white",
                   cursor: "pointer",
+                  padding: "10px",
+                  width: "100%",
                 }}
+                type="submit"
               >
                 Confirm
               </button>

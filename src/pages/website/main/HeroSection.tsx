@@ -13,39 +13,39 @@ export function HeroSection() {
 
         <div class="iconRow mt-2 mb-2">
           <IconCard
-            icon={"fluent:form-48-regular"}
-            text="Contact"
-            subtext="Form"
             altText="Contact Form Icon"
-          />
-          <IconCard
-            icon={"hugeicons:mail-open-01"}
-            text="Sign Up"
+            icon={"fluent:form-48-regular"}
             subtext="Form"
+            text="Contact"
+          />
+          <IconCard
             altText="Sign Up Form Icon"
+            icon={"hugeicons:mail-open-01"}
+            subtext="Form"
+            text="Sign Up"
           />
           <IconCard
-            icon={"iconoir:multiple-pages"}
-            text="50+"
-            subtext="Templates"
             altText="Templates Icon"
+            icon={"iconoir:multiple-pages"}
+            subtext="Templates"
+            text="50+"
           />
           <IconCard
-            icon={"ant-design:edit-twotone"}
-            text="40+"
-            subtext="Input Style"
             altText="Input Style Icon"
+            icon={"ant-design:edit-twotone"}
+            subtext="Input Style"
+            text="40+"
           />
         </div>
         <div class="heroCTA mt-5 align-item-center">
           <button
-            onClick={() => navigate("/pricing")}
-            class="btn-mid-icon-filled bg-pink cursor:pointer"
             aria-label="Get Easy Form Forge"
+            class="btn-mid-icon-filled bg-pink cursor:pointer"
+            onClick={() => navigate("/pricing")}
           >
             Get Easy Form Forge
           </button>
-          <a class="pb-05 btn-underline h3" href="#" aria-label="Explore Features">
+          <a aria-label="Explore Features" class="pb-05 btn-underline h3" href="#">
             Explore Features <i class="fa-solid fa-arrow-right"/>
           </a>
         </div>
@@ -56,22 +56,22 @@ export function HeroSection() {
 
 
 export const IconCard = (props: Readonly<{
-  icon: any;
-  text: string;
-  subtext: string;
   altText: string;
+  icon: any;
+  subtext: string;
+  text: string;
 }>) => {
   return (
     <div class="iconcard">
       <div
         class="iconBackground"
         style={{
+          "align-items": "center",
           display: "flex",
           "justify-content": "center",
-          "align-items": "center",
         }}
       >
-        <Icon icon={props.icon} height={40} width={40} aria-label={props.altText} />
+        <Icon aria-label={props.altText} height={40} icon={props.icon} width={40} />
       </div>
       <p class="pt-2">
         {props.text} <br /> {props.subtext}

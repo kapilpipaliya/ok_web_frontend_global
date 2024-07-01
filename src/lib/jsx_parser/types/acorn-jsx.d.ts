@@ -1,30 +1,30 @@
-/* eslint-disable no-use-before-define */
+ 
 declare module "acorn-jsx" {
   export interface BaseExpression {
     start: number;
   }
 
   export interface JSXAttribute extends BaseExpression {
-    type: "JSXAttribute";
     elements?: Expression[];
-    expression?: null | Expression;
+    expression?: Expression | null;
     name: { name: string };
+    type: "JSXAttribute";
     value: Expression;
   }
 
   export interface JSXAttributeExpression extends BaseExpression {
-    type: "JSXAttributeExpression";
     argument?: Expression;
+    type: "JSXAttributeExpression";
   }
 
   export interface ArrowFunctionExpression extends BaseExpression {
-    type: "ArrowFunctionExpression";
-    async: boolean;
-    generator: boolean;
-    expression: true;
     argument?: Expression;
+    async: boolean;
     body: Expression;
+    expression: true;
+    generator: boolean;
     params: Identifier[];
+    type: "ArrowFunctionExpression";
   }
 
   export interface JSXFragment {
@@ -40,31 +40,31 @@ declare module "acorn-jsx" {
   }
 
   export interface JSXElement extends BaseExpression {
-    type: "JSXElement";
     children: JSXElement[];
-    openingElement: OpeningElement;
     name: JSXIdentifier | JSXMemberExpression;
+    openingElement: OpeningElement;
+    type: "JSXElement";
   }
 
   export interface JSXExpressionContainer extends BaseExpression {
-    type: "JSXExpressionContainer";
     expression: Expression;
+    type: "JSXExpressionContainer";
   }
 
   export interface JSXIdentifier extends BaseExpression {
-    type: "JSXIdentifier";
     name: string;
+    type: "JSXIdentifier";
   }
 
   export interface JSXMemberExpression extends BaseExpression {
-    type: "JSXMemberExpression";
     object: JSXIdentifier | JSXMemberExpression;
     property: JSXIdentifier | JSXMemberExpression;
+    type: "JSXMemberExpression";
   }
 
   export interface JSXSpreadAttribute extends BaseExpression {
-    type: "JSXSpreadAttribute";
     argument: Identifier;
+    type: "JSXSpreadAttribute";
   }
 
   export interface JSXText extends BaseExpression {
@@ -73,38 +73,38 @@ declare module "acorn-jsx" {
   }
 
   export interface ArrayExpression extends BaseExpression {
-    type: "ArrayExpression";
     elements: Expression[];
+    type: "ArrayExpression";
   }
 
   export interface BinaryExpression extends BaseExpression {
-    type: "BinaryExpression";
     left: Expression;
     operator: string;
     right: Expression;
+    type: "BinaryExpression";
   }
 
   export interface CallExpression extends BaseExpression {
-    type: "CallExpression";
     arguments: Expression[];
     callee: Expression;
+    type: "CallExpression";
   }
 
   export interface ConditionalExpression extends BaseExpression {
-    type: "ConditionalExpression";
     alternate: Expression;
     consequent: Expression;
     test: Expression;
+    type: "ConditionalExpression";
   }
 
   export interface ExpressionStatement extends BaseExpression {
-    type: "ExpressionStatement";
     expression: Expression;
+    type: "ExpressionStatement";
   }
 
   export interface Identifier extends BaseExpression {
-    type: "Identifier";
     name: string;
+    type: "Identifier";
   }
 
   export interface Literal extends BaseExpression {
@@ -113,29 +113,29 @@ declare module "acorn-jsx" {
   }
 
   export interface LogicalExpression extends BaseExpression {
-    type: "LogicalExpression";
     left: Expression;
     operator: string;
     right: Expression;
+    type: "LogicalExpression";
   }
 
   export interface MemberExpression extends BaseExpression {
-    type: "MemberExpression";
     computed: boolean;
     name?: string;
     object: Literal | MemberExpression;
     property?: MemberExpression;
     raw?: string;
+    type: "MemberExpression";
   }
 
   export interface ObjectExpression extends BaseExpression {
-    type: "ObjectExpression";
     properties: [
       {
         key: { name?: string; value?: string };
         value: Expression;
       },
     ];
+    type: "ObjectExpression";
   }
 
   export interface TemplateElement extends BaseExpression {
@@ -144,39 +144,39 @@ declare module "acorn-jsx" {
   }
 
   export interface TemplateLiteral extends BaseExpression {
-    type: "TemplateLiteral";
     expressions: Expression[];
     quasis: Expression[];
+    type: "TemplateLiteral";
   }
 
   export interface UnaryExpression extends BaseExpression {
-    type: "UnaryExpression";
-    operator: string;
     argument: { value: any };
+    operator: string;
+    type: "UnaryExpression";
   }
 
   export type Expression =
-    | JSXAttribute
-    | JSXAttributeExpression
-    | JSXElement
-    | JSXExpressionContainer
-    | JSXSpreadAttribute
-    | JSXFragment
-    | JSXText
     | ArrayExpression
+    | ArrowFunctionExpression
     | BinaryExpression
     | CallExpression
     | ConditionalExpression
     | ExpressionStatement
     | Identifier
+    | JSXAttribute
+    | JSXAttributeExpression
+    | JSXElement
+    | JSXExpressionContainer
+    | JSXFragment
+    | JSXSpreadAttribute
+    | JSXText
     | Literal
     | LogicalExpression
     | MemberExpression
     | ObjectExpression
     | TemplateElement
     | TemplateLiteral
-    | UnaryExpression
-    | ArrowFunctionExpression;
+    | UnaryExpression;
 
   interface PluginOptions {
     allowNamespacedObjects?: boolean;
@@ -186,4 +186,4 @@ declare module "acorn-jsx" {
 
   export default function (options?: PluginOptions): any;
 }
-/* eslint-enable no-use-before-define */
+ 

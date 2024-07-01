@@ -1,7 +1,8 @@
+import { klona } from "klona";
 import { describe, expect, test } from "vitest";
+
 import { graph } from "../../graph";
 import { getNewGraphId, transactions } from "../../transaction";
-import { klona } from "klona";
 import {
   addNewEdge,
   deleteEdge,

@@ -1,9 +1,11 @@
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
-import { getParentVertex } from "~/lib/graph/get/sync/traverse";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+
 import { mergeVertexProperties } from "../graph/mutate/vertex";
 
 export async function handleComponentDrag(

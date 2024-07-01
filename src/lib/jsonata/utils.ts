@@ -10,14 +10,14 @@
  * @returns {boolean} True if n is a finite number
  */
 export function isNumeric(n) {
-  var isNum = false;
+  let isNum = false;
   if (typeof n === "number") {
     isNum = !isNaN(n);
     if (isNum && !isFinite(n)) {
       throw {
         code: "D1001",
-        value: n,
         stack: new Error().stack,
+        value: n,
       };
     }
   }
@@ -30,7 +30,7 @@ export function isNumeric(n) {
  * @returns {boolean} True if arg is an array of strings
  */
 export function isArrayOfStrings(arg) {
-  var result = false;
+  let result = false;
   /* istanbul ignore else */
   if (Array.isArray(arg)) {
     result = arg.filter((item) => typeof item !== "string").length === 0;
@@ -44,7 +44,7 @@ export function isArrayOfStrings(arg) {
  * @returns {boolean} True if arg is an array of numbers
  */
 export function isArrayOfNumbers(arg) {
-  var result = false;
+  let result = false;
   if (Array.isArray(arg)) {
     result = arg.filter((item) => !isNumeric(item)).length === 0;
   }
@@ -56,7 +56,7 @@ export function isArrayOfNumbers(arg) {
  * @returns {Array} - empty sequence
  */
 export function createSequence() {
-  var sequence = [];
+  const sequence = [];
   sequence.sequence = true;
   if (arguments.length === 1) {
     sequence.push(arguments[0]);
@@ -91,7 +91,7 @@ export function isFunction(arg) {
  * @returns {*} - the arity
  */
 export function getFunctionArity(func) {
-  var arity =
+  const arity =
     typeof func.arity === "number"
       ? func.arity
       : typeof func.implementation === "function"
@@ -112,7 +112,7 @@ export function isLambda(arg) {
 }
 
 // istanbul ignore next
-var iteratorSymbol =
+const iteratorSymbol =
   (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
 
 /**
@@ -161,8 +161,8 @@ export function isDeepEqual(lhs, rhs) {
     }
     // both objects
     // must have the same set of keys (in any order)
-    var lkeys = Object.getOwnPropertyNames(lhs);
-    var rkeys = Object.getOwnPropertyNames(rhs);
+    let lkeys = Object.getOwnPropertyNames(lhs);
+    let rkeys = Object.getOwnPropertyNames(rhs);
     if (lkeys.length !== rkeys.length) {
       return false;
     }
@@ -175,7 +175,7 @@ export function isDeepEqual(lhs, rhs) {
     }
     // must have the same values
     for (ii = 0; ii < lkeys.length; ii++) {
-      var key = lkeys[ii];
+      const key = lkeys[ii];
       if (!isDeepEqual(lhs[key], rhs[key])) {
         return false;
       }
@@ -204,7 +204,7 @@ export function isPromise(arg) {
  * @returns {Array} - the array of characters
  */
 export function stringToArray(str) {
-  var arr = [];
+  const arr = [];
   for (const char of str) {
     arr.push(char);
   }

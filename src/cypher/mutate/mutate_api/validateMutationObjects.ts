@@ -1,6 +1,7 @@
 import { isObject } from "~/lib/utils";
-import { isProperNodeFormat } from "./isProperNodeFormat";
+
 import { isProperEdgeFormat } from "./isProperEdgeFormat";
+import { isProperNodeFormat } from "./isProperNodeFormat";
 
 
 export function validateMutationObjects(mutationObjects: any[]) {

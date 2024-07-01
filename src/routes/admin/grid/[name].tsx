@@ -1,13 +1,13 @@
-import { UserDashBoardGrid } from "~/pages/UserDashBoardGrid";
 import {Breadcrumb} from "~/components/Breadcrumb";
 import { breadcrumbData } from "~/lib/constants";
+import { UserDashBoardGrid } from "~/pages/UserDashBoardGrid";
 
 export default function tableDashboard() {
   return (
     <>
       <Breadcrumb
-        title="Dashboard"
         breadcrumb={[...breadcrumbData, { name: "Dashboard" }]}
+        title="Dashboard"
       />
       <UserDashBoardGrid />
     </>

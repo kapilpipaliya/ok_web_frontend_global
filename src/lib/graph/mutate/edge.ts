@@ -1,8 +1,10 @@
+import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { batch } from "solid-js";
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
-import { pipe } from "@mobily/ts-belt";
+import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
+
 import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
+
 import { transactionDetailAdd } from "../transaction";
 
 export function newEdge(
@@ -21,11 +23,11 @@ export function newEdge(
       `edge endId should not be empty`,
     );
   return {
-    id: edgeId,
-    T: type,
+    E: endVertexId,
     P: properties,
     S: startVertexId,
-    E: endVertexId,
+    T: type,
+    id: edgeId,
   };
 }
 
@@ -35,7 +37,7 @@ export function addNewEdge(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
-  error: string | boolean;
+  error: boolean | string;
   txnDetailIndex?: number;
 } {
   if (!edge.id) {
@@ -96,7 +98,7 @@ export function replaceEdgeProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: {},
-): { error: string | boolean; txnDetailIndex?: number } {
+): { error: boolean | string; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -105,8 +107,8 @@ export function replaceEdgeProperties(
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
     data,
-    replaceEdge: () => data,
     redo: () => replaceEdgeProperties(0, edgeId, graph, setGraph, data.P),
+    replaceEdge: () => data,
     revert: () =>
       replaceEdgeProperties(0, edgeId, graph, setGraph, originalProperties),
   }, graph);
@@ -123,7 +125,7 @@ export function replaceEdgeStart(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newStartVertexId: Id,
-): { error: string | boolean; txnDetailIndex?: number } {
+): { error: boolean | string; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -150,8 +152,8 @@ export function replaceEdgeStart(
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
     data,
-    replaceEdgeStart: () => data,
     redo: () => replaceEdgeStart(0, edgeId, graph, setGraph, data.S),
+    replaceEdgeStart: () => data,
     revert: () =>
       replaceEdgeStart(0, edgeId, graph, setGraph, oldStartVertexId),
   }, graph);
@@ -167,7 +169,7 @@ export function replaceEdgeEnd(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newEndVertexId: Id,
-): { error: string | boolean; txnDetailIndex?: number } {
+): { error: boolean | string; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -194,8 +196,8 @@ export function replaceEdgeEnd(
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
     data,
-    replaceEdgeEnd: () => data,
     redo: () => replaceEdgeEnd(0, edgeId, graph, setGraph, data.E),
+    replaceEdgeEnd: () => data,
     revert: () => replaceEdgeEnd(0, edgeId, graph, setGraph, oldEndVertexId),
   }, graph);
   return {
@@ -210,7 +212,7 @@ export function deleteEdge(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
-  error: string | boolean;
+  error: boolean | string;
   txnDetailIndex?: number;
 } {
   if (!graph.edges[edgeId]) {

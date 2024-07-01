@@ -1,9 +1,11 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import {
   getChildVertexes,
   getSelectionOptions,
 } from "./traverse";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(

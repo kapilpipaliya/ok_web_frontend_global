@@ -1,17 +1,19 @@
 // JavaScript Expression Parser
 import jsep from "jsep";
 // https://github.com/donmccurdy/expression-eval
-//import { eval as eval1} from 'expression-eval';
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { path } from "rambda";
-import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
-import { jsonata } from "~/lib/jsonata/jsonata";
-import { isObject } from "~/lib/utils";
-import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
+
 import {evalGetChildren} from "~/cypher/get/evaluate/evalGetChildren";
 import {evalGetParents} from "~/cypher/get/evaluate/evalGetParents";
 import {evalGlobalColl} from "~/cypher/get/evaluate/evalGlobalColl";
 import {evalVertexById} from "~/cypher/get/evaluate/evalVertexById";
+import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
+//import { eval as eval1} from 'expression-eval';
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { jsonata } from "~/lib/jsonata/jsonata";
+import { isObject } from "~/lib/utils";
+
+import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -20,61 +22,61 @@ import {evalVertexById} from "~/cypher/get/evaluate/evalVertexById";
 
 // Default operator precedence from https://github.com/EricSmekens/jsep/blob/master/src/jsep.js#L55
 const DEFAULT_PRECEDENCE = {
-  "||": 1,
-  "&&": 2,
-  "|": 3,
-  "^": 4,
-  "&": 5,
-  "==": 6,
   "!=": 6,
-  "===": 6,
   "!==": 6,
+  "%": 10,
+  "&": 5,
+  "&&": 2,
+  "*": 10,
+  "+": 9,
+  "/": 10,
   "<": 7,
-  ">": 7,
-  "<=": 7,
-  ">=": 7,
   "<<": 8,
+  "<=": 7,
+  "==": 6,
+  "===": 6,
+  ">": 7,
+  ">=": 7,
   ">>": 8,
   ">>>": 8,
-  "+": 9,
+  "^": 4,
+  "|": 3,
+  "||": 1,
   "-": 9,
-  "*": 10,
-  "/": 10,
-  "%": 10,
 };
 
 export const binops = {
-  "+": (a, b) => a + b,
-  "-": (a, b) => a - b,
-  "*": (a, b) => a * b,
-  "/": (a, b) => a / b,
-  "%": (a, b) => a % b,
-  "||": (a, b) => a || b,
-  "&&": (a, b) => a && b,
-  "|": (a, b) => a | b,
-  "^": (a, b) => a ^ b,
-  "&": (a, b) => a & b,
-  "==": (a, b) => a === b, // jshint ignore:line
   "!=": (a, b) => a !== b, // jshint ignore:line
-  "===": (a, b) => a === b,
   "!==": (a, b) => a !== b,
+  "%": (a, b) => a % b,
+  "&": (a, b) => a & b,
+  "&&": (a, b) => a && b,
+  "*": (a, b) => a * b,
+  "+": (a, b) => a + b,
+  "/": (a, b) => a / b,
   "<": (a, b) => a < b,
-  ">": (a, b) => a > b,
-  "<=": (a, b) => a <= b,
-  ">=": (a, b) => a >= b,
   "<<": (a, b) => a << b,
+  "<=": (a, b) => a <= b,
+  "==": (a, b) => a === b, // jshint ignore:line
+  "===": (a, b) => a === b,
+  ">": (a, b) => a > b,
+  ">=": (a, b) => a >= b,
   ">>": (a, b) => a >> b,
   ">>>": (a, b) => a >>> b,
+  "^": (a, b) => a ^ b,
+  "|": (a, b) => a | b,
+  "||": (a, b) => a || b,
+  "-": (a, b) => a - b,
 } as { [key: string]: (v1: any, v2: any, context: object) => any };
 
 export const unops = {
-  "-": (a) => -a,
+  "!": (a) => !a,
   "+": (a) => +a,
   "~": (a) => ~a,
-  "!": (a) => !a,
+  "-": (a) => -a,
 } as { [key: string]: (v: any, context: any) => any };
 
-declare type operand = number | string | any;
+declare type operand = any | number | string;
 declare type unaryCallback = (a: operand, context: object) => operand;
 declare type binaryCallback = (
   a: operand,
@@ -281,13 +283,13 @@ export async function evalAsync(
 }
 
 export function compile(
-  expression: string | jsep.Expression,
+  expression: jsep.Expression | string,
 ): (context: object) => any {
   return evaluate.bind(null, jsep(expression));
 }
 
 export function compileAsync(
-  expression: string | jsep.Expression,
+  expression: jsep.Expression | string,
 ): (context: object) => Promise<any> {
   return evalAsync.bind(null, jsep(expression));
 }
@@ -432,7 +434,7 @@ addBinaryOp(
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {
-      const { type, filter, isMultiple } = calculateFilter(
+      const { filter, isMultiple, type } = calculateFilter(
         edgeType.replace("$0", currentVertex.L[0]),
       );
 
@@ -477,7 +479,7 @@ addUnaryOp("json:", (string) => {
 addUnaryOp(
   "g:",
   (edgeType, context) => {
-    const { type, filter, isMultiple } = calculateFilter(edgeType);
+    const { filter, isMultiple, type } = calculateFilter(edgeType);
 
     if (filter) {
       const vertexIds = findVertexIdsByLabel(context.graph, type);

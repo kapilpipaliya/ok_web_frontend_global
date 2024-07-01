@@ -1,12 +1,14 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+
 import { type Session, int } from "neo4j-driver";
-import { deleteVertexMGCall } from "~/cypher/mutate/deleteVertex";
-import { findVertexesMGCall } from "~/cypher/get/findVertex";
-import { newRowMGCall } from "~/cypher/mutate/newRow";
-import { getSubDomain } from "~/server/getSubDomain";
+
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
-import { getHttpsSession } from "~/server/getHttpsSession";
+import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { deleteVertexMGCall } from "~/cypher/mutate/deleteVertex";
+import { newRowMGCall } from "~/cypher/mutate/newRow";
+import { getHttpsSession } from "~/server/getHttpsSession";
+import { getSubDomain } from "~/server/getSubDomain";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -56,7 +58,7 @@ export async function POST({ request }: APIEvent) {
 }
 
 const profile = async (payload: any, session: Session, subdomain: string) => {
-  const { userId, username, email, profileImage, uId } = payload;
+  const { email, profileImage, uId, userId, username } = payload;
 
   // Ensure user exists
   const userExists = await session.run(
@@ -64,7 +66,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
     { uId },
   );
   if (userExists.records.length === 0) {
-    return { status: 404, error: "User not exists" };
+    return { error: "User not exists", status: 404 };
   }
 
   // Check if email and username already exists
@@ -72,25 +74,25 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
     email &&
     !(
       await findVertexesMGCall({
-        label: "User",
         attribute: "email",
+        label: "User",
         value: email,
       })
     ).error
   ) {
-    return { status: 500, error: "Email address already exists" };
+    return { error: "Email address already exists", status: 500 };
   }
   if (
     username &&
     !(
       await findVertexesMGCall({
-        label: "User",
         attribute: "username",
+        label: "User",
         value: username,
       })
     ).error
   ) {
-    return { status: 500, error: "Username already exists" };
+    return { error: "Username already exists", status: 500 };
   }
 
   // Update user profile
@@ -102,11 +104,11 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
   const result = await session.run(query, {
-    userId,
     email,
-    uId,
-    username,
     profileImage,
+    uId,
+    userId,
+    username,
   });
   const user = result.records[0]?.get("u");
 
@@ -114,11 +116,11 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
     await getDriverWithPort(user.properties.driverPort)
   ).session();
   await session2.run(query, {
-    userId,
     email,
-    uId,
-    username,
     profileImage,
+    uId,
+    userId,
+    username,
   });
 
   if (email) {
@@ -133,7 +135,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
 };
 
 const password = async (payload: any, session: Session) => {
-  const { currentPassword, username, newPassword } = payload;
+  const { currentPassword, newPassword, username } = payload;
 
   const findUserQuery =
     "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
@@ -148,8 +150,8 @@ const password = async (payload: any, session: Session) => {
   const query =
     "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
   const result = await session.run(query, {
-    username: username,
     password: newPassword,
+    username: username,
   });
   if (result.records.length === 0) {
     return { error: "Failed to update password" };
@@ -192,7 +194,7 @@ const supportTicket = async (
       // payload: { panel: 'supportTicket',action: 'delete',id }
       return await deleteTicket(payload, session, subdomain);
     default:
-      return { status: 400, error: "Invalid support ticket action" };
+      return { error: "Invalid support ticket action", status: 400 };
   }
 
   async function getTicket(payload: any, session: Session) {
@@ -213,14 +215,14 @@ const supportTicket = async (
   }
 
   async function createTicket(payload: any, session: Session) {
-    const { name, email, subject, message } = payload;
+    const { email, message, name, subject } = payload;
 
     const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) SET n.createdAt = localDateTime() RETURN n;`;
     await session.run(query, {
-      name: name,
       email: email,
-      subject: subject,
       message: message,
+      name: name,
+      subject: subject,
     });
     return {
       message: "Message sent successfully",
@@ -239,7 +241,7 @@ const supportTicket = async (
   }
 
   async function chat(payload: any, session: Session, subdomain: string) {
-    const { subAction, parentVertexId, newMessage } = payload;
+    const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
       case "send": {
         const data = await newRowMGCall(

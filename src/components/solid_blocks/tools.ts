@@ -1,16 +1,16 @@
 import {
   type Accessor,
+  type JSX,
+  type Setter,
   createEffect,
   createMemo,
   createSignal,
-  type JSX,
   onCleanup,
-  type Setter,
 } from "solid-js";
 
 export type WrappedElement<P> = (props: P) => JSX.Element;
 
-export function toStyleObject(style: string | JSX.CSSProperties) {
+export function toStyleObject(style: JSX.CSSProperties | string) {
   if (typeof style === "object") {
     return style;
   }
@@ -53,29 +53,29 @@ export type MediaQueryItem =
   | "all"
   | "print"
   | "screen"
-  | `(${"min-" | "max-" | ""}${
+  | `(${"" | "max-" | "min-"}${
       | "aspect-ratio"
       | "color"
       | "color-gamut"
       | "color-index"
       | "display-mode"
       | "grid"
-      | "inverted-colors"
       | "height"
+      | "inverted-colors"
       | "orientation"
       | "pointer"
+      | "resolution"
+      | "scan"
+      | "width"
       | `prefers-${
           | "color-scheme"
           | "contrast"
           | "reduced-motion"
-          | "reduced-transparency"}`
-      | "resolution"
-      | "scan"
-      | "width"}: ${string})`;
+          | "reduced-transparency"}`}: ${string})`;
 export type MediaQueryOperator = " and " | " not " | " only " | ", ";
 export type MediaQueryString =
-  | MediaQueryItem
-  | `${MediaQueryItem}${MediaQueryOperator}${MediaQueryItem}`;
+  | `${MediaQueryItem}${MediaQueryOperator}${MediaQueryItem}`
+  | MediaQueryItem;
 
 export function useMediaQuery(query: MediaQueryString): Accessor<boolean> {
   const matcher = window.matchMedia(query);
@@ -89,7 +89,7 @@ export function useMediaQuery(query: MediaQueryString): Accessor<boolean> {
 }
 
 function parseStorage<T extends any | string>(
-  data: string | null | undefined,
+  data: null | string | undefined,
   useJson: boolean,
 ): T | undefined {
   return useJson ? (data ? JSON.parse(data) : undefined) : data ?? undefined;
@@ -141,8 +141,8 @@ export function useDarkMode(localStorageKey = "COLOR_SCHEME") {
 export type NodeName = string;
 
 export function getElements(
-  children: JSX.Element | ((...args: any[]) => JSX.Element),
-  filter?: NodeName | ((node: HTMLElement) => boolean),
+  children: ((...args: any[]) => JSX.Element) | JSX.Element,
+  filter?: ((node: HTMLElement) => boolean) | NodeName,
   /** if the children contains a callback, you may add an array of props */
   props: any = [],
   /** you can add prepended results if you want */
@@ -171,7 +171,7 @@ export function getElements(
 export function runEvent<
   E extends Event,
   T extends HTMLElement,
-  EV = E & { currentTarget: T; target: Element },
+  EV = { currentTarget: T; target: Element } & E,
   EU = JSX.EventHandlerUnion<T, E>,
 >(ev: EV, handler?: EU): void {
   if (Array.isArray(handler)) {

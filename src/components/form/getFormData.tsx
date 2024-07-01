@@ -1,9 +1,10 @@
+import type {ServerResult} from "~/cypher/get/ServerResult";
 import type { Id } from "~/lib/graph/graph";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import type {ServerResult} from "~/cypher/get/ServerResult";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
 export const getFormData = async (formId: string, id: Id): Promise<{error: string, graph?: ServerResult['graph']}> => {
   try {

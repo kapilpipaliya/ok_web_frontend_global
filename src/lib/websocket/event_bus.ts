@@ -9,23 +9,9 @@ export class EventBus {
     this._ctx = ctx;
   }
 
-  on(event: string, cb: Function) {
-    if (this._events[event] == null) {
-      this._events[event] = [];
-    }
-    this._events[event].push(cb);
-    return this;
-  }
-
-  off(event: string, cb: Function) {
-    if (this._events[event]) {
-      if (cb) {
-        const index = this._events[event].indexOf(cb);
-        this._events[event].splice(index, 1);
-      } else {
-        this._events[event] = [];
-      }
-    }
+  destroy() {
+    this._events = null;
+    this._ctx = null;
   }
 
   emit(event: string, ...args) {
@@ -56,8 +42,22 @@ export class EventBus {
     });
   }
 
-  destroy() {
-    this._events = null;
-    this._ctx = null;
+  off(event: string, cb: Function) {
+    if (this._events[event]) {
+      if (cb) {
+        const index = this._events[event].indexOf(cb);
+        this._events[event].splice(index, 1);
+      } else {
+        this._events[event] = [];
+      }
+    }
+  }
+
+  on(event: string, cb: Function) {
+    if (this._events[event] == null) {
+      this._events[event] = [];
+    }
+    this._events[event].push(cb);
+    return this;
   }
 }

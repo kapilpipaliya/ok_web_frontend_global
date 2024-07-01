@@ -1,6 +1,7 @@
-import { createMiddleware } from "@solidjs/start/middleware";
-import { getHttpsSession } from "~/server/getHttpsSession";
 import { redirect } from "@solidjs/router";
+import { createMiddleware } from "@solidjs/start/middleware";
+
+import { getHttpsSession } from "~/server/getHttpsSession";
 export default createMiddleware({
   onRequest: [
     async (event) => {

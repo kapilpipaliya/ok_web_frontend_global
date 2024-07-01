@@ -1,10 +1,13 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "../websocket/setGraphData";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+
 import { FormMetaData } from "../formMetaData";
 import { FormMetaDataAuth } from "../formMetaDataAuth";
+import { setGraphData } from "../websocket/setGraphData";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,

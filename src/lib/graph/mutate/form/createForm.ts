@@ -1,14 +1,17 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type {
   GraphInterface,
   Vertex
 } from "~/lib/graph/graph";
+
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+
 import {
   commitTxn,
   getNewGraphId,
   getNewTxnId
 } from "../../transaction";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import type { SetStoreFunction, Store } from "solid-js/store";
 
 
 export function createForm(
@@ -20,7 +23,7 @@ export function createForm(
     [key: string]: any;
   }
 ): {
-  error: string | boolean;
+  error: boolean | string;
   vertex?: Vertex;
 } {
   if (!label) {

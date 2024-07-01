@@ -1,15 +1,16 @@
 import {
+  Show,
   createEffect,
   createSignal,
   onCleanup,
-  Show,
   useContext,
 } from "solid-js";
+
 import { GraphContext } from "~/lib/graph/graph";
 
 interface GraphViewProps {
-  nodes: any[];
   edges: any[];
+  nodes: any[];
 }
 
 export function GraphView() {
@@ -31,7 +32,7 @@ export function GraphView() {
       const orb = new Orb.Orb(container);
 
       // Initialize nodes and edges
-      orb.data.setup({ nodes: props.nodes, edges: props.edges });
+      orb.data.setup({ edges: props.edges, nodes: props.nodes });
       // orb.data.setup({ nodes, edges });
       // Render and recenter the view
       orb.view.render(() => {
@@ -51,13 +52,13 @@ export function GraphView() {
     return (
       <>
         <div
-          style="border: 1px solid #e0e0e0; width: 1200px; height: 600px;"
           ref={(el) => {
             setTimeout(() => mount(el), 0);
             onCleanup(() => {
               el.replaceChildren();
             });
           }}
+          style="border: 1px solid #e0e0e0; width: 1200px; height: 600px;"
         />
         <pre>{JSON.stringify(json())}</pre>
       </>
@@ -80,9 +81,9 @@ export function GraphView() {
           .filter(([_, edge]) => edge.T !== "MetaAttr")
           .map(([key, value]) => ({
             ...value,
-            type: value.T,
-            start: value.S,
             end: value.E,
+            start: value.S,
+            type: value.T,
           }))}
         nodes={Object.entries(graph.vertexes)
           .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")

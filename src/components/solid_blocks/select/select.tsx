@@ -1,13 +1,12 @@
 import { type JSX, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
-
 import "./select.css";
 
-export type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
+export type SelectProps = {
   label: JSX.Element;
   setValue?: (value: string) => void;
-};
+} & JSX.SelectHTMLAttributes<HTMLSelectElement>;
 
 export function Select(props: SelectProps) {
   const [local, fieldProps] = splitProps(props, [
@@ -19,8 +18,8 @@ export function Select(props: SelectProps) {
   ]);
   return (
     <label
-      classList={{ "sb-select": true, disabled: props.disabled }}
       aria-orientation={local["aria-orientation"]}
+      classList={{ disabled: props.disabled, "sb-select": true }}
     >
       {/* <span class="sb-select-label">{local.label}</span> */}
       <select

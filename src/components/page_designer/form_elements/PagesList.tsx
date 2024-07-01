@@ -1,22 +1,24 @@
+import { Icon } from "@iconify-icon/solid";
 import {
+  For,
   Match,
+  Switch,
   createEffect,
   createResource,
   createSignal,
   useContext,
-  For,
-  Switch,
 } from "solid-js";
+
+import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
+import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import { type NavItem, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { getTreeData, type NavItem } from "~/lib/graph/get/sync/traverse";
-import { Icon } from "@iconify-icon/solid";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import { PageItem } from "./PageItem";
+
 import { useDesignerLayoutStore } from "../LayoutContext";
+import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -30,15 +32,15 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   
   // Fetch data function
   async function fetchData(): Promise<{
-    graph?: any;
     data?: any;
     error?: string;
+    graph?: any;
   }> {
     try {
       const data = await getTreeDataMGCall({
         collection: paginationExpression({ coll: props.coll }),
       });
-      return { graph: data.graph, data: data };
+      return { data: data, graph: data.graph };
     } catch (error: any) {
       return { error: error.message };
     }
@@ -95,22 +97,22 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 style={{ color: "#9e9ea7" }}
               />
               <input
-                placeholder={`Search ${props.coll}...`}
-                type="search"
                 class="inputSearch f:14"
-                value={searchQuery()}
                 onInput={(e) => {
                   setSearchQuery(e.target.value);
                   updateFilteredData(); // Update filteredData when searchQuery changes
                 }}
+                placeholder={`Search ${props.coll}...`}
+                type="search"
+                value={searchQuery()}
               />
             </div>
           </nav>
           <div
             class="overflow:auto h:full grid"
             style={{
-              "scrollbar-width": "thin",
               "scrollbar-color": "lightgrey",
+              "scrollbar-width": "thin",
             }}
           >
             <For

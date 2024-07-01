@@ -1,20 +1,23 @@
-import { batch } from "solid-js";
-import { deleteEdge } from "~/lib/graph/mutate/edge";
-import type { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
-import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction } from "solid-js/store";
+
+import { batch } from "solid-js";
+
+import type { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
+
+import { deleteEdge } from "~/lib/graph/mutate/edge";
+import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
 
 export function setGraphData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   args: {
-    timestamp?: number;
-    vertexes: VertexMap;
-    vertexLabelIdMap?: { [key: string]: Id[]; };
-    edges: EdgeMap;
-    deleted_vertexes?: string[];
     deleted_edges?: string[];
+    deleted_vertexes?: string[];
+    edges: EdgeMap;
+    timestamp?: number;
+    vertexLabelIdMap?: { [key: string]: Id[]; };
+    vertexes: VertexMap;
   }
 ) {
   batch(() => {

@@ -1,9 +1,9 @@
 export function paginationExpression(params: {
  coll?: string;
- skip?: number;
- limit?: number;
- filter?: string;
  custom?: string;
+ filter?: string;
+ limit?: number;
+ skip?: number;
 }): string {
  if (params.custom) {
   return params.custom;

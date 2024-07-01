@@ -1,16 +1,19 @@
-import {
-  Switch,
-  Match
-} from "solid-js";
-import type { GraphInterface, Id } from "~/lib/graph/graph";
-import { Icon } from "@iconify-icon/solid";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { capitalizeFirstLetter } from "~/lib/utils";
 import type { ColumnDef } from "@tanstack/solid-table";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { Icon } from "@iconify-icon/solid";
+import {
+  Match,
+  Switch
+} from "solid-js";
+
 import type { IFormMetaData } from "~/lib/FormMetadataType";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
+
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
 import { getSelectValue } from "~/components/grid/getSelectValue";
 import { getTagValue } from "~/components/grid/getTagValue";
+import { capitalizeFirstLetter } from "~/lib/utils";
 
 export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, setDeleteRowId: (id: Id) => void, navigate: (path: string) => void, tableId: string) {
   const tableColumns = [] as ColumnDef<any>[];
@@ -29,8 +32,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
           >
             {getSelectValue({
               attribute: attribute,
-              info: info,
               graph: graph,
+              info: info,
               setGraph: setGraph,
             })}
           </Match>
@@ -40,8 +43,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
           >
             {getTagValue({
               attribute: attribute,
-              info: info,
               graph: graph,
+              info: info,
               setGraph: setGraph,
             })}
           </Match>
@@ -70,25 +73,23 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
   }
   tableColumns.push({
     accessorKey: "Actions",
-    header: "Actions",
-    footer: "",
     cell: (info) => {
       return (
         <Switch>
           <Match when={formNew.isInlineEditable}>
             <div class="flex gap:10px ai:center  jc:center cursor:pointer">
               <QuickEditModal
-                info={info}
                 graph={graph}
+                info={info}
                 setGraph={setGraph}
                 tableId={tableId} />
               <Icon
+                class="color:rgb(255,0,0)"
+                height={22}
+                icon="fluent:delete-12-regular"
                 onclick={() => {
                   setDeleteRowId(info.row.original.id);
                 }}
-                icon="fluent:delete-12-regular"
-                class="color:rgb(255,0,0)"
-                height={22}
                 width={22} />
             </div>
           </Match>
@@ -97,18 +98,18 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
             <div class="py:0.25rem">
               <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
                 <Icon
-                  onClick={() => navigate(`./${info.row.original.id}`)}
-                  height={21}
-                  width={21}
                   class={"color:#3477CC"}
-                  icon="fluent:edit-12-regular" />
+                  height={21}
+                  icon="fluent:edit-12-regular"
+                  onClick={() => navigate(`./${info.row.original.id}`)}
+                  width={21} />
                 <Icon
+                  class="color:rgb(255,0,0)"
+                  height={22}
+                  icon="fluent:delete-12-regular"
                   onclick={() => {
                     setDeleteRowId(info.row.original.id);
                   }}
-                  icon="fluent:delete-12-regular"
-                  class="color:rgb(255,0,0)"
-                  height={22}
                   width={22} />
               </div>
             </div>
@@ -116,6 +117,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
         </Switch>
       );
     },
+    footer: "",
+    header: "Actions",
   });
   return tableColumns;
 }

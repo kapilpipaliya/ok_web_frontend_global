@@ -1,8 +1,13 @@
-import type { Edge, Vertex } from "~/lib/graph/graph";
-import { evalAsync } from "~/lib/expression_eval";
-import jsep from "jsep";
-import type { ServerResult } from "./ServerResult";
 import type { TransactionPromise } from "neo4j-driver-core";
+
+import jsep from "jsep";
+
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
+import { evalAsync } from "~/lib/expression_eval";
+
+import type { ServerResult } from "./ServerResult";
+
 import { replaceExpressionToLabel } from "./replaceExpressionToLabel";
 
 
@@ -10,26 +15,26 @@ export async function getSelectionOptionsBase(
   vertex: Vertex[],
   collection: string,
   tx: TransactionPromise
-): Promise<Partial<ServerResult> & { error: boolean; }> {
+): Promise<{ error: boolean; } & Partial<ServerResult>> {
   const nodes: { [key: string]: Vertex; } = {};
   const relationships: { [key: string]: Edge; } = {};
   collection = await replaceExpressionToLabel(collection, vertex[0], tx);
 
   const value = await evalAsync(jsep(collection), {
-    vertexes: vertex,
     nodes,
     relationships,
-    tx
+    tx,
+    vertexes: vertex
   });
 
   if (value) {
     return {
       error: false,
-      result: value,
       graph: {
-        vertexes: nodes,
         edges: relationships,
+        vertexes: nodes,
       },
+      result: value,
     };
   }
   return { error: true };

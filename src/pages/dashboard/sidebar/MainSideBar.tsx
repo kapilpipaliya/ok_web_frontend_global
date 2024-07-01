@@ -1,13 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, For, type Setter, Show } from "solid-js";
+
 import logo from "~/assets/graphics/sidebarLogo.svg";
 
 type MainSideBarProps = {
   activeSection: Accessor<string>;
-  setActiveSection: Setter<string>;
-  navData: any;
-  mainIcon: any;
   isCollapsed: Accessor<boolean>;
+  mainIcon: any;
+  navData: any;
+  setActiveSection: Setter<string>;
   toggleCollapse: () => void;
 };
 
@@ -21,7 +22,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
     >
       <nav style="display: flex; margin-top: 1rem; padding-top: .5rem; flex-direction: column; flex: 1 1 0%; align-items: center;">
         <a href="/">
-          <img style="height: 35px; " src={logo} alt="logo" />
+          <img alt="logo" src={logo} style="height: 35px; " />
         </a>
         <div class="flex flex-direction:column gap:10 mt:20">
           <For each={props.navData}>
@@ -34,10 +35,10 @@ export const MainSideBar = (props: MainSideBarProps) => {
                       : ""
                   } gap:10 `}
                   href={navNode.P.url}
+                  onClick={() => props.setActiveSection(navNode.P.name)}
                   style={
                     "display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; "
                   }
-                  onClick={() => props.setActiveSection(navNode.P.name)}
                 >
                   <Icon
                     color={`${
@@ -45,8 +46,8 @@ export const MainSideBar = (props: MainSideBarProps) => {
                         ? "#3B82F6"
                         : "#4B5563"
                     }`}
-                    icon={props.mainIcon[navNode.P.url]}
                     height={24}
+                    icon={props.mainIcon[navNode.P.url]}
                     width={24}
                   />
                 </a>
@@ -54,19 +55,19 @@ export const MainSideBar = (props: MainSideBarProps) => {
             )}
           </For>
           <Icon
+            class="b:1px|solid|lightgrey abs bg:#f3f3f4 r:50% top:2px right:-13px p:3 cursor:pointer text:center"
             height={19}
-            width={19}
             icon={
               !props.isCollapsed()
                 ? "mingcute:arrows-left-line"
                 : "mingcute:arrows-right-line"
             }
+            onClick={props.toggleCollapse}
             style={{
               "box-shadow": "1px 0px 9px darkgrey",
               color: "rgb(161,161,169)",
             }}
-            class="b:1px|solid|lightgrey abs bg:#f3f3f4 r:50% top:2px right:-13px p:3 cursor:pointer text:center"
-            onClick={props.toggleCollapse}
+            width={19}
           />
         </div>
       </nav>

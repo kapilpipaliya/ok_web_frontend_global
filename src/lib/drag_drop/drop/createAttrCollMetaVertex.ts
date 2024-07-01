@@ -3,11 +3,11 @@ import {getNewGraphId} from "~/lib/graph/transaction";
 
 export function createAttrCollMetaVertex() {
   return newVertex(getNewGraphId(), [], {
-    name: "coll",
-    displayName: "Collection",
-    component: "SelectBox",
-
     collection: "g:'Coll'",
+    component: "SelectBox",
+    displayName: "Collection",
+
+    name: "coll",
     parentLabel: "Coll",
 
   });

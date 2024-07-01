@@ -1,9 +1,11 @@
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+
 import type { PageLayoutObject } from "../../LayoutContext";
-import type { SetStoreFunction, Store } from "solid-js/store";
 
 export function addStepBefore(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, toVertex: Vertex) {
   // add form component

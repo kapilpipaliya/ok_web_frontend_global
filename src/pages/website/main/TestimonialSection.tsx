@@ -4,33 +4,33 @@ import { For } from "solid-js";
 export function TestimonialSection() {
   const testimonials = [
     {
-      rating: 5,
-      title: "Great form builder",
       feedback:
         "EasyFormForge works great. Designing a form is really easy, the form works well, and the formatting of submission emails looks great as well. Really great product.",
       name: "Tom Wilson",
       profession: "Primary Teacher",
+      rating: 5,
+      title: "Great form builder",
     },
     {
-      rating: 5,
-      title: "User-friendly and efficient",
       feedback:
         "The drag-and-drop feature is very intuitive. I was able to create a form in minutes without any coding knowledge. Highly recommend EasyFormForge!",
       name: "Sarah Johnson",
       profession: "Web Developer",
+      rating: 5,
+      title: "User-friendly and efficient",
     },
     {
-      rating: 5,
-      title: "Excellent customer support",
       feedback:
         "The customer support team is very responsive and helpful. They resolved my issue within a few hours. Great service!",
       name: "Emily Davis",
       profession: "Freelancer",
+      rating: 5,
+      title: "Excellent customer support",
     },
   ];
 
   return (
-    <section class="testimonial" aria-labelledby="testimonial-heading">
+    <section aria-labelledby="testimonial-heading" class="testimonial">
       <div class="testimonialinner container pt-100 pb-5">
         <h2 id="testimonial-heading">
           What people have said <br /> about the product
@@ -48,15 +48,15 @@ export function TestimonialSection() {
 }
 
 function Testimonial(props: Readonly<{
-  rating: number;
-  title: string;
   feedback: string;
   name: string;
   profession: string;
+  rating: number;
+  title: string;
 }>) {
   return (
-    <div class="personaltestimonial" aria-label={`Testimonial from ${props.name}, ${props.profession}`}>
-      <p class="ratestar" aria-label={`Rating: ${props.rating} stars`}>
+    <div aria-label={`Testimonial from ${props.name}, ${props.profession}`} class="personaltestimonial">
+      <p aria-label={`Rating: ${props.rating} stars`} class="ratestar">
         {Array.from({ length: props.rating }).map(() => (
           <Icon icon="heroicons:star-solid" style={{ color: "gold" }} />
         ))}

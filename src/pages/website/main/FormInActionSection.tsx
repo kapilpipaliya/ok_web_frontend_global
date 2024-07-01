@@ -24,10 +24,10 @@ const FormSection = () => {
   return (
     <div class="formsection">
       <div class="formtitle">
-        <a class="btn-mid-icon-filled" href="#" aria-label="Demo style 1">
+        <a aria-label="Demo style 1" class="btn-mid-icon-filled" href="#">
           Demo style 1
         </a>
-        <a class="btn-transperant bg-transperant" href="#" aria-label="Demo style 2">
+        <a aria-label="Demo style 2" class="btn-transperant bg-transperant" href="#">
           Demo style 2
         </a>
       </div>
@@ -36,24 +36,24 @@ const FormSection = () => {
         <form action="#" method="post">
           <label for="fname">First Name</label>
           <input
-            type="text"
+            aria-label="First Name"
             id="fname"
             name="firstname"
             placeholder="Your name.."
-            aria-label="First Name"
+            type="text"
           />
 
           <label for="lname">Last Name</label>
           <input
-            type="text"
+            aria-label="Last Name"
             id="lname"
             name="lastname"
             placeholder="Your last name.."
-            aria-label="Last Name"
+            type="text"
           />
 
           <label for="country">Country</label>
-          <select id="country" name="country" aria-label="Country">
+          <select aria-label="Country" id="country" name="country">
             <option value="australia">Australia</option>
             <option value="canada">Canada</option>
             <option value="usa">USA</option>
@@ -61,14 +61,14 @@ const FormSection = () => {
 
           <label for="subject">Subject</label>
           <textarea
+            aria-label="Subject"
             id="subject"
             name="subject"
             placeholder="Write something.."
             style="height:200px"
-            aria-label="Subject"
           />
 
-          <input class="btn-small-icon-filled" type="submit" value="Submit" aria-label="Submit" />
+          <input aria-label="Submit" class="btn-small-icon-filled" type="submit" value="Submit" />
         </form>
       </div>
     </div>
@@ -77,14 +77,14 @@ const FormSection = () => {
 
 const FormTypes = () => {
   const formType = [
-    { name: "Contact form", count: 2 },
-    { name: "Quiz form", count: 1 },
-    { name: "Feedback form", count: 4 },
-    { name: "Admission form", count: 6 },
-    { name: "Newsletter form", count: 3 },
-    { name: "LogIn form", count: 2 },
-    { name: "SignUp form", count: 1 },
-    { name: "All form control", count: 2 },
+    { count: 2, name: "Contact form" },
+    { count: 1, name: "Quiz form" },
+    { count: 4, name: "Feedback form" },
+    { count: 6, name: "Admission form" },
+    { count: 3, name: "Newsletter form" },
+    { count: 2, name: "LogIn form" },
+    { count: 1, name: "SignUp form" },
+    { count: 2, name: "All form control" },
   ];
   return (
     <div class="formtypes">
@@ -92,7 +92,7 @@ const FormTypes = () => {
         <For each={formType}>
           {(form) => (
             <li>
-              <a href="#" aria-label={form.name}>{form.name}</a> <span>({form.count})</span>
+              <a aria-label={form.name} href="#">{form.name}</a> <span>({form.count})</span>
             </li>
           )}
         </For>

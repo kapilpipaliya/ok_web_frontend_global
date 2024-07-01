@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getSubDomain } from "~/server/getSubDomain";
+
 import { getDriver } from "~/cypher/driver";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function POST({ request }: APIEvent) {
   const subdomain = await getSubDomain(request.headers.get("host")!);

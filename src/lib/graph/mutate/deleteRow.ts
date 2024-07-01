@@ -1,10 +1,14 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import { batch } from "solid-js";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { commitTxn, getNewTxnId } from "../transaction";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { useToast } from "~/components/Toast";
 
 export function deleteRow(
   vertex: Vertex,

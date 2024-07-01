@@ -1,15 +1,16 @@
 
-import {CustomModal} from "./CommonDialog";
 import type { JSX } from "solid-js";
 
+import {CustomModal} from "./CommonDialog";
+
 export function DeleteDialog(props: Readonly<{
-  onConfirm: () => void;
-  title?: string;
-  message?: string;
   buttonLabel?: JSX.Element;
+  message?: string;
   onCancel?: () => void;
+  onConfirm: () => void;
   open?: boolean;
   setOpen?: (open: boolean) => void;
+  title?: string;
 }>) {
   const handleConfirm = () => {
     props.onConfirm();
@@ -20,26 +21,24 @@ export function DeleteDialog(props: Readonly<{
   };
   return (
     <CustomModal
-      bodyStyle={{ "max-height": "none", overflow: "auto" }}
-      openButton={false}
-      open={props.open}
-      setOpen={props.setOpen}
-      buttonLabel={props.buttonLabel}
-      customTitle={<span>{props.title || "Delete Confirmation"}</span>}
       body={
         <p class="p:10px|0px">
           {props.message || "Are you sure you want to delete this item?"}
         </p>
       }
+      bodyStyle={{ "max-height": "none", overflow: "auto" }}
+      buttonLabel={props.buttonLabel}
+      customTitle={<span>{props.title || "Delete Confirmation"}</span>}
+      dialogClass="min-w:20% r:10px p:0"
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <button
             class="danger"
-            style={{ "margin-right": "7px" }}  
             onClick={() => {
               handleCancel();
               toggle((v) => !v);
-            }}
+            }}  
+            style={{ "margin-right": "7px" }}
           >
             Cancel
           </button>
@@ -54,7 +53,9 @@ export function DeleteDialog(props: Readonly<{
           </button>
         </div>
       )}
-      dialogClass="min-w:20% r:10px p:0"
+      open={props.open}
+      openButton={false}
+      setOpen={props.setOpen}
     />
   );
 }

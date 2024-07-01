@@ -1,22 +1,25 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { klona } from "klona/json";
+import { batch, onCleanup } from "solid-js";
+
+import { useToast } from "~/components/Toast";
+import { getUniqueName } from "~/lib/drag_drop/getChildrenAttrs";
 import {
-  IdAttr,
   type GraphInterface,
-  type Id, type Vertex
+  type Id,
+  IdAttr, type Vertex
 } from "~/lib/graph/graph";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+
+import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
+import { getChildVertex, getChildVertexes, getToEdge } from "../../get/sync/traverse";
 import {
   commitTxn,
   getNewGraphId,
   getNewTxnId
 } from "../../transaction";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { batch, onCleanup } from "solid-js";
-import { getChildVertex, getChildVertexes, getToEdge } from "../../get/sync/traverse";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { useToast } from "~/components/Toast";
-import { newEdge, addNewEdge } from "../edge";
-import { klona } from "klona/json";
-import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
-import { getUniqueName } from "~/lib/drag_drop/getChildrenAttrs";
+import { addNewEdge, newEdge } from "../edge";
 
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
@@ -49,7 +52,7 @@ export function newRow(
   label: string,
   edgeType?: string,
   properties?: { [key: string]: any; }
-): { error: boolean; vertexId?: Id; edgeId?: Id; } {
+): { edgeId?: Id; error: boolean; vertexId?: Id; } {
   const { showErrorToast } = useToast();
 
   return batch(() => {
@@ -82,9 +85,9 @@ export function newRow(
       };
     }
     return {
+      edgeId: edgeNew.id,
       error: false,
       vertexId: vertexNew.id,
-      edgeId: edgeNew.id,
     };
   });
 }
@@ -195,8 +198,8 @@ export function rowMetaInitialize(
         graph,
         setGraph,
         {
-          rows,
           metaTxnId,
+          rows,
         }
       );
     });

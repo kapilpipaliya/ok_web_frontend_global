@@ -1,6 +1,6 @@
 import { camelCase } from "./camelCase";
 
-type Style = string | Partial<CSSStyleDeclaration>;
+type Style = Partial<CSSStyleDeclaration> | string;
 
 /**
  * Converts a CSS Style string

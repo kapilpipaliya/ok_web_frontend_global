@@ -1,8 +1,12 @@
-import type { Vertex } from "~/lib/graph/graph";
-import { mutateData } from "../mutate/mutate_api/mutateData";
-import { int } from "neo4j-driver";
-import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import type { TransactionPromise } from "neo4j-driver-core";
+
+import { int } from "neo4j-driver";
+
+import type { Vertex } from "~/lib/graph/graph";
+
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
+
+import { mutateData } from "../mutate/mutate_api/mutateData";
 
 
 export async function handleMutationData(

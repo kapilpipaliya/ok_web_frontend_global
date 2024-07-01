@@ -1,10 +1,11 @@
 import type { Config } from "@master/css";
+
 import { RuntimeCSS } from "@master/css-runtime";
 import {
+  type JSX,
   createContext,
   createEffect,
   createSignal,
-  type JSX,
   onCleanup,
   useContext,
 } from "solid-js";

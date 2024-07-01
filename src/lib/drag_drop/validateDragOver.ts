@@ -1,9 +1,13 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import { getParentVertex } from "~/lib/graph/get/sync/traverse";
-import { evaluate } from "../expression_eval";
+
 import jsep from "jsep";
+
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
 import {getComponentFromLayoutRow} from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
+import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+
+import { evaluate } from "../expression_eval";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,
@@ -46,7 +50,7 @@ export function validateDragOver(
       return;
     }
 
-    const rootChildren = () => evaluate(jsep("->Attr"), { vertexes: [formData], graph, setGraph }) || [];
+    const rootChildren = () => evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [formData] }) || [];
     const isFormRootVertetx = () => formData?.L?.[0] === "Form";
     const rootVertexes = () =>
       {

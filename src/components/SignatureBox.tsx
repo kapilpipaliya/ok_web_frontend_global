@@ -5,7 +5,7 @@ export function Signature() {
     let canvasRef: HTMLCanvasElement | undefined;
     let context: CanvasRenderingContext2D | null = null;
     let isDrawing = false;
-    const [signatureImage, setSignatureImage] = createSignal<string | null>(null);
+    const [signatureImage, setSignatureImage] = createSignal<null | string>(null);
     const [isEditing, setIsEditing] = createSignal(false);
 
     const initializeCanvas = () => {
@@ -81,10 +81,10 @@ export function Signature() {
             <h2 class="font-size:1.25rem font-weight:700 margin-bottom:1rem">E-Signature</h2>
             {signatureImage() && !isEditing() ? (
                 <div class="position:relative">
-                    <img src={signatureImage()!} alt="Signature" class="border:1px border:solid border:#d1d5db rounded:0.5rem width:100%" />
+                    <img alt="Signature" class="border:1px border:solid border:#d1d5db rounded:0.5rem width:100%" src={signatureImage()!} />
                     <button class="position:absolute top:0 right:0 bg:white border:none cursor:pointer" onClick={editSignature}>
-                        <svg class="width:1.5rem height:1.5rem color:#1d4ed8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-4.036a2.5 2.5 0 113.536 3.536l-12 12a2 2 0 01-.879.515l-4 1a1 1 0 01-1.265-1.265l1-4a2 2 0 01.515-.879l12-12z" />
+                        <svg class="width:1.5rem height:1.5rem color:#1d4ed8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.232 5.232l3.536 3.536m-2.036-4.036a2.5 2.5 0 113.536 3.536l-12 12a2 2 0 01-.879.515l-4 1a1 1 0 01-1.265-1.265l1-4a2 2 0 01.515-.879l12-12z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                         </svg>
                     </button>
                 </div>

@@ -1,5 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 

@@ -1,16 +1,18 @@
-import { type JSX, useContext, For, Show, type JSXElement, createMemo } from "solid-js";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
+import { For, type JSX, type JSXElement, Show, createMemo, useContext } from "solid-js";
+
 import "~/css/componentUtilCSS.css";
 
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
+
 export const ToggleButton = (props: {
-  options: { key: JSX.Element; value: string; icon?: string }[];
-  label: JSXElement;
-  onChangeInput: any;
-  isAddToClass: boolean;
-  name: string;
   infoLink?: string;
+  isAddToClass: boolean;
   isLabelOnTop: boolean;
+  label: JSXElement;
+  name: string;
+  onChangeInput: any;
+  options: { icon?: string; key: JSX.Element; value: string }[];
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);
@@ -30,14 +32,6 @@ export const ToggleButton = (props: {
         {(option) => {
           return (
             <div
-              onClick={() => {
-                if (props.onChangeInput) {
-                  props.onChangeInput(option.value);
-                }
-                if (props.isAddToClass) {
-                  setCssState(state(), { [props.name]: option.value });
-                }
-              }}
               class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
                                      bg:${isSelected(option)
                   ? "#e0e7f3"
@@ -52,6 +46,14 @@ export const ToggleButton = (props: {
                     ? "0|5|5|0"
                     : "0"
                 }`}
+              onClick={() => {
+                if (props.onChangeInput) {
+                  props.onChangeInput(option.value);
+                }
+                if (props.isAddToClass) {
+                  setCssState(state(), { [props.name]: option.value });
+                }
+              }}
             >
               {option.icon ? (
                 <IconifyIcon icon={option.key as string} />
@@ -67,15 +69,15 @@ export const ToggleButton = (props: {
 
   return (
     <Show
-      when={props.isLabelOnTop}
       fallback={
-        <Show when={props.label} fallback={<Content />}>
+        <Show fallback={<Content />} when={props.label}>
           <CenterDiv>
             <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
+      when={props.isLabelOnTop}
     >
       <div class={"w:full"}>
         <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />

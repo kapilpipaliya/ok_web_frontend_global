@@ -1,4 +1,4 @@
-import { createSignal, For } from "solid-js";
+import { For, createSignal } from "solid-js";
 
 export function StatusChip(props: Readonly<{ status: string }>) {
   const [status] = createSignal(props.status);
@@ -26,8 +26,8 @@ export function StatusChip(props: Readonly<{ status: string }>) {
 }
 
 export function ChipDropDown(props: Readonly<{
-  selectedItem: string;
   onChanged: (value: string) => void;
+  selectedItem: string;
 }>) {
   const options = ["pending", "completed", "cancelled"];
 
@@ -48,7 +48,6 @@ export function ChipDropDown(props: Readonly<{
 
   return (
     <select
-      value={status()}
       onChange={(event) => {
         const newValue = event.currentTarget.value;
         setStatus(newValue); // Update the signal
@@ -57,6 +56,7 @@ export function ChipDropDown(props: Readonly<{
       style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles(
         status(),
       )}`}
+      value={status()}
     >
       <For each={options}>
         {(option) => (

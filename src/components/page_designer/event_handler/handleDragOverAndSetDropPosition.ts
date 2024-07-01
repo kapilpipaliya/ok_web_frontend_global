@@ -1,14 +1,16 @@
 import type { Accessor, } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
-import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
+
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
+import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
+import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 
 
 export function handleDragOverAndSetDropPosition(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
-  let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "before" |
-    "after" |
+  let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "after" |
+    "before" |
     "center" |
     "left" |
     "right" |

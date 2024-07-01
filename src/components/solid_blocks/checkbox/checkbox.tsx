@@ -1,10 +1,9 @@
 import { type JSX, Show, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
-
 import "./checkbox.css";
 
-export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {
+export type CheckboxProps = {
   /**
    * align the checkbox inside its label
    * can be 'left' or 'right; default is 'left'
@@ -14,13 +13,13 @@ export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {
   checked?: boolean;
   disabled?: boolean;
   name?: string;
-  setChecked?: (checked: boolean) => void;
   oninvalid?: JSX.EventHandler<HTMLInputElement, Event>;
   required?: boolean;
+  setChecked?: (checked: boolean) => void;
   switch?: boolean;
   value?: string;
   wrapperStyle?: JSX.CSSProperties;
-};
+} & JSX.HTMLAttributes<HTMLInputElement>;
 
 export function Checkbox(props: CheckboxProps) {
   const [inputProps, content, labelProps] = splitProps(
@@ -62,8 +61,8 @@ export function Checkbox(props: CheckboxProps) {
       <div class={"checkbox-wrapper m:-5px"} style={props.wrapperStyle}>
         <input
           ref={props.ref}
-          type="checkbox"
           role={content.switch ? "switch" : undefined}
+          type="checkbox"
           {...inputProps}
           onChange={(ev): void => {
             runEvent(ev, content.onChange);

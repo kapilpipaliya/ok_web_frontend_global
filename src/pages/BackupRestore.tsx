@@ -1,13 +1,14 @@
 import type { JSX } from "solid-js";
+
 import { A } from "@solidjs/router";
 
 import { APP_BASE_URL } from "~/lib/constants";
 
 export function BackupRestore() {
   const C = (props: Readonly<{
-    title: string;
-    subtitle: string;
     children: JSX.Element;
+    subtitle: string;
+    title: string;
   }>) => {
     return (
       <div class="b:2">
@@ -23,7 +24,7 @@ export function BackupRestore() {
   return (
     <div class="mb:1.5rem mt:10 m:6">
       <div class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
-        <C title={"Links"} subtitle={"Simple Import"}>
+        <C subtitle={"Simple Import"} title={"Links"}>
           <div class="m:0 p:12">
             <div class="m:1rem flex gap:0.5rem">
               <A

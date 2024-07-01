@@ -1,12 +1,15 @@
 import { onCleanup, useContext } from "solid-js";
+
+import type { FieldAttribute } from "~/lib/FormMetadataType";
+
+import { TableInputField } from "~/components/fields/TableInputField";
+import { FormMetaData } from "~/lib/formMetaData";
 import { getChildVertex, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { TableInputField } from "~/components/fields/TableInputField";
-import type { FieldAttribute } from "~/lib/FormMetadataType";
-import { FormMetaData } from "~/lib/formMetaData";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function RulesModalBody() {
@@ -45,17 +48,17 @@ export function RulesModalBody() {
                 graph,
                 setGraph,
                 {
-                  collection: "->Attr",
                   child: {
-                    collection: "->Attr",
                     child: {
-                      collection: "->Attr",
                       child: {
-                        collection: "->Attr",
                         child: { collection: "->Attr" },
+                        collection: "->Attr",
                       },
+                      collection: "->Attr",
                     },
+                    collection: "->Attr",
                   },
+                  collection: "->Attr",
                 },
                 layoutStore.formData?.formData
                   ? [layoutStore.formData.formData]
@@ -71,22 +74,22 @@ export function RulesModalBody() {
 
               condAttribute!.props = {
                 dataSource: data,
-                valueExpr: "id",
                 displayExpr: "name",
                 itemsExpr: "children",
                 showClearButton: true,
                 treeProps: {
                   dataStructure: "tree",
-                  keyExpr: "id",
                   displayExpr: "name",
+                  // focusStateEnabled: false,
+                  expandNodesRecursive: false,
                   itemsExpr: "children",
-                  selectionMode: "single",
+                  keyExpr: "id",
                   // width: 200,
                   // searchEnabled: true,
                   // activeStateEnabled: false,
-                  // focusStateEnabled: false,
-                  expandNodesRecursive: false,
+                  selectionMode: "single",
                 },
+                valueExpr: "id",
               };
             }
           }
@@ -108,9 +111,9 @@ export function RulesModalBody() {
 
   return (
     <TableInputField
-      meta={graph.vertexes[metaVertexId]}
       data={graph.vertexes[layoutStore.selectedId]}
-      txnId={layoutStore.formData.txnId}
-      isRealTime={false} />
+      isRealTime={false}
+      meta={graph.vertexes[metaVertexId]}
+      txnId={layoutStore.formData.txnId} />
   );
 }

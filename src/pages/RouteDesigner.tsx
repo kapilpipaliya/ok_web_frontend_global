@@ -1,4 +1,5 @@
-import { createSignal, For, Show, Match, Switch } from "solid-js";
+import { For, Match, Show, Switch, createSignal } from "solid-js";
+
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 
 export function RouteDesigner() {
@@ -6,7 +7,7 @@ export function RouteDesigner() {
   const [showModal, setShowModal] = createSignal(false);
 
   const addElement = (type: any) => {
-    setElements([...elements(), {type, id: Date.now()}]);
+    setElements([...elements(), {id: Date.now(), type}]);
   };
   const getFormFields = (event: any) => {
     event.preventDefault();
@@ -37,8 +38,8 @@ export function RouteDesigner() {
             {(element: any) => (
               <DynamicElement
                 element={element}
-                showModal={showModal}
                 setShowModal={setShowModal}
+                showModal={showModal}
               />
             )}
           </For>
@@ -65,8 +66,8 @@ export function RouteDesigner() {
 
 const DynamicElement = (props: {
   element: any;
-  showModal: any;
   setShowModal: any;
+  showModal: any;
 }) => {
   return (
     <Switch>
@@ -94,8 +95,8 @@ const DynamicElement = (props: {
       <Match when={props.element.type === "modal"}>
         <div style="position: relative; margin-bottom: 20px;">
           <button
-            style="padding: 10px;"
             onClick={() => props.setShowModal(true)}
+            style="padding: 10px;"
           >
             Open Modal
           </button>

@@ -17,8 +17,8 @@ export function UploadVideo() {
             setError('');
             // Replace with your upload URL
             const response = await fetch('YOUR_UPLOAD_URL', {
-                method: 'POST',
                 body: formData,
+                method: 'POST',
             });
 
             if (!response.ok) {
@@ -38,10 +38,10 @@ export function UploadVideo() {
       <div
         style="display: flex; flex-direction: column; align-items: center; padding: 16px; border: 1px solid #ccc; border-radius: 8px; width: 300px;">
           <input
-            type="file"
             accept="video/*"
             onChange={handleUpload}
             style="margin-bottom: 16px;"
+            type="file"
           />
           {uploading() && <p style="color: blue;">Uploading...</p>}
           {error() && <p style="color: red;">{error()}</p>}

@@ -1,12 +1,13 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
+
 import { Meter } from "./meter";
 
 export function MeterDocs() {
   const [value, setValue] = createSignal(0);
   const state = {
-    interval: 0,
     counter: 0,
     current: 0,
+    interval: 0,
     next: 0,
     steps: 20,
   };
@@ -47,7 +48,7 @@ MeterProps {
 }`}
       </pre>
       <div class="example">
-        <Meter min={0} max={100} value={value()} />
+        <Meter max={100} min={0} value={value()} />
       </div>
       <pre>{`<Meter min={0} max={100} value={${value()}} />`}</pre>
       <hr />

@@ -11,7 +11,7 @@ export async function handleReplace(replace: any, tx: any, clientToServerVertexI
   try {
     const result = await tx.run(query, { id: int(id), properties: replace.P });
     if (result.records.length > 0) {
-      txnResult.push({ replace: { id, error: false } });
+      txnResult.push({ replace: { error: false, id } });
     }
   } catch (error: any) {
     throw new Error(`Can't replace due to an internal server error: ${error.message}`);

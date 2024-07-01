@@ -1,4 +1,5 @@
 import { For, Match, Show, Switch } from "solid-js";
+
 import { ButtonGroups } from "~/components/css_properties/components/ButtonGroups";
 import { ColorPickerInput } from "~/components/css_properties/components/ColorPickerInput";
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
@@ -13,77 +14,77 @@ export function DynamicCSSComponent(props: { value: any }) {
       <Match when={props.value.component === "colorPicker"}>
         <ColorPickerInput
           infoLink={props.value.infoLink}
+          isAddToClass={props.value.isAddToClass ?? true}
+          isLabelOnTop={props.value.isLabelOnTop}
+          label={props.value.label}
           name={props.value.name}
           onChangeInput={props.value.onChangeInput}
-          isAddToClass={props.value.isAddToClass ?? true}
-          label={props.value.label}
-          isLabelOnTop={props.value.isLabelOnTop}
         />
       </Match>
       <Match when={props.value.component === "select"}>
         <DisplaySelector
           infoLink={props.value.infoLink}
           isAddToClass={props.value.isAddToClass ?? true}
-          value={props.value.value}
-          onRemoveIconClick={props.value.onRemoveIconClick}
-          name={props.value.name}
-          label={props.value.label}
           isLabelOnTop={props.value.isLabelOnTop}
-          options={props.value.options}
+          label={props.value.label}
+          name={props.value.name}
           onChangeInput={props.value.onChangeInput}
+          onRemoveIconClick={props.value.onRemoveIconClick}
+          options={props.value.options}
+          value={props.value.value}
         />
       </Match>
       <Match when={props.value.component === "toggleButton"}>
         <ToggleButton
           infoLink={props.value.infoLink}
-          onChangeInput={props.value.onChangeInput}
           isAddToClass={props.value.isAddToClass ?? true}
           isLabelOnTop={props.value.isLabelOnTop}
           label={props.value.label}
           name={props.value.name}
+          onChangeInput={props.value.onChangeInput}
           options={props.value.options}
         />
       </Match>
       <Match when={props.value.component === "textField"}>
         <TextFieldWithSelect
-          value={props.value.value}
           infoLink={props.value.infoLink}
+          inputType={props.value.type}
           isAddToClass={props.value.isAddToClass ?? true}
-          name={props.value.name}
           isLabelOnTop={props.value.isLabelOnTop}
           label={props.value.label}
-          onChangeInput={props.value.onChangeInput}
-          placeholder={props.value.placeholder}
           leftIcon={props.value.leftIcon}
+          name={props.value.name}
+          onChangeInput={props.value.onChangeInput}
           options={props.value.options}
+          placeholder={props.value.placeholder}
           showInside={props.value.showInside}
-          inputType={props.value.type}
+          value={props.value.value}
         />
       </Match>
       <Match when={props.value.component === "textFieldOptions"}>
         <TextFieldWithSelect
           infoLink={props.value.infoLink}
-          value={props.value.value}
-          isAddToClass={props.value.isAddToClass ?? true}
-          name={props.value.name}
-          showInside={true}
-          leftIcon={props.value.leftIcon}
-          isLabelOnTop={props.value.isLabelOnTop}
-          onChangeInput={props.value.onChangeInput}
-          label={props.value.label}
-          placeholder={props.value.placeholder}
           inputType={props.value.type}
+          isAddToClass={props.value.isAddToClass ?? true}
+          isLabelOnTop={props.value.isLabelOnTop}
+          label={props.value.label}
+          leftIcon={props.value.leftIcon}
+          name={props.value.name}
+          onChangeInput={props.value.onChangeInput}
           options={props.value.options}
+          placeholder={props.value.placeholder}
+          showInside={true}
+          value={props.value.value}
         />
       </Match>
       <Match when={props.value.component === "grid"}>
         <div
           style={{
-            padding: props.value.padding || 0,
+            "align-items": props.value.align || "center",
             display: "grid",
             gap: props.value.gap || 10,
-            "align-items": props.value.align || "center",
             "grid-template-columns": props.value["grid-template-columns"],
+            padding: props.value.padding || 0,
           }}
         >
           <For each={props.value.children}>
@@ -96,39 +97,39 @@ export function DynamicCSSComponent(props: { value: any }) {
       <Match when={props.value.component === "buttonGroups"}>
         <ButtonGroups
           infoLink={props.value.infoLink}
+          isAddToClass={props.value.isAddToClass ?? true}
           isLabelOnTop={props.value.isLabelOnTop}
+          label={props.value.label}
           name={props.value.name}
           onChangeInput={props.value.onChangeInput}
-          isAddToClass={props.value.isAddToClass ?? true}
-          label={props.value.label}
           options={props.value.options}
         />
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
         <FieldWithCustomBox
         
-          isLabelOnTop={props.value.isLabelOnTop}
+          component={props.value.component}
           customProperty={props.value.customProperty}
           gridType={props.value.gridType}
-          component={props.value.component}
-          name={props.value.name}
           inputType={props.value.inputType}
+          isLabelOnTop={props.value.isLabelOnTop}
           label={props.value.label}
           mainFieldType={props.value.mainFieldType}
+          name={props.value.name}
           options={props.value.options}
         />
       </Match>
       <Match when={props.value.component === "dataEditor"}>
         <DataEditWithCustomDialog
-          infoLink={props.value.infoLink}
-          dialogLabel={props.value.dialogLabel}
-          fallback={props.value.fallback}
-          name={props.value.name}
           centerComponent={props.value.centerComponent}
           children={props.value.children}
+          dialogLabel={props.value.dialogLabel}
+          fallback={props.value.fallback}
+          infoLink={props.value.infoLink}
+          label={props.value.label}
+          name={props.value.name}
           openMenu={props.value.openMenu[0]}
           setOpenMenu={props.value.openMenu[1]}
-          label={props.value.label}
         />
       </Match>
       <Match when={props.value.component === "divider"}>

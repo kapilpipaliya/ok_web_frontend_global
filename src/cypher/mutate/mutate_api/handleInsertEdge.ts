@@ -1,5 +1,6 @@
-import { int } from "neo4j-driver";
 import type { TransactionPromise } from "neo4j-driver-core";
+
+import { int } from "neo4j-driver";
 
 
 export async function handleInsertEdge(insertEdge: any, tx: TransactionPromise, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
@@ -18,9 +19,9 @@ export async function handleInsertEdge(insertEdge: any, tx: TransactionPromise, 
 
   try {
     const result = await tx.run(query, {
-      startId: int(startId),
       endId: int(endId),
       properties: insertEdge.P,
+      startId: int(startId),
     });
     if (result.records.length > 0) {
       const oldId = insertEdge.id;

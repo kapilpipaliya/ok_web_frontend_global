@@ -1,8 +1,12 @@
 // ->
-import type {Vertex} from "~/lib/graph/graph";
 import {int, } from "neo4j-driver";
+
+import type {Vertex} from "~/lib/graph/graph";
+
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+
 import type { ContextType } from "./ContextType";
+
 import { processResult } from "./processResult";
 
 export async function evalGetChildren(

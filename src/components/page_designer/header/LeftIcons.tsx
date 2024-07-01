@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import logo from "~/assets/graphics/sidebarLogo.svg";
 import { useNavigate } from "@solidjs/router";
+
+import logo from "~/assets/graphics/sidebarLogo.svg";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 
 export const LeftIcons = () => {
@@ -13,13 +14,13 @@ export const LeftIcons = () => {
         title="Back"
       >
         <Icon
-          icon={"flowbite:caret-left-outline"}
           class={"color:black:hover color:lightgrey"}
           height={30}
+          icon={"flowbite:caret-left-outline"}
           width={30} />
       </button>
       <a href="/">
-        <img style="height: 35px;" src={logo} alt="logo" />
+        <img alt="logo" src={logo} style="height: 35px;" />
       </a>
     </div>
   );

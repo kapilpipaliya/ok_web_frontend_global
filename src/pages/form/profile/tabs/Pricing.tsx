@@ -2,11 +2,11 @@ import { Icon } from "@iconify-icon/solid";
 import { For, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 const icons: any = {
+  "Advanced Pro":
+    "streamline:money-graph-arrow-increase-ascend-growth-up-arrow-stats-graph-right-grow",
   Basic: "quill:stack-alt",
   Premium: "ant-design:fire-outlined",
   Pro: "mage:electricity",
-  "Advanced Pro":
-    "streamline:money-graph-arrow-increase-ascend-growth-up-arrow-stats-graph-right-grow",
 };
 export const PricingPlans = (props: Readonly<{ plans: any }>) => {
   const [selectedPlan, setSelectedPlan] = createSignal("");
@@ -47,10 +47,10 @@ export const PricingPlans = (props: Readonly<{ plans: any }>) => {
                     }
                   >
                     <Icon
-                      height={22}
-                      width={22}
                       class={"color:black"}
+                      height={22}
                       icon={icons[plan.name]}
+                      width={22}
                     />
                   </div>
                   <div class={"p:5|10"}>
@@ -73,8 +73,8 @@ export const PricingPlans = (props: Readonly<{ plans: any }>) => {
 };
 export const CurrentPlan = () => {
   const [plan, setPlan] = createStore<any>({
-    name: "Premium",
     currency: "INR",
+    name: "Premium",
     price: 1000,
     type: "Monthly",
   });
@@ -102,10 +102,10 @@ export const CurrentPlan = () => {
                 }
               >
                 <Icon
-                  height={22}
-                  width={22}
                   class={"color:black"}
+                  height={22}
                   icon={icons[plan.name]}
+                  width={22}
                 />
               </div>
               <div class={"p:5|10"}>

@@ -27,8 +27,8 @@ createLocalStorageSignal<T>(
         This allows to react on{" "}
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries"
-          target="_blank"
           rel="noreferrer noopener"
+          target="_blank"
         >
           media query
         </a>{" "}

@@ -1,27 +1,26 @@
 import {
   type Accessor,
+  type JSX,
+  Show,
   createContext,
   createEffect,
   createMemo,
   createSignal,
-  type JSX,
   onCleanup,
   onMount,
-  Show,
   splitProps,
   useContext,
 } from "solid-js";
-
-import { getElements } from "../tools";
-
-import "./menu.css";
 import { isServer } from "solid-js/web";
 
-export type MenuProps = JSX.HTMLAttributes<HTMLDivElement> & {
-  open?: boolean;
+import { getElements } from "../tools";
+import "./menu.css";
+
+export type MenuProps = {
+  align?: "center" | "left" | "right";
   ontoggle?: (open?: boolean) => void;
-  align?: "left" | "center" | "right";
-};
+  open?: boolean;
+} & JSX.HTMLAttributes<HTMLDivElement>;
 
 const getFirstMenuButton = (open: Accessor<boolean>) => {
   let counter = 0;
@@ -113,7 +112,7 @@ export function Menu(props: MenuProps) {
   const overHandler = (ev: MouseEvent) => {
     const target = ev.target as HTMLElement;
     if (
-      ["menuitem", "menuitemradio", "menuitemcheckbox"].includes(
+      ["menuitem", "menuitemcheckbox", "menuitemradio"].includes(
         target?.getAttribute("role") ?? "",
       ) &&
       target?.tabIndex !== -1 &&
@@ -124,7 +123,7 @@ export function Menu(props: MenuProps) {
     }
   };
 
-  const moveFocus = (step: 1 | -1) => {
+  const moveFocus = (step: -1 | 1) => {
     const menuItems = menuRef.querySelectorAll<HTMLElement>(
       '[role^=menuitem]:not([aria-disabled], [tabIndex="-1"])',
     );
@@ -148,7 +147,7 @@ export function Menu(props: MenuProps) {
     const role = target?.getAttribute("role");
     if (
       ev.key === " " &&
-      ["menuitem", "menuitemradio", "menuitemcheckbox"].includes(role ?? "")
+      ["menuitem", "menuitemcheckbox", "menuitemradio"].includes(role ?? "")
     ) {
       target.click();
       if (role === "menuitemradio") {
@@ -182,7 +181,7 @@ export function Menu(props: MenuProps) {
       onkeydown={keyHandler}
     >
       {opener()}
-      <div tabIndex="-1" role="menu" hidden={!open()} onmouseover={overHandler}>
+      <div hidden={!open()} onmouseover={overHandler} role="menu" tabIndex="-1">
         {menuItems()}
       </div>
     </div>
@@ -201,15 +200,15 @@ export function MenuItem(props: MenuItemProps) {
   return <div tabIndex="0" {...props} role="menuitem" />;
 }
 
-export type MenuItemGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+export type MenuItemGroupProps = {
   title?: JSX.Element;
-};
+} & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function MenuItemGroup(props: MenuItemGroupProps) {
   const [local, divProps] = splitProps(props, ["title", "children"]);
   return (
     <div {...divProps} role="group">
-      <Show when={typeof props.title === "string"} fallback={local.title}>
+      <Show fallback={local.title} when={typeof props.title === "string"}>
         <p>{local.title}</p>
       </Show>
       {local.children}
@@ -228,13 +227,13 @@ export const MenuOptionsContext = createContext<MenuOptionsContextValue>([
   (value) => console.warn("context default!", value),
 ]);
 
-export type MenuOptionProps = Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "onchange"
-> & {
+export type MenuOptionProps = {
   onchange?: (checked?: boolean) => void;
   value: string;
-};
+} & Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  "onchange"
+>;
 
 export function MenuOption(props: MenuOptionProps) {
   const [local, divProps] = splitProps(props, ["value", "onchange"]);
@@ -264,31 +263,31 @@ export function MenuOption(props: MenuOptionProps) {
           : "-1"
       }
       {...divProps}
-      role={type !== "checkbox" ? "menuitemradio" : "menuitemcheckbox"}
       onclick={clickHandler()}
       onkeypress={keyHandler()}
+      role={type !== "checkbox" ? "menuitemradio" : "menuitemcheckbox"}
     />
   );
 }
 
-export type MenuOptionGroupProps = Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "onchange"
-> &
-  (
+export type MenuOptionGroupProps = (
     | {
-        type: "checkbox";
-        onchange?: (value: string[]) => void;
-        title?: JSX.Element;
-        value?: string[];
-      }
-    | {
-        type?: "radio" | undefined;
         onchange?: (value: string) => void;
         title?: JSX.Element;
+        type?: "radio" | undefined;
         value?: [string] | string;
       }
-  );
+    | {
+        onchange?: (value: string[]) => void;
+        title?: JSX.Element;
+        type: "checkbox";
+        value?: string[];
+      }
+  ) &
+  Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  "onchange"
+>;
 
 export function MenuOptionGroup(props: MenuOptionGroupProps): JSX.Element {
   const [local, divProps] = splitProps(props, [
@@ -316,7 +315,7 @@ export function MenuOptionGroup(props: MenuOptionGroupProps): JSX.Element {
       : (value) => setValue((prev) => (prev[0] === value ? prev : [value])),
   );
 
-  createEffect((lastVal?: string | string[] | [string]) => {
+  createEffect((lastVal?: [string] | string | string[]) => {
     if (lastVal !== local.value) {
       setValue(
         Array.isArray(local.value)
@@ -345,8 +344,8 @@ export function MenuOptionGroup(props: MenuOptionGroupProps): JSX.Element {
   }, value());
 
   return (
-    <div tabIndex="-1" role="group" {...divProps}>
-      <Show when={typeof props.title === "string"} fallback={local.title}>
+    <div role="group" tabIndex="-1" {...divProps}>
+      <Show fallback={local.title} when={typeof props.title === "string"}>
         <p>{local.title}</p>
       </Show>
       <MenuOptionsContext.Provider value={[value, change(), local.type]}>

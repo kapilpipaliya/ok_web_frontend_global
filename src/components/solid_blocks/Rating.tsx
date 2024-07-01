@@ -2,8 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, createSignal, } from "solid-js";
 
 export function StarRating(
-  props: JSX.IntrinsicAttributes &
-    JSX.HTMLAttributes<HTMLDivElement> & { etc: any; heading?: string },
+  props: { etc: any; heading?: string } &
+    JSX.HTMLAttributes<HTMLDivElement> & JSX.IntrinsicAttributes,
 ) {
   const [rating, setRating] = createSignal(0);
   const [hover, setHover] = createSignal(0);
@@ -19,17 +19,17 @@ export function StarRating(
             const ratingValue = index() + 1;
             return (
               <Icon
-                icon="mdi:star"
-                width={24}
-                height={24}
                 class={`w:8 h:20 mr:15 cursor:pointer ${
                   ratingValue <= (hover() || rating())
                     ? "color:#ffc107"
                     : "color:lightgray"
                 }`}
+                height={24}
+                icon="mdi:star"
                 onClick={() => setRating(ratingValue)}
                 onMouseEnter={() => setHover(ratingValue)}
                 onMouseLeave={() => setHover(0)}
+                width={24}
               />
             );
           }}

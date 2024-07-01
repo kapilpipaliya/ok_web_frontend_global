@@ -1,13 +1,15 @@
-import type {Edge, Vertex} from "~/lib/graph/graph";
-import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
+
+import type {Edge, Vertex} from "~/lib/graph/graph";
+
+import {evalAsync} from "~/lib/expression_eval";
 
 export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
   options?: {
-    nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
+    nameExpr?: (child: Vertex) => string;
   },
 ) {
   "use server";
@@ -21,9 +23,9 @@ export async function getTreeDataMGCall(
     if (!levels.collection) return result;
 
     const children = await evalAsync(jsep(levels.collection), {
-      vertexes: vertexes,
       nodes,
       relationships,
+      vertexes: vertexes,
     });
     // @ts-ignore
     for (const child of (children || []).sort((a, b) => a.P.pos - b.P.pos)) {
@@ -55,8 +57,8 @@ export async function getTreeDataMGCall(
   return {
     children,
     graph: {
-      vertexes: nodes,
       edges: relationships,
+      vertexes: nodes,
     },
   };
 }

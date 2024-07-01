@@ -1,9 +1,10 @@
-import { getDriver } from "~/cypher/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getSubDomain } from "~/server/getSubDomain";
-import { getHttpsSession } from "~/server/getHttpsSession";
 import type { Node } from "neo4j-driver";
+
+import { getDriver } from "~/cypher/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { getHttpsSession } from "~/server/getHttpsSession";
+import { getSubDomain } from "~/server/getSubDomain";
 
 // Main POST function
 export async function GET({ request }: APIEvent) {

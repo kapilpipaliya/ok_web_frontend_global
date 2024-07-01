@@ -1,8 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
+
 import type { Id } from "~/lib/graph/graph";
 
-export const OpenComponentSettings = (props: Readonly<{ id: Id; class?: string }>) => {
+export const OpenComponentSettings = (props: Readonly<{ class?: string; id: Id }>) => {
   return <Icon
+    class={`${props.class ?? ""}`}
+    height={21}
+    icon={"solar:settings-linear"}
     onClick={() => {
       const currentURL = window.location.href;
       const navigateUrl = `${currentURL
@@ -11,8 +15,5 @@ export const OpenComponentSettings = (props: Readonly<{ id: Id; class?: string }
         .join("/")}/Comp/${props.id}`;
       window.open(navigateUrl, "_blank");
     }}
-    class={`${props.class ?? ""}`}
-    icon={"solar:settings-linear"}
-    width={21}
-    height={21} />;
+    width={21} />;
 };

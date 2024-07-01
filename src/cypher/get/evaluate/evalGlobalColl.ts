@@ -1,6 +1,7 @@
 
-import {calculateFilter} from "~/lib/graph/get/sync/traverse";
 import {findVertexMGCallId} from "~/cypher/get/evaluate/findVertexMGCallId";
+import {calculateFilter} from "~/lib/graph/get/sync/traverse";
+
 import type { ContextType } from "./ContextType";
 
 export async function evalGlobalColl(
@@ -8,9 +9,9 @@ export async function evalGlobalColl(
   context: ContextType = {},
 ) {
   "use server";
-  const {type, filter, isMultiple, skip, limit} = calculateFilter(edgeType);
+  const {filter, isMultiple, limit, skip, type} = calculateFilter(edgeType);
     return await findVertexMGCallId(
-      {label: type ?? edgeType, skip, limit, name: filter},
+      {label: type ?? edgeType, limit, name: filter, skip},
       context,
     );
 

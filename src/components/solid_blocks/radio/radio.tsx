@@ -1,26 +1,26 @@
 import {
   type Accessor,
+  type JSX,
+  type Setter,
+  Show,
   createContext,
   createEffect,
   createSelector,
   createSignal,
   createUniqueId,
-  type JSX,
   on,
-  type Setter,
-  Show,
   splitProps,
   useContext,
 } from "solid-js";
-import { runEvent } from "../tools";
 
+import { runEvent } from "../tools";
 import "./radio.css";
 
 export const radioContext = createContext<
-  [Accessor<string>, Setter<string>, (value: string) => boolean, string] | []
+  [] | [Accessor<string>, Setter<string>, (value: string) => boolean, string]
 >([]);
 
-export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
+export type RadioProps = {
   /**
    * align the checkbox inside its label
    * can be 'left' or 'right; default is 'left'
@@ -28,13 +28,13 @@ export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
   align?: "left" | "right";
   autofocus?: boolean;
   checked?: boolean;
-  setChecked?: (checked?: boolean) => void;
   disabled?: boolean;
   name?: string;
   onInvalid?: JSX.EventHandler<HTMLInputElement, Event>;
   required?: boolean;
+  setChecked?: (checked?: boolean) => void;
   value?: string;
-};
+} & JSX.HTMLAttributes<HTMLInputElement>;
 
 export function Radio(props: RadioProps) {
   const [inputProps, content, labelProps] = splitProps(
@@ -73,9 +73,9 @@ export function Radio(props: RadioProps) {
     >
       <Show when={content.align === "right"}>{content.children}</Show>
       <input
-        type="radio"
-        ref={props.ref}
         name={uniqueId}
+        ref={props.ref}
+        type="radio"
         {...inputProps}
         checked={
           isValueActive
@@ -83,7 +83,7 @@ export function Radio(props: RadioProps) {
             : content.checked
         }
         onChange={(
-          ev: Event & { currentTarget: HTMLInputElement; target: Element },
+          ev: { currentTarget: HTMLInputElement; target: Element } & Event,
         ): void => {
           runEvent(ev, content.onChange);
           content.setChecked?.(ev.currentTarget.checked);
@@ -97,10 +97,10 @@ export function Radio(props: RadioProps) {
   );
 }
 
-export type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+export type RadioGroupProps = {
   setValue?: (value: string) => void;
   value?: Accessor<string>;
-};
+} & JSX.HTMLAttributes<HTMLDivElement>;
 
 // This is just a wrapper that run setValue when value is changed.
 export function RadioGroup(props: RadioGroupProps) {

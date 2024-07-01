@@ -1,26 +1,29 @@
 import { int, } from "neo4j-driver";
+
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
+
 import type { ContextType } from "./ContextType";
+
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
 
 export async function findVertexMGCallId(
   {
     id,
     label,
-    skip,
     limit,
     name,
+    skip,
   }: {
     id?: string;
     label?: string;
-    skip?: number;
     limit?: number;
     name?: string;
+    skip?: number;
   },
   context: ContextType = {},
 ) {
   let query: string | undefined;
-  const params = {} as { name?: string; id: any };
+  const params = {} as { id: any; name?: string };
 
   if (id) {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";

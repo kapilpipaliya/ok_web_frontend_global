@@ -1,8 +1,9 @@
 import type { Store } from "solid-js/store";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
 export function getComponent(
  graph: Store<GraphInterface>,

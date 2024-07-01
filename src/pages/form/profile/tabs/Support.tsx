@@ -1,35 +1,38 @@
-import { Icon } from "@iconify-icon/solid";
-import { createSignal, Show, For } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-import { API } from "~/lib/api/endpoints";
-import {
-  sendChatsSupportCall,
-  getChatsSupportCall,
-  deleteSupportTicketCall,
-} from "~/lib/api/api_functions";
-import {postAPI} from "~/lib/api/postApi";
+
+import { Icon } from "@iconify-icon/solid";
+import { For, Show, createSignal } from "solid-js";
+
+import type { Id } from "~/lib/graph/graph";
+
 import { ChipDropDown } from "~/components/Chip";
 import {CustomModal} from "~/components/CommonDialog";
 import { DeleteDialog } from "~/components/DeleteDialog";
-import { Table, TableHeadCell, TableBodyCell } from "~/components/Table";
+import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
-import type { Id } from "~/lib/graph/graph";
+import {
+  deleteSupportTicketCall,
+  getChatsSupportCall,
+  sendChatsSupportCall,
+} from "~/lib/api/api_functions";
+import { API } from "~/lib/api/endpoints";
+import {postAPI} from "~/lib/api/postApi";
 
 export const SupportTicketSection = (props: Readonly<{
-  setIsMainScreenLoad: SetStoreFunction<boolean>;
   contactList: any;
   setContactList: SetStoreFunction<any>;
+  setIsMainScreenLoad: SetStoreFunction<boolean>;
 }>) => {
   const [messages, setMessages] = createSignal<any>([]);
   const [inputMessage, setInputMessage] = createSignal("");
-  const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
+  const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const sendMessage = async (parentVertexId: Id) => {
     if (inputMessage().trim() !== "") {
       const newMessage = {
+        personal: true,
         text: inputMessage(),
         timestamp: new Date().toLocaleTimeString(),
-        personal: true,
       };
 
       await sendChatsSupportCall(parentVertexId, newMessage)
@@ -54,9 +57,9 @@ export const SupportTicketSection = (props: Readonly<{
     ];
     const randomIndex = Math.floor(Math.random() * replies.length);
     const reply = {
+      personal: false,
       text: replies[randomIndex],
       timestamp: new Date().toLocaleTimeString(),
-      personal: false,
     };
     setMessages([...messages()!, reply]);
   };
@@ -84,18 +87,18 @@ export const SupportTicketSection = (props: Readonly<{
 
     return (
       <Show
-        when={messages().length > 0}
         fallback={
           <div class="text-align:-webkit-center">
             <img
               class="h:30vh"
               src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
             />
-            <div style="text-align:center;" class="font-weight:600">
+            <div class="font-weight:600" style="text-align:center;">
               No messages yet
             </div>
           </div>
         }
+        when={messages().length > 0}
       >
         <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
           <div
@@ -151,17 +154,16 @@ export const SupportTicketSection = (props: Readonly<{
   const OpenDialog = (props: Readonly<{ id: number }>) => {
     return (
       <CustomModal
-        bodyStyle={{ "max-height": "none", overflow: "auto" }}
-        openButton={false}
-        buttonLabel={
-          <Icon class="color:#37c" height={22} width={22} icon="bi:chat-text" />
-        }
-        title="Chat With Support"
         body={
           <div>
             <Chat id={props.id} />
           </div>
         }
+        bodyStyle={{ "max-height": "none", overflow: "auto" }}
+        buttonLabel={
+          <Icon class="color:#37c" height={22} icon="bi:chat-text" width={22} />
+        }
+        dialogClass="min-w:30% r:10px p:0"
         footer={() => (
           <div class={"flex ai:center jc:center"}>
             <div
@@ -169,28 +171,29 @@ export const SupportTicketSection = (props: Readonly<{
               style="width: 100%;position: relative;"
             >
               <input
-                type="text"
-                value={inputMessage()}
                 onInput={(e) => setInputMessage(e.target.value)}
-                style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
                     sendMessage(props.id);
                   }
                 }}
                 placeholder="Type message..."
+                style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
+                type="text"
+                value={inputMessage()}
               />
               <div
-                onClick={() => sendMessage(props.id)}
                 class="flex jc:center"
+                onClick={() => sendMessage(props.id)}
                 style="position: absolute; top: 5px; right: 10px; color: #fff; border: none; background: #248A52; font-size: 10px; text-transform: uppercase;padding: 4px 6px; border-radius: 10px; cursor: pointer;"
               >
-                <Icon icon={"fluent:send-48-filled"} height={22} width={22} />
+                <Icon height={22} icon={"fluent:send-48-filled"} width={22} />
               </div>
             </div>
           </div>
         )}
-        dialogClass="min-w:30% r:10px p:0"
+        openButton={false}
+        title="Chat With Support"
       />
     );
   };
@@ -198,13 +201,13 @@ export const SupportTicketSection = (props: Readonly<{
   const deleteContact = async (id: string) => {
     props.setIsMainScreenLoad(true);
     await showLoadingToast({
-      promise: deleteSupportTicketCall(id),
       loadMessage: "Deleting Ticket...",
-      successMessage: "Support ticket deleted successfully",
       onSuccess: (value) => {
         const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
+      promise: deleteSupportTicketCall(id),
+      successMessage: "Support ticket deleted successfully",
     });
     props.setIsMainScreenLoad(false);
   };
@@ -212,9 +215,9 @@ export const SupportTicketSection = (props: Readonly<{
   const changeStatus = async (id: string, status: string) => {
     props.setIsMainScreenLoad(true);
     const res: any = await postAPI(API.profileUrl, {
-      panel: "supportTicket",
       action: "updateStatus",
       id,
+      panel: "supportTicket",
       status,
     });
     if (res.error) {
@@ -250,6 +253,7 @@ export const SupportTicketSection = (props: Readonly<{
           </For>
 
           <For
+            each={props.contactList()}
             fallback={
               <div
                 class={"grid-column-span:6"}
@@ -258,7 +262,6 @@ export const SupportTicketSection = (props: Readonly<{
                 No Tickets Found
               </div>
             }
-            each={props.contactList()}
           >
             {(row: any, index) => {
               return (
@@ -269,10 +272,10 @@ export const SupportTicketSection = (props: Readonly<{
                   <TableBodyCell>{row.message}</TableBodyCell>
                   <TableBodyCell>
                     <ChipDropDown
-                      selectedItem={row.status}
                       onChanged={(e) => {
                         changeStatus(row.id, e);
                       }}
+                      selectedItem={row.status}
                     />
                   </TableBodyCell>
                   <TableBodyCell>
@@ -281,17 +284,17 @@ export const SupportTicketSection = (props: Readonly<{
                       <DeleteDialog
                         buttonLabel={
                           <Icon
-                            icon="fluent:delete-48-regular"
                             class="color:rgb(255,0,0)"
                             height={22}
+                            icon="fluent:delete-48-regular"
                             width={22}
                           />
                         }
+                        message={"Are you sure you want to delete this ticket?"}
                         onConfirm={() => {
                           deleteContact(row.id);
                         }}
                         title={"Delete Support Ticket"}
-                        message={"Are you sure you want to delete this ticket?"}
                       />
                     </div>
                   </TableBodyCell>

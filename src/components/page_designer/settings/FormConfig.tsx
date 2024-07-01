@@ -1,7 +1,8 @@
+import { useParams } from "@solidjs/router";
 import { useContext } from "solid-js";
+
 import { DynamicForm } from "~/components/form/DynamicForm";
 import { GraphContext } from "~/lib/graph/graph";
-import { useParams } from "@solidjs/router";
 
 export function FormConfig() {
   const params = useParams();
@@ -10,11 +11,11 @@ export function FormConfig() {
     <DynamicForm
       buttonAlign={"center"}
       formId={params.entity}
-      id={params.id}
       graph={graph}
-      showMainFieldsOnly={true}
+      id={params.id}
       importExportButtons={false}
       setGraph={setGraph}
+      showMainFieldsOnly={true}
     />
   );
 }

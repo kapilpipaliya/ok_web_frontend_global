@@ -1,6 +1,8 @@
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { getChildVertexes } from "./traverse";
 import { useContext } from "solid-js";
+
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+
+import { getChildVertexes } from "./traverse";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];

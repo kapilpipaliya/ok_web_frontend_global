@@ -1,27 +1,29 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  useContext,
-  createSignal,
-  createEffect,
-  onCleanup,
-  Show,
   For,
+  Show,
+  createEffect,
   createMemo,
+  createSignal,
+  onCleanup,
+  useContext,
 } from "solid-js";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { Container, ContainerLabel } from "./CssUtils";
+
 import "~/css/componentUtilCSS.css";
 
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { Container, ContainerLabel } from "./CssUtils";
+
 export const DisplaySelector = (props: {
-  name: string;
-  options: any;
   infoLink?: string;
+  isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
-  isAddToClass: boolean;
-  value: any;
+  name: string;
   onChangeInput?: (label: any, value: any) => void;
   onRemoveIconClick?: () => void
+  options: any;
+  value: any;
 }) => {
   function formatString(str: string) {
     return str
@@ -67,9 +69,8 @@ export const DisplaySelector = (props: {
   return (
     <Container>
       <Show
-        when={props.isLabelOnTop}
         fallback={
-          <Show when={props.label} fallback={<Content />}>
+          <Show fallback={<Content />} when={props.label}>
             <div class={"w:100% flex jc:space-between ai:center"}>
               <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
                 setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
@@ -81,6 +82,7 @@ export const DisplaySelector = (props: {
             </div>
           </Show>
         }
+        when={props.isLabelOnTop}
       >
         <div class={"w:full"}>
           <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
@@ -104,20 +106,20 @@ export const DisplaySelector = (props: {
           onClick={toggleDropdown}
         >
           <button
-            class="select-button"
-            role="combobox"
-            aria-labelledby="select button"
-            aria-haspopup="listbox"
             aria-controls={`select-dropdown${props.label}`}
             aria-expanded={isActive()}
+            aria-haspopup="listbox"
+            aria-labelledby="select button"
+            class="select-button"
+            role="combobox"
           >
             <span class={`selected-value ${!selected() && "color:lightgray"}`}>{selected() ? formatString(selected()) : `Select Value`}</span>
             <span class="arrow" />
           </button>
           <div>
             <Icon
-              icon={"teenyicons:down-small-outline"}
               height={22}
+              icon={"teenyicons:down-small-outline"}
               width={22}
             />
           </div>
@@ -126,10 +128,10 @@ export const DisplaySelector = (props: {
         <ul
           class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${isActive() ? "visible" : "hidden"
             }`}
+          id={`select-dropdown${props.label}`}
           style={
             "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
           }
-          id={`select-dropdown${props.label}`}
         >
           <For each={props.options}>
             {(option) => {
@@ -146,10 +148,10 @@ export const DisplaySelector = (props: {
                   <label>{formatString(label())}</label>
                   <Show when={selected() === label()}>
                     <Icon
-                      icon={"icon-park-outline:check-one"}
                       height={22}
-                      width={22}
+                      icon={"icon-park-outline:check-one"}
                       style={{ color: "dodgerblue" }}
+                      width={22}
                     />
                   </Show>
                 </li>

@@ -1,7 +1,7 @@
 export default {
   class: "className",
+  colspan: "colSpan",
   for: "htmlFor",
   maxlength: "maxLength",
-  colspan: "colSpan",
   rowspan: "rowSpan",
 } as Record<string, string>;

@@ -1,32 +1,36 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { batch } from "solid-js";
-import { updateEdgeId } from "~/lib/graph/mutate/edge";
+
 import type { GraphInterface } from "~/lib/graph/graph";
+
+import { useToast } from "~/components/Toast";
+import { updateEdgeId } from "~/lib/graph/mutate/edge";
+import { updateVertexId } from "~/lib/graph/mutate/vertex";
+
 import {
+  ProcessStatus,
   edgeOldIdToNewIdMap,
   isAllTxnProcessed,
-  ProcessStatus,
   vertexOldIdToNewIdMap,
 } from "../graph/transaction";
-import { updateVertexId } from "~/lib/graph/mutate/vertex";
-import type { SetStoreFunction } from "solid-js/store";
-import { useToast } from "~/components/Toast";
 
 export function onMutatDataGet(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   d: {
-    txnId: number;
     data: {
       [key in
-      | "insert"
-      | "replace"
+      | "deleteEdge"
       | "deleteVertex"
+      | "insert"
       | "insertEdge"
+      | "replace"
       | "replaceEdge"
-      | "replaceEdgeStart"
       | "replaceEdgeEnd"
-      | "deleteEdge"]?: any;
+      | "replaceEdgeStart"]?: any;
     }[],
+    txnId: number;
   },
 ) {
   const { showErrorToast } = useToast();

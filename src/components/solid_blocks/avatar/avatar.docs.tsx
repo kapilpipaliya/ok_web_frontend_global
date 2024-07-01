@@ -1,6 +1,7 @@
-import { Avatar, AvatarBadge, AvatarGroup } from "./avatar";
-import { Checkbox } from "../checkbox/checkbox";
 import { createSignal } from "solid-js";
+
+import { Checkbox } from "../checkbox/checkbox";
+import { Avatar, AvatarBadge, AvatarGroup } from "./avatar";
 
 export function AvatarDocs() {
   const [expanded, setExpanded] = createSignal(false);

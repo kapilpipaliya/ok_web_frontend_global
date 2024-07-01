@@ -1,7 +1,10 @@
 // Function to update properties of an existing node.
 import type {Session} from "neo4j-driver";
+
 import {int} from "neo4j-driver";
+
 import type {Vertex} from "~/lib/graph/graph";
+
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
 
 export async function updateNodeProperties(

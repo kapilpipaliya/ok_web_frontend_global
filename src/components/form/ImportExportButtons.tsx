@@ -4,31 +4,31 @@ export function ImportExportButtons(props: Readonly<{ setPopup: (value: boolean)
   return (
     <div
       style={{
+        display: "flex",
         "justify-content": "end",
         "margin-bottom": "10px",
-        display: "flex",
       }}
     >
       <button
-        type="button"
-        style={{ display: "flex" }}
         onClick={() => props.setPopup(true)}
+        style={{ display: "flex" }}
+        type="button"
       >
         <Icon
-          icon={"lets-icons:import"}
           height={22}
+          icon={"lets-icons:import"}
           width={22} />
         Import
       </button>
       <button
-        type="button"
-        style={{ display: "flex" }}
-        onClick={() => props.setPopup(true)}
         class="b:blue"
+        onClick={() => props.setPopup(true)}
+        style={{ display: "flex" }}
+        type="button"
       >
         <Icon
-          icon={"lets-icons:export"}
           height={22}
+          icon={"lets-icons:export"}
           width={22} />
         Export
       </button>

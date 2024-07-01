@@ -1,22 +1,24 @@
-import { type JSX, useContext, For, Show, createMemo } from "solid-js";
+import { For, type JSX, Show, createMemo, useContext } from "solid-js";
+
 import { CustomTooltip } from "~/components/Tooltip";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
+
 export const ButtonGroups = (props: {
-  options: {
-    key: JSX.Element;
-    value: string;
-    tooltip?: string;
-    icon?: boolean;
-  }[];
-  name: string;
-  label: any;
-  isLabelOnTop: boolean;
   infoLink?: string;
   isAddToClass?: boolean;
+  isLabelOnTop: boolean;
+  label: any;
+  name: string;
   onChangeInput?: any;
+  options: {
+    icon?: boolean;
+    key: JSX.Element;
+    tooltip?: string;
+    value: string;
+  }[];
 }) => {
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [cssState, setCssState] = useContext(CssEditorContext);
@@ -42,10 +44,10 @@ export const ButtonGroups = (props: {
             <label class={"radio"}>
               <CustomTooltip message={option.tooltip ?? option.value}>
                 <input
-                  type="radio"
-                  name={props.name}
                   checked={selected() === option.value}
+                  name={props.name}
                   onChange={(e) => handleChange(e, option)}
+                  type="radio"
                 />
                 <span class={"name"}>
                   {option.icon ? (
@@ -65,18 +67,18 @@ export const ButtonGroups = (props: {
   const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
   return (
     <Show
-      when={props.isLabelOnTop}
       fallback={
-        <Show when={props.label} fallback={<Content />}>
+        <Show fallback={<Content />} when={props.label}>
           <CenterDiv>
-            <ContainerLabel info={props.name} title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
+            <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
+      when={props.isLabelOnTop}
     >
       <div class={"w:full"}>
-        <ContainerLabel info={props.name} title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
+        <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
         <Content />
       </div>
     </Show>

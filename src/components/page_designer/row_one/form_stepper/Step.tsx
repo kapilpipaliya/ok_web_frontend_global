@@ -1,13 +1,15 @@
 import { type Accessor, createMemo, useContext } from "solid-js";
-import { Tooltip } from "~/components/solid_blocks";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+
 import { useToast } from "~/components/Toast";
+import { Tooltip } from "~/components/solid_blocks";
+import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
+
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 
-export function Step(props: Readonly<{ steps: Vertex[]; step: Vertex; index: Accessor<number>; }>) {
+export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[]; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const { showErrorToast, showSuccessToast } = useToast();
@@ -32,7 +34,7 @@ export function Step(props: Readonly<{ steps: Vertex[]; step: Vertex; index: Acc
     <div
       style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${isActiveStep() ? "color:rgb(37,99,235);" : ""} position:relative;`}
     >
-      <button type="button" class="flex width:100% align-items:center; gap:0.5rem;" onClick={() => setLayoutStore('activeStepId', props.step.id)}>
+      <button class="flex width:100% align-items:center; gap:0.5rem;" onClick={() => setLayoutStore('activeStepId', props.step.id)} type="button">
         <span style="display:flex; align-items:center;">
           <Tooltip content={props.step.P.name}>
             <span
@@ -47,20 +49,20 @@ export function Step(props: Readonly<{ steps: Vertex[]; step: Vertex; index: Acc
       </button>
 
       <button
-        style="margin-left:0.5rem; color:red; background:none; border:none; cursor:pointer;"
         onClick={handleDelete}
+        style="margin-left:0.5rem; color:red; background:none; border:none; cursor:pointer;"
       >
         &times;
       </button>
       <button
-        style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
         onClick={handleMoveUp}
+        style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
       >
         ↑
       </button>
       <button
-        style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
         onClick={handleMoveDown}
+        style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
       >
         ↓
       </button>

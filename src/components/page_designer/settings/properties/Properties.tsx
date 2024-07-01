@@ -1,5 +1,5 @@
-import { PropertiesHeader } from './PropertiesHeader';
 import { PropertiesBody } from './PropertiesBody';
+import { PropertiesHeader } from './PropertiesHeader';
 
 export function Properties() {
   return (

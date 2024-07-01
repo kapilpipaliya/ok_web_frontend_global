@@ -1,18 +1,18 @@
 import {
   type Accessor,
+  type JSX,
+  Match,
+  Switch,
   createEffect,
   createMemo,
   createSignal,
-  type JSX,
-  Match,
   mergeProps,
   splitProps,
-  Switch,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import { type WrappedElement, getElements } from "../tools";
 import "./modal.css";
-import { getElements, type WrappedElement } from "../tools";
 
 export type WrappedModalContentProps = {
   open: Accessor<boolean>;
@@ -25,16 +25,16 @@ export type WrappedModalContentProps = {
   toggle: (open?: boolean | unknown) => void;
 };
 
-export type ModalProps = Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "children"
-> & {
+export type ModalProps = {
+  children: JSX.Element | WrappedElement<WrappedModalContentProps>;
   closeOnClickOutside?: boolean;
   closeOnEsc?: boolean;
-  open?: boolean;
   noPortal?: boolean;
-  children: WrappedElement<WrappedModalContentProps> | JSX.Element;
-};
+  open?: boolean;
+} & Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  "children"
+>;
 
 let modalCount = 0;
 
@@ -89,10 +89,8 @@ export function Modal(props: ModalProps): JSX.Element {
   });
 
   const divProps = mergeProps(containerProps, {
-    role: "dialog" as JSX.HTMLAttributes<HTMLDivElement>["role"],
-    tabIndex: -1,
-    class: props.class ? `sb-modal ${props.class}` : "sb-modal",
     children: modalContent(),
+    class: props.class ? `sb-modal ${props.class}` : "sb-modal",
     onClick: createMemo(() =>
       props.closeOnClickOutside
         ? (ev: MouseEvent) => {
@@ -112,6 +110,8 @@ export function Modal(props: ModalProps): JSX.Element {
           }
         : undefined,
     )(),
+    role: "dialog" as JSX.HTMLAttributes<HTMLDivElement>["role"],
+    tabIndex: -1,
   });
 
   return (

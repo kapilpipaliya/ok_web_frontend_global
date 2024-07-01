@@ -1,7 +1,10 @@
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction} from "solid-js/store";
-import {getAPI} from "~/lib/api/getApi";
+
+import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
+
 import {API} from "~/lib/api/endpoints";
+import {getAPI} from "~/lib/api/getApi";
+
 import { setGraphData } from "./lib/websocket/setGraphData";
 
 export function getInitialDataAndSetToGraph(graph: [get: GraphInterface, set: SetStoreFunction<GraphInterface>]) {

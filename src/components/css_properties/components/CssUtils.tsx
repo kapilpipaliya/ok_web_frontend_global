@@ -1,5 +1,6 @@
-import { type IconifyIconProps, Icon } from "@iconify-icon/solid";
-import { splitProps, Show, type JSXElement } from "solid-js";
+import { Icon, type IconifyIconProps } from "@iconify-icon/solid";
+import { type JSXElement, Show, splitProps } from "solid-js";
+
 import { CustomTooltip } from "~/components/Tooltip";
 import "~/css/componentUtilCSS.css";
 
@@ -8,8 +9,8 @@ export const IconifyIcon = (props: IconifyIconProps) => {
   if (selected.icon === "allCustom") {
     return (
       <Icon
-        icon={"radix-icons:box"}
         height={selected.height ?? 23}
+        icon={"radix-icons:box"}
         width={selected.width ?? 23}
         {...restProps}
       />
@@ -18,8 +19,8 @@ export const IconifyIcon = (props: IconifyIconProps) => {
   if (selected.icon === "customIcon") {
     return (
       <Icon
-        icon={"lucide:box-select"}
         height={selected.height ?? 23}
+        icon={"lucide:box-select"}
         width={selected.width ?? 23}
         {...restProps}
       />
@@ -27,8 +28,8 @@ export const IconifyIcon = (props: IconifyIconProps) => {
   }
   return (
     <Icon
-      icon={selected.icon}
       height={selected.height ?? 23}
+      icon={selected.icon}
       width={selected.width ?? 23}
       {...restProps}
     />
@@ -36,11 +37,11 @@ export const IconifyIcon = (props: IconifyIconProps) => {
 };
 
 export const ContainerLabel = (props: {
-  title: JSXElement;
-  showIcon?: boolean;
-  onIconClick?: any;
-  info?: any;
   class?: any;
+  info?: any;
+  onIconClick?: any;
+  showIcon?: boolean;
+  title: JSXElement;
 }) => (
   <span
     class={`flex ai:center m:0 pt:5 font:14 font-weight:400 ${props.class}`}
@@ -49,23 +50,23 @@ export const ContainerLabel = (props: {
     <Show when={props.showIcon ?? false}>
       &nbsp;
       <Icon
-        style={{ 'color': 'purple' }}
-        onClick={props.onIconClick}
-        icon={"mdi:close"}
         class={"cursor:pointer"}
+        icon={"mdi:close"}
+        onClick={props.onIconClick}
+        style={{ 'color': 'purple' }}
       />
     </Show>
     <Show when={props.info}>
       <CustomTooltip message={'Click for more Info'} title={props.title} >
-        <div onClick={() => {
+        <div class={"cursor:pointer flex"} onClick={() => {
           window.open(`https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`, '_blank');
-        }} class={"cursor:pointer flex"}><Icon style={{ 'color': 'lightgray', 'margin-left': '2px' }} height={21} width={21} icon={"mdi:information-outline"} /></div>
+        }}><Icon height={21} icon={"mdi:information-outline"} style={{ 'color': 'lightgray', 'margin-left': '2px' }} width={21} /></div>
       </CustomTooltip>
     </Show>
   </span>
 );
 
-export const Container = (props: { class?: string; children: JSXElement }) => (
+export const Container = (props: { children: JSXElement; class?: string }) => (
   <span
     class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}
   >

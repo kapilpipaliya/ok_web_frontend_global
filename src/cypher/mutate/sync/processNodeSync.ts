@@ -1,9 +1,13 @@
 import type {Session} from "neo4j-driver";
+
+import jsep from "jsep";
+
 import type { NestedExpression } from "~/cypher/get/NestedExpression";
 import type {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
-import {evalAsync} from "~/lib/expression_eval";
-import jsep from "jsep";
+
 import {addNodeEdges} from "~/cypher/mutate/sync/addNodeEdges";
+import {evalAsync} from "~/lib/expression_eval";
+
 import { findOrCreateNodeAndUpdateProperties } from "./findOrCreateNodeAndUpdateProperties";
 
 export async function processNodeSync(
@@ -17,9 +21,9 @@ export async function processNodeSync(
   const context = {
     nodes: {} as VertexMap,
     relationships: {} as EdgeMap,
-    vertexes,
     session: sessionSource,
     setChildren: true,
+    vertexes,
   }
   const mainResult = await evalAsync(jsep(expression.expression), context);
 
@@ -48,10 +52,10 @@ export async function processNodeSync(
   }
 
   return {
-    result: mainResult,
     graph: {
-      vertexes: context.nodes,
       edges: context.relationships,
+      vertexes: context.nodes,
     },
+    result: mainResult,
   };
 }

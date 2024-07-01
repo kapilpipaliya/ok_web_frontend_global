@@ -1,15 +1,18 @@
-import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
-import type {SetStoreFunction} from "solid-js/store";
-import type {FieldAttribute} from "~/lib/FormMetadataType";
 import type {CellContext} from "@tanstack/solid-table";
-import { selectedValue } from "../fields/selectedValue";
+import type {SetStoreFunction} from "solid-js/store";
+
+import type {FieldAttribute} from "~/lib/FormMetadataType";
+
 import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
+
+import { selectedValue } from "../fields/selectedValue";
 
 export const getTagValue = (props: {
-  graph: GraphInterface;
-  setGraph: SetStoreFunction<GraphInterface>;
   attribute: FieldAttribute;
+  graph: GraphInterface;
   info: CellContext<any, any>;
+  setGraph: SetStoreFunction<GraphInterface>;
 }) => {
   const vertex = selectedValue(
     {

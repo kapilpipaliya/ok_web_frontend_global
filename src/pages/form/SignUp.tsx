@@ -1,17 +1,18 @@
-import { createSignal, useContext } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
 import { Icon } from "@iconify-icon/solid";
+import { useNavigate } from "@solidjs/router";
+import { createSignal, useContext } from "solid-js";
+
 import logo from "~/assets/graphics/logo.png";
+import { useToast } from "~/components/Toast";
 import "~/css/base.css";
 import { registerUserCall } from "~/lib/api/api_functions";
+import { APP_BASE_URL } from "~/lib/constants";
 import { LoadingContext } from "~/lib/contexts";
 import {
   validateEmail,
   validatePassword,
   validateUsername
 } from "~/lib/validations";
-import { APP_BASE_URL } from "~/lib/constants";
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -19,11 +20,11 @@ export function SignUp() {
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
 
   const [formData, setFormData] = createSignal({
-    username: "",
-    subdomain: "",
     email: "",
-    password: "",
     loginType: "signup",
+    password: "",
+    subdomain: "",
+    username: "",
   });
 
   const [showPassword, setShowPassword] = createSignal(false);
@@ -47,18 +48,18 @@ export function SignUp() {
     } else {
       setLoadingSite(true);
       await showLoadingToast({
-        promise: registerUserCall(formData),
         loadMessage: "Registering User...",
-        successMessage: "Registered Successfully",
+        onError: (v) => {
+          setLoadingSite(false);
+        },
         onSuccess: (value) => {
           setLoadingSite(false);
           if (value != null && value.id !== null) {
             navigate(`${APP_BASE_URL}/Page`);
           }
         },
-        onError: (v) => {
-          setLoadingSite(false);
-        },
+        promise: registerUserCall(formData),
+        successMessage: "Registered Successfully",
       });
     }
   };
@@ -67,36 +68,36 @@ export function SignUp() {
     <div
       class="@fade|.5s"
       style={{
-        flex: "auto",
-        "background-size": "cover",
+        "align-items": "center",
+        "background-color": "rgb(239,235,233)",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-size": "cover",
         display: "flex",
-        "background-color": "rgb(239,235,233)",
+        flex: "auto",
         "flex-direction": "column",
-        "align-items": "center",
-        "justify-content": "center",
         height: "100vh",
+        "justify-content": "center",
       }}
     >
       <img
-        src={logo}
         alt="logo"
         class="h:70px mb:100px"
+        src={logo}
         style={{ "justify-self": "center" }}
       />
       <form
         class="m:10px mb:5rem bg:white jc:center r:10"
         style={{
+          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
           padding: "20px 30px",
-          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
         }}
       >
         <img
-          src={"../../public/graphics/register_vector.png"}
           alt="logo"
           class="w:25rem d:none@<md"
+          src={"../../public/graphics/register_vector.png"}
         />
         <div class="w:50% w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
@@ -109,83 +110,83 @@ export function SignUp() {
             {" "}
             <div class="m:10|0|0|0">
               <label
-                for="subdomain"
                 class="f:14"
+                for="subdomain"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Sub Domain
               </label>
               <input
                 name="subdomain"
-                type="text"
-                value={formData().subdomain}
                 onInput={(e) =>
                   setFormData({ ...formData(), subdomain: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Enter SubDomain"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="text"
+                value={formData().subdomain}
               />
             </div>
             <div class="m:10|0|0|0">
               <label
-                for="username"
                 class="f:14"
+                for="username"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Username
               </label>
               <input
                 name="username"
-                type="text"
-                value={formData().username}
                 onInput={(e) =>
                   setFormData({ ...formData(), username: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Enter Name"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="text"
+                value={formData().username}
               />
             </div>
             <div class="m:10|0|0|0">
               <label
-                for="username"
                 class="f:14"
+                for="username"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Email Address
               </label>
               <input
                 name="email"
-                type="text"
-                value={formData().email}
                 onInput={(e) =>
                   setFormData({ ...formData(), email: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Enter Email"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="text"
+                value={formData().email}
               />
             </div>
             <div class="m:10|0|10|0">
               <label
-                for="password"
                 class="f:14"
+                for="password"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Password
@@ -193,44 +194,44 @@ export function SignUp() {
               <div class="rel">
                 <input
                   name="password"
-                  type={`${showPassword() ? "text" : "password"}`}
-                  value={formData().password}
                   onInput={(e) =>
                     setFormData({ ...formData(), password: e.target.value })
                   }
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                  }}
                   placeholder="Enter Password"
                   required
+                  style={{
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                    padding: "8px",
+                    width: "100%",
+                  }}
+                  type={`${showPassword() ? "text" : "password"}`}
+                  value={formData().password}
                 />
                 <Icon
-                  onClick={togglePasswordVisibility}
-                  class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
+                  class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   icon={`${
                     showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
                   }`}
+                  onClick={togglePasswordVisibility}
                 />
               </div>
             </div>
           </div>
 
           <button
-            type="button"
             onclick={handleSubmit}
             style={{
-              width: "100%",
-              padding: "8px",
               background: "rgb(226,65,74)",
-              color: "white",
               border: "none",
               "border-radius": "4px",
+              color: "white",
               cursor: "pointer",
+              padding: "8px",
+              width: "100%",
             }}
+            type="button"
           >
             Sign Up
           </button>

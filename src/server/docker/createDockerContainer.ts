@@ -1,5 +1,6 @@
 // @ts-ignore
 import Docker from 'dockerode';
+
 import { startDockerContainer } from '~/server/docker/startDockerContainer';
 
 // Docker API Reference: https://docs.docker.com/engine/api/v1.24/
@@ -36,10 +37,10 @@ export async function createDockerContainer(
 
   try {
     const container = await docker.createContainer({
+      ExposedPorts,
+      HostConfig: hostConfig,
       Image,
       name,
-      HostConfig: hostConfig,
-      ExposedPorts,
     });
 
     const containerId = container.id;

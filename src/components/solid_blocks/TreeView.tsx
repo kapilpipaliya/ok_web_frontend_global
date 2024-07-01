@@ -1,16 +1,17 @@
+import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
+  type JSX,
+  type Setter, Show,
   createContext,
-  createSignal, type JSX,
-  type Setter,
-  Show,
+  createSignal,
   useContext,
 } from "solid-js";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
-import { Icon } from "@iconify-icon/solid";
 
-export const treeContext = createContext<null | [Accessor<Id[]>, Setter<Id[]>]>(
+import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+
+export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
   null,
 );
 const [expandedItems, setExpandedItems] = createSignal(new Set());
@@ -26,7 +27,7 @@ const toggleExpansion = (id: Id) => {
   setExpandedItems(expandedSet);
 };
 
-export function TreeView(props: Readonly<{ title: string; meta: Vertex; children: JSX.Element }>) {
+export function TreeView(props: Readonly<{ children: JSX.Element; meta: Vertex; title: string }>) {
   let parentValues = useContext(treeContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   // Recursive function to render tree nodes
@@ -39,20 +40,20 @@ export function TreeView(props: Readonly<{ title: string; meta: Vertex; children
         <span class={"display:inline-flex"}>
           <Show when={childrenLength() > 0}>
             <span
-              style="cursor: pointer;"
               onClick={() => toggleExpansion(props.meta.id)}
+              style="cursor: pointer;"
             >
               <Icon
+                class="flex-1"
                 icon={"mdi:chevron-right"}
                 style={{
-                  "font-size": "24px",
                   "border-radius": "50%",
-                  transition: "transform 0.2s linear",
+                  "font-size": "24px",
                   transform: `${
                     !isExpanded() ? "rotate(0deg)" : "rotate(90deg)"
                   }`,
+                  transition: "transform 0.2s linear",
                 }}
-                class="flex-1"
               />
             </span>
           </Show>

@@ -1,9 +1,10 @@
-import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/getSubDomain";
-import { getDriver } from "~/cypher/driver";
 import { int } from "neo4j-driver";
+import { getRequestURL } from "vinxi/http";
 
-export async function deleteRelationShipMGCall(edgeId: string | number | any) {
+import { getDriver } from "~/cypher/driver";
+import { getSubDomain } from "~/server/getSubDomain";
+
+export async function deleteRelationShipMGCall(edgeId: any | number | string) {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);

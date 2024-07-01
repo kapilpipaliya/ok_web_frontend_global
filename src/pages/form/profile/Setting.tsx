@@ -1,25 +1,27 @@
 import {
-  createSignal,
+  type Accessor,
   Match,
   type Setter,
   Show,
   Switch,
+  createSignal,
   untrack,
-  type Accessor,
 } from "solid-js";
-import "~/css/base.css";
-import {Breadcrumb} from "~/components/Breadcrumb";
-import "~/css/tab.css";
 import { createStore } from "solid-js/store";
+
+import {Breadcrumb} from "~/components/Breadcrumb";
+import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
-import {postAPI} from "~/lib/api/postApi";
+import "~/css/base.css";
+import "~/css/tab.css";
 import { API } from "~/lib/api/endpoints";
 import {getAPI} from "~/lib/api/getApi";
-import { PasswordSection } from "./tabs/Password";
+import {postAPI} from "~/lib/api/postApi";
+
 import { GeneralSection } from "./tabs/General";
+import { PasswordSection } from "./tabs/Password";
 import { CurrentPlan, PricingPlans } from "./tabs/Pricing";
 import { SupportTicketSection } from "./tabs/Support";
-import { LoaderNew } from "~/components/LoaderSimple";
 
 export function Settings() {
   const [selectedTab, setSelectedTab] = createSignal("General");
@@ -29,19 +31,19 @@ export function Settings() {
   const [originalProfileData, setOriginalProfileData] = createStore<{
     [key: string]: any;
   }>({}); // Track original data
-  const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
+  const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const [profileData, setProfileData] = createStore<{ [key: string]: any }>({
-    username: "",
+    country: "United States",
     email: "",
     id: "",
-    uId: "",
     profileImage: "",
-    country: "United States",
+    uId: "",
+    username: "",
   });
 
   const breadcrumbData = [
-    { name: "Admin", href: "/admin" },
+    { href: "/admin", name: "Admin" },
     { name: "Settings" },
   ];
 
@@ -49,14 +51,14 @@ export function Settings() {
     .then((data: { [key: string]: any }) => {
       setIsMainScreenLoad(true);
       setProfileData({
-        username: data.properties.username,
+        country: "United States",
         email: data.properties.email,
         id: data.id,
-        uId: data.properties.uId,
         profileImage:
           data.properties.profileImage ??
           "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
-        country: "United States",
+        uId: data.properties.uId,
+        username: data.properties.username,
       });
 
       loadContactData();
@@ -70,9 +72,9 @@ export function Settings() {
   const loadContactData = async () => {
     untrack(() => {
       postAPI(API.profileUrl, {
-        panel: "supportTicket",
         action: "getTicktes",
         email: profileData.email,
+        panel: "supportTicket",
       }).then((value: any) => {
         if (value.contact.length > 0) {
           setContactList(value.contact);
@@ -104,18 +106,18 @@ export function Settings() {
 
   return (
     <>
-      <Breadcrumb title="Account Setting" breadcrumb={breadcrumbData} />
-      <TabSection setSelectedTab={setSelectedTab} selectedTab={selectedTab} />
+      <Breadcrumb breadcrumb={breadcrumbData} title="Account Setting" />
+      <TabSection selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
 
       <Show
-        when={!isMainScreenLoad()}
         fallback={<LoaderNew loaderHeight="50vh" />}
+        when={!isMainScreenLoad()}
       >
         <Switch>
           <Match when={selectedTab() === "General"}>
             <GeneralSection
-              profileData={profileData}
               originalProfileData={originalProfileData}
+              profileData={profileData}
               setOriginalProfileData={setOriginalProfileData}
               setProfileData={setProfileData}
             />
@@ -140,40 +142,40 @@ export function Settings() {
   );
 }
 const TabSection = (props: Readonly<{
-  setSelectedTab: Setter<string>;
   selectedTab: Accessor<string>;
+  setSelectedTab: Setter<string>;
 }>) => {
   return (
     <div class="radio-inputs m:20">
       <label class="radio" onClick={() => props.setSelectedTab("General")}>
         <input
-          type="radio"
-          name="radio"
           checked={props.selectedTab() === "General"}
+          name="radio"
+          type="radio"
         />
         <span class="name">General</span>
       </label>
       <label class="radio" onClick={() => props.setSelectedTab("Pricing")}>
         <input
-          type="radio"
-          name="radio"
           checked={props.selectedTab() === "Pricing"}
+          name="radio"
+          type="radio"
         />
         <span class="name">Pricing</span>
       </label>
       <label class="radio" onClick={() => props.setSelectedTab("Password")}>
         <input
-          type="radio"
-          name="radio"
           checked={props.selectedTab() === "Password"}
+          name="radio"
+          type="radio"
         />
         <span class="name">Password</span>
       </label>
       <label class="radio" onClick={() => props.setSelectedTab("Support")}>
         <input
-          type="radio"
-          name="radio"
           checked={props.selectedTab() === "Support"}
+          name="radio"
+          type="radio"
         />
         <span class="name">Support</span>
       </label>

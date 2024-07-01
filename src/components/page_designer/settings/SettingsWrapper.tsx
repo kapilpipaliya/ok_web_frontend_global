@@ -11,8 +11,8 @@ export function SettingsWrapper() {
         class={"h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5"}
         style={{
           "max-height": "calc(100vh - 120px)",
-          "scrollbar-width": "thin",
           "scrollbar-color": "lightgrey",
+          "scrollbar-width": "thin",
         }}
       >
         <SettingTabs />

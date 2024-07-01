@@ -1,10 +1,11 @@
-import { createSignal, For } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { For, createSignal } from "solid-js";
+
 import { LoaderNew } from "./LoaderSimple";
 
 interface TableTabProps {
-  tabs: string[];
   setActiveTab?: (tab: string) => string;
+  tabs: string[];
 }
 
 export function TableTabs(props: TableTabProps) {
@@ -12,15 +13,15 @@ export function TableTabs(props: TableTabProps) {
 
   const dynamicIcon = (name: string) => {
     const icons: { [key: string]: string } = {
-      Properties: "carbon:logical-partition",
-      Events: "codicon:symbol-method",
       Attribute: "carbon:data-1",
+      Events: "codicon:symbol-method",
+      Permission: "icon-park-outline:permissions",
+      Properties: "carbon:logical-partition",
       Rules: "carbon:subnet-acl-rules",
       Transform: "icon-park-outline:transform",
-      Permission: "icon-park-outline:permissions",
       "Unique Constrain": "material-symbols:inbox-customize-outline",
     };
-    return icons[name] ? <Icon icon={icons[name]} height={22} width={22} /> : <div />;
+    return icons[name] ? <Icon height={22} icon={icons[name]} width={22} /> : <div />;
   };
 
   const handleTabClick = (item: string) => {
@@ -35,21 +36,21 @@ export function TableTabs(props: TableTabProps) {
       <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
           <div
+            class={`${currentTab() === item ? 'f:16' : 'f:14 color:slategray'} p:5|0 bb:2px|solid|lightgrey:hover cursor:pointer`}
             id={`tabletab-${item}`}
+            onClick={() => handleTabClick(item)}
             style={{
               "border-bottom": currentTab() === item ? "2px solid #37c" : '',
             }}
-            class={`${currentTab() === item ? 'f:16' : 'f:14 color:slategray'} p:5|0 bb:2px|solid|lightgrey:hover cursor:pointer`}
-            onClick={() => handleTabClick(item)}
           >
             <div
-              style={{
-                cursor: "pointer",
-                "align-items": "center",
-                "font-weight": "bold",
-                display: "flex",
-              }}
               class={"f-15"}
+              style={{
+                "align-items": "center",
+                cursor: "pointer",
+                display: "flex",
+                "font-weight": "bold",
+              }}
             >
               {dynamicIcon(item)}&nbsp;{item}
             </div>

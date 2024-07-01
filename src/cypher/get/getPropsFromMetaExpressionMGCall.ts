@@ -1,9 +1,12 @@
 
-import { handleMutationData } from "./handleMutationData";
-import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
-import type { Vertex } from "~/lib/graph/graph";
 import type { TransactionPromise } from "neo4j-driver-core";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import {retryTransaction} from "~/cypher/mutate/mutate_api/retryTransaction";
+
+import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
+import { handleMutationData } from "./handleMutationData";
 
 export async function getPropsFromMetaExpressionMGCall(
   metaVertex: Vertex,

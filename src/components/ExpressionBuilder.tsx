@@ -1,18 +1,19 @@
-import { For, Show, useContext } from "solid-js";
-
 import { Icon } from "@iconify-icon/solid";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { binops, unops } from "~/lib/expression_eval";
+import { For, Show, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
-import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
-import { CustomModal } from "./CommonDialog";
+
+import { binops, unops } from "~/lib/expression_eval";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+
+import { CustomModal } from "./CommonDialog";
 import { MultiSelectField } from "./MultiSelect";
+import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 
 type Option =
-  | Record<string, string | number | boolean | unknown>
-  | string
-  | number;
+  | Record<string, boolean | number | string | unknown>
+  | number
+  | string;
 // function expressionFromTree(node) {
 //     if (node.type === "BinaryExpression") {
 //         return (
@@ -46,21 +47,21 @@ type Option =
 // }
 
 export function ExpressionBuilder(props: Readonly<{
-  content: string;
-  title: string;
   component: string;
+  content: string;
+  data?: any;
   meta: Vertex;
   setValue: (data: any) => void;
+  title: string;
   txnId?: number;
-  data?: any;
 }>) {
   const state = props.content.split("+").map(
     (value) =>
       ({ value }) as {
-        unAryOperator?: Option;
-        value: string;
         binAryOperator?: Option;
         error: boolean;
+        unAryOperator?: Option;
+        value: string;
       },
   );
   // const fetchData = (content) => {
@@ -77,7 +78,7 @@ export function ExpressionBuilder(props: Readonly<{
   const [graph, setGraph] = useContext(GraphContext)!;
   const [contentList, setContentList] = createStore(state);
   const handleInsert = () => {
-    setContentList((prev) => [...prev, { value: "", error: false }]);
+    setContentList((prev) => [...prev, { error: false, value: "" }]);
   };
 
   const handleDelete = (index: number) => {
@@ -95,8 +96,8 @@ export function ExpressionBuilder(props: Readonly<{
     const updatedList = [...contentList];
     updatedList[index] = {
       ...updatedList[index],
-      value: e.target.value,
       error: e.target.value.trim() === "",
+      value: e.target.value,
     };
     setContentList(updatedList);
   };
@@ -149,9 +150,6 @@ export function ExpressionBuilder(props: Readonly<{
 
   return (
     <CustomModal
-      buttonIcon={"carbon:settings-edit"}
-      title="Expression Builder"
-      iconSize={14}
       body={
         <div>
           <For each={contentList}>
@@ -163,60 +161,60 @@ export function ExpressionBuilder(props: Readonly<{
                   </span>
                   <Show when={index() > 0}>
                     <Icon
-                      icon={"fluent:delete-28-regular"}
-                      height={20}
-                      width={20}
                       class={"cursor:pointer"}
-                      style={{ color: "red" }}
+                      height={20}
+                      icon={"fluent:delete-28-regular"}
                       onclick={() => handleDelete(index())}
+                      style={{ color: "red" }}
+                      width={20}
                     />
                   </Show>
                 </div>
                 <div class={"flex ai:center jc:space-between"}>
                   <div class={"flex"}>
                     <MultiSelectField
-                      selectedValues={() => []}
-                      displayValueParent="P"
                       displayValueChild="name"
+                      displayValueParent="P"
+                      onRemove={(e) => onUnaryOperatorChange(index())}
+                      onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
                       options={Object.keys(unops).map((key) => ({
-                        id: key,
                         P: { name: key },
+                        id: key,
                       }))}
                       placeholder={"Unary"}
-                      onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
-                      onRemove={(e) => onUnaryOperatorChange(index())}
+                      selectedValues={() => []}
                       selectionLimit={1}
                     />
                   </div>
                   <input
-                    style={`border: ${item.error ? "1px solid red " : ""}`}
                     class={"flex-col"}
+                    style={`border: ${item.error ? "1px solid red " : ""}`}
                     {...props.meta?.P}
-                    placeholder={"Write Expression..."}
                     onchange={(e: any) => handleChange(index(), e)}
-                    value={item.value}
+                    placeholder={"Write Expression..."}
                     title={item.error ? "Please fill in this field" : ""}
+                    value={item.value}
                   />
                   <NestedExpressionBuilder
                     content={item.value}
-                    meta={props.meta}
                     data={props.data}
-                    txnId={props.txnId}
-                    setValue={props.setValue}
+                    meta={props.meta}
                     onClose={handleCancel}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
                   />
                   <div class={"flex"}>
                     <MultiSelectField
-                      selectedValues={() => []}
-                      displayValueParent="P"
                       displayValueChild="name"
+                      displayValueParent="P"
+                      onRemove={(e) => onBinaryOperatorChange(index())}
+                      onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
                       options={Object.keys(binops).map((key) => ({
-                        id: key,
                         P: { name: key },
+                        id: key,
                       }))}
                       placeholder={"Binary"}
-                      onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
-                      onRemove={(e) => onBinaryOperatorChange(index())}
+                      selectedValues={() => []}
                       selectionLimit={1}
                     />
                   </div>
@@ -226,6 +224,8 @@ export function ExpressionBuilder(props: Readonly<{
           </For>
         </div>
       }
+      buttonIcon={"carbon:settings-edit"}
+      dialogClass="min-w:30% r:10px p:0"
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <button
@@ -255,7 +255,8 @@ export function ExpressionBuilder(props: Readonly<{
           </button>
         </div>
       )}
-      dialogClass="min-w:30% r:10px p:0"
+      iconSize={14}
+      title="Expression Builder"
     />
   );
 }

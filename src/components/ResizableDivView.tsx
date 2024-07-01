@@ -1,15 +1,15 @@
 import { type JSX, createEffect, createSignal } from "solid-js";
 
 export function ResizableContainer(props: Readonly<{
-  view: string;
   children: JSX.Element;
+  view: string;
 }>) {
   const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(100vh - 70px)");
   const DIMENSIONS = {
-    mobile: { width: "360px", height: "570px" },
-    tablet: { width: "768px", height: "1026px" },
-    desktop: { width: "100%", height: "1200px" }
+    desktop: { height: "1200px", width: "100%" },
+    mobile: { height: "570px", width: "360px" },
+    tablet: { height: "1026px", width: "768px" }
   };
 
   createEffect(() => {

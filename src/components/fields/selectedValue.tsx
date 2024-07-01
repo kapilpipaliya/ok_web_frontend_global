@@ -1,15 +1,18 @@
+import type { Store } from "solid-js/store";
+
 import { untrack } from "solid-js";
+
+import {
+  getParentVertexValue,
+  getSelectedVertexValue
+} from "~/lib/graph/get/sync/traverse";
 import {
   type GraphInterface,
   type Id,
   IdAttr,
   type Vertex
 } from "~/lib/graph/graph";
-import {
-  getParentVertexValue,
-  getSelectedVertexValue
-} from "~/lib/graph/get/sync/traverse";
-import type { Store } from "solid-js/store";
+
 import { ensureArray } from "./ensureArray";
 
 

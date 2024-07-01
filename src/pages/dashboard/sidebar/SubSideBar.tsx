@@ -1,16 +1,16 @@
 import { Icon } from "@iconify-icon/solid";
 import { useLocation } from "@solidjs/router";
-import { Show, For, type Accessor, type Setter } from "solid-js";
+import { type Accessor, For, type Setter, Show } from "solid-js";
 type MainSideBarProps = {
   activeSection: Accessor<string>;
-  handleSearch: (input: string) => void;
-  searchTerm: Accessor<string>;
-  searchData: Accessor<any>;
-  setSearchTerm: Setter<string>;
   expandedSections: Accessor<Map<string, boolean>>;
-  toggleSection: (sectionName: string) => void;
-  mainIcon: any;
+  handleSearch: (input: string) => void;
   isCollapsed: Accessor<boolean>;
+  mainIcon: any;
+  searchData: Accessor<any>;
+  searchTerm: Accessor<string>;
+  setSearchTerm: Setter<string>;
+  toggleSection: (sectionName: string) => void;
 };
 export const SubSideBar = (props: MainSideBarProps) => {
   const location = useLocation();
@@ -35,16 +35,16 @@ export const SubSideBar = (props: MainSideBarProps) => {
               style={{ color: "#9e9ea7" }}
             />
 
-            <form autocomplete="off" method="post" action="">
+            <form action="" autocomplete="off" method="post">
               <input
-                placeholder="Search..."
-                type="search"
                 autocomplete="none"
                 class="inputSearch f:14"
-                value={props.searchTerm()}
                 onInput={(e) => {
                   props.handleSearch(e.target.value);
                 }}
+                placeholder="Search..."
+                type="search"
+                value={props.searchTerm()}
               />
             </form>
           </div>
@@ -88,16 +88,16 @@ export const SubSideBar = (props: MainSideBarProps) => {
                           }}
                         >
                           <Icon
-                            icon="mingcute:down-fill"
                             class={"transform 2s ease-in-out"}
+                            icon="mingcute:down-fill"
                             style={{
-                              transition: "transform 0.2s linear",
                               "margin-top": "7px",
                               transform: `${
                                 !props.expandedSections().get(nav.P.name)
                                   ? "rotate(0deg)"
                                   : "rotate(180deg)"
                               }`,
+                              transition: "transform 0.2s linear",
                             }}
                           />
                         </button>
@@ -121,8 +121,8 @@ export const SubSideBar = (props: MainSideBarProps) => {
                                     ? "#3B82F6"
                                     : "#4B5563"
                                 }`}
-                                icon={props.mainIcon[child.P.url]}
                                 height={24}
+                                icon={props.mainIcon[child.P.url]}
                                 width={24}
                               />
                               <span class="ml:8 color:#4B5563 ">

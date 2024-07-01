@@ -1,6 +1,11 @@
-import { createMemo, Match, Show, splitProps, Switch, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo, splitProps, useContext } from "solid-js";
 
-import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import type { ComponentProps } from "~/components/fields/ComponentType";
+
+import { ExpressionBuilder } from "~/components/ExpressionBuilder";
+import { MultiSelectField } from "~/components/MultiSelect";
+import { mergeCSS } from "~/components/css_properties/cssUtils";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import {
 
 
@@ -8,25 +13,22 @@ import {
   RadioGroup,
 } from "~/components/solid_blocks";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
-import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { ExpressionBuilder } from "~/components/ExpressionBuilder";
-import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import type { ComponentProps } from "~/components/fields/ComponentType";
-import { MultiSelectField } from "~/components/MultiSelect";
-import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
+import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
+import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { deNullify, ifNotNull } from "~/lib/utils";
-import { mergeCSS } from "~/components/css_properties/cssUtils";
+
 import { Signature } from "../SignatureBox";
 
 export function GenericInputField(
-  props: ComponentProps & {
+  props: {
+    applyDefaults?: boolean;
     component?: string; // depricated
     componentName?: string;
     title: string;
     txnId: number;
-    applyDefaults?: boolean;
-  },
+  } & ComponentProps,
 ) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const component = () => props.component ?? props.componentName ?? props.meta.P.component;
@@ -41,8 +43,8 @@ export function GenericInputField(
 
   return (
     <Show
-      when={!props.disabled}
       fallback={getViewValue(props.data?.P[props.meta.P[IdAttr]])}
+      when={!props.disabled}
     >
       <Switch>
         <Match when={component() === "CheckBox"}>
@@ -50,6 +52,10 @@ export function GenericInputField(
             type="checkbox"
             {...defaultValues()}
             {...deNullify(customMetaProps)}
+            checked={
+              props.data?.P[props.meta.P[IdAttr]] ??
+              props.meta?.P.checked
+            }
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
             onchange={(e: any) => {
               props.setValue
@@ -65,13 +71,9 @@ export function GenericInputField(
                   false,
                 );
             }}
-            checked={
-              props.data?.P[props.meta.P[IdAttr]] ??
-              props.meta?.P.checked
-            }
           />
           <Error />
-          <PageAttrRender metaVertex={props.meta} data={props.data} />
+          <PageAttrRender data={props.data} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "ColorBox"}>
           <input
@@ -79,7 +81,6 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
-            value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             onInput={(e) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -94,6 +95,7 @@ export function GenericInputField(
                   false,
                 );
             }}
+            value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
           <Error />
         </Match>
@@ -113,7 +115,6 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "NumberBox"}>
           <input
-            placeholder={props.meta?.P.label ?? ""}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -128,6 +129,7 @@ export function GenericInputField(
                   false,
                 );
             }}
+            placeholder={props.meta?.P.label ?? ""}
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
@@ -140,6 +142,8 @@ export function GenericInputField(
           <Radio
             {...defaultValues()}
             {...deNullify(customMetaProps)}
+            // name={props.meta?.P.label ?? "radio"}
+            align="left"
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
             // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
             onchange={(e: any) => {
@@ -156,8 +160,6 @@ export function GenericInputField(
                   false,
                 );
             }}
-            // name={props.meta?.P.label ?? "radio"}
-            align="left"
           >
             {props.meta?.P.label ?? "radio"}
           </Radio>
@@ -165,8 +167,8 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "ProgressBar"}>
           <input
-            type="progress"
             style={{ ...props.meta?.P }}
+            type="progress"
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
@@ -176,6 +178,9 @@ export function GenericInputField(
         <Match when={component() === "SelectBox"}>
           <MultiSelectField
             {...defaultValues()}
+            disable={props.disabled}
+            displayValueChild="name"
+            displayValueParent="P"
             onRemove={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -205,18 +210,15 @@ export function GenericInputField(
                 );
             }}
             options={props.meta?.P.options ?? []}
-            selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
             placeholder={props.meta?.P.placeholder ?? "Select Item"}
-            disable={props.disabled}
-            displayValueParent="P"
-            displayValueChild="name"
+            selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
             selectionLimit={1}
           />
           <Error />
         </Match>
         <Match when={component() === "RadioGroup"}>
           <RadioGroup>
-            <PageAttrRender metaVertex={props.meta} data={props.data} />
+            <PageAttrRender data={props.data} metaVertex={props.meta} />
           </RadioGroup>
           <Error />
         </Match>
@@ -283,12 +285,10 @@ export function GenericInputField(
           />
           <Error />
           <ExpressionBuilder
-            content={props.data?.P[props.meta.P[IdAttr]]}
-            meta={props.meta}
-            data={props.data}
-            title={props.title}
-            txnId={props.txnId}
             component={component()}
+            content={props.data?.P[props.meta.P[IdAttr]]}
+            data={props.data}
+            meta={props.meta}
             setValue={
               props.setValue
                 ? props.setValue
@@ -304,6 +304,8 @@ export function GenericInputField(
                     false,
                   )
             }
+            title={props.title}
+            txnId={props.txnId}
           />
         </Match>
         <Match when={component() === "TextBox"}>
@@ -312,7 +314,6 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
-            placeholder={props.meta?.P.label ?? props.title}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -327,6 +328,7 @@ export function GenericInputField(
                   false,
                 );
             }}
+            placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
           <Error />

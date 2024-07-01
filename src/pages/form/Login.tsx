@@ -1,14 +1,15 @@
-import { createSignal, onMount, Show, useContext } from "solid-js";
-import { A, useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
 import { Icon } from "@iconify-icon/solid";
-import { LoadingContext } from "~/lib/contexts";
+import { A, useNavigate } from "@solidjs/router";
+import { Show, createSignal, onMount, useContext } from "solid-js";
+
 import logo from "~/assets/graphics/logo.png";
-import { signInCall } from "~/lib/api/api_functions";
+import { useToast } from "~/components/Toast";
 import "~/css/base.css";
+import { signInCall } from "~/lib/api/api_functions";
 import {postAPI} from "~/lib/api/postApi";
-import { validateEmail, validatePassword, validateUsername } from "~/lib/validations";
 import { APP_BASE_URL } from "~/lib/constants";
+import { LoadingContext } from "~/lib/contexts";
+import { validateEmail, validatePassword, validateUsername } from "~/lib/validations";
 
 export function Login() {
   const navigate = useNavigate();
@@ -16,10 +17,10 @@ export function Login() {
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
   const [formData, setFormData] = createSignal({
     email: "",
+    loginType: "login",
     password: "",
     profileImage: "",
     username: "",
-    loginType: "login",
   });
 
   const getAll = async () => {
@@ -63,9 +64,10 @@ export function Login() {
     } else {
       setLoadingSite(true);
       await showLoadingToast({
-        promise: signInCall(formData),
         loadMessage: "Logging In...",
-        successMessage: "Logged In Successfully",
+        onError(error) {
+          setLoadingSite(false);
+        },
         onSuccess: (value) => {
           setLoadingSite(false);
 
@@ -73,9 +75,8 @@ export function Login() {
             navigate(`${APP_BASE_URL}/Page`);
           }
         },
-        onError(error) {
-          setLoadingSite(false);
-        },
+        promise: signInCall(formData),
+        successMessage: "Logged In Successfully",
       });
     }
   };
@@ -84,36 +85,36 @@ export function Login() {
     <div
       class="@fade|.5s"
       style={{
-        flex: "auto",
-        "background-size": "cover",
+        "align-items": "center",
+        "background-color": "rgb(239,235,233)",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-size": "cover",
         display: "flex",
-        "background-color": "rgb(239,235,233)",
+        flex: "auto",
         "flex-direction": "column",
-        "align-items": "center",
-        "justify-content": "center",
         "grid-row-gap": "50px",
         height: "100vh",
+        "justify-content": "center",
       }}
     >
       <Show
-        when={formData().profileImage}
         fallback={
           <img
-            src={logo}
             alt="logo"
             class="@fade|.5s"
-            style={{ "justify-self": "center", height: "70px" }}
+            src={logo}
+            style={{ height: "70px", "justify-self": "center" }}
           />
         }
+        when={formData().profileImage}
       >
         <div class="text-align:-webkit-center">
           <img
-            src={formData().profileImage}
             alt="logo"
             class="r:10 @fade|.5s bg:white p:2"
-            style={{ "justify-self": "center", height: "130px" }}
+            src={formData().profileImage}
+            style={{ height: "130px", "justify-self": "center" }}
           />
           <div class="m:10">
             <span>Welcome Back,</span>
@@ -126,16 +127,16 @@ export function Login() {
       <form
         class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
         style={{
+          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
           padding: "20px 30px",
-          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
         }}
       >
         <img
-          src={"../../public/graphics/login_vector.jpg"}
-          style={{ width: "25rem" }}
           alt="logo"
           class="d:none@<md"
+          src={"../../public/graphics/login_vector.jpg"}
+          style={{ width: "25rem" }}
         />
         <div class="mt:25 w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">Log In</div>
@@ -143,67 +144,67 @@ export function Login() {
             You Will be Redirected to Home Page
           </div>
           <label
-            for="username"
             class="f:14"
+            for="username"
             style={{ display: "block", "margin-bottom": "5px" }}
           >
             Email Address or Username
           </label>
           <input
+            autocomplete="email"
             name="email"
-            type="text"
-            value={formData().email}
             onInput={(e) =>
               setFormData({ ...formData(), email: e.target.value })
             }
-            style={{
-              width: "100%",
-              padding: "8px",
-              border: "1px solid #ccc",
-              "border-radius": "4px",
-            }}
-            autocomplete="email"
             placeholder="Your email or username"
             required
+            style={{
+              border: "1px solid #ccc",
+              "border-radius": "4px",
+              padding: "8px",
+              width: "100%",
+            }}
+            type="text"
+            value={formData().email}
           />
           <label
-            for="password"
             class="f:14 mt:5"
+            for="password"
             style={{ display: "block", "margin-bottom": "5px" }}
           >
             Password
           </label>
           <div class="rel">
             <input
+              autocomplete="password"
               name="password"
-              type={`${showPassword() ? "text" : "password"}`}
-              value={formData().password}
               onInput={(e) =>
                 setFormData({ ...formData(), password: e.target.value })
               }
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-              }}
-              autocomplete="password"
               placeholder="Your Password"
               required
+              style={{
+                border: "1px solid #ccc",
+                "border-radius": "4px",
+                padding: "8px",
+                width: "100%",
+              }}
+              type={`${showPassword() ? "text" : "password"}`}
+              value={formData().password}
             />
             <Icon
-              onClick={togglePasswordVisibility}
-              class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
               aria-label="Toggle password visibility"
+              class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
               icon={`${
                 showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
               }`}
+              onClick={togglePasswordVisibility}
             />
           </div>
           <div
             style={{
-              display: "flex",
               "align-items": "center",
+              display: "flex",
               "justify-content": "space-between",
               margin: "10px 0",
             }}
@@ -213,25 +214,25 @@ export function Login() {
               &nbsp;Remember me
             </label>
             <a
-              href="/auth/forgotPassword"
               class="f:14"
+              href="/auth/forgotPassword"
               style={{ color: "#069", "text-decoration": "none" }}
             >
               Forgot Password?
             </a>
           </div>
           <button
-            type="button"
             onClick={handleSubmit}
             style={{
-              width: "100%",
-              padding: "10px",
               background: "rgb(226,65,74)",
-              color: "white",
               border: "none",
               "border-radius": "4px",
+              color: "white",
               cursor: "pointer",
+              padding: "10px",
+              width: "100%",
             }}
+            type="button"
           >
             Log In
           </button>

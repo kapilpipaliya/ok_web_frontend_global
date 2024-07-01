@@ -1,15 +1,15 @@
-import { createSignal, type JSX, Show, onMount, onCleanup, type Accessor, type Setter } from "solid-js";
+import { type Accessor, type JSX, type Setter, Show, createSignal, onCleanup, onMount } from "solid-js";
 
 interface DrawerProps {
-  customButton?: (props: Readonly<{
-    onClick: () => void;
-    isOpen: boolean;
-  }>) => JSX.Element;
   children: JSX.Element;
+  customButton?: (props: Readonly<{
+    isOpen: boolean;
+    onClick: () => void;
+  }>) => JSX.Element;
   drawerStyle?: string;
-  width?: string;
   open?: Accessor<boolean>;
   setIsOpen?: Setter<boolean>;
+  width?: string;
 }
 
 export function Drawer(props: Readonly<DrawerProps>) {
@@ -61,7 +61,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
     <>
       <Show when={props.customButton}>
         {props.customButton && (
-          <props.customButton onClick={toggleDrawer} isOpen={isOpen()} />
+          <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
         )}
       </Show>
       <div
@@ -81,8 +81,9 @@ export function Drawer(props: Readonly<DrawerProps>) {
           border-left: ${mainDivHover()?"2px solid #37c":"none"};
         `}
       >
-        <div style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`} class="overflow:auto  h:100%">{props.children}</div>
+        <div class="overflow:auto  h:100%" style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`}>{props.children}</div>
         <div
+          onMouseDown={handleMouseDown}
           onMouseEnter={() => setMainDivHover(true)}
           onMouseLeave={() => setMainDivHover(false)}
           style={`
@@ -93,10 +94,10 @@ export function Drawer(props: Readonly<DrawerProps>) {
             height: 100%;
             cursor: ew-resize;
           `}
-          onMouseDown={handleMouseDown}
         />
       </div>
       <div
+        onClick={toggleDrawer}
         style={`
           position: fixed;
           top: 0;
@@ -106,7 +107,6 @@ export function Drawer(props: Readonly<DrawerProps>) {
           z-index: 10;
           display: ${isOpen() ? "block" : "none"};
         `}
-        onClick={toggleDrawer}
       />
     </>
   );

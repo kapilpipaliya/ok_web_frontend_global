@@ -1,12 +1,14 @@
-import type { GraphInterface } from "~/lib/graph/graph";
 import type { Store } from "solid-js/store";
-import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import { FormMetaData } from "~/lib/formMetaData";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+
+import type { IFormMetaData } from "~/lib/FormMetadataType";
+import type { GraphInterface } from "~/lib/graph/graph";
+
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { getFormMetaData } from "~/lib/drag_drop/getChildrenAttrs";
-import type { IFormMetaData } from "~/lib/FormMetadataType";
+import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 async function getFormAttr(tableId: string): Promise<{ error: string, form?: IFormMetaData }> {
   let form = FormMetaData[tableId] || FormMetaDataAuth[tableId];
@@ -38,9 +40,9 @@ export async function getTableData(tableId: string, skip?: number, limit?: numbe
     const { incoming, outgoing } = getEdgesFromRowsAttr(formAttrResult.form!.attributes);
     const expression = paginationExpression({
       coll: tableId,
-      skip: skip,
-      limit: limit,
       filter: "",
+      limit: limit,
+      skip: skip,
     });
 
     const result = await getDataMGCall({

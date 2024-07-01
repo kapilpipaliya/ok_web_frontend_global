@@ -1,13 +1,16 @@
-import { batch } from "solid-js";
+import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import { batch } from "solid-js";
+import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
+
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
+import { useToast } from "~/components/Toast";
+import { deleteEdge } from "~/lib/graph/mutate/edge";
+
 import {
   transactionDetailAdd,
 } from "../transaction";
-import { pipe } from "@mobily/ts-belt";
-import { deleteEdge } from "~/lib/graph/mutate/edge";
-import { useToast } from "~/components/Toast";
 
 // return a new Vertex
 export function newVertex(
@@ -15,7 +18,7 @@ export function newVertex(
   labels: string[],
   properties?: { [key: string]: any },
 ): Vertex {
-  return { id, L: labels, P: properties || {}, IN: {}, OUT: {} };
+  return { IN: {}, L: labels, OUT: {}, P: properties || {}, id };
 }
 
 // add a new vertex to the graph
@@ -25,7 +28,7 @@ export function addNewVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
-  error: string | boolean;
+  error: boolean | string;
   txnDetailIndex?: number;
 } {
   if (graph.vertexes[vertex.id]) {
@@ -65,7 +68,7 @@ export function replaceVertexProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: {},
-): { error: string | boolean; txnDetailIndex?: number } {
+): { error: boolean | string; txnDetailIndex?: number } {
   if (!graph.vertexes[vertexId]) {
     return { error: "Vertex ID is not valid" };
   }
@@ -74,8 +77,8 @@ export function replaceVertexProperties(
   const data = klona(graph.vertexes[vertexId]);
   transactionDetailAdd(txnId, {
     data,
-    replace: () => klona(graph.vertexes[vertexId]),
     redo: () => replaceVertexProperties(0, vertexId, graph, setGraph, data.P),
+    replace: () => klona(graph.vertexes[vertexId]),
     revert: () =>
       replaceVertexProperties(0, vertexId, graph, setGraph, originalProperties),
   }, graph);
@@ -93,7 +96,7 @@ export function mergeVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
   types?: { [key: string]: any },
-): { error: string | boolean; txnDetailIndex?: number } {
+): { error: boolean | string; txnDetailIndex?: number } {
   const vertex = graph.vertexes[vertexId];
   if (!vertex) {
     return { error: `Vertex ID is not valid ${vertexId}` };
@@ -125,7 +128,7 @@ export function deleteVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
-  error: string | boolean;
+  error: boolean | string;
   txnDetailIndex?: number;
 } {
   const { showErrorToast } = useToast();

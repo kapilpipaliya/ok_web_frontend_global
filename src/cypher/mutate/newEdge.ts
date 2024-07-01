@@ -1,9 +1,11 @@
-import { getDriver } from "~/cypher/driver";
-import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/getSubDomain";
-import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
+import { getRequestURL } from "vinxi/http";
+
 import type { Id } from "~/lib/graph/graph";
+
+import { getDriver } from "~/cypher/driver";
+import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function newEdgeMGCall(
   edgeType: string,
@@ -40,8 +42,8 @@ export async function newEdgeMGCall(
     await transaction.commit();
 
     return {
-      error: false,
       edge: newEdge,
+      error: false,
     };
   } catch (error) {
     console.error(error);

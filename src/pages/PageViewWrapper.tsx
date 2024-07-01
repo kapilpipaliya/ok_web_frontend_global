@@ -1,6 +1,7 @@
 
 import { clientOnly } from "@solidjs/start";
-import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
+import { Show, createEffect, createSignal, on, onMount, useContext } from "solid-js";
+
 import PreviewPage from "~/components/PreviewPage";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
@@ -12,11 +13,11 @@ import { setGraphData } from "~/lib/websocket/setGraphData";
 const PageView = clientOnly(() => import("~/components/page_attr_render/PageView"));
 
 export function PageViewWrapper(props: {
+  expression?: string,
+  formId?: string,
+  pageId?: string,
   pageVertexLabel?: string,
   pageVertexName?: string,
-  pageId?: string,
-  formId?: string,
-  expression?: string,
 }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
@@ -94,22 +95,22 @@ export function PageViewWrapper(props: {
   const cleanUpConfig = {};
 
   return (
-    <Show when={count()} keyed>
+    <Show keyed when={count()}>
       <Show when={mounted() && metaVertex()}>
-        <Show when={!(isPreview())} fallback={
+        <Show fallback={
           <PreviewPage>
             <PageView
-              metaVertex={metaVertex()}
               data={dataVertex()}
               isPreview={true}
+              metaVertex={metaVertex()}
             />
           </PreviewPage>
-        }>
+        } when={!(isPreview())}>
           {/* <Show when={dataVertex()}> */}
           <PageView
-            metaVertex={metaVertex()}
             data={dataVertex()}
             isPreview={true}
+            metaVertex={metaVertex()}
           />
         </Show>
         {/* </Show> */}

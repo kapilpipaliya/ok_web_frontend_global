@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+
 import { Checkbox } from "./checkbox";
 
 export function CheckboxDocs() {
@@ -20,8 +21,8 @@ export function CheckboxDocs() {
         It has all{" "}
         <a
           href="https://developer.mozilla.org/de/docs/Web/HTML/Element/Input/checkbox"
-          target="_blank"
           rel="noreferrer noopener"
+          target="_blank"
         >
           the properties of an input of type "checkbox"
         </a>
@@ -48,7 +49,7 @@ CheckboxProps {
       </dl>
       <h4>Effect</h4>
       <label for="checkbox-alignment">left </label>
-      <Checkbox id="checkbox-alignment" switch setChecked={setAlignRight}>
+      <Checkbox id="checkbox-alignment" setChecked={setAlignRight} switch>
         {" "}
         right
       </Checkbox>{" "}
@@ -67,13 +68,13 @@ CheckboxProps {
       <div class="example">
         <Checkbox
           align={alignRight() ? "right" : "left"}
-          switch={asSwitch()}
+          aria-invalid={invalid() || undefined}
           checked={checked()}
           disabled={disabled()}
-          aria-invalid={invalid() || undefined}
           setChecked={(checked) =>
             setEvents((e) => `setChecked(${checked})\n${e}`)
           }
+          switch={asSwitch()}
         >
           {" "}
           Example Checkbox{" "}

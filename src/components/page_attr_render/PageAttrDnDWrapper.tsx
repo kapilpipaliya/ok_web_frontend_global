@@ -1,31 +1,33 @@
-import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX, } from "solid-js";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
-import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
-import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
-import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
+import { Icon } from "@iconify-icon/solid";
+import { Popover } from "@kobalte/core/popover";
+import { type JSX, Match, Show, Switch, createMemo, createSelector, createSignal, onMount, useContext, } from "solid-js";
+
+import { PageRenderVertexContext } from "~/components/page_attr_render/Context";
+import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
+import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
+import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
+import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
-import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { IsPreviewContext } from "~/lib/contexts";
-import { Popover } from "@kobalte/core/popover";
-import { PageRenderVertexContext } from "~/components/page_attr_render/Context";
-import { iconMap } from "~/lib/constants";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { DropdownMenu } from "../DropdownMenu";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { submitDataCall } from "~/lib/api/api_functions";
+import { iconMap } from "~/lib/constants";
+import { IsPreviewContext } from "~/lib/contexts";
+import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
+import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+
+import { DropdownMenu } from "../DropdownMenu";
 import { useToast } from "../Toast";
-import { submitDataCall } from "~/lib/api/api_functions";
-import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
-export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX.Element; }>) {
+export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item: Vertex; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
@@ -83,13 +85,13 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
     });
 
     return (
-      <DropdownMenu parentRef={saveAsTemplateRef as any} onMouseLeave={() => setShowModal(false)}>
+      <DropdownMenu onMouseLeave={() => setShowModal(false)} parentRef={saveAsTemplateRef as any}>
         Save As Template
-        <input type="text" value={templateName()} onChange={(e) => setTemplateName(e.target.value)} ref={nameInputRef!} />
+        <input onChange={(e) => setTemplateName(e.target.value)} ref={nameInputRef!} type="text" value={templateName()} />
         <Show when={error()}>
           <div style={{ color: 'red' }}>{error()}</div>
         </Show>
-        <button type="button" disabled={!templateName()} onClick={() => saveAsTemplate(templateName())}>Save</button>
+        <button disabled={!templateName()} onClick={() => saveAsTemplate(templateName())} type="button">Save</button>
       </DropdownMenu>
     );
   };
@@ -98,11 +100,11 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
     <Show when={isSelectedLayoutId(props.itemId)}>
       <Tooltip content={"Properties"} nowrap>
         <Icon
+          class="cursor:pointer flex ai:center"
+          height={22}
           icon={"mingcute:settings-5-line"}
           onclick={() => setLayoutStore('showPropertiesDrawer', !layoutStore.showPropertiesDrawer)}
-          height={22}
-          width={22}
-          class="cursor:pointer flex ai:center" />
+          width={22} />
       </Tooltip>
     </Show>
   );
@@ -118,49 +120,49 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
         <PropertyDrawer itemId={props.item.id} />
         <Tooltip content={"Move"} nowrap>
           <Icon
+            class="cursor:pointer flex"
             draggable={true}
-            onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
-            icon={"material-symbols-light:drag-pan-rounded"}
             height={20}
-            width={20}
-            class="cursor:pointer flex" />
+            icon={"material-symbols-light:drag-pan-rounded"}
+            onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
+            width={20} />
         </Tooltip>
         <Tooltip content={"Parent"} nowrap>
           <Icon
-            icon={"mdi:arrow-up"}
-            height={20}
-            width={20}
             class="cursor:pointer flex"
+            height={20}
+            icon={"mdi:arrow-up"}
             onClick={() => {
               const parentResult = getParentVertex(["Attr"], props.item, graph);
               if (parentResult.error) return;
               onLayoutItemClick(setLayoutStore, parentResult.vertex!, graph, setGraph);
-            }} />
+            }}
+            width={20} />
         </Tooltip>
         <Tooltip content={"Duplicate"}>
           <Icon
-            icon={"mage:copy"}
-            height={20}
-            width={20}
             class="cursor:pointer flex"
-            onClick={() => cloneLayoutAndChildren(props.item, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData)} />
+            height={20}
+            icon={"mage:copy"}
+            onClick={() => cloneLayoutAndChildren(props.item, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData)}
+            width={20} />
         </Tooltip>
         <Tooltip content={"Save as Template"}>
           <Icon
-            ref={el => saveAsTemplateRef = el}
-            icon={"fluent:save-as-24-regular"}
-            height={20}
-            width={20}
             class="cursor:pointer flex"
-            onClick={() => setShowModal(true)} />
+            height={20}
+            icon={"fluent:save-as-24-regular"}
+            onClick={() => setShowModal(true)}
+            ref={el => saveAsTemplateRef = el}
+            width={20} />
         </Tooltip>
         <Tooltip content={"Delete"}>
           <Icon
-            onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, layoutStore.formData.txnId, getComponentName(), showSuccessToast)}
-            icon={"fluent:delete-20-regular"}
+            class="cursor:pointer flex"
             height={20}
-            width={20}
-            class="cursor:pointer flex" />
+            icon={"fluent:delete-20-regular"}
+            onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, layoutStore.formData.txnId, getComponentName(), showSuccessToast)}
+            width={20} />
         </Tooltip>
         <Show when={showModal()}>
           <SaveAsTemplateMenu />
@@ -172,7 +174,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
   const HoverAttrConfigPopOver = () => (
     <span class="position:relative ">
       <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235) r:5px|5px|0px|0px z:50 p:0.25rem ai:center right:0">
-        <Icon icon={iconMap[getComponentName()]} class="flex" />
+        <Icon class="flex" icon={iconMap[getComponentName()]} />
         <Tooltip content={"Name"} nowrap>
           <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
             {getComponentName()}
@@ -222,6 +224,17 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
     <PageRenderVertexContext.Provider value={[...useContext(PageRenderVertexContext), props.item]}>
       <button
         class={`contents ${getBorder() || ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
+        }}
+        onDragEnter={(e) => handleDragOverAndSetDropPosition(e,layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
+        onDragLeave={() => handleDragLeave(setLayoutStore)}
+        onDragOver={(e) => handleDragOver(e, layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
+        onDrop={async (e) => {debugger
+          await handleDrop(e, layoutStore, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
+          resetDragDropState(setLayoutStore);
+        }}
         onMouseOver={(e) => {
           e.stopPropagation();
           setLayoutStore('hoverId', props.item.id);
@@ -230,19 +243,8 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
           e.stopPropagation();
           setLayoutStore('hoverId', -1);
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
-        }}
-        onDragOver={(e) => handleDragOver(e, layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
-        onDragEnter={(e) => handleDragOverAndSetDropPosition(e,layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
-        onDragLeave={() => handleDragLeave(setLayoutStore)}
-        onDrop={async (e) => {debugger
-          await handleDrop(e, layoutStore, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
-          resetDragDropState(setLayoutStore);
-        }}
       >
-        <Popover placement={`${isSelectedLayoutId(props.item.id) ? "top-start" : "top-end"}`} open={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id)}>
+        <Popover open={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id)} placement={`${isSelectedLayoutId(props.item.id) ? "top-start" : "top-end"}`}>
           <Popover.Anchor>
             {props.children}
           </Popover.Anchor>

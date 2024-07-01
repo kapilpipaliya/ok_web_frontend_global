@@ -1,8 +1,8 @@
-import {createEffect, createSignal, createUniqueId, type JSX, Show} from "solid-js";
+import {type JSX, Show, createEffect, createSignal, createUniqueId} from "solid-js";
 
 export function CustomTooltip(props: Readonly<{
-  message: any;
   children: JSX.Element;
+  message: any;
   title?: string;
 }>) {
   const [isHovered, setIsHovered] = createSignal(false);
@@ -33,10 +33,10 @@ export function CustomTooltip(props: Readonly<{
         {props.children}
       </div>
       <div
-        id={id}
         class={
           "text:nowrap center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
         }
+        id={id}
       >
         <Show when={props.title}>
           <div class={"font-weight:500 f:14"}>{props.title}</div>

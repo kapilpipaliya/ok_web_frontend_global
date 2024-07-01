@@ -1,69 +1,36 @@
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
+import { useContext } from "solid-js";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
-import { GraphContext } from "~/lib/graph/graph";
-import { useContext } from "solid-js";
 import type { IFormContext } from "~/lib/contexts";
 
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
+import { GraphContext } from "~/lib/graph/graph";
+
 export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
-  User: {
-    title: "User",
-    name: "User",
-    isInlineEditable: true,
-    attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "email", component: "TextBox" },
-      { name: "pass", component: "TextBox" },
-      {
-        name: "role",
-        component: "TagBox",
-        
-          collection: "g:'Role'",
-        
-      },
-    ],
-  },
-  Perm: {
-    title: "Perm",
-    name: "Perm",
-    isInlineEditable: true,
-    attributes: [{ name: "name", component: "TextBox" }],
-  },
-  Role: {
-    title: "Role",
-    name: "Role",
-    isInlineEditable: true,
-    attributes: [{ name: "name", component: "TextBox" }],
-  },
   Dashboard: {
-    title: "Dashboards",
-    name: "Dashboard",
-    isInlineEditable: true,
     attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "description", component: "TextArea" },
+      { component: "TextBox", name: "name" },
+      { component: "TextArea", name: "description" },
     ],
+    isInlineEditable: true,
+    name: "Dashboard",
+    title: "Dashboards",
   },
   Import: {
-    title: "Simple Insert",
-    name: "Import",
-    isRealTime: true,
     attributes: [
       {
-        name: "csv",
         component: "TextArea",
-         width: 600, height: 500,
+        height: 500,
+         name: "csv", width: 600,
       },
-      { name: "label", component: "TextBox" },
-      { name: "dry", component: "CheckBox" },
-      { name: "lookup", component: "TextBox" },
-      { name: "lookupId", component: "TextBox" },
-      { name: "lookupChild", component: "TextBox" },
+      { component: "TextBox", name: "label" },
+      { component: "CheckBox", name: "dry" },
+      { component: "TextBox", name: "lookup" },
+      { component: "TextBox", name: "lookupId" },
+      { component: "TextBox", name: "lookupChild" },
       {
-        name: "meta",
-        component: "DynamicTable",
         attributes: [
-          { name: "column", component: "TextBox" },
+          { component: "TextBox", name: "column" },
           // {
           //  name: "column",
           //  component: "SelectBox",
@@ -72,69 +39,72 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
           //   collection: "Update Dynamically on meta based on first row",
           //  },
           // },
-          { name: "attrId", displayName: "Attribute ID", component: "TextBox" },
+          { component: "TextBox", displayName: "Attribute ID", name: "attrId" },
           {
-            name: "coll",
-            displayName: "Lookup Collection",
+            collection: "g:'Coll'",
             component: "SelectBox",
+            displayExpr: "name",
             
-              displayExpr: "name",
-              collection: "g:'Coll'",
+              displayName: "Lookup Collection",
+              name: "coll",
             
           },
           {
-            name: "collLabel",
+            component: "TextBox",
             displayName: "Lookup Label",
-            component: "TextBox",
+            name: "collLabel",
           },
-          { name: "inward", component: "CheckBox" },
+          { component: "CheckBox", name: "inward" },
           {
-            name: "collId",
+            component: "TextBox",
             displayName: "Lookup Collection ID",
-            component: "TextBox",
+            name: "collId",
           },
-          { name: "edge", displayName: "Edge Type", component: "TextBox" },
+          { component: "TextBox", displayName: "Edge Type", name: "edge" },
           {
-            name: "func",
-            displayName: "Function",
-            component: "SelectBox",
-            
-              stringValue: true,
-              displayExpr: "key",
-              collection:
+            collection:
                 '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
+            component: "SelectBox",
+            displayExpr: "key",
+            
+              displayName: "Function",
+              name: "func",
+              stringValue: true,
             
           },
-          { name: "skip", component: "CheckBox" },
-          { name: "skipRow", component: "TextArea" },
+          { component: "CheckBox", name: "skip" },
+          { component: "TextArea", name: "skipRow" },
         ],
+        component: "DynamicTable",
+        name: "meta",
       },
     ],
+    isRealTime: true,
+    name: "Import",
+    title: "Simple Insert",
   },
   Nav: {
-    title: "Navigation",
-    name: "Nav",
     attributes: [
       {
-        name: "title",
         component: "TextBox",
+        name: "title",
         
           onchange: '{"new": ["name","id"]}',
         
       },
       {
-        name: "name",
         component: "TextBox",
+        name: "name",
         
           validationRules: [
             {
-              type: "required",
               message: "ID is required",
+              type: "required",
             },
             {
-              type: "custom",
               ignoreEmptyValue: true,
               message: "This ID is already taken",
+              type: "custom",
               validationCallback: (options: any) => {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
@@ -154,320 +124,351 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
           ],
         
       },
-      { name: "description", component: "TextArea" },
+      { component: "TextArea", name: "description" },
       {
-        name: "Attr",
-        component: "DynamicTable",
-        tab: "Attributes",
-        
-          type: "NavAttr",
-        
         attributes: [
           {
-            name: "name",
-            displayName: "ID",
             component: "TextBox",
+            displayName: "ID",
+            name: "name",
 
           },
           {
-            name: "definition",
             component: "TextArea",
+            name: "definition",
           },
           {
-            name: "expanded",
             component: "CheckBox",
+            name: "expanded",
           },
           {
-            name: "func",
             component: "SelectBox",
-            
-              items: `Table
+            items: `Table
 Form
 Url`,
             
+              name: "func",
+            
           },
           {
-            name: "Coll",
+            collection: "g:'Coll'",
             component: "SelectBox",
             
-              collection: "g:'Coll'",
+              name: "Coll",
             
           },
           {
-            name: "Form",
+            collection: "g:'Form'",
             component: "SelectBox",
             
-              collection: "g:'Form'",
+              name: "Form",
             
           },
           {
-            name: "url",
             component: "TextBox",
+            name: "url",
           },
           {
-            name: "Role",
-            component: "DynamicTable",
-            tab: "Permission",
             attributes: [
               {
-                name: "role",
+                collection: "g:'Role'",
                 component: "SelectBox",
                 
-                  collection: "g:'Role'",
+                  name: "role",
                 
               },
               {
-                name: "Perm",
-                component: "DynamicTable",
                 attributes: [
                   {
-                    name: "perm",
+                    collection: "g:'Perm'",
                     component: "SelectBox",
                     
-                      collection: "g:'Perm'",
+                      name: "perm",
                     
                   },
                 ],
+                component: "DynamicTable",
+                name: "Perm",
               },
             ],
+            component: "DynamicTable",
+            name: "Role",
+            tab: "Permission",
           },
           {
-            name: "Attr",
-            component: "DynamicTable",
-            tab: "expand",
-            
-              type: "NavAttr",
- 
             attributes: [
               {
-                name: "name",
-                displayName: "ID",
                 component: "TextBox",
+                displayName: "ID",
+                name: "name",
                 
               },
               {
-                name: "definition",
                 component: "TextArea",
+                name: "definition",
               },
               {
-                name: "expanded",
                 component: "CheckBox",
+                name: "expanded",
               },
               {
-                name: "func",
                 component: "SelectBox",
-                
-                  items: `Table
+                items: `Table
 Form
 Url`,
+                
+                  name: "func",
 
               },
               {
-                name: "Coll",
+                collection: "g:'Coll'",
                 component: "SelectBox",
                 
-                  collection: "g:'Coll'",
+                  name: "Coll",
           
               },
               {
-                name: "Form",
+                collection: "g:'Form'",
                 component: "SelectBox",
                 
-                  collection: "g:'Form'",
+                  name: "Form",
                 
               },
               {
-                name: "url",
                 component: "TextBox",
+                name: "url",
               },
               {
-                name: "Role",
-                component: "DynamicTable",
-                tab: "Permission",
                 attributes: [
                   {
-                    name: "role",
+                    collection: "g:'Role'",
                     component: "SelectBox",
                     
-                      collection: "g:'Role'",
+                      name: "role",
                     
                   },
                   {
-                    name: "Perm",
-                    component: "DynamicTable",
                     attributes: [
                       {
-                        name: "perm",
+                        collection: "g:'Perm'",
                         component: "SelectBox",
                         
-                          collection: "g:'Perm'",
+                          name: "perm",
                         
                       },
                     ],
+                    component: "DynamicTable",
+                    name: "Perm",
                   },
                 ],
+                component: "DynamicTable",
+                name: "Role",
+                tab: "Permission",
               },
               {
-                name: "Attr",
-                component: "DynamicTable",
-                tab: "expand",
-                
-                  type: "NavAttr",
-                
                 attributes: [
                   {
-                    name: "name",
-                    displayName: "ID",
                     component: "TextBox",
+                    displayName: "ID",
+                    name: "name",
                     
                   },
                   {
-                    name: "definition",
                     component: "TextArea",
+                    name: "definition",
                   },
                   {
-                    name: "expanded",
                     component: "CheckBox",
+                    name: "expanded",
                   },
                   {
-                    name: "func",
                     component: "SelectBox",
-                    
-                      items: `Table
+                    items: `Table
 Form
 Url`,
                     
+                      name: "func",
+                    
                   },
                   {
-                    name: "Coll",
+                    collection: "g:'Coll'",
                     component: "SelectBox",
                     
-                      collection: "g:'Coll'",
+                      name: "Coll",
                     
                   },
                   {
-                    name: "Form",
+                    collection: "g:'Form'",
                     component: "SelectBox",
                     
-                      collection: "g:'Form'",
+                      name: "Form",
                     
                   },
                   {
-                    name: "url",
                     component: "TextBox",
+                    name: "url",
                   },
                   {
-                    name: "Role",
-                    component: "DynamicTable",
-                    tab: "Permission",
                     attributes: [
                       {
-                        name: "role",
+                        collection: "g:'Role'",
                         component: "SelectBox",
                         
-                          collection: "g:'Role'",
+                          name: "role",
                         
                       },
                       {
-                        name: "Perm",
-                        component: "DynamicTable",
                         attributes: [
                           {
-                            name: "perm",
+                            collection: "g:'Perm'",
                             component: "SelectBox",
                             
-                              collection: "g:'Perm'",
+                              name: "perm",
                             
                           },
                         ],
+                        component: "DynamicTable",
+                        name: "Perm",
                       },
                     ],
+                    component: "DynamicTable",
+                    name: "Role",
+                    tab: "Permission",
                   },
                   {
-                    name: "Attr",
-                    component: "DynamicTable",
-                    tab: "expand",
-                    
-                      type: "NavAttr",
-                    
                     attributes: [
                       {
-                        name: "name",
-                        displayName: "ID",
                         component: "TextBox",
+                        displayName: "ID",
+                        name: "name",
                  
                       },
                       {
-                        name: "definition",
                         component: "TextArea",
+                        name: "definition",
                       },
                       {
-                        name: "expanded",
                         component: "CheckBox",
+                        name: "expanded",
                       },
                       {
-                        name: "func",
                         component: "SelectBox",
-                        
-                          items: `Table
+                        items: `Table
 Form
 Url`,
                         
+                          name: "func",
+                        
                       },
                       {
-                        name: "Coll",
+                        collection: "g:'Coll'",
                         component: "SelectBox",
                         
-                          collection: "g:'Coll'",
+                          name: "Coll",
                         
                       },
                       {
-                        name: "Form",
+                        collection: "g:'Form'",
                         component: "SelectBox",
                         
-                          collection: "g:'Form'",
+                          name: "Form",
                         
                       },
                       {
-                        name: "url",
                         component: "TextBox",
+                        name: "url",
                       },
                       {
-                        name: "Role",
-                        component: "DynamicTable",
-                        tab: "Permission",
                         attributes: [
                           {
-                            name: "role",
+                            collection: "g:'Role'",
                             component: "SelectBox",
                             
-                              collection: "g:'Role'",
+                              name: "role",
                             
                           },
                           {
-                            name: "Perm",
-                            component: "DynamicTable",
                             attributes: [
                               {
-                                name: "perm",
+                                collection: "g:'Perm'",
                                 component: "SelectBox",
                                 
-                                  collection: "g:'Perm'",
+                                  name: "perm",
                                 
                               },
                             ],
+                            component: "DynamicTable",
+                            name: "Perm",
                           },
                         ],
+                        component: "DynamicTable",
+                        name: "Role",
+                        tab: "Permission",
                       },
                     ],
+                    component: "DynamicTable",
+                    name: "Attr",
+                    
+                      tab: "expand",
+                    
+                    type: "NavAttr",
                   },
                 ],
+                component: "DynamicTable",
+                name: "Attr",
+                
+                  tab: "expand",
+                
+                type: "NavAttr",
               },
             ],
+            component: "DynamicTable",
+            name: "Attr",
+            
+              tab: "expand",
+ 
+            type: "NavAttr",
           },
         ],
+        component: "DynamicTable",
+        name: "Attr",
+        
+          tab: "Attributes",
+        
+        type: "NavAttr",
       },
     ],
+    name: "Nav",
+    title: "Navigation",
+  },
+  Perm: {
+    attributes: [{ component: "TextBox", name: "name" }],
+    isInlineEditable: true,
+    name: "Perm",
+    title: "Perm",
+  },
+  Role: {
+    attributes: [{ component: "TextBox", name: "name" }],
+    isInlineEditable: true,
+    name: "Role",
+    title: "Role",
+  },
+  User: {
+    attributes: [
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "email" },
+      { component: "TextBox", name: "pass" },
+      {
+        collection: "g:'Role'",
+        component: "TagBox",
+        
+          name: "role",
+        
+      },
+    ],
+    isInlineEditable: true,
+    name: "User",
+    title: "User",
   },
   // TODO: Dynamic Filter on Grid: Role->Filter
 };

@@ -1,13 +1,15 @@
-import { type JSX, onMount, } from "solid-js";
-import { HeaderRow } from "../header/HeaderRow";
-import { createStore } from "solid-js/store";
-import { PageSetting } from "./PageSetting";
-import { isServer } from "solid-js/web";
-import { getInitialDesignerLayoutStore, DesignerLayoutStoreContext } from "~/components/page_designer/LayoutContext";
-import { RenderMainContent } from "./RenderMainContent";
-import { LayoutGridRowOne } from "../row_one/LayoutGridRowOne";
-import { debounce } from "@solid-primitives/scheduled";
 import { makeEventListener } from "@solid-primitives/event-listener";
+import { debounce } from "@solid-primitives/scheduled";
+import { type JSX, onMount, } from "solid-js";
+import { createStore } from "solid-js/store";
+import { isServer } from "solid-js/web";
+
+import { DesignerLayoutStoreContext, getInitialDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+
+import { HeaderRow } from "../header/HeaderRow";
+import { LayoutGridRowOne } from "../row_one/LayoutGridRowOne";
+import { PageSetting } from "./PageSetting";
+import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {
   const [layoutStore, setLayoutStore] = createStore(getInitialDesignerLayoutStore());
@@ -15,9 +17,9 @@ export function PageDesignerWrapper(): JSX.Element {
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;
     setLayoutStore({
-      isSmallScreen,
       isLeftOpen: !isSmallScreen,
       isRightOpen: !isSmallScreen,
+      isSmallScreen,
     });
   };
 

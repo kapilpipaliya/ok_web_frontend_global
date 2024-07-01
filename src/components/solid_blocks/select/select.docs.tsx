@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+
 import { Checkbox } from "../checkbox/checkbox";
 import { Select } from "./select";
 
@@ -45,9 +46,9 @@ SelectProps {
       <pre data-title="setValue-calls">{events()}</pre>
       <div class="example">
         <Select
-          label="framework"
           aria-invalid={invalid() ? "true" : undefined}
           aria-orientation={vertical() ? "vertical" : "horizontal"}
+          label="framework"
           setValue={(value) => setEvents((e) => `setValue("${value}")\n${e}`)}
         >
           <option value="solid">SolidJS</option>

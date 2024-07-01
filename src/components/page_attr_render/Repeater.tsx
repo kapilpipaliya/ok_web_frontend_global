@@ -6,19 +6,20 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
+
+import {
+  PageRenderVertexContext, RepeaterVertexContext
+} from "~/components/page_attr_render/Context";
 import {
   PageAttrRender,
 } from "~/components/page_attr_render/PageAttrRender";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
-import { GraphContext } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
-import {
-  RepeaterVertexContext, PageRenderVertexContext
-} from "~/components/page_attr_render/Context";
-import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
 import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
+import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { GraphContext } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 
 export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -69,7 +70,7 @@ export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
             <PageRenderVertexContext.Provider
               value={[...useContext(PageRenderVertexContext), props.meta]}
             >
-              <PageAttrRender metaVertex={props.meta} data={vertex} />
+              <PageAttrRender data={vertex} metaVertex={props.meta} />
             </PageRenderVertexContext.Provider>
           </RepeaterVertexContext.Provider>
         )}

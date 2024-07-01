@@ -1,21 +1,22 @@
+import { useLocation } from "@solidjs/router";
 import {
+  type JSX,
+  Show,
   createEffect,
   createSignal,
-  type JSX,
   onMount,
-  Show,
   useContext,
 } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import "~/css/sideBarSearch.css";
-import { MainSideBar } from "./MainSideBar";
-import { SubSideBar } from "./SubSideBar";
+import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { useLocation } from "@solidjs/router";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+
+import { MainSideBar } from "./MainSideBar";
+import { SubSideBar } from "./SubSideBar";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -80,26 +81,26 @@ export function Sidebar() {
   };
 
   const sidebarIcon: any = {
-    "/admin/dashboards/": "akar-icons:dashboard",
     "/admin/": "fluent:home-24-regular",
-    "/admin/DataType": "carbon:data-1",
+    "/admin/Coll": "ep:collection-tag",
+    "/admin/CollCategory": "ic:outline-collections-bookmark",
+    "/admin/Comp": "iconoir:component",
     "/admin/CompCategory":
       "material-symbols-light:settings-input-component-outline",
-    "/admin/Comp": "iconoir:component",
-    "/admin/SimpleImport": "uil:import",
-    "/admin/backup_restore": "lucide:database-backup",
-    "/admin/User": "ci:users",
-    "/admin/Role": "eos-icons:role-binding-outlined",
-    "/admin/Perm": "tabler:lock-access",
-    "/admin/Coll": "ep:collection-tag",
-    "/admin/Form": "fluent:form-28-regular",
-    "/admin/CollCategory": "ic:outline-collections-bookmark",
-    "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
+    "/admin/DataType": "carbon:data-1",
+    "/admin/EmailTemplatePage": "mdi:email-outline",
+    "/admin/ErrorPage": "icon-park-outline:error",
+    "/admin/Form": "fluent:form-28-regular",
+    "/admin/Page": "iconoir:multiple-pages",
+    "/admin/Perm": "tabler:lock-access",
+    "/admin/Role": "eos-icons:role-binding-outlined",
+    "/admin/SimpleImport": "uil:import",
     "/admin/TemplatePage": "eos-icons:templates-outlined",
     "/admin/ThankYouPage": "icon-park-outline:doc-success",
-    "/admin/ErrorPage": "icon-park-outline:error",
-    "/admin/EmailTemplatePage": "mdi:email-outline",
+    "/admin/User": "ci:users",
+    "/admin/backup_restore": "lucide:database-backup",
+    "/admin/dashboards/": "akar-icons:dashboard",
   };
 
   const toggleSectionCollapse = () => {
@@ -127,12 +128,12 @@ export function Sidebar() {
 
   async function getNavData() {
     const data: any = await getTreeDataMGCall({
-      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
       // TODO: Dont display "Form" Component
       child: {
+        child: { child: { collection: "->NavAttr" }, collection: "->NavAttr" },
         collection: "->NavAttr",
-        child: { collection: "->NavAttr", child: { collection: "->NavAttr" } },
       },
+      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
     });
 
     return data;
@@ -157,34 +158,34 @@ export function Sidebar() {
 
   const sidebarStyle = () =>
     ({
-      width: isCollapsed() ? "70px" : "310px",
       background: "#f4f4f4",
-      display: graph.isSideBarOpen ? "contents" : "none",
-      transition: "transform 0.3s ease-in-out",
-      transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
-      "box-shadow": "-15px 0px 31px rgb(95,156,249)",
       "border-right": "1px solid lightgray",
+      "box-shadow": "-15px 0px 31px rgb(95,156,249)",
+      display: graph.isSideBarOpen ? "contents" : "none",
+      transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
+      transition: "transform 0.3s ease-in-out",
+      width: isCollapsed() ? "70px" : "310px",
     }) as JSX.CSSProperties;
 
   return (
     <div class="r:0|10|10|0 rel" style={sidebarStyle()}>
       <Show
-        when={navData()}
         fallback={
           <div class="flex jc:center ai:center">
             <LoaderNew />
           </div>
         }
+        when={navData()}
       >
         <ul>
           <div>
             <aside class="flex">
               <MainSideBar
                 activeSection={activeSection}
-                setActiveSection={setActiveSection}
-                navData={navData()}
-                mainIcon={sidebarIcon}
                 isCollapsed={isCollapsed}
+                mainIcon={sidebarIcon}
+                navData={navData()}
+                setActiveSection={setActiveSection}
                 toggleCollapse={toggleSectionCollapse}
               />
 
@@ -192,11 +193,11 @@ export function Sidebar() {
                 activeSection={activeSection}
                 expandedSections={expandedSections}
                 handleSearch={handleSearch}
-                mainIcon={sidebarIcon}
                 isCollapsed={isCollapsed}
+                mainIcon={sidebarIcon}
                 searchData={searchData}
-                setSearchTerm={setSearchTerm}
                 searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
                 toggleSection={toggleMainSection}
               />
             </aside>

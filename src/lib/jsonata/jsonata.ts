@@ -10,6 +10,8 @@
  */
 import * as datetime from "./datetime.js";
 import * as fn from "./functions.js";
+import { parser } from "./parser";
+import { parseSignature } from "./signature";
 import {
   createSequence,
   getFunctionArity,
@@ -23,8 +25,6 @@ import {
   isPromise,
   isSequence,
 } from "./utils";
-import { parser } from "./parser";
-import { parseSignature } from "./signature";
 
 /**
  * jsonata
@@ -35,7 +35,7 @@ import { parseSignature } from "./signature";
 
 // Start of Evaluator code
 
-var staticFrame = createFrame(null);
+const staticFrame = createFrame(null);
 
 /**
  * Evaluate expression against input data
@@ -45,9 +45,9 @@ var staticFrame = createFrame(null);
  * @returns {*} Evaluated input data
  */
 function evaluate(expr, input, environment) {
-  var result;
+  let result;
 
-  var entryCallback = environment.lookup("__evaluate_entry");
+  const entryCallback = environment.lookup("__evaluate_entry");
   if (entryCallback) {
     entryCallback(expr, input, environment);
   }
@@ -112,7 +112,7 @@ function evaluate(expr, input, environment) {
   }
 
   if (Object.prototype.hasOwnProperty.call(expr, "predicate")) {
-    for (var ii = 0; ii < expr.predicate.length; ii++) {
+    for (let ii = 0; ii < expr.predicate.length; ii++) {
       result = evaluateFilter(expr.predicate[ii].expr, result, environment);
     }
   }
@@ -124,7 +124,7 @@ function evaluate(expr, input, environment) {
     result = evaluateGroupExpression(expr.group, result, environment);
   }
 
-  var exitCallback = environment.lookup("__evaluate_exit");
+  const exitCallback = environment.lookup("__evaluate_exit");
   if (exitCallback) {
     exitCallback(expr, input, environment, result);
   }
@@ -151,7 +151,7 @@ function evaluate(expr, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluatePath(expr, input, environment) {
-  var inputSequence;
+  let inputSequence;
   // expr is an array of steps
   // if the first step is a variable reference ($...), including root reference ($$),
   //   then the path is absolute rather than relative
@@ -162,13 +162,13 @@ function evaluatePath(expr, input, environment) {
     inputSequence = createSequence(input);
   }
 
-  var resultSequence;
-  var isTupleStream = false;
-  var tupleBindings = undefined;
+  let resultSequence;
+  let isTupleStream = false;
+  let tupleBindings = undefined;
 
   // evaluate each step in turn
   for (var ii = 0; ii < expr.steps.length; ii++) {
-    var step = expr.steps[ii];
+    const step = expr.steps[ii];
 
     if (step.tuple) {
       isTupleStream = true;
@@ -243,7 +243,7 @@ function evaluatePath(expr, input, environment) {
 }
 
 function createFrameFromTuple(environment, tuple) {
-  var frame = createFrame(environment);
+  const frame = createFrame(environment);
   for (const prop in tuple) {
     frame.bind(prop, tuple[prop]);
   }
@@ -259,7 +259,7 @@ function createFrameFromTuple(environment, tuple) {
  * @returns {*} Evaluated input data
  */
 function evaluateStep(expr, input, environment, lastStep) {
-  var result;
+  let result;
   if (expr.type === "sort") {
     result = evaluateSortExpression(expr, input, environment);
     if (expr.stages) {
@@ -270,10 +270,10 @@ function evaluateStep(expr, input, environment, lastStep) {
 
   result = createSequence();
 
-  for (var ii = 0; ii < input.length; ii++) {
-    var res = evaluate(expr, input[ii], environment);
+  for (let ii = 0; ii < input.length; ii++) {
+    let res = evaluate(expr, input[ii], environment);
     if (expr.stages) {
-      for (var ss = 0; ss < expr.stages.length; ss++) {
+      for (let ss = 0; ss < expr.stages.length; ss++) {
         res = evaluateFilter(expr.stages[ss].expr, res, environment);
       }
     }
@@ -282,7 +282,7 @@ function evaluateStep(expr, input, environment, lastStep) {
     }
   }
 
-  var resultSequence = createSequence();
+  let resultSequence = createSequence();
   if (
     lastStep &&
     result.length === 1 &&
@@ -307,16 +307,16 @@ function evaluateStep(expr, input, environment, lastStep) {
 }
 
 function evaluateStages(stages, input, environment) {
-  var result = input;
-  for (var ss = 0; ss < stages.length; ss++) {
-    var stage = stages[ss];
+  let result = input;
+  for (let ss = 0; ss < stages.length; ss++) {
+    const stage = stages[ss];
     switch (stage.type) {
       case "filter":
         result = evaluateFilter(stage.expr, result, environment);
         break;
       case "index":
-        for (var ee = 0; ee < result.length; ee++) {
-          var tuple = result[ee];
+        for (let ee = 0; ee < result.length; ee++) {
+          const tuple = result[ee];
           tuple[stage.value] = ee;
         }
         break;
@@ -334,15 +334,15 @@ function evaluateStages(stages, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateTupleStep(expr, input, tupleBindings, environment) {
-  var result;
+  let result;
   if (expr.type === "sort") {
     if (tupleBindings) {
       result = evaluateSortExpression(expr, tupleBindings, environment);
     } else {
-      var sorted = evaluateSortExpression(expr, input, environment);
+      const sorted = evaluateSortExpression(expr, input, environment);
       result = createSequence();
       result.tupleStream = true;
-      for (var ss = 0; ss < sorted.length; ss++) {
+      for (let ss = 0; ss < sorted.length; ss++) {
         var tuple = { "@": sorted[ss] };
         tuple[expr.index] = ss;
         result.push(tuple);
@@ -356,22 +356,22 @@ function evaluateTupleStep(expr, input, tupleBindings, environment) {
 
   result = createSequence();
   result.tupleStream = true;
-  var stepEnv = environment;
+  let stepEnv = environment;
   if (tupleBindings === undefined) {
     tupleBindings = input.map((item) => {
       return { "@": item };
     });
   }
 
-  for (var ee = 0; ee < tupleBindings.length; ee++) {
+  for (let ee = 0; ee < tupleBindings.length; ee++) {
     stepEnv = createFrameFromTuple(environment, tupleBindings[ee]);
-    var res = evaluate(expr, tupleBindings[ee]["@"], stepEnv);
+    let res = evaluate(expr, tupleBindings[ee]["@"], stepEnv);
     // res is the binding sequence for the output tuple stream
     if (typeof res !== "undefined") {
       if (!Array.isArray(res)) {
         res = [res];
       }
-      for (var bb = 0; bb < res.length; bb++) {
+      for (let bb = 0; bb < res.length; bb++) {
         tuple = {};
         Object.assign(tuple, tupleBindings[ee]);
         if (res.tupleStream) {
@@ -410,7 +410,7 @@ function evaluateTupleStep(expr, input, tupleBindings, environment) {
  * @returns {*} Result after applying predicates
  */
 function evaluateFilter(predicate, input, environment) {
-  var results = createSequence();
+  let results = createSequence();
   if (input && input.tupleStream) {
     results.tupleStream = true;
   }
@@ -434,20 +434,20 @@ function evaluateFilter(predicate, input, environment) {
   } else {
     for (index = 0; index < input.length; index++) {
       var item = input[index];
-      var context = item;
-      var env = environment;
+      let context = item;
+      let env = environment;
       if (input.tupleStream) {
         context = item["@"];
         env = createFrameFromTuple(environment, item);
       }
-      var res = evaluate(predicate, context, env);
+      let res = evaluate(predicate, context, env);
       if (isNumeric(res)) {
         res = [res];
       }
       if (isArrayOfNumbers(res)) {
         res.forEach((ires) => {
           // round it down
-          var ii = Math.floor(ires);
+          let ii = Math.floor(ires);
           if (ii < 0) {
             // count in from end of array
             ii = input.length + ii;
@@ -473,12 +473,12 @@ function evaluateFilter(predicate, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateBinary(expr, input, environment) {
-  var result;
-  var lhs = evaluate(expr.lhs, input, environment);
-  var op = expr.value;
+  let result;
+  const lhs = evaluate(expr.lhs, input, environment);
+  const op = expr.value;
 
   //defer evaluation of RHS to allow short-circuiting
-  var evalrhs = () => evaluate(expr.rhs, input, environment);
+  const evalrhs = () => evaluate(expr.rhs, input, environment);
   if (op === "and" || op === "or") {
     try {
       return evaluateBooleanExpression(lhs, evalrhs, op);
@@ -489,7 +489,7 @@ function evaluateBinary(expr, input, environment) {
     }
   }
 
-  var rhs = evalrhs();
+  const rhs = evalrhs();
   try {
     switch (op) {
       case "+":
@@ -535,7 +535,7 @@ function evaluateBinary(expr, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateUnary(expr, input, environment) {
-  var result;
+  let result;
 
   switch (expr.value) {
     case "-":
@@ -547,8 +547,8 @@ function evaluateUnary(expr, input, environment) {
       } else {
         throw {
           code: "D1002",
-          stack: new Error().stack,
           position: expr.position,
+          stack: new Error().stack,
           token: expr.value,
           value: result,
         };
@@ -564,7 +564,7 @@ function evaluateUnary(expr, input, environment) {
         }),
       );
       for (const generator of generators) {
-        var [item, value] = generator;
+        const [item, value] = generator;
         if (typeof value !== "undefined") {
           if (item.value === "[") {
             result.push(value);
@@ -575,8 +575,8 @@ function evaluateUnary(expr, input, environment) {
       }
       if (expr.consarray) {
         Object.defineProperty(result, "cons", {
-          enumerable: false,
           configurable: false,
+          enumerable: false,
           value: true,
         });
       }
@@ -617,13 +617,13 @@ function evaluateLiteral(expr) {
  * @returns {*} Evaluated input data
  */
 function evaluateWildcard(expr, input) {
-  var results = createSequence();
+  let results = createSequence();
   if (Array.isArray(input) && input.outerWrapper && input.length > 0) {
     input = input[0];
   }
   if (input !== null && typeof input === "object") {
     Object.keys(input).forEach((key) => {
-      var value = input[key];
+      let value = input[key];
       if (Array.isArray(value)) {
         value = flatten(value);
         results = fn.append(results, value);
@@ -664,8 +664,8 @@ function flatten(arg, flattened) {
  * @returns {*} Evaluated input data
  */
 function evaluateDescendants(expr, input) {
-  var result;
-  var resultSequence = createSequence();
+  let result;
+  const resultSequence = createSequence();
   if (typeof input !== "undefined") {
     // traverse all descendants of this object/array
     recurseDescendants(input, resultSequence);
@@ -707,7 +707,7 @@ function recurseDescendants(input, results) {
  * @returns {*} Result
  */
 function evaluateNumericExpression(lhs, rhs, op) {
-  var result;
+  let result;
 
   if (typeof lhs !== "undefined" && !isNumeric(lhs)) {
     throw {
@@ -757,11 +757,11 @@ function evaluateNumericExpression(lhs, rhs, op) {
  * @returns {*} Result
  */
 function evaluateEqualityExpression(lhs, rhs, op) {
-  var result;
+  let result;
 
   // type checks
-  var ltype = typeof lhs;
-  var rtype = typeof rhs;
+  const ltype = typeof lhs;
+  const rtype = typeof rhs;
 
   if (ltype === "undefined" || rtype === "undefined") {
     // if either side is undefined, the result is false
@@ -787,15 +787,15 @@ function evaluateEqualityExpression(lhs, rhs, op) {
  * @returns {*} Result
  */
 function evaluateComparisonExpression(lhs, rhs, op) {
-  var result;
+  let result;
 
   // type checks
-  var ltype = typeof lhs;
-  var rtype = typeof rhs;
+  const ltype = typeof lhs;
+  const rtype = typeof rhs;
 
-  var lcomparable =
+  const lcomparable =
     ltype === "undefined" || ltype === "string" || ltype === "number";
-  var rcomparable =
+  const rcomparable =
     rtype === "undefined" || rtype === "string" || rtype === "number";
 
   // if either aa or bb are not comparable (string or numeric) values, then throw an error
@@ -847,7 +847,7 @@ function evaluateComparisonExpression(lhs, rhs, op) {
  * @returns {boolean} - true if lhs is a member of rhs
  */
 function evaluateIncludesExpression(lhs, rhs) {
-  var result = false;
+  let result = false;
 
   if (typeof lhs === "undefined" || typeof rhs === "undefined") {
     // if either side is undefined, the result is false
@@ -858,7 +858,7 @@ function evaluateIncludesExpression(lhs, rhs) {
     rhs = [rhs];
   }
 
-  for (var i = 0; i < rhs.length; i++) {
+  for (let i = 0; i < rhs.length; i++) {
     if (rhs[i] === lhs) {
       result = true;
       break;
@@ -876,9 +876,9 @@ function evaluateIncludesExpression(lhs, rhs) {
  * @returns {*} Result
  */
 function evaluateBooleanExpression(lhs, evalrhs, op) {
-  var result;
+  let result;
 
-  var lBool = boolize(lhs);
+  const lBool = boolize(lhs);
 
   switch (op) {
     case "and":
@@ -892,7 +892,7 @@ function evaluateBooleanExpression(lhs, evalrhs, op) {
 }
 
 function boolize(value) {
-  var booledValue = fn.boolean(value);
+  const booledValue = fn.boolean(value);
   return typeof booledValue === "undefined" ? false : booledValue;
 }
 
@@ -903,10 +903,10 @@ function boolize(value) {
  * @returns {string|*} Concatenated string
  */
 function evaluateStringConcat(lhs, rhs) {
-  var result;
+  let result;
 
-  var lstr = "";
-  var rstr = "";
+  let lstr = "";
+  let rstr = "";
   if (typeof lhs !== "undefined") {
     lstr = fn.string(lhs);
   }
@@ -926,9 +926,9 @@ function evaluateStringConcat(lhs, rhs) {
  * @returns {{}} Evaluated input data
  */
 function evaluateGroupExpression(expr, input, environment) {
-  var result = {};
-  var groups = {};
-  var reduce = input && input.tupleStream ? true : false;
+  const result = {};
+  const groups = {};
+  const reduce = input && input.tupleStream ? true : false;
   // group the input sequence by 'key' expression
   if (!Array.isArray(input)) {
     input = createSequence(input);
@@ -938,24 +938,24 @@ function evaluateGroupExpression(expr, input, environment) {
     input.push(undefined);
   }
 
-  for (var itemIndex = 0; itemIndex < input.length; itemIndex++) {
-    var item = input[itemIndex];
-    var env = reduce ? createFrameFromTuple(environment, item) : environment;
-    for (var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
-      var pair = expr.lhs[pairIndex];
+  for (let itemIndex = 0; itemIndex < input.length; itemIndex++) {
+    const item = input[itemIndex];
+    const env = reduce ? createFrameFromTuple(environment, item) : environment;
+    for (let pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
+      const pair = expr.lhs[pairIndex];
       var key = evaluate(pair[0], reduce ? item["@"] : item, env);
       // key has to be a string
       if (typeof key !== "string" && key !== undefined) {
         throw {
           code: "T1003",
-          stack: new Error().stack,
           position: expr.position,
+          stack: new Error().stack,
           value: key,
         };
       }
 
       if (key !== undefined) {
-        var entry = { data: item, exprIndex: pairIndex };
+        const entry = { data: item, exprIndex: pairIndex };
         if (groups.hasOwnProperty(key)) {
           // a value already exists in this slot
           if (groups[key].exprIndex !== pairIndex) {
@@ -963,8 +963,8 @@ function evaluateGroupExpression(expr, input, environment) {
             // when multiple key expressions evaluate to the same key, then error D1009 must be thrown
             throw {
               code: "D1009",
-              stack: new Error().stack,
               position: expr.position,
+              stack: new Error().stack,
               value: key,
             };
           }
@@ -982,10 +982,10 @@ function evaluateGroupExpression(expr, input, environment) {
   const generators = Promise.all(
     Object.keys(groups).map((key, idx) => {
       const entry = groups[key];
-      var context = entry.data;
-      var env = environment;
+      let context = entry.data;
+      let env = environment;
       if (reduce) {
-        var tuple = reduceTupleStream(entry.data);
+        const tuple = reduceTupleStream(entry.data);
         context = tuple["@"];
         delete tuple["@"];
         env = createFrameFromTuple(environment, tuple);
@@ -1009,9 +1009,9 @@ function reduceTupleStream(tupleStream) {
   if (!Array.isArray(tupleStream)) {
     return tupleStream;
   }
-  var result = {};
+  const result = {};
   Object.assign(result, tupleStream[0]);
-  for (var ii = 1; ii < tupleStream.length; ii++) {
+  for (let ii = 1; ii < tupleStream.length; ii++) {
     for (const prop in tupleStream[ii]) {
       result[prop] = fn.append(result[prop], tupleStream[ii][prop]);
     }
@@ -1026,7 +1026,7 @@ function reduceTupleStream(tupleStream) {
  * @returns {Array} Resultant array
  */
 function evaluateRangeExpression(lhs, rhs) {
-  var result;
+  let result;
 
   if (typeof lhs !== "undefined" && !Number.isInteger(lhs)) {
     throw {
@@ -1056,7 +1056,7 @@ function evaluateRangeExpression(lhs, rhs) {
   // limit the size of the array to ten million entries (1e7)
   // this is an implementation defined limit to protect against
   // memory and performance issues.  This value may increase in the future.
-  var size = rhs - lhs + 1;
+  const size = rhs - lhs + 1;
   if (size > 1e7) {
     throw {
       code: "D2014",
@@ -1066,7 +1066,7 @@ function evaluateRangeExpression(lhs, rhs) {
   }
 
   result = new Array(size);
-  for (var item = lhs, index = 0; item <= rhs; item++, index++) {
+  for (let item = lhs, index = 0; item <= rhs; item++, index++) {
     result[index] = item;
   }
   result.sequence = true;
@@ -1083,7 +1083,7 @@ function evaluateRangeExpression(lhs, rhs) {
 function evaluateBindExpression(expr, input, environment) {
   // The RHS is the expression to evaluate
   // The LHS is the name of the variable to bind to - should be a VARIABLE token (enforced by parser)
-  var value = evaluate(expr.rhs, input, environment);
+  const value = evaluate(expr.rhs, input, environment);
   environment.bind(expr.lhs.value, value);
   return value;
 }
@@ -1096,8 +1096,8 @@ function evaluateBindExpression(expr, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateCondition(expr, input, environment) {
-  var result;
-  var condition = evaluate(expr.condition, input, environment);
+  let result;
+  const condition = evaluate(expr.condition, input, environment);
   if (fn.boolean(condition)) {
     result = evaluate(expr.then, input, environment);
   } else if (typeof expr.else !== "undefined") {
@@ -1114,13 +1114,13 @@ function evaluateCondition(expr, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateBlock(expr, input, environment) {
-  var result;
+  let result;
   // create a new frame to limit the scope of variable assignments
   // TODO, only do this if the post-parse stage has flagged this as required
-  var frame = createFrame(environment);
+  const frame = createFrame(environment);
   // invoke each expression in turn
   // only return the result of the last one
-  for (var ii = 0; ii < expr.expressions.length; ii++) {
+  for (let ii = 0; ii < expr.expressions.length; ii++) {
     result = evaluate(expr.expressions[ii], input, frame);
   }
 
@@ -1133,20 +1133,20 @@ function evaluateBlock(expr, input, environment) {
  * @returns {Function} Higher order function representing prepared regex
  */
 function evaluateRegex(expr) {
-  var re = new jsonata.RegexEngine(expr.value);
-  var closure = (str, fromIndex) => {
-    var result;
+  const re = new jsonata.RegexEngine(expr.value);
+  const closure = (str, fromIndex) => {
+    let result;
     re.lastIndex = fromIndex || 0;
-    var match = re.exec(str);
+    const match = re.exec(str);
     if (match !== null) {
       result = {
-        match: match[0],
-        start: match.index,
         end: match.index + match[0].length,
         groups: [],
+        match: match[0],
+        start: match.index,
       };
       if (match.length > 1) {
-        for (var i = 1; i < match.length; i++) {
+        for (let i = 1; i < match.length; i++) {
           result.groups.push(match[i]);
         }
       }
@@ -1154,13 +1154,13 @@ function evaluateRegex(expr) {
         if (re.lastIndex >= str.length) {
           return undefined;
         } else {
-          var next = closure(str, re.lastIndex);
+          const next = closure(str, re.lastIndex);
           if (next && next.match === "") {
             // matches zero length string; this will never progress
             throw {
               code: "D1004",
-              stack: new Error().stack,
               position: expr.position,
+              stack: new Error().stack,
               value: expr.value.source,
             };
           }
@@ -1183,7 +1183,7 @@ function evaluateRegex(expr) {
  */
 function evaluateVariable(expr, input, environment) {
   // lookup the variable value in the environment
-  var result;
+  let result;
   // if the variable name is empty string, then it refers to context value
   if (expr.value === "") {
     result = input && input.outerWrapper ? input[0] : input;
@@ -1201,27 +1201,27 @@ function evaluateVariable(expr, input, environment) {
  * @returns {*} Ordered sequence
  */
 function evaluateSortExpression(expr, input, environment) {
-  var result;
+  let result;
 
   // evaluate the lhs, then sort the results in order according to rhs expression
-  var lhs = input;
-  var isTupleSort = input.tupleStream ? true : false;
+  const lhs = input;
+  const isTupleSort = input.tupleStream ? true : false;
 
   // sort the lhs array
   // use comparator function
-  var comparator = (a, b) => {
+  const comparator = (a, b) => {
     // expr.terms is an array of order-by in priority order
-    var comp = 0;
-    for (var index = 0; comp === 0 && index < expr.terms.length; index++) {
-      var term = expr.terms[index];
+    let comp = 0;
+    for (let index = 0; comp === 0 && index < expr.terms.length; index++) {
+      const term = expr.terms[index];
       //evaluate the sort term in the context of a
-      var context = a;
-      var env = environment;
+      let context = a;
+      let env = environment;
       if (isTupleSort) {
         context = a["@"];
         env = createFrameFromTuple(environment, a);
       }
-      var aa = evaluate(term.expression, context, env);
+      const aa = evaluate(term.expression, context, env);
       //evaluate the sort term in the context of b
       context = b;
       env = environment;
@@ -1229,11 +1229,11 @@ function evaluateSortExpression(expr, input, environment) {
         context = b["@"];
         env = createFrameFromTuple(environment, b);
       }
-      var bb = evaluate(term.expression, context, env);
+      const bb = evaluate(term.expression, context, env);
 
       // type checks
-      var atype = typeof aa;
-      var btype = typeof bb;
+      const atype = typeof aa;
+      const btype = typeof bb;
       // undefined should be last in sort order
       if (atype === "undefined") {
         // swap them, unless btype is also undefined
@@ -1252,8 +1252,8 @@ function evaluateSortExpression(expr, input, environment) {
       ) {
         throw {
           code: "T2008",
-          stack: new Error().stack,
           position: expr.position,
+          stack: new Error().stack,
           value: !(atype === "string" || atype === "number") ? aa : bb,
         };
       }
@@ -1262,8 +1262,8 @@ function evaluateSortExpression(expr, input, environment) {
       if (atype !== btype) {
         throw {
           code: "T2007",
-          stack: new Error().stack,
           position: expr.position,
+          stack: new Error().stack,
           value: aa,
           value2: bb,
         };
@@ -1284,7 +1284,7 @@ function evaluateSortExpression(expr, input, environment) {
     return comp === 1;
   };
 
-  var focus = {
+  const focus = {
     environment: environment,
     input: input,
   };
@@ -1303,7 +1303,7 @@ function evaluateSortExpression(expr, input, environment) {
  */
 function evaluateTransformExpression(expr, input, environment) {
   // create a function to implement the transform definition
-  var transformer = (obj) => {
+  const transformer = (obj) => {
     // signature <(oa):o>
     // undefined inputs always return undefined
     if (typeof obj === "undefined") {
@@ -1311,27 +1311,27 @@ function evaluateTransformExpression(expr, input, environment) {
     }
 
     // this function returns a copy of obj with changes specified by the pattern/operation
-    var cloneFunction = environment.lookup("clone");
+    const cloneFunction = environment.lookup("clone");
     if (!isFunction(cloneFunction)) {
       // throw type error
       throw {
         code: "T2013",
-        stack: new Error().stack,
         position: expr.position,
+        stack: new Error().stack,
       };
     }
-    var result = apply(cloneFunction, [obj], null, environment);
-    var matches = evaluate(expr.pattern, result, environment);
+    const result = apply(cloneFunction, [obj], null, environment);
+    let matches = evaluate(expr.pattern, result, environment);
     if (typeof matches !== "undefined") {
       if (!Array.isArray(matches)) {
         matches = [matches];
       }
-      for (var ii = 0; ii < matches.length; ii++) {
-        var match = matches[ii];
+      for (let ii = 0; ii < matches.length; ii++) {
+        const match = matches[ii];
         // evaluate the update value for each match
-        var update = evaluate(expr.update, match, environment);
+        const update = evaluate(expr.update, match, environment);
         // update must be an object
-        var updateType = typeof update;
+        const updateType = typeof update;
         if (updateType !== "undefined") {
           if (
             updateType !== "object" ||
@@ -1341,22 +1341,22 @@ function evaluateTransformExpression(expr, input, environment) {
             // throw type error
             throw {
               code: "T2011",
-              stack: new Error().stack,
               position: expr.update.position,
+              stack: new Error().stack,
               value: update,
             };
           }
           // merge the update
-          for (var prop in update) {
+          for (const prop in update) {
             match[prop] = update[prop];
           }
         }
 
         // delete, if specified, must be an array of strings (or single string)
         if (typeof expr.delete !== "undefined") {
-          var deletions = evaluate(expr.delete, match, environment);
+          let deletions = evaluate(expr.delete, match, environment);
           if (typeof deletions !== "undefined") {
-            var val = deletions;
+            const val = deletions;
             if (!Array.isArray(deletions)) {
               deletions = [deletions];
             }
@@ -1364,12 +1364,12 @@ function evaluateTransformExpression(expr, input, environment) {
               // throw type error
               throw {
                 code: "T2012",
-                stack: new Error().stack,
                 position: expr.delete.position,
+                stack: new Error().stack,
                 value: val,
               };
             }
-            for (var jj = 0; jj < deletions.length; jj++) {
+            for (let jj = 0; jj < deletions.length; jj++) {
               if (typeof match === "object" && match !== null) {
                 delete match[deletions[jj]];
               }
@@ -1385,7 +1385,7 @@ function evaluateTransformExpression(expr, input, environment) {
   return defineFunction(transformer, "<(oa):o>");
 }
 
-var chainAST = parser("function($f, $g) { function($x){ $g($f($x)) } }");
+const chainAST = parser("function($f, $g) { function($x){ $g($f($x)) } }");
 
 /**
  * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -1395,20 +1395,20 @@ var chainAST = parser("function($f, $g) { function($x){ $g($f($x)) } }");
  * @returns {*} Evaluated input data
  */
 function evaluateApplyExpression(expr, input, environment) {
-  var result;
+  let result;
 
-  var lhs = evaluate(expr.lhs, input, environment);
+  const lhs = evaluate(expr.lhs, input, environment);
   if (expr.rhs.type === "function") {
     // this is a function _invocation_; invoke it with lhs expression as the first argument
     result = evaluateFunction(expr.rhs, input, environment, { context: lhs });
   } else {
-    var func = evaluate(expr.rhs, input, environment);
+    const func = evaluate(expr.rhs, input, environment);
 
     if (!isFunction(func)) {
       throw {
         code: "T2006",
-        stack: new Error().stack,
         position: expr.position,
+        stack: new Error().stack,
         value: func,
       };
     }
@@ -1416,7 +1416,7 @@ function evaluateApplyExpression(expr, input, environment) {
     if (isFunction(lhs)) {
       // this is function chaining (func1 ~> func2)
       // λ($f, $g) { λ($x){ $g($f($x)) } }
-      var chain = evaluate(chainAST, null, environment);
+      const chain = evaluate(chainAST, null, environment);
       result = apply(chain, [lhs, func], null, environment);
     } else {
       result = apply(func, [lhs], null, environment);
@@ -1434,13 +1434,13 @@ function evaluateApplyExpression(expr, input, environment) {
  * @returns {*} Evaluated input data
  */
 function evaluateFunction(expr, input, environment, applyto) {
-  var result;
+  let result;
 
   // create the procedure
   // can't assume that expr.procedure is a lambda type directly
   // could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
   // evaluate it generically first, then check that it is a function.  Throw error if not.
-  var proc = evaluate(expr.procedure, input, environment);
+  const proc = evaluate(expr.procedure, input, environment);
 
   if (
     typeof proc === "undefined" &&
@@ -1450,18 +1450,18 @@ function evaluateFunction(expr, input, environment, applyto) {
     // help the user out here if they simply forgot the leading $
     throw {
       code: "T1005",
-      stack: new Error().stack,
       position: expr.position,
+      stack: new Error().stack,
       token: expr.procedure.steps[0].value,
     };
   }
 
-  var evaluatedArgs = [];
+  const evaluatedArgs = [];
   if (typeof applyto !== "undefined") {
     evaluatedArgs.push(applyto.context);
   }
   // eager evaluation - evaluate the arguments
-  for (var jj = 0; jj < expr.arguments.length; jj++) {
+  for (let jj = 0; jj < expr.arguments.length; jj++) {
     const arg = evaluate(expr.arguments[jj], input, environment);
     if (isFunction(arg)) {
       // wrap this in a closure
@@ -1476,7 +1476,7 @@ function evaluateFunction(expr, input, environment, applyto) {
     }
   }
   // apply the procedure
-  var procName =
+  const procName =
     expr.procedure.type === "path"
       ? expr.procedure.steps[0].value
       : expr.procedure.value;
@@ -1509,13 +1509,13 @@ function evaluateFunction(expr, input, environment, applyto) {
  * @returns {*} Result of procedure
  */
 function apply(proc, args, input, environment) {
-  var result;
+  let result;
   result = applyInner(proc, args, input, environment);
   while (isLambda(result) && result.thunk === true) {
     // trampoline loop - this gets invoked as a result of tail-call optimization
     // the function returned a tail-call thunk
     // unpack it, evaluate its arguments, and apply the tail call
-    var next = evaluate(
+    const next = evaluate(
       result.body.procedure,
       result.input,
       result.environment,
@@ -1524,8 +1524,8 @@ function apply(proc, args, input, environment) {
       next.token = result.body.procedure.value;
     }
     next.position = result.body.procedure.position;
-    var evaluatedArgs = [];
-    for (var ii = 0; ii < result.body.arguments.length; ii++) {
+    const evaluatedArgs = [];
+    for (let ii = 0; ii < result.body.arguments.length; ii++) {
       evaluatedArgs.push(
         evaluate(result.body.arguments[ii], result.input, result.environment),
       );
@@ -1545,9 +1545,9 @@ function apply(proc, args, input, environment) {
  * @returns {*} Result of procedure
  */
 function applyInner(proc, args, input, environment) {
-  var result;
+  let result;
   try {
-    var validatedArgs = args;
+    let validatedArgs = args;
     if (proc) {
       validatedArgs = validateArguments(proc.signature, args, input);
     }
@@ -1555,7 +1555,7 @@ function applyInner(proc, args, input, environment) {
     if (isLambda(proc)) {
       result = applyProcedure(proc, validatedArgs);
     } else if (proc && proc._jsonata_function === true) {
-      var focus = {
+      const focus = {
         environment: environment,
         input: input,
       };
@@ -1608,19 +1608,19 @@ function applyInner(proc, args, input, environment) {
  */
 function evaluateLambda(expr, input, environment) {
   // make a function (closure)
-  var procedure = {
+  const procedure = {
     _jsonata_lambda: true,
-    input: input,
-    environment: environment,
     arguments: expr.arguments,
-    signature: expr.signature,
     body: expr.body,
+    environment: environment,
+    input: input,
+    signature: expr.signature,
   };
   if (expr.thunk === true) {
     procedure.thunk = true;
   }
   procedure.apply = (self, args) =>
-    apply(procedure, args, input, !!self ? self.environment : environment);
+    apply(procedure, args, input, self ? self.environment : environment);
   return procedure;
 }
 
@@ -1633,11 +1633,11 @@ function evaluateLambda(expr, input, environment) {
  */
 function evaluatePartialApplication(expr, input, environment) {
   // partially apply a function
-  var result;
+  let result;
   // evaluate the arguments
-  var evaluatedArgs = [];
-  for (var ii = 0; ii < expr.arguments.length; ii++) {
-    var arg = expr.arguments[ii];
+  const evaluatedArgs = [];
+  for (let ii = 0; ii < expr.arguments.length; ii++) {
+    const arg = expr.arguments[ii];
     if (arg.type === "operator" && arg.value === "?") {
       evaluatedArgs.push(arg);
     } else {
@@ -1645,7 +1645,7 @@ function evaluatePartialApplication(expr, input, environment) {
     }
   }
   // lookup the procedure
-  var proc = evaluate(expr.procedure, input, environment);
+  const proc = evaluate(expr.procedure, input, environment);
   if (
     typeof proc === "undefined" &&
     expr.procedure.type === "path" &&
@@ -1654,8 +1654,8 @@ function evaluatePartialApplication(expr, input, environment) {
     // help the user out here if they simply forgot the leading $
     throw {
       code: "T1007",
-      stack: new Error().stack,
       position: expr.position,
+      stack: new Error().stack,
       token: expr.procedure.steps[0].value,
     };
   }
@@ -1668,8 +1668,8 @@ function evaluatePartialApplication(expr, input, environment) {
   } else {
     throw {
       code: "T1008",
-      stack: new Error().stack,
       position: expr.position,
+      stack: new Error().stack,
       token:
         expr.procedure.type === "path"
           ? expr.procedure.steps[0].value
@@ -1691,7 +1691,7 @@ function validateArguments(signature, args, context) {
     // nothing to validate
     return args;
   }
-  var validatedArgs = signature.validate(args, context);
+  const validatedArgs = signature.validate(args, context);
   return validatedArgs;
 }
 
@@ -1702,8 +1702,8 @@ function validateArguments(signature, args, context) {
  * @returns {*} Result of procedure
  */
 function applyProcedure(proc, args) {
-  var result;
-  var env = createFrame(proc.environment);
+  let result;
+  const env = createFrame(proc.environment);
   proc.arguments.forEach((param, index) => {
     env.bind(param.value, args[index]);
   });
@@ -1724,22 +1724,22 @@ function applyProcedure(proc, args) {
  */
 function partialApplyProcedure(proc, args) {
   // create a closure, bind the supplied parameters and return a function that takes the remaining (?) parameters
-  var env = createFrame(proc.environment);
-  var unboundArgs = [];
+  const env = createFrame(proc.environment);
+  const unboundArgs = [];
   proc.arguments.forEach((param, index) => {
-    var arg = args[index];
+    const arg = args[index];
     if (arg && arg.type === "operator" && arg.value === "?") {
       unboundArgs.push(param);
     } else {
       env.bind(param.value, arg);
     }
   });
-  var procedure = {
+  const procedure = {
     _jsonata_lambda: true,
-    input: proc.input,
-    environment: env,
     arguments: unboundArgs,
     body: proc.body,
+    environment: env,
+    input: proc.input,
   };
   return procedure;
 }
@@ -1754,14 +1754,14 @@ function partialApplyNativeFunction(native, args) {
   // create a lambda function that wraps and invokes the native function
   // get the list of declared arguments from the native function
   // this has to be picked out from the toString() value
-  var sigArgs = getNativeFunctionArguments(native);
+  let sigArgs = getNativeFunctionArguments(native);
   sigArgs = sigArgs.map((sigArg) => "$" + sigArg.trim());
-  var body = "function(" + sigArgs.join(", ") + "){ _ }";
+  const body = "function(" + sigArgs.join(", ") + "){ _ }";
 
-  var bodyAST = parser(body);
+  const bodyAST = parser(body);
   bodyAST.body = native;
 
-  var partial = partialApplyProcedure(bodyAST, args);
+  const partial = partialApplyProcedure(bodyAST, args);
   return partial;
 }
 
@@ -1772,14 +1772,14 @@ function partialApplyNativeFunction(native, args) {
  * @returns {*} Result of applying native function
  */
 function applyNativeFunction(proc, env) {
-  var sigArgs = getNativeFunctionArguments(proc);
+  const sigArgs = getNativeFunctionArguments(proc);
   // generate the array of arguments for invoking the function - look them up in the environment
-  var args = sigArgs.map((sigArg) => env.lookup(sigArg.trim()));
+  const args = sigArgs.map((sigArg) => env.lookup(sigArg.trim()));
 
-  var focus = {
+  const focus = {
     environment: env,
   };
-  var result = proc.apply(focus, args);
+  let result = proc.apply(focus, args);
   if (isPromise(result)) {
     result = result;
   }
@@ -1792,9 +1792,9 @@ function applyNativeFunction(proc, env) {
  * @returns {*|Array} Native function arguments
  */
 function getNativeFunctionArguments(func) {
-  var signature = func.toString();
-  var sigParens = /\(([^)]*)\)/.exec(signature)[1]; // the contents of the parens
-  var sigArgs = sigParens.split(",");
+  const signature = func.toString();
+  const sigParens = /\(([^)]*)\)/.exec(signature)[1]; // the contents of the parens
+  const sigArgs = sigParens.split(",");
   return sigArgs;
 }
 
@@ -1805,7 +1805,7 @@ function getNativeFunctionArguments(func) {
  * @returns {{implementation: *, signature: *}} function definition
  */
 function defineFunction(func, signature) {
-  var definition = {
+  const definition = {
     _jsonata_function: true,
     implementation: func,
   };
@@ -1825,7 +1825,7 @@ function functionEval(expr, focus) {
   if (typeof expr === "undefined") {
     return undefined;
   }
-  var input = this.input;
+  let input = this.input;
   if (typeof focus !== "undefined") {
     input = focus;
     // if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
@@ -1841,10 +1841,10 @@ function functionEval(expr, focus) {
     // error parsing the expression passed to $eval
     populateMessage(err);
     throw {
-      stack: new Error().stack,
       code: "D3120",
-      value: err.message,
       error: err,
+      stack: new Error().stack,
+      value: err.message,
     };
   }
   try {
@@ -1853,10 +1853,10 @@ function functionEval(expr, focus) {
     // error evaluating the expression passed to $eval
     populateMessage(err);
     throw {
-      stack: new Error().stack,
       code: "D3121",
-      value: err.message,
       error: err,
+      stack: new Error().stack,
+      value: err.message,
     };
   }
 
@@ -1883,13 +1883,22 @@ function functionClone(arg) {
  * @returns {{bind: bind, lookup: lookup}} Created frame
  */
 function createFrame(enclosingEnvironment) {
-  var bindings = {};
+  const bindings = {};
   return {
+    async: enclosingEnvironment ? enclosingEnvironment.async : false,
     bind: (name, value) => {
       bindings[name] = value;
     },
+    global: enclosingEnvironment
+      ? enclosingEnvironment.global
+      : {
+          ancestry: [null],
+        },
+    isParallelCall: enclosingEnvironment
+      ? enclosingEnvironment.isParallelCall
+      : false,
     lookup: (name) => {
-      var value;
+      let value;
       if (bindings.hasOwnProperty(name)) {
         value = bindings[name];
       } else if (enclosingEnvironment) {
@@ -1898,15 +1907,6 @@ function createFrame(enclosingEnvironment) {
       return value;
     },
     timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
-    async: enclosingEnvironment ? enclosingEnvironment.async : false,
-    isParallelCall: enclosingEnvironment
-      ? enclosingEnvironment.isParallelCall
-      : false,
-    global: enclosingEnvironment
-      ? enclosingEnvironment.global
-      : {
-          ancestry: [null],
-        },
   };
 }
 
@@ -2010,79 +2010,12 @@ staticFrame.bind("clone", defineFunction(functionClone, "<(oa)-:o>"));
  *  20xx    - operators
  *  3xxx    - functions (blocks of 10 for each function)
  */
-var errorCodes = {
-  S0101: "String literal must be terminated by a matching quote",
-  S0102: "Number out of range: {{token}}",
-  S0103: "Unsupported escape sequence: \\{{token}}",
-  S0104: "The escape sequence \\u must be followed by 4 hex digits",
-  S0105: "Quoted property name must be terminated with a backquote (`)",
-  S0106: "Comment has no closing tag",
-  S0201: "Syntax error: {{token}}",
-  S0202: "Expected {{value}}, got {{token}}",
-  S0203: "Expected {{value}} before end of expression",
-  S0204: "Unknown operator: {{token}}",
-  S0205: "Unexpected token: {{token}}",
-  S0206: "Unknown expression type: {{token}}",
-  S0207: "Unexpected end of expression",
-  S0208:
-    "Parameter {{value}} of function definition must be a variable name (start with $)",
-  S0209: "A predicate cannot follow a grouping expression in a step",
-  S0210: "Each step can only have one grouping expression",
-  S0211: "The symbol {{token}} cannot be used as a unary operator",
-  S0212: "The left side of := must be a variable name (start with $)",
-  S0213:
-    "The literal value {{value}} cannot be used as a step within a path expression",
-  S0214: "The right side of {{token}} must be a variable name (start with $)",
-  S0215: "A context variable binding must precede any predicates on a step",
-  S0216:
-    "A context variable binding must precede the 'order-by' clause on a step",
-  S0217:
-    "The object representing the 'parent' cannot be derived from this expression",
-  S0301: "Empty regular expressions are not allowed",
-  S0302: "No terminating / in regular expression",
-  S0402: "Choice groups containing parameterized types are not supported",
-  S0401: "Type parameters can only be applied to functions and arrays",
-  S0500: "Attempted to evaluate an expression containing syntax error(s)",
-  T0410:
-    "Argument {{index}} of function {{token}} does not match function signature",
-  T0411:
-    "Context value is not a compatible type with argument {{index}} of function {{token}}",
-  T0412:
-    "Argument {{index}} of function {{token}} must be an array of {{type}}",
+const errorCodes = {
   D1001: "Number out of range: {{value}}",
   D1002: "Cannot negate a non-numeric value: {{value}}",
-  T1003: "Key in object structure must evaluate to a string; got: {{value}}",
   D1004: "Regular expression matches zero length string",
-  T1005: "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
-  T1006: "Attempted to invoke a non-function",
-  T1007:
-    "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
-  T1008: "Attempted to partially apply a non-function",
   D1009: "Multiple key definitions evaluate to same key: {{value}}",
-  T1010:
-    "The matcher function argument passed to function {{token}} does not return the correct object structure",
-  T2001: "The left side of the {{token}} operator must evaluate to a number",
-  T2002: "The right side of the {{token}} operator must evaluate to a number",
-  T2003: "The left side of the range operator (..) must evaluate to an integer",
-  T2004:
-    "The right side of the range operator (..) must evaluate to an integer",
   D2005: "The left side of := must be a variable name (start with $)", // defunct - replaced by S0212 parser error
-  T2006:
-    "The right side of the function application operator ~> must be a function",
-  T2007:
-    "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
-  T2008:
-    "The expressions within an order-by clause must evaluate to numeric or string values",
-  T2009:
-    "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
-  T2010:
-    "The expressions either side of operator {{token}} must evaluate to numeric or string values",
-  T2011:
-    "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
-  T2012:
-    "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
-  T2013:
-    "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
   D2014:
     "The size of the sequence allocated by the range operator (..) must not exceed 1e6.  Attempted to allocate {{value}}.",
   D3001: "Attempting to invoke string function on Infinity or NaN",
@@ -2153,6 +2086,73 @@ var errorCodes = {
     "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
   D3140: "Malformed URL passed to ${{{functionName}}}(): {{value}}",
   D3141: "{{{message}}}",
+  S0101: "String literal must be terminated by a matching quote",
+  S0102: "Number out of range: {{token}}",
+  S0103: "Unsupported escape sequence: \\{{token}}",
+  S0104: "The escape sequence \\u must be followed by 4 hex digits",
+  S0105: "Quoted property name must be terminated with a backquote (`)",
+  S0106: "Comment has no closing tag",
+  S0201: "Syntax error: {{token}}",
+  S0202: "Expected {{value}}, got {{token}}",
+  S0203: "Expected {{value}} before end of expression",
+  S0204: "Unknown operator: {{token}}",
+  S0205: "Unexpected token: {{token}}",
+  S0206: "Unknown expression type: {{token}}",
+  S0207: "Unexpected end of expression",
+  S0208:
+    "Parameter {{value}} of function definition must be a variable name (start with $)",
+  S0209: "A predicate cannot follow a grouping expression in a step",
+  S0210: "Each step can only have one grouping expression",
+  S0211: "The symbol {{token}} cannot be used as a unary operator",
+  S0212: "The left side of := must be a variable name (start with $)",
+  S0213:
+    "The literal value {{value}} cannot be used as a step within a path expression",
+  S0214: "The right side of {{token}} must be a variable name (start with $)",
+  S0215: "A context variable binding must precede any predicates on a step",
+  S0216:
+    "A context variable binding must precede the 'order-by' clause on a step",
+  S0217:
+    "The object representing the 'parent' cannot be derived from this expression",
+  S0301: "Empty regular expressions are not allowed",
+  S0302: "No terminating / in regular expression",
+  S0401: "Type parameters can only be applied to functions and arrays",
+  S0402: "Choice groups containing parameterized types are not supported",
+  S0500: "Attempted to evaluate an expression containing syntax error(s)",
+  T0410:
+    "Argument {{index}} of function {{token}} does not match function signature",
+  T0411:
+    "Context value is not a compatible type with argument {{index}} of function {{token}}",
+  T0412:
+    "Argument {{index}} of function {{token}} must be an array of {{type}}",
+  T1003: "Key in object structure must evaluate to a string; got: {{value}}",
+  T1005: "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
+  T1006: "Attempted to invoke a non-function",
+  T1007:
+    "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
+  T1008: "Attempted to partially apply a non-function",
+  T1010:
+    "The matcher function argument passed to function {{token}} does not return the correct object structure",
+  T2001: "The left side of the {{token}} operator must evaluate to a number",
+  T2002: "The right side of the {{token}} operator must evaluate to a number",
+  T2003: "The left side of the range operator (..) must evaluate to an integer",
+  T2004:
+    "The right side of the range operator (..) must evaluate to an integer",
+  T2006:
+    "The right side of the function application operator ~> must be a function",
+  T2007:
+    "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
+  T2008:
+    "The expressions within an order-by clause must evaluate to numeric or string values",
+  T2009:
+    "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
+  T2010:
+    "The expressions either side of operator {{token}} must evaluate to numeric or string values",
+  T2011:
+    "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
+  T2012:
+    "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
+  T2013:
+    "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
 };
 
 /**
@@ -2163,12 +2163,12 @@ var errorCodes = {
  * @returns {undefined} - `err` is modified in place
  */
 function populateMessage(err) {
-  var template = errorCodes[err.code];
+  const template = errorCodes[err.code];
   if (typeof template !== "undefined") {
     // if there are any handlebars, replace them with the field references
     // triple braces - replace with value
     // double braces - replace with json stringified value
-    var message = template.replace(
+    let message = template.replace(
       /\{\{\{([^}]+)}}}/g,
       () => err[arguments[1]],
     );
@@ -2189,8 +2189,8 @@ function populateMessage(err) {
  * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
  */
 export function jsonata(expr: string, options?: {}) {
-  var ast;
-  var errors;
+  let ast;
+  let errors;
   try {
     ast = parser(expr, options && options.recover);
     errors = ast.errors;
@@ -2200,9 +2200,9 @@ export function jsonata(expr: string, options?: {}) {
     populateMessage(err); // possible side-effects on `err`
     throw err;
   }
-  var environment = createFrame(staticFrame);
+  const environment = createFrame(staticFrame);
 
-  var timestamp = new Date(); // will be overridden on each call to evalute()
+  let timestamp = new Date(); // will be overridden on each call to evalute()
   environment.bind(
     "now",
     defineFunction(
@@ -2223,6 +2223,11 @@ export function jsonata(expr: string, options?: {}) {
   }
 
   return {
+    assign: (name, value) => {
+      environment.bind(name, value);
+    },
+    ast: () => ast,
+    errors: () => errors,
     evaluate: (
       input: any,
       bindings?: { [key: string]: any },
@@ -2230,7 +2235,7 @@ export function jsonata(expr: string, options?: {}) {
     ) => {
       // throw if the expression compiled with syntax errors
       if (typeof errors !== "undefined") {
-        var err = {
+        const err = {
           code: "S0500",
           position: 0,
         };
@@ -2242,7 +2247,7 @@ export function jsonata(expr: string, options?: {}) {
         var exec_env;
         // the variable bindings have been passed in - create a frame to hold these
         exec_env = createFrame(environment);
-        for (var v in bindings) {
+        for (const v in bindings) {
           exec_env.bind(v, bindings[v]);
         }
       } else {
@@ -2262,7 +2267,7 @@ export function jsonata(expr: string, options?: {}) {
         input.outerWrapper = true;
       }
 
-      var it;
+      let it;
       try {
         it = evaluate(ast, input, exec_env);
         if (typeof callback === "function") {
@@ -2275,14 +2280,9 @@ export function jsonata(expr: string, options?: {}) {
         throw err;
       }
     },
-    assign: (name, value) => {
-      environment.bind(name, value);
-    },
     registerFunction: (name, implementation, signature) => {
-      var func = defineFunction(implementation, signature);
+      const func = defineFunction(implementation, signature);
       environment.bind(name, func);
     },
-    ast: () => ast,
-    errors: () => errors,
   };
 }

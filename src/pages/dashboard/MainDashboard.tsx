@@ -1,31 +1,32 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
+import Dismiss from "solid-dismiss";
 // import {get, set} from "idb-keyval";
 import {
+  type JSX,
+  Show,
   createEffect,
   createSignal,
-  type JSX,
   onMount,
-  Show,
   useContext,
 } from "solid-js";
+
+import { useToast } from "~/components/Toast";
+import "~/css/base.css";
+import "~/css/modal.css";
+import { signOutCall } from "~/lib/api/api_functions";
+import { API } from "~/lib/api/endpoints";
+import {getAPI} from "~/lib/api/getApi";
+import { APP_BASE_URL } from "~/lib/constants";
+import { LoadingContext, PageContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
-import { getNewGraphId } from "~/lib/graph/transaction";
-import Dismiss from "solid-dismiss";
-import { Navbar } from "~/pages/dashboard/Navbar";
 import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
-import "~/css/base.css";
-import "~/css/modal.css";
-import { LoadingContext, PageContext } from "~/lib/contexts";
-import { useToast } from "~/components/Toast";
-import { signOutCall } from "~/lib/api/api_functions";
-import {getAPI} from "~/lib/api/getApi";
-import { API } from "~/lib/api/endpoints";
-import { APP_BASE_URL } from "~/lib/constants";
+import { getNewGraphId } from "~/lib/graph/transaction";
 import { isPageDesignerPath } from "~/lib/utils";
+import { Navbar } from "~/pages/dashboard/Navbar";
 
 export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   const border = "|solid|rgb(212,219,231)";
@@ -53,11 +54,11 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
     return location.pathname; // Track changes in pathname
   });
   const mainContentStyle = {
-    "flex-grow": 1,
-    "scrollbar-width": "thin",
-    overflow: "auto",
     display: "flex",
     "flex-direction": "column",
+    "flex-grow": 1,
+    overflow: "auto",
+    "scrollbar-width": "thin",
   };
 
   return (
@@ -72,17 +73,17 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
       >
         <Show when={location.pathname.includes("/admin/") && !isPageDesignerPath(location.pathname)}>
           <Navbar
+            meta={graph.vertexes[vertexId]}
+            right={<DropdownMenu />}
             showCloseDrawerBtn={location.pathname.includes("/admin/")}
             toggleSidebar={() => {
               setGraph("isSideBarOpen", (prev) => !prev);
             }}
-            right={<DropdownMenu />}
-            meta={graph.vertexes[vertexId]}
           />
         </Show>
         <div
-          classList={{ "height:93vh": graph.isSideBarOpen }}
           class={" p:4|10 overflow-y:auto"}
+          classList={{ "height:93vh": graph.isSideBarOpen }}
           style={{ "scrollbar-width": "thin" }}
         >
           {props.children}
@@ -96,7 +97,7 @@ const DropdownMenu = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
   const navigate = useNavigate();
-  const { showLoadingToast, showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: any;
   let dropdownContainerEl: any;
@@ -139,25 +140,25 @@ const DropdownMenu = () => {
   return (
     <>
       <button
-        id="dropdown-toggle"
-        ref={btnEl}
-        onClick={handleOpen}
         class={
           "flex width:40px height:40px ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
         }
+        id="dropdown-toggle"
+        onClick={handleOpen}
+        ref={btnEl}
         style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${
           graph.member?.properties?.profileImage ||
           "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
         })`}
       />
       <Dismiss
-        menuButton={btnEl}
-        open={isOpen}
-        setOpen={setIsOpen}
-        mount="body"
-        overlay
         cursorKeys
+        menuButton={btnEl}
+        mount="body"
+        open={isOpen}
+        overlay
         ref={dropdownContainerEl}
+        setOpen={setIsOpen}
       >
         <div
           style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
@@ -167,14 +168,14 @@ const DropdownMenu = () => {
           }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
-            style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
             onClick={handleClose}
+            style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
           />
           <ul
             class="@fade|.3s"
             style="list-style-type: none; padding: 0; margin: 0; position:relative;"
           >
-            <li style="margin-bottom: 5px; padding: 10px; " class={"flex p:13"}>
+            <li class={"flex p:13"} style="margin-bottom: 5px; padding: 10px; ">
               <div
                 // alt="profile"
                 class="h:45 w:45 r:50%"
@@ -186,18 +187,18 @@ const DropdownMenu = () => {
               <div class={"ml:10 mr:1rem"}>
                 <div class={"text-align:start f:15 font-weight:bold"}>
                   <Show
-                    when={!graph.member?.properties?.username}
                     fallback={graph.member?.properties?.username ?? "anonymous"}
+                    when={!graph.member?.properties?.username}
                   >
                     {"Guest User"}
                   </Show>
                 </div>
                 <div class={"text-align:start f:13"}>
                   <Show
-                    when={!graph.member?.properties?.email}
                     fallback={
                       graph.member?.properties?.email ?? "anonymous@gmail.com"
                     }
+                    when={!graph.member?.properties?.email}
                   >
                     {"guest@gmail.com"}
                   </Show>
@@ -207,28 +208,27 @@ const DropdownMenu = () => {
             <hr class={"color:rgb(223,223,223)"} />
 
             <Show
-              when={!graph.member?.properties?.email}
               fallback={
                 <div>
-                  <li style="margin-top: 5px; " class={"m:5|10"}>
+                  <li class={"m:5|10"} style="margin-top: 5px; ">
                     <A
+                      class="bg:rgb(241,241,241):hover r:5|5|5|5"
                       href={`${APP_BASE_URL}/setting`}
                       onclick={() => {
                         setIsOpen(false);
                       }}
-                      class="bg:rgb(241,241,241):hover r:5|5|5|5"
                       style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                     >
                       Account Setting
                     </A>
                   </li>
-                  <li style="margin-top: 5px; " class={"m:5|10"}>
+                  <li class={"m:5|10"} style="margin-top: 5px; ">
                     <A
+                      class="bg:rgb(241,241,241):hover r:5|5|5|5"
                       href={"/contact-us"}
                       onclick={() => {
                         setIsOpen(false);
                       }}
-                      class="bg:rgb(241,241,241):hover r:5|5|5|5"
                       style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                     >
                       Help
@@ -237,24 +237,24 @@ const DropdownMenu = () => {
                   <hr class={"color:rgb(223,223,223)"} />
 
                   {/*<hr style="color:lightgrey" class={'mt:.5rem'}/>*/}
-                  <li style="margin-top: 5px; " class={"m:5|10"}>
+                  <li class={"m:5|10"} style="margin-top: 5px; ">
                     <a
+                      class="r:5|5|5|5 cursor:default"
                       onclick={async () => {
                         setIsOpen(false);
                         setLoadingSite(true);
                         await showLoadingToast({
-                          promise: signOutCall(),
                           loadMessage: "Logging Out...",
-                          successMessage: "Log Out Successfully",
                           onSuccess: (value) => {
                             if (value != null && value.message !== null) {
                               navigate("/auth/login");
                             }
                           },
+                          promise: signOutCall(),
+                          successMessage: "Log Out Successfully",
                         });
                         setLoadingSite(false);
                       }}
-                      class="r:5|5|5|5 cursor:default"
                       style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 10px 7px;"
                     >
                       Sign Out
@@ -262,29 +262,30 @@ const DropdownMenu = () => {
                   </li>
                 </div>
               }
+              when={!graph.member?.properties?.email}
             >
               <div>
-                <li style="margin-top: 5px; " class={"m:5|10"}>
+                <li class={"m:5|10"} style="margin-top: 5px; ">
                   <A
+                    class="bg:rgb(241,241,241):hover r:5|5|5|5"
                     href={"/auth/login"}
-                    replace={true}
                     onclick={() => {
                       setIsOpen(false);
                     }}
-                    class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                    replace={true}
                     style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                   >
                     Log In
                   </A>
                 </li>
-                <li style="margin-top: 5px; " class={"m:5|10"}>
+                <li class={"m:5|10"} style="margin-top: 5px; ">
                   <A
+                    class="bg:rgb(241,241,241):hover r:5|5|5|5"
                     href={"/auth/signup"}
-                    replace={true}
                     onclick={() => {
                       setIsOpen(false);
                     }}
-                    class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                    replace={true}
                     style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                   >
                     Sign Up

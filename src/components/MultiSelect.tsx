@@ -1,31 +1,32 @@
-import { Icon } from "@iconify-icon/solid";
-import {
-  type JSX,
-  createSignal,
-  For,
-  createMemo,
-  onCleanup,
-  Show,
-} from "solid-js";
-import { useToast } from "./Toast";
-import { Portal, } from "solid-js/web";
-import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
+import { Icon } from "@iconify-icon/solid";
+import { useFloating } from 'solid-floating-ui';
+import {
+  For,
+  type JSX,
+  Show,
+  createMemo,
+  createSignal,
+  onCleanup,
+} from "solid-js";
+import { Portal, } from "solid-js/web";
+
+import { useToast } from "./Toast";
 
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: Readonly<{
-   selectedValues: () => any;
-   options: any[];
-   onRemove: (arg0: any, arg1: any) => void;
-   onSelect: (arg0: any, arg1: any) => void;
-   placeholder?: string;
    disable?: boolean;
-   displayValueParent?: string;
    displayValueChild?: string;
-   selectionLimit?: number;
-   renderLabel?: ((arg0: any) => JSX.Element);
+   displayValueParent?: string;
    isLoadingOptions?: boolean;
    loadOptions?: () => Promise<void>;
+   onRemove: (arg0: any, arg1: any) => void;
+   onSelect: (arg0: any, arg1: any) => void;
+   options: any[];
+   placeholder?: string;
+   renderLabel?: ((arg0: any) => JSX.Element);
+   selectedValues: () => any;
+   selectionLimit?: number;
 }>) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
@@ -42,9 +43,9 @@ export function MultiSelectField(props: Readonly<{
 
   const getOptionProperty = (option: {
     [x: string]: { [x: string]: any }; // Vertex
-    value?: any;
     label?: any;
-  }, property: 'value' | 'label') => {
+    value?: any;
+  }, property: 'label' | 'value') => {
     if (typeof option === "object" && props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
@@ -102,15 +103,15 @@ export function MultiSelectField(props: Readonly<{
     "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
   const closeButtonStyle = "cursor: pointer; display: flex;";
   const inputStyle = () => ({
+    border: "none",
     display:
       props.selectedValues().length === 1 && props.selectionLimit === 1
         ? "none"
         : "",
     flex: 1,
-    "smin-width": "100px",
-    padding: "5px",
-    border: "none",
     outline: "none",
+    padding: "5px",
+    "smin-width": "100px",
   });
 
   const optionStyle = "padding: 8px; cursor: pointer; width: 100%;";
@@ -159,20 +160,25 @@ export function MultiSelectField(props: Readonly<{
     return (
       <Portal mount={document.body}>
         {/* z-index greater than drawers z-index */}
-        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:1001" style={{
+        <div class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:1001" ref={setFloating} style={{
+          left: `${position.x ?? 0}px`,
           position: position.strategy,
           top: `${position.y ?? 0}px`,
-          left: `${position.x ?? 0}px`,
         }}>
-          <Show when={!props.isLoadingOptions} fallback={<div style={optionStyle}>Loading...</div>}>
+          <Show fallback={<div style={optionStyle}>Loading...</div>} when={!props.isLoadingOptions}>
             <For
               each={filteredOptions()}
               fallback={<div style={optionStyle}>No item found </div>}
             >
               {(option, index) => (
-                <div
-                  class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
-                    } f:14 m:3 r:5 w:full bg:#e0e0e0:hover`}
+                <button
+                class="bg:#f4f4f4:hover f:14 m:3 r:5 w:full bg:#e0e0e0:hover w:full"
+                classList={{
+                   
+                    "r:0|0|5|5": index() === filteredOptions().length - 1,
+                   
+                  }}
+                  onMouseDown={() => handleSelectChange(getOptionValue(option))}
                   style={`${optionStyle} ${selected().some(
                     (item: { value: any }) =>
                       getOptionValue(item) === getOptionValue(option),
@@ -180,12 +186,12 @@ export function MultiSelectField(props: Readonly<{
                     ? optionSelectedStyle
                     : ""
                     }`}
-                  onMouseDown={() => handleSelectChange(getOptionValue(option))}
+                  type="button"
                 >
                   {props.renderLabel
                     ? props.renderLabel(option)
                     : getOptionLabel(option)}
-                </div>
+                </button>
               )}
             </For>
           </Show>
@@ -195,34 +201,34 @@ export function MultiSelectField(props: Readonly<{
   }
 
   return (
-    <div ref={setReference} style={containerStyle} class="grid text-align:left">
+    <div class="grid text-align:left" ref={setReference} style={containerStyle}>
       <div style={inputContainerStyle}>
         <For each={selected()}>
           {(tag) => (
-            <div style={tagStyle} class="f:14">
+            <div class="f:14" style={tagStyle}>
               {props.renderLabel ? props.renderLabel(tag) : getOptionLabel(tag)}
               <span
-                style={closeButtonStyle}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopImmediatePropagation();
                   return handleRemoveTag(getOptionValue(tag));
                 }}
+                style={closeButtonStyle}
               >
-                <Icon icon="ic:round-close" height={21} width={21} />
+                <Icon height={21} icon="ic:round-close" width={21} />
               </span>
             </div>
           )}
         </For>
         <input
-          ref={inputRef}
-          type="text"
-          style={inputStyle()}
-          value={inputValue()}
-          onInput={(e) => setInputValue(e.target.value)}
-          onFocus={handleInputFocus}
-          placeholder={props.placeholder ?? "Select options"}
           disabled={props.disable}
+          onFocus={handleInputFocus}
+          onInput={(e) => setInputValue(e.target.value)}
+          placeholder={props.placeholder ?? "Select options"}
+          ref={inputRef}
+          style={inputStyle()}
+          type="text"
+          value={inputValue()}
         />
       </div>
       <Show when={dropdownVisible()}>

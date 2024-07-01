@@ -1,10 +1,10 @@
 import {
+  type JSX,
   createContext,
   createEffect,
   createSelector,
   createSignal,
   createUniqueId,
-  type JSX,
   mergeProps,
   on,
   useContext,
@@ -12,10 +12,10 @@ import {
 
 import "./tabs.css";
 
-export type TabsProps = Omit<JSX.HTMLAttributes<HTMLElement>, "onchange"> & {
+export type TabsProps = {
   index?: number;
   setIndex?: (index?: number) => void;
-};
+} & Omit<JSX.HTMLAttributes<HTMLElement>, "onchange">;
 
 export const tabsContext = createContext<
   | [
@@ -31,7 +31,7 @@ export const tabsContext = createContext<
 export function Tabs(props: TabsProps) {
   const [index, setIndex] = createSignal(props.index || 0);
   const isActive = createSelector(index);
-  const indices = { tabs: -1, container: -1 };
+  const indices = { container: -1, tabs: -1 };
   const id = props.id || createUniqueId();
   createEffect(on(index, (index) => props.setIndex?.(index), { defer: true }));
   return (
@@ -86,12 +86,8 @@ export function Tab(props: TabProps) {
   );
   return (
     <button
-      ref={setRef}
-      role="tab"
-      type="button"
-      aria-selected={active()}
-      tabIndex={!active() ? -1 : undefined}
       aria-controls={`${id}-container${index}`}
+      aria-selected={active()}
       id={`${id}-tab${index}`}
       onClick={setIndex && [(index) => setIndex(index), index]}
       onKeyDown={
@@ -111,6 +107,10 @@ export function Tab(props: TabProps) {
           index,
         ]
       }
+      ref={setRef}
+      role="tab"
+      tabIndex={!active() ? -1 : undefined}
+      type="button"
       {...(active() ? {} : { tabIndex: -1 })}
       {...props}
     />
@@ -124,11 +124,11 @@ export function TabContainer(props: TabContainerProps) {
   const index = getIndex ? getIndex(true) : -1;
   return (
     <div
-      role="tabpanel"
-      id={`${id}-container${index}`}
       aria-labelledby={`${id}-tab${index}`}
-      tabIndex={isActive?.(index) ? 0 : undefined}
       hidden={!isActive || isActive(index) ? undefined : true}
+      id={`${id}-container${index}`}
+      role="tabpanel"
+      tabIndex={isActive?.(index) ? 0 : undefined}
       {...props}
     />
   );

@@ -1,18 +1,19 @@
-import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
+import { createSignal } from "solid-js";
+
 import logo from "~/assets/graphics/logo.png";
-import { contactUsCall } from "~/lib/api/api_functions";
+import { useToast } from "~/components/Toast";
 import "~/css/base.css";
+import { contactUsCall } from "~/lib/api/api_functions";
 import { validateEmail } from "~/lib/validations";
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [formData, setFormData] = createSignal({
     email: "",
+    message: "",
     name: "",
     subject: "",
-    message: "",
   });
   const [loadingSite, setLoadingSite] = createSignal(false);
 
@@ -24,12 +25,12 @@ export function ContactForm() {
     } else {
       setLoadingSite(true);
       await showLoadingToast({
-        promise: contactUsCall(formData),
         loadMessage: "Sending message...",
-        successMessage: "Message Sent Successfully",
         onSuccess: (value) => {
           navigate("/");
         },
+        promise: contactUsCall(formData),
+        successMessage: "Message Sent Successfully",
       });
       setLoadingSite(false);
     }
@@ -39,38 +40,38 @@ export function ContactForm() {
     <div
       class="@fade|.5s"
       style={{
-        flex: "auto",
-        "background-size": "cover",
+        "align-items": "center",
+        "background-color": "rgb(239,235,233)",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-size": "cover",
         display: "flex",
-        "background-color": "rgb(239,235,233)",
+        flex: "auto",
         "flex-direction": "column",
-        "align-items": "center",
-        "justify-content": "center",
         height: "100vh",
+        "justify-content": "center",
       }}
     >
       <img
-        src={logo}
         alt="logo"
         class="h:70px mb:100px"
+        src={logo}
         style={{ "justify-self": "center" }}
       />
       <form
         class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
         onSubmit={handleSubmit}
         style={{
+          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
           padding: "20px 30px",
-          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
         }}
       >
         <div class="d:none@<md flex jc:center w:-webkit-fill-available">
           <img
-            src={"../../public/graphics/contact-us.jpg"}
             alt="logo"
             class="w:25rem "
+            src={"../../public/graphics/contact-us.jpg"}
           />
         </div>
         <div class="mt:25 w:-webkit-fill-available w:100%@<md grid align-content:center m:0|30@lg">
@@ -83,124 +84,124 @@ export function ContactForm() {
           <div class="grid grid-template-columns:1fr|50%@>md gap:10 ">
             <div>
               <label
-                for="fullname"
                 class="f:14"
+                for="fullname"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Full Name
               </label>
               <input
-                type="text"
                 id="name"
                 name="name"
-                value={formData().name}
                 onInput={(e) =>
                   setFormData({ ...formData(), name: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Your name"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="text"
+                value={formData().name}
               />
             </div>
             <div>
               <label
-                for="email"
                 class="f:14"
+                for="email"
                 style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Email Address
               </label>
               <input
-                type="email"
                 id="email"
                 name="email"
-                value={formData().email}
                 onInput={(e) =>
                   setFormData({ ...formData(), email: e.target.value })
                 }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
                 placeholder="Your email"
                 required
+                style={{
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                  padding: "8px",
+                  width: "100%",
+                }}
+                type="email"
+                value={formData().email}
               />
             </div>
           </div>
           <div style={{ margin: "10px 0" }}>
             <label
-              for="subject"
               class="f:14"
+              for="subject"
               style={{ display: "block", "margin-bottom": "5px" }}
             >
               Subject
             </label>
             <input
-              name="subject"
               id="subject"
-              type="text"
-              value={formData().subject}
+              name="subject"
               onInput={(e) =>
                 setFormData({ ...formData(), subject: e.target.value })
               }
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-              }}
               placeholder="What's the subject?"
               required
+              style={{
+                border: "1px solid #ccc",
+                "border-radius": "4px",
+                padding: "8px",
+                width: "100%",
+              }}
+              type="text"
+              value={formData().subject}
             />
           </div>
           <div style={{ "margin-bottom": "10px 0" }}>
             <label
-              for="username"
               class="f:14"
+              for="username"
               style={{ display: "block", "margin-bottom": "5px" }}
             >
               Message
             </label>
             <textarea
-              id="message"
-              rows="4"
-              typeof="textarea"
               aria-multiline="true"
-              name="text"
               class="max-h:10rem"
-              value={formData().message}
+              id="message"
+              name="text"
               onInput={(e) =>
                 setFormData({ ...formData(), message: e.target.value })
               }
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-              }}
               placeholder="Write your message.."
               required
+              rows="4"
+              style={{
+                border: "1px solid #ccc",
+                "border-radius": "4px",
+                padding: "8px",
+                width: "100%",
+              }}
+              typeof="textarea"
+              value={formData().message}
             />
           </div>
 
           <button
-            type="submit"
             style={{
-              width: "100%",
-              padding: "10px",
               background: "rgb(226,65,74)",
-              color: "white",
               border: "none",
               "border-radius": "4px",
+              color: "white",
               cursor: "pointer",
+              padding: "10px",
+              width: "100%",
             }}
+            type="submit"
           >
             Send Message
           </button>

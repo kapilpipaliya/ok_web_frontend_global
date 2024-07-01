@@ -1,5 +1,7 @@
-import type { GraphInterface } from "~/lib/graph/graph";
 import type { Store } from "solid-js/store";
+
+import type { GraphInterface } from "~/lib/graph/graph";
+
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/getNameKeyForCollection";
 

@@ -1,4 +1,5 @@
 import type { Component, JSX } from "solid-js";
+
 import {
   createContext,
   createEffect,
@@ -9,8 +10,8 @@ import {
   splitProps,
   useContext,
 } from "solid-js";
-import { runEvent } from "../tools";
 
+import { runEvent } from "../tools";
 import "./accordion.css";
 
 declare module "solid-js" {
@@ -38,10 +39,10 @@ const accordionContext = createContext<
   | []
 >([]);
 
-export type AccordionProps = JSX.HTMLAttributes<HTMLDetailsElement> & {
+export type AccordionProps = {
   open?: boolean;
   setOpen?: (isOpen: boolean) => void;
-};
+} & JSX.HTMLAttributes<HTMLDetailsElement>;
 
 export const Accordion: Component<AccordionProps> = (props) => {
   const [local, detailsProps] = splitProps(props, ["setOpen"]);
@@ -116,12 +117,12 @@ export const AccordionHeader: Component<AccordionHeaderProps> = (props) => (
   />
 );
 
-export type AccordionGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+export type AccordionGroupProps = {
   /** opening another accordion does not close the last opened one */
   allowMultiple?: boolean;
   /** the last open accordion may be closed */
   allowToggle?: boolean;
-};
+} & JSX.HTMLAttributes<HTMLDivElement>;
 
 export const AccordionGroup: Component<AccordionGroupProps> = (props) => {
   const [local, divProps] = splitProps(props, ["allowMultiple", "allowToggle"]);

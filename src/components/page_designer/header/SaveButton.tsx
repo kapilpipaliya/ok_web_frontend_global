@@ -1,16 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext } from "solid-js";
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { useNavigate } from "@solidjs/router";
+import { useContext } from "solid-js";
+
 import { useToast } from "~/components/Toast";
-import { getNewTxnId } from "~/lib/graph/transaction";
-import { GraphContext } from "~/lib/graph/graph";
-import { useDesignerLayoutStore } from "../LayoutContext";
 import { formSubmit } from "~/components/form/formSubmit";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
+import { GraphContext } from "~/lib/graph/graph";
+import { getNewTxnId } from "~/lib/graph/transaction";
+
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function SaveButton() {
   const [layoutStore] = useDesignerLayoutStore();
-  const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
   const navigate = useNavigate();
@@ -32,11 +34,11 @@ export function SaveButton() {
   return (
     <Tooltip content={"Save"} position={"s"}>
       <button
-        type="button"
         class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px w:37px cursor:pointer"
         onClick={onSubmit}
+        type="button"
       >
-        <Icon icon={"bi:floppy"} height={22} width={22} />
+        <Icon height={22} icon={"bi:floppy"} width={22} />
       </button>
     </Tooltip>
   );

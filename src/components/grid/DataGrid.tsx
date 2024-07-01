@@ -1,28 +1,31 @@
+import type { ColumnDef } from "@tanstack/solid-table";
+
+import { Icon } from "@iconify-icon/solid";
+import { useNavigate } from "@solidjs/router";
 import {
-  useContext,
-  createSignal,
+  Match,
   Show,
   Switch,
-  Match,
+  createSignal,
   onMount,
+  useContext,
 } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/Toast";
-import { GraphContext, type Id, type Vertex, } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
-import { CommonTable } from "~/components/Table";
-import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
+
+import type { IFormMetaData } from "~/lib/FormMetadataType";
+
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
-import type { ColumnDef } from "@tanstack/solid-table";
-import type { IFormMetaData } from "~/lib/FormMetadataType";
+import { CommonTable } from "~/components/Table";
+import { useToast } from "~/components/Toast";
 import { PageContext } from "~/lib/contexts";
+import { GraphContext, type Id, type Vertex, } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 
+import { AddNewButton } from "./AddNew";
 import { deleteRowConfirm } from "./deleteRow";
 import { getTableData } from "./getTableData";
 import { setGridHeaders } from "./setGridHeaders";
-import { AddNewButton } from "./AddNew";
 interface DataGridProps {
   tableId: string;
 }
@@ -46,18 +49,18 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   type TableData = {
     error?: string;
-    result?: any;
+    form?: IFormMetaData;
     graph?: {
-      vertexes: {
-        [key: string]: any;
-      };
       edges: {
         [key: string]: any;
       };
+      vertexes: {
+        [key: string]: any;
+      };
     };
-    form?: IFormMetaData;
+    result?: any;
   };
-  const [error, setError] = createSignal<string | null>(null);
+  const [error, setError] = createSignal<null | string>(null);
 
   // createdResource caled Two times, making API Calles two times, so used onMount
   const [isLoading, setIsLoading] = createSignal(false);
@@ -122,14 +125,14 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       style={{ color: "#9e9ea7" }}
     />
     <input
-      placeholder="Search Data..."
-      type="search"
       autocomplete="none"
       class="inputSearch f:14"
-      value={search()}
       onInput={(e) => {
         handleSearch(e.target.value);
       }}
+      placeholder="Search Data..."
+      type="search"
+      value={search()}
     />
   </div>
 
@@ -147,21 +150,21 @@ export function DataGrid(props: Readonly<DataGridProps>) {
           </nav>
         </div>
         <CommonTable
-          headers={tableStore.tableColumns}
           data={filteredData()}
+          defaultRowsPerPage={10}
+          headers={tableStore.tableColumns}
           isSearching={isSearching()}
           isShowLoadMore={isShowLoadMore()}
-          rowsPerPageOptions={[5, 10, 15]}
-          defaultRowsPerPage={10}
           onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
+          rowsPerPageOptions={[5, 10, 15]}
           totalItems={filteredData().length}
         />
         <Show when={deleteRowId()}>
           <DeleteDialog
-            open={true}
-            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate)}
-            title="Delete Item"
             message="Are you sure you want to delete this item?"
+            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate)}
+            open={true}
+            title="Delete Item"
           />
         </Show>
       </Match>

@@ -1,17 +1,18 @@
 import type {APIEvent} from "@solidjs/start/dist/server";
+
 import {getDriver} from "~/cypher/driver";
-import {getSubDomain} from "~/server/getSubDomain";
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
-import {getNewPortsForUser} from "~/routes/api/signup/getNewPortsForUser";
-import {checkUserExistence} from "~/routes/api/signup/checkUserExistence";
-import {waitForDockerCreate} from "~/routes/api/signup/waitForDockerCreate";
-import {updatePortForNewUser} from "~/routes/api/signup/updatePortForNewUser";
-import {createUserInDB} from "~/routes/api/signup/createUserInDB";
-import {updateSession} from "~/routes/api/signup/updateSession";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
+import {convertNodeToJson} from "~/lib/convertNodeToJson";
+import {checkUserExistence} from "~/routes/api/signup/checkUserExistence";
+import {createUserInDB} from "~/routes/api/signup/createUserInDB";
+import {getNewPortsForUser} from "~/routes/api/signup/getNewPortsForUser";
+import {updatePortForNewUser} from "~/routes/api/signup/updatePortForNewUser";
+import {updateSession} from "~/routes/api/signup/updateSession";
+import {waitForDockerCreate} from "~/routes/api/signup/waitForDockerCreate";
+import {getSubDomain} from "~/server/getSubDomain";
 
 async function signupAdmin(request: APIEvent["request"]) {
-  const { username, email, password, subdomain } = await request.json();
+  const { email, password, subdomain, username } = await request.json();
 
   const session = (await getDriver("super")).session();
   const tx = session.beginTransaction();
@@ -20,7 +21,7 @@ async function signupAdmin(request: APIEvent["request"]) {
     await checkUserExistence(tx, username, email, subdomain);
 
     // Get ports for the user's database
-    const { driverPort, logsPort, labPort }: { [key: string]: any } =
+    const { driverPort, labPort, logsPort }: { [key: string]: any } =
       await getNewPortsForUser(tx);
 
     await waitForDockerCreate(username, driverPort, logsPort, labPort);
@@ -42,8 +43,8 @@ async function signupAdmin(request: APIEvent["request"]) {
     console.log("FetchCSVData");
 
     syncNodesMGCall({
-      userport: driverPort,
-      nodesToTransfer: ["DataType", "CompCategory", "Comp", "Nav"]
+      nodesToTransfer: ["DataType", "CompCategory", "Comp", "Nav"],
+      userport: driverPort
     })
 
     // this should be in parent function
@@ -59,8 +60,8 @@ async function signupAdmin(request: APIEvent["request"]) {
     const { password: _, ...P } = user.P;
 
     return {
-      id: user.id,
-      P
+      P,
+      id: user.id
     };
   } catch (error: any) {
     console.error("Server error:", error.message, error);

@@ -1,4 +1,5 @@
 import type { JSX } from "solid-js";
+
 import {
   type Accessor,
   type Component,
@@ -11,27 +12,27 @@ import {
 import "./tooltip.css";
 
 export type TooltipTrigger =
-  | boolean
   | "focus"
   | "hover"
+  | ("focus" | "hover" | Accessor<boolean>)[]
   | Accessor<boolean>
-  | ("focus" | "hover" | Accessor<boolean>)[];
+  | boolean;
 
-export type TooltipPosition = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
+export type TooltipPosition = "e" | "n" | "ne" | "nw" | "s" | "se" | "sw" | "w";
 
-export type TooltipProps = JSX.HTMLAttributes<HTMLSpanElement> & {
+export type TooltipProps = {
   arrow?: boolean;
+  content: JSX.Element;
   nowrap?: boolean;
   position?: TooltipPosition;
-  content: JSX.Element;
   trigger?: TooltipTrigger;
-};
+} & JSX.HTMLAttributes<HTMLSpanElement>;
 
 declare module "solid-js" {
   namespace JSX {
     interface CustomCaptureEvents {
-      focus: FocusEvent;
       blur: FocusEvent;
+      focus: FocusEvent;
     }
   }
 }
@@ -106,7 +107,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
     () => (ev: FocusEvent) => useFocus() && setVisible(ev.type === "focus"),
   );
   const hoverHandler = createMemo(
-    () => (ev: MouseEvent & { toElement?: HTMLElement }) =>
+    () => (ev: { toElement?: HTMLElement } & MouseEvent) =>
       useHover() &&
       setVisible(
         wrapperRef.contains((ev.toElement ?? ev.target) as Node | null),
@@ -120,53 +121,53 @@ export const Tooltip: Component<TooltipProps> = (props) => {
     setPositionStyle(
       local.position === "nw"
         ? {
-            top: `${wrapperRef.offsetTop}px`,
             left: `${wrapperRef.offsetLeft}px`,
+            top: `${wrapperRef.offsetTop}px`,
           }
         : local.position === "n"
           ? {
-              top: `${wrapperRef.offsetTop}px`,
               left: `${
                 wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)
               }px`,
+              top: `${wrapperRef.offsetTop}px`,
             }
           : local.position === "ne"
             ? {
-                top: `${wrapperRef.offsetTop}px`,
                 left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
+                top: `${wrapperRef.offsetTop}px`,
               }
             : local.position === "e"
               ? {
+                  left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
                   top: `${
                     wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)
                   }px`,
-                  left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
                 }
               : local.position === "se"
                 ? {
-                    top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
                     left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
+                    top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
                   }
                 : local.position === "sw"
                   ? {
+                      left: `${wrapperRef.offsetLeft}px`,
                       top: `${
                         wrapperRef.offsetTop + wrapperRef.offsetHeight
                       }px`,
-                      left: `${wrapperRef.offsetLeft}px`,
                     }
                   : local.position === "w"
                     ? {
+                        left: `${wrapperRef.offsetLeft}px`,
                         top: `${
                           wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)
                         }px`,
-                        left: `${wrapperRef.offsetLeft}px`,
                       }
                     : /* s is default */ {
-                        top: `${
-                          wrapperRef.offsetTop + wrapperRef.offsetHeight
-                        }px`,
                         left: `${
                           wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)
+                        }px`,
+                        top: `${
+                          wrapperRef.offsetTop + wrapperRef.offsetHeight
                         }px`,
                       },
     );
@@ -174,22 +175,22 @@ export const Tooltip: Component<TooltipProps> = (props) => {
 
   return (
     <span
-      ref={wrapperRef}
-      aria-haspopup="true"
       aria-expanded={visible()}
+      aria-haspopup="true"
       class={`sb-tooltip-wrapper position-${local.position ?? "s"}${
         local.arrow === false ? "" : " arrow"
       }${local.nowrap ? " nowrap" : ""}`}
-      oncapture:focus={focusHandler()}
       oncapture:blur={focusHandler()}
-      onmouseover={hoverHandler()}
+      oncapture:focus={focusHandler()}
       onmouseleave={hoverHandler()}
+      onmouseover={hoverHandler()}
+      ref={wrapperRef}
     >
       {children()}
       <span
         {...spanProps}
-        role="tooltip"
         hidden={!visible()}
+        role="tooltip"
         style={positionStyle()}
       >
         {local.content}

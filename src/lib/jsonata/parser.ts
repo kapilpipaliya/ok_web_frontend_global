@@ -6,50 +6,50 @@
 
 import { parseSignature } from "./signature.js";
 
-var operators = {
-  ".": 75,
-  "[": 80,
-  "]": 0,
-  "{": 70,
-  "}": 0,
+const operators = {
+  "!": 0, // not an operator, but needed as a stop character for name tokens
+  "!=": 40,
+  "#": 80,
+  "%": 60,
+  "&": 50,
   "(": 80,
   ")": 0,
-  ",": 0,
-  "@": 80,
-  "#": 80,
-  ";": 80,
-  ":": 80,
-  "?": 20,
-  "+": 50,
-  "-": 50,
   "*": 60,
-  "/": 60,
-  "%": 60,
-  "|": 20,
-  "=": 40,
-  "<": 40,
-  ">": 40,
-  "^": 40,
   "**": 60,
+  "+": 50,
+  ",": 0,
+  ".": 75,
   "..": 20,
+  "/": 60,
+  ":": 80,
   ":=": 10,
-  "!=": 40,
+  ";": 80,
+  "<": 40,
   "<=": 40,
+  "=": 40,
+  ">": 40,
   ">=": 40,
-  "~>": 40,
-  and: 30,
-  or: 25,
-  in: 40,
-  "&": 50,
-  "!": 0, // not an operator, but needed as a stop character for name tokens
+  "?": 20,
+  "@": 80,
+  "[": 80,
+  "]": 0,
+  "^": 40,
+  "{": 70,
+  "|": 20,
+  "}": 0,
   "~": 0, // not an operator, but needed as a stop character for name tokens
+  "~>": 40,
+  "-": 50,
+  and: 30,
+  in: 40,
+  or: 25,
 };
 
-var escapes = {
+const escapes = {
   // JSON string escape sequences - see json.org
   '"': '"',
-  "\\": "\\",
   "/": "/",
+  "\\": "\\",
   b: "\b",
   f: "\f",
   n: "\n",
@@ -58,26 +58,26 @@ var escapes = {
 };
 
 // Tokenizer (lexer) - invoked by the parser to return one token at a time
-var tokenizer = (path) => {
-  var position = 0;
-  var length = path.length;
+const tokenizer = (path) => {
+  let position = 0;
+  const length = path.length;
 
-  var create = (type, value) => {
-    var obj = { type: type, value: value, position: position };
+  const create = (type, value) => {
+    const obj = { position: position, type: type, value: value };
     return obj;
   };
 
-  var scanRegex = () => {
+  const scanRegex = () => {
     // the prefix '/' will have been previously scanned. Find the end of the regex.
     // search for closing '/' ignoring any that are escaped, or within brackets
-    var start = position;
-    var depth = 0;
-    var pattern;
-    var flags;
+    let start = position;
+    let depth = 0;
+    let pattern;
+    let flags;
 
-    var isClosingSlash = (position) => {
+    const isClosingSlash = (position) => {
       if (path.charAt(position) === "/" && depth === 0) {
-        var backslashCount = 0;
+        let backslashCount = 0;
         while (path.charAt(position - (backslashCount + 1)) === "\\") {
           backslashCount++;
         }
@@ -89,15 +89,15 @@ var tokenizer = (path) => {
     };
 
     while (position < length) {
-      var currentChar = path.charAt(position);
+      let currentChar = path.charAt(position);
       if (isClosingSlash(position)) {
         // end of regex found
         pattern = path.substring(start, position);
         if (pattern === "") {
           throw {
             code: "S0301",
-            stack: new Error().stack,
             position: position,
+            stack: new Error().stack,
           };
         }
         position++;
@@ -128,14 +128,14 @@ var tokenizer = (path) => {
     }
     throw {
       code: "S0302",
-      stack: new Error().stack,
       position: position,
+      stack: new Error().stack,
     };
   };
 
-  var next = (prefix) => {
+  const next = (prefix) => {
     if (position >= length) return null;
-    var currentChar = path.charAt(position);
+    let currentChar = path.charAt(position);
     // skip whitespace
     while (position < length && " \t\n\r\v".indexOf(currentChar) > -1) {
       position++;
@@ -143,7 +143,7 @@ var tokenizer = (path) => {
     }
     // skip comments
     if (currentChar === "/" && path.charAt(position + 1) === "*") {
-      var commentStart = position;
+      const commentStart = position;
       position += 2;
       currentChar = path.charAt(position);
       while (!(currentChar === "*" && path.charAt(position + 1) === "/")) {
@@ -152,8 +152,8 @@ var tokenizer = (path) => {
           // no closing tag
           throw {
             code: "S0106",
-            stack: new Error().stack,
             position: commentStart,
+            stack: new Error().stack,
           };
         }
       }
@@ -209,10 +209,10 @@ var tokenizer = (path) => {
     }
     // test for string literals
     if (currentChar === '"' || currentChar === "'") {
-      var quoteType = currentChar;
+      const quoteType = currentChar;
       // double quoted string literal - find end of string
       position++;
-      var qstr = "";
+      let qstr = "";
       while (position < length) {
         currentChar = path.charAt(position);
         if (currentChar === "\\") {
@@ -223,24 +223,24 @@ var tokenizer = (path) => {
             qstr += escapes[currentChar];
           } else if (currentChar === "u") {
             // \u should be followed by 4 hex digits
-            var octets = path.substr(position + 1, 4);
+            const octets = path.substr(position + 1, 4);
             if (/^[0-9a-fA-F]+$/.test(octets)) {
-              var codepoint = Number.parseInt(octets, 16);
+              const codepoint = Number.parseInt(octets, 16);
               qstr += String.fromCharCode(codepoint);
               position += 4;
             } else {
               throw {
                 code: "S0104",
-                stack: new Error().stack,
                 position: position,
+                stack: new Error().stack,
               };
             }
           } else {
             // illegal escape sequence
             throw {
               code: "S0103",
-              stack: new Error().stack,
               position: position,
+              stack: new Error().stack,
               token: currentChar,
             };
           }
@@ -254,33 +254,33 @@ var tokenizer = (path) => {
       }
       throw {
         code: "S0101",
-        stack: new Error().stack,
         position: position,
+        stack: new Error().stack,
       };
     }
     // test for numbers
-    var numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/;
-    var match = numregex.exec(path.substring(position));
+    const numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/;
+    const match = numregex.exec(path.substring(position));
     if (match !== null) {
-      var num = Number.parseFloat(match[0]);
+      const num = Number.parseFloat(match[0]);
       if (!isNaN(num) && isFinite(num)) {
         position += match[0].length;
         return create("number", num);
       } else {
         throw {
           code: "S0102",
-          stack: new Error().stack,
           position: position,
+          stack: new Error().stack,
           token: match[0],
         };
       }
     }
     // test for quoted names (backticks)
-    var name;
+    let name;
     if (currentChar === "`") {
       // scan for closing quote
       position++;
-      var end = path.indexOf("`", position);
+      const end = path.indexOf("`", position);
       if (end !== -1) {
         name = path.substring(position, end);
         position = end + 1;
@@ -289,13 +289,13 @@ var tokenizer = (path) => {
       position = length;
       throw {
         code: "S0105",
-        stack: new Error().stack,
         position: position,
+        stack: new Error().stack,
       };
     }
     // test for names
-    var i = position;
-    var ch;
+    let i = position;
+    let ch;
     for (;;) {
       ch = path.charAt(i);
       if (
@@ -344,22 +344,22 @@ var tokenizer = (path) => {
 // and in 'Beautiful Code', edited by Andy Oram and Greg Wilson, Copyright 2007 O'Reilly Media, Inc. 798-0-596-51004-6
 
 export function parser(source, recover) {
-  var node;
-  var lexer;
+  let node;
+  let lexer;
 
-  var symbol_table = {};
-  var errors = [];
+  const symbol_table = {};
+  const errors = [];
 
-  var remainingTokens = () => {
-    var remaining = [];
+  const remainingTokens = () => {
+    const remaining = [];
     if (node.id !== "(end)") {
       remaining.push({
+        position: node.position,
         type: node.type,
         value: node.value,
-        position: node.position,
       });
     }
-    var nxt = lexer();
+    let nxt = lexer();
     while (nxt !== null) {
       remaining.push(nxt);
       nxt = lexer();
@@ -367,13 +367,13 @@ export function parser(source, recover) {
     return remaining;
   };
 
-  var base_symbol = {
+  const base_symbol = {
     nud: function () {
       // error - symbol has been invoked as a unary operator
-      var err = {
+      const err = {
         code: "S0211",
-        token: this.value,
         position: this.position,
+        token: this.value,
       };
 
       if (recover) {
@@ -388,8 +388,8 @@ export function parser(source, recover) {
     },
   };
 
-  var symbol = (id, bp) => {
-    var s = symbol_table[id];
+  const symbol = (id, bp) => {
+    let s = symbol_table[id];
     bp = bp || 0;
     if (s) {
       if (bp >= s.lbp) {
@@ -404,12 +404,12 @@ export function parser(source, recover) {
     return s;
   };
 
-  var handleError = (err) => {
+  const handleError = (err) => {
     if (recover) {
       // tokenize the rest of the buffer and add it to an error token
       err.remaining = remainingTokens();
       errors.push(err);
-      var symbol = symbol_table["(error)"];
+      const symbol = symbol_table["(error)"];
       node = Object.create(symbol);
       node.error = err;
       node.type = "(error)";
@@ -420,16 +420,16 @@ export function parser(source, recover) {
     }
   };
 
-  var advance = (id, infix) => {
+  const advance = (id, infix) => {
     if (id && node.id !== id) {
-      var code;
+      let code;
       if (node.id === "(end)") {
         // unexpected end of buffer
         code = "S0203";
       } else {
         code = "S0202";
       }
-      var err = {
+      const err = {
         code: code,
         position: node.position,
         token: node.value,
@@ -437,15 +437,15 @@ export function parser(source, recover) {
       };
       return handleError(err);
     }
-    var next_token = lexer(infix);
+    const next_token = lexer(infix);
     if (next_token === null) {
       node = symbol_table["(end)"];
       node.position = source.length;
       return node;
     }
-    var value = next_token.value;
-    var type = next_token.type;
-    var symbol;
+    const value = next_token.value;
+    let type = next_token.type;
+    let symbol;
     switch (type) {
       case "name":
       case "variable":
@@ -456,8 +456,8 @@ export function parser(source, recover) {
         if (!symbol) {
           return handleError({
             code: "S0204",
-            stack: new Error().stack,
             position: next_token.position,
+            stack: new Error().stack,
             token: value,
           });
         }
@@ -475,8 +475,8 @@ export function parser(source, recover) {
       default:
         return handleError({
           code: "S0205",
-          stack: new Error().stack,
           position: next_token.position,
+          stack: new Error().stack,
           token: value,
         });
     }
@@ -489,9 +489,9 @@ export function parser(source, recover) {
   };
 
   // Pratt's algorithm
-  var expression = (rbp) => {
-    var left;
-    var t = node;
+  const expression = (rbp) => {
+    let left;
+    let t = node;
     advance(null, true);
     left = t.nud();
     while (rbp < node.lbp) {
@@ -502,8 +502,8 @@ export function parser(source, recover) {
     return left;
   };
 
-  var terminal = (id) => {
-    var s = symbol(id, 0);
+  const terminal = (id) => {
+    const s = symbol(id, 0);
     s.nud = function () {
       return this;
     };
@@ -512,9 +512,9 @@ export function parser(source, recover) {
   // match infix operators
   // <expression> <operator> <expression>
   // left associative
-  var infix = (id, bp, led) => {
-    var bindingPower = bp || operators[id];
-    var s = symbol(id, bindingPower);
+  const infix = (id, bp, led) => {
+    const bindingPower = bp || operators[id];
+    const s = symbol(id, bindingPower);
     s.led =
       led ||
       function (left) {
@@ -529,16 +529,16 @@ export function parser(source, recover) {
   // match infix operators
   // <expression> <operator> <expression>
   // right associative
-  var infixr = (id, bp, led) => {
-    var s = symbol(id, bp);
+  const infixr = (id, bp, led) => {
+    const s = symbol(id, bp);
     s.led = led;
     return s;
   };
 
   // match prefix operators
   // <operator> <expression>
-  var prefix = (id, nud) => {
-    var s = symbol(id);
+  const prefix = (id, nud) => {
+    const s = symbol(id);
     s.nud =
       nud ||
       function () {
@@ -640,8 +640,8 @@ export function parser(source, recover) {
         if (arg.type !== "variable") {
           return handleError({
             code: "S0208",
-            stack: new Error().stack,
             position: arg.position,
+            stack: new Error().stack,
             token: arg.value,
             value: index + 1,
           });
@@ -650,11 +650,11 @@ export function parser(source, recover) {
       this.type = "lambda";
       // is the next token a '<' - if so, parse the function signature
       if (node.id === "<") {
-        var sigPos = node.position;
-        var depth = 1;
-        var sig = "<";
+        const sigPos = node.position;
+        let depth = 1;
+        let sig = "<";
         while (depth > 0 && node.id !== "{" && node.id !== "(end)") {
-          var tok = advance();
+          const tok = advance();
           if (tok.id === ">") {
             depth--;
           } else if (tok.id === "<") {
@@ -681,7 +681,7 @@ export function parser(source, recover) {
 
   // parenthesis - block expression
   prefix("(", function () {
-    var expressions = [];
+    const expressions = [];
     while (node.id !== ")") {
       expressions.push(expression(0));
       if (node.id !== ";") {
@@ -697,17 +697,17 @@ export function parser(source, recover) {
 
   // array constructor
   prefix("[", function () {
-    var a = [];
+    const a = [];
     if (node.id !== "]") {
       for (;;) {
-        var item = expression(0);
+        let item = expression(0);
         if (node.id === "..") {
           // range operator
-          var range = {
+          const range = {
+            lhs: item,
+            position: node.position,
             type: "binary",
             value: "..",
-            position: node.position,
-            lhs: item,
           };
           advance("..");
           range.rhs = expression(0);
@@ -730,7 +730,7 @@ export function parser(source, recover) {
   infix("[", operators["["], function (left) {
     if (node.id === "]") {
       // empty predicate means maintain singleton arrays in the output
-      var step = left;
+      let step = left;
       while (step && step.type === "binary" && step.value === "[") {
         step = step.lhs;
       }
@@ -749,9 +749,9 @@ export function parser(source, recover) {
   // order-by
   infix("^", operators["^"], function (left) {
     advance("(");
-    var terms = [];
+    const terms = [];
     for (;;) {
-      var term = {
+      const term = {
         descending: false,
       };
       if (node.id === "<") {
@@ -778,13 +778,13 @@ export function parser(source, recover) {
     return this;
   });
 
-  var objectParser = function (left) {
-    var a = [];
+  const objectParser = function (left) {
+    const a = [];
     if (node.id !== "}") {
       for (;;) {
-        var n = expression(0);
+        const n = expression(0);
         advance(":");
-        var v = expression(0);
+        const v = expression(0);
         a.push([n, v]); // holds an array of name/value expression pairs
         if (node.id !== ",") {
           break;
@@ -817,8 +817,8 @@ export function parser(source, recover) {
     if (left.type !== "variable") {
       return handleError({
         code: "S0212",
-        stack: new Error().stack,
         position: left.position,
+        stack: new Error().stack,
         token: left.value,
       });
     }
@@ -835,8 +835,8 @@ export function parser(source, recover) {
     if (this.rhs.type !== "variable") {
       return handleError({
         code: "S0214",
-        stack: new Error().stack,
         position: this.rhs.position,
+        stack: new Error().stack,
         token: "@",
       });
     }
@@ -851,8 +851,8 @@ export function parser(source, recover) {
     if (this.rhs.type !== "variable") {
       return handleError({
         code: "S0214",
-        stack: new Error().stack,
         position: this.rhs.position,
+        stack: new Error().stack,
         token: "#",
       });
     }
@@ -892,14 +892,14 @@ export function parser(source, recover) {
   // if they make a tail call.  If so, it is replaced by a thunk which will
   // be invoked by the trampoline loop during function application.
   // This enables tail-recursive functions to be written without growing the stack
-  var tailCallOptimize = (expr) => {
-    var result;
+  const tailCallOptimize = (expr) => {
+    let result;
     if (expr.type === "function" && !expr.predicate) {
-      var thunk = {
-        type: "lambda",
-        thunk: true,
+      const thunk = {
         arguments: [],
         position: expr.position,
+        thunk: true,
+        type: "lambda",
       };
       thunk.body = expr;
       result = thunk;
@@ -912,7 +912,7 @@ export function parser(source, recover) {
       result = expr;
     } else if (expr.type === "block") {
       // only the last expression in the block
-      var length = expr.expressions.length;
+      const length = expr.expressions.length;
       if (length > 0) {
         expr.expressions[length - 1] = tailCallOptimize(
           expr.expressions[length - 1],
@@ -925,11 +925,11 @@ export function parser(source, recover) {
     return result;
   };
 
-  var ancestorLabel = 0;
-  var ancestorIndex = 0;
-  var ancestry = [];
+  let ancestorLabel = 0;
+  let ancestorIndex = 0;
+  const ancestry = [];
 
-  var seekParent = (node, slot) => {
+  const seekParent = (node, slot) => {
     switch (node.type) {
       case "name":
       case "wildcard":
@@ -972,16 +972,16 @@ export function parser(source, recover) {
         // error - can't derive ancestor
         throw {
           code: "S0217",
-          token: node.type,
           position: node.position,
+          token: node.type,
         };
     }
     return slot;
   };
 
-  var pushAncestry = (result, value) => {
+  const pushAncestry = (result, value) => {
     if (typeof value.seekingParent !== "undefined" || value.type === "parent") {
-      var slots =
+      const slots =
         typeof value.seekingParent !== "undefined" ? value.seekingParent : [];
       if (value.type === "parent") {
         slots.push(value.slot);
@@ -994,18 +994,18 @@ export function parser(source, recover) {
     }
   };
 
-  var resolveAncestry = (path) => {
-    var index = path.steps.length - 1;
-    var laststep = path.steps[index];
-    var slots =
+  const resolveAncestry = (path) => {
+    let index = path.steps.length - 1;
+    const laststep = path.steps[index];
+    const slots =
       typeof laststep.seekingParent !== "undefined"
         ? laststep.seekingParent
         : [];
     if (laststep.type === "parent") {
       slots.push(laststep.slot);
     }
-    for (var is = 0; is < slots.length; is++) {
-      var slot = slots[is];
+    for (let is = 0; is < slots.length; is++) {
+      let slot = slots[is];
       index = path.steps.length - 2;
       while (slot.level > 0) {
         if (index < 0) {
@@ -1017,7 +1017,7 @@ export function parser(source, recover) {
           break;
         }
         // try previous step
-        var step = path.steps[index--];
+        let step = path.steps[index--];
         // multiple contiguous steps that bind the focus should be skipped
         while (index >= 0 && step.focus && path.steps[index].focus) {
           step = path.steps[index--];
@@ -1033,8 +1033,8 @@ export function parser(source, recover) {
   // This includes flattening the parts of the AST representing location paths,
   // converting them to arrays of steps which in turn may contain arrays of predicates.
   // following this, nodes containing '.' and '[' should be eliminated from the AST.
-  var processAST = (expr) => {
-    var result;
+  const processAST = (expr) => {
+    let result;
     switch (expr.type) {
       case "binary":
         switch (expr.value) {
@@ -1044,7 +1044,7 @@ export function parser(source, recover) {
             if (lstep.type === "path") {
               result = lstep;
             } else {
-              result = { type: "path", steps: [lstep] };
+              result = { steps: [lstep], type: "path" };
             }
             if (lstep.type === "parent") {
               result.seekingParent = [lstep.slot];
@@ -1077,8 +1077,8 @@ export function parser(source, recover) {
                   // don't allow steps to be numbers or the values true/false/null
                   throw {
                     code: "S0213",
-                    stack: new Error().stack,
                     position: step.position,
+                    stack: new Error().stack,
                     value: step.value,
                   };
                 }
@@ -1119,8 +1119,8 @@ export function parser(source, recover) {
             if (typeof step.group !== "undefined") {
               throw {
                 code: "S0209",
-                stack: new Error().stack,
                 position: expr.position,
+                stack: new Error().stack,
               };
             }
             if (typeof step[type] === "undefined") {
@@ -1138,9 +1138,9 @@ export function parser(source, recover) {
               pushAncestry(step, predicate);
             }
             step[type].push({
-              type: "filter",
               expr: predicate,
               position: expr.position,
+              type: "filter",
             });
             break;
           case "{":
@@ -1151,8 +1151,8 @@ export function parser(source, recover) {
             if (typeof result.group !== "undefined") {
               throw {
                 code: "S0210",
-                stack: new Error().stack,
                 position: expr.position,
+                stack: new Error().stack,
               };
             }
             // object constructor - process each pair
@@ -1170,11 +1170,11 @@ export function parser(source, recover) {
             // RHS defines the terms
             result = processAST(expr.lhs);
             if (result.type !== "path") {
-              result = { type: "path", steps: [result] };
+              result = { steps: [result], type: "path" };
             }
-            var sortStep = { type: "sort", position: expr.position };
+            var sortStep = { position: expr.position, type: "sort" };
             sortStep.terms = expr.rhs.map((terms) => {
-              var expression = processAST(terms.expression);
+              const expression = processAST(terms.expression);
               pushAncestry(sortStep, expression);
               return {
                 descending: terms.descending,
@@ -1186,9 +1186,9 @@ export function parser(source, recover) {
             break;
           case ":=":
             result = {
+              position: expr.position,
               type: "bind",
               value: expr.value,
-              position: expr.position,
             };
             result.lhs = processAST(expr.lhs);
             result.rhs = processAST(expr.rhs);
@@ -1208,16 +1208,16 @@ export function parser(source, recover) {
             ) {
               throw {
                 code: "S0215",
-                stack: new Error().stack,
                 position: expr.position,
+                stack: new Error().stack,
               };
             }
             // also throw if this is applied after an 'order-by' clause
             if (step.type === "sort") {
               throw {
                 code: "S0216",
-                stack: new Error().stack,
                 position: expr.position,
+                stack: new Error().stack,
               };
             }
             if (expr.keepArray) {
@@ -1232,7 +1232,7 @@ export function parser(source, recover) {
             if (result.type === "path") {
               step = result.steps[result.steps.length - 1];
             } else {
-              result = { type: "path", steps: [result] };
+              result = { steps: [result], type: "path" };
               if (typeof step.predicate !== "undefined") {
                 step.stages = step.predicate;
                 delete step.predicate;
@@ -1242,27 +1242,27 @@ export function parser(source, recover) {
               step.index = expr.rhs.value;
             } else {
               step.stages.push({
+                position: expr.position,
                 type: "index",
                 value: expr.rhs.value,
-                position: expr.position,
               });
             }
             step.tuple = true;
             break;
           case "~>":
             result = {
+              position: expr.position,
               type: "apply",
               value: expr.value,
-              position: expr.position,
             };
             result.lhs = processAST(expr.lhs);
             result.rhs = processAST(expr.rhs);
             break;
           default:
             result = {
+              position: expr.position,
               type: expr.type,
               value: expr.value,
-              position: expr.position,
             };
             result.lhs = processAST(expr.lhs);
             result.rhs = processAST(expr.rhs);
@@ -1272,23 +1272,23 @@ export function parser(source, recover) {
         break;
       case "unary":
         result = {
+          position: expr.position,
           type: expr.type,
           value: expr.value,
-          position: expr.position,
         };
         if (expr.value === "[") {
           // array constructor - process each item
           result.expressions = expr.expressions.map((item) => {
-            var value = processAST(item);
+            const value = processAST(item);
             pushAncestry(result, value);
             return value;
           });
         } else if (expr.value === "{") {
           // object constructor - process each pair
           result.lhs = expr.lhs.map((pair) => {
-            var key = processAST(pair[0]);
+            const key = processAST(pair[0]);
             pushAncestry(result, key);
-            var value = processAST(pair[1]);
+            const value = processAST(pair[1]);
             pushAncestry(result, value);
             return [key, value];
           });
@@ -1307,13 +1307,13 @@ export function parser(source, recover) {
       case "function":
       case "partial":
         result = {
-          type: expr.type,
           name: expr.name,
-          value: expr.value,
           position: expr.position,
+          type: expr.type,
+          value: expr.value,
         };
         result.arguments = expr.arguments.map((arg) => {
-          var argAST = processAST(arg);
+          const argAST = processAST(arg);
           pushAncestry(result, argAST);
           return argAST;
         });
@@ -1321,16 +1321,16 @@ export function parser(source, recover) {
         break;
       case "lambda":
         result = {
-          type: expr.type,
           arguments: expr.arguments,
-          signature: expr.signature,
           position: expr.position,
+          signature: expr.signature,
+          type: expr.type,
         };
         var body = processAST(expr.body);
         result.body = tailCallOptimize(body);
         break;
       case "condition":
-        result = { type: expr.type, position: expr.position };
+        result = { position: expr.position, type: expr.type };
         result.condition = processAST(expr.condition);
         pushAncestry(result, result.condition);
         result.then = processAST(expr.then);
@@ -1341,7 +1341,7 @@ export function parser(source, recover) {
         }
         break;
       case "transform":
-        result = { type: expr.type, position: expr.position };
+        result = { position: expr.position, type: expr.type };
         result.pattern = processAST(expr.pattern);
         result.update = processAST(expr.update);
         if (typeof expr.delete !== "undefined") {
@@ -1349,10 +1349,10 @@ export function parser(source, recover) {
         }
         break;
       case "block":
-        result = { type: expr.type, position: expr.position };
+        result = { position: expr.position, type: expr.type };
         // array of expressions - process each one
         result.expressions = expr.expressions.map((item) => {
-          var part = processAST(item);
+          const part = processAST(item);
           pushAncestry(result, part);
           if (
             part.consarray ||
@@ -1366,19 +1366,19 @@ export function parser(source, recover) {
         // if so, need to mark the block as one that needs to create a new frame
         break;
       case "name":
-        result = { type: "path", steps: [expr] };
+        result = { steps: [expr], type: "path" };
         if (expr.keepArray) {
           result.keepSingletonArray = true;
         }
         break;
       case "parent":
         result = {
-          type: "parent",
           slot: {
+            index: ancestorIndex++,
             label: "!" + ancestorLabel++,
             level: 1,
-            index: ancestorIndex++,
           },
+          type: "parent",
         };
         ancestry.push(result);
         break;
@@ -1406,8 +1406,8 @@ export function parser(source, recover) {
         } else {
           throw {
             code: "S0201",
-            stack: new Error().stack,
             position: expr.position,
+            stack: new Error().stack,
             token: expr.value,
           };
         }
@@ -1431,7 +1431,7 @@ export function parser(source, recover) {
         };
         if (recover) {
           errors.push(err);
-          return { type: "error", error: err };
+          return { error: err, type: "error" };
         } else {
           err.stack = new Error().stack;
           throw err;
@@ -1447,9 +1447,9 @@ export function parser(source, recover) {
   lexer = tokenizer(source);
   advance();
   // parse the tokens
-  var expr = expression(0);
+  let expr = expression(0);
   if (node.id !== "(end)") {
-    var err = {
+    const err = {
       code: "S0201",
       position: node.position,
       token: node.value,
@@ -1462,8 +1462,8 @@ export function parser(source, recover) {
     // error - trying to derive ancestor at top level
     throw {
       code: "S0217",
-      token: expr.type,
       position: expr.position,
+      token: expr.type,
     };
   }
 

@@ -1,12 +1,15 @@
-import { untrack } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { groupBy } from "~/lib/utils";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
-import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
+
+import { untrack } from "solid-js";
+
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
+import { groupBy } from "~/lib/utils";
 
 export function getInitialState(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, id: Id | undefined, txnId: number, label: string) {
   let dataVertex: Vertex | undefined;
@@ -65,9 +68,9 @@ export function getInitialState(graph: Store<GraphInterface>, setGraph: SetStore
   );
 
   return {
-    tabs,
+    dataVertex,
     groupByTabsAndGroup,
     metaVertexResult,
-    dataVertex,
+    tabs,
   };
 }

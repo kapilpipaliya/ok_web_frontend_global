@@ -1,23 +1,23 @@
 export interface IFormMetaData {
-  name: string; // required to create new vertex
-  isInlineEditable?: boolean;
-  title: string;
   attributes: FieldAttribute[];
+  isInlineEditable?: boolean;
   isRealTime?: boolean;
+  name: string; // required to create new vertex
+  title: string;
 }
 
 export interface FieldAttribute {
-  name: string;
-  tab?: string;
-  // group?: string;
-  dataType?: string;
-  meta?: string;
-  component: string;
-  displayName?: string;
-
   [key: string]: any;
-   validationRules?: Array<{}>;
-  
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
+  component: string;
+  // group?: string;
+  dataType?: string;
+  displayName?: string;
+  meta?: string;
+
+  name: string;
+   tab?: string;
+  
+  validationRules?: Array<{}>;
 }

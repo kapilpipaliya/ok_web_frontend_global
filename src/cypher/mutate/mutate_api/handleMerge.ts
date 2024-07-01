@@ -11,7 +11,7 @@ export async function handleMerge(merge: any, tx: any, clientToServerVertexIdMap
   try {
     const result = await tx.run(query, { id: int(id), properties: merge.P });
     if (result.records.length > 0) {
-      txnResult.push({ merge: { id, error: false } });
+      txnResult.push({ merge: { error: false, id } });
     }
   } catch (error: any) {
     throw new Error(`Can't merge due to an internal server error: ${error.message}`);

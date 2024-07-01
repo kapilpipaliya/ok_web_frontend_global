@@ -8,7 +8,7 @@ import * as utils from "./utils";
 
 // A mapping between the function signature symbols and the full plural of the type
 // Expected to be used in error messages
-var arraySignatureMapping = {
+const arraySignatureMapping = {
   a: "arrays",
   b: "booleans",
   f: "functions",
@@ -26,10 +26,10 @@ export function parseSignature(signature) {
   // create a Regex that represents this signature and return a function that when invoked,
   // returns the validated (possibly fixed-up) arguments, or throws a validation error
   // step through the signature, one symbol at a time
-  var position = 1;
-  var params = [];
-  var param = {};
-  var prevParam = param;
+  let position = 1;
+  const params = [];
+  let param = {};
+  let prevParam = param;
   while (position < signature.length) {
     var symbol = signature.charAt(position);
     if (symbol === ":") {
@@ -38,17 +38,17 @@ export function parseSignature(signature) {
       break;
     }
 
-    var next = () => {
+    const next = () => {
       params.push(param);
       prevParam = param;
       param = {};
     };
 
-    var findClosingBracket = (str, start, openSymbol, closeSymbol) => {
+    const findClosingBracket = (str, start, openSymbol, closeSymbol) => {
       // returns the position of the closing symbol (e.g. bracket) in a string
       // that balances the opening symbol at position start
-      var depth = 1;
-      var position = start;
+      let depth = 1;
+      let position = start;
       while (position < str.length) {
         position++;
         symbol = str.charAt(position);
@@ -117,9 +117,9 @@ export function parseSignature(signature) {
           // TODO harder
           throw {
             code: "S0402",
+            offset: position,
             stack: new Error().stack,
             value: choice,
-            offset: position,
           };
         }
         param.type = "(" + choice + ")";
@@ -129,30 +129,30 @@ export function parseSignature(signature) {
       case "<": // type parameter - can only be applied to 'a' and 'f'
         if (prevParam.type === "a" || prevParam.type === "f") {
           // search forward for matching '>'
-          var endPos = findClosingBracket(signature, position, "<", ">");
+          const endPos = findClosingBracket(signature, position, "<", ">");
           prevParam.subtype = signature.substring(position + 1, endPos);
           position = endPos;
         } else {
           throw {
             code: "S0401",
+            offset: position,
             stack: new Error().stack,
             value: prevParam.type,
-            offset: position,
           };
         }
         break;
     }
     position++;
   }
-  var regexStr =
+  const regexStr =
     "^" + params.map((param) => "(" + param.regex + ")").join("") + "$";
-  var regex = new RegExp(regexStr);
-  var getSymbol = (value) => {
-    var symbol;
+  const regex = new RegExp(regexStr);
+  const getSymbol = (value) => {
+    let symbol;
     if (utils.isFunction(value)) {
       symbol = "f";
     } else {
-      var type = typeof value;
+      const type = typeof value;
       switch (type) {
         case "string":
           symbol = "s";
@@ -181,21 +181,21 @@ export function parseSignature(signature) {
     return symbol;
   };
 
-  var throwValidationError = (badArgs, badSig) => {
+  const throwValidationError = (badArgs, badSig) => {
     // to figure out where this went wrong we need apply each component of the
     // regex to each argument until we get to the one that fails to match
-    var partialPattern = "^";
-    var goodTo = 0;
-    for (var index = 0; index < params.length; index++) {
+    let partialPattern = "^";
+    let goodTo = 0;
+    for (let index = 0; index < params.length; index++) {
       partialPattern += params[index].regex;
-      var match = badSig.match(partialPattern);
+      const match = badSig.match(partialPattern);
       if (match === null) {
         // failed here
         throw {
           code: "T0410",
+          index: goodTo + 1,
           stack: new Error().stack,
           value: badArgs[goodTo],
-          index: goodTo + 1,
         };
       }
       goodTo = match[0].length;
@@ -204,31 +204,31 @@ export function parseSignature(signature) {
     // haven't added the trailing '$' in the regex yet.
     throw {
       code: "T0410",
+      index: goodTo + 1,
       stack: new Error().stack,
       value: badArgs[goodTo],
-      index: goodTo + 1,
     };
   };
 
   return {
     definition: signature,
     validate: (args, context) => {
-      var suppliedSig = "";
+      let suppliedSig = "";
       args.forEach((arg) => {
         suppliedSig += getSymbol(arg);
       });
-      var isValid = regex.exec(suppliedSig);
+      const isValid = regex.exec(suppliedSig);
       if (isValid) {
-        var validatedArgs = [];
-        var argIndex = 0;
+        const validatedArgs = [];
+        let argIndex = 0;
         params.forEach((param, index) => {
-          var arg = args[argIndex];
-          var match = isValid[index + 1];
+          let arg = args[argIndex];
+          const match = isValid[index + 1];
           if (match === "") {
             if (param.context && param.contextRegex) {
               // substitute context value for missing arg
               // first check that the context value is the right type
-              var contextType = getSymbol(context);
+              const contextType = getSymbol(context);
               // test contextType against the regex for this arg (without the trailing ?)
               if (param.contextRegex.test(contextType)) {
                 validatedArgs.push(context);
@@ -236,9 +236,9 @@ export function parseSignature(signature) {
                 // context value not compatible with this argument
                 throw {
                   code: "T0411",
+                  index: argIndex + 1,
                   stack: new Error().stack,
                   value: context,
-                  index: argIndex + 1,
                 };
               }
             } else {
@@ -255,20 +255,20 @@ export function parseSignature(signature) {
                   arg = undefined;
                 } else {
                   arg = args[argIndex];
-                  var arrayOK = true;
+                  let arrayOK = true;
                   // is there type information on the contents of the array?
                   if (typeof param.subtype !== "undefined") {
                     if (single !== "a" && match !== param.subtype) {
                       arrayOK = false;
                     } else if (single === "a") {
                       if (arg.length > 0) {
-                        var itemType = getSymbol(arg[0]);
+                        const itemType = getSymbol(arg[0]);
                         if (itemType !== param.subtype.charAt(0)) {
                           // TODO recurse further
                           arrayOK = false;
                         } else {
                           // make sure every item in the array is this type
-                          var differentItems = arg.filter(
+                          const differentItems = arg.filter(
                             (val) => getSymbol(val) !== itemType,
                           );
                           arrayOK = differentItems.length === 0;
@@ -279,10 +279,10 @@ export function parseSignature(signature) {
                   if (!arrayOK) {
                     throw {
                       code: "T0412",
-                      stack: new Error().stack,
-                      value: arg,
                       index: argIndex + 1,
+                      stack: new Error().stack,
                       type: arraySignatureMapping[param.subtype],
+                      value: arg,
                     };
                   }
                   // the function expects an array. If it's not one, make it so

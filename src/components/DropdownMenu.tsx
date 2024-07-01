@@ -1,9 +1,9 @@
-import { type JSX, onCleanup, onMount, splitProps, createSignal } from "solid-js";
-import { Portal } from "solid-js/web";
-import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
+import { useFloating } from 'solid-floating-ui';
+import { type JSX, createSignal, onCleanup, onMount, splitProps } from "solid-js";
+import { Portal } from "solid-js/web";
 
-export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { parentRef: HTMLElement, onClickOutside: () => void }) {
+export function DropdownMenu(props: { onClickOutside: () => void, parentRef: HTMLElement } & JSX.HTMLAttributes<HTMLDivElement>) {
     let dropdownRef: HTMLDivElement;
 
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -38,21 +38,21 @@ export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { paren
                 // used inline style because master css is not working!
                 ref={setFloating}
                 style={{
-                    position: position.strategy,
-                    top: `${position.y ?? 0}px`,
-                    left: `${position.x ?? 0}px`,
-                    padding: "0.25rem",
-                    "max-height": "13rem",
-                    "overflow-y": "auto",
-                    "box-shadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                    "z-index": "999",
+                    "align-items": "flex-start",
                     "background-color": "white",
                     "border": "1px solid #D1D5DB",
+                    "box-shadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                     "display": "flex",
                     "flex-direction": "column",
                     gap: "0.25rem",
-                    "align-items": "flex-start",
-                    "min-width": "12rem"
+                    left: `${position.x ?? 0}px`,
+                    "max-height": "13rem",
+                    "min-width": "12rem",
+                    "overflow-y": "auto",
+                    padding: "0.25rem",
+                    position: position.strategy,
+                    top: `${position.y ?? 0}px`,
+                    "z-index": "999"
                 }}
                 {...splitProps(props, ["ref", "parentRef"])[1]}
             />

@@ -1,5 +1,7 @@
 import type { RouteSectionProps, } from "@solidjs/router";
+
 import { Show, createSignal, onMount, useContext } from "solid-js";
+
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 import { GraphContext } from "~/lib/graph/graph";
@@ -24,7 +26,7 @@ export default function AuthLayout(props: RouteSectionProps) {
   // });
 
 
-  return <Show when={!initialDataLoading()} fallback={<LoaderNew />}>
+  return <Show fallback={<LoaderNew />} when={!initialDataLoading()}>
     {props.children}
     </Show>;
 }

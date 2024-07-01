@@ -1,8 +1,10 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export async function handleParentChange(
   graph: GraphInterface,

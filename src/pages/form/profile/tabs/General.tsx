@@ -1,31 +1,33 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { equals } from "rambda";
 import { Show, createSignal, useContext } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+
+import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import {getAPI} from "~/lib/api/getApi";
 import {postAPI} from "~/lib/api/postApi";
-import { useToast } from "~/components/Toast";
 import { GraphContext } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validations";
 
 type GenralProps = {
-  profileData: {
-    [key: string]: any;
-  };
-  setProfileData: SetStoreFunction<{
-    [key: string]: any;
-  }>;
   originalProfileData: {
     [key: string]: any;
   };
+  profileData: {
+    [key: string]: any;
+  };
   setOriginalProfileData: SetStoreFunction<{
+    [key: string]: any;
+  }>;
+  setProfileData: SetStoreFunction<{
     [key: string]: any;
   }>;
 };
 
 export const GeneralSection = (props: GenralProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
+  const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
   const [selectedImage, setSelectedImage] = createSignal(null);
   const handleImageChange = async (e: any) => {
@@ -53,8 +55,8 @@ export const GeneralSection = (props: GenralProps) => {
       const res = await fetch(
         `/api/uploadImage?name=profile&username=${props.profileData.username}`,
         {
-          method: "POST",
           body: formData,
+          method: "POST",
         },
       );
       const result = await res.json();
@@ -66,8 +68,8 @@ export const GeneralSection = (props: GenralProps) => {
     }
     const payload = {
       panel: "profile",
-      userId: props.profileData.id,
       uId: props.profileData.uId,
+      userId: props.profileData.id,
       ...updatedData,
     };
     return await postAPI(API.profileUrl, payload);
@@ -94,22 +96,25 @@ export const GeneralSection = (props: GenralProps) => {
       return false;
     }
     await showLoadingToast({
-      promise: profileCall(), // This should return a promise
       loadMessage: "Saving Changes...",
+      onError: (error) => {
+        setSelectedImage(null);
+        console.error("API call failed:", error);
+      },
       onSuccess: async (data) => {
         if (data.user) {
           setSelectedImage(null);
           await getAPI(API.getUserUrl).then((data: { [key: string]: any }) => {
             setIsEdit(false);
             props.setProfileData({
-              username: data.properties.username.toLowerCase(),
+              country: "United States",
               email: data.properties.email.toLowerCase(),
               id: data.id,
-              uId: data.properties.uId,
               profileImage:
                 data.properties.profileImage ??
                 "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
-              country: "United States",
+              uId: data.properties.uId,
+              username: data.properties.username.toLowerCase(),
             });
             // loadContactData();
             props.setOriginalProfileData(props.profileData); // Set original data
@@ -117,10 +122,7 @@ export const GeneralSection = (props: GenralProps) => {
           });
         }
       },
-      onError: (error) => {
-        setSelectedImage(null);
-        console.error("API call failed:", error);
-      },
+      promise: profileCall(), // This should return a promise
     });
   };
 
@@ -137,27 +139,27 @@ export const GeneralSection = (props: GenralProps) => {
         Update personal details here
         <div class="flex m:10|0 mt:2rem">
           <input
-            name="profileImage"
-            type="file"
             accept="image/png, image/jpg, image/jpeg"
             id="fileInput"
+            name="profileImage"
             onChange={handleImageChange}
             style={{ display: "none" }}
+            type="file"
           />
 
           <div class="circle-avatar" onClick={handleAvatarClick}>
             <img
+              alt="Avatar"
               src={
                 props.profileData.profileImage ||
                 "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
               }
-              alt="Avatar"
               style={{
-                "object-fit": "cover",
-                width: "60px",
-                height: "60px",
                 "border-radius": "50%",
                 cursor: "pointer",
+                height: "60px",
+                "object-fit": "cover",
+                width: "60px",
               }}
             />
           </div>
@@ -172,11 +174,11 @@ export const GeneralSection = (props: GenralProps) => {
           <div>
             <span class={"font-weight:500 font:15 color:dimgrey"}>User Id</span>
             <input
-              name={"id"}
-              placeholder={"Id"}
               disabled={true}
-              value={props.profileData.id}
+              name={"id"}
               onChange={handleInputChange}
+              placeholder={"Id"}
+              value={props.profileData.id}
             />
           </div>
           <div>
@@ -184,11 +186,11 @@ export const GeneralSection = (props: GenralProps) => {
               UserName
             </span>
             <input
-              name={"username"}
               disabled={!isEdit()}
+              name={"username"}
+              onChange={handleInputChange}
               placeholder={"Username"}
               value={props.profileData.username}
-              onChange={handleInputChange}
             />
           </div>
           <div>
@@ -196,21 +198,21 @@ export const GeneralSection = (props: GenralProps) => {
               Email Address
             </span>
             <input
-              name={"email"}
               disabled={!isEdit()}
+              name={"email"}
+              onChange={handleInputChange}
               placeholder={"Email Address"}
               value={props.profileData.email}
-              onChange={handleInputChange}
             />
           </div>
           <div class="d:grid">
             <span class={"font-weight:500 font:15 color:dimgrey"}>Country</span>
             <select
-              name={"country"}
-              disabled={!isEdit()}
               class="p:5|10 r:4 border:1px|solid|#ccc"
-              value={props.profileData.country}
+              disabled={!isEdit()}
+              name={"country"}
               onChange={handleInputChange}
+              value={props.profileData.country}
             >
               <option>United States</option>
               <option>Canada</option>
@@ -220,7 +222,6 @@ export const GeneralSection = (props: GenralProps) => {
         </div>
         <div class={"flex jc:end"}>
           <Show
-            when={isEdit()}
             fallback={
               <button
                 class="p:5|10 m:15|10 r:4 border:none color:white bg:#5b7dff cursor:pointer"
@@ -231,6 +232,7 @@ export const GeneralSection = (props: GenralProps) => {
                 Edit Settings
               </button>
             }
+            when={isEdit()}
           >
             <button
               class="p:5|10 m:15|0 r:4 border:1px|solid|#5b7dff color:white bg:#5b7dff cursor:pointer"

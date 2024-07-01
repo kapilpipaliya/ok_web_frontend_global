@@ -1,12 +1,12 @@
-import { createMemo, type JSX, mergeProps, splitProps } from "solid-js";
-import { composeStyles, getRandom } from "../tools";
+import { type JSX, createMemo, mergeProps, splitProps } from "solid-js";
 
+import { composeStyles, getRandom } from "../tools";
 import "./avatar.css";
 
 export type AvatarProps = {
+  fallback?: JSX.Element;
   img?: string;
   name?: string;
-  fallback?: JSX.Element;
   plus?: number;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
@@ -41,11 +41,11 @@ export function Avatar(props: AvatarProps) {
     return (
       <div
         classList={mergeProps(local.classList ?? {}, { "sb-avatar": true })}
-        role="figure"
         data-random={getRandom()}
+        role="figure"
         {...divProps}
       >
-        <img src={local.img} alt={local.name} />
+        <img alt={local.name} src={local.img} />
         <span aria-hidden="true">{initials()}</span>
         {local.children}
       </div>
@@ -54,10 +54,10 @@ export function Avatar(props: AvatarProps) {
   if (local.name) {
     return (
       <div
-        classList={mergeProps(local.classList ?? {}, { "sb-avatar": true })}
-        role="img"
         aria-label={local.name}
+        classList={mergeProps(local.classList ?? {}, { "sb-avatar": true })}
         data-random={getRandom()}
+        role="img"
         {...divProps}
       >
         {initials()}
@@ -67,10 +67,10 @@ export function Avatar(props: AvatarProps) {
   }
   return (
     <div
-      classList={mergeProps(local.classList ?? {}, { "sb-avatar": true })}
-      role="img"
-      data-random={getRandom()}
       aria-label="Unknown"
+      classList={mergeProps(local.classList ?? {}, { "sb-avatar": true })}
+      data-random={getRandom()}
+      role="img"
       {...divProps}
     >
       {local.fallback ?? "?"}
@@ -80,8 +80,8 @@ export function Avatar(props: AvatarProps) {
 }
 
 export type AvatarBadgeProps = {
-  borderColor?: string;
   background?: string;
+  borderColor?: string;
 } & JSX.HTMLAttributes<HTMLSpanElement>;
 
 export function AvatarBadge(props: AvatarBadgeProps) {
@@ -92,8 +92,8 @@ export function AvatarBadge(props: AvatarBadgeProps) {
     "style",
   ]);
   const composedStyle = composeStyles(local.style ?? {}, {
-    "border-color": local.borderColor,
     background: local.background,
+    "border-color": local.borderColor,
   });
 
   return (
@@ -105,17 +105,17 @@ export function AvatarBadge(props: AvatarBadgeProps) {
   );
 }
 
-export type AvatarGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+export type AvatarGroupProps = {
   "data-plus"?: string;
-};
+} & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function AvatarGroup(props: AvatarGroupProps) {
   return (
     <div
       {...props}
+      aria-haspopup={Array.isArray(props.children) && props.children.length > 3}
       classList={mergeProps(props.classList ?? {}, { "sb-avatar": true })}
       role="group"
-      aria-haspopup={Array.isArray(props.children) && props.children.length > 3}
     />
   );
 }

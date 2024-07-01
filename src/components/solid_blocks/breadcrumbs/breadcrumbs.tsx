@@ -2,9 +2,9 @@ import type { JSX } from "solid-js";
 
 import "./breadcrumbs.css";
 
-export type BreadcrumbsProps = JSX.HTMLAttributes<HTMLOListElement> & {
+export type BreadcrumbsProps = {
   children: JSX.Element | JSX.Element[];
-};
+} & JSX.HTMLAttributes<HTMLOListElement>;
 
 export function Breadcrumbs(props: BreadcrumbsProps) {
   return (

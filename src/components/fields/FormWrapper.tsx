@@ -1,22 +1,24 @@
-import type { ComponentProps } from "~/components/fields/ComponentType";
-import { Show, useContext } from "solid-js";
-import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useToast } from "~/components/Toast";
 import { useNavigate } from "@solidjs/router";
-import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
-import { FormContext } from "~/lib/contexts";
+import { Show, useContext } from "solid-js";
 import { type Store, createStore } from "solid-js/store";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
-import { submitDataCall } from "~/lib/api/api_functions";
+
+import type { ComponentProps } from "~/components/fields/ComponentType";
+
+import { useToast } from "~/components/Toast";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { submitDataCall } from "~/lib/api/api_functions";
+import { FormContext } from "~/lib/contexts";
 import { getFormMetaData, isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
+import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 
 export function FormWrapper(
-  props: ComponentProps & {
-    submitButton?: any;
+  props: {
     // For Root Level Forms we use Parent vertex label as form name
     label?: string;
-  },
+    submitButton?: any;
+  } & ComponentProps,
 ) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { showLoadingToast } = useToast();
@@ -29,19 +31,19 @@ export function FormWrapper(
   // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
 
   const [formData, setFormData] = createStore({
-    txnId,
     cleanUpConfig: () => cleanUpConfig,
+    txnId,
   } as {
     cleanUpConfig: () => { [key: string]: any };
-    txnId: number;
-    formMeta: Vertex;
     formData: Vertex;
-    tabs: string[];
+    formMeta: Vertex;
     groupByTabsAndGroup: {
       [tab: string]: {
         [group: string]: Vertex[];
       };
     };
+    tabs: string[];
+    txnId: number;
   });
 
 
@@ -73,12 +75,12 @@ export function FormWrapper(
       }
       const data = commitTxn(txnId, graph);
       await showLoadingToast({
-        promise: submitDataCall(data, graph, setGraph, txnId),
         loadMessage: "Submitting Data...",
-        successMessage: "Data submitted successfully",
         onSuccess: (value) => {
           setTimeout(() => navigate(-1), 0);
         },
+        promise: submitDataCall(data, graph, setGraph, txnId),
+        successMessage: "Data submitted successfully",
       });
     };
 
@@ -89,14 +91,14 @@ export function FormWrapper(
     return (
       <div class="flex gap:1">
         <Show
-          when={props.submitButton}
           fallback={
             <button onClick={onSubmit}>Submit</button>
           }
+          when={props.submitButton}
         >
           {props.submitButton}
         </Show>
-        <button style={{ "margin-left": "7px" }} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</button>
+        <button class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel} style={{ "margin-left": "7px" }}>Cancel</button>
       </div>
     );
   };
@@ -109,7 +111,7 @@ export function FormWrapper(
     >
       <FormContext.Provider value={formData}>
         <div class="">
-          <PageAttrRender metaVertex={props.meta} data={formData.formData} />
+          <PageAttrRender data={formData.formData} metaVertex={props.meta} />
         </div>
         <div />
         <SubmitCancelButtons />

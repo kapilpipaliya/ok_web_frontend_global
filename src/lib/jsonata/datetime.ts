@@ -76,8 +76,8 @@ const magnitudes = ["Thousand", "Million", "Billion", "Trillion"];
  * @returns {string} - representation in words
  */
 function numberToWords(value, ordinal) {
-  var lookup = (num, prev, ord) => {
-    var words = "";
+  const lookup = (num, prev, ord) => {
+    let words = "";
     if (num <= 19) {
       words = (prev ? " and " : "") + (ord ? ordinals[num] : few[num]);
     } else if (num < 100) {
@@ -99,7 +99,7 @@ function numberToWords(value, ordinal) {
         words += "th";
       }
     } else {
-      var mag = Math.floor(Math.log10(num) / 3);
+      let mag = Math.floor(Math.log10(num) / 3);
       if (mag > magnitudes.length) {
         mag = magnitudes.length; // the largest word
       }
@@ -120,7 +120,7 @@ function numberToWords(value, ordinal) {
     return words;
   };
 
-  var words = lookup(value, false, ordinal);
+  const words = lookup(value, false, ordinal);
   return words;
 }
 
@@ -185,7 +185,7 @@ const romanNumerals = [
   [1, "i"],
 ];
 
-const romanValues = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
+const romanValues = { C: 100, D: 500, I: 1, L: 50, M: 1000, V: 5, X: 10 };
 
 /**
  * converts a number to roman numerals
@@ -193,7 +193,7 @@ const romanValues = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
  * @returns {string} - the number in roman numerals
  */
 function decimalToRoman(value) {
-  for (var index = 0; index < romanNumerals.length; index++) {
+  for (let index = 0; index < romanNumerals.length; index++) {
     const numeral = romanNumerals[index];
     if (value >= numeral[0]) {
       return numeral[1] + decimalToRoman(value - numeral[0]);
@@ -208,9 +208,9 @@ function decimalToRoman(value) {
  * @returns {number} - the numeric value
  */
 function romanToDecimal(roman) {
-  var decimal = 0;
-  var max = 1;
-  for (var i = roman.length - 1; i >= 0; i--) {
+  let decimal = 0;
+  let max = 1;
+  for (let i = roman.length - 1; i >= 0; i--) {
     const digit = roman[i];
     const value = romanValues[digit];
     if (value < max) {
@@ -230,8 +230,8 @@ function romanToDecimal(roman) {
  * @returns {string} - the letters
  */
 function decimalToLetters(value, aChar) {
-  var letters = [];
-  var aCode = aChar.charCodeAt(0);
+  const letters = [];
+  const aCode = aChar.charCodeAt(0);
   while (value > 0) {
     letters.unshift(String.fromCharCode(((value - 1) % 26) + aCode));
     value = Math.floor((value - 1) / 26);
@@ -246,9 +246,9 @@ function decimalToLetters(value, aChar) {
  * @returns {number} - the numeric value
  */
 function lettersToDecimal(letters, aChar) {
-  var aCode = aChar.charCodeAt(0);
-  var decimal = 0;
-  for (var i = 0; i < letters.length; i++) {
+  const aCode = aChar.charCodeAt(0);
+  let decimal = 0;
+  for (let i = 0; i < letters.length; i++) {
     decimal +=
       (letters.charCodeAt(letters.length - i - 1) - aCode + 1) *
       Math.pow(26, i);
@@ -278,14 +278,14 @@ const formats = {
   DECIMAL: "decimal",
   LETTERS: "letters",
   ROMAN: "roman",
-  WORDS: "words",
   SEQUENCE: "sequence",
+  WORDS: "words",
 };
 
 const tcase = {
-  UPPER: "upper",
   LOWER: "lower",
   TITLE: "title",
+  UPPER: "upper",
 };
 
 /**
@@ -325,7 +325,7 @@ function _formatInteger(value, format) {
       // TODO use functionPad
       var padLength = format.mandatoryDigits - formattedInteger.length;
       if (padLength > 0) {
-        var padding = new Array(padLength + 1).join("0");
+        const padding = new Array(padLength + 1).join("0");
         formattedInteger = padding + formattedInteger;
       }
       if (format.zeroCode !== 0x30) {
@@ -361,9 +361,9 @@ function _formatInteger(value, format) {
       }
 
       if (format.ordinal) {
-        var suffix123 = { "1": "st", "2": "nd", "3": "rd" };
-        var lastDigit = formattedInteger[formattedInteger.length - 1];
-        var suffix = suffix123[lastDigit];
+        const suffix123 = { "1": "st", "2": "nd", "3": "rd" };
+        const lastDigit = formattedInteger[formattedInteger.length - 1];
+        let suffix = suffix123[lastDigit];
         if (
           !suffix ||
           (formattedInteger.length > 1 &&
@@ -402,10 +402,10 @@ const decimalGroups = [
  */
 function analyseIntegerPicture(picture) {
   const format = {
-    type: "integer",
-    primary: formats.DECIMAL,
     case: tcase.LOWER,
     ordinal: false,
+    primary: formats.DECIMAL,
+    type: "integer",
   };
 
   let primaryFormat, formatModifier;
@@ -484,8 +484,8 @@ function analyseIntegerPicture(picture) {
           } else {
             // neither a decimal-digit-sign ot optional-digit-sign, assume it is a grouping-separator-sign
             groupingSeparators.push({
-              position: separatorPosition,
               character: String.fromCodePoint(codePoint),
+              position: separatorPosition,
             });
           }
         }
@@ -533,8 +533,8 @@ function analyseIntegerPicture(picture) {
         if (regular > 0) {
           format.regular = true;
           format.groupingSeparators = {
-            position: regular,
             character: groupingSeparators[0].character,
+            position: regular,
           };
         } else {
           format.regular = false;
@@ -553,25 +553,25 @@ function analyseIntegerPicture(picture) {
 }
 
 const defaultPresentationModifiers = {
-  Y: "1",
-  M: "1",
+  C: "n",
   D: "1",
-  d: "1",
+  E: "n",
   F: "n",
-  W: "1",
-  w: "1",
-  X: "1",
-  x: "1",
   H: "1",
-  h: "1",
+  M: "1",
   P: "n",
+  W: "1",
+  X: "1",
+  Y: "1",
+  Z: "01:01",
+  d: "1",
+  f: "1",
+  h: "1",
   m: "01",
   s: "01",
-  f: "1",
-  Z: "01:01",
+  w: "1",
+  x: "1",
   z: "01:01",
-  C: "n",
-  E: "n",
 };
 
 // §9.8.4.1 the format specifier is an array of string literals and variable markers
@@ -581,10 +581,10 @@ const defaultPresentationModifiers = {
  * @returns {{type: string, parts: Array}} - the analysed string
  */
 function analyseDateTimePicture(picture) {
-  var spec = [];
+  const spec = [];
   const format = {
-    type: "datetime",
     parts: spec,
+    type: "datetime",
   };
   const addLiteral = (start, end) => {
     if (end > start) {
@@ -596,7 +596,7 @@ function analyseDateTimePicture(picture) {
     }
   };
 
-  var start = 0,
+  let start = 0,
     pos = 0;
   while (pos < picture.length) {
     if (picture.charAt(pos) === "[") {
@@ -625,11 +625,11 @@ function analyseDateTimePicture(picture) {
       let marker = picture.substring(start + 1, pos);
       // whitespace within a variable marker is ignored (i.e. remove it)
       marker = marker.split(/\s+/).join("");
-      var def = {
-        type: "marker",
+      const def = {
         component: marker.charAt(0), // 1. The component specifier is always present and is always a single letter.
+        type: "marker",
       };
-      var comma = marker.lastIndexOf(","); // 2. The width modifier may be recognized by the presence of a comma
+      const comma = marker.lastIndexOf(","); // 2. The width modifier may be recognized by the presence of a comma
       var presMod; // the presentation modifiers
       if (comma !== -1) {
         // §9.8.4.2 The Width Modifier
@@ -651,8 +651,8 @@ function analyseDateTimePicture(picture) {
           max = widthMod.substring(dash + 1);
         }
         const widthDef = {
-          min: parseWidth(min),
           max: parseWidth(max),
+          min: parseWidth(min),
         };
         def.width = widthDef;
         presMod = marker.substring(1, comma);
@@ -663,7 +663,7 @@ function analyseDateTimePicture(picture) {
         def.presentation1 = presMod; // first presentation modifier
         //TODO validate the first presentation modifier - it's either N, n, Nn or it passes analyseIntegerPicture
       } else if (presMod.length > 1) {
-        var lastChar = presMod.charAt(presMod.length - 1);
+        const lastChar = presMod.charAt(presMod.length - 1);
         if ("atco".indexOf(lastChar) !== -1) {
           def.presentation2 = lastChar;
           if (lastChar === "o") {
@@ -697,7 +697,7 @@ function analyseDateTimePicture(picture) {
           def.names = tcase.UPPER;
         }
       } else if ("YMDdFWwXxHhmsf".indexOf(def.component) !== -1) {
-        var integerPattern = def.presentation1;
+        let integerPattern = def.presentation1;
         if (def.presentation2) {
           integerPattern += ";" + def.presentation2;
         }
@@ -714,7 +714,7 @@ function analyseDateTimePicture(picture) {
             def.n = def.width.max;
             def.integerFormat.mandatoryDigits = def.n;
           } else {
-            var w =
+            const w =
               def.integerFormat.mandatoryDigits +
               def.integerFormat.optionalDigits;
             if (w >= 2) {
@@ -767,7 +767,7 @@ const startOfFirstWeek = (ym) => {
   // the week starts on a Monday - calculate the millis for the start of the first week
   // millis for given 1st Jan of that year (at 00:00 UTC)
   const jan1 = Date.UTC(ym.year, ym.month);
-  var dayOfJan1 = new Date(jan1).getUTCDay();
+  let dayOfJan1 = new Date(jan1).getUTCDay();
   if (dayOfJan1 === 0) {
     dayOfJan1 = 7;
   }
@@ -778,14 +778,14 @@ const startOfFirstWeek = (ym) => {
 };
 
 const yearMonth = (year, month) => ({
-  year: year,
   month: month,
   nextMonth: () =>
     month === 11 ? yearMonth(year + 1, 0) : yearMonth(year, month + 1),
+  nextYear: () => yearMonth(year + 1, month),
   previousMonth: () =>
     month === 0 ? yearMonth(year - 1, 11) : yearMonth(year, month - 1),
-  nextYear: () => yearMonth(year + 1, month),
   previousYear: () => yearMonth(year - 1, month),
+  year: year,
 });
 
 const deltaWeeks = (start, end) => (end - start) / (millisInADay * 7) + 1;
@@ -957,8 +957,8 @@ let iso8601Spec = null;
  * @returns {string} - the formatted timestamp
  */
 function formatDateTime(millis, picture, timezone) {
-  var offsetHours = 0;
-  var offsetMinutes = 0;
+  let offsetHours = 0;
+  let offsetMinutes = 0;
 
   if (typeof timezone !== "undefined") {
     // parse the hour and minute offsets
@@ -968,8 +968,8 @@ function formatDateTime(millis, picture, timezone) {
     offsetMinutes = offset % 100;
   }
 
-  var formatComponent = (date, markerSpec) => {
-    var componentValue = getDateTimeFragment(date, markerSpec.component);
+  const formatComponent = (date, markerSpec) => {
+    let componentValue = getDateTimeFragment(date, markerSpec.component);
 
     // §9.8.4.3 Formatting Integer-Valued Date/Time Components
     if ("YMDdFWwXxHhms".indexOf(markerSpec.component) !== -1) {
@@ -1085,11 +1085,11 @@ function formatDateTime(millis, picture, timezone) {
  * @returns {object} - regex
  */
 function generateRegex(formatSpec) {
-  var matcher = {};
+  const matcher = {};
   if (formatSpec.type === "datetime") {
     matcher.type = "datetime";
     matcher.parts = formatSpec.parts.map((part) => {
-      var res = {};
+      let res = {};
       if (part.type === "literal") {
         res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       } else if (part.component === "Z" || part.component === "z") {
@@ -1138,7 +1138,7 @@ function generateRegex(formatSpec) {
       } else {
         // must be a month or day name
         res.regex = "[a-zA-Z]+";
-        var lookup = {};
+        let lookup = {};
         if (part.component === "M" || part.component === "x") {
           // months
           months.forEach((name, index) => {
@@ -1160,7 +1160,7 @@ function generateRegex(formatSpec) {
             }
           });
         } else if (part.component === "P") {
-          lookup = { am: 0, AM: 0, pm: 1, PM: 1 };
+          lookup = { AM: 0, PM: 1, am: 0, pm: 1 };
         } else {
           // unsupported 'name' option for this component
           throw {
@@ -1282,7 +1282,7 @@ function parseDateTime(timestamp, picture) {
     "^" + matchSpec.parts.map((part) => "(" + part.regex + ")").join("") + "$";
 
   const matcher = new RegExp(fullRegex, "i"); // TODO can cache this against the picture
-  var info = matcher.exec(timestamp);
+  const info = matcher.exec(timestamp);
   if (info !== null) {
     // validate what we've just parsed - do we have enough information to create a timestamp?
     // rules:
@@ -1440,7 +1440,7 @@ function parseDateTime(timestamp, picture) {
       }
     }
 
-    var millis = Date.UTC(
+    let millis = Date.UTC(
       components.Y,
       components.M,
       components.D,
@@ -1458,7 +1458,7 @@ function parseDateTime(timestamp, picture) {
 }
 
 // Regular expression to match an ISO 8601 formatted timestamp
-var iso8601regex =
+const iso8601regex =
   /^\d{4}(-[01]\d)*(-[0-3]\d)*(T[0-2]\d:[0-5]\d:[0-5]\d)*(\.\d+)?([+-][0-2]\d:?[0-5]\d|Z)?$/;
 
 /**
@@ -1477,8 +1477,8 @@ export function toMillis(timestamp, picture) {
   if (typeof picture === "undefined") {
     if (!iso8601regex.test(timestamp)) {
       throw {
-        stack: new Error().stack,
         code: "D3110",
+        stack: new Error().stack,
         value: timestamp,
       };
     }

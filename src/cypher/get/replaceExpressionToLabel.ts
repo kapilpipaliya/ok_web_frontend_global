@@ -1,5 +1,7 @@
-import type { Vertex } from "~/lib/graph/graph";
 import type { TransactionPromise } from "neo4j-driver-core";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
 
 

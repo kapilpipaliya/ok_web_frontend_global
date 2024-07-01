@@ -1,4 +1,5 @@
 import type {Vertex} from "~/lib/graph/graph";
+
 import {getHttpsSession} from "~/server/getHttpsSession";
 
 export async function updateSession(createUserResult: Vertex) {

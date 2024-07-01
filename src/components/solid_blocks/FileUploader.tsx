@@ -1,13 +1,14 @@
-import { createEffect, createSignal, type JSX, splitProps } from "solid-js";
+import { type JSX, createEffect, createSignal, splitProps } from "solid-js";
+
 import { runEvent } from "./tools";
 
-export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
-  setValue?: (meta: any, data: any, file: File) => void;
-  meta?: any;
+export type FileUploaderProps = {
   data?: any;
   label?: string;
   media?: string;
-};
+  meta?: any;
+  setValue?: (meta: any, data: any, file: File) => void;
+} & JSX.HTMLAttributes<HTMLLabelElement>;
 
 export function FileUploader(props: FileUploaderProps) {
   const [inputProps, content, labelProps] = splitProps(
@@ -15,7 +16,7 @@ export function FileUploader(props: FileUploaderProps) {
     [],
     ["setValue", "meta", "data", "label"]
   );
-  const [file, setFile] = createSignal<File | null | any>(null);
+  const [file, setFile] = createSignal<File | any | null>(null);
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
 
   createEffect(() => {
@@ -57,26 +58,26 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <div
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onClick={handleFullBoxClick}
       draggable={false}
+      onClick={handleFullBoxClick}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       style={{
-        position: "relative",
-        border: fullBoxMedia() === "" ? "2px dashed #ccc" : "",
-        padding: "20px",
-        "border-radius": "10px",
-        "text-align": "center",
-        cursor: "pointer",
-        "background-size": "cover",
         "background-position": "center",
+        "background-size": "cover",
+        border: fullBoxMedia() === "" ? "2px dashed #ccc" : "",
+        "border-radius": "10px",
+        cursor: "pointer",
+        padding: "20px",
+        position: "relative",
+        "text-align": "center",
       }}
     >
       <label {...labelProps}>
         <input
-          type="file"
           accept="image/*, video/*"
           style={{ display: "none" }}
+          type="file"
           {...inputProps}
           onChange={(event) => {
             runEvent(event, handleInputChange);
@@ -87,12 +88,12 @@ export function FileUploader(props: FileUploaderProps) {
             {file().type.startsWith("image/") ? (
               <img
                 {...(props as JSX.HTMLAttributes<HTMLInputElement>)}
-                src={fullBoxMedia()}
                 alt="Media"
+                src={fullBoxMedia()}
                 style={{
-                  "max-width": "100%",
-                  "max-height": "100%",
                   "border-radius": "10px",
+                  "max-height": "100%",
+                  "max-width": "100%",
                 }}
               />
             ) : (
@@ -101,9 +102,9 @@ export function FileUploader(props: FileUploaderProps) {
                 controls
                 src={fullBoxMedia()}
                 style={{
-                  "max-width": "100%",
-                  "max-height": "100%",
                   "border-radius": "10px",
+                  "max-height": "100%",
+                  "max-width": "100%",
                 }}
               />
             )}

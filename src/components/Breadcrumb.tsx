@@ -1,12 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show } from "solid-js";
+
 import {SiteTitle} from "~/pages/website/SiteTitle";
 
 export type PageHeaderProps = {
-  title: string;
-  breadcrumb: { name: string; href?: string; icon?: string }[];
-  className?: string;
+  breadcrumb: { href?: string; icon?: string; name: string }[];
   children?: JSX.Element;
+  className?: string;
+  title: string;
 };
 
 export function Breadcrumb(props: PageHeaderProps) {
@@ -16,10 +17,10 @@ export function Breadcrumb(props: PageHeaderProps) {
   };
 
   const titleStyle = {
-    "margin-bottom": "0.5rem",
     "font-size": "22px",
     "font-weight": "bold",
     fontFamily: '"Public Sans", sans-serif',
+    "margin-bottom": "0.5rem",
   };
 
   const breadcrumbsStyle = {
@@ -37,13 +38,12 @@ export function Breadcrumb(props: PageHeaderProps) {
         <SiteTitle>{props.title}</SiteTitle>
         <h2 style={titleStyle}>{props.title}</h2>
 
-        <nav class="flex" aria-label="Breadcrumb">
+        <nav aria-label="Breadcrumb" class="flex">
           <ol class="display:inline-flex  align-items:center  space-x:0.25rem space-x:0.5rem@md --space-x-reverse:1:rtl">
             <For each={props.breadcrumb}>
               {(item) => (
                 <li>
                   <Show
-                    when={item.href}
                     fallback={
                       <div class="flex align-items:center ">
                         <Icon
@@ -55,20 +55,21 @@ export function Breadcrumb(props: PageHeaderProps) {
                         </span>
                       </div>
                     }
+                    when={item.href}
                   >
                     <li>
                       <div class="flex align-items:center text:underline">
                         <Show when={item.icon}>
                           <Icon
-                            icon={item.icon!}
                             class="color:rgb(156,163,175) mr:5"
                             height={20}
+                            icon={item.icon!}
                             width={20}
                           />
                         </Show>
                         <a
-                          href={item.href}
                           class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(55,65,81)  color:rgb(37,99,235):hover md:ms-2 color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark"
+                          href={item.href}
                         >
                           {item.name}
                         </a>

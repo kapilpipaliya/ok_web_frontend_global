@@ -1,7 +1,9 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { getChildVertexes } from "../get/sync/traverse";
 import { deleteRow } from "./deleteRow";
-import type { SetStoreFunction, Store } from "solid-js/store";
 
 export function deleteNestedLayout(
   graph: Store<GraphInterface>,
@@ -9,8 +11,8 @@ export function deleteNestedLayout(
   txnId: number,
   vertexes: Vertex[] = [],
   options?: {
-    nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
+    nameExpr?: (child: Vertex) => string;
   },
 ) {
   const deleteChildren = (vertexes: Vertex[]) => {

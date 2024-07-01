@@ -1,12 +1,13 @@
 import { type JSX, Show } from "solid-js";
 import { Portal } from "solid-js/web";
-import { ModalContent, ModalFooter, ModalHeader, ModalBody } from "~/components/solid_blocks";
 
-export function RenderModal(props: { isOpen: boolean; toggle: () => void; children: JSX.Element; }) {
+import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
+
+export function RenderModal(props: { children: JSX.Element; isOpen: boolean; toggle: () => void; }) {
   return (
     <Show when={props.isOpen}>
       <Portal>
-        <div role="dialog" tabIndex={-1} class="sb-modal r:10|10|10|10">
+        <div class="sb-modal r:10|10|10|10" role="dialog" tabIndex={-1}>
           <ModalContent>
             <ModalHeader>
               Header
@@ -20,9 +21,9 @@ export function RenderModal(props: { isOpen: boolean; toggle: () => void; childr
             <ModalFooter>
               <div
                 style={{
+                  "align-items": "center",
                   display: "flex",
                   "justify-content": "center",
-                  "align-items": "center",
                 }}
               >
                 <button onClick={props.toggle}>Submit</button>

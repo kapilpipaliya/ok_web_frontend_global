@@ -1,5 +1,15 @@
+import type { JSX } from "solid-js";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
+import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
 import {
   canHaveChildren,
   canHaveWhitespace,
@@ -8,13 +18,6 @@ import {
 import { randomHash } from "~/lib/jsx_parser/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/helpers/resolvePath";
-import type { JSX } from "solid-js";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
-import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
-import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 
 type ParsedJSX = JSX.Element | boolean | string;
 type ParsedTree = ParsedJSX | ParsedJSX[] | null;
@@ -22,29 +25,28 @@ export type TProps = {
   allowUnknownElements?: boolean;
   autoCloseVoidElements?: boolean;
   bindings?: { [key: string]: unknown };
-  blacklistedAttrs?: Array<string | RegExp>;
+  blacklistedAttrs?: Array<RegExp | string>;
   blacklistedTags?: string[];
   className?: string;
   components?: Record<string, ComponentType | ExoticComponent>;
   componentsOnly?: boolean;
   disableFragments?: boolean;
   disableKeyGeneration?: boolean;
+  // added props
+  formData: Vertex,
   jsx?: string;
   onError?: (error: Error) => void;
-  showWarnings?: boolean;
+  parent: Vertex
   renderError?: (props: { error: string }) => JSX.Element | null;
   renderInWrapper?: boolean;
   renderUnrecognized?: (tagName: string) => JSX.Element | null;
-  // added props
-  formData: Vertex,
+  showWarnings?: boolean;
   txnId: number,
-  parent: Vertex
 };
 type Scope = Record<string, any>;
 
-/* eslint-disable consistent-return */
+ 
 export default class JsxParser {
-  static displayName = "JsxParser";
   static defaultProps: TProps = {
     allowUnknownElements: true,
     autoCloseVoidElements: false,
@@ -58,333 +60,12 @@ export default class JsxParser {
     disableKeyGeneration: false,
     jsx: "",
     onError: () => {},
-    showWarnings: false,
     renderError: undefined,
     renderInWrapper: true,
     renderUnrecognized: () => null,
+    showWarnings: false,
   };
-  private ParsedChildren: ParsedTree = null;
-  props: TProps;
-
-  constructor(props: TProps) {
-    const newProps = Object.assign({}, JsxParser.defaultProps, props);
-    this.props = {};
-    for (const property in newProps) {
-      this.props[property] = newProps[property];
-    }
-  }
-
-  render = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-  ): JSX.Element => {
-    const jsx = (this.props.jsx || "").trim().replace(/<!DOCTYPE([^>]*)>/g, "");
-    this.ParsedChildren = this.#parseJSX(graph, setGraph, jsx, {
-      parent: this.props.parent,
-    });
-    const className = [
-      ...new Set(["jsx-parser", ...String(this.props.className).split(" ")]),
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    return this.ParsedChildren;
-  };
-
-  #parseJSX = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-    jsx: string,
-    scope: {},
-  ): JSX.Element | JSX.Element[] | null => {
-    const parser = Acorn.Parser.extend(
-      AcornJSX({
-        autoCloseVoidElements: this.props.autoCloseVoidElements,
-      }),
-    );
-    const wrappedJsx = `<root>${jsx}</root>`;
-    let parsed: AcornJSX.Expression[] = [];
-    try {
-      // @ts-ignore - AcornJsx doesn't have typescript typings
-      parsed = parser.parse(wrappedJsx, { ecmaVersion: "latest" });
-      // @ts-ignore - AcornJsx doesn't have typescript typings
-      parsed = parsed.body[0].expression.children || [];
-    } catch (error) {
-      if (this.props.showWarnings) console.warn(error); // eslint-disable-line no-console
-      if (this.props.onError) this.props.onError(error);
-      if (this.props.renderError) {
-        return this.props.renderError({ error: String(error) });
-      }
-      return null;
-    }
-
-    return parsed
-      .map((p) => this.#parseExpression(graph, setGraph, p, scope))
-      .filter(Boolean);
-  };
-
-  #parseExpression = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-    expression: AcornJSX.Expression,
-    scope?: Scope,
-  ): any => {
-    switch (expression.type) {
-      case "JSXAttribute":
-        if (expression.value === null) return true;
-        return this.#parseExpression(graph, setGraph, expression.value, scope);
-      case "JSXElement":
-      case "JSXFragment":
-        return this.#parseElement(graph, setGraph, expression, scope);
-      case "JSXExpressionContainer":
-        return this.#parseExpression(
-          graph,
-          setGraph,
-          expression.expression,
-          scope,
-        );
-      case "JSXText": {
-        const key = this.props.disableKeyGeneration ? undefined : randomHash();
-        return expression.value;
-      }
-      // return this.props.disableFragments
-      // 	? expression.value
-      // 	: <Fragment key={key}>{expression.value}</Fragment>
-      case "ArrayExpression":
-        return expression.elements.map((ele) =>
-          this.#parseExpression(graph, setGraph, ele, scope),
-        ) as ParsedTree;
-      case "BinaryExpression":
-        /* eslint-disable eqeqeq,max-len */
-        switch (expression.operator) {
-          case "-":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) -
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "!=":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) !=
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "!==":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) !==
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "*":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) *
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "**":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) **
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "/":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) /
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "%":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) %
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "+":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) +
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "<":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) <
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "<=":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) <=
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "==":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) ==
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "===":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) ===
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case ">":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) >
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case ">=":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) >=
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          /* eslint-enable eqeqeq,max-len */
-        }
-        return undefined;
-      case "CallExpression": {
-        const parsedCallee = this.#parseExpression(
-          graph,
-          setGraph,
-          expression.callee,
-        );
-        if (parsedCallee === undefined) {
-          this.props.onError?.(
-            new Error(
-              `The expression '${expression.callee}' could not be resolved, resulting in an undefined return value.`,
-            ),
-          );
-          return undefined;
-        }
-        return parsedCallee(
-          ...expression.arguments.map((arg) =>
-            this.#parseExpression(graph, setGraph, arg, expression.callee),
-          ),
-        );
-      }
-      case "ConditionalExpression":
-        return this.#parseExpression(graph, setGraph, expression.test)
-          ? this.#parseExpression(graph, setGraph, expression.consequent)
-          : this.#parseExpression(graph, setGraph, expression.alternate);
-      case "ExpressionStatement":
-        return this.#parseExpression(graph, setGraph, expression.expression);
-      case "Identifier":
-        if (scope && expression.name in scope) {
-          return scope[expression.name];
-        }
-        return this.props.bindings?.[expression.name];
-
-      case "Literal":
-        return expression.value;
-      case "LogicalExpression": {
-        const left = this.#parseExpression(graph, setGraph, expression.left);
-        if (expression.operator === "||" && left) return left;
-        if (
-          (expression.operator === "&&" && left) ||
-          (expression.operator === "||" && !left)
-        ) {
-          return this.#parseExpression(graph, setGraph, expression.right);
-        }
-        return false;
-      }
-      case "MemberExpression":
-        return this.#parseMemberExpression(graph, setGraph, expression, scope);
-      case "ObjectExpression": {
-        const object: Record<string, any> = {};
-        expression.properties.forEach((prop) => {
-          object[prop.key.name! || prop.key.value!] = this.#parseExpression(
-            graph,
-            setGraph,
-            prop.value,
-          );
-        });
-        return object;
-      }
-      case "TemplateElement":
-        return expression.value.cooked;
-      case "TemplateLiteral":
-        return [...expression.expressions, ...expression.quasis]
-          .sort((a, b) => {
-            if (a.start < b.start) return -1;
-            return 1;
-          })
-          .map((item) => this.#parseExpression(graph, setGraph, item))
-          .join("");
-      case "UnaryExpression":
-        switch (expression.operator) {
-          case "+":
-            return expression.argument.value;
-          case "-":
-            return -expression.argument.value;
-          case "!":
-            return !expression.argument.value;
-        }
-        return undefined;
-      case "ArrowFunctionExpression":
-        if (expression.async || expression.generator) {
-          this.props.onError?.(
-            new Error("Async and generator arrow functions are not supported."),
-          );
-        }
-        return (...args: any[]): any => {
-          const functionScope: Record<string, any> = {};
-          expression.params.forEach((param, idx) => {
-            functionScope[param.name] = args[idx];
-          });
-          return this.#parseExpression(
-            graph,
-            setGraph,
-            expression.body,
-            functionScope,
-          );
-        };
-    }
-  };
-
-  #parseMemberExpression = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-    expression: AcornJSX.MemberExpression,
-    scope?: Scope,
-  ): any => {
-    // eslint-disable-next-line prefer-destructuring
-    let { object } = expression;
-    const path = [
-      expression.property?.name ?? JSON.parse(expression.property?.raw ?? '""'),
-    ];
-
-    if (expression.object.type !== "Literal") {
-      while (object && ["MemberExpression", "Literal"].includes(object?.type)) {
-        const { property } = object as AcornJSX.MemberExpression;
-        if ((object as AcornJSX.MemberExpression).computed) {
-          path.unshift(
-            this.#parseExpression(graph, setGraph, property!, scope),
-          );
-        } else {
-          path.unshift(property?.name ?? JSON.parse(property?.raw ?? '""'));
-        }
-
-        object = (object as AcornJSX.MemberExpression).object;
-      }
-    }
-
-    const target = this.#parseExpression(graph, setGraph, object, scope);
-    try {
-      let parent = target;
-      const member = path.reduce((value, next) => {
-        parent = value;
-        return value[next];
-      }, target);
-      if (typeof member === "function") return member.bind(parent);
-
-      return member;
-    } catch {
-      const name = (object as AcornJSX.MemberExpression)?.name || "unknown";
-      this.props.onError?.(
-        new Error(`Unable to parse ${name}["${path.join('"]["')}"]}`),
-      );
-    }
-  };
-
-  #parseName = (
-    element: AcornJSX.JSXIdentifier | AcornJSX.JSXMemberExpression,
-  ): string => {
-    if (element.type === "JSXIdentifier") {
-      return element.name;
-    }
-    return `${this.#parseName(element.object)}.${this.#parseName(
-      element.property,
-    )}`;
-  };
-
+  static displayName = "JsxParser";
   #parseElement = (
     graph: Store<GraphInterface>,
     setGraph: SetStoreFunction<GraphInterface>,
@@ -538,7 +219,7 @@ export default class JsxParser {
       key: this.props.disableKeyGeneration ? undefined : randomHash(),
     };
     attributes.forEach(
-      // eslint-disable-next-line max-len
+       
       (
         expr:
           | AcornJSX.JSXAttribute
@@ -728,5 +409,327 @@ export default class JsxParser {
       console.log("not handled", children);
     }
   };
+  #parseExpression = (
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+    expression: AcornJSX.Expression,
+    scope?: Scope,
+  ): any => {
+    switch (expression.type) {
+      case "JSXAttribute":
+        if (expression.value === null) return true;
+        return this.#parseExpression(graph, setGraph, expression.value, scope);
+      case "JSXElement":
+      case "JSXFragment":
+        return this.#parseElement(graph, setGraph, expression, scope);
+      case "JSXExpressionContainer":
+        return this.#parseExpression(
+          graph,
+          setGraph,
+          expression.expression,
+          scope,
+        );
+      case "JSXText": {
+        const key = this.props.disableKeyGeneration ? undefined : randomHash();
+        return expression.value;
+      }
+      // return this.props.disableFragments
+      // 	? expression.value
+      // 	: <Fragment key={key}>{expression.value}</Fragment>
+      case "ArrayExpression":
+        return expression.elements.map((ele) =>
+          this.#parseExpression(graph, setGraph, ele, scope),
+        ) as ParsedTree;
+      case "BinaryExpression":
+         
+        switch (expression.operator) {
+          case "-":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) -
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "!=":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) !=
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "!==":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) !==
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "*":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) *
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "**":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) **
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "/":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) /
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "%":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) %
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "+":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) +
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "<":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) <
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "<=":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) <=
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "==":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) ==
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "===":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) ===
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case ">":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) >
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case ">=":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) >=
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+           
+        }
+        return undefined;
+      case "CallExpression": {
+        const parsedCallee = this.#parseExpression(
+          graph,
+          setGraph,
+          expression.callee,
+        );
+        if (parsedCallee === undefined) {
+          this.props.onError?.(
+            new Error(
+              `The expression '${expression.callee}' could not be resolved, resulting in an undefined return value.`,
+            ),
+          );
+          return undefined;
+        }
+        return parsedCallee(
+          ...expression.arguments.map((arg) =>
+            this.#parseExpression(graph, setGraph, arg, expression.callee),
+          ),
+        );
+      }
+      case "ConditionalExpression":
+        return this.#parseExpression(graph, setGraph, expression.test)
+          ? this.#parseExpression(graph, setGraph, expression.consequent)
+          : this.#parseExpression(graph, setGraph, expression.alternate);
+      case "ExpressionStatement":
+        return this.#parseExpression(graph, setGraph, expression.expression);
+      case "Identifier":
+        if (scope && expression.name in scope) {
+          return scope[expression.name];
+        }
+        return this.props.bindings?.[expression.name];
+
+      case "Literal":
+        return expression.value;
+      case "LogicalExpression": {
+        const left = this.#parseExpression(graph, setGraph, expression.left);
+        if (expression.operator === "||" && left) return left;
+        if (
+          (expression.operator === "&&" && left) ||
+          (expression.operator === "||" && !left)
+        ) {
+          return this.#parseExpression(graph, setGraph, expression.right);
+        }
+        return false;
+      }
+      case "MemberExpression":
+        return this.#parseMemberExpression(graph, setGraph, expression, scope);
+      case "ObjectExpression": {
+        const object: Record<string, any> = {};
+        expression.properties.forEach((prop) => {
+          object[prop.key.name! || prop.key.value!] = this.#parseExpression(
+            graph,
+            setGraph,
+            prop.value,
+          );
+        });
+        return object;
+      }
+      case "TemplateElement":
+        return expression.value.cooked;
+      case "TemplateLiteral":
+        return [...expression.expressions, ...expression.quasis]
+          .sort((a, b) => {
+            if (a.start < b.start) return -1;
+            return 1;
+          })
+          .map((item) => this.#parseExpression(graph, setGraph, item))
+          .join("");
+      case "UnaryExpression":
+        switch (expression.operator) {
+          case "+":
+            return expression.argument.value;
+          case "-":
+            return -expression.argument.value;
+          case "!":
+            return !expression.argument.value;
+        }
+        return undefined;
+      case "ArrowFunctionExpression":
+        if (expression.async || expression.generator) {
+          this.props.onError?.(
+            new Error("Async and generator arrow functions are not supported."),
+          );
+        }
+        return (...args: any[]): any => {
+          const functionScope: Record<string, any> = {};
+          expression.params.forEach((param, idx) => {
+            functionScope[param.name] = args[idx];
+          });
+          return this.#parseExpression(
+            graph,
+            setGraph,
+            expression.body,
+            functionScope,
+          );
+        };
+    }
+  };
+
+  #parseJSX = (
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+    jsx: string,
+    scope: {},
+  ): JSX.Element | JSX.Element[] | null => {
+    const parser = Acorn.Parser.extend(
+      AcornJSX({
+        autoCloseVoidElements: this.props.autoCloseVoidElements,
+      }),
+    );
+    const wrappedJsx = `<root>${jsx}</root>`;
+    let parsed: AcornJSX.Expression[] = [];
+    try {
+      // @ts-ignore - AcornJsx doesn't have typescript typings
+      parsed = parser.parse(wrappedJsx, { ecmaVersion: "latest" });
+      // @ts-ignore - AcornJsx doesn't have typescript typings
+      parsed = parsed.body[0].expression.children || [];
+    } catch (error) {
+      if (this.props.showWarnings) console.warn(error);  
+      if (this.props.onError) this.props.onError(error);
+      if (this.props.renderError) {
+        return this.props.renderError({ error: String(error) });
+      }
+      return null;
+    }
+
+    return parsed
+      .map((p) => this.#parseExpression(graph, setGraph, p, scope))
+      .filter(Boolean);
+  };
+
+  #parseMemberExpression = (
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+    expression: AcornJSX.MemberExpression,
+    scope?: Scope,
+  ): any => {
+     
+    let { object } = expression;
+    const path = [
+      expression.property?.name ?? JSON.parse(expression.property?.raw ?? '""'),
+    ];
+
+    if (expression.object.type !== "Literal") {
+      while (object && ["Literal", "MemberExpression"].includes(object?.type)) {
+        const { property } = object as AcornJSX.MemberExpression;
+        if ((object as AcornJSX.MemberExpression).computed) {
+          path.unshift(
+            this.#parseExpression(graph, setGraph, property!, scope),
+          );
+        } else {
+          path.unshift(property?.name ?? JSON.parse(property?.raw ?? '""'));
+        }
+
+        object = (object as AcornJSX.MemberExpression).object;
+      }
+    }
+
+    const target = this.#parseExpression(graph, setGraph, object, scope);
+    try {
+      let parent = target;
+      const member = path.reduce((value, next) => {
+        parent = value;
+        return value[next];
+      }, target);
+      if (typeof member === "function") return member.bind(parent);
+
+      return member;
+    } catch {
+      const name = (object as AcornJSX.MemberExpression)?.name || "unknown";
+      this.props.onError?.(
+        new Error(`Unable to parse ${name}["${path.join('"]["')}"]}`),
+      );
+    }
+  };
+
+  #parseName = (
+    element: AcornJSX.JSXIdentifier | AcornJSX.JSXMemberExpression,
+  ): string => {
+    if (element.type === "JSXIdentifier") {
+      return element.name;
+    }
+    return `${this.#parseName(element.object)}.${this.#parseName(
+      element.property,
+    )}`;
+  };
+
+  private ParsedChildren: ParsedTree = null;
+
+  props: TProps;
+
+  render = (
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+  ): JSX.Element => {
+    const jsx = (this.props.jsx || "").trim().replace(/<!DOCTYPE([^>]*)>/g, "");
+    this.ParsedChildren = this.#parseJSX(graph, setGraph, jsx, {
+      parent: this.props.parent,
+    });
+    const className = [
+      ...new Set(["jsx-parser", ...String(this.props.className).split(" ")]),
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return this.ParsedChildren;
+  };
+
+  constructor(props: TProps) {
+    const newProps = Object.assign({}, JsxParser.defaultProps, props);
+    this.props = {};
+    for (const property in newProps) {
+      this.props[property] = newProps[property];
+    }
+  }
 }
-/* eslint-enable consistent-return */
+ 

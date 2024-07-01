@@ -1,43 +1,45 @@
 import {
+  For,
+  Show,
   batch,
   createSignal,
-  For,
   getOwner,
   runWithOwner,
-  Show,
   useContext,
 } from "solid-js";
 
+import type { ComponentProps } from "~/components/fields/ComponentType";
+
+import { MultiSelectField } from "~/components/MultiSelect";
+import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { FormContext } from "~/lib/contexts";
+import {
+  getSelectionOptions,
+} from "~/lib/graph/get/sync/traverse";
 import {
   GraphContext,
   type Id,
   IdAttr,
   type Vertex,
 } from "~/lib/graph/graph";
-import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
-import {
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/traverse";
-import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
-import type { ComponentProps } from "~/components/fields/ComponentType";
-import { MultiSelectField } from "~/components/MultiSelect";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
-import { FormContext } from "~/lib/contexts";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
-import { selectedValue } from "./selectedValue";
-import { isValidResponse } from "./isValidResponse";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+
 import { ensureArray } from "./ensureArray";
+import { isValidResponse } from "./isValidResponse";
+import { selectedValue } from "./selectedValue";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
-  props: ComponentProps & {
+  props: {
     component: string;
+    isRealTime?: boolean;
     title: string;
     txnId?: number;
-    isRealTime?: boolean;
-  },
+  } & ComponentProps,
 ) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const formData = useContext(FormContext);
@@ -50,7 +52,7 @@ export function SelectInputField(
 
   const isCommaSeparated = () => props.meta.P.options?.includes(",");
 
-  const getStaticOptions = (options: string | { label: string; value: string; }[]) => {
+  const getStaticOptions = (options: { label: string; value: string; }[] | string) => {
     if (typeof options === "string") {
       const lines = options.split("\n");
       return lines.map((item) => {
@@ -133,7 +135,7 @@ export function SelectInputField(
               false,
             );
         } else {
-          let data: Id[] | Id;
+          let data: Id | Id[];
           if (isRemove && getComponent() === "SelectBox") {
             data = [];
           } else if (getComponent() === "SelectBox") {
@@ -177,7 +179,6 @@ export function SelectInputField(
   return (
     <div>
       <Show
-        when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data as Vertex, graph)}>
             {(vertexId) => (
@@ -194,11 +195,18 @@ export function SelectInputField(
             )}
           </For>
         }
+        when={!props.disabled}
       >
         <MultiSelectField
-          selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
+          disable={props.disabled}
           displayValueChild={!isCommaSeparated() ? "displayName" : undefined}
           displayValueParent={!isCommaSeparated() ? "P" : undefined}
+          isLoadingOptions={loading()}
+          loadOptions={loadOptions}
+          onRemove={(e) => onChangeSelect(e, true)}
+          onSelect={(e) => onChangeSelect(e, false)}
+          options={options()}
+          placeholder={`${props.title}`}
           selectedValues={() => {
             if (!props.meta.P.options && !props.meta.P.saveValue) {
               return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
@@ -215,13 +223,7 @@ export function SelectInputField(
             }
           }
           }
-          disable={props.disabled}
-          options={options()}
-          onRemove={(e) => onChangeSelect(e, true)}
-          onSelect={(e) => onChangeSelect(e, false)}
-          placeholder={`${props.title}`}
-          loadOptions={loadOptions}
-          isLoadingOptions={loading()}
+          selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
         />
       </Show>
       {/* Todo: think about validations */}

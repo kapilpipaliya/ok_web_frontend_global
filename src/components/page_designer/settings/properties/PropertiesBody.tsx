@@ -1,13 +1,15 @@
-import { createSignal, Show, useContext } from "solid-js";
+import { Show, createSignal, useContext } from "solid-js";
+
+import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { CollAndData } from "./CollAndData";
-import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
-import { FormGroupProperties } from "./FormGroupProperties";
+
 import { useDesignerLayoutStore } from "../../LayoutContext";
+import { CollAndData } from "./CollAndData";
+import { FormGroupProperties } from "./FormGroupProperties";
 import { ImportModal } from "./import/ImportModal";
-import { RulesModalBody } from "./rules/RulesModalBody";
 import { RenderModal } from "./rules/RenderModal";
+import { RulesModalBody } from "./rules/RulesModalBody";
 
 export function PropertiesBody() {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
@@ -49,10 +51,10 @@ export function PropertiesBody() {
         </div>
         <CollAndData />
         <FormGroupProperties
-          txnId={layoutStore.formData.txnId}
           metaAttributes={selectedComponentProperties().vertexes ?? []}
-          setValue={setPropertyValue}
           selectedLayout={graph.vertexes[layoutStore.selectedId]}
+          setValue={setPropertyValue}
+          txnId={layoutStore.formData.txnId}
         />
       </Show>
       <RenderModal isOpen={isRulesModalOpen()} toggle={toggleRulesModal}>

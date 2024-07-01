@@ -4,18 +4,19 @@ import {
   Switch,
   createSignal,
 } from "solid-js";
+
 import { ComponentList } from "./ComponentList";
 import { PagesList } from "./PagesList";
 
 export function FormElementTabs() {
   const leftMenuTabs = [
-    { title: "Components", collection: "Comp" },
-    { title: "Pages", collection: "Page" },
-    { title: "Templates", collection: "TemplatePage" },
-    { title: "Forms", collection: "Form" },
-    { title: "Thank You", collection: "ThankYouPage" },
-    { title: "Error Pages", collection: "ErrorPages" },
-    { title: "Email Template", collection: "EmailTemplate" }
+    { collection: "Comp", title: "Components" },
+    { collection: "Page", title: "Pages" },
+    { collection: "TemplatePage", title: "Templates" },
+    { collection: "Form", title: "Forms" },
+    { collection: "ThankYouPage", title: "Thank You" },
+    { collection: "ErrorPages", title: "Error Pages" },
+    { collection: "EmailTemplate", title: "Email Template" }
   ]
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
@@ -27,11 +28,11 @@ export function FormElementTabs() {
             {(data) => (
               <li class="me-2 cursor:pointer">
                 <button
-                  type="button"
-                  onClick={() => setSelectedTab(data)}
                   class={`${selectedTab() === data
                     ? "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)"
                     : "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover"} display:inline-block p:10px border-bottom-width:2.5px border-color:transparent rounded-t-lg`}
+                  onClick={() => setSelectedTab(data)}
+                  type="button"
                 >
                   {data.title}
                 </button>
@@ -50,14 +51,14 @@ export function FormElementTabs() {
           <Match when={selectedTab().collection === "Comp"}>
             <ComponentList />
           </Match>
-          <Match when={[
+          <Match keyed when={[
             "Page",
             "TemplatePage",
             "Form",
             "ThankYouPage",
             "ErrorPage",
             "EmailTemplate"
-          ].find((v)=> v ===selectedTab().collection)} keyed>
+          ].find((v)=> v ===selectedTab().collection)}>
             <PagesList coll={selectedTab().collection} />
           </Match>
         </Switch>

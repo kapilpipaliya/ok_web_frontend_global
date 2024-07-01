@@ -64,8 +64,8 @@ ModalProps {
             <>
               <button
                 aria-disabled={open()}
-                style={{ margin: "auto" }}
                 onclick={toggle}
+                style={{ margin: "auto" }}
               >
                 Press to open
               </button>
@@ -73,9 +73,9 @@ ModalProps {
                 <ModalHeader>
                   Header
                   <button
-                    variant="icon"
                     onclick={toggle}
                     style={{ float: "right" }}
+                    variant="icon"
                   >
                     ✕
                   </button>

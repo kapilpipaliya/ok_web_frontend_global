@@ -1,7 +1,8 @@
-import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
+
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import {getChildVertex, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 
 export function getComponentForCollRow(
   metaVertex: Vertex,

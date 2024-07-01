@@ -1,16 +1,18 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import {
   type GraphInterface, IdAttr,
   type Vertex
 } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { getSelectionOptions } from "../../get/sync/traverse";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import {
-  isObject,
-  getLabel,
-  getId
-} from "~/lib/utils";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  getId,
+  getLabel,
+  isObject
+} from "~/lib/utils";
+
+import { getSelectionOptions } from "../../get/sync/traverse";
 
 // Select On Change Handler
 export function onChangeHandler(

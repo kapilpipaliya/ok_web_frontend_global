@@ -8,10 +8,10 @@ import { useToast } from "../../components/Toast";
 export async function getAPI(url: string): Promise<{ [key: string]: any }> {
   const { showErrorToast } = useToast();
   const response = await fetch(url, {
-    method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
+    method: "GET",
   });
 
   const contentType = response.headers.get("content-type");

@@ -1,7 +1,10 @@
-import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
-import type {NestedExpression} from "./NestedExpression";
+
 import type {ServerResult} from "~/cypher/get/ServerResult";
+
+import {evalAsync} from "~/lib/expression_eval";
+
+import type {NestedExpression} from "./NestedExpression";
 
 export async function getDataMGCall(
   expression: NestedExpression,
@@ -28,10 +31,10 @@ export async function getDataMGCall(
   }
 
   return {
-    result: mainResult,
     graph: {
-      vertexes: context.nodes,
       edges: context.relationships,
+      vertexes: context.nodes,
     },
+    result: mainResult,
   };
 }

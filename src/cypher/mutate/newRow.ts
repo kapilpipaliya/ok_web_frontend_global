@@ -1,12 +1,14 @@
-import { getDriver } from "~/cypher/driver";
+import { int } from "neo4j-driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/getSubDomain";
+
+import type { Id } from "~/lib/graph/graph";
+
+import { getDriver } from "~/cypher/driver";
 import {
   convertNodeToJson,
   convertRelationshipToJson,
 } from "~/lib/convertNodeToJson";
-import { int } from "neo4j-driver";
-import type { Id } from "~/lib/graph/graph";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function newRowMGCall(
   parentVertexId: Id,
@@ -58,9 +60,9 @@ export async function newRowMGCall(
     await transaction.commit();
 
     return {
+      edge: newEdge,
       error: false,
       vertex: newVertex,
-      edge: newEdge,
     };
   } catch (error) {
     console.error(error);

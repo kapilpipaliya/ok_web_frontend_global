@@ -1,118 +1,120 @@
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
-import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { useContext } from "solid-js";
-import { GraphContext } from "~/lib/graph/graph";
+
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import type { IFormContext } from "~/lib/contexts";
+
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
+import { GraphContext } from "~/lib/graph/graph";
 
 const collectionAttr = [
   {
-    name: "displayName",
     component: "TextBox",
+    name: "displayName",
     
       onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
 
   },
   {
-    name: "name",
-    displayName: "ID",
     component: "TextBox",
+    displayName: "ID",
+    name: "name",
     
   },
   {
-    name: "definition",
     component: "TextArea",
+    name: "definition",
   },
   {
-    name: "dataType",
+    collection: "g:'DataType'",
     component: "SelectBox",
     
-      collection: "g:'DataType'",
+      name: "dataType",
     
   },
   {
-    name: "Comp",
+    collection: "->$0DataType->$0Comp",
     component: "SelectBox",
     
-      collection: "->$0DataType->$0Comp",
+      name: "Comp",
       // smaller version:
       // collection: "g:'Comp'",
     
   },
   {
-    name: "coll",
+    collection: "g:'Coll'",
     component: "SelectBox",
     
-      collection: "g:'Coll'",
+      name: "coll",
     
   },
   {
+    component: "CheckBox",
     name: "required",
-    component: "CheckBox",
   },
   {
+    component: "CheckBox",
     name: "disabled",
-    component: "CheckBox",
   },
   {
-    name: "Prop",
-    displayName: "Properties",
-    component: "DynamicTable",
     attributes: [
       {
-        name: "name",
+        collection: "<-$0->$0Comp->$0Prop",
         component: "SelectBox",
         
           displayExpr: "::'P.name'",
-          collection: "<-$0->$0Comp->$0Prop",
+          name: "name",
         
       },
       {
-        name: "value",
-        meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
           "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+        meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+        name: "value",
       },
     ],
+    component: "DynamicTable",
+    displayName: "Properties",
+    name: "Prop",
   },
   {
-    name: "Role",
-    displayName: "Permissions",
-    component: "DynamicTable",
     attributes: [
       {
-        name: "role",
+        collection: "g:'Role'",
         component: "SelectBox",
         
-          collection: "g:'Role'",
+          name: "role",
         
       },
       {
-        name: "Perm",
-        component: "DynamicTable",
         attributes: [
           {
-            name: "perm",
+            collection: "g:'Perm'",
             component: "TagBox",
             
-              collection: "g:'Perm'",
+              name: "perm",
             
           },
           {
-            name: "scope",
             component: "TextBox",
+            name: "scope",
           },
         ],
+        component: "DynamicTable",
+        name: "Perm",
       },
     ],
+    component: "DynamicTable",
+    displayName: "Permissions",
+    name: "Role",
   },
   {
-    name: "Attr",
     component: "DynamicTable",
-    tab: "expand",
+    label: "Attr",
+    name: "Attr",
     
+      tab: "expand",
       type: "Attr",
-      label: "Attr",
     
   },
 ] as FieldAttribute[];
@@ -125,28 +127,28 @@ for (let i = 0; i < 5; i++) {
 
 const pageAttr = [
   {
-    name: "coll",
-    displayName: "Collection",
+    collection: "g:'Coll'",
     component: "SelectBox",
+    displayName: "Collection",
     
-      collection: "g:'Coll'",
+      name: "coll",
       parentLabel: "Coll",
     
   },
   {
-    name: "Att",
-    displayName: "Attribute",
+    collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
     component: "SelectBox",
-    
-      // displayExpr: "P.displayName||P.name",
+    // displayExpr: "P.displayName||P.name",
       displayExpr: "$P.displayName ($P.name)",
-      collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
+    
+      displayName: "Attribute",
+      name: "Att",
     
   },
   {
-    name: "name",
-    displayName: "ID",
     component: "TextBox",
+    displayName: "ID",
+    name: "name",
   },
   // {
   //   name: "definition",
@@ -161,75 +163,75 @@ const pageAttr = [
   //     focusRefresh: true
   // },
   {
-    name: "data",
+    collection: `g:'{{->$0Coll::'P.name'}}'`,
     component: "SelectBox",
     
-      collection: `g:'{{->$0Coll::'P.name'}}'`,
+      name: "data",
   
   },
   {
-    name: "Comp",
+    collection: "g:'Comp'",
     component: "SelectBox",
     
-      collection: "g:'Comp'",
+      name: "Comp",
       // smaller version:
       // collection: "g:'Comp'",
     
   },
   {
-    name: "Prop",
-    displayName: "Property",
-    component: "DynamicTable",
     attributes: [
       {
-        name: "name",
+        collection: "<-$0->$0Comp->$0Prop",
         component: "SelectBox",
         
           displayExpr: "::'P.name'",
-          collection: "<-$0->$0Comp->$0Prop",
+          name: "name",
         
       },
       {
-        name: "value",
-        meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
           "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+        meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+        name: "value",
       },
     ],
+    component: "DynamicTable",
+    displayName: "Property",
+    name: "Prop",
   },
   {
-    name: "Role",
-    component: "DynamicTable",
     attributes: [
       {
-        name: "role",
+        collection: "g:'Role'",
         component: "SelectBox",
         
-          collection: "g:'Role'",
+          name: "role",
         
       },
       {
-        name: "Perm",
-        component: "DynamicTable",
         attributes: [
           {
-            name: "perm",
+            collection: "g:'Perm'",
             component: "SelectBox",
             
-              collection: "g:'Perm'",
+              name: "perm",
             
           },
         ],
+        component: "DynamicTable",
+        name: "Perm",
       },
     ],
+    component: "DynamicTable",
+    name: "Role",
   },
   {
-    name: "Attr",
     component: "DynamicTable",
-    tab: "expand",
+    label: "Attr",
+    name: "Attr",
     
+      tab: "expand",
       type: "Attr",
-      label: "Attr",
     
   },
 ] as FieldAttribute[];
@@ -249,234 +251,29 @@ export const AdminAttrKeys = [
   "Nav",
 ];
 export const FormMetaData: { [key: string]: IFormMetaData } = {
-  DataType: {
-    title: "DataType",
-    name: "DataType",
-    isInlineEditable: true,
-    attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "label", component: "TextBox" },
-      {
-        name: "default",
-        displayName: "Default Component",
-        component: "SelectBox",
-    
-          collection: "g:'Comp'",
-     
-      },
-    ],
-  },
-  CompCategory: {
-    title: "Component Category",
-    name: "CompCategory",
-    isInlineEditable: true,
-    attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "label", component: "TextBox" },
-      { name: "description", component: "TextArea" },
-    ],
-  },
-  Comp: {
-    title: "Component",
-    name: "Comp",
-    isInlineEditable: false,
-    attributes: [
-      {
-        name: "category",
-        component: "SelectBox",
-       
-          collection: "g:'CompCategory'",
-          parentLabel: "CompCategory",
-          inward: true,
-     
-      },
-      { name: "name", component: "TextBox" },
-      { name: "label", component: "TextBox" },
-      {
-        name: "parent",
-        displayName: "Parent Component",
-        component: "SelectBox",
-       
-          collection: "g:'Comp'",
-          inward: true,
-          parentLabel: "Comp",
-          childLabel: "Child",
-        
-      },
-      {
-        name: "dataType",
-        displayName: "DataType",
-        component: "TagBox",
-    
-          collection: "g:'DataType'",
-          inward: true,
-          parentLabel: "DataType",
-      
-      },
-      {
-        name: "child",
-        displayName: "Children",
-        component: "CheckBox",
-      },
-      {
-        name: "required",
-        displayName: "Required",
-        component: "CheckBox",
-      },
-      { name: "description", component: "TextArea" },
-      // TODO: add validation, duplicate row with same name is not allowed.
-      {
-        name: "Prop",
-        component: "DynamicTable",
-        tab: "Properties",
-        attributes: [
-          {
-            name: "name",
-            component: "TextBox",
-          },
-          {
-            name: "label",
-            component: "TextBox",
-          },
-          {
-            name: "required",
-            component: "CheckBox",
-          },
-          {
-            name: "dataType",
-            component: "SelectBox",
-            
-              collection: "g:'DataType'",
-              onchange: '["Comp",null]',
-            
-          },
-          {
-            name: "Comp",
-            displayName: "Component",
-            component: "SelectBox",
-            
-              collection: "->$0DataType->$0Comp",
-            
-          },
-          {
-            // TODO: Be sure the name is ok, it will not change in production.
-            name: "valueProp",
-            displayName: "Value Property",
-            component: "DynamicTable",
-            tab: "Properties",
-            attributes: [
-              {
-                name: "name",
-                component: "SelectBox",
-                  displayExpr: "::'P.name'",
-                  collection: "<-$0->$0Comp->$0Prop",
-              },
-              {
-                name: "value",
-                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-              },
-            ],
-          },
-          {
-            name: "value",
-            meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
-            component:
-              "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
-            // component: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
-          },
-          {
-            name: "description",
-            component: "TextArea",
-            
-              // autoResizeEnabled: true,
-              width: "550px",
-            
-          },
-          {
-            name: "reset",
-            component: "Button",
-            
-              children: "Reset",
-              class: "border-color:#FF0000 color:#FF0000",
-              variant: "outlined",
-              // TODO:
-              // function: "reset",
-              // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
-            
-          },
-        ],
-      },
-      {
-        name: "Event",
-        component: "DynamicTable",
-        tab: "Events",
-        attributes: [
-          {
-            name: "name",
-            component: "TextBox",
-          },
-          {
-            name: "label",
-            component: "TextBox",
-          },
-          {
-            name: "description",
-            component: "TextArea",
-            
-              // autoResizeEnabled: true,
-              width: "550px",
-            
-          },
-        ],
-      },
-    ],
-  },
-  CollCategory: {
-    title: "Collection Category",
-    name: "CollCategory",
-    isInlineEditable: true,
-    attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "label", component: "TextBox" },
-      { name: "description", component: "TextArea" },
-    ],
-  },
-  FormCategory: {
-    title: "Form Category",
-    name: "FormCategory",
-    isInlineEditable: true,
-    attributes: [
-      { name: "name", component: "TextBox" },
-      { name: "label", component: "TextBox" },
-      { name: "description", component: "TextArea" },
-    ],
-  },
   // TODO: Coll has only one Attr. Add validation for that.
   Coll: {
-    title: "Collection",
-    name: "Coll",
     attributes: [
       {
-        name: "title",
         component: "TextBox",
+        name: "title",
         
           onchange: '{"new": ["name","id"]}',
         
       },
       {
-        name: "name",
         component: "TextBox",
+        name: "name",
   
           validationRules: [
             {
-              type: "required",
               message: "ID is required",
+              type: "required",
             },
             {
-              type: "custom",
               ignoreEmptyValue: true,
               message: "This ID is already taken",
+              type: "custom",
               validationCallback: (options: any) => {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
@@ -506,45 +303,45 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
         
       },
       {
-        name: "category",
+        collection: "g:'CollCategory'",
         component: "SelectBox",
     
-          collection: "g:'CollCategory'",
-          parentLabel: "CollCategory",
           inward: true,
+          name: "category",
+          parentLabel: "CollCategory",
         
       },
       {
-        name: "dashboard",
+        collection: "g:'Dashboard'",
         component: "TagBox",
       
-          collection: "g:'Dashboard'",
-          parentLabel: "Dashboard",
           inward: true,
+          name: "dashboard",
+          parentLabel: "Dashboard",
     
       },
-      { name: "description", component: "TextArea" },
-      { name: "public", component: "CheckBox" },
-      { name: "isInlineEditable", component: "CheckBox" },
+      { component: "TextArea", name: "description" },
+      { component: "CheckBox", name: "public" },
+      { component: "CheckBox", name: "isInlineEditable" },
       // { name: "supportCustomFields", component: "CheckBox" },
       // { name: "searchOnly", component: "CheckBox" },
       // { name: "supportDeletedRecordSearch", component: "CheckBox" },
       {
-        name: "pk",
+        collection: "->Attr",
+        component: "TagBox",
         displayName: "Primary Key",
-        component: "TagBox",
       
-          collection: "->Attr",
+          name: "pk",
           // TODO: add validation
           // If there is not name attribute,
           // then this field is required.
         
       },
       {
-        name: "nameKey",
+        collection: "->Attr",
         component: "TagBox",
       
-          collection: "->Attr",
+          name: "nameKey",
           // TODO: add validation
           // If there is not name attribute,
           // then this field is required.
@@ -552,120 +349,120 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
 
       {
-        name: "Attr",
-        component: "DynamicTable",
-        tab: "Attribute",
-   
-          type: "Attr",
-          label: "Attr",
-        
         attributes: collectionAttr,
+        component: "DynamicTable",
+        label: "Attr",
+   
+          name: "Attr",
+          tab: "Attribute",
+        
+        type: "Attr",
       },
       {
-        name: "Rules",
-        component: "DynamicTable",
-        tab: "Rules",
-
-          type: "Rules",
-          label: "Rules",
-      
         attributes: [
           {
-            name: "name",
             component: "TextBox",
+            name: "name",
   
           },
           {
-            name: "label",
             component: "TextBox",
+            name: "label",
           },
           {
-            name: "Rule",
-            component: "DynamicTable",
-            tab: "Rule",
-
-              type: "Rule",
-              label: "Rule",
-   
             attributes: [
               {
-                name: "cond",
-                displayName: "Conditions",
-                component: "DynamicTable",
                 attributes: [
                   {
-                    name: "left",
-                    displayName: "Paren",
                     component: "SelectBox",
-                    
-                      items: `(
+                    displayName: "Paren",
+                    items: `(
 ((
 (((`,
+                    
+                      name: "left",
                   
                   },
                   {
-                    name: "layout",
-                    displayName: "Layout",
                     component: "DropDownBoxTreeView",
+                    displayName: "Layout",
+                    name: "layout",
                    
                       // collection: "g:'DataType'",
                  
                   },
                   {
-                    name: "field",
-                    displayName: "Field",
                     component: "SelectBox",
+                    displayName: "Field",
+                    name: "field",
                     
                       // collection: "g:'DataType'",
                  
                   },
                   {
-                    name: "operator",
-                    displayName: "Operator",
                     component: "SelectBox",
-                  
-                      items: `<
+                    displayName: "Operator",
+                    items: `<
 <=
 >=`,
+                  
+                      name: "operator",
                     
                   },
                   {
-                    name: "right",
-                    displayName: "Paren",
                     component: "SelectBox",
-                    
-                      items: `)
+                    displayName: "Paren",
+                    items: `)
 ))
 )))`,
+                    
+                      name: "right",
                    
                   },
                 ],
+                component: "DynamicTable",
+                displayName: "Conditions",
+                name: "cond",
               },
               {
-                name: "dataType",
+                collection: "g:'DataType'",
+                component: "SelectBox",
                 displayName: "DataType",
-                component: "SelectBox",
                 
-                  collection: "g:'DataType'",
+                  name: "dataType",
                 
               },
               {
-                name: "comp",
+                collection: "->$0DataType->$0Comp||Comp",
+                component: "SelectBox",
                 displayName: "Component",
-                component: "SelectBox",
                 
-                  collection: "->$0DataType->$0Comp||Comp",
+                  name: "comp",
                 
               },
               {
-                name: "value",
+                component: `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
                 displayName: "Value",
                 meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
-                component: `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
+                name: "value",
               },
             ],
+            component: "DynamicTable",
+            label: "Rule",
+
+              name: "Rule",
+              tab: "Rule",
+   
+            type: "Rule",
           },
         ],
+        component: "DynamicTable",
+        label: "Rules",
+
+          name: "Rules",
+          tab: "Rules",
+      
+        type: "Rules",
       },
 
       /*      {
@@ -731,140 +528,330 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                     ],
                   },*/
       {
-        name: "Transform",
-        component: "DynamicTable",
-        tab: "Transform",
         attributes: [
           {
-            name: "coll",
+            collection: "g:'Coll'",
             component: "SelectBox",
             
-              collection: "g:'Coll'",
+              name: "coll",
             
           },
           {
+            component: "TextBox",
             name: "displayName",
-            component: "TextBox",
           },
           {
+            component: "TextBox",
             name: "fieldDefaults",
-            component: "TextBox",
           },
           {
-            name: "Prop",
-            displayName: "Property",
-            component: "DynamicTable",
             attributes: [
               {
-                name: "name",
+                collection: "g:'Comp[Table]'->$0Prop",
                 component: "SelectBox",
                 
                   displayExpr: "::'P.name'",
-                  collection: "g:'Comp[Table]'->$0Prop",
+                  name: "name",
                 
               },
               {
-                name: "value",
-                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
                 component:
                   "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+                name: "value",
               },
             ],
+            component: "DynamicTable",
+            displayName: "Property",
+            name: "Prop",
           },
         ],
+        component: "DynamicTable",
+        name: "Transform",
+        tab: "Transform",
       },
       {
-        name: "Role",
-        component: "DynamicTable",
-        tab: "Permission",
         attributes: [
           {
-            name: "role",
+            collection: "g:'Role'",
             component: "SelectBox",
             
-              collection: "g:'Role'",
+              name: "role",
             
           },
           {
-            name: "perm",
+            collection: "g:'Perm'",
             component: "TagBox",
             
-              collection: "g:'Perm'",
+              name: "perm",
             
           },
           {
-            name: "scope",
             component: "TextBox",
+            name: "scope",
           },
         ],
+        component: "DynamicTable",
+        name: "Role",
+        tab: "Permission",
       },
       {
-        name: "uniqueConstrain",
-        component: "DynamicTable",
-        tab: "Unique Constrain",
         attributes: [
           {
-            name: "pk",
-            displayName: "Unique Constrain Keys",
+            collection: "<-$0->Attr",
             component: "TagBox",
+            displayName: "Unique Constrain Keys",
             
-              collection: "<-$0->Attr",
+              name: "pk",
             
           },
         ],
+        component: "DynamicTable",
+        name: "uniqueConstrain",
+        tab: "Unique Constrain",
       },
     ],
+    name: "Coll",
+    title: "Collection",
   },
-  SignUp: {
-    title: "User",
-    name: "User",
-    isRealTime: true,
+  CollCategory: {
     attributes: [
-      { name: "email", component: "TextBox" },
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "label" },
+      { component: "TextArea", name: "description" },
+    ],
+    isInlineEditable: true,
+    name: "CollCategory",
+    title: "Collection Category",
+  },
+  Comp: {
+    attributes: [
       {
-        name: "pass",
-        component: "TextBox",
-         mode: "password",
+        collection: "g:'CompCategory'",
+        component: "SelectBox",
+       
+          inward: true,
+          name: "category",
+          parentLabel: "CompCategory",
+     
+      },
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "label" },
+      {
+        childLabel: "Child",
+        collection: "g:'Comp'",
+        component: "SelectBox",
+       
+          displayName: "Parent Component",
+          inward: true,
+          name: "parent",
+          parentLabel: "Comp",
+        
+      },
+      {
+        collection: "g:'DataType'",
+        component: "TagBox",
+        displayName: "DataType",
+    
+          inward: true,
+          name: "dataType",
+          parentLabel: "DataType",
+      
+      },
+      {
+        component: "CheckBox",
+        displayName: "Children",
+        name: "child",
+      },
+      {
+        component: "CheckBox",
+        displayName: "Required",
+        name: "required",
+      },
+      { component: "TextArea", name: "description" },
+      // TODO: add validation, duplicate row with same name is not allowed.
+      {
+        attributes: [
+          {
+            component: "TextBox",
+            name: "name",
+          },
+          {
+            component: "TextBox",
+            name: "label",
+          },
+          {
+            component: "CheckBox",
+            name: "required",
+          },
+          {
+            collection: "g:'DataType'",
+            component: "SelectBox",
+            
+              name: "dataType",
+              onchange: '["Comp",null]',
+            
+          },
+          {
+            collection: "->$0DataType->$0Comp",
+            component: "SelectBox",
+            displayName: "Component",
+            
+              name: "Comp",
+            
+          },
+          {
+            attributes: [
+              {
+                collection: "<-$0->$0Comp->$0Prop",
+                component: "SelectBox",
+                  displayExpr: "::'P.name'",
+                  name: "name",
+              },
+              {
+                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
+                name: "value",
+              },
+            ],
+            component: "DynamicTable",
+            displayName: "Value Property",
+            // TODO: Be sure the name is ok, it will not change in production.
+            name: "valueProp",
+            tab: "Properties",
+          },
+          {
+            component:
+              "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
+            meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
+            name: "value",
+            // component: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
+          },
+          {
+            component: "TextArea",
+            name: "description",
+            
+              // autoResizeEnabled: true,
+              width: "550px",
+            
+          },
+          {
+            children: "Reset",
+            class: "border-color:#FF0000 color:#FF0000",
+            
+              component: "Button",
+              name: "reset",
+              variant: "outlined",
+              // TODO:
+              // function: "reset",
+              // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
+            
+          },
+        ],
+        component: "DynamicTable",
+        name: "Prop",
+        tab: "Properties",
+      },
+      {
+        attributes: [
+          {
+            component: "TextBox",
+            name: "name",
+          },
+          {
+            component: "TextBox",
+            name: "label",
+          },
+          {
+            component: "TextArea",
+            name: "description",
+            
+              // autoResizeEnabled: true,
+              width: "550px",
+            
+          },
+        ],
+        component: "DynamicTable",
+        name: "Event",
+        tab: "Events",
       },
     ],
+    isInlineEditable: false,
+    name: "Comp",
+    title: "Component",
+  },
+  CompCategory: {
+    attributes: [
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "label" },
+      { component: "TextArea", name: "description" },
+    ],
+    isInlineEditable: true,
+    name: "CompCategory",
+    title: "Component Category",
+  },
+  DataType: {
+    attributes: [
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "label" },
+      {
+        collection: "g:'Comp'",
+        component: "SelectBox",
+        displayName: "Default Component",
+    
+          name: "default",
+     
+      },
+    ],
+    isInlineEditable: true,
+    name: "DataType",
+    title: "DataType",
+  },
+  FormCategory: {
+    attributes: [
+      { component: "TextBox", name: "name" },
+      { component: "TextBox", name: "label" },
+      { component: "TextArea", name: "description" },
+    ],
+    isInlineEditable: true,
+    name: "FormCategory",
+    title: "Form Category",
   },
   LogIn: {
-    title: "User",
-    name: "User",
-    isRealTime: true,
     attributes: [
-      { name: "email", component: "TextBox" },
+      { component: "TextBox", name: "email" },
       {
-        name: "pass",
         component: "TextBox",
-         mode: "password",
+        mode: "password",
+         name: "pass",
       },
     ],
+    isRealTime: true,
+    name: "User",
+    title: "User",
   },
   Page: {
-    title: "Page",
-    name: "Page",
     attributes: [
       {
-        name: "title",
         component: "TextBox",
+        name: "title",
         
           onchange: '{"new": ["name","id"]}',
       
       },
       {
-        name: "name",
         component: "TextBox",
+        name: "name",
         
           validationRules: [
             {
-              type: "required",
               message: "ID is required",
+              type: "required",
             },
             {
-              type: "custom",
               ignoreEmptyValue: true,
               message: "This ID is already taken",
+              type: "custom",
               validationCallback: (options: any) => {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
@@ -883,98 +870,113 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           ],
         
       },
-      { name: "description", component: "TextArea" },
+      { component: "TextArea", name: "description" },
       {
-        name: "dashboard",
+        collection: "g:'Dashboard'",
         component: "TagBox",
         
-          collection: "g:'Dashboard'",
-          parentLabel: "Dashboard",
           inward: true,
+          name: "dashboard",
+          parentLabel: "Dashboard",
         
       },
-      { name: "public", component: "CheckBox" },
-      { name: "isRealTime", component: "CheckBox" },
+      { component: "CheckBox", name: "public" },
+      { component: "CheckBox", name: "isRealTime" },
       {
-        name: "coll",
-        displayName: "Collection",
+        collection: "g:'Coll'",
         component: "SelectBox",
+        displayName: "Collection",
         
-          collection: "g:'Coll'",
+          name: "coll",
           // inward: true,
           parentLabel: "Coll",
         
       },
       {
-        name: "data",
+        collection: `g:'{{->$0Coll::'P.name'}}'`,
         component: "SelectBox",
         
-          collection: `g:'{{->$0Coll::'P.name'}}'`,
+          name: "data",
       
       },
       {
-        name: "Attr",
-        component: "DynamicTable",
-        tab: "Attribute",
-        
-          type: "Attr",
-          label: "Attr",
-        
         attributes: pageAttr,
+        component: "DynamicTable",
+        label: "Attr",
+        
+          name: "Attr",
+          tab: "Attribute",
+        
+        type: "Attr",
       },
       {
-        name: "Role",
-        component: "DynamicTable",
-        tab: "Permission",
         attributes: [
           {
-            name: "role",
+            collection: "g:'Role'",
             component: "SelectBox",
             
-              collection: "g:'Role'",
+              name: "role",
             
           },
           {
-            name: "Perm",
-            component: "DynamicTable",
             attributes: [
               {
-                name: "perm",
+                collection: "g:'Perm'",
                 component: "SelectBox",
                 
-                  collection: "g:'Perm'",
+                  name: "perm",
                
               },
             ],
+            component: "DynamicTable",
+            name: "Perm",
           },
         ],
+        component: "DynamicTable",
+        name: "Role",
+        tab: "Permission",
       },
     ],
+    name: "Page",
+    title: "Page",
+  },
+  SignUp: {
+    attributes: [
+      { component: "TextBox", name: "email" },
+      {
+        component: "TextBox",
+        mode: "password",
+         name: "pass",
+      },
+    ],
+    isRealTime: true,
+    name: "User",
+    title: "User",
   },
 };
 FormMetaData.Form = {
-  title: "Form",
-  name: "Form",
   attributes: [...FormMetaData.Page.attributes, {
-    name: "form",
-    component: "SelectBox",
     collection: "g:'Form'",
-    parentLabel: "FormCategory",
+    component: "SelectBox",
     inward: true,
+    name: "form",
+    parentLabel: "FormCategory",
   }],
+  name: "Form",
+  title: "Form",
 };
 FormMetaData.ThankYouPage = {
-  title: "Thank You Page",
-  name: "ThankYouPage",
   attributes: [...FormMetaData.Page.attributes],
+  name: "ThankYouPage",
+  title: "Thank You Page",
 };
 FormMetaData.ErrorPage = {
-  title: "Error Page",
-  name: "ErrorPage",
   attributes: [...FormMetaData.Page.attributes],
+  name: "ErrorPage",
+  title: "Error Page",
 };
 FormMetaData.TemplatePage = {
-  title: "Templates",
-  name: "TemplatePage",
   attributes: [...FormMetaData.Page.attributes],
+  name: "TemplatePage",
+  title: "Templates",
 };

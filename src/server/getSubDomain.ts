@@ -1,4 +1,5 @@
 import { getRequestURL } from "vinxi/http";
+
 import { getHttpsSession } from "./getHttpsSession";
 
 export async function getSubDomain(host: string, isAuthCheck = true) {

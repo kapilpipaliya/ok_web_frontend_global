@@ -1,4 +1,5 @@
 import { recursive } from "merge";
+
 import { isObject } from "~/lib/utils";
 
 export interface CSSStore {
@@ -49,7 +50,7 @@ export function cssStateToString(cssState: CSSStore) {
     .join("\n");
 }
 
-export function mergeCSS(input1: string | CSSStore, input2: string | CSSStore ) {
+export function mergeCSS(input1: CSSStore | string, input2: CSSStore | string ) {
   const css1 = typeof input1 === 'string' ? parseAndApplyCssRules(input1) : input1;
   const css2 = typeof input2 === 'string' ? parseAndApplyCssRules(input2) : input2;
 

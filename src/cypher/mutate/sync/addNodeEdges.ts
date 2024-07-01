@@ -1,10 +1,13 @@
 // Function to add edges between nodes based on certain conditions.
 import type {Session} from "neo4j-driver";
+
 import {int} from "neo4j-driver";
+
 import type {Vertex} from "~/lib/graph/graph";
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
+
 import {findOrCreateNodeAndUpdateProperties} from "~/cypher/mutate/sync/findOrCreateNodeAndUpdateProperties";
 import {getChildrenOrParentVertex} from "~/cypher/mutate/sync/getChildrenOrParentVertex";
+import {convertNodeToJson} from "~/lib/convertNodeToJson";
 
 export async function addNodeEdges(
   sessionSource: Session,
@@ -55,8 +58,8 @@ export async function addNodeEdges(
          CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b) RETURN b;`;
         props = {
           parentNodeId: int(parentVertex.id),
-          targetNodeId: int(targetNode.id),
           props: superProperties,
+          targetNodeId: int(targetNode.id),
         }
       } else {
         query = `MATCH (a) WHERE id(a) = $parentNodeId

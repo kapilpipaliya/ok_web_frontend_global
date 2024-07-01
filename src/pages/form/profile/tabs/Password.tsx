@@ -1,25 +1,26 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext } from "solid-js";
 import { createStore } from "solid-js/store";
-import { resetPasswordCall } from "~/lib/api/api_functions";
+
 import { useToast } from "~/components/Toast";
+import { resetPasswordCall } from "~/lib/api/api_functions";
 import { GraphContext } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validations";
 
 export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
+  const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const [passwordData, setPasswordData] = createStore<{ [key: string]: any }>({
-    currentUser: "",
-    currentPassword: "",
-    newPassword: "",
     confirmPassword: "",
+    currentPassword: "",
+    currentUser: "",
+    newPassword: "",
   });
   const [showPassword, setShowPassword] = createStore({
+    confirmPassword: false,
     currentPassword: false,
     newPassword: false,
-    confirmPassword: false,
   });
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -33,7 +34,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
   };
 
   const onClickSave = async () => {
-    const { currentPassword, newPassword, confirmPassword } = passwordData;
+    const { confirmPassword, currentPassword, newPassword } = passwordData;
     if (!currentPassword.trim()) {
       showErrorToast("Please enter current password");
       return false;
@@ -66,21 +67,21 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
       return false;
     }
     await showLoadingToast({
-      promise: resetPasswordCall(passwordData, props.profileData),
       loadMessage: "Updating Password...",
-      successMessage: "Password reset successfully",
       onSuccess: (value) => {
         setPasswordData({
+          confirmPassword: "",
           currentPassword: "",
           newPassword: "",
-          confirmPassword: "",
         });
         setShowPassword({
+          confirmPassword: false,
           currentPassword: false,
           newPassword: false,
-          confirmPassword: false,
         });
       },
+      promise: resetPasswordCall(passwordData, props.profileData),
+      successMessage: "Password reset successfully",
     });
   };
 
@@ -100,8 +101,8 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
 
           <input
             name={"username"}
-            readOnly
             placeholder={"username"}
+            readOnly
             type={"text"}
             value={props.profileData.username}
           />
@@ -115,40 +116,40 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
 
           <input
             name={"currentPassword"}
-            type={`${showPassword.currentPassword ? "text" : "password"}`}
-            placeholder={"Enter Current Password"}
-            value={passwordData.currentPassword}
             onChange={handleInputChange}
+            placeholder={"Enter Current Password"}
+            type={`${showPassword.currentPassword ? "text" : "password"}`}
+            value={passwordData.currentPassword}
           />
           <Icon
-            onClick={() => togglePasswordVisibility("currentPassword")}
-            class="abs top:50px top:25px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
+            class="abs top:50px top:25px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             icon={`${
               showPassword.currentPassword
                 ? "iconamoon:eye-light"
                 : "iconamoon:eye-off"
             }`}
+            onClick={() => togglePasswordVisibility("currentPassword")}
           />
         </div>
         <div class={"flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"}>
           <span class={"font-weight:600"}>New Password</span>
           <input
             name={"newPassword"}
-            type={`${showPassword.newPassword ? "text" : "password"}`}
-            placeholder={"Enter New Password"}
-            value={passwordData.newPassword}
             onChange={handleInputChange}
+            placeholder={"Enter New Password"}
+            type={`${showPassword.newPassword ? "text" : "password"}`}
+            value={passwordData.newPassword}
           />
           <Icon
-            onClick={() => togglePasswordVisibility("newPassword")}
-            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
+            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             icon={`${
               showPassword.newPassword
                 ? "iconamoon:eye-light"
                 : "iconamoon:eye-off"
             }`}
+            onClick={() => togglePasswordVisibility("newPassword")}
           />
         </div>
         <div
@@ -159,20 +160,20 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
           <span class={"font-weight:600"}>Confirm Password</span>
           <input
             name={"confirmPassword"}
-            type={`${showPassword.confirmPassword ? "text" : "password"}`}
-            placeholder={"Enter Confirm Password"}
-            value={passwordData.confirmPassword}
             onChange={handleInputChange}
+            placeholder={"Enter Confirm Password"}
+            type={`${showPassword.confirmPassword ? "text" : "password"}`}
+            value={passwordData.confirmPassword}
           />
           <Icon
-            onClick={() => togglePasswordVisibility("confirmPassword")}
-            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
+            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             icon={`${
               showPassword.confirmPassword
                 ? "iconamoon:eye-light"
                 : "iconamoon:eye-off"
             }`}
+            onClick={() => togglePasswordVisibility("confirmPassword")}
           />
         </div>
       </div>

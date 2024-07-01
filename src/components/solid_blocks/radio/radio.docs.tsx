@@ -31,10 +31,10 @@ RadioGroupProps {
   value?: () => string;
 }`}
       </pre>
-      <button variant="secondary" onClick={() => setValue("1")}>
+      <button onClick={() => setValue("1")} variant="secondary">
         Activate first
       </button>
-      <button variant="secondary" onClick={() => setValue("2")}>
+      <button onClick={() => setValue("2")} variant="secondary">
         Activate second
       </button>
       <pre data-title="setValue-calls" style={{ "max-height": "9em" }}>
@@ -43,19 +43,19 @@ RadioGroupProps {
       <div class="example">
         <RadioGroup
           class="flex-row"
-          value={value}
           setValue={(value) => {
             setEvents((e) => `setValue("${value}")\n${e}`);
             setValue(value);
           }}
+          value={value}
         >
           <Radio value="1"> First</Radio>
           <Radio value="2"> Second</Radio>
-          <Radio value="3" disabled>
+          <Radio disabled value="3">
             {" "}
             Third
           </Radio>
-          <Radio value="4" aria-invalid="true">
+          <Radio aria-invalid="true" value="4">
             {" "}
             Fourth
           </Radio>

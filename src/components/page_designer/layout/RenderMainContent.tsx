@@ -1,23 +1,24 @@
 import { type Setter, Show } from "solid-js";
+
 import { Drawer } from "~/components/Drawer";
-import { SettingsWrapper } from "../settings/SettingsWrapper";
-import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { ResizableContainer } from "~/components/ResizableDivView";
 import { PageView } from "~/components/page_attr_render/PageView";
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+
+import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
+import { SettingsWrapper } from "../settings/SettingsWrapper";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <div style={{
+    <div class={`grid gap:4px`} style={{
       'grid-template-columns': (!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
         ? 'repeat(1, 1fr)'
         : (layoutStore.isLeftOpen && layoutStore.isRightOpen)
           ? 'repeat(3, 22% 53% 25%)'
           : `repeat(2, ${!layoutStore.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
-    }} class={`grid gap:4px`}>
+    }}>
       <Show
-        when={!layoutStore.isSmallScreen}
         fallback={<Drawer
           customButton={() => false}
           drawerStyle={'padding: 10px'}
@@ -27,6 +28,7 @@ export function RenderMainContent() {
         >
           <FormElementsWrapper />
         </Drawer>}
+        when={!layoutStore.isSmallScreen}
       >
         <div class={`${!layoutStore.isLeftOpen ? 'd:none' : ''}`}>
           <Show when={layoutStore.isLeftOpen}>
@@ -36,11 +38,10 @@ export function RenderMainContent() {
       </Show>
       <Show when={layoutStore.formData}>
         <ResizableContainer view={layoutStore.view}>
-          <PageView metaVertex={layoutStore.formData?.formData} isPreview={false} />
+          <PageView isPreview={false} metaVertex={layoutStore.formData?.formData} />
         </ResizableContainer>
       </Show>
       <Show
-        when={!layoutStore.isSmallScreen}
         fallback={<Drawer
           customButton={() => false}
           drawerStyle={'padding: 10px'}
@@ -50,6 +51,7 @@ export function RenderMainContent() {
         >
           <SettingsWrapper />
         </Drawer>}
+        when={!layoutStore.isSmallScreen}
       >
         <div class={`${!layoutStore.isRightOpen ? "hidden" : "contents"}`}>
           <SettingsWrapper />

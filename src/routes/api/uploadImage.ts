@@ -1,7 +1,9 @@
-import fs from "node:fs";
 import type { APIEvent } from "@solidjs/start/dist/server";
+
+import fs from "node:fs";
 import path from "node:path";
-import { getQuery, type HTTPEvent, readMultipartFormData } from "vinxi/http";
+import { type HTTPEvent, getQuery, readMultipartFormData } from "vinxi/http";
+
 import { getSubDomain } from "~/server/getSubDomain";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {

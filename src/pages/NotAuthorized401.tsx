@@ -15,14 +15,14 @@ export function NotAuthorized401() {
         </p>
         <div class="mt:2.5rem flex align-items:center  justify-content:center  gap-x:1.5rem">
           <a
-            href="/auth/login"
             class="border-radius:0.375rem  bg:rgb(79,70,229)  px:0.875rem py:0.625rem f:0.875rem lh:1.25rem font-weight:600  color:rgb(255,255,255)  box-shadow:0|1px|2px|0|rgba(0,0,0,0.05)  bg:rgb(99,102,241):hover outline-style:solid:focus-visible outline-width:2px:focus-visible outline-offset:2px:focus-visible outline-color:rgb(23,17,123);:focus-visible"
+            href="/auth/login"
           >
             Go To Login
           </a>
           <a
-            href="/contact-us"
             class="f:0.875rem lh:1.25rem font-weight:600  color:rgb(17,24,39) "
+            href="/contact-us"
           >
             Contact support <span aria-hidden="true">&rarr;</span>
           </a>

@@ -1,21 +1,21 @@
 export function validatePassword(password: any) {
   const conditions = [
     {
-      regex: /.{8,}/,
       message: "Passwords must be at least 8 characters long.",
+      regex: /.{8,}/,
     },
     {
-      regex: /[A-Z]/,
       message: "Password must include at least one uppercase letter.",
+      regex: /[A-Z]/,
     },
     {
-      regex: /[a-z]/,
       message: "Password must include at least one lowercase letter.",
+      regex: /[a-z]/,
     },
-    { regex: /[0-9]/, message: "Password must include at least one number." },
+    { message: "Password must include at least one number.", regex: /[0-9]/ },
     {
-      regex: /[!@#$%^&*(),.?":{}|<>]/,
       message: "Password must include at least one special character.",
+      regex: /[!@#$%^&*(),.?":{}|<>]/,
     },
   ];
 

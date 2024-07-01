@@ -1,20 +1,21 @@
-import { useNavigate } from "@solidjs/router";
 import { Icon } from "@iconify-icon/solid";
+import { useNavigate } from "@solidjs/router";
+
 import logos from "~/assets/graphics/logo.png";
-import "~/pages/website/style.css";
 import "~/pages/website/krd.css";
+import "~/pages/website/style.css";
 
 export function Header() {
   const navigate = useNavigate();
   return (
     <header class="header flex jc:space-around ai:center flex-direction:row">
       <div class="logo">
-        <a href="/public" aria-label="EasyFormForge Home">
-          <img class="headerLogo" src={logos} alt="EasyFormForge Logo" />
+        <a aria-label="EasyFormForge Home" href="/public">
+          <img alt="EasyFormForge Logo" class="headerLogo" src={logos} />
         </a>
       </div>
 
-      <nav class="links" aria-label="Main Navigation">
+      <nav aria-label="Main Navigation" class="links">
         <ul>
           <li>
             <a class="bodycopytext-16" href="/public">
@@ -35,15 +36,15 @@ export function Header() {
       </nav>
       <div class="flex">
         <button
-          class="btn-small-icon-filled flex ai:center"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate("/auth/login")}
           aria-label="Get Started"
+          class="btn-small-icon-filled flex ai:center"
+          onClick={() => navigate("/auth/login")}
+          style={{ cursor: "pointer" }}
         >
           Get Started{" "}
           <Icon
-            icon={"fa-solid:chevron-right"}
             class="fa-solid fa-chevron-right ml:10"
+            icon={"fa-solid:chevron-right"}
           />
         </button>
       </div>

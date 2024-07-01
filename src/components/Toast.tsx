@@ -1,49 +1,49 @@
+import { Icon } from "@iconify-icon/solid";
 import {
   type Component,
+  Show,
   createEffect,
   createSignal,
   onCleanup,
-  Show,
 } from "solid-js";
 import { type Renderable, toast } from "solid-toast";
-import { Icon } from "@iconify-icon/solid";
 
 const DismissButton: Component<{
   onDismiss: () => void;
 }> = (props) => {
   return (
     <button
+      onClick={props.onDismiss}
       style={{
-        "background-color": "rgba(229, 231, 235, 0.8)", // bg-gray-200/80
-        display: "flex", // flex
-        "justify-content": "center", // justify-center
         "align-items": "center", // items-center
-        width: "1.5rem", // w-6
+        "background-color": "rgba(229, 231, 235, 0.8)", // bg-gray-200/80
+        "border-radius": "9999px", // rounded-full
+        display: "flex", // flex
         height: "1.5rem", // h-6
+        "justify-content": "center", // justify-center
         position: "absolute", // absolute
         right: "0.625rem", // right-2.5
         top: "50%", // top-1/2
         transform: "translateY(-50%)", // -translate-y-1/2
-        "border-radius": "9999px", // rounded-full
+        width: "1.5rem", // w-6
       }}
-      onClick={props.onDismiss}
     >
       &times;
     </button>
   );
 };
 
-type ValueOrFunction<T, Args> = T | ((args: Args) => T);
+type ValueOrFunction<T, Args> = ((args: Args) => T) | T;
 
 interface LoadingToastParams<T extends { [key: string]: any }> {
-  promise: Promise<T>;
-  loadMessage?: string;
-  successMessage?: string;
-  errorMessage?: string;
-  successJSXFn?: ValueOrFunction<Renderable, T>;
   errorJSXFn?: ValueOrFunction<Renderable, any>;
-  onSuccess?: (value: T) => void;
+  errorMessage?: string;
+  loadMessage?: string;
   onError?: (error: any) => void;
+  onSuccess?: (value: T) => void;
+  promise: Promise<T>;
+  successJSXFn?: ValueOrFunction<Renderable, T>;
+  successMessage?: string;
 }
 
 export function useToast() {
@@ -52,12 +52,12 @@ export function useToast() {
       (t) => (
         <div
           style={{
-            padding: "0.75rem 3rem 0.75rem 1.5rem", // px-6 py-3 pr-12
             "background-color": "white", // bg-white
             "border-radius": "10px", // rounded-full
             "box-shadow":
               "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // shadow-md
             "font-weight": "500", // font-medium
+            padding: "0.75rem 3rem 0.75rem 1.5rem", // px-6 py-3 pr-12
             position: "relative", // relative
           }}
         >
@@ -85,16 +85,24 @@ export function useToast() {
   }
 
   async function showLoadingToast<T extends { [key: string]: any }>({
-    promise,
-    loadMessage = "Processing...",
-    successMessage,
-    errorMessage,
-    successJSXFn,
     errorJSXFn,
-    onSuccess,
+    errorMessage,
+    loadMessage = "Processing...",
     onError,
+    onSuccess,
+    promise,
+    successJSXFn,
+    successMessage,
   }: LoadingToastParams<T>) {
     await toast.promise(promise, {
+      error: (e: any) => {
+        onError?.(e);
+        return (
+          <span>
+            {errorMessage ?? e.message ?? "Oops! Something went wrong"}
+          </span>
+        );
+      },
       loading: loadMessage,
       success:
         successJSXFn ??
@@ -106,14 +114,6 @@ export function useToast() {
             </span>
           );
         }),
-      error: (e: any) => {
-        onError?.(e);
-        return (
-          <span>
-            {errorMessage ?? e.message ?? "Oops! Something went wrong"}
-          </span>
-        );
-      },
     });
   }
 
@@ -125,10 +125,10 @@ export function useToast() {
     toast.error(message, {
       icon: (
         <Icon
-          icon={"mingcute:warning-line"}
           height={27}
-          width={27}
+          icon={"mingcute:warning-line"}
           style={{ color: "#009cfa" }}
+          width={27}
         />
       ),
     });
@@ -160,24 +160,24 @@ export function useToast() {
               </div>
               <div class="flex items-center">
                 <button
-                  style="padding: 14px; height: 80%; letter-spacing: 0.025em; font-weight: 500; border-radius: 6px; font-size: 13px; color: white; background-color: #0e7490;"
-                  // @ts-ignore
-                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.7)'"
-                 // @ts-ignore
-                  onMouseOut="this.style.backgroundColor='#0e7490'"
                   onClick={() => toast.dismiss(t.id)}
+                  // @ts-ignore
+                  onMouseOut="this.style.backgroundColor='#0e7490'"
+                 // @ts-ignore
+                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.7)'"
+                  style="padding: 14px; height: 80%; letter-spacing: 0.025em; font-weight: 500; border-radius: 6px; font-size: 13px; color: white; background-color: #0e7490;"
                 >
                   CANCEL
                 </button>
               </div>
               <div class="flex items-center">
                 <button
-                  style="padding: 10px; display: flex; align-items: center; position: relative; height: 80%; letter-spacing: 0.025em; border-radius: 6px; font-size: 24px; color: white; background-color: rgba(14, 116, 144, 0.4);"
-                  // @ts-ignore
-                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.2)'"
+                  onClick={() => toast.dismiss(t.id)}
                   // @ts-ignore
                   onMouseOut="this.style.backgroundColor='rgba(14, 116, 144, 0.4)'"
-                  onClick={() => toast.dismiss(t.id)}
+                  // @ts-ignore
+                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.2)'"
+                  style="padding: 10px; display: flex; align-items: center; position: relative; height: 80%; letter-spacing: 0.025em; border-radius: 6px; font-size: 24px; color: white; background-color: rgba(14, 116, 144, 0.4);"
                 >
                   x
                 </button>
@@ -200,10 +200,10 @@ export function useToast() {
 
   return {
     showCustomToast,
-    showLoadingToast,
     showErrorToast,
+    showLoadingToast,
     showSuccessToast,
-    showWarningToast,
     showTimerToast,
+    showWarningToast,
   };
 }

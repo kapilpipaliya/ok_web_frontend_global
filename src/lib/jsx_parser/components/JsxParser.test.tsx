@@ -1,8 +1,8 @@
 // @ts-nocheck
-/* eslint-disable function-paren-newline, no-console, no-underscore-dangle */
+ 
+import { mount, shallow } from "enzyme";
 import React from "react";
-import TestUtils from "react-dom/test-utils";
-import { mount, shallow } from "enzyme"; // eslint-disable-line import/no-extraneous-dependencies
+import TestUtils from "react-dom/test-utils"; // eslint-disable-line import/no-extraneous-dependencies
 import JsxParser from "./JsxParser";
 
 jest.unmock("acorn-jsx");
@@ -264,8 +264,8 @@ describe("JsxParser Component", () => {
       };
       const { component, rendered } = render(
         <JsxParser
-          components={{ Custom }}
           bindings={{ first, second }}
+          components={{ Custom }}
           jsx="<Custom {...first} {...second.innerProps} {...{ text: 'Will Not Spread' }} />"
         />,
       );
@@ -407,7 +407,7 @@ describe("JsxParser Component", () => {
 
       const { rendered } = render(
         <JsxParser
-          components={{ CustomContent, CuStomContent }}
+          components={{ CuStomContent, CustomContent }}
           jsx="<CustomContent /><CuStomContent />"
         />,
       );
@@ -515,7 +515,7 @@ describe("JsxParser Component", () => {
     });
     test("renders errors with renderError prop, if supplied", () => {
       const onError = jest.fn();
-      // eslint-disable-next-line
+       
       const renderError = ({ error }) => <div className="error">{error}</div>;
       const { rendered } = render(
         <JsxParser {...{ onError, renderError }} jsx="<h2>No closing tag " />,
@@ -617,8 +617,8 @@ describe("JsxParser Component", () => {
     test("strips custom blacklisted tags and attributes", () => {
       const { component, rendered } = render(
         <JsxParser
-          blacklistedTags={["Foo"]}
           blacklistedAttrs={["foo", "prefixed[a-z]*"]}
+          blacklistedTags={["Foo"]}
           jsx={
             '<div foo="bar" prefixedFoo="foo" prefixedBar="bar">first</div>' +
             "<Foo>second</Foo>"
@@ -801,8 +801,8 @@ describe("JsxParser Component", () => {
 
       expect(component.ParsedChildren).toHaveLength(1);
       expect(component.ParsedChildren[0].props.obj).toEqual({
-        foo: "bar",
         bar: "foo",
+        foo: "bar",
       });
     });
     test("parses style attributes", () => {
@@ -824,8 +824,8 @@ describe("JsxParser Component", () => {
       const { component } = render(
         <JsxParser
           bindings={{
-            foo: "Foo",
             bar: "Bar",
+            foo: "Foo",
             logFn,
             nested: {
               objects: {
@@ -847,8 +847,8 @@ describe("JsxParser Component", () => {
 
       expect(component.ParsedChildren).toHaveLength(5);
       expect(component.ParsedChildren[0].props).toEqual({
-        foo: "Foo",
         bar: "Bar",
+        foo: "Foo",
       });
       expect(component.ParsedChildren[1].props).toEqual({ foo: "Foo" });
       expect(component.ParsedChildren[2].props.onClick).toEqual(logFn);
@@ -870,8 +870,8 @@ describe("JsxParser Component", () => {
       const { component } = render(
         <JsxParser
           bindings={{
-            foo: "Foo",
             bar: "Bar",
+            foo: "Foo",
             logFn,
             nested: {
               objects: {
@@ -906,13 +906,13 @@ describe("JsxParser Component", () => {
       const { component } = render(
         <JsxParser
           bindings={{
-            foo: "Foo",
             bar: "Bar",
+            foo: "Foo",
             logFn,
             nested: {
               objects: {
-                work: false,
                 noWork: () => true,
+                work: false,
               },
             },
           }}
@@ -1007,49 +1007,49 @@ describe("JsxParser Component", () => {
       expect(component.ParsedChildren[0].props.testProp).toEqual(true);
     });
     test("can execute unary plus operations", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx="<span testProp={+60}>{ +75 }</span>" />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("75");
       expect(component.ParsedChildren[0].props.testProp).toEqual(60);
     });
     test("can execute unary negation operations", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx="<span testProp={-60}>{ -75 }</span>" />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("-75");
       expect(component.ParsedChildren[0].props.testProp).toEqual(-60);
     });
     test("can execute unary NOT operations", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx={'<span testProp={!60}>{ !false && "Yes" }</span>'} />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("Yes");
       expect(component.ParsedChildren[0].props.testProp).toEqual(false);
     });
     test("can evaluate > operator", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx={'<span testProp={1 > 2}>{1 > 2 || "Nope"}</span>'} />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("Nope");
       expect(component.ParsedChildren[0].props.testProp).toEqual(false);
     });
     test("can evaluate >= operator", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx={'<span testProp={1 >= 2}>{1 >= 2 || "Nope"}</span>'} />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("Nope");
       expect(component.ParsedChildren[0].props.testProp).toEqual(false);
     });
     test("can evaluate < operator", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx={'<span testProp={1 < 2}>{2 < 1 || "Nope"}</span>'} />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("Nope");
       expect(component.ParsedChildren[0].props.testProp).toEqual(true);
     });
     test("can evaluate <= operator", () => {
-      const { rendered, component } = render(
+      const { component, rendered } = render(
         <JsxParser jsx={'<span testProp={1 <= 2}>{2 <= 1 || "Nope"}</span>'} />,
       );
       expect(rendered.childNodes[0].textContent).toEqual("Nope");
@@ -1064,7 +1064,7 @@ describe("JsxParser Component", () => {
       expect(wrapper.html()).toMatchSnapshot();
     });
     describe("can evaluate multi-level property accessors", () => {
-      /* eslint-disable dot-notation,no-useless-concat */
+       
       const bindings = {
         array: [{ of: "objects" }],
         index: 0,
@@ -1074,7 +1074,7 @@ describe("JsxParser Component", () => {
       test("can evaluate a.b.c", () => {
         const expression = "object.with.child";
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1088,7 +1088,7 @@ describe("JsxParser Component", () => {
       test('can evaluate a["b"].c', () => {
         const expression = 'object["with"].child';
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1102,7 +1102,7 @@ describe("JsxParser Component", () => {
       test('can evaluate a["b" + 1].c', () => {
         const expression = 'object["wi" + "th"].child';
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1116,7 +1116,7 @@ describe("JsxParser Component", () => {
       test("can evaluate a[0].b", () => {
         const expression = "array[0].of";
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1130,7 +1130,7 @@ describe("JsxParser Component", () => {
       test("can evaluate a[1 - 1].b", () => {
         const expression = "array[1 - 1].of";
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1144,7 +1144,7 @@ describe("JsxParser Component", () => {
       test("can evaluate a[b].c", () => {
         const expression = "array[index].of";
         const jsx = `<span foo={${expression}}>{${expression}}</span>`;
-        const { rendered, component } = render(
+        const { component, rendered } = render(
           <JsxParser {...{ bindings, jsx }} />,
         );
 
@@ -1155,15 +1155,15 @@ describe("JsxParser Component", () => {
           bindings.array[bindings.index].of,
         );
       });
-      /* eslint-enable dot-notation,no-useless-concat */
+       
     });
   });
   describe("template strings", () => {
     test("correctly parse/bind bindings", () => {
       const { rendered } = render(
         <JsxParser
-          bindings={{ foo: 2, bar: 3 }}
-          // eslint-disable-next-line no-template-curly-in-string
+          bindings={{ bar: 3, foo: 2 }}
+           
           jsx="<span>{`foo: ${foo}, bar: ${bar}, baz: ${foo * bar}`}</span>"
         />,
       );
@@ -1275,7 +1275,7 @@ describe("JsxParser Component", () => {
   describe("void elements", () => {
     test("void-element named custom components to take children", () => {
       // eslint-disable-next-line react/prop-types
-      const link = ({ to, children }) => <a href={to}>{children}</a>;
+      const link = ({ children, to }) => <a href={to}>{children}</a>;
       const { rendered } = render(
         <JsxParser components={{ link }} jsx={'<link to="/url">Text</link>'} />,
       );
@@ -1287,8 +1287,8 @@ describe("JsxParser Component", () => {
     test("by default, renders self-closing tags without their children", () => {
       const { rendered } = render(
         <JsxParser
-          showWarnings
           jsx='<img src="/foo.png"><div class="invalidChild"></div></img>'
+          showWarnings
         />,
       );
 
@@ -1440,13 +1440,13 @@ describe("JsxParser Component", () => {
       const { component, rendered } = render(
         <JsxParser
           components={{ Custom }}
+          disableKeyGeneration
           jsx={
             '<Custom className="parent" text="parent">' +
             '<Custom className="child-1" text="child-1" key="child-1" />' +
             '<Custom className="child-2" text="child-2" />' +
             "</Custom>"
           }
-          disableKeyGeneration
         />,
       );
 
@@ -1486,8 +1486,8 @@ describe("JsxParser Component", () => {
       // for acorn AST
       const { html } = render(
         <JsxParser
-          components={{ Custom }}
           bindings={{ items: [1, 2] }}
+          components={{ Custom }}
           jsx="{items.map(item => <Custom><p>{item}</p></Custom>)}"
         />,
       );
@@ -1499,8 +1499,8 @@ describe("JsxParser Component", () => {
     it("supports JSX expressions inside arrow functions", () => {
       const { html } = render(
         <JsxParser
-          components={{ Custom }}
           bindings={{ items: [{ name: "Megeara", title: "Fury" }] }}
+          components={{ Custom }}
           jsx="{items.map(item => <Custom text={item.title}><p>{item.name}</p></Custom>)}"
         />,
       );
@@ -1513,17 +1513,17 @@ describe("JsxParser Component", () => {
       const PropTest = (props: { booleanAttribute: boolean }) => (
         <>{`val:${props.booleanAttribute}`}</>
       );
-      const { html, component } = render(
+      const { component, html } = render(
         <JsxParser
-          renderInWrapper={false}
-          components={{ PropTest }}
           bindings={{
             items: [
-              { name: "Megeara", friend: true },
-              { name: "Austerious", friend: false },
+              { friend: true, name: "Megeara" },
+              { friend: false, name: "Austerious" },
             ],
           }}
+          components={{ PropTest }}
           jsx="{items.map(item => <p><PropTest booleanAttribute={item.friend} /></p>)}"
+          renderInWrapper={false}
         />,
       );
       expect(html).toEqual("<p>val:true</p><p>val:false</p>");
@@ -1540,10 +1540,10 @@ describe("JsxParser Component", () => {
       const PropTest = (props: any) => <>{JSON.stringify(props)}</>;
       const { html } = render(
         <JsxParser
-          renderInWrapper={false}
+          bindings={{ items: [{ friend: true, name: "Megeara" }] }}
           components={{ PropTest }}
-          bindings={{ items: [{ name: "Megeara", friend: true }] }}
           jsx="{items.map(item => <PropTest {...item} />)}"
+          renderInWrapper={false}
         />,
       );
       expect(html).toEqual('{"name":"Megeara","friend":true}');
@@ -1554,9 +1554,9 @@ describe("JsxParser Component", () => {
       const RenderPropContainer = (props: any) => props.children(fakeData);
       const { html } = render(
         <JsxParser
-          renderInWrapper={false}
           components={{ PropTest: RenderPropContainer }}
           jsx="{<PropTest>{(data) => <p>{data.name}</p>}</PropTest>}"
+          renderInWrapper={false}
         />,
       );
       expect(html).toEqual("<p>from-container</p>");

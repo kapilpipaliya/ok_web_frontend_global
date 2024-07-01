@@ -1,23 +1,24 @@
-import "~/css/modal.css";
-import Dismiss from "solid-dismiss";
-import { createSignal, type JSX, type Setter, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import Dismiss from "solid-dismiss";
+import { type JSX, type Setter, Show, createSignal } from "solid-js";
+
+import "~/css/modal.css";
 
 interface CustomModalProps {
-  buttonLabel?: JSX.Element;
-  buttonIcon?: string;
-  title?: string | JSX.Element;
-  customTitle?: JSX.Element;
   body: JSX.Element;
-  footer: (setOpen: Setter<boolean>) => JSX.Element;
-  dialogClass: string;
   bodyStyle?: JSX.CSSProperties;
-  openButton?: boolean;
+  buttonIcon?: string;
+  buttonLabel?: JSX.Element;
   closeButton?: boolean;
-  iconSize?: number;
+  customTitle?: JSX.Element;
+  dialogClass: string;
+  footer: (setOpen: Setter<boolean>) => JSX.Element;
   iconClass?: string;
+  iconSize?: number;
   open?: boolean;
+  openButton?: boolean;
   setOpen?: (open: boolean) => void;
+  title?: JSX.Element | string;
 }
 
 export function CustomModal(props: CustomModalProps) {
@@ -36,50 +37,50 @@ export function CustomModal(props: CustomModalProps) {
   return (
     <>
       <Show
-        when={props.openButton !== false}
         fallback={
           <div
+            aria-disabled={open()}
             class={`cursor:pointer bg:#dfe9f3d1:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`}
             ref={btnEl!}
-            aria-disabled={open()}
           >
             {props.buttonLabel}
           </div>
         }
+        when={props.openButton !== false}
       >
         <Icon
-          ref={btnEl!}
-          height={props.iconSize ?? 25}
-          width={props.iconSize ?? 25}
-          color={"grey"}
           aria-disabled={open()}
           class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`}
-          onClick={() => setOpen(true)}
+          color={"grey"}
+          height={props.iconSize ?? 25}
           icon={props.buttonIcon ?? "material-symbols:error"}
+          onClick={() => setOpen(true)}
+          ref={btnEl!}
+          width={props.iconSize ?? 25}
         />
       </Show>
-      <Dismiss menuButton={btnEl!} open={open} setOpen={setOpen} modal>
+      <Dismiss menuButton={btnEl!} modal open={open} setOpen={setOpen}>
         <div
           class="modal-container"
           onClick={onClickOverlay}
           role="presentation"
         >
           <div
+            aria-modal="true"
             class={`modal r:10 ${props.dialogClass}`}
             role="dialog"
-            aria-modal="true"
             tabindex="-1"
           >
             <div class={"mb:4 font-weight:bold"}>
-              <Show when={!props.customTitle} fallback={props.customTitle}>
+              <Show fallback={props.customTitle} when={!props.customTitle}>
                 {props.title}
               </Show>
               {props.closeButton !== false && (
                 <button
-                  title={"Close"}
-                  onClick={onClickOverlay}
                   class={"bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5"}
+                  onClick={onClickOverlay}
                   style={{float: "right"}}
+                  title={"Close"}
                 >
                   ✕
                 </button>

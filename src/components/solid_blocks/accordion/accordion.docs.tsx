@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
-import { Accordion, AccordionGroup, AccordionHeader } from "./accordion";
+
 import { Checkbox } from "../checkbox/checkbox";
+import { Accordion, AccordionGroup, AccordionHeader } from "./accordion";
 
 export function AccordionDocs() {
   const [exampleOpen, setExampleOpen] = createSignal(false);

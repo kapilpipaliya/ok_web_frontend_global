@@ -1,6 +1,8 @@
-import { getChildVertexes } from "./traverse";
 import type { Store } from "solid-js/store";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { getChildVertexes } from "./traverse";
 
 
 export function getNameKeyForCollection(

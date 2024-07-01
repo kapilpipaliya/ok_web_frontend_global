@@ -1,7 +1,8 @@
-import { getDriver } from "~/cypher/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getSubDomain } from "~/server/getSubDomain";
+
+import { getDriver } from "~/cypher/driver";
 import { mutateData } from "~/cypher/mutate/mutate_api/mutateData";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function POST({ request }: APIEvent) {
   const data = await request.json();

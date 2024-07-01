@@ -27,11 +27,11 @@ export function atom<T>(value: T, equals = Object.is): Atom<T> {
 }
 
 export function fileDownloader(opt: {
-  data: string | ArrayBuffer | ArrayBufferView | Blob;
-  filename: string;
-  title: string;
-  mime?: string;
   bom?: string;
+  data: ArrayBuffer | ArrayBufferView | Blob | string;
+  filename: string;
+  mime?: string;
+  title: string;
 }) {
   const throwError = (name: string) => {
     throw new Error(`No ${name} provided to generate-download-link.`);

@@ -16,10 +16,10 @@ export async function handleReplaceEdge(replaceEdge: any, tx: any, clientToServe
 
   try {
     const result = await tx.run(query, {
-      id: int(id),
-      startId: int(startId),
       endId: int(endId),
+      id: int(id),
       properties: replaceEdge.P,
+      startId: int(startId),
     });
     if (result.records.length > 0) {
       const oldId = replaceEdge.id;

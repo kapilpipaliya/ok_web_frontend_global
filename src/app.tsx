@@ -1,41 +1,44 @@
+import type { Config } from "@master/css";
+
+import { ReactiveMap } from "@solid-primitives/map";
 import { MetaProvider } from "@solidjs/meta";
 import { Router, } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense } from "solid-js";
+import { Show, Suspense, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { Toaster } from "solid-toast";
+
 import { LoadingContext } from "~/lib/contexts";
+import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
+
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
-import type { Config } from "@master/css";
-import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
-import { createStore } from "solid-js/store";
-import { ReactiveMap } from "@solid-primitives/map";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const config: Config = {
-    styles: {},
-    rules: {},
-    variables: {},
     animations: {},
-    selectors: {},
     functions: {},
+    rules: {},
+    selectors: {},
+    styles: {},
+    variables: {},
   };
 
   const loadingSite = createSignal(false);
 
   const graph = createStore<GraphInterface>({
-    vertexes: {} as VertexMap,
+    componentIdMap: {},
     edges: {} as EdgeMap,
-    vertexLabelIdMap: {} as { [key: string]: Id[] },
-    member: {},
-    navigationData: [],
-    txnId: 0,
     isSideBarOpen: true,
     isSubSideBarOpen: true,
-    componentIdMap: {},
+    member: {},
+    navigationData: [],
     transactions: new ReactiveMap(),
+    txnId: 0,
+    vertexLabelIdMap: {} as { [key: string]: Id[] },
+    vertexes: {} as VertexMap,
   });
 
   return (
@@ -60,18 +63,18 @@ export default function App() {
                     </Suspense>
                   </div>
 
-                  <Show when={loadingSite[0]()} fallback={<Toaster />}>
+                  <Show fallback={<Toaster />} when={loadingSite[0]()}>
                     <div
                       style={{
-                        position: "fixed",
-                        top: "0",
-                        left: "0",
-                        width: "100%",
-                        height: "100%",
+                        "align-items": "center",
                         background: "rgba(0, 0, 0, 0.5)",
                         display: "flex",
+                        height: "100%",
                         "justify-content": "center",
-                        "align-items": "center",
+                        left: "0",
+                        position: "fixed",
+                        top: "0",
+                        width: "100%",
                         "z-index": "9999",
                       }}
                     >

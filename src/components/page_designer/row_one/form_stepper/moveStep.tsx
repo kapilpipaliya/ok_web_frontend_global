@@ -1,7 +1,10 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import type { PageLayoutObject } from "../../LayoutContext";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { sortChildren } from "~/lib/drag_drop/sortChildren";
+
+import type { PageLayoutObject } from "../../LayoutContext";
 
 export function moveStep(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, steps: Vertex[], fromIndex: number, toIndex: number) {
   const fromVertex = steps[fromIndex];

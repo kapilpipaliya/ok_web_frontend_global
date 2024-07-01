@@ -1,7 +1,9 @@
-import type {TransactionPromise} from "neo4j-driver-core";
-import {v4 as uuidv4} from "uuid";
-import {getDriverWithPort} from "~/cypher/driver";
 import type {Node} from "neo4j-driver";
+import type {TransactionPromise} from "neo4j-driver-core";
+
+import {v4 as uuidv4} from "uuid";
+
+import {getDriverWithPort} from "~/cypher/driver";
 
 export async function createUserInDB(
   tx: TransactionPromise,
@@ -29,14 +31,14 @@ export async function createUserInDB(
             profileImage: ''
         }) SET u.createdAt = localDateTime() RETURN u;`;
   const createUserResult = await tx.run(createUserQuery, {
-    username,
-    uId,
+    driverPort,
     email,
+    labPort,
+    logsPort,
     password: subdomainFromUrl === "super" ? null : password,
     subdomain,
-    driverPort,
-    logsPort,
-    labPort,
+    uId,
+    username,
   });
 
   if (subdomainFromUrl === "super") {
@@ -54,14 +56,14 @@ export async function createUserInDB(
                 profileImage: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
     await session2.run(createUserQuery2, {
-      username,
-      uId,
+      driverPort,
       email,
+      labPort,
+      logsPort,
       password,
       subdomain,
-      driverPort,
-      logsPort,
-      labPort,
+      uId,
+      username,
     });
     session2.close();
   }

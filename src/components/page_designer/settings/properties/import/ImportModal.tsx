@@ -1,10 +1,12 @@
 import { onCleanup, useContext } from "solid-js";
 import { Portal } from "solid-js/web";
+
+import { GenericInputField } from "~/components/fields/GenericInputField";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
-import { GenericInputField } from "~/components/fields/GenericInputField";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
+
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function ImportModal(props: { toggleModal: () => void; }) {
@@ -18,9 +20,9 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   const dataVertexId = getNewGraphId();
 
   setGraph("vertexes", metaVertexId, {
-    P: { name: "jsx", width: 700, height: 700 },
+    P: { height: 700, name: "jsx", width: 700 },
   });
-  setGraph("vertexes", dataVertexId, { id: dataVertexId, P: {} });
+  setGraph("vertexes", dataVertexId, { P: {}, id: dataVertexId });
 
   onCleanup(() => {
     // @ts-ignore
@@ -32,10 +34,10 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   const onImport = () => {
     const jsxParser = new JsxParser({
       formData: layoutStore.formData.formData,
-      showWarnings: true,
-      txnId: layoutStore.formData.txnId,
       jsx: graph.vertexes[dataVertexId].P.jsx || "",
       parent: graph.vertexes[layoutStore.selectedId],
+      showWarnings: true,
+      txnId: layoutStore.formData.txnId,
     });
     jsxParser.render(graph, setGraph);
     // reset layout
@@ -51,7 +53,7 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   return (
     <>
       <Portal>
-        <div role="dialog" tabIndex={-1} class="sb-modal r:10|10|10|10">
+        <div class="sb-modal r:10|10|10|10" role="dialog" tabIndex={-1}>
           <ModalContent class={"min-w:30%"}>
             <ModalHeader>
               Import HTML
@@ -64,20 +66,20 @@ export function ImportModal(props: { toggleModal: () => void; }) {
             </ModalHeader>
             <ModalBody class={"mt:1rem"}>
               <GenericInputField
-                txnId={layoutStore.formData.txnId}
-                title={"Write HTML"}
                 component="TextArea"
-                meta={graph.vertexes[metaVertexId]}
                 data={graph.vertexes[dataVertexId]}
+                disabled={false}
+                meta={graph.vertexes[metaVertexId]}
                 setValue={(data: any) => setGraph("vertexes", dataVertexId, "P", { jsx: data })}
-                disabled={false} />
+                title={"Write HTML"}
+                txnId={layoutStore.formData.txnId} />
             </ModalBody>
             <ModalFooter>
               <div
                 style={{
+                  "align-items": "center",
                   display: "flex",
                   "justify-content": "center",
-                  "align-items": "center",
                 }}
               >
                 <button

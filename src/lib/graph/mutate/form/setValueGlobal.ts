@@ -1,13 +1,16 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { batch } from "solid-js";
+
+import { validateInput } from "~/components/page_designer/settings/validateInput";
 import {
   type GraphInterface, IdAttr,
   type Vertex
 } from "~/lib/graph/graph";
-import { commitTxn, getNewTxnId } from "../../transaction";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { commitTxn, getNewTxnId } from "../../transaction";
 import { onChangeHandler } from "./onChangeHandler";
-import { validateInput } from "~/components/page_designer/settings/validateInput";
-import { batch } from "solid-js";
 
 
 export function setValueGlobal(

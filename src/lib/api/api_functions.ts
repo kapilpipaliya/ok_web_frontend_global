@@ -1,8 +1,10 @@
-import { postAPI } from "~/lib/api/postApi";
-import { API } from "~/lib/api/endpoints";
-import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
-import type { GraphInterface } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
+import type { GraphInterface } from "~/lib/graph/graph";
+
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
 
 // General function to make API calls with a payload
 async function makeAPICall(url: string, payload: object) {
@@ -20,10 +22,10 @@ export async function submitDataCall(data: any, graph: Store<GraphInterface>, se
 // Register a new user with form data
 export async function registerUserCall(formData: any) {
   return await makeAPICall(API.signUpUrl, {
-    username: formData().username.toLowerCase(),
     email: formData().email.toLowerCase(),
     password: formData().password,
     subdomain: formData().subdomain,
+    username: formData().username.toLowerCase(),
   });
 }
 
@@ -43,22 +45,22 @@ export async function signOutCall() {
 // Send a contact us form to support
 export async function contactUsCall(formData: any) {
   return await makeAPICall(API.profileUrl, {
-    panel: "supportTicket",
     action: "create",
-    uId: formData().uId,
-    name: formData().name,
     email: formData().email.toLowerCase(),
-    subject: formData().subject,
     message: formData().message,
+    name: formData().name,
+    panel: "supportTicket",
+    subject: formData().subject,
+    uId: formData().uId,
   });
 }
 
 // Reset user's password with new credentials
 export async function resetPasswordCall(passwordData: any, profileData: any) {
   return await makeAPICall(API.profileUrl, {
-    panel: "password",
     currentPassword: passwordData.currentPassword,
     newPassword: passwordData.newPassword,
+    panel: "password",
     username: profileData.username,
   });
 }
@@ -66,9 +68,9 @@ export async function resetPasswordCall(passwordData: any, profileData: any) {
 // Retrieve chat history for support tickets
 export async function getChatsSupportCall(parentVertexId: any) {
   return await makeAPICall(API.profileUrl, {
-    parentVertexId,
-    panel: "supportTicket",
     action: "chat",
+    panel: "supportTicket",
+    parentVertexId,
     subAction: "get",
   });
 }
@@ -79,10 +81,10 @@ export async function sendChatsSupportCall(
   newMessage: any,
 ) {
   return await makeAPICall(API.profileUrl, {
-    newMessage,
-    parentVertexId,
-    panel: "supportTicket",
     action: "chat",
+    newMessage,
+    panel: "supportTicket",
+    parentVertexId,
     subAction: "send",
   });
 }
@@ -90,8 +92,8 @@ export async function sendChatsSupportCall(
 // Delete a support ticket
 export async function deleteSupportTicketCall(ticketId: any) {
   return await makeAPICall(API.profileUrl, {
-    panel: "supportTicket",
     action: "delete",
     id: ticketId,
+    panel: "supportTicket",
   });
 }

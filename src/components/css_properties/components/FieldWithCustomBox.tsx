@@ -1,19 +1,21 @@
-import { createSignal, useContext, Show, For } from "solid-js";
+import { For, Show, createSignal, useContext } from "solid-js";
+
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { CssEditorContext, CssStateContext } from "../context";
-import { ButtonGroups } from "./ButtonGroups";
 import "~/css/componentUtilCSS.css";
 
+import { CssEditorContext, CssStateContext } from "../context";
+import { ButtonGroups } from "./ButtonGroups";
+
 export const FieldWithCustomBox = (props: {
-  label: string;
-  name: string;
   component: string;
-  isLabelOnTop: boolean;
-  options: any;
   customProperty: any;
   gridType?: string;
-  mainFieldType?: string;
   inputType?: string;
+  isLabelOnTop: boolean;
+  label: string;
+  mainFieldType?: string;
+  name: string;
+  options: any;
 }) => {
   const [optionType, setOptionType] = createSignal("all");
   const [cssState, setCssState] = useContext(CssEditorContext);
@@ -32,31 +34,31 @@ export const FieldWithCustomBox = (props: {
     <div>
       <div
         style={{
+          "align-items": "end",
           display: "grid",
           gap: "10px",
-          "align-items": "end",
           "grid-template-columns": "1fr 20%",
         }}
       >
         <DynamicCSSComponent
           value={{
-            name: props.name,
-            placeholder: "0",
+            component: props.mainFieldType ?? "textFieldOptions",
             isLabelOnTop: props.isLabelOnTop,
             label: props.label,
-            type: props.inputType ?? "number",
+            name: props.name,
             onChangeInput: () => {
               onChangeAllField();
             },
-            component: props.mainFieldType ?? "textFieldOptions",
             options: props.options,
+            placeholder: "0",
+            type: props.inputType ?? "number",
           }}
         />
         <ButtonGroups
-          isLabelOnTop={false}
-          name={props.name}
           isAddToClass={false}
+          isLabelOnTop={false}
           label={false}
+          name={props.name}
           onChangeInput={() => {
             if (optionType() === "all") {
               setOptionType("custom");
@@ -66,16 +68,16 @@ export const FieldWithCustomBox = (props: {
           }}
           options={[
             {
-              key: "allCustom",
-              value: "all",
-              tooltip: "All",
               icon: true,
+              key: "allCustom",
+              tooltip: "All",
+              value: "all",
             },
             {
-              key: "customIcon",
-              value: "custom",
-              tooltip: "Custom",
               icon: true,
+              key: "customIcon",
+              tooltip: "Custom",
+              value: "custom",
             },
           ]}
         />
@@ -84,9 +86,9 @@ export const FieldWithCustomBox = (props: {
         <div
           class={"b:1px|solid|lightgray p:0|10 pb:7 r:5 m:5|10"}
           style={{
+            "align-items": "end",
             display: "grid",
             gap: "10px",
-            "align-items": "end",
             "grid-template-columns": props.gridType ?? "repeat(2,auto)",
           }}
         >
@@ -95,13 +97,13 @@ export const FieldWithCustomBox = (props: {
               return (
                 <DynamicCSSComponent
                   value={{
-                    name: item.name,
-                    isLabelOnTop: props.isLabelOnTop,
-                    placeholder: "0",
-                    label: item.label,
-                    type: props.inputType ?? "number",
                     component: props.mainFieldType ?? "textFieldOptions",
+                    isLabelOnTop: props.isLabelOnTop,
+                    label: item.label,
+                    name: item.name,
                     options: props.options,
+                    placeholder: "0",
+                    type: props.inputType ?? "number",
                   }}
                 />
               );

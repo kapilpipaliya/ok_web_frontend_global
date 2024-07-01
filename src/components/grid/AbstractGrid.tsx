@@ -1,12 +1,14 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { createEffect, createResource, createSignal, Show } from "solid-js";
+import { Show, createEffect, createResource, createSignal } from "solid-js";
 import { useContext } from "solid-js";
-import { GraphContext, } from "~/lib/graph/graph";
+
 import {Breadcrumb} from "~/components/Breadcrumb";
-import {DataGrid} from "./DataGrid";
-import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { breadcrumbData } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import { getTreeData } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, } from "~/lib/graph/graph";
+
+import {DataGrid} from "./DataGrid";
 
 interface AbstractGridProps {
   tableId: string;
@@ -21,11 +23,11 @@ export function AbstractGrid(props: AbstractGridProps) {
 
   async function getNavData() {
     const data: any = getTreeData(graph, setGraph, {
-      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
       child: {
+        child: { child: { collection: "->NavAttr" }, collection: "->NavAttr" },
         collection: "->NavAttr",
-        child: { collection: "->NavAttr", child: { collection: "->NavAttr" } },
       },
+      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
     });
     return data?.[0]?.children || [];
   }
@@ -66,12 +68,12 @@ export function AbstractGrid(props: AbstractGridProps) {
     <>
       <Show when={nav()}>
         <Breadcrumb
-          title={`${nav()[2]}`}
           breadcrumb={[
             ...breadcrumbData,
             { name: `${nav()[1]}` },
             { name: nav()[2] },
           ]}
+          title={`${nav()[2]}`}
         />
       </Show>
 

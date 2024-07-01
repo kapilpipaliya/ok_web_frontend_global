@@ -1,21 +1,22 @@
-import { createSignal, For, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { For, Show, createSignal } from "solid-js";
+
 import { Tooltip } from "~/components/solid_blocks";
 
 export const Stepper = () => {
   const [steps, setSteps] = createSignal([
-    { id: 1, label: "Personal Info", icon: "1" },
-    { id: 2, label: "Account Info", icon: "2" },
-    { id: 3, label: "Review", icon: "3" },
+    { icon: "1", id: 1, label: "Personal Info" },
+    { icon: "2", id: 2, label: "Account Info" },
+    { icon: "3", id: 3, label: "Review" },
   ]);
   const [currentStep, setCurrentStep] = createSignal(1);
 
   const updateIndices = (newSteps: any) => {
     return newSteps.map((step: any, index: any) => ({
       ...step,
+      icon: `${index + 1}`,
       id: index + 1,
-      label: `Step ${index + 1}`,
-      icon: `${index + 1}`
+      label: `Step ${index + 1}`
     }));
   };
 
@@ -24,7 +25,7 @@ export const Stepper = () => {
     const newSteps: any = [];
     steps().forEach(step => {
       if (step.id === id) {
-        newSteps.push({ id: newStepId, label: `Step ${newStepId}`, icon: `${newStepId}` });
+        newSteps.push({ icon: `${newStepId}`, id: newStepId, label: `Step ${newStepId}` });
       }
       newSteps.push(step);
     });
@@ -37,7 +38,7 @@ export const Stepper = () => {
     steps().forEach(step => {
       newSteps.push(step);
       if (step.id === id) {
-        newSteps.push({ id: newStepId, label: `Step ${newStepId}`, icon: `${newStepId}` });
+        newSteps.push({ icon: `${newStepId}`, id: newStepId, label: `Step ${newStepId}` });
       }
     });
     setSteps(updateIndices(newSteps));
@@ -54,22 +55,22 @@ export const Stepper = () => {
 
   return (
     <>
-      <ul style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap" class="w:50%@>md w:100% m:0|10">
+      <ul class="w:50%@>md w:100% m:0|10" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
         <For each={steps()}>
           {(step, index) => (
             <>
               <Icon
-                style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
-                icon="mdi:plus"
                 height={20}
-                width={20}
+                icon="mdi:plus"
                 onClick={(e) => {
                   e.stopPropagation();
                   addStepBefore(step.id);
-                }} />
+                }}
+                style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
+                width={20} />
               <li
-                style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${currentStep() === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
                 onClick={() => setCurrentStep(step.id)}
+                style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${currentStep() === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
               >
                 <span style="display:flex; align-items:center;">
                   <Tooltip content={step.label}>
@@ -83,11 +84,11 @@ export const Stepper = () => {
                 <span style="margin-right: 0.5rem; white-space: nowrap;">{step.label}</span>
                 <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);"></div>
                 <button
-                  style="margin-left:0.5rem; color:red; background:none; border:none; cursor:pointer;"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteStep(step.id);
                   }}
+                  style="margin-left:0.5rem; color:red; background:none; border:none; cursor:pointer;"
                 >
                   &times;
                 </button>
@@ -97,14 +98,14 @@ export const Stepper = () => {
               </li>
               <Show when={index() === steps().length - 1}>
                 <Icon
-                  style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
-                  icon="mdi:plus"
                   height={20}
-                  width={20}
+                  icon="mdi:plus"
                   onClick={(e) => {
                     e.stopPropagation();
                     addStepAfter(step.id);
-                  }} />
+                  }}
+                  style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
+                  width={20} />
               </Show>
             </>
           )}

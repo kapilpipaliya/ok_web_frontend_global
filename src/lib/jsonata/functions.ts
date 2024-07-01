@@ -6,10 +6,10 @@
 // @ts-nocheck
 import {
   createSequence,
+  isDeepEqual as deepEquals,
   getFunctionArity,
   isArrayOfNumbers,
   isArrayOfStrings,
-  isDeepEqual as deepEquals,
   isFunction,
   isLambda,
   isNumeric,
@@ -28,7 +28,7 @@ export function sum(args) {
     return undefined;
   }
 
-  var total = 0;
+  let total = 0;
   args.forEach((num) => {
     total += num;
   });
@@ -88,7 +88,7 @@ export function average(args) {
     return undefined;
   }
 
-  var total = 0;
+  let total = 0;
   args.forEach((num) => {
     total += num;
   });
@@ -107,7 +107,7 @@ export function string(arg, prettify = false) {
     return undefined;
   }
 
-  var str;
+  let str;
 
   if (typeof arg === "string") {
     // already a string
@@ -118,11 +118,11 @@ export function string(arg, prettify = false) {
   } else if (typeof arg === "number" && !isFinite(arg)) {
     throw {
       code: "D3001",
-      value: arg,
       stack: new Error().stack,
+      value: arg,
     };
   } else {
-    var space = prettify ? 2 : 0;
+    const space = prettify ? 2 : 0;
     if (Array.isArray(arg) && arg.outerWrapper) {
       arg = arg[0];
     }
@@ -156,8 +156,8 @@ export function substring(str, start, length) {
     return undefined;
   }
 
-  var strArray = stringToArray(str);
-  var strLength = strArray.length;
+  const strArray = stringToArray(str);
+  const strLength = strArray.length;
 
   if (strLength + start < 0) {
     start = 0;
@@ -167,7 +167,7 @@ export function substring(str, start, length) {
     if (length <= 0) {
       return "";
     }
-    var end = start >= 0 ? start + length : strLength + start + length;
+    const end = start >= 0 ? start + length : strLength + start + length;
     return strArray.slice(start, end).join("");
   }
 
@@ -186,7 +186,7 @@ export function substringBefore(str, chars) {
     return undefined;
   }
 
-  var pos = str.indexOf(chars);
+  const pos = str.indexOf(chars);
   if (pos > -1) {
     return str.substr(0, pos);
   } else {
@@ -206,7 +206,7 @@ export function substringAfter(str, chars) {
     return undefined;
   }
 
-  var pos = str.indexOf(chars);
+  const pos = str.indexOf(chars);
   if (pos > -1) {
     return str.substr(pos + chars.length);
   } else {
@@ -268,7 +268,7 @@ export function trim(str) {
   }
 
   // normalize whitespace
-  var result = str.replace(/[ \t\n\r]+/gm, " ");
+  let result = str.replace(/[ \t\n\r]+/gm, " ");
   if (result.charAt(0) === " ") {
     // strip leading space
     result = result.substring(1);
@@ -297,10 +297,10 @@ export function pad(str, width, char) {
     char = " ";
   }
 
-  var result;
-  var padLength = Math.abs(width) - length(str);
+  let result;
+  const padLength = Math.abs(width) - length(str);
   if (padLength > 0) {
-    var padding = new Array(padLength + 1).join(char);
+    let padding = new Array(padLength + 1).join(char);
     if (char.length > 1) {
       padding = substring(padding, 0, padLength);
     }
@@ -323,7 +323,7 @@ export function pad(str, width, char) {
  * @returns {object} - structure that represents the match(es)
  */
 export function evaluateMatcher(matcher, str) {
-  var result = matcher.apply(this, [str]); // eslint-disable-line no-useless-call
+  const result = matcher.apply(this, [str]);  
   // if(isPromise(result)) {
   //     result = await result;
   // }
@@ -357,12 +357,12 @@ export function contains(str, token) {
     return undefined;
   }
 
-  var result;
+  let result;
 
   if (typeof token === "string") {
     result = str.indexOf(token) !== -1;
   } else {
-    var matches = evaluateMatcher(token, str);
+    const matches = evaluateMatcher(token, str);
     result = typeof matches !== "undefined";
   }
 
@@ -385,27 +385,27 @@ export function match(str, regex, limit) {
   // limit, if specified, must be a non-negative number
   if (limit < 0) {
     throw {
-      stack: new Error().stack,
-      value: limit,
       code: "D3040",
       index: 3,
+      stack: new Error().stack,
+      value: limit,
     };
   }
 
-  var result = createSequence();
+  const result = createSequence();
 
   if (typeof limit === "undefined" || limit > 0) {
-    var count = 0;
-    var matches = evaluateMatcher(regex, str);
+    let count = 0;
+    let matches = evaluateMatcher(regex, str);
     if (typeof matches !== "undefined") {
       while (
         typeof matches !== "undefined" &&
         (typeof limit === "undefined" || count < limit)
       ) {
         result.push({
-          match: matches.match,
-          index: matches.start,
           groups: matches.groups,
+          index: matches.start,
+          match: matches.match,
         });
         matches = evaluateMatcher(matches.next);
         count++;
@@ -434,9 +434,9 @@ export function replace(str, pattern, replacement, limit) {
   if (pattern === "") {
     throw {
       code: "D3010",
+      index: 2,
       stack: new Error().stack,
       value: pattern,
-      index: 2,
     };
   }
 
@@ -444,24 +444,24 @@ export function replace(str, pattern, replacement, limit) {
   if (limit < 0) {
     throw {
       code: "D3011",
+      index: 4,
       stack: new Error().stack,
       value: limit,
-      index: 4,
     };
   }
 
-  var replacer;
+  let replacer;
   if (typeof replacement === "string") {
     replacer = (regexMatch) => {
-      var substitute = "";
+      let substitute = "";
       // scan forward, copying the replacement text into the substitute string
       // and replace any occurrence of $n with the values matched by the regex
-      var position = 0;
-      var index = replacement.indexOf("$", position);
+      let position = 0;
+      let index = replacement.indexOf("$", position);
       while (index !== -1 && position < replacement.length) {
         substitute += replacement.substring(position, index);
         position = index + 1;
-        var dollarVal = replacement.charAt(position);
+        const dollarVal = replacement.charAt(position);
         if (dollarVal === "$") {
           // literal $
           substitute += "$";
@@ -491,7 +491,7 @@ export function replace(str, pattern, replacement, limit) {
           }
           if (!isNaN(index)) {
             if (regexMatch.groups.length > 0) {
-              var submatch = regexMatch.groups[index - 1];
+              const submatch = regexMatch.groups[index - 1];
               if (typeof submatch !== "undefined") {
                 substitute += submatch;
               }
@@ -511,13 +511,13 @@ export function replace(str, pattern, replacement, limit) {
     replacer = replacement;
   }
 
-  var result = "";
-  var position = 0;
+  let result = "";
+  let position = 0;
 
   if (typeof limit === "undefined" || limit > 0) {
-    var count = 0;
+    let count = 0;
     if (typeof pattern === "string") {
-      var index = str.indexOf(pattern, position);
+      let index = str.indexOf(pattern, position);
       while (index !== -1 && (typeof limit === "undefined" || count < limit)) {
         result += str.substring(position, index);
         result += replacement;
@@ -527,14 +527,14 @@ export function replace(str, pattern, replacement, limit) {
       }
       result += str.substring(position);
     } else {
-      var matches = evaluateMatcher(pattern, str);
+      let matches = evaluateMatcher(pattern, str);
       if (typeof matches !== "undefined") {
         while (
           typeof matches !== "undefined" &&
           (typeof limit === "undefined" || count < limit)
         ) {
           result += str.substring(position, matches.start);
-          var replacedWith = replacer.apply(this, [matches]);
+          const replacedWith = replacer.apply(this, [matches]);
           // if (isPromise(replacedWith)) {
           //     replacedWith = await replacedWith;
           // }
@@ -577,14 +577,14 @@ export function base64encode(str) {
   }
   // Use btoa in a browser, or Buffer in Node.js
 
-  var btoa =
+  const btoa =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.btoa
       : (str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "binary").toString("base64"); // eslint-disable-line new-cap
+          return new global.Buffer.from(str, "binary").toString("base64");  
         };
   return btoa(str);
 }
@@ -600,14 +600,14 @@ export function base64decode(str) {
     return undefined;
   }
   // Use btoa in a browser, or Buffer in Node.js
-  var atob =
+  const atob =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.atob
       : (str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "base64").toString("binary"); // eslint-disable-line new-cap
+          return new global.Buffer.from(str, "base64").toString("binary");  
         };
   return atob(str);
 }
@@ -624,15 +624,15 @@ export function encodeUrlComponent(str) {
   }
 
   // Catch URIErrors when URI sequence is malformed
-  var returnVal;
+  let returnVal;
   try {
     returnVal = encodeURIComponent(str);
   } catch (e) {
     throw {
       code: "D3140",
+      functionName: "encodeUrlComponent",
       stack: new Error().stack,
       value: str,
-      functionName: "encodeUrlComponent",
     };
   }
   return returnVal;
@@ -650,15 +650,15 @@ export function encodeUrl(str) {
   }
 
   // Catch URIErrors when URI sequence is malformed
-  var returnVal;
+  let returnVal;
   try {
     returnVal = encodeURI(str);
   } catch (e) {
     throw {
       code: "D3140",
+      functionName: "encodeUrl",
       stack: new Error().stack,
       value: str,
-      functionName: "encodeUrl",
     };
   }
   return returnVal;
@@ -676,15 +676,15 @@ export function decodeUrlComponent(str) {
   }
 
   // Catch URIErrors when URI sequence is malformed
-  var returnVal;
+  let returnVal;
   try {
     returnVal = decodeURIComponent(str);
   } catch (e) {
     throw {
       code: "D3140",
+      functionName: "decodeUrlComponent",
       stack: new Error().stack,
       value: str,
-      functionName: "decodeUrlComponent",
     };
   }
   return returnVal;
@@ -702,15 +702,15 @@ export function decodeUrl(str) {
   }
 
   // Catch URIErrors when URI sequence is malformed
-  var returnVal;
+  let returnVal;
   try {
     returnVal = decodeURI(str);
   } catch (e) {
     throw {
       code: "D3140",
+      functionName: "decodeUrl",
       stack: new Error().stack,
       value: str,
-      functionName: "decodeUrl",
     };
   }
   return returnVal;
@@ -733,22 +733,22 @@ export function split(str, separator, limit) {
   if (limit < 0) {
     throw {
       code: "D3020",
+      index: 3,
       stack: new Error().stack,
       value: limit,
-      index: 3,
     };
   }
 
-  var result = [];
+  let result = [];
 
   if (typeof limit === "undefined" || limit > 0) {
     if (typeof separator === "string") {
       result = str.split(separator, limit);
     } else {
-      var count = 0;
-      var matches = evaluateMatcher(separator, str);
+      let count = 0;
+      let matches = evaluateMatcher(separator, str);
       if (typeof matches !== "undefined") {
-        var start = 0;
+        let start = 0;
         while (
           typeof matches !== "undefined" &&
           (typeof limit === "undefined" || count < limit)
@@ -803,35 +803,35 @@ export function formatNumber(value, picture, options) {
     return undefined;
   }
 
-  var defaults = {
+  const defaults = {
+    NaN: "NaN",
     "decimal-separator": ".",
-    "grouping-separator": ",",
+    digit: "#",
     "exponent-separator": "e",
+    "grouping-separator": ",",
     infinity: "Infinity",
     "minus-sign": "-",
-    NaN: "NaN",
-    percent: "%",
-    "per-mille": "\u2030",
-    "zero-digit": "0",
-    digit: "#",
     "pattern-separator": ";",
+    "per-mille": "\u2030",
+    percent: "%",
+    "zero-digit": "0",
   };
 
   // if `options` is specified, then its entries override defaults
-  var properties = defaults;
+  const properties = defaults;
   if (typeof options !== "undefined") {
     Object.keys(options).forEach((key) => {
       properties[key] = options[key];
     });
   }
 
-  var decimalDigitFamily = [];
-  var zeroCharCode = properties["zero-digit"].charCodeAt(0);
-  for (var ii = zeroCharCode; ii < zeroCharCode + 10; ii++) {
+  const decimalDigitFamily = [];
+  const zeroCharCode = properties["zero-digit"].charCodeAt(0);
+  for (let ii = zeroCharCode; ii < zeroCharCode + 10; ii++) {
     decimalDigitFamily.push(String.fromCharCode(ii));
   }
 
-  var activeChars = decimalDigitFamily.concat([
+  const activeChars = decimalDigitFamily.concat([
     properties["decimal-separator"],
     properties["exponent-separator"],
     properties["grouping-separator"],
@@ -839,7 +839,7 @@ export function formatNumber(value, picture, options) {
     properties["pattern-separator"],
   ]);
 
-  var subPictures = picture.split(properties["pattern-separator"]);
+  const subPictures = picture.split(properties["pattern-separator"]);
 
   if (subPictures.length > 2) {
     throw {
@@ -848,10 +848,10 @@ export function formatNumber(value, picture, options) {
     };
   }
 
-  var splitParts = (subpicture) => {
-    var prefix = (() => {
-      var ch;
-      for (var ii = 0; ii < subpicture.length; ii++) {
+  const splitParts = (subpicture) => {
+    const prefix = (() => {
+      let ch;
+      for (let ii = 0; ii < subpicture.length; ii++) {
         ch = subpicture.charAt(ii);
         if (
           activeChars.indexOf(ch) !== -1 &&
@@ -861,9 +861,9 @@ export function formatNumber(value, picture, options) {
         }
       }
     })();
-    var suffix = (() => {
-      var ch;
-      for (var ii = subpicture.length - 1; ii >= 0; ii--) {
+    const suffix = (() => {
+      let ch;
+      for (let ii = subpicture.length - 1; ii >= 0; ii--) {
         ch = subpicture.charAt(ii);
         if (
           activeChars.indexOf(ch) !== -1 &&
@@ -873,12 +873,12 @@ export function formatNumber(value, picture, options) {
         }
       }
     })();
-    var activePart = subpicture.substring(
+    const activePart = subpicture.substring(
       prefix.length,
       subpicture.length - suffix.length,
     );
-    var mantissaPart, exponentPart, integerPart, fractionalPart;
-    var exponentPosition = subpicture.indexOf(
+    let mantissaPart, exponentPart, integerPart, fractionalPart;
+    const exponentPosition = subpicture.indexOf(
       properties["exponent-separator"],
       prefix.length,
     );
@@ -892,7 +892,7 @@ export function formatNumber(value, picture, options) {
       mantissaPart = activePart.substring(0, exponentPosition);
       exponentPart = activePart.substring(exponentPosition + 1);
     }
-    var decimalPosition = mantissaPart.indexOf(properties["decimal-separator"]);
+    const decimalPosition = mantissaPart.indexOf(properties["decimal-separator"]);
     if (decimalPosition === -1) {
       integerPart = mantissaPart;
       fractionalPart = suffix;
@@ -901,23 +901,23 @@ export function formatNumber(value, picture, options) {
       fractionalPart = mantissaPart.substring(decimalPosition + 1);
     }
     return {
-      prefix: prefix,
-      suffix: suffix,
       activePart: activePart,
-      mantissaPart: mantissaPart,
       exponentPart: exponentPart,
-      integerPart: integerPart,
       fractionalPart: fractionalPart,
+      integerPart: integerPart,
+      mantissaPart: mantissaPart,
+      prefix: prefix,
       subpicture: subpicture,
+      suffix: suffix,
     };
   };
 
   // validate the picture string, F&O 4.7.3
-  var validate = (parts) => {
-    var error;
-    var ii;
-    var subpicture = parts.subpicture;
-    var decimalPos = subpicture.indexOf(properties["decimal-separator"]);
+  const validate = (parts) => {
+    let error;
+    let ii;
+    const subpicture = parts.subpicture;
+    const decimalPos = subpicture.indexOf(properties["decimal-separator"]);
     if (
       decimalPos !== subpicture.lastIndexOf(properties["decimal-separator"])
     ) {
@@ -941,9 +941,9 @@ export function formatNumber(value, picture, options) {
     ) {
       error = "D3084";
     }
-    var valid = false;
+    let valid = false;
     for (ii = 0; ii < parts.mantissaPart.length; ii++) {
-      var ch = parts.mantissaPart.charAt(ii);
+      const ch = parts.mantissaPart.charAt(ii);
       if (decimalDigitFamily.indexOf(ch) !== -1 || ch === properties.digit) {
         valid = true;
         break;
@@ -952,7 +952,7 @@ export function formatNumber(value, picture, options) {
     if (!valid) {
       error = "D3085";
     }
-    var charTypes = parts.activePart
+    const charTypes = parts.activePart
       .split("")
       .map((char) => (activeChars.indexOf(char) === -1 ? "p" : "a"))
       .join("");
@@ -980,7 +980,7 @@ export function formatNumber(value, picture, options) {
     ) {
       error = "D3089";
     }
-    var optionalDigitPos = parts.integerPart.indexOf(properties.digit);
+    let optionalDigitPos = parts.integerPart.indexOf(properties.digit);
     if (
       optionalDigitPos !== -1 &&
       parts.integerPart
@@ -1000,7 +1000,7 @@ export function formatNumber(value, picture, options) {
     ) {
       error = "D3091";
     }
-    var exponentExists = typeof parts.exponentPart === "string";
+    const exponentExists = typeof parts.exponentPart === "string";
     if (
       exponentExists &&
       parts.exponentPart.length > 0 &&
@@ -1027,12 +1027,12 @@ export function formatNumber(value, picture, options) {
   };
 
   // analyse the picture string, F&O 4.7.4
-  var analyse = (parts) => {
-    var getGroupingPositions = (part, toLeft) => {
-      var positions = [];
-      var groupingPosition = part.indexOf(properties["grouping-separator"]);
+  const analyse = (parts) => {
+    const getGroupingPositions = (part, toLeft) => {
+      const positions = [];
+      let groupingPosition = part.indexOf(properties["grouping-separator"]);
       while (groupingPosition !== -1) {
-        var charsToTheRight = (
+        const charsToTheRight = (
           toLeft
             ? part.substring(0, groupingPosition)
             : part.substring(groupingPosition)
@@ -1051,17 +1051,17 @@ export function formatNumber(value, picture, options) {
       }
       return positions;
     };
-    var integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
-    var regular = (indexes) => {
+    const integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
+    const regular = (indexes) => {
       // are the grouping positions regular? i.e. same interval between each of them
       if (indexes.length === 0) {
         return 0;
       }
-      var gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+      const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
       // find the greatest common divisor of all the positions
-      var factor = indexes.reduce(gcd);
+      const factor = indexes.reduce(gcd);
       // is every position separated by this divisor? If so, it's regular
-      for (var index = 1; index <= indexes.length; index++) {
+      for (let index = 1; index <= indexes.length; index++) {
         if (indexes.indexOf(index * factor) === -1) {
           return 0;
         }
@@ -1069,26 +1069,26 @@ export function formatNumber(value, picture, options) {
       return factor;
     };
 
-    var regularGrouping = regular(integerPartGroupingPositions);
-    var fractionalPartGroupingPositions = getGroupingPositions(
+    const regularGrouping = regular(integerPartGroupingPositions);
+    const fractionalPartGroupingPositions = getGroupingPositions(
       parts.fractionalPart,
       true,
     );
 
-    var minimumIntegerPartSize = parts.integerPart
+    let minimumIntegerPartSize = parts.integerPart
       .split("")
       .filter((char) => decimalDigitFamily.indexOf(char) !== -1).length;
-    var scalingFactor = minimumIntegerPartSize;
+    const scalingFactor = minimumIntegerPartSize;
 
-    var fractionalPartArray = parts.fractionalPart.split("");
-    var minimumFactionalPartSize = fractionalPartArray.filter(
+    const fractionalPartArray = parts.fractionalPart.split("");
+    let minimumFactionalPartSize = fractionalPartArray.filter(
       (char) => decimalDigitFamily.indexOf(char) !== -1,
     ).length;
-    var maximumFactionalPartSize = fractionalPartArray.filter(
+    let maximumFactionalPartSize = fractionalPartArray.filter(
       (char) =>
         decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit,
     ).length;
-    var exponentPresent = typeof parts.exponentPart === "string";
+    const exponentPresent = typeof parts.exponentPart === "string";
     if (minimumIntegerPartSize === 0 && maximumFactionalPartSize === 0) {
       if (exponentPresent) {
         minimumFactionalPartSize = 1;
@@ -1107,7 +1107,7 @@ export function formatNumber(value, picture, options) {
     if (minimumIntegerPartSize === 0 && minimumFactionalPartSize === 0) {
       minimumFactionalPartSize = 1;
     }
-    var minimumExponentSize = 0;
+    let minimumExponentSize = 0;
     if (exponentPresent) {
       minimumExponentSize = parts.exponentPart
         .split("")
@@ -1115,29 +1115,29 @@ export function formatNumber(value, picture, options) {
     }
 
     return {
-      integerPartGroupingPositions: integerPartGroupingPositions,
-      regularGrouping: regularGrouping,
-      minimumIntegerPartSize: minimumIntegerPartSize,
-      scalingFactor: scalingFactor,
-      prefix: parts.prefix,
       fractionalPartGroupingPositions: fractionalPartGroupingPositions,
-      minimumFactionalPartSize: minimumFactionalPartSize,
+      integerPartGroupingPositions: integerPartGroupingPositions,
       maximumFactionalPartSize: maximumFactionalPartSize,
       minimumExponentSize: minimumExponentSize,
-      suffix: parts.suffix,
+      minimumFactionalPartSize: minimumFactionalPartSize,
+      minimumIntegerPartSize: minimumIntegerPartSize,
       picture: parts.subpicture,
+      prefix: parts.prefix,
+      regularGrouping: regularGrouping,
+      scalingFactor: scalingFactor,
+      suffix: parts.suffix,
     };
   };
 
-  var parts = subPictures.map(splitParts);
+  const parts = subPictures.map(splitParts);
   parts.forEach(validate);
 
-  var variables = parts.map(analyse);
+  const variables = parts.map(analyse);
 
-  var minus_sign = properties["minus-sign"];
-  var zero_digit = properties["zero-digit"];
-  var decimal_separator = properties["decimal-separator"];
-  var grouping_separator = properties["grouping-separator"];
+  const minus_sign = properties["minus-sign"];
+  const zero_digit = properties["zero-digit"];
+  const decimal_separator = properties["decimal-separator"];
+  const grouping_separator = properties["grouping-separator"];
 
   if (variables.length === 1) {
     variables.push(JSON.parse(JSON.stringify(variables[0])));
@@ -1148,14 +1148,14 @@ export function formatNumber(value, picture, options) {
 
   // format the number
   // bullet 1: TODO: NaN - not sure we'd ever get this in JSON
-  var pic;
+  let pic;
   // bullet 2:
   if (value >= 0) {
     pic = variables[0];
   } else {
     pic = variables[1];
   }
-  var adjustedNumber;
+  let adjustedNumber;
   // bullet 3:
   if (pic.picture.indexOf(properties.percent) !== -1) {
     adjustedNumber = value * 100;
@@ -1167,13 +1167,13 @@ export function formatNumber(value, picture, options) {
   // bullet 4:
   // TODO: infinity - not sure we'd ever get this in JSON
   // bullet 5:
-  var mantissa, exponent;
+  let mantissa, exponent;
   if (pic.minimumExponentSize === 0) {
     mantissa = adjustedNumber;
   } else {
     // mantissa * 10^exponent = adjustedNumber
-    var maxMantissa = Math.pow(10, pic.scalingFactor);
-    var minMantissa = Math.pow(10, pic.scalingFactor - 1);
+    const maxMantissa = Math.pow(10, pic.scalingFactor);
+    const minMantissa = Math.pow(10, pic.scalingFactor - 1);
     mantissa = adjustedNumber;
     exponent = 0;
     while (mantissa < minMantissa) {
@@ -1186,10 +1186,10 @@ export function formatNumber(value, picture, options) {
     }
   }
   // bullet 6:
-  var roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
+  const roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
   // bullet 7:
-  var makeString = (value, dp) => {
-    var str = Math.abs(value).toFixed(dp);
+  const makeString = (value, dp) => {
+    let str = Math.abs(value).toFixed(dp);
     if (zero_digit !== "0") {
       str = str
         .split("")
@@ -1204,8 +1204,8 @@ export function formatNumber(value, picture, options) {
     }
     return str;
   };
-  var stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
-  var decimalPos = stringValue.indexOf(".");
+  let stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
+  let decimalPos = stringValue.indexOf(".");
   if (decimalPos === -1) {
     stringValue = stringValue + decimal_separator;
   } else {
@@ -1219,8 +1219,8 @@ export function formatNumber(value, picture, options) {
   }
   // bullets 8 & 9:
   decimalPos = stringValue.indexOf(decimal_separator);
-  var padLeft = pic.minimumIntegerPartSize - decimalPos;
-  var padRight =
+  let padLeft = pic.minimumIntegerPartSize - decimalPos;
+  const padRight =
     pic.minimumFactionalPartSize - (stringValue.length - decimalPos - 1);
   stringValue =
     (padLeft > 0 ? new Array(padLeft + 1).join(zero_digit) : "") + stringValue;
@@ -1230,8 +1230,8 @@ export function formatNumber(value, picture, options) {
   decimalPos = stringValue.indexOf(decimal_separator);
   // bullet 10:
   if (pic.regularGrouping > 0) {
-    var groupCount = Math.floor((decimalPos - 1) / pic.regularGrouping);
-    for (var group = 1; group <= groupCount; group++) {
+    const groupCount = Math.floor((decimalPos - 1) / pic.regularGrouping);
+    for (let group = 1; group <= groupCount; group++) {
       stringValue = [
         stringValue.slice(0, decimalPos - group * pic.regularGrouping),
         grouping_separator,
@@ -1267,7 +1267,7 @@ export function formatNumber(value, picture, options) {
   }
   // bullet 13:
   if (typeof exponent !== "undefined") {
-    var stringExponent = makeString(exponent, 0);
+    let stringExponent = makeString(exponent, 0);
     padLeft = pic.minimumExponentSize - stringExponent.length;
     if (padLeft > 0) {
       stringExponent = new Array(padLeft + 1).join(zero_digit) + stringExponent;
@@ -1311,7 +1311,7 @@ export function formatBase(value, radix) {
     };
   }
 
-  var result = value.toString(radix);
+  const result = value.toString(radix);
 
   return result;
 }
@@ -1322,7 +1322,7 @@ export function formatBase(value, radix) {
  * @returns {Number} numeric value of argument
  */
 export function number(arg) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1353,9 +1353,9 @@ export function number(arg) {
   } else {
     throw {
       code: "D3030",
-      value: arg,
-      stack: new Error().stack,
       index: 1,
+      stack: new Error().stack,
+      value: arg,
     };
   }
   return result;
@@ -1367,7 +1367,7 @@ export function number(arg) {
  * @returns {Number} absolute value of argument
  */
 export function abs(arg) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1384,7 +1384,7 @@ export function abs(arg) {
  * @returns {Number} rounded integer
  */
 export function floor(arg) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1401,7 +1401,7 @@ export function floor(arg) {
  * @returns {Number} rounded integer
  */
 export function ceil(arg) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1419,7 +1419,7 @@ export function ceil(arg) {
  * @returns {Number} rounded integer
  */
 export function round(arg, precision) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1438,7 +1438,7 @@ export function round(arg, precision) {
 
   // round up to nearest int
   result = Math.round(arg);
-  var diff = result - arg;
+  const diff = result - arg;
   if (Math.abs(diff) === 0.5 && Math.abs(result % 2) === 1) {
     // rounded the wrong way - adjust to nearest even number
     result = result - 1;
@@ -1467,7 +1467,7 @@ export function round(arg, precision) {
  * @returns {Number} square root
  */
 export function sqrt(arg) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1476,9 +1476,9 @@ export function sqrt(arg) {
 
   if (arg < 0) {
     throw {
-      stack: new Error().stack,
       code: "D3060",
       index: 1,
+      stack: new Error().stack,
       value: arg,
     };
   }
@@ -1495,7 +1495,7 @@ export function sqrt(arg) {
  * @returns {Number} rounded integer
  */
 export function power(arg, exp) {
-  var result;
+  let result;
 
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
@@ -1506,11 +1506,11 @@ export function power(arg, exp) {
 
   if (!isFinite(result)) {
     throw {
-      stack: new Error().stack,
       code: "D3061",
-      index: 1,
-      value: arg,
       exp: exp,
+      index: 1,
+      stack: new Error().stack,
+      value: arg,
     };
   }
 
@@ -1545,12 +1545,12 @@ export function boolean(arg) {
     return undefined;
   }
 
-  var result = false;
+  let result = false;
   if (Array.isArray(arg)) {
     if (arg.length === 1) {
       result = boolean(arg[0]);
     } else if (arg.length > 1) {
-      var trues = arg.filter((val) => boolean(val));
+      const trues = arg.filter((val) => boolean(val));
       result = trues.length > 0;
     }
   } else if (typeof arg === "string") {
@@ -1595,9 +1595,9 @@ export function not(arg) {
  * @returns {*[]} the argument list
  */
 export function hofFuncArgs(func, arg1, arg2, arg3) {
-  var func_args = [arg1]; // the first arg (the value) is required
+  const func_args = [arg1]; // the first arg (the value) is required
   // the other two are optional - only supply it if the function can take it
-  var length = getFunctionArity(func);
+  const length = getFunctionArity(func);
   if (length >= 2) {
     func_args.push(arg2);
   }
@@ -1619,12 +1619,12 @@ export function map(arr, func) {
     return undefined;
   }
 
-  var result = createSequence();
+  const result = createSequence();
   // do the map - iterate over the arrays, and invoke func
-  for (var i = 0; i < arr.length; i++) {
-    var func_args = hofFuncArgs(func, arr[i], i, arr);
+  for (let i = 0; i < arr.length; i++) {
+    const func_args = hofFuncArgs(func, arr[i], i, arr);
     // invoke func
-    var res = func.apply(this, func_args);
+    const res = func.apply(this, func_args);
     if (typeof res !== "undefined") {
       result.push(res);
     }
@@ -1645,13 +1645,13 @@ export function filter(arr, func) {
     return undefined;
   }
 
-  var result = createSequence();
+  const result = createSequence();
 
-  for (var i = 0; i < arr.length; i++) {
-    var entry = arr[i];
-    var func_args = hofFuncArgs(func, entry, i, arr);
+  for (let i = 0; i < arr.length; i++) {
+    const entry = arr[i];
+    const func_args = hofFuncArgs(func, entry, i, arr);
     // invoke func
-    var res = func.apply(this, func_args);
+    const res = func.apply(this, func_args);
     if (boolean(res)) {
       result.push(entry);
     }
@@ -1673,16 +1673,16 @@ export function single(arr, func) {
     return undefined;
   }
 
-  var hasFoundMatch = false;
-  var result;
+  let hasFoundMatch = false;
+  let result;
 
-  for (var i = 0; i < arr.length; i++) {
-    var entry = arr[i];
-    var positiveResult = true;
+  for (let i = 0; i < arr.length; i++) {
+    const entry = arr[i];
+    let positiveResult = true;
     if (typeof func !== "undefined") {
-      var func_args = hofFuncArgs(func, entry, i, arr);
+      const func_args = hofFuncArgs(func, entry, i, arr);
       // invoke func
-      var res = func.apply(this, func_args);
+      const res = func.apply(this, func_args);
       positiveResult = boolean(res);
     }
     if (positiveResult) {
@@ -1691,9 +1691,9 @@ export function single(arr, func) {
         hasFoundMatch = true;
       } else {
         throw {
-          stack: new Error().stack,
           code: "D3138",
           index: i,
+          stack: new Error().stack,
         };
       }
     }
@@ -1701,8 +1701,8 @@ export function single(arr, func) {
 
   if (!hasFoundMatch) {
     throw {
-      stack: new Error().stack,
       code: "D3139",
+      stack: new Error().stack,
     };
   }
 
@@ -1716,10 +1716,10 @@ export function single(arr, func) {
  */
 export function zip() {
   // this can take a variable number of arguments
-  var result = [];
-  var args = Array.prototype.slice.call(arguments);
+  const result = [];
+  const args = Array.prototype.slice.call(arguments);
   // length of the shortest array
-  var length = Math.min.apply(
+  const length = Math.min.apply(
     Math,
     args.map((arg) => {
       if (Array.isArray(arg)) {
@@ -1729,7 +1729,7 @@ export function zip() {
     }),
   );
   for (var i = 0; i < length; i++) {
-    var tuple = args.map((arg) => {
+    const tuple = args.map((arg) => {
       return arg[i];
     });
     result.push(tuple);
@@ -1750,18 +1750,18 @@ export function foldLeft(sequence, func, init) {
     return undefined;
   }
 
-  var result;
+  let result;
 
-  var arity = getFunctionArity(func);
+  const arity = getFunctionArity(func);
   if (arity < 2) {
     throw {
-      stack: new Error().stack,
       code: "D3050",
       index: 1,
+      stack: new Error().stack,
     };
   }
 
-  var index;
+  let index;
   if (typeof init === "undefined" && sequence.length > 0) {
     result = sequence[0];
     index = 1;
@@ -1771,7 +1771,7 @@ export function foldLeft(sequence, func, init) {
   }
 
   while (index < sequence.length) {
-    var args = [result, sequence[index]];
+    const args = [result, sequence[index]];
     if (arity >= 3) {
       args.push(index);
     }
@@ -1791,13 +1791,13 @@ export function foldLeft(sequence, func, init) {
  * @returns {Array} Array of keys
  */
 export function keys(arg) {
-  var result = createSequence();
+  let result = createSequence();
 
   if (Array.isArray(arg)) {
     // merge the keys of all of the items in the array
-    var merge = {};
+    const merge = {};
     arg.forEach((item) => {
-      var allkeys = keys(item);
+      const allkeys = keys(item);
       allkeys.forEach((key) => {
         merge[key] = true;
       });
@@ -1817,11 +1817,11 @@ export function keys(arg) {
  */
 export function lookup(input, key) {
   // lookup the 'name' item in the input
-  var result;
+  let result;
   if (Array.isArray(input)) {
     result = createSequence();
-    for (var ii = 0; ii < input.length; ii++) {
-      var res = lookup(input[ii], key);
+    for (let ii = 0; ii < input.length; ii++) {
+      const res = lookup(input[ii], key);
       if (typeof res !== "undefined") {
         if (Array.isArray(res)) {
           res.forEach((val) => result.push(val));
@@ -1879,7 +1879,7 @@ export function exists(arg) {
  * @returns {*} - the array
  */
 export function spread(arg) {
-  var result = createSequence();
+  let result = createSequence();
 
   if (Array.isArray(arg)) {
     // spread all of the items in the array
@@ -1887,8 +1887,8 @@ export function spread(arg) {
       result = append(result, spread(item));
     });
   } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
-    for (var key in arg) {
-      var obj = {};
+    for (const key in arg) {
+      const obj = {};
       obj[key] = arg[key];
       result.push(obj);
     }
@@ -1910,10 +1910,10 @@ export function merge(arg) {
     return undefined;
   }
 
-  var result = {};
+  const result = {};
 
   arg.forEach((obj) => {
-    for (var prop in obj) {
+    for (const prop in obj) {
       result[prop] = obj[prop];
     }
   });
@@ -1935,9 +1935,9 @@ export function reverse(arr) {
     return arr;
   }
 
-  var length = arr.length;
-  var result = new Array(length);
-  for (var i = 0; i < length; i++) {
+  const length = arr.length;
+  const result = new Array(length);
+  for (let i = 0; i < length; i++) {
     result[length - i - 1] = arr[i];
   }
 
@@ -1951,12 +1951,12 @@ export function reverse(arr) {
  * @returns {Array} - the resultant array
  */
 export function each(obj, func) {
-  var result = createSequence();
+  const result = createSequence();
 
-  for (var key in obj) {
-    var func_args = hofFuncArgs(func, obj[key], key, obj);
+  for (const key in obj) {
+    const func_args = hofFuncArgs(func, obj[key], key, obj);
     // invoke func
-    var val = func.apply(this, func_args);
+    const val = func.apply(this, func_args);
     if (typeof val !== "undefined") {
       result.push(val);
     }
@@ -1973,8 +1973,8 @@ export function each(obj, func) {
 export function error(message) {
   throw {
     code: "D3137",
-    stack: new Error().stack,
     message: message || "$error() function evaluated",
+    stack: new Error().stack,
   };
 }
 
@@ -1989,8 +1989,8 @@ export function assert(condition, message) {
   if (!condition) {
     throw {
       code: "D3141",
-      stack: new Error().stack,
       message: message || "$assert() statement failed",
+      stack: new Error().stack,
     };
   }
 
@@ -2051,14 +2051,14 @@ export function sort(arr, comparator) {
     return arr;
   }
 
-  var comp;
+  let comp;
   if (typeof comparator === "undefined") {
     // inject a default comparator - only works for numeric or string arrays
     if (!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
       throw {
-        stack: new Error().stack,
         code: "D3070",
         index: 1,
+        stack: new Error().stack,
       };
     }
 
@@ -2068,8 +2068,8 @@ export function sort(arr, comparator) {
     comp = comparator;
   }
 
-  var merge = (l, r) => {
-    var merge_iter = (result, left, right) => {
+  const merge = (l, r) => {
+    const merge_iter = (result, left, right) => {
       if (left.length === 0) {
         Array.prototype.push.apply(result, right);
       } else if (right.length === 0) {
@@ -2085,25 +2085,25 @@ export function sort(arr, comparator) {
         merge_iter(result, left.slice(1), right);
       }
     };
-    var merged = [];
+    const merged = [];
     merge_iter(merged, l, r);
     return merged;
   };
 
-  var msort = (array) => {
+  const msort = (array) => {
     if (!Array.isArray(array) || array.length <= 1) {
       return array;
     } else {
-      var middle = Math.floor(array.length / 2);
-      var left = array.slice(0, middle);
-      var right = array.slice(middle);
+      const middle = Math.floor(array.length / 2);
+      let left = array.slice(0, middle);
+      let right = array.slice(middle);
       left = msort(left);
       right = msort(right);
       return merge(left, right);
     }
   };
 
-  var result = msort(arr);
+  const result = msort(arr);
 
   return result;
 }
@@ -2124,9 +2124,9 @@ export function shuffle(arr) {
   }
 
   // shuffle using the 'inside-out' variant of the Fisher-Yates algorithm
-  var result = new Array(arr.length);
-  for (var i = 0; i < arr.length; i++) {
-    var j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
+  const result = new Array(arr.length);
+  for (let i = 0; i < arr.length; i++) {
+    const j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
     if (i !== j) {
       result[i] = result[j];
     }
@@ -2151,13 +2151,13 @@ export function distinct(arr) {
     return arr;
   }
 
-  var results = isSequence(arr) ? createSequence() : [];
+  const results = isSequence(arr) ? createSequence() : [];
 
-  for (var ii = 0; ii < arr.length; ii++) {
-    var value = arr[ii];
+  for (let ii = 0; ii < arr.length; ii++) {
+    const value = arr[ii];
     // is this value already in the result sequence?
-    var includes = false;
-    for (var jj = 0; jj < results.length; jj++) {
+    let includes = false;
+    for (let jj = 0; jj < results.length; jj++) {
       if (deepEquals(value, results[jj])) {
         includes = true;
         break;
@@ -2179,13 +2179,13 @@ export function distinct(arr) {
  * @returns {object} - sifted object
  */
 export function sift(arg, func) {
-  var result = {};
+  let result = {};
 
-  for (var item in arg) {
-    var entry = arg[item];
-    var func_args = hofFuncArgs(func, entry, item, arg);
+  for (const item in arg) {
+    const entry = arg[item];
+    const func_args = hofFuncArgs(func, entry, item, arg);
     // invoke func
-    var res = func.apply(this, func_args);
+    const res = func.apply(this, func_args);
     if (boolean(res)) {
       result[item] = entry;
     }

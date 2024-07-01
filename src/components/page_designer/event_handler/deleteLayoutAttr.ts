@@ -1,11 +1,13 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import {
   batch
 } from "solid-js";
-import type { SetStoreFunction, Store } from "solid-js/store";
-import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
 
 export function deleteLayoutAttr(layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
   batch(() => {

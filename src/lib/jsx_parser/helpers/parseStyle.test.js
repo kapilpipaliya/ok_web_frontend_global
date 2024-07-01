@@ -4,7 +4,7 @@ jest.unmock("./parseStyle.js");
 
 describe("parseStyle", () => {
   it("returns objects without modification", () => {
-    const before = { foo: "bar", baz: { a: "b" } };
+    const before = { baz: { a: "b" }, foo: "bar" };
     const after = parseStyle(before);
 
     expect(after).toEqual(before);
@@ -20,7 +20,7 @@ describe("parseStyle", () => {
       "margin: 0 5px; padding: 1em 5px; text-decoration: underline";
     const after = parseStyle(before);
 
-    /* eslint-disable key-spacing */
+     
     expect(after).toEqual({
       margin: "0 5px",
       padding: "1em 5px",

@@ -1,18 +1,21 @@
-import {toTitle} from "case-switcher-js";
-import {createMemo, For, Match, Switch} from "solid-js";
 import type {SetStoreFunction, Store} from "solid-js/store";
-import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
-import {DynamicComponent} from "./DynamicComponent";
+
+import {toTitle} from "case-switcher-js";
+import {For, Match, Switch, createMemo} from "solid-js";
+
 import {getComponentForCollRow} from "~/components/form/getComponentForCollRow";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
+
+import {DynamicComponent} from "./DynamicComponent";
 
 interface FormGroupProps {
-  metaAttributes: Vertex[];
-  vertex: Vertex;
-  labelPrefix: string;
   graph: Store<GraphInterface>;
+  isLoginRegister?: string;
+  labelPrefix: string;
+  metaAttributes: Vertex[];
   setGraph: SetStoreFunction<GraphInterface>;
   txnId: number;
-  isLoginRegister?: string;
+  vertex: Vertex;
 }
 
 // group of the fields
@@ -42,19 +45,19 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
         const Content = () => (
           <DynamicComponent
             component={component()}
-            meta={metaVertex}
+            data={props.vertex}
+            isRealTime={false}
             isTableInside={true}
+            meta={metaVertex}
+            // setValue={props.setValue}
             title={toTitle(
               metaVertex.P.displayName ||
                 metaVertex.P[IdAttr] ||
                 metaVertex.P.key ||
                 "",
             )}
-            data={props.vertex}
-            // setValue={props.setValue}
             // disabled={props.d}
             txnId={props.txnId}
-            isRealTime={false}
           />
         );
         // TODO: Make permissions working.

@@ -1,6 +1,8 @@
-import { batch } from "solid-js";
-import type { GraphInterface, Id } from "./graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { batch } from "solid-js";
+
+import type { GraphInterface, Id } from "./graph";
 
 // temporary we start from 500000 because newId should not conflict with existing Ids
 let uniqueId = -50000;
@@ -8,26 +10,26 @@ let uniqueId = -50000;
 export type Revert = { revert: () => any };
 export type InsertFn = {
   [key in
-  | "insert"
-  | "replace"
-  | "merge"
+  | "deleteEdge"
   | "deleteVertex"
+  | "insert"
   | "insertEdge"
+  | "merge"
+  | "replace"
   | "replaceEdge"
-  | "replaceEdgeStart"
   | "replaceEdgeEnd"
-  | "deleteEdge"]?: () => any;
+  | "replaceEdgeStart"]?: () => any;
 };
 
 export enum ProcessStatus {
-  Unset = 0,
-  Ready = 1,
-  Sent = 2,
   AckReceived = 3,
   Processed = 4,
+  Ready = 1,
+  Sent = 2,
+  Unset = 0,
 }
 
-export type TransactionValue = InsertFn & Revert & { data: any };
+export type TransactionValue = { data: any } & InsertFn & Revert;
 
 // @ts-ignore
 export function transactionDetailAdd(
@@ -65,12 +67,12 @@ export function getNewTxnId(
 export function getExistingOrDefaultTxnValue(txnId: number, graph: Store<GraphInterface>) {
   return (
     graph.transactions.has(txnId) ? {...graph.transactions.get(txnId)!} : {
-      status: ProcessStatus.Unset,
-      undoStep: 0,
-      submittedStep: 0,
-      steps: [],
       revertSteps: [],
+      status: ProcessStatus.Unset,
+      steps: [],
+      submittedStep: 0,
       undoPoints: [],
+      undoStep: 0,
     }
   );
 }
@@ -128,15 +130,15 @@ export function getTransactionData(txnId: number, graph: Store<GraphInterface>) 
   const existingTxnValue = [...(graph.transactions.get(txnId)?.steps || [])].map(
     (txnDetail) => {
       const txnData = {
-        insert: txnDetail.insert?.(),
-        replace: txnDetail.replace?.(),
-        merge: txnDetail.merge?.(),
-        deleteVertex: txnDetail.deleteVertex?.(),
-        insertEdge: txnDetail.insertEdge?.(),
-        replaceEdge: txnDetail.replaceEdge?.(),
-        replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
-        replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
         deleteEdge: txnDetail.deleteEdge?.(),
+        deleteVertex: txnDetail.deleteVertex?.(),
+        insert: txnDetail.insert?.(),
+        insertEdge: txnDetail.insertEdge?.(),
+        merge: txnDetail.merge?.(),
+        replace: txnDetail.replace?.(),
+        replaceEdge: txnDetail.replaceEdge?.(),
+        replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
+        replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
       };
       return Object.keys(txnData).reduce((acc, key) => {
         // @ts-ignore
@@ -157,10 +159,10 @@ export function commitTransaction(txnId: number, graph: Store<GraphInterface>) {
     const existingTxnValue = getTransactionData(txnId, graph);
     if (existingTxnValue.length) {
       const data =  {
-          txnId: txnId,
-          vertexIdMap: [...vertexOldIdToNewIdMap],
           edgeIdMap: [...edgeOldIdToNewIdMap],
           transactions: existingTxnValue,
+          txnId: txnId,
+          vertexIdMap: [...vertexOldIdToNewIdMap],
         }
       return data;
     }

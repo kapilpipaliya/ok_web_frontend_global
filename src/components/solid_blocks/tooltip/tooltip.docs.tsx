@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+
 import { Checkbox } from "../checkbox/checkbox";
 import { Radio, RadioGroup } from "../radio/radio";
 import { Select } from "../select/select";
@@ -82,10 +83,10 @@ trigger?: SingularOrArray<TooltipTrigger>;
           </ul>
         </dd>
       </dl>
-      <Checkbox setChecked={setArrow} checked={arrow()}>
+      <Checkbox checked={arrow()} setChecked={setArrow}>
         arrow
       </Checkbox>{" "}
-      <Checkbox setChecked={setNowrap} checked={nowrap()}>
+      <Checkbox checked={nowrap()} setChecked={setNowrap}>
         nowrap
       </Checkbox>{" "}
       <Select
@@ -113,15 +114,15 @@ trigger?: SingularOrArray<TooltipTrigger>;
       <div
         class="example"
         style={{
-          display: "flex",
           "align-items": "center",
-          "justify-content": "center",
+          display: "flex",
           height: "8em",
+          "justify-content": "center",
         }}
       >
         <Tooltip
-          content="Tooltip content that is slightly longer"
           arrow={arrow()}
+          content="Tooltip content that is slightly longer"
           nowrap={nowrap()}
           position={pos() as TooltipPosition}
           trigger={triggers[+trigger()]}

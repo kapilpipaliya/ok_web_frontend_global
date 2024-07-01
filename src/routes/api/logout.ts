@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+
 import { getHttpsSession } from "~/server/getHttpsSession";
 
 // Cant export this function

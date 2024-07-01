@@ -1,68 +1,70 @@
+import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate, } from "@solidjs/router";
 import {
-  createMemo,
-  createSignal,
   For,
   type JSXElement,
   Match,
-  onCleanup,
-  onMount,
   Show,
   Switch,
+  createMemo,
+  createSignal,
+  onCleanup,
+  onMount,
   useContext,
 } from "solid-js";
-import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
-import { isPageDesignerPath } from "~/lib/utils";
-import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
-import { getNewTxnId, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
-import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate, } from "@solidjs/router";
+import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
+
+import { DeleteDialog } from "~/components/DeleteDialog";
+import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
 import { useToast } from "~/components/Toast";
-import { DeleteDialog } from "~/components/DeleteDialog";
-import { setGraphData } from "~/lib/websocket/setGraphData";
-import { FormContext, type IFormContext } from "~/lib/contexts";
-import { FormGroup } from "./FormGroup";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
-import { getFormData } from "./getFormData";
 import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
-import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
-import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 import { formSubmit } from "~/components/form/formSubmit";
-import { getInitialState } from "./getInitialState";
+import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
+import { FormContext, type IFormContext } from "~/lib/contexts";
+import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
+import { getNewTxnId, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
+import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
+import { isPageDesignerPath } from "~/lib/utils";
+import { setGraphData } from "~/lib/websocket/setGraphData";
+
+import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
+import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SubmitButton } from "./SubmitButton";
+import { getFormData } from "./getFormData";
+import { getInitialState } from "./getInitialState";
 
 export interface DynamicFormProps {
-  meta?: Vertex;
-  id?: Id;
   buttonAlign?: string;
-  submitButton?: JSXElement;
-  importExportButtons?: boolean;
-  showMainFieldsOnly?: boolean;
-  showSubmitButtonOnTop?: boolean;
-  isLoginRegister?: string;
+  closePopUp?: () => void;
   doMount?: boolean;
   formId: string;
   graph: Store<GraphInterface>;
+  id?: Id;
+  importExportButtons?: boolean;
+  isLoginRegister?: string;
+  meta?: Vertex;
   setGraph: SetStoreFunction<GraphInterface>;
-  closePopUp?: () => void;
+  showMainFieldsOnly?: boolean;
+  showSubmitButtonOnTop?: boolean;
+  submitButton?: JSXElement;
 }
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
   const navigate = useNavigate();
   const location = useLocation();
-  const { showLoadingToast, showWarningToast, showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [_, setLayoutStore] = useDesignerLayoutStore() || [];
 
   const [formData, setFormData] = createStore({
-    txnId,
     cleanUpConfig: () => cleanUpConfig,
+    txnId,
   } as IFormContext);
   const [activeTab, setActiveTab] = createSignal("main");
-  const [error, setError] = createSignal<string | null>(null);
+  const [error, setError] = createSignal<null | string>(null);
   const [isLoading, setIsLoading] = createSignal(false);
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   const [popup, setPopup] = createSignal(false);
@@ -107,12 +109,12 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     }
     setActiveTab(initFormStateResult.tabs![0]);
     setFormData({
-      txnId,
-      formMeta: initFormStateResult.metaVertexResult!.vertex!,
       formData: graph.vertexes[id() as Id] ?? initFormStateResult.dataVertex!,
-      tabs: initFormStateResult.tabs,
+      formMeta: initFormStateResult.metaVertexResult!.vertex!,
       groupByTabsAndGroup: initFormStateResult.groupByTabsAndGroup,
       metaTxnId: initFormStateResult.metaVertexResult!.txnId,
+      tabs: initFormStateResult.tabs,
+      txnId,
     });
 
     if (initFormStateResult.dataVertex?.L[0] === "Form") {
@@ -170,7 +172,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
             }}
           >
             <Show when={props.showSubmitButtonOnTop ?? false}>
-              <SubmitButton onCancel={onCancel} onSubmit={onSubmit} buttonAlign={props.buttonAlign} submitButton={props.submitButton}/>
+              <SubmitButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
             </Show>
 
             <Show when={divRef()}>
@@ -191,13 +193,13 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                           <div class={`p:5|15|15|15 w:full grid  grid-cols:1@<md gap:0|10 grid-cols:auto ${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"}`}>
                             <FormGroup
                               graph={graph}
-                              setGraph={setGraph}
+                              labelPrefix={"Form"}
                               metaAttributes={
                                 formData.groupByTabsAndGroup.main[group]
                               }
-                              labelPrefix={"Form"}
-                              vertex={formData.formData}
+                              setGraph={setGraph}
                               txnId={formData.txnId}
+                              vertex={formData.formData}
                             />
                           </div>
                         </div>
@@ -211,7 +213,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                     !(props.showMainFieldsOnly ?? false)
                   }
                 >
-                  <TableTabs tabs={formData.tabs} setActiveTab={setActiveTab} />
+                  <TableTabs setActiveTab={setActiveTab} tabs={formData.tabs} />
                   <br />
                   <For
                     each={Object.keys(
@@ -228,13 +230,13 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                           </Show>
                           <FormGroup
                             graph={graph}
-                            setGraph={setGraph}
+                            labelPrefix={""}
                             metaAttributes={
                               formData.groupByTabsAndGroup[activeTab()][group]
                             }
-                            labelPrefix={""}
-                            vertex={formData.formData}
+                            setGraph={setGraph}
                             txnId={formData.txnId}
+                            vertex={formData.formData}
                           />
                         </div>
                       );
@@ -250,21 +252,21 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                     !props.isLoginRegister
                   }
                 >
-                  <SubmitButton onCancel={onCancel} onSubmit={onSubmit} buttonAlign={props.buttonAlign} submitButton={props.submitButton}/>
+                  <SubmitButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
                 </Show>
               </FormContext.Provider>
             </Show>
             <Show when={popup()}>PopOver</Show>
             <Show when={discradPopup()}>
               <DeleteDialog
-                open={discradPopup()}
+                message="Discard unsaved changes - are you sure?"
                 onConfirm={() => {
                   revertTransaction(formData.txnId, graph);
                   setDiscradPopup(false);
                   onConfirmExit();
                 }}
+                open={discradPopup()}
                 title="Discard changes"
-                message="Discard unsaved changes - are you sure?"
               />
             </Show>
           </div>

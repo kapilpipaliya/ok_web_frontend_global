@@ -4,28 +4,28 @@ import { Show, createSignal } from "solid-js";
 export function FAQSection() {
   const faqData = [
     {
-      question: "Do I need knowledge of coding to Use EasyFormForge?",
       answer:
         "Absolutely not. You don’t need any coding skills required to use the EasyFormForge. It is a complete drag-and-drop form builder.",
+      question: "Do I need knowledge of coding to Use EasyFormForge?",
     },
     {
-      question: "Does EasyFormForge have any video documentation?",
       answer:
         "Absolutely Yes. Check our official YouTube channel for more information.",
+      question: "Does EasyFormForge have any video documentation?",
     },
     {
-      question: "What happens after the subscription expires?",
       answer:
         "In that case our system will send the notification to you several times to renew your subscription. In case you decide not to renew it, no worries. You will still be able to access old data and forms.",
+      question: "What happens after the subscription expires?",
     },
     {
-      question: "How long do I get support?",
       answer: "We are open 24x7 every day for you!",
+      question: "How long do I get support?",
     },
     {
-      question: "Do you offer refunds?",
       answer:
         "We are sure that you will love EasyFormForge. However, if you are not satisfied with our product, within 7 days, you’re more than welcome to get a full refund!",
+      question: "Do you offer refunds?",
     },
   ];
 
@@ -40,7 +40,7 @@ export function FAQSection() {
 
         <div class="accordionParent d-grid justify-content-center pt-5 gap:10px">
           {faqData.map((faq: any) => (
-            <AccordionItem question={faq.question} answer={faq.answer}/>
+            <AccordionItem answer={faq.answer} question={faq.question}/>
           ))}
         </div>
       </div>
@@ -48,7 +48,7 @@ export function FAQSection() {
   );
 }
 
-const AccordionItem = (props: Readonly<{ question: string; answer: string }>) => {
+const AccordionItem = (props: Readonly<{ answer: string; question: string }>) => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const toggleOpen = () => {
@@ -67,12 +67,12 @@ const AccordionItem = (props: Readonly<{ question: string; answer: string }>) =>
           }}
         >
           <Icon
-            icon="mingcute:down-fill"
             class={"transform 2s ease-in-out"}
+            icon="mingcute:down-fill"
             style={{
-              transition: "transform 0.2s linear",
               "margin-top": "7px",
               transform: `${isOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
+              transition: "transform 0.2s linear",
             }}
           />
         </span>
@@ -81,8 +81,8 @@ const AccordionItem = (props: Readonly<{ question: string; answer: string }>) =>
         <div
           class="p:10 r:10"
           style={{
-            display: isOpen() ? "block" : "none",
             "background-color": "transparent",
+            display: isOpen() ? "block" : "none",
           }}
         >
           <p>{props.answer}</p>

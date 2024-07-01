@@ -3,12 +3,14 @@ import {
   Show, createSignal,
   useContext
 } from "solid-js";
+
 import { Checkbox } from "~/components/solid_blocks";
-import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
-import { onClickAddComponent } from "../../../lib/drag_drop/onClickAddComponent";
 import { iconMap } from "~/lib/constants";
-import { OpenComponentSettings } from "../OpenComponentSettings";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+
+import { onClickAddComponent } from "../../../lib/drag_drop/onClickAddComponent";
 import { useDesignerLayoutStore } from "../LayoutContext";
+import { OpenComponentSettings } from "../OpenComponentSettings";
 
 export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -32,35 +34,31 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
   };
 
   const baseStyle = {
-    "border-radius": ".2rem",
-    "margin-left": "3px",
-    "margin-right": "3px",
-    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-    "justify-content": "space-between",
+    "align-items": "center",
     "background-color": "white",
+    "border-radius": ".2rem",
+    "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
     display: "flex",
     "flex-direction": "row",
-    "align-items": "center",
-    position: "relative",
     gap: "5px",
+    "justify-content": "space-between",
+    "margin-left": "3px",
+    "margin-right": "3px",
     padding: "10px 0px",
     "place-content": "center",
-    "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
+    position: "relative",
+    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
   };
 
   const hoverStyle = {
-    cursor: "move",
     boxShadow: "4px 4px 4px",
+    cursor: "move",
   };
 
   const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
   return (
     <button
-      type="button"
-      style={itemStyle()}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       draggable={true}
       onDragStart={(e) => {
         e.stopPropagation();
@@ -71,6 +69,8 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
         setLayoutStore('draggedVertices', (prev) => [...prev, ...dataTransfer]);
         setSelectedComponents(new Set<Vertex>());
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       ondblclick={(e) => {
         setLayoutStore('draggedVertices', [graph.vertexes[props.child.id]]);
         onClickAddComponent(
@@ -85,9 +85,11 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
         );
         setLayoutStore('draggedVertices', []);
       }}
+      style={itemStyle()}
+      type="button"
     >
       <Show when={isHovered()}>
-        <OpenComponentSettings id={props.child.id} class="cursor:pointer position:absolute right:3px top:3px" />
+        <OpenComponentSettings class="cursor:pointer position:absolute right:3px top:3px" id={props.child.id} />
       </Show>
       {/* @ts-ignore  */}
       <Show
@@ -95,21 +97,21 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
           selectedComponents().has(graph.vertexes[props.child.id])}
       >
         <Checkbox
-          wrapperStyle={{ height: "19px", width: "19px" }}
-          style={{ position: "absolute", top: "-2px", left: "7px" }}
-          onChange={(e) => handleCheckboxChange(e, props.child.id)}
           // @ts-ignore
-          checked={selectedComponents().has(graph.vertexes[props.child.id])} />
+          checked={selectedComponents().has(graph.vertexes[props.child.id])}
+          onChange={(e) => handleCheckboxChange(e, props.child.id)}
+          style={{ left: "7px", position: "absolute", top: "-2px" }}
+          wrapperStyle={{ height: "19px", width: "19px" }} />
       </Show>
       <div
         class="pt:5px flex gap:5px ai:center"
         style={{ "flex-flow": "column" }}
       >
         <Icon
+          height={24}
           icon={iconMap[props.child?.P.name] ??
             "material-symbols:widgets-outline-rounded"}
-          width={24}
-          height={24} />
+          width={24} />
         <span style={{ "font-size": "14px" }}>{props.child?.P.label || props.child?.P.name}</span>
       </div>
     </button>

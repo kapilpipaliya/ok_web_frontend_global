@@ -1,8 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext } from "solid-js";
+
 import { GraphContext } from "~/lib/graph/graph";
-import { OpenComponentSettings } from "../../OpenComponentSettings";
+
 import { useDesignerLayoutStore } from "../../LayoutContext";
+import { OpenComponentSettings } from "../../OpenComponentSettings";
 
 export function PropertiesHeader() {
     const [graph, setGraph] = useContext(GraphContext)!;
@@ -13,10 +15,10 @@ export function PropertiesHeader() {
     return (
         <div
             style={{
-                display: "flex",
-                "justify-content": "space-between",
                 "align-items": "center",
                 cursor: "pointer",
+                display: "flex",
+                "justify-content": "space-between",
             }}
         >
             <div
@@ -26,12 +28,12 @@ export function PropertiesHeader() {
                 {getComponentName()} Properties <OpenComponentSettings id={layoutStore.selectedComponent as string} />
             </div>
             <Icon
-                onclick={()=>setLayoutStore('showPropertiesDrawer', false)}
-                icon={"iconamoon:close-light"}
                 class="bg:#ededed:hover r:50%"
                 height={24}
-                width={24}
+                icon={"iconamoon:close-light"}
+                onclick={()=>setLayoutStore('showPropertiesDrawer', false)}
                 style={{ color: "lightgray", cursor: "pointer" }}
+                width={24}
             />
         </div>
     );

@@ -2,9 +2,9 @@ import { createSignal } from "solid-js";
 
 export function SubscribeSection() {
   return (
-    <section class="subscribe d-flex" aria-labelledby="subscribe-heading">
+    <section aria-labelledby="subscribe-heading" class="subscribe d-flex">
       <div class="subscribeinner container">
-        <h2 id="subscribe-heading" class="color-white">Let’s build forms together</h2>
+        <h2 class="color-white" id="subscribe-heading">Let’s build forms together</h2>
         <p class="color-white text-center">
           Subscribe for the latest news and exclusive deals!
         </p>
@@ -25,19 +25,19 @@ const SubscribeForm = () => {
   };
 
   return (
-    <form class="subs d-flex m-auto mt-3" onSubmit={handleSubmit} aria-label="Subscribe Form">
+    <form aria-label="Subscribe Form" class="subs d-flex m-auto mt-3" onSubmit={handleSubmit}>
       <input
-        class="p-0 m-0"
-        type="email"
-        placeholder="Enter your email..."
-        value={email()}
-        onInput={(e) => setEmail(e.target.value)}
         aria-label="Email Address"
+        class="p-0 m-0"
+        onInput={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email..."
+        type="email"
+        value={email()}
       />
       <button
+        aria-label="Subscribe"
         class="btn-mid-icon-filled align-item-center bg-pink"
         type="submit"
-        aria-label="Subscribe"
       >
         Subscribe
       </button>

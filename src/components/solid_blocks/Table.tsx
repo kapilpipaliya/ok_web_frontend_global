@@ -1,12 +1,12 @@
-import { createContext, type JSX, useContext } from "solid-js";
+import { type JSX, createContext, useContext } from "solid-js";
 
 import "./radio/radio.css";
 
 export const tableContext = createContext<[] | []>([]);
 
-export type TableCellProps = JSX.HTMLAttributes<HTMLTableCellElement> & {
+export type TableCellProps = {
   disabled?: boolean;
-};
+} & JSX.HTMLAttributes<HTMLTableCellElement>;
 
 export function TableHeader(props: TableCellProps) {
   const [] = useContext(tableContext);
@@ -20,7 +20,7 @@ export function TableRow(props: TableCellProps) {
   return <td {...props} />;
 }
 
-export type TableProps = JSX.HTMLAttributes<HTMLTableElement> & {};
+export type TableProps = {} & JSX.HTMLAttributes<HTMLTableElement>;
 
 export function TableGroup(props: TableProps) {
   return (

@@ -1,9 +1,11 @@
 // Function to handle transfer of a single node.
 import type {Session} from "neo4j-driver";
+
 import type {Vertex} from "~/lib/graph/graph";
+
+import {createNode} from "~/cypher/mutate/sync/createNode";
 import {findExistingNode} from "~/cypher/mutate/sync/findExistingNode";
 import {updateNodeProperties} from "~/cypher/mutate/sync/updateNodeProperties";
-import {createNode} from "~/cypher/mutate/sync/createNode";
 
 export async function findOrCreateNodeAndUpdateProperties( // transferNode
   sessionSource: Session,
