@@ -134,7 +134,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           </Match>
         </Switch>
         {/* Select Rules: */}
-        <SelectInputField
+        {/* <SelectInputField
           component={"SelectBox"}
           data={{ P: {} } as Vertex}
           meta={{
@@ -145,7 +145,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
             },
           } as unknown as Vertex}
           setValue={(attr, vertex, data) => 0}
-        />
+        /> */}
       </span>
       <Show when={props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null}>
         <span>

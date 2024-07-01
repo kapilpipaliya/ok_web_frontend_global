@@ -7,7 +7,7 @@ import { FormMetaData } from "~/lib/formMetaData";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function RulesModalBody() {
   const [graph, setGraph] = useContext(GraphContext)!;

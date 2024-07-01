@@ -5,9 +5,9 @@ import { CollAndData } from "./CollAndData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 import { FormGroupProperties } from "../FormGroupProperties";
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { ImportModal } from "./ImportModal";
-import { RulesModalBody } from "./RulesModalBody";
-import { RenderModal } from "./RenderModal";
+import { ImportModal } from "./import/ImportModal";
+import { RulesModalBody } from "./rules/RulesModalBody";
+import { RenderModal } from "./rules/RenderModal";
 
 export function PropertiesBody() {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);

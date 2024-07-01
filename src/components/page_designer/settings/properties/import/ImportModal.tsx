@@ -5,7 +5,7 @@ import { GraphContext } from "~/lib/graph/graph";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function ImportModal(props: { toggleModal: () => void; }) {
   const [graph, setGraph] = useContext(GraphContext)!;

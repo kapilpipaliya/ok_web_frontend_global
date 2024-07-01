@@ -45,7 +45,7 @@ export function SelectInputField(
   const [options, setOptions] = createSignal([] as any[]);
 
   const getCollection = () => (
-    props.meta.P.collection
+    typeof props.meta.P.collection === 'function' ? props.meta.P.collection() : props.meta.P.collection
   );
 
   const isCommaSeparated = () => props.meta.P.options?.includes(",");
