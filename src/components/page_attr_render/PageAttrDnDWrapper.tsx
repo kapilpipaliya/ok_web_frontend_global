@@ -11,7 +11,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { FormContext, IsPreviewContext } from "~/lib/contexts";
+import { IsPreviewContext } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
 import { PageRenderVertexContext } from "~/components/page_attr_render/Context";
 import { iconMap } from "~/lib/constants";

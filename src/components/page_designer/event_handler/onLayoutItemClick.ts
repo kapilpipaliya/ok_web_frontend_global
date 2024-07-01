@@ -1,7 +1,6 @@
 import { batch, } from "solid-js";
 import type { SetStoreFunction, } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { getChildVertex } from "../../../lib/graph/get/sync/traverse";
 import { getComponentFromLayoutRow } from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
