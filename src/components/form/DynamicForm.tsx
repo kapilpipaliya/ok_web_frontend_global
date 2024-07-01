@@ -189,8 +189,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                           <ImportExportButtons setPopup={setPopup} />
                         </Show>
 
-                        <div class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
-                          <div class={`p:5|15|15|15 w:full grid  grid-cols:1@<md gap:0|10 grid-cols:auto ${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"}`}>
+                        <div class="b:1 b:rgb(214,214,216) bg:rgb(237,237,237,.75) r:10|10|10|10 w:100%">
+                          <div class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10  grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}>
                             <FormGroup
                               graph={graph}
                               labelPrefix={"Form"}

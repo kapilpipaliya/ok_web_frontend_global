@@ -7,7 +7,7 @@ import { FormElementTabs } from "./FormElementTabs";
 function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
   return <div class="flex ai:center jc:space-between position:relative">
     <Icon
-      class="cursor:pointer bg:white:hover position:absolute top:0 right:0 z:2"
+      class="bg:white:hover cursor:pointer position:absolute right:0 top:0 z:2"
       height={30}
       icon={"iconamoon:close-duotone"}
       onClick={props.onClick}
@@ -24,7 +24,7 @@ export function FormElementsWrapper() {
     >
       <div class={"rel"}>
         <div
-          class={"h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"}
+          class={"flex-col  border:1|solid|lightgrey direction:rtl h:100vh m:5 overflow:auto r:5|5|5|5"}
           style={{
             "max-height": "calc(100vh - 120px)",
             "scrollbar-color": "lightgrey",

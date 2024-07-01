@@ -89,7 +89,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       <Match when={data.error}>Error: {data.error}</Match>
       <Match when={!isFetchingData()}>
         <>
-          <nav class="bg:white p:5 position:sticky abs z:10">
+          <nav class="abs bg:white p:5 z:10">
             <div class="group">
               <Icon
                 class="icon"
@@ -109,7 +109,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
             </div>
           </nav>
           <div
-            class="overflow:auto h:full grid"
+            class="grid h:full overflow:auto"
             style={{
               "scrollbar-color": "lightgrey",
               "scrollbar-width": "thin",
@@ -118,7 +118,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
             <For
               each={filteredData()}
               fallback={
-                <div class="p:3 m:20px|0px font-weight:bold text-align:center">
+                <div class="font-weight:bold m:20px|0px p:3 text-align:center">
                   No {props.coll} Found!
                 </div>
               }

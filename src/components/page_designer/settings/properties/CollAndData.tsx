@@ -88,7 +88,7 @@ export function CollAndData() {
 
       <div class="flex">
         <span class="flex:.5 mt:5">Expression: </span>
-        <div class="flex flex:1 f:15 ai:center">
+        <div class="flex ai:center f:15 flex:1">
           <GenericInputField
             component={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
@@ -123,7 +123,7 @@ export function CollAndData() {
 
       </div>
 
-      <div class="text-center mt:2 mb:2">OR</div>
+      <div class="text-center mb:2 mt:2">OR</div>
       <span class="flex.5 mt:5">Collection:</span>
       <SelectInputField
         component={"SelectBox"}

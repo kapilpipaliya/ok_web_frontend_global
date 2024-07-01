@@ -216,7 +216,7 @@ export function TableInputField(
             <Switch>
               <Match when={metaVertex().P.hidden}>
                 <td class="align-content:center">
-                  <div class={`flex ai:center jc:center ${getComponentClass(component())}`}>
+                  <div class={`${getComponentClass(component())} flex ai:center jc:center`}>
                     <DefaultValue />
                   </div>
                 </td>
@@ -224,7 +224,7 @@ export function TableInputField(
               <Match when={component() === "DynamicTable"}>
                 <td class="align-content:center">
                   <Show when={!disabled()}>
-                    <div class={`flex ai:center jc:center ${getComponentClass(component())}`}>
+                    <div class={`${getComponentClass(component())} flex ai:center jc:center`}>
                       <DefaultValue />
                       <Content />
                     </div>
@@ -232,7 +232,7 @@ export function TableInputField(
                 </td>
               </Match>
               <Match when={true}>
-                <td class={`padding:1px align-content:center ${getComponentClass(component())}`}>
+                <td class={`${getComponentClass(component())} align-content:center padding:1px`}>
                   <div class="align-items:center">
                     <DefaultValue />
                     <Content />
@@ -248,7 +248,7 @@ export function TableInputField(
     return (
       <>
         <tr
-          class="border-radius:10px border-bottom:1px|solid|#dddddd"
+          class="border-bottom:1px|solid|#dddddd border-radius:10px"
           draggable={true}
           onDragEnter={() => setDragToIndex(p.index)}
           onDragOver={(event) => event.preventDefault()}
@@ -284,7 +284,7 @@ export function TableInputField(
         {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
         {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
         <Show when={expandVertex() && expanded()}>
-          <tr class="border-radius:10px border-bottom:1px|solid|#dddddd">
+          <tr class="border-bottom:1px|solid|#dddddd border-radius:10px">
             <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
                 component={"DynamicTable"}
@@ -328,12 +328,12 @@ export function TableInputField(
         <AddNewButton onClick={() => insertNewRow()} />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <div class={"overflow:auto r:10 m:2"} style={{ 'border': sortedVertexes().length ? '1px solid #37c' : '', "scrollbar-width": "thin" }}>
-          <table class="border-collapse:collapse font-size:0.9em b:none box-shadow:0|0|20px|rgba(0,0,0,0.15) border-radius:0.4rem" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
+        <div class={"m:2 overflow:auto r:10"} style={{ 'border': sortedVertexes().length ? '1px solid #37c' : '', "scrollbar-width": "thin" }}>
+          <table class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
             <Show when={sortedVertexes().length}>
               <thead>
-                <tr class="background-color:#37c   height:35px color:#ffffff text-align:center " style={{ width: "max-content" }}>
-                  <td class={"font-weight:medium p:0px|10px color:#ffffff text-align:left align-items:center align-content:center"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
+                <tr class="background-color:#37c   color:#ffffff height:35px text-align:center " style={{ width: "max-content" }}>
+                  <td class={"align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
                       <Switch>

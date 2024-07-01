@@ -10,15 +10,15 @@ import { FormStepper } from "./form_stepper/FormStepper";
 export function LayoutGridRowOne(): JSX.Element {
   const [layoutStore] = useDesignerLayoutStore();
   return (
-    <div class={`grid ${(layoutStore.isLeftOpen && layoutStore.isRightOpen)
+    <div class={`${(layoutStore.isLeftOpen && layoutStore.isRightOpen)
       ? 'grid-cols:1'
       : (!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
         ? 'grid-cols:3'
-        : 'grid-cols:2'} gap:4px`}>
+        : 'grid-cols:2'} grid gap:4px`}>
       <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
         <LeftToggleButton />
       </Show>
-      <div class="ai:center flex gap:5 p:8 jc:center">
+      <div class="flex ai:center gap:5 jc:center p:8">
         <UndoRedoIcons />
         <Show when={location.pathname.includes("/admin/Form/")}>
           <FormStepper />

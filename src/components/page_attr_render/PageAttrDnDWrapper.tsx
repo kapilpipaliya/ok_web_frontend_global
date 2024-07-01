@@ -100,7 +100,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
     <Show when={isSelectedLayoutId(props.itemId)}>
       <Tooltip content={"Properties"} nowrap>
         <Icon
-          class="cursor:pointer flex ai:center"
+          class="flex ai:center cursor:pointer"
           height={22}
           icon={"mingcute:settings-5-line"}
           onclick={() => setLayoutStore('showPropertiesDrawer', !layoutStore.showPropertiesDrawer)}
@@ -111,7 +111,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
 
   const SelectedAttrConfigPopOver = () => (
     <span class="position:relative ">
-      <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235) r:5px|5px|0px|0px z:50 p:0.25rem ai:center">
+      <div class="flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:50">
         <Tooltip content={"Name"} nowrap>
           <div style={{ display: "flex", "font-size": "0.875rem", "line-height": "1.25rem", "margin-right": "4px" }}>
             {getComponentName()}
@@ -120,7 +120,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         <PropertyDrawer itemId={props.item.id} />
         <Tooltip content={"Move"} nowrap>
           <Icon
-            class="cursor:pointer flex"
+            class="flex cursor:pointer"
             draggable={true}
             height={20}
             icon={"material-symbols-light:drag-pan-rounded"}
@@ -129,7 +129,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         </Tooltip>
         <Tooltip content={"Parent"} nowrap>
           <Icon
-            class="cursor:pointer flex"
+            class="flex cursor:pointer"
             height={20}
             icon={"mdi:arrow-up"}
             onClick={() => {
@@ -141,7 +141,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         </Tooltip>
         <Tooltip content={"Duplicate"}>
           <Icon
-            class="cursor:pointer flex"
+            class="flex cursor:pointer"
             height={20}
             icon={"mage:copy"}
             onClick={() => cloneLayoutAndChildren(props.item, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData)}
@@ -149,7 +149,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         </Tooltip>
         <Tooltip content={"Save as Template"}>
           <Icon
-            class="cursor:pointer flex"
+            class="flex cursor:pointer"
             height={20}
             icon={"fluent:save-as-24-regular"}
             onClick={() => setShowModal(true)}
@@ -158,7 +158,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         </Tooltip>
         <Tooltip content={"Delete"}>
           <Icon
-            class="cursor:pointer flex"
+            class="flex cursor:pointer"
             height={20}
             icon={"fluent:delete-20-regular"}
             onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, layoutStore.formData.txnId, getComponentName(), showSuccessToast)}
@@ -173,10 +173,10 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
 
   const HoverAttrConfigPopOver = () => (
     <span class="position:relative ">
-      <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235) r:5px|5px|0px|0px z:50 p:0.25rem ai:center right:0">
+      <div class="flex ai:center bg:rgb(37,99,235) bottom:100% color:white p:0.25rem position:absolute r:5px|5px|0px|0px right:0 z:50">
         <Icon class="flex" icon={iconMap[getComponentName()]} />
         <Tooltip content={"Name"} nowrap>
-          <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
+          <div class="lh:1.25rem f:0.875rem ml:5px mr:5px">
             {getComponentName()}
           </div>
         </Tooltip>
@@ -223,7 +223,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
   return (
     <PageRenderVertexContext.Provider value={[...useContext(PageRenderVertexContext), props.item]}>
       <button
-        class={`contents ${getBorder() || ""}`}
+        class={`${getBorder() || ""} contents`}
         onClick={(e) => {
           e.stopPropagation();
           onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);

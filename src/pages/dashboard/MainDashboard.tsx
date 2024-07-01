@@ -82,7 +82,7 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
           />
         </Show>
         <div
-          class={" p:4|10 overflow-y:auto"}
+          class={" overflow-y:auto p:4|10"}
           classList={{ "height:93vh": graph.isSideBarOpen }}
           style={{ "scrollbar-width": "thin" }}
         >
@@ -141,7 +141,7 @@ const DropdownMenu = () => {
     <>
       <button
         class={
-          "flex width:40px height:40px ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
+          "flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover height:40px p:.2rem|.3rem r:50% width:40px"
         }
         id="dropdown-toggle"
         onClick={handleOpen}
@@ -178,14 +178,14 @@ const DropdownMenu = () => {
             <li class={"flex p:13"} style="margin-bottom: 5px; padding: 10px; ">
               <div
                 // alt="profile"
-                class="h:45 w:45 r:50%"
+                class="h:45 r:50% w:45"
                 style={`background-size:cover;background-image: url(${
                   graph.member?.properties?.profileImage ||
                   "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
                 })`}
               />
               <div class={"ml:10 mr:1rem"}>
-                <div class={"text-align:start f:15 font-weight:bold"}>
+                <div class={"f:15 font-weight:bold text-align:start"}>
                   <Show
                     fallback={graph.member?.properties?.username ?? "anonymous"}
                     when={!graph.member?.properties?.username}
@@ -193,7 +193,7 @@ const DropdownMenu = () => {
                     {"Guest User"}
                   </Show>
                 </div>
-                <div class={"text-align:start f:13"}>
+                <div class={"f:13 text-align:start"}>
                   <Show
                     fallback={
                       graph.member?.properties?.email ?? "anonymous@gmail.com"
@@ -239,7 +239,7 @@ const DropdownMenu = () => {
                   {/*<hr style="color:lightgrey" class={'mt:.5rem'}/>*/}
                   <li class={"m:5|10"} style="margin-top: 5px; ">
                     <a
-                      class="r:5|5|5|5 cursor:default"
+                      class="cursor:default r:5|5|5|5"
                       onclick={async () => {
                         setIsOpen(false);
                         setLoadingSite(true);

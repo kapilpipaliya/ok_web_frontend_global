@@ -49,11 +49,11 @@ export function ValidationConfig(props: ValidationProps) {
   };
 
   const RuleInput = (inputProps: { label: string, onChange: (e: any) => void, rule: string, type: string, value: any }) => (
-    <div class="flex gap:2 mt:6 justify-content:space-between ai:center ">
-      <label class="flex:.5 f:15">{inputProps.label}</label>
+    <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
+      <label class="f:15 flex:.5">{inputProps.label}</label>
       <input
         checked={inputProps.type === "checkbox" ? inputProps.value : undefined}
-        class="flex:1 f:15 border:1px|solid|#ccc p:2"
+        class="border:1px|solid|#ccc f:15 flex:1 p:2"
         onChange={(e) => {
           inputProps.onChange(e);
           props.setValue(props.meta, values);
@@ -66,28 +66,28 @@ export function ValidationConfig(props: ValidationProps) {
 
   const RegexInput = (regexprops: { index: number, }) => (
     <div class="">
-      <div class="flex gap:2 mt:6 justify-content:space-between ai:center ">
-        <label class="flex:.5 f:15">Regex</label>
+      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
+        <label class="f:15 flex:.5">Regex</label>
         <input
-          class="flex:1 f:15 border:1px|solid|#ccc p:2"
+          class="border:1px|solid|#ccc f:15 flex:1 p:2"
           onChange={(e) => setValues('regex', regexprops.index, 'value', e.target.value)}
           type="text"
           value={values.regex[regexprops.index].value}
         />
       </div>
-      <div class="flex gap:2 mt:6 justify-content:space-between ai:center ">
-        <label class="flex:.5 f:15">Enabled</label>
+      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
+        <label class="f:15 flex:.5">Enabled</label>
         <input
           checked={values.regex[regexprops.index].enabled}
-          class="flex:1 f:15 border:1px|solid|#ccc p:2"
+          class="border:1px|solid|#ccc f:15 flex:1 p:2"
           onChange={(e) => setValues('regex', regexprops.index, 'enabled', e.target.checked)}
           type="checkbox"
         />
       </div>
-      <div class="flex gap:2 mt:6 justify-content:space-between ai:center ">
-        <label class="flex:.5 f:15">Message</label>
+      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
+        <label class="f:15 flex:.5">Message</label>
         <input
-          class="flex:1 f:15 border:1px|solid|#ccc p:2"
+          class="border:1px|solid|#ccc f:15 flex:1 p:2"
           onChange={(e) => setValues('regex', regexprops.index, 'message', e.target.value)}
           type="text"
           value={values.regex[regexprops.index].message}

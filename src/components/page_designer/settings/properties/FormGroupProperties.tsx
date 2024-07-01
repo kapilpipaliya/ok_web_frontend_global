@@ -104,11 +104,11 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   }
 
   const UniqueNameField = (p: { id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
-    <div class={`flex gap:2 mt:6 justify-content:space-between ai:center ${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 p:2|3 r:5 bt:none bb:none' : ''}`}>
-      <span class="flex:.5 f:15" id={p.id}>
+    <div class={`${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
+      <span class="f:15 flex:.5" id={p.id}>
         <Label metaVertex={p.metaVertex} />
       </span>
-      <span class="flex:1 f:15">
+      <span class="f:15 flex:1">
         <DynamicComponent
           component={"TextBox"}
           data={props.selectedLayout}
@@ -122,11 +122,11 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   );
 
   const HighlightSetValue = (p: { component: Accessor<string>, id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
-    <div class={`flex gap:2 mt:6 justify-content:space-between ai:center ${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 p:2|3 r:5 bt:none bb:none' : ''}`}>
-      <span class="flex:.5 f:15" id={p.id}>
+    <div class={`${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
+      <span class="f:15 flex:.5" id={p.id}>
         <Label metaVertex={p.metaVertex} />
       </span>
-      <span class="flex:1 f:15">
+      <span class="f:15 flex:1">
         <Switch>
           <Match when={p.metaVertex.P.name === "defaultValue"}>
             <DefaultValueContent meta={p.meta} />
@@ -152,7 +152,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       <Show when={props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null}>
         <span>
           <Icon
-            class="cursor:pointer color:#ff0000"
+            class="color:#ff0000 cursor:pointer"
             data-testid="clearIcon"
             icon="mdi:close"
             onClick={() => props.setValue(p.metaVertex, null)}

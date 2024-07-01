@@ -44,7 +44,7 @@ export const ContainerLabel = (props: {
   title: JSXElement;
 }) => (
   <span
-    class={`flex ai:center m:0 pt:5 font:14 font-weight:400 ${props.class}`}
+    class={`${props.class} flex ai:center font-weight:400 font:14 m:0 pt:5`}
   >
     {props.title}
     <Show when={props.showIcon ?? false}>
@@ -58,7 +58,7 @@ export const ContainerLabel = (props: {
     </Show>
     <Show when={props.info}>
       <CustomTooltip message={'Click for more Info'} title={props.title} >
-        <div class={"cursor:pointer flex"} onClick={() => {
+        <div class={"flex cursor:pointer"} onClick={() => {
           window.open(`https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`, '_blank');
         }}><Icon height={21} icon={"mdi:information-outline"} style={{ 'color': 'lightgray', 'margin-left': '2px' }} width={21} /></div>
       </CustomTooltip>
@@ -68,12 +68,12 @@ export const ContainerLabel = (props: {
 
 export const Container = (props: { children: JSXElement; class?: string }) => (
   <span
-    class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}
+    class={`${props.class} flex ai:center flex-shrink:0 jc:space-between min-h:45px w:full`}
   >
     {props.children}
   </span>
 );
 
 export const CenterDiv = (props: { children: JSXElement }) => (
-  <div class={"w:full flex ai:center jc:space-between"}>{props.children}</div>
+  <div class={"flex ai:center jc:space-between w:full"}>{props.children}</div>
 );

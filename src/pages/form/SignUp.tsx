@@ -87,7 +87,7 @@ export function SignUp() {
         style={{ "justify-self": "center" }}
       />
       <form
-        class="m:10px mb:5rem bg:white jc:center r:10"
+        class="bg:white jc:center m:10px mb:5rem r:10"
         style={{
           "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
@@ -96,17 +96,17 @@ export function SignUp() {
       >
         <img
           alt="logo"
-          class="w:25rem d:none@<md"
+          class="d:none@<md w:25rem"
           src={"../../public/graphics/register_vector.png"}
         />
-        <div class="w:50% w:100%@<md grid align-content:center m:0|30@lg">
-          <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+        <div class="grid align-content:center m:0|30@lg w:50% w:100%@<md">
+          <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
             Sign Up
           </div>
-          <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
             Let's Bright up your future!
           </div>
-          <div class="grid-template-columns:1fr|50% grid gap:0|10">
+          <div class="grid gap:0|10 grid-template-columns:1fr|50%">
             {" "}
             <div class="m:10|0|0|0">
               <label
@@ -210,7 +210,7 @@ export function SignUp() {
                 />
                 <Icon
                   aria-label="Toggle password visibility"
-                  class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
                   icon={`${
                     showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
                   }`}
@@ -235,7 +235,7 @@ export function SignUp() {
           >
             Sign Up
           </button>
-          <div class="flex text-align:center jc:center mt:20 f:15">
+          <div class="flex f:15 jc:center mt:20 text-align:center">
             Already have an account?&nbsp;
             <a href={"/auth/login"} replace={true}>
               <u class="font:bold">Sign In</u>

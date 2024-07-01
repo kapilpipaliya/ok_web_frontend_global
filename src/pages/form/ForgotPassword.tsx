@@ -81,14 +81,14 @@ export function ForgotPassword() {
       />
       <Switch>
         <Match when={isLoading()}>
-          <div class="p:5rem bg:white r:10">
+          <div class="bg:white p:5rem r:10">
             <div class="loader" />
           </div>
         </Match>
         <Match when={true}>
           <Show when={stage() === 0}>
             <form
-              class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+              class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
               onSubmit={handleEmailSubmit}
               style={{
                 "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
@@ -97,10 +97,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
                 Forgot Password
               </div>
-              <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
                 Provide the email address associated with your account. We will
                 send you a link to reset your password.
               </div>
@@ -141,11 +141,11 @@ export function ForgotPassword() {
               >
                 Confirm
               </button>
-              <div class="flex justify-content:center mt:20 f:15">
+              <div class="flex f:15 justify-content:center mt:20">
                 <span>
                   Return to&nbsp;
                   <A href={"/auth/login"}>
-                    <u class="font:bolder text-fill:black">Log In</u>
+                    <u class="text-fill:black font:bolder">Log In</u>
                   </A>
                 </span>
               </div>
@@ -153,7 +153,7 @@ export function ForgotPassword() {
           </Show>
           <Show when={stage() === 1}>
             <form
-              class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw@<md w:40vw@lg w:28vw@>xl"
+              class="@fade|.5s bg:white mb:5rem r:10 w:50vw@<md w:70vw@<xs w:40vw@lg w:28vw@>xl"
               onSubmit={handleOtpSubmit}
               style={{
                 "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
@@ -162,10 +162,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
                 OTP Verification
               </div>
-              <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
                 We have sent an OTP to your email. Please enter it below to
                 proceed.
               </div>
@@ -205,11 +205,11 @@ export function ForgotPassword() {
               >
                 Submit
               </button>
-              <div class="flex justify-content:center mt:20 f:15">
+              <div class="flex f:15 justify-content:center mt:20">
                 <span>
                   Return to&nbsp;
                   <A href={"/auth/login"}>
-                    <u class="font:bolder text-fill:black">Log In</u>
+                    <u class="text-fill:black font:bolder">Log In</u>
                   </A>
                 </span>
               </div>
@@ -217,7 +217,7 @@ export function ForgotPassword() {
           </Show>
           <Show when={stage() === 2}>
             <form
-              class="@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+              class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
               onSubmit={handlePasswordResetSubmit}
               style={{
                 "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
@@ -226,10 +226,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
                 Reset Password
               </div>
-              <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
                 Below you can enter your new password.
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>
@@ -255,7 +255,7 @@ export function ForgotPassword() {
                 />
                 <Icon
                   aria-label="Toggle password visibility"
-                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
                   icon={`${
                     showNewPassword()
                       ? "iconamoon:eye-light"
@@ -287,7 +287,7 @@ export function ForgotPassword() {
                 />
                 <Icon
                   aria-label="Toggle password visibility"
-                  class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
                   icon={`${
                     showConfirmPassword()
                       ? "iconamoon:eye-light"
@@ -311,10 +311,10 @@ export function ForgotPassword() {
               >
                 Confirm
               </button>
-              <div class="flex mt:20 f:15" style={{ "text-align": "center" }}>
+              <div class="flex f:15 mt:20" style={{ "text-align": "center" }}>
                 Return to&nbsp;
                 <A href={"/auth/login"}>
-                  <u class="font:bolder text-fill:black">Log In</u>
+                  <u class="text-fill:black font:bolder">Log In</u>
                 </A>
               </div>
             </form>

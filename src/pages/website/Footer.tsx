@@ -69,7 +69,7 @@ export function Footer() {
   return (
     <section aria-labelledby="footer-heading" class="footer">
       <h2 class="sr-only" id="footer-heading">Footer</h2>
-      <div class="pb-3 flex jc:space-around ai:center flex-direction:row">
+      <div class="pb-3 flex ai:center flex-direction:row jc:space-around">
         <div class="info d-grid align-content-spacebetween">
           <div>
             <a aria-label="EasyFormForge Home" href="/">

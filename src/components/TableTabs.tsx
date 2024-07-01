@@ -32,11 +32,11 @@ export function TableTabs(props: TableTabProps) {
   };
 
   return (
-    <div class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 mt:1rem overflow:auto">
+    <div class="flex bb:#E0E0E0 border-bottom:0.7 flex:row gap-x:30 mt:1rem overflow:auto">
       <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
           <div
-            class={`${currentTab() === item ? 'f:16' : 'f:14 color:slategray'} p:5|0 bb:2px|solid|lightgrey:hover cursor:pointer`}
+            class={`${currentTab() === item ? 'f:16' : 'color:slategray f:14'} bb:2px|solid|lightgrey:hover cursor:pointer p:5|0`}
             id={`tabletab-${item}`}
             onClick={() => handleTabClick(item)}
             style={{

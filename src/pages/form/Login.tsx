@@ -112,7 +112,7 @@ export function Login() {
         <div class="text-align:-webkit-center">
           <img
             alt="logo"
-            class="r:10 @fade|.5s bg:white p:2"
+            class="@fade|.5s bg:white p:2 r:10"
             src={formData().profileImage}
             style={{ height: "130px", "justify-self": "center" }}
           />
@@ -125,7 +125,7 @@ export function Login() {
         </div>
       </Show>
       <form
-        class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
+        class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
         style={{
           "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
@@ -138,9 +138,9 @@ export function Login() {
           src={"../../public/graphics/login_vector.jpg"}
           style={{ width: "25rem" }}
         />
-        <div class="mt:25 w:100%@<md grid align-content:center m:0|30@lg">
-          <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">Log In</div>
-          <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+        <div class="grid align-content:center m:0|30@lg mt:25 w:100%@<md">
+          <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">Log In</div>
+          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
             You Will be Redirected to Home Page
           </div>
           <label
@@ -194,7 +194,7 @@ export function Login() {
             />
             <Icon
               aria-label="Toggle password visibility"
-              class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+              class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
               icon={`${
                 showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
               }`}
@@ -236,11 +236,11 @@ export function Login() {
           >
             Log In
           </button>
-          <div class="flex justify-content:center mt:20 f:15">
+          <div class="flex f:15 justify-content:center mt:20">
             <span>
               Don't have an account?{" "}
               <A href={"/auth/signup"}>
-                <u class="font:bolder text-fill:black">Sign Up</u>
+                <u class="text-fill:black font:bolder">Sign Up</u>
               </A>
             </span>
           </div>

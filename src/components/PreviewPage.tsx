@@ -15,14 +15,14 @@ const PreviewPage = (props: any) => {
     { icon: true, key: "humbleicons:desktop", value: "Desktop" },
   ];
   return (
-    <div class="flex flex:col ai:center bg:gray-100 p:5|20 min-h:100vh">
+    <div class="flex ai:center bg:gray-100 flex:col min-h:100vh p:5|20">
       <div class="flex mb:16">
         <For each={views}>
           {(viewData, index) => (
             <Tooltip content={viewData.value} position={"s"}>
               <button
-                class={`rel d:inline-flex ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""
-                  }`}
+                class={`${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""
+                  } rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem z:10:focus`}
                 onclick={() => setView(viewData.value)}
                 style={{
                   "background-color": viewData.value === view() ? "#E0E7F3" : "",
@@ -36,11 +36,11 @@ const PreviewPage = (props: any) => {
           )}
         </For>
       </div>
-      <div class="w:full h:full flex ai:center jc:center">
+      <div class="flex ai:center h:full jc:center w:full">
         <div 
-          class={`w:${view() === 'Mobile' ? '375px' : view() === 'Tablet' ? '768px' : 'full'} 
+          class={`b:1px|solid|lightblue 
                  h:${view() === 'Mobile' || view() === 'Tablet' ? 'calc(100vh-130px)' : '90vh'} 
-                 overflow:auto b:1px|solid|lightblue r:5 `}
+                 overflow:auto r:5 w:${view() === 'Mobile' ? '375px' : view() === 'Tablet' ? '768px' : 'full'} `}
         >
           {props.children}
         </div>

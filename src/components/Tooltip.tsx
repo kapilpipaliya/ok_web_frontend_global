@@ -34,12 +34,12 @@ export function CustomTooltip(props: Readonly<{
       </div>
       <div
         class={
-          "text:nowrap center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
+          "abs center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content mt:3 p:3|10 r:5 text:nowrap w:full z-index:1"
         }
         id={id}
       >
         <Show when={props.title}>
-          <div class={"font-weight:500 f:14"}>{props.title}</div>
+          <div class={"f:14 font-weight:500"}>{props.title}</div>
         </Show>
         <Show when={props.message}>
           {props.message}

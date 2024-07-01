@@ -12,7 +12,7 @@ export function BackupRestore() {
   }>) => {
     return (
       <div class="b:2">
-        <div class="p:10 bb:1">
+        <div class="bb:1 p:10">
           <h2 class="uk-margin-remove-bottom">{props.title}</h2>
           <span>{props.subtitle}</span>
         </div>
@@ -22,11 +22,11 @@ export function BackupRestore() {
   };
 
   return (
-    <div class="mb:1.5rem mt:10 m:6">
-      <div class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
+    <div class="m:6 mb:1.5rem mt:10">
+      <div class="gap:10 grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl text:center w:full">
         <C subtitle={"Simple Import"} title={"Links"}>
           <div class="m:0 p:12">
-            <div class="m:1rem flex gap:0.5rem">
+            <div class="flex gap:0.5rem m:1rem">
               <A
                 class="b:2|solid|blue-40"
                 href={`${APP_BASE_URL}/SimpleImport`}

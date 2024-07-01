@@ -104,7 +104,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
           wrapperStyle={{ height: "19px", width: "19px" }} />
       </Show>
       <div
-        class="pt:5px flex gap:5px ai:center"
+        class="flex ai:center gap:5px pt:5px"
         style={{ "flex-flow": "column" }}
       >
         <Icon

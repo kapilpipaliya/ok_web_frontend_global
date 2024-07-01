@@ -118,7 +118,7 @@ function PricingContent() {
         <h5 class="color-info mt-2">Save up to 20%</h5>
 
         <div
-          class={"mt-5 grid grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg gap:20px"}
+          class={"mt-5 grid gap:20px grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg"}
         >
           <For each={plans}>
             {(plan) => (
@@ -149,7 +149,7 @@ function PricingPlan(props: Readonly<{
       style={{ display: "block" }}
     >
       <h4 id={`${props.title.toLowerCase().replace(" ", "-")}-heading`} style={{ float: "left" }}>{props.title}</h4>
-      <div class="plan-price flex text-align:left f:14 pt:10">
+      <div class="plan-price flex f:14 pt:10 text-align:left">
         <h4 class="mr-2 f:35px">${props.price}</h4>
         <p class="line-height:1">
           per month <br /> incl. tax

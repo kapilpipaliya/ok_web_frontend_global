@@ -25,12 +25,12 @@ export function UserDashBoardGrid() {
     ...new Set([...allFormTableLayouts]),
   ];
   return (
-    <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
+    <div class="gap:15 gap:20@sm grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md">
       <For each={allTableLayouts()}>
         {(tableLayout) => (
-          <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
+          <div class="flex bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:10">
             <h3 class="f:18@md font:semibold" />
-            <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
+            <p class="f:18@md font:semibold mb:0 mt:5 mx:auto">
               <A href={`${APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
                 {tableLayout.P.title || tableLayout.P[IdAttr]}
               </A>

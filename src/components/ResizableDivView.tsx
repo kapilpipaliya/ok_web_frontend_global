@@ -60,7 +60,7 @@ export function ResizableContainer(props: Readonly<{
         "min-h:100%": props.view === "Tablet"
       }}>
       <div
-        class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"
+        class="justify-self:center min-h:80% min-w:30% r:10|10|10|10"
         style={`${width() ? `width:${width()};` : ""} height: ${height()}; max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
       >
         {/*<div

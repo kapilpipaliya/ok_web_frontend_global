@@ -22,7 +22,7 @@ export function PropertiesHeader() {
             }}
         >
             <div
-                class="mb:2px ml:5px p:3|0 f:16"
+                class="f:16 mb:2px ml:5px p:3|0"
                 style="flex-grow: 1; font-weight: bold;text-align-last: left;"
             >
                 {getComponentName()} Properties <OpenComponentSettings id={layoutStore.selectedComponent as string} />

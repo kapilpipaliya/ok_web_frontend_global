@@ -31,13 +31,13 @@ export const ColorPickerInput = (props: {
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
       <input
-        class="color-picker__input-color mr:10 cursor:pointer; h:25px w:30px r:5 p:0 bg:#ffffff b:none"
+        class="color-picker__input-color b:none bg:#ffffff cursor:pointer; h:25px mr:10 p:0 r:5 w:30px"
         onInput={handleChange}
         type="color"
         value={selected()}
       />
       <input
-        class="b:none w:100% f:14 outline:none"
+        class="b:none f:14 outline:none w:100%"
         onInput={handleChange}
         placeholder="Enter color code"
         type="text"
@@ -51,7 +51,7 @@ export const ColorPickerInput = (props: {
       <Show
         fallback={
           <Show fallback={<Content />} when={props.label}>
-            <div class={"w:100% flex jc:space-between ai:center"}>
+            <div class={"flex ai:center jc:space-between w:100%"}>
               <ContainerLabel info={props.name} onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>

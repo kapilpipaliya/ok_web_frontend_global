@@ -233,12 +233,12 @@ export function GenericField(
           </Table>
         </Match>
         <Match when={component() === "TableHeader" && getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length}>
-          <TableHeadCell class={"p:10 text:center h:5"}>
+          <TableHeadCell class={"h:5 p:10 text:center"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
-          <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
+          <TableBodyCell class={"b:1px|solid|#000 bg:#ffffff h:50 text:center"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
@@ -322,7 +322,7 @@ export function GenericField(
           <hr
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={` h:${props.meta.P.height ?? "2"} color:${props.meta.P.color ?? "lightgrey"} w:full ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            class={` ${mergeCSS(defaultValues().class, props.meta.P.class)} color:${props.meta.P.color ?? "lightgrey"} h:${props.meta.P.height ?? "2"} w:full`}
           />
         </Match>
         <Match when={component() === "Heading"}>

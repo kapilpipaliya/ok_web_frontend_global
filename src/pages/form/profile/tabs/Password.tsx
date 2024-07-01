@@ -86,7 +86,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
   };
 
   return (
-    <div class="bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|rgb(237,239,241)">
+    <div class="bg:#f5f7fa box-shadow:0|0|12|.1|rgb(237,239,241) m:20 p:10px|15px r:8 w:80%">
       <div>
         <div class={"font-weight:700"}>Password</div>
         <div class={"font-weight:400 mb:30"}>
@@ -94,7 +94,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
         </div>
         <div
           class={
-            "flex@md rel ai:center jc:space-between p:20 bt:1px|solid|lightgrey"
+            "flex@md rel ai:center bt:1px|solid|lightgrey jc:space-between p:20"
           }
         >
           <span class={"font-weight:600"}>Current User</span>
@@ -109,7 +109,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
         </div>
         <div
           class={
-            "flex@md rel ai:center jc:space-between p:20 mb:5 bt:1px|solid|lightgrey"
+            "flex@md rel ai:center bt:1px|solid|lightgrey jc:space-between mb:5 p:20"
           }
         >
           <span class={"font-weight:600"}>Current Password</span>
@@ -123,7 +123,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
           />
           <Icon
             aria-label="Toggle password visibility"
-            class="abs top:50px top:25px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+            class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:20 top:50px top:25px@md"
             icon={`${
               showPassword.currentPassword
                 ? "iconamoon:eye-light"
@@ -132,7 +132,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
             onClick={() => togglePasswordVisibility("currentPassword")}
           />
         </div>
-        <div class={"flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"}>
+        <div class={"flex@md rel ai:center jc:space-between mb:5 p:5|20|20|20"}>
           <span class={"font-weight:600"}>New Password</span>
           <input
             name={"newPassword"}
@@ -143,7 +143,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
           />
           <Icon
             aria-label="Toggle password visibility"
-            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+            class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:20 top:33px top:10px@md"
             icon={`${
               showPassword.newPassword
                 ? "iconamoon:eye-light"
@@ -154,7 +154,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
         </div>
         <div
           class={
-            "flex@md rel ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|solid|lightgrey"
+            "flex@md rel ai:center bb:1px|solid|lightgrey jc:space-between mb:10 p:5|20|20|20"
           }
         >
           <span class={"font-weight:600"}>Confirm Password</span>
@@ -167,7 +167,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
           />
           <Icon
             aria-label="Toggle password visibility"
-            class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+            class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:20 top:33px top:10px@md"
             icon={`${
               showPassword.confirmPassword
                 ? "iconamoon:eye-light"
@@ -180,7 +180,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
       <div class={"flex jc:end"}>
         <button
           class={
-            "p:5|10 m:15|10 r:4 border:none color:white bg:#5b7dff cursor:pointer"
+            "bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
           }
           onClick={onClickSave}
         >

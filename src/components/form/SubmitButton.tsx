@@ -8,7 +8,7 @@ export function SubmitButton(props: Readonly<{ buttonAlign?: string; onCancel: (
         "justify-content": props.buttonAlign ?? "start",
       }}
     >
-      <button class="border-color:#FF0000 color:#FF0000 danger" onClick={props.onCancel} style={{ "margin-right": "7px" }}>Cancel</button>
+      <button class="danger border-color:#FF0000 color:#FF0000" onClick={props.onCancel} style={{ "margin-right": "7px" }}>Cancel</button>
       <Show
         fallback={<button onClick={props.onSubmit}>Save</button>}
         when={props.submitButton}

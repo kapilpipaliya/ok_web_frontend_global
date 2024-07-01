@@ -40,7 +40,7 @@ export function CustomModal(props: CustomModalProps) {
         fallback={
           <div
             aria-disabled={open()}
-            class={`cursor:pointer bg:#dfe9f3d1:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`}
+            class={`${props.iconClass} bg:#dfe9f3d1:hover cursor:pointer p:5|5|5|5 r:5|5|5|5`}
             ref={btnEl!}
           >
             {props.buttonLabel}
@@ -50,7 +50,7 @@ export function CustomModal(props: CustomModalProps) {
       >
         <Icon
           aria-disabled={open()}
-          class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`}
+          class={`${props.iconClass} bg:lightgrey:hover cursor:pointer p:5|5|5|5 r:5|5|5|5`}
           color={"grey"}
           height={props.iconSize ?? 25}
           icon={props.buttonIcon ?? "material-symbols:error"}
@@ -67,17 +67,17 @@ export function CustomModal(props: CustomModalProps) {
         >
           <div
             aria-modal="true"
-            class={`modal r:10 ${props.dialogClass}`}
+            class={`modal ${props.dialogClass} r:10`}
             role="dialog"
             tabindex="-1"
           >
-            <div class={"mb:4 font-weight:bold"}>
+            <div class={"font-weight:bold mb:4"}>
               <Show fallback={props.customTitle} when={!props.customTitle}>
                 {props.title}
               </Show>
               {props.closeButton !== false && (
                 <button
-                  class={"bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5"}
+                  class={"bg:lightgrey:hover p:0|5|0|5 r:5|5|5|5"}
                   onClick={onClickOverlay}
                   style={{float: "right"}}
                   title={"Close"}
@@ -87,7 +87,7 @@ export function CustomModal(props: CustomModalProps) {
               )}
             </div>
             <hr class={"fg:lightgrey"}/>
-            <div class={"p:3 max-h:50vh overflow:auto"} style={props.bodyStyle}>
+            <div class={"max-h:50vh overflow:auto p:3"} style={props.bodyStyle}>
               {props.body}
             </div>
             <div class={"pt:5"}>{props.footer(setOpen)}</div>

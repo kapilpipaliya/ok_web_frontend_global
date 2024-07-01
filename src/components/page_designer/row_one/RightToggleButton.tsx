@@ -5,14 +5,14 @@ import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext
 export function RightToggleButton() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <div class={`rel flex jc:end h:50px r:0|15|15|0 p:2 cursor:pointer`}>
+    <div class={`flex rel cursor:pointer h:50px jc:end p:2 r:0|15|15|0`}>
       <button
-        class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus cursor:pointer p:15px border-radius:5px flex gap:10px align-items:center"
+        class="flex align-items:center border-radius:5px cursor:pointer gap:10px jc:center outline:2px|solid|transparent outline:offset|2px:focus p:15"
         onClick={() => setLayoutStore("isRightOpen", !layoutStore.isRightOpen)}
       >
-        <span class="font:14 cursor:pointer d:none@<sm ml:10">View Form Settings</span>
+        <span class="cursor:pointer d:none@<sm font:14 ml:10">View Form Settings</span>
         <Icon
-          class="cursor:pointer color:#37c"
+          class="color:#37c cursor:pointer"
           height={22}
           icon={"icon-park-outline:setting-two"}
           width={22}

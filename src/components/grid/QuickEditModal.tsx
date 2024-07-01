@@ -28,7 +28,7 @@ export const QuickEditModal = (p: {
       <Icon
         aria-disabled={open()}
         class={
-          "cursor:pointer bg:#e6f8ff:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue"
+          "bg:#e6f8ff:hover color:cornflowerblue cursor:pointer p:5|5|5|5 r:5|5|5|5"
         }
         color={"grey"}
         height={22}
@@ -51,14 +51,14 @@ export const QuickEditModal = (p: {
         <div class="modal-container" ref={btnPopUp} role="presentation">
           <div
             aria-modal="true"
-            class="modal min-w:30% r:10px p:0"
+            class="modal min-w:30% p:0 r:10px"
             role="dialog"
             tabindex="-1"
           >
-            <div class="mb:4 font-weight:bold">
+            <div class="font-weight:bold mb:4">
               Quick Edit
               <button
-                class="bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5 float:right"
+                class="bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5"
                 onClick={closePopUp}
                 title="Close"
               >
@@ -67,7 +67,7 @@ export const QuickEditModal = (p: {
             </div>
             <hr class="fg:lightgrey"/>
 
-            <div class="p:3 mt:10 max-h:50vh overflow:auto">
+            <div class="max-h:50vh mt:10 overflow:auto p:3">
               <DynamicForm
                 buttonAlign="end"
                 closePopUp={closePopUp}

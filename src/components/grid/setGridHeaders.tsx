@@ -77,7 +77,7 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
       return (
         <Switch>
           <Match when={formNew.isInlineEditable}>
-            <div class="flex gap:10px ai:center  jc:center cursor:pointer">
+            <div class="flex ai:center cursor:pointer  gap:10px jc:center">
               <QuickEditModal
                 graph={graph}
                 info={info}
@@ -96,7 +96,7 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
 
           <Match when={!formNew.isInlineEditable}>
             <div class="py:0.25rem">
-              <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
+              <div class="flex ai:center cursor:pointer  gap:10px jc:center r:7">
                 <Icon
                   class={"color:#3477CC"}
                   height={21}

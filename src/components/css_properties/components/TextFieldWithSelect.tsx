@@ -130,11 +130,11 @@ export const TextFieldWithSelect = (props: {
   });
   const Content = () => (
     <div
-      class={`flex ai:center jc:space-between ${
+      class={`${
         props.showInside ? "b:1px|solid|#ccc" : ""
-      } r:5 ${props.showInside ? "p:0|5|0|5" : ""} rel ${
+      } ${props.showInside ? "p:0|5|0|5" : ""} ${
         !props.isLabelOnTop ? "max-w:50%" : ""
-      }`}
+      } flex rel ai:center jc:space-between r:5`}
     >
       <div class={"flex ai:center"} style={{ flex: "1" }}>
         <Show when={props.leftIcon || props.inputType === "number"}>
@@ -190,7 +190,7 @@ export const TextFieldWithSelect = (props: {
       <Show when={props.options}>
         <span
           class={
-            "color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none"
+            "color:lightgrey cursor:pointer f:14 ml:5 pr:5 user-select:none"
           }
           onClick={toggleDropdown}
         >
@@ -199,17 +199,17 @@ export const TextFieldWithSelect = (props: {
         <Show when={isDropdownOpen()}>
           <div
             class={
-              "bg:white w:full box-shadow:0px|2px|5px|rgba(0,0,0,0.2) r:5 p:5 abs z-index:1000 top:100% left:0"
+              "abs bg:white box-shadow:0px|2px|5px|rgba(0,0,0,0.2) left:0 p:5 r:5 top:100% w:full z-index:1000"
             }
           >
             <For each={props.options}>
               {(option) => (
                 <div
-                  class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${
+                  class={`${
                     selectedOption?.() === option
                       ? "bg:rgb(229,234,253) font-weight:medium"
                       : "bg:transparent"
-                  } r:5`}
+                  } flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
                   onClick={() => selectOption(option)}
                 >
                   {option}

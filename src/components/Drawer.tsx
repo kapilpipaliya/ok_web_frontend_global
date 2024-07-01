@@ -81,7 +81,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
           border-left: ${mainDivHover()?"2px solid #37c":"none"};
         `}
       >
-        <div class="overflow:auto  h:100%" style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`}>{props.children}</div>
+        <div class="h:100%  overflow:auto" style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`}>{props.children}</div>
         <div
           onMouseDown={handleMouseDown}
           onMouseEnter={() => setMainDivHover(true)}

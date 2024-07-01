@@ -39,7 +39,7 @@ export function Breadcrumb(props: PageHeaderProps) {
         <h2 style={titleStyle}>{props.title}</h2>
 
         <nav aria-label="Breadcrumb" class="flex">
-          <ol class="display:inline-flex  align-items:center  space-x:0.25rem space-x:0.5rem@md --space-x-reverse:1:rtl">
+          <ol class="space-x:0.25rem  space-x:0.5rem@md  --space-x-reverse:1:rtl align-items:center display:inline-flex">
             <For each={props.breadcrumb}>
               {(item) => (
                 <li>
@@ -50,7 +50,7 @@ export function Breadcrumb(props: PageHeaderProps) {
                           icon={"octicon:chevron-right-12"}
                           style={{ color: "rgb(156,163,175)" }}
                         />
-                        <span class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(107,114,128)  md:ms-2 color:rgb(156,163,175)@dark">
+                        <span class="ms-1 lh:1.25rem md:ms-2 color:rgb(107,114,128)  color:rgb(156,163,175)@dark  f:0.875rem font-weight:500">
                           {item.name}
                         </span>
                       </div>
@@ -68,7 +68,7 @@ export function Breadcrumb(props: PageHeaderProps) {
                           />
                         </Show>
                         <a
-                          class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(55,65,81)  color:rgb(37,99,235):hover md:ms-2 color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark"
+                          class="ms-1 lh:1.25rem md:ms-2 color:rgb(55,65,81)  color:rgb(37,99,235):hover  color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark f:0.875rem font-weight:500"
                           href={item.href}
                         >
                           {item.name}

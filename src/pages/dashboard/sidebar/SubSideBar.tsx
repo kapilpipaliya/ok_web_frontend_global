@@ -24,10 +24,10 @@ export const SubSideBar = (props: MainSideBarProps) => {
   return (
     <Show when={!props.isCollapsed()}>
       <div
-        class={"bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20 w:max-content"}
+        class={"@fade|.3s bg:ghostwhite p:10|20 r:0|0|15|0 w:max-content"}
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
-        <nav class="flex 0px 0px 10px 10px pt:13">
+        <nav class="0px 0px 10px 10px flex pt:13">
           <div class="group">
             <Icon
               class="icon"
@@ -50,7 +50,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
           </div>
         </nav>
         <nav
-          class="mt:10 ml:-12 mr:-12 overflow:auto scrollbar-width:thin"
+          class="scrollbar-width:thin ml:-12 mr:-12 mt:10 overflow:auto"
           style={{
             "max-height": "calc(100vh - 5rem)",
             "overflow-y": "auto",
@@ -65,7 +65,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
                     style="padding-top: 12px; padding-bottom: 12px;"
                   >
                     <div
-                      class={`flex ai:center jc:space-between ${
+                      class={`${
                         !props.expandedSections().get(nav.P.name)
                           ? "color:#37c"
                           : ""
@@ -73,7 +73,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
                         location.pathname === nav.P.url
                           ? "bg:#E5EAFE font-weight:600"
                           : "font-weight:400"
-                      } pl:12 f:15 pr:12 capitalize`}
+                      } capitalize flex ai:center f:15 jc:space-between pl:12 pr:12`}
                     >
                       <div onClick={() => props.toggleSection(nav.P.name)}>
                         {nav.P.name}
@@ -112,7 +112,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
                                 location.pathname === child.P.url
                                   ? "bg:#E5EAFE font-weight:600"
                                   : "font-weight:400"
-                              } r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
+                              } trs:color|.3s|bg|.3s td:none ai:center bg:#E5E7EB:hover color:#4B5563 d:flex f:14 m:5px|10px p:8|12 r:7`}
                               href={child.P.url}
                             >
                               <Icon
@@ -125,7 +125,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
                                 icon={props.mainIcon[child.P.url]}
                                 width={24}
                               />
-                              <span class="ml:8 color:#4B5563 ">
+                              <span class="color:#4B5563 ml:8 ">
                                 {child.P.name}
                               </span>
                             </a>

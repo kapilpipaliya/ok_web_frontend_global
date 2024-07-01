@@ -56,7 +56,7 @@ export function SyncData() {
         title="Sync"
       />
 
-      <div class="position:relative  overflow-x:auto  box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06)  r:0.5rem@sm">
+      <div class="box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06)  overflow-x:auto  position:relative  r:0.5rem@sm">
         {TableActions()}
         {Table()}
         {transferPart()}
@@ -125,8 +125,8 @@ export function SyncData() {
 
     return (
       <>
-        <table class="width:100% f:0.875rem lh:1.25rem text-align:left text-align:right color:rgb(107,114,128) color:rgb(156,163,175)@dark">
-          <thead class="f:0.75rem lh:1rem color:rgb(55,65,81) text-transform:uppercase bg:rgb(249,250,251) bg:rgb(55,65,81)@dark color:rgb(156,163,175)@dark">
+        <table class="lh:1.25rem color:rgb(107,114,128) color:rgb(156,163,175)@dark f:0.875rem text-align:left width:100%">
+          <thead class="lh:1rem bg:rgb(249,250,251) bg:rgb(55,65,81)@dark color:rgb(55,65,81) color:rgb(156,163,175)@dark f:0.75rem text-transform:uppercase">
             <tr>
               <th class="p:1rem" scope="col">
                 <div class="flex ai:center">
@@ -134,7 +134,7 @@ export function SyncData() {
                     checked={displayedUsers().every((user) =>
                       selectedUsers().includes(user),
                     )}
-                    class="w:1rem h:1rem color:rgb(37,99,235) bg:rgb(243,244,246) border-color:rgb(209,213,219) r:0.25rem"
+                    class="bg:rgb(243,244,246) border-color:rgb(209,213,219) color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
                     id="checkbox-all-search"
                     onChange={handleSelectAll}
                     type="checkbox"
@@ -159,12 +159,12 @@ export function SyncData() {
           <tbody>
             <For each={displayedUsers()}>
               {(user) => (
-                <tr class="bg:rgb(255,255,255) border-bottom-width:1px bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark bg:rgb(249,250,251):hover bg:rgb(75,85,99):hover@dark">
-                  <td class="w:1rem p:1rem">
+                <tr class="bg:rgb(255,255,255) bg:rgb(249,250,251):hover bg:rgb(31,41,55)@dark bg:rgb(75,85,99):hover@dark border-bottom-width:1px border-color:rgb(55,65,81)@dark">
+                  <td class="p:1rem w:1rem">
                     <div class="flex ai:center">
                       <input
                         checked={selectedUsers().includes(user)}
-                        class="w:1rem h:1rem color:rgb(37,99,235) bg:rgb(243,244,246) border-color:rgb(209,213,219) r:0.25rem"
+                        class="bg:rgb(243,244,246) border-color:rgb(209,213,219) color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
                         id={`checkbox-table-search-${user.id}`}
                         onChange={() => handleCheckboxChange(user)}
                         type="checkbox"
@@ -185,17 +185,17 @@ export function SyncData() {
                           <div class="flex ai:center">
                             <img
                               alt={"image"}
-                              class="object-fit:cover w:2.5rem h:2.5rem r:9999px"
+                              class="h:2.5rem object-fit:cover r:9999px w:2.5rem"
                               src={
                                 user.P.profileImage ||
                                 "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
                               }
                             />
                             <div class="ml:13">
-                              <div class="f:1rem lh:1.5rem font-weight:600">
+                              <div class="lh:1.5rem f:1rem font-weight:600">
                                 {user.P.username}
                               </div>
-                              <div class="font-weight:400 color:rgb(107,114,128)">
+                              <div class="color:rgb(107,114,128) font-weight:400">
                                 {user.P.email}
                               </div>
                             </div>
@@ -208,7 +208,7 @@ export function SyncData() {
                   </For>
                   <td class="px:1.5rem py:1rem">
                     <a
-                      class="font-weight:500 color:rgb(37,99,235) color:rgb(59,130,246)@dark text-decoration:underline:hover"
+                      class="color:rgb(37,99,235) color:rgb(59,130,246)@dark font-weight:500 text-decoration:underline:hover"
                       data-modal-show="editUserModal"
                       href="#"
                       type="button"
@@ -223,26 +223,26 @@ export function SyncData() {
         </table>
         <nav
           aria-label="Table navigation"
-          class="p:10  flex ai:center flex-column flex-wrap:wrap flex-direction:row@md justify-content:space-between pt:1rem"
+          class="flex-column  flex ai:center flex-direction:row@md flex-wrap:wrap justify-content:space-between p:10 pt:1rem"
         >
-          <span class="f:0.875rem lh:1.25rem font-weight:400 color:rgb(107,114,128) color:rgb(156,163,175)@dark mb:1rem mb:0@md display:block width:100% display:inline@md width:auto@md">
+          <span class="lh:1.25rem color:rgb(107,114,128) color:rgb(156,163,175)@dark display:block display:inline@md f:0.875rem font-weight:400 mb:1rem mb:0@md width:100% width:auto@md">
             Showing{" "}
-            <span class="font-weight:600 color:rgb(17,24,39) color:rgb(255,255,255)@dark">
+            <span class="color:rgb(17,24,39) color:rgb(255,255,255)@dark font-weight:600">
               {(currentPage() - 1) * itemsPerPage + 1}
             </span>{" "}
             to{" "}
-            <span class="font-weight:600 color:rgb(17,24,39) color:rgb(255,255,255)@dark">
+            <span class="color:rgb(17,24,39) color:rgb(255,255,255)@dark font-weight:600">
               {Math.min(currentPage() * itemsPerPage, users().length)}
             </span>{" "}
             of{" "}
-            <span class="font-weight:600 color:rgb(17,24,39) ">
+            <span class="color:rgb(17,24,39) font-weight:600 ">
               {users().length}
             </span>
           </span>
-          <ul class="display:inline-flex ml:-1px --space-x-reverse:1:rtl f:0.875rem lh:1.25rem h:2rem">
+          <ul class="--space-x-reverse:1:rtl lh:1.25rem display:inline-flex f:0.875rem h:2rem ml:-1px">
             <li>
               <button
-                class="flex ai:center justify-content:center px:0.75rem h:2rem ms-0 lh:1.25 color:rgb(107,114,128) bg:rgb(255,255,255) border-width:1px r:5|0|0|5 border-color:rgb(209,213,219) rounded-s-lg bg:rgb(243,244,246):hover color:rgb(55,65,81):hover"
+                class="ms-0 lh:1.25 rounded-s-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:5|0|0|5"
                 onClick={() => setCurrentPage(Math.max(currentPage() - 1, 1))}
               >
                 Previous
@@ -252,11 +252,11 @@ export function SyncData() {
               {(page) => (
                 <li>
                   <button
-                    class={`flex ai:center justify-content:center px:0.75rem h:2rem lh:1.25 color:rgb(107,114,128) bg:rgb(255,255,255) border-width:1px border-color:rgb(209,213,219) ${
-                      page === currentPage()
-                        ? "color:rgb(37,99,235) border-color:rgb(209,213,219) bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark "
-                        : "bg:rgb(243,244,246):hover color:rgb(55,65,81):hover bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark color:rgb(156,163,175)@dark bg:rgb(55,65,81):hover@dark color:rgb(255,255,255):hover@dark"
-                    }`}
+                    class="lh:1.25 flex ai:center bg:rgb(255,255,255) border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) h:2rem justify-content:center px:0.75rem"
+                    classList={{
+                      "bg:rgb(243,244,246):hover color:rgb(55,65,81):hover bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark color:rgb(156,163,175)@dark bg:rgb(55,65,81):hover@dark color:rgb(255,255,255):hover@dark": page !== currentPage(),
+                      "color:rgb(37,99,235) border-color:rgb(209,213,219) bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark": page === currentPage()
+                    }}
                     onClick={() => setCurrentPage(page)}
                   >
                     {page}
@@ -266,7 +266,7 @@ export function SyncData() {
             </For>
             <li>
               <button
-                class="r:0|5|5|0 flex ai:center justify-content:center px:0.75rem h:2rem lh:1.25 color:rgb(107,114,128) bg:rgb(255,255,255) border-width:1px border-color:rgb(209,213,219) rounded-e-lg bg:rgb(243,244,246):hover color:rgb(55,65,81):hover"
+                class="lh:1.25 rounded-e-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:0|5|5|0"
                 onClick={() =>
                   setCurrentPage(Math.min(currentPage() + 1, totalPages))
                 }
@@ -284,11 +284,11 @@ export function SyncData() {
     return (
       <Show when={selectedUsers().length > 0}>
         <div class="p:10">
-          <h3 class="bg:#f4f4f4 r:5 p:3|6 mb:10 font-weight:500 color:rgb(17,24,39)">
+          <h3 class="bg:#f4f4f4 color:rgb(17,24,39) font-weight:500 mb:10 p:3|6 r:5">
             Transfer nodes
           </h3>
           <button
-            class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2"
+            class="bg:#37c f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
             onClick={() => {
               onClickTransfer(transferNodes.map((node) => node.value));
             }}
@@ -300,7 +300,7 @@ export function SyncData() {
           <For each={transferNodes}>
             {(node) => (
               <button
-                class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2"
+                class="bg:#37c f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
                 onClick={() => {
                   onClickTransfer([node.value]);
                 }}
@@ -342,10 +342,10 @@ export function SyncData() {
       });
     });
     return (
-      <div class="p:10 flex ai:center  jc:space-between  flex-column flex-direction:row@md flex-wrap:wrap  space-y:1rem margin-top:0@md py:1rem bg:rgb(255,255,255)  bg:rgb(17,24,39)@dark">
+      <div class="flex-column space-y:1rem flex  ai:center  bg:rgb(255,255,255) bg:rgb(17,24,39)@dark flex-direction:row@md  flex-wrap:wrap jc:space-between margin-top:0@md p:10  py:1rem">
         <div>
           <button
-            class="display:inline-flex  ai:center  color:rgb(107,114,128)  bg:rgb(255,255,255)  border-width:1px  border-color:rgb(209,213,219)  outline:none bg:rgb(243,244,246):hover font-weight:500  r:0.5rem  f:0.875rem lh:1.25rem px:0.75rem py:0.375rem"
+            class="lh:1.25rem  ai:center  bg:rgb(255,255,255)  bg:rgb(243,244,246):hover  border-color:rgb(209,213,219)  border-width:1px  color:rgb(107,114,128) display:inline-flex f:0.875rem  font-weight:500  outline:none px:0.75rem py:0.375rem r:0.5rem"
             id="dropdownActionButton"
             onClick={() => setShowModal(!showModal())}
             type="button"
@@ -354,7 +354,7 @@ export function SyncData() {
             Action
             <svg
               aria-hidden="true"
-              class="w:0.625rem m:5 h:0.625rem ms-2.5"
+              class="ms-2.5 h:0.625rem m:5 w:0.625rem"
               fill="none"
               viewBox="0 0 10 6"
               xmlns="http://www.w3.org/2000/svg"
@@ -369,17 +369,17 @@ export function SyncData() {
             </svg>
           </button>
           <div
-            class="abs z:10 display:none bg:rgb(255,255,255) r:0.5rem  box-shadow:0|1px|3px|0|rgba(0,0,0,0.1),0|1px|2px|0|rgba(0,0,0,0.06)  w:11rem "
+            class="abs bg:rgb(255,255,255) box-shadow:0|1px|3px|0|rgba(0,0,0,0.1),0|1px|2px|0|rgba(0,0,0,0.06) display:none r:0.5rem  w:11rem  z:10 "
             id="dropdownAction"
             style={{ display: showModal() ? "block" : "none" }}
           >
             <ul
               aria-labelledby="dropdownActionButton"
-              class="py:0.25rem f:0.875rem lh:1.25rem color:rgb(55,65,81)"
+              class="lh:1.25rem color:rgb(55,65,81) f:0.875rem py:0.25rem"
             >
               <li>
                 <a
-                  class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark"
+                  class="bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark display:block px:1rem  py:0.5rem"
                   href="#"
                 >
                   Reward
@@ -387,7 +387,7 @@ export function SyncData() {
               </li>
               <li>
                 <a
-                  class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark"
+                  class="bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark display:block px:1rem  py:0.5rem"
                   href="#"
                 >
                   Promote
@@ -395,7 +395,7 @@ export function SyncData() {
               </li>
               <li>
                 <a
-                  class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark"
+                  class="bg:rgb(243,244,246):hover  color:rgb(255,255,255):hover@dark display:block px:1rem  py:0.5rem"
                   href="#"
                 >
                   Activate account
@@ -404,7 +404,7 @@ export function SyncData() {
             </ul>
             <div class="py:0.25rem">
               <a
-                class="display:block bt:1px|solid|rgb(252,238,238,1) px:1rem py:0.5rem f:0.875rem lh:1.25rem color:rgb(243,0,0)  bg:rgb(243,244,246):hover"
+                class="lh:1.25rem bg:rgb(243,244,246):hover bt:1px|solid|rgb(252,238,238,1) color:rgb(243,0,0) display:block f:0.875rem px:1rem  py:0.5rem"
                 href="#"
               >
                 Delete User
@@ -417,7 +417,7 @@ export function SyncData() {
         </label>
         <div class="">
           <input
-            class="display:block p:5 f:0.875rem lh:1.25rem color:rgb(17,24,39)  border-width:1px  border-color:rgb(209,213,219)  r:0.5rem  w:20rem bg:rgb(249,250,251) border-color:rgb(59,130,246):focus outline:none"
+            class="lh:1.25rem bg:rgb(249,250,251) border-color:rgb(209,213,219) border-color:rgb(59,130,246):focus border-width:1px  color:rgb(17,24,39)  display:block  f:0.875rem  outline:none p:5 r:0.5rem w:20rem"
             id="table-search-users"
             onInput={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by username or email"

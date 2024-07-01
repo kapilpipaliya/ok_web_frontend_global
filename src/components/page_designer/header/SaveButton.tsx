@@ -34,7 +34,7 @@ export function SaveButton() {
   return (
     <Tooltip content={"Save"} position={"s"}>
       <button
-        class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px w:37px cursor:pointer"
+        class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer h:35px jc:center r:7 w:37px"
         onClick={onSubmit}
         type="button"
       >

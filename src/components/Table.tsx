@@ -178,7 +178,7 @@ const TableActions = (props: Readonly<{
         <div class="flex gap:10px">
           <Tooltip content="Move first">
             <button
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               disabled={props.currentPage() === 0}
               onClick={props.handleFirstPage}
               style={{
@@ -194,7 +194,7 @@ const TableActions = (props: Readonly<{
           </Tooltip>
           <Tooltip content="Previous">
             <button
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               disabled={props.currentPage() === 0}
               onClick={props.handlePreviousPage}
               style={{
@@ -206,7 +206,7 @@ const TableActions = (props: Readonly<{
           </Tooltip>
           <Tooltip content="Next">
             <button
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleNextPage}
               style={{
@@ -221,7 +221,7 @@ const TableActions = (props: Readonly<{
           </Tooltip>
           <Tooltip content="Move last">
             <button
-              class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleLastPage}
               style={{
@@ -243,11 +243,11 @@ const TableActions = (props: Readonly<{
 export function Table(props: Readonly<{ children: JSX.Element; class?: string; headers: number }>) {
   return (
     <div
-      class="overflow:visible rel r:10"
+      class="rel overflow:visible r:10"
       style={{ "scrollbar-width": "thin" }}
     >
       <div
-        class={`grid bb:2px|solid|#37c ${props.class || ""}`}
+        class={`${props.class || ""} grid bb:2px|solid|#37c`}
         style={`grid-template-columns: repeat(${props.headers}, 1fr);width: 100%; border-radius: 10px;overflow: auto;scrollbar-width: thin;font-size: 0.9em;`}
       >
         {props.children}
@@ -259,7 +259,7 @@ export function Table(props: Readonly<{ children: JSX.Element; class?: string; h
 export function TableHeadCell(props: any) {
   return (
     <div
-      class="font-weight:600 bg:#37c color:white p:10 border:1px|solid|#347fdd;"
+      class="bg:#37c border:1px|solid|#347fdd; color:white font-weight:600 p:10"
       style="padding: 10px; text-align: center;"
     >
       {props.children}
@@ -274,9 +274,9 @@ export function TableBodyCell(props: Readonly<{
 }>) {
   return (
     <div
-      class={`h:50 text:center bg:${
+      class={`${props.class} @fade|.4s bg:${
         props.index ? (props.index % 2 === 0 ? "white" : "#3478cc0d") : ""
-      } @fade|.4s ${props.class}`}
+      } h:50 text:center`}
       style="padding: 7px; align-content: center;"
     >
       {props.children}

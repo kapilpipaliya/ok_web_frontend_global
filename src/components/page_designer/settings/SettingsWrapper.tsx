@@ -8,7 +8,7 @@ export function SettingsWrapper() {
       classList={{ "display:none": !layoutStore.isRightOpen }}
     >
       <div
-        class={"h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5"}
+        class={"flex-col border:1|solid|lightgrey h:100vh m:5 overflow-x:auto r:5|5|5|5"}
         style={{
           "max-height": "calc(100vh - 120px)",
           "scrollbar-color": "lightgrey",

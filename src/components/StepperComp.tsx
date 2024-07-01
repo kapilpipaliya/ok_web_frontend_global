@@ -55,7 +55,7 @@ export const Stepper = () => {
 
   return (
     <>
-      <ul class="w:50%@>md w:100% m:0|10" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
+      <ul class="m:0|10 w:100% w:50%@>md" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
         <For each={steps()}>
           {(step, index) => (
             <>

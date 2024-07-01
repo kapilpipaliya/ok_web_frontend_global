@@ -50,7 +50,7 @@ export function Navbar(
     }) as JSX.CSSProperties;
   return (
     <div
-      class="p:5|10 bb:1|solid|rgb(212,219,231) r:0|0|10|10"
+      class="bb:1|solid|rgb(212,219,231) p:5|10 r:0|0|10|10"
       style={navbarStyle()}
     >
       <Show
@@ -94,7 +94,7 @@ export function Navbar(
       </button>*/}
 
       {/* Actions */}
-      <div class="flex ai:center jc:center gap:8">
+      <div class="flex ai:center gap:8 jc:center">
         {field.right}
         <Show when={field.meta?.P.menuPosition === "right"}>
           <NavToggleBtn toggleSidebar={field.toggleSidebar} />

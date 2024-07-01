@@ -133,7 +133,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "divider"}>
-        <hr class={"w:full color:lightgrey m:5|0"} />
+        <hr class={"color:lightgrey m:5|0 w:full"} />
         <Show when={props.value.title}>
           <div class={"f:15"}>{props.value.title}</div>
         </Show>

@@ -155,8 +155,8 @@ export function ExpressionBuilder(props: Readonly<{
           <For each={contentList}>
             {(item, index) => (
               <div class={"p:2"}>
-                <div class={"flex ai:center jc:space-between mt:4 mb:2"}>
-                  <span class={"font-weight:medium f:14"}>
+                <div class={"flex ai:center jc:space-between mb:2 mt:4"}>
+                  <span class={"f:14 font-weight:medium"}>
                     Expression : {index() + 1}
                   </span>
                   <Show when={index() > 0}>

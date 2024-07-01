@@ -71,7 +71,7 @@ export const DisplaySelector = (props: {
       <Show
         fallback={
           <Show fallback={<Content />} when={props.label}>
-            <div class={"w:100% flex jc:space-between ai:center"}>
+            <div class={"flex ai:center jc:space-between w:100%"}>
               <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
                 setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
                 if (props.value) {
@@ -99,10 +99,10 @@ export const DisplaySelector = (props: {
 
   function Content() {
     return (
-      <div class={`rel ${props.isLabelOnTop ? "w:full" : "w:50%"}`}>
+      <div class={`${props.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
         <div
-          class={`flex ai:center jc:space-between b:1px|solid|lightgray r:5 p:2|7 f:14 ${isActive() ? "open" : ""
-            }`}
+          class={`${isActive() ? "open" : ""
+            } flex ai:center b:1px|solid|lightgray f:14 jc:space-between p:2|7 r:5`}
           onClick={toggleDropdown}
         >
           <button
@@ -126,8 +126,8 @@ export const DisplaySelector = (props: {
         </div>
 
         <ul
-          class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${isActive() ? "visible" : "hidden"
-            }`}
+          class={`popup ${isActive() ? "visible" : "hidden"
+            } b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available`}
           id={`select-dropdown${props.label}`}
           style={
             "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
@@ -138,11 +138,11 @@ export const DisplaySelector = (props: {
               const label = () => option.value || option;
               return (
                 <li
-                  class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${selected() !== label()
+                  class={`${selected() !== label()
                     ? "bg:#efefef:hover"
                     : "bg:rgb(229,234,253):hover"
-                    } font-weight:${selected() === label() ? "medium" : ""} r:5 ${selected() === label() ? "bg:rgb(229,234,253)" : ""
-                    }`}
+                    } ${selected() === label() ? "bg:rgb(229,234,253)" : ""
+                    } flex rel ai:center cursor:pointer f:14 font-weight:${selected() === label() ? "medium" : ""} jc:space-between p:5 r:5`}
                   onClick={() => selectOption(option)}
                 >
                   <label>{formatString(label())}</label>

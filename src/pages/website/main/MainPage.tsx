@@ -29,13 +29,13 @@ export const MainPage = () => {
 
 const VideoSection = () => {
   return (
-    <section class="video container d-grid">
+    <section class="container d-grid video">
       <img alt="Video Home" src="graphics/videohome.png" title="Video Home" />
 
       <div class="userandreview mt-5 mb-5">
         <div class="activeusers">
           <Icon
-            class="bg:aliceblue p:10 r:50% color:blueviolet"
+            class="bg:aliceblue color:blueviolet p:10 r:50%"
             height={40}
             icon={"solar:users-group-rounded-line-duotone"}
             width={40}
@@ -47,7 +47,7 @@ const VideoSection = () => {
 
         <div class="reviews">
           <Icon
-            class="bg:aliceblue p:10 r:50% color:blueviolet"
+            class="bg:aliceblue color:blueviolet p:10 r:50%"
             height={45}
             icon={"material-symbols-light:bookmark-star-outline-rounded"}
             width={45}

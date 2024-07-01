@@ -84,7 +84,7 @@ export const FieldWithCustomBox = (props: {
       </div>
       <Show when={optionType() === "custom"}>
         <div
-          class={"b:1px|solid|lightgray p:0|10 pb:7 r:5 m:5|10"}
+          class={"b:1px|solid|lightgray m:5|10 p:0|10 pb:7 r:5"}
           style={{
             "align-items": "end",
             display: "grid",

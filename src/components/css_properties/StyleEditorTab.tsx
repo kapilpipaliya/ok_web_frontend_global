@@ -80,12 +80,12 @@ export const StyleEditorTab = () => {
 `}
       >
         <div
-          class={"cursor:pointer flex ai:center jc:space-between"}
+          class={"flex ai:center cursor:pointer jc:space-between"}
           onClick={() => setIsOpen(!isOpen())}
         >
           <span class={"f:15 font-weight:600"}>{props.title}</span>
           <Icon
-            class={"cursor:pointer transform 1s ease-in-out"}
+            class={"transform 1s ease-in-out cursor:pointer"}
             height={25}
             icon="uil:angle-up"
             style={{
@@ -114,10 +114,10 @@ export const StyleEditorTab = () => {
     <>
       <span
         class={
-          "flex ai:start jc:space-between flex-direction:column w:full mb:10 mt:10"
+          "flex ai:start flex-direction:column jc:space-between mb:10 mt:10 w:full"
         }
       >
-        <nav class="bg:white 0px 0px 10px 10px w:full p:5|0">
+        <nav class="0px 0px 10px 10px bg:white p:5|0 w:full">
           <div class="group">
             <Icon
               class="icon"

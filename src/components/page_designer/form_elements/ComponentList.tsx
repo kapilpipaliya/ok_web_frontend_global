@@ -122,7 +122,7 @@ export function ComponentList() {
 
   return (
     <>
-      <nav class="bg:white p:5 position:sticky abs">
+      <nav class="abs bg:white p:5">
         <div class="group">
           <Icon
             class="icon"
@@ -142,7 +142,7 @@ export function ComponentList() {
         </div>
       </nav>
       <div
-        class="overflow:auto h:full"
+        class="h:full overflow:auto"
         style={{
           "scrollbar-color": "lightgrey",
           "scrollbar-width": "thin",
@@ -152,7 +152,7 @@ export function ComponentList() {
           <For
             each={filteredData()}
             fallback={
-              <div class="p:3 font-weight:bold m:20px|0px text-align:center">
+              <div class="font-weight:bold m:20px|0px p:3 text-align:center">
                 No Component Found !
               </div>
             }

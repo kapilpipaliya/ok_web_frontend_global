@@ -25,27 +25,27 @@ export const ToggleButton = (props: {
 
   const Content = () => (
     <div
-      class={`inline-flex b:1px|solid|#ccc r:5 overflow:hidden ${!props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
-        }`}
+      class={`${!props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
+        } inline-flex b:1px|solid|#ccc overflow:hidden r:5`}
     >
       <For each={props.options}>
         {(option) => {
           return (
             <div
-              class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
-                                     bg:${isSelected(option)
+              class={`flex ai:center bg:${isSelected(option)
                   ? "#e0e7f3"
                   : "transparent"
-                }
-                 color:${isSelected(option) ? "#5252f1" : "black"
-                }
+                } color:${isSelected(option) ? "#5252f1" : "black"
+                } cursor:pointer f:14 jc:center
+                                     p:2|5
                  r:${props.options.indexOf(option) === 0
                   ? "5|0|0|5"
                   : props.options.indexOf(option) ===
                     props.options.length - 1
                     ? "0|5|5|0"
                     : "0"
-                }`}
+                }
+                 w:-webkit-fill-available`}
               onClick={() => {
                 if (props.onChangeInput) {
                   props.onChangeInput(option.value);

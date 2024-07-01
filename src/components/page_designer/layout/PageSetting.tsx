@@ -13,7 +13,7 @@ export function PageSetting() {
   const selectedSection=() => createMemo(() => menuItems.find((item: any) => item.id === selected()));
   
   return (
-    <div class="mt:1rem w:98vw flex:column@<sm" style={{display: "flex"}}>
+    <div class="flex:column@<sm mt:1rem w:98vw" style={{display: "flex"}}>
       <div
         class="h:90vh@>sm"
         style={{

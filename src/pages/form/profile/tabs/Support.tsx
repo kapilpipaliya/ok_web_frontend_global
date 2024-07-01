@@ -102,7 +102,7 @@ export const SupportTicketSection = (props: Readonly<{
       >
         <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
           <div
-            class="grid flex-col"
+            class="flex-col grid"
             ref={(el) => {
               messageContainer = el;
             }}
@@ -111,7 +111,7 @@ export const SupportTicketSection = (props: Readonly<{
             <For each={messages()}>
               {(msg: any) => (
                 <>
-                  <div class="rel mb:10 mt:10 @fade|.5s">
+                  <div class="rel @fade|.5s mb:10 mt:10">
                     <div
                       style={`color: #fff; float: ${
                         msg.personal ? "right" : "left"
@@ -126,19 +126,19 @@ export const SupportTicketSection = (props: Readonly<{
                       {msg.text}
                     </div>
                     <div
-                      class={`abs bottom:-10 ${
+                      class={`${
                         msg.personal ? "right:0" : "left:0"
-                      }`}
+                      } abs bottom:-10`}
                       style="font-size: 8px;"
                     >
                       {msg.timestamp}
                     </div>
                     <div
-                      class={`abs ${
-                        msg.personal
-                          ? "right:0 bg:#267e70 h:7px bottom:7px"
-                          : "left:0 bg:#5783d2 h:7px bottom:8px"
-                      }`}
+                      classList={{
+                        abs: true,
+                        "left:0 bg:#5783d2 h:7px bottom:8px": !msg.personal,
+                        "right:0 bg:#267e70 h:7px bottom:7px": msg.personal
+                      }}
                       style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;"
                     />
                   </div>
@@ -237,10 +237,10 @@ export const SupportTicketSection = (props: Readonly<{
   };
 
   return (
-    <div class={"w:80%@>md w:100%"}>
+    <div class={"w:100% w:80%@>md"}>
       <div class={"m:10|20"}>
         <div class={"font-weight:700"}>Support Ticket Details</div>
-        <span class={"font-weight:500 color:grey f:14"}>
+        <span class={"color:grey f:14 font-weight:500"}>
           List of all your contacts with our platforms
         </span>
       </div>
@@ -279,7 +279,7 @@ export const SupportTicketSection = (props: Readonly<{
                     />
                   </TableBodyCell>
                   <TableBodyCell>
-                    <div class={"flex jc:center ai:center"}>
+                    <div class={"flex ai:center jc:center"}>
                       <OpenDialog id={row.id} />
                       <DeleteDialog
                         buttonLabel={

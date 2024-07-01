@@ -8,7 +8,7 @@ import "~/pages/website/style.css";
 export function Header() {
   const navigate = useNavigate();
   return (
-    <header class="header flex jc:space-around ai:center flex-direction:row">
+    <header class="header flex ai:center flex-direction:row jc:space-around">
       <div class="logo">
         <a aria-label="EasyFormForge Home" href="/public">
           <img alt="EasyFormForge Logo" class="headerLogo" src={logos} />

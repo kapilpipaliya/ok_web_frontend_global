@@ -9,7 +9,7 @@ export function PreviewButton() {
   return (
     <Tooltip content={"Preview"} position={"s"}>
       <button
-        class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px w:37px cursor:pointer"
+        class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer h:35px jc:center r:7 w:37px"
         onClick={() => window.open(
           `/view/${layoutStore.formData.formData.L[0]}/${layoutStore.formData.formData.P.name}/preview`
         )}

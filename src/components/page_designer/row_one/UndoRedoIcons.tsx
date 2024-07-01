@@ -18,7 +18,7 @@ export function UndoRedoIcons() {
       {(item) => (
         <Tooltip content={item.tooltip} position={"n"}>
           <button
-            class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
+            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer h:30px jc:center r:7 w:30px"
             onClick={item.onClick}
             type="button"
           >

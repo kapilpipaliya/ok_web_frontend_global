@@ -15,7 +15,7 @@ export function ExportSection(props: Readonly<{
     <CustomModal
       body={<ShareSection />}
       buttonLabel={<Tooltip content={"Share"} position={"s"}>
-        <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px w:37px cursor:pointer">
+        <div class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer h:35px jc:center r:7 w:37px">
           <Icon height={22} icon={"basil:share-box-outline"} width={22} />
         </div>
       </Tooltip>}

@@ -267,7 +267,7 @@ export const DataEditWithCustomDialog = (props: {
             {p.option.replaceAll("|", " ")}
           </span>
           <div
-            class={`mr:10 h:20px bg:#fff w:20px r:5 box-shadow:${p.option}`}
+            class={`bg:#fff box-shadow:${p.option} h:20px mr:10 r:5 w:20px`}
           />
         </Match>
         {props.label}
@@ -320,7 +320,7 @@ export const DataEditWithCustomDialog = (props: {
 
   return (
     <div
-      class={"b:1px|solid|lightgray r:5 p:.2rem|.3rem"}
+      class={"b:1px|solid|lightgray p:.2rem|.3rem r:5"}
       style={{
         color: "#333",
         margin: "10px",

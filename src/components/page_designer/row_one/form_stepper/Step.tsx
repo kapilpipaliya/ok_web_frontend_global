@@ -34,7 +34,7 @@ export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; st
     <div
       style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${isActiveStep() ? "color:rgb(37,99,235);" : ""} position:relative;`}
     >
-      <button class="flex width:100% align-items:center; gap:0.5rem;" onClick={() => setLayoutStore('activeStepId', props.step.id)} type="button">
+      <button class="flex align-items:center; gap:0.5rem; width:100%" onClick={() => setLayoutStore('activeStepId', props.step.id)} type="button">
         <span style="display:flex; align-items:center;">
           <Tooltip content={props.step.P.name}>
             <span

@@ -71,7 +71,7 @@ export function ContactUs() {
         }}
       >
         <form
-          class="m:10px w:inherit bg:white jc:center r:10"
+          class="bg:white jc:center m:10px r:10 w:inherit"
           onSubmit={handleSubmit}
           style={{
             "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
@@ -79,22 +79,22 @@ export function ContactUs() {
             padding: "20px 30px",
           }}
         >
-          <div class="d:none@<md flex jc:center w:-webkit-fill-available">
+          <div class="flex d:none@<md jc:center w:-webkit-fill-available">
             <img
               alt="Contact Us"
               class="w:25rem "
               src={"../../public/graphics/contact-us.jpg"}
             />
           </div>
-          <div class="mt:25 w:-webkit-fill-available w:100%@<md grid align-content:center m:0|30@lg">
-            <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+          <div class="grid align-content:center m:0|30@lg mt:25 w:-webkit-fill-available w:100%@<md">
+            <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
               Contact Us
             </div>
-            <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+            <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
               We are open to any suggestions, please don't hesitate to contact
               us.
             </div>
-            <div class="grid grid-template-columns:1fr|50%@>md gap:10 ">
+            <div class="grid gap:10 grid-template-columns:1fr|50%@>md ">
               <div>
                 <label
                   class="f:14"

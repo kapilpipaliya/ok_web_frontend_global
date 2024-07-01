@@ -15,14 +15,14 @@ export const PricingPlans = (props: Readonly<{ plans: any }>) => {
     <>
       <div class={"m:10|20"}>
         <div class={"font-weight:700"}>Account Plans</div>
-        <span class={"font-weight:500 color:grey f:14"}>
+        <span class={"color:grey f:14 font-weight:500"}>
           Pick an account plan that fits your workflow.
         </span>
       </div>
 
       <div
         class={
-          "grid grid-template-columns:(2fr|50%) m:0|20 gap:10 grid-rows:2 w:80%@>md"
+          "grid gap:10 grid-rows:2 grid-template-columns:(2fr|50%) m:0|20 w:80%@>md"
         }
       >
         <For each={props.plans()}>
@@ -32,18 +32,18 @@ export const PricingPlans = (props: Readonly<{ plans: any }>) => {
                 isSelected(plan.name)
                   ? "b:2px|solid|rgb(56,114,250) color:black"
                   : "b:1.5px|solid|rgb(227,227,227) color:black"
-              } r:10 p:0|5 cursor:pointer`}
+              } cursor:pointer p:0|5 r:10`}
               onClick={() => setSelectedPlan(plan.name)}
             >
               <div
                 class={
-                  "flex jc:space-between ai:center font-weight:medium p:10|20"
+                  "flex ai:center font-weight:medium jc:space-between p:10|20"
                 }
               >
                 <div class={"flex ai:center"}>
                   <div
                     class={
-                      "h:35 w:35 bg:rgb(227,227,227) r:50% grid place-items:center"
+                      "grid bg:rgb(227,227,227) h:35 place-items:center r:50% w:35"
                     }
                   >
                     <Icon
@@ -82,23 +82,23 @@ export const CurrentPlan = () => {
   return (
     <div class={"m:10|20"}>
       <div class={"font-weight:700"}>Current Plan</div>
-      <span class={"font-weight:500 color:grey f:14"}>
+      <span class={"color:grey f:14 font-weight:500"}>
         We’ll credit your account if you need to downgrade during the billing
         cycle.
       </span>
-      <div class={"w:50%@>md w:39%@lg m:10|0 mb:20"}>
+      <div class={"m:10|0 mb:20 w:50%@>md w:39%@lg"}>
         <div
           class={
-            "b:2px|solid|rgb(33,146,15) color:black r:10 p:0|5 cursor:pointer"
+            "b:2px|solid|rgb(33,146,15) color:black cursor:pointer p:0|5 r:10"
           }
         >
           <div
-            class={"flex jc:space-between ai:center font-weight:medium p:10|20"}
+            class={"flex ai:center font-weight:medium jc:space-between p:10|20"}
           >
             <div class={"flex ai:center"}>
               <div
                 class={
-                  "h:35 w:35 bg:rgb(227,227,227) r:50% grid place-items:center"
+                  "grid bg:rgb(227,227,227) h:35 place-items:center r:50% w:35"
                 }
               >
                 <Icon

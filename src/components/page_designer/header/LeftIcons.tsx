@@ -9,12 +9,12 @@ export const LeftIcons = () => {
   return (
     <div class="flex ai:center">
       <button
-        class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
+        class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer h:30px jc:center r:5|5|5|5 w:30px"
         onclick={() => navigate(removeLastPathSegment())}
         title="Back"
       >
         <Icon
-          class={"color:black:hover color:lightgrey"}
+          class={"color:lightgrey color:black:hover"}
           height={30}
           icon={"flowbite:caret-left-outline"}
           width={30} />

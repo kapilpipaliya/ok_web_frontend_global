@@ -155,10 +155,10 @@ export function useToast() {
           <div style="animation: ${t.visible ? 'enterAnimation 1s forwards' : 'leaveAnimation 1s forwards'}; background-color: #0891b2; padding: 12px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); min-width: 350px;">
             <div style="display: flex; gap: 8px;">
               <div style="display: flex; flex: 1; flex-direction: column;">
-                <div class="font-weight:medium color:white">{title}</div>
+                <div class="color:white font-weight:medium">{title}</div>
                 <div style="font-size: 13px; color: #ecfeff;">{subtitle}</div>
               </div>
-              <div class="flex items-center">
+              <div class="items-center flex">
                 <button
                   onClick={() => toast.dismiss(t.id)}
                   // @ts-ignore
@@ -170,7 +170,7 @@ export function useToast() {
                   CANCEL
                 </button>
               </div>
-              <div class="flex items-center">
+              <div class="items-center flex">
                 <button
                   onClick={() => toast.dismiss(t.id)}
                   // @ts-ignore

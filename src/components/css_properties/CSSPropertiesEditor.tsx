@@ -66,7 +66,7 @@ export function CSSPropertiesEditor(props: Readonly<{
       </TabList>
       <TabContainer>
         <Container>
-          <div class="block w:inherit p:20px|10px|0px|10px">
+          <div class="block p:20px|10px|0px|10px w:inherit">
             <DisplaySelector
               infoLink=":target"
               isAddToClass={false}

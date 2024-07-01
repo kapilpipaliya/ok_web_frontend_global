@@ -45,7 +45,7 @@ export function PropertiesBody() {
   return (
     <>
       <Show when={layoutStore.selectedId !== -1}>
-        <div class="flex jc:start gap:2">
+        <div class="flex gap:2 jc:start">
           <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
           <button onClick={toggleImportsModal}>Import HTML</button>
         </div>

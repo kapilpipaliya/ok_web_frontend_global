@@ -77,13 +77,13 @@ export function Signature() {
     });
 
     return (
-        <div class="bg:white padding:1rem border:1px border:solid border:#d1d5db shadow:0|2px|4px|rgba(0,0,0,0.1) rounded:0.5rem width:24rem margin:0">
+        <div class="rounded:0.5rem bg:white border:#d1d5db border:1px border:solid margin:0 padding:1rem shadow:0|2px|4px|rgba(0,0,0,0.1) width:24rem">
             <h2 class="font-size:1.25rem font-weight:700 margin-bottom:1rem">E-Signature</h2>
             {signatureImage() && !isEditing() ? (
                 <div class="position:relative">
-                    <img alt="Signature" class="border:1px border:solid border:#d1d5db rounded:0.5rem width:100%" src={signatureImage()!} />
-                    <button class="position:absolute top:0 right:0 bg:white border:none cursor:pointer" onClick={editSignature}>
-                        <svg class="width:1.5rem height:1.5rem color:#1d4ed8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <img alt="Signature" class="rounded:0.5rem border:#d1d5db border:1px border:solid width:100%" src={signatureImage()!} />
+                    <button class="bg:white border:none cursor:pointer position:absolute right:0 top:0" onClick={editSignature}>
+                        <svg class="color:#1d4ed8 height:1.5rem width:1.5rem" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M15.232 5.232l3.536 3.536m-2.036-4.036a2.5 2.5 0 113.536 3.536l-12 12a2 2 0 01-.879.515l-4 1a1 1 0 01-1.265-1.265l1-4a2 2 0 01.515-.879l12-12z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
                         </svg>
                     </button>
@@ -91,10 +91,10 @@ export function Signature() {
             ) : (
                 <>
                     <p class="color:#6b7280 margin-bottom:1rem">Sign in the canvas below and save your signature as an image!</p>
-                    <canvas class="border:1px border:dashed border:#d1d5db rounded:0.5rem width:100% height:10rem" ref={canvasRef} />
-                    <div class="margin-top:1rem display:flex justify-content:space-between">
-                        <button class="bg:#1d4ed8 color:white padding:0.5rem|1rem border:none rounded:0.25rem cursor:pointer" onClick={submitSignature}>Submit Signature</button>
-                        <button class="bg:#ffffff border:1px border:solid border:#d1d5db color:#1d4ed8 padding:0.5rem|1rem rounded:0.25rem cursor:pointer" onClick={clearCanvas}>Clear Signature</button>
+                    <canvas class="rounded:0.5rem border:#d1d5db border:1px border:dashed height:10rem width:100%" ref={canvasRef} />
+                    <div class="display:flex justify-content:space-between margin-top:1rem">
+                        <button class="rounded:0.25rem bg:#1d4ed8 border:none color:white cursor:pointer padding:0.5rem|1rem" onClick={submitSignature}>Submit Signature</button>
+                        <button class="rounded:0.25rem bg:#ffffff border:#d1d5db border:1px border:solid color:#1d4ed8 cursor:pointer padding:0.5rem|1rem" onClick={clearCanvas}>Clear Signature</button>
                     </div>
                 </>
             )}

@@ -66,7 +66,7 @@ export function FeaturesSection() {
         Easy Form Forge serves everyone’s needs by out of the box like
       </p>
 
-      <div class="row mt-5 grid grid-cols:3@>lg grid-cols:2@md grid-cols:1@<sm gap:10px">
+      <div class="row mt-5 grid gap:10px grid-cols:1@<sm grid-cols:2@md grid-cols:3@>lg">
         <For each={featureData}>
           {(feature) => (
             <FeatureBox

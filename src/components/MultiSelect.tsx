@@ -172,7 +172,7 @@ export function MultiSelectField(props: Readonly<{
             >
               {(option, index) => (
                 <button
-                class="bg:#f4f4f4:hover f:14 m:3 r:5 w:full bg:#e0e0e0:hover w:full"
+                class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
                 classList={{
                    
                     "r:0|0|5|5": index() === filteredOptions().length - 1,

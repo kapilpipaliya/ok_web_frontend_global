@@ -133,7 +133,7 @@ export const GeneralSection = (props: GenralProps) => {
     }
   };
   return (
-    <div class="max-w:70%@>lg bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|rgb(237,239,241)">
+    <div class="bg:#f5f7fa box-shadow:0|0|12|.1|rgb(237,239,241) m:20 max-w:70%@>lg p:10px|15px r:8 w:80%">
       <div class={"font-weight:700"}>Personal Info</div>
       <div class={"font-weight:400"}>
         Update personal details here
@@ -170,9 +170,9 @@ export const GeneralSection = (props: GenralProps) => {
             <div style={"font-size: 18px;"}>{props.profileData.email}</div>
           </div>
         </div>
-        <div class="p:10 gap:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">
+        <div class="grid@>lg gap:10 grid-template-columns:repeat(2,50%) justify-self:center p:10">
           <div>
-            <span class={"font-weight:500 font:15 color:dimgrey"}>User Id</span>
+            <span class={"color:dimgrey font-weight:500 font:15"}>User Id</span>
             <input
               disabled={true}
               name={"id"}
@@ -182,7 +182,7 @@ export const GeneralSection = (props: GenralProps) => {
             />
           </div>
           <div>
-            <span class={"font-weight:500 font:15 color:dimgrey"}>
+            <span class={"color:dimgrey font-weight:500 font:15"}>
               UserName
             </span>
             <input
@@ -194,7 +194,7 @@ export const GeneralSection = (props: GenralProps) => {
             />
           </div>
           <div>
-            <span class={"font-weight:500 font:15 color:dimgrey"}>
+            <span class={"color:dimgrey font-weight:500 font:15"}>
               Email Address
             </span>
             <input
@@ -206,9 +206,9 @@ export const GeneralSection = (props: GenralProps) => {
             />
           </div>
           <div class="d:grid">
-            <span class={"font-weight:500 font:15 color:dimgrey"}>Country</span>
+            <span class={"color:dimgrey font-weight:500 font:15"}>Country</span>
             <select
-              class="p:5|10 r:4 border:1px|solid|#ccc"
+              class="border:1px|solid|#ccc p:5|10 r:4"
               disabled={!isEdit()}
               name={"country"}
               onChange={handleInputChange}
@@ -224,7 +224,7 @@ export const GeneralSection = (props: GenralProps) => {
           <Show
             fallback={
               <button
-                class="p:5|10 m:15|10 r:4 border:none color:white bg:#5b7dff cursor:pointer"
+                class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
                 onClick={() => {
                   setIsEdit(true);
                 }}
@@ -235,7 +235,7 @@ export const GeneralSection = (props: GenralProps) => {
             when={isEdit()}
           >
             <button
-              class="p:5|10 m:15|0 r:4 border:1px|solid|#5b7dff color:white bg:#5b7dff cursor:pointer"
+              class="bg:#5b7dff border:1px|solid|#5b7dff color:white cursor:pointer m:15|0 p:5|10 r:4"
               onClick={() => {
                 props.setProfileData(props.originalProfileData);
                 setIsEdit(false);
@@ -245,7 +245,7 @@ export const GeneralSection = (props: GenralProps) => {
             </button>
             <button
               class={
-                "p:5|10 m:15|10 r:4 border:none color:white bg:#5b7dff cursor:pointer"
+                "bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
               }
               onClick={onClickSave}
             >

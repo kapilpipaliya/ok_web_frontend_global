@@ -55,7 +55,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
             )}
           </For>
           <Icon
-            class="b:1px|solid|lightgrey abs bg:#f3f3f4 r:50% top:2px right:-13px p:3 cursor:pointer text:center"
+            class="abs b:1px|solid|lightgrey bg:#f3f3f4 cursor:pointer p:3 r:50% right:-13px text:center top:2px"
             height={19}
             icon={
               !props.isCollapsed()

@@ -168,10 +168,10 @@ export function Sidebar() {
     }) as JSX.CSSProperties;
 
   return (
-    <div class="r:0|10|10|0 rel" style={sidebarStyle()}>
+    <div class="rel r:0|10|10|0" style={sidebarStyle()}>
       <Show
         fallback={
-          <div class="flex jc:center ai:center">
+          <div class="flex ai:center jc:center">
             <LoaderNew />
           </div>
         }

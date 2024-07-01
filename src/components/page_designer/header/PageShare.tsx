@@ -44,14 +44,14 @@ export function ShareSection() {
     <div class="p:20px r:10px">
       <div class="flex mb:20px">
         <input
-          class={"w:full bg:rgb(245,245,245) r:5|0|0|5 p:10"}
+          class={"bg:rgb(245,245,245) p:10 r:5|0|0|5 w:full"}
           readOnly
           type="text"
           value={getLink()}
         />
         <Tooltip content={"Preview link"}>
           <button
-            class={"p:10 border:none bg:rgb(245,245,245) border-l:1px_solid_#ddd cursor:pointer r:0|5|5|0"}
+            class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
             onClick={previewLink}
           >
             🚀
@@ -59,7 +59,7 @@ export function ShareSection() {
         </Tooltip>
         <Tooltip content={showCopiedTooltip() ? "Copied" : "Click to copy"} nowrap>
           <button
-            class={"p:10 border:none bg:rgb(245,245,245) border-l:1px_solid_#ddd cursor:pointer r:0|5|5|0"}
+            class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
             onClick={copyToClipboard}
           >
             📋
@@ -70,8 +70,8 @@ export function ShareSection() {
         <button
           class={
             access() === "everyone"
-              ? "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer bg:#554FDC color:white"
-              : "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer"
+              ? "bg:#554FDC border:none color:white cursor:pointer mr:10px p:10px_20px r:6px"
+              : "bg:rgb(245,245,245) border:none cursor:pointer mr:10px p:10px_20px r:6px"
           }
           onClick={() => {
             setAccess("everyone");
@@ -82,8 +82,8 @@ export function ShareSection() {
         <button
           class={
             access() === "invite"
-              ? "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer bg:#554FDC color:white"
-              : "p:10px_20px border:none r:6px bg:rgb(245,245,245) mr:10px cursor:pointer"
+              ? "bg:#554FDC border:none color:white cursor:pointer mr:10px p:10px_20px r:6px"
+              : "bg:rgb(245,245,245) border:none cursor:pointer mr:10px p:10px_20px r:6px"
           }
           onClick={() => setAccess("invite")}
         >
@@ -91,12 +91,12 @@ export function ShareSection() {
         </button>
       </div>
       <div class="flex mb:20px">
-        <button class={"r:5|0|0|5 p:10 bg:#F5F5F5"} onClick={copyToClipboard}>
+        <button class={"bg:#F5F5F5 p:10 r:5|0|0|5"} onClick={copyToClipboard}>
           <Icon height={25} icon={"system-uicons:mail"} width={25}/>
         </button>
 
         <input
-          class="w:full r:0|5|5|0 p:10"
+          class="p:10 r:0|5|5|0 w:full"
           disabled={access() === "everyone"}
           name="email"
           onInput={(e) => setEmail(e.target.value)}
@@ -106,10 +106,10 @@ export function ShareSection() {
         />
       </div>
       <div class="flex">
-        <button class="mr:10px cursor:pointer">🌐</button>
-        <button class="mr:10px cursor:pointer">💬</button>
-        <button class="mr:10px cursor:pointer">✉️</button>
-        <button class="mr:10px cursor:pointer">🔗</button>
+        <button class="cursor:pointer mr:10px">🌐</button>
+        <button class="cursor:pointer mr:10px">💬</button>
+        <button class="cursor:pointer mr:10px">✉️</button>
+        <button class="cursor:pointer mr:10px">🔗</button>
       </div>
     </div>
   );

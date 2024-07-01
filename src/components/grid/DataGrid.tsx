@@ -143,7 +143,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       </Match>
       <Match when={error()}>Error {error()}</Match>
       <Match when={tableStore.data?.length > 0}>
-        <div class="flex jc:space-between ai:center p:5">
+        <div class="flex ai:center jc:space-between p:5">
           <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">
             <Search />

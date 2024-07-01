@@ -16,15 +16,15 @@ export function Heading(
   ]);
 
   return (
-    <div class={`flex mt:5 mb:5 ai:center jc:start flex:col ${props.etc}`}>
-      <h1 class="font:17 font-weight:bold mr:auto">
+    <div class={`${props.etc} flex ai:center flex:col jc:start mb:5 mt:5`}>
+      <h1 class="font-weight:bold font:17 mr:auto">
         {local.heading || "Default Heading"}
       </h1>
       {local.subheading && (
-        <p class="text-base f:13 color:lightgrey mr:auto">{local.subheading}</p>
+        <p class="text-base color:lightgrey f:13 mr:auto">{local.subheading}</p>
       )}
       {local.divider !== false && (
-        <hr class="mt:2 mb:2 h:0.5 color:lightgrey w:full"/>
+        <hr class="color:lightgrey h:0.5 mb:2 mt:2 w:full"/>
       )}
     </div>
   );
