@@ -312,14 +312,12 @@ export function LayoutTree() {
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDrop={handleDropEvent}
-          class={`${isSelectedLayoutId(props.metaVertex.id)
-              ? "bg:rgb(197,221,255)"
-              : isSelectedHoverId(props.metaVertex.id)
-                ? "bg:#F2EDED"
-                : ""
-            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"
-            }`}
           classList={{
+            "w:100%": true,
+            "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
+            "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
+            "r:5|5|5|5": !!children().length,
+            "r:0|5|5|0": !children().length,
             "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
               isActiveTargetItem() && layoutStore.position === "center",
             "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":

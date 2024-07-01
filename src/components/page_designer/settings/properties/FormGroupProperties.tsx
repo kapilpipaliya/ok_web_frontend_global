@@ -1,18 +1,18 @@
-import { Show, createMemo, For, Match, Switch, useContext, createUniqueId, onCleanup, Accessor } from "solid-js";
+import { Show, createMemo, For, Match, Switch, useContext, createUniqueId, onCleanup, type Accessor } from "solid-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { Icon } from "@iconify-icon/solid";
 import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
-import { ValidationConfig } from "./ValidationConfig";
+import { ValidationConfig } from "../ValidationConfig";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { FormMetaData } from "~/lib/formMetaData";
 import { createWritableMemo } from "@solid-primitives/memo";
-import { useDesignerLayoutStore } from "../LayoutContext";
-import { SelectInputField } from "~/components/fields/SelectInputField";
+import { useDesignerLayoutStore } from "../../LayoutContext";
+import { PROPERTIES } from "./constant";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -29,7 +29,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const classVertexId = `classVertex${createUniqueId()}`;
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
 
-  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { name: 'name', displayName: 'Unique Name', class: 'border:1px|solid|#ccc p:2', component: "TextBox" }), graph, setGraph);
+  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { name: 'name', displayName: 'Unique Name', class: PROPERTIES.Css.TextBox, component: "TextBox" }), graph, setGraph);
   addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { name: 'class', displayName: 'Class' }), graph, setGraph);
   addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { name: 'defaultValue', displayName: 'Default Value' }), graph, setGraph);
 

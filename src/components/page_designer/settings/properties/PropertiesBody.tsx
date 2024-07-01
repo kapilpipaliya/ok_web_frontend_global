@@ -3,7 +3,7 @@ import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { CollAndData } from "./CollAndData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
-import { FormGroupProperties } from "../FormGroupProperties";
+import { FormGroupProperties } from "./FormGroupProperties";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { ImportModal } from "./import/ImportModal";
 import { RulesModalBody } from "./rules/RulesModalBody";

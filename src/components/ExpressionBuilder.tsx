@@ -5,9 +5,9 @@ import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { binops, unops } from "~/lib/expression_eval";
 import { createStore } from "solid-js/store";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
-import {CustomModal} from "./CommonDialog";
+import { CustomModal } from "./CommonDialog";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import {MultiSelectField} from "./MultiSelect";
+import { MultiSelectField } from "./MultiSelect";
 
 type Option =
   | Record<string, string | number | boolean | unknown>
@@ -148,115 +148,114 @@ export function ExpressionBuilder(props: Readonly<{
   };
 
   return (
-    <div>
-      <CustomModal
-        buttonIcon={"carbon:settings-edit"}
-        title="Expression Builder"
-        body={
-          <div>
-            <For each={contentList}>
-              {(item, index) => (
-                <div class={"p:2"}>
-                  <div class={"flex ai:center jc:space-between mt:4 mb:2"}>
-                    <span class={"font-weight:medium f:14"}>
-                      Expression : {index() + 1}
-                    </span>
-                    <Show when={index() > 0}>
-                      <Icon
-                        icon={"fluent:delete-28-regular"}
-                        height={20}
-                        width={20}
-                        class={"cursor:pointer"}
-                        style={{ color: "red" }}
-                        onclick={() => handleDelete(index())}
-                      />
-                    </Show>
+    <CustomModal
+      buttonIcon={"carbon:settings-edit"}
+      title="Expression Builder"
+      iconSize={14}
+      body={
+        <div>
+          <For each={contentList}>
+            {(item, index) => (
+              <div class={"p:2"}>
+                <div class={"flex ai:center jc:space-between mt:4 mb:2"}>
+                  <span class={"font-weight:medium f:14"}>
+                    Expression : {index() + 1}
+                  </span>
+                  <Show when={index() > 0}>
+                    <Icon
+                      icon={"fluent:delete-28-regular"}
+                      height={20}
+                      width={20}
+                      class={"cursor:pointer"}
+                      style={{ color: "red" }}
+                      onclick={() => handleDelete(index())}
+                    />
+                  </Show>
+                </div>
+                <div class={"flex ai:center jc:space-between"}>
+                  <div class={"flex"}>
+                    <MultiSelectField
+                      selectedValues={() => []}
+                      displayValueParent="P"
+                      displayValueChild="name"
+                      options={Object.keys(unops).map((key) => ({
+                        id: key,
+                        P: { name: key },
+                      }))}
+                      placeholder={"Unary"}
+                      onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
+                      onRemove={(e) => onUnaryOperatorChange(index())}
+                      selectionLimit={1}
+                    />
                   </div>
-                  <div class={"flex ai:center jc:space-between"}>
-                    <div class={"flex"}>
-                      <MultiSelectField
-                        selectedValues={() => []}
-                        displayValueParent="P"
-                        displayValueChild="name"
-                        options={Object.keys(unops).map((key) => ({
-                          id: key,
-                          P: { name: key },
-                        }))}
-                        placeholder={"Unary"}
-                        onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
-                        onRemove={(e) => onUnaryOperatorChange(index())}
-                        selectionLimit={1}
-                      />
-                    </div>
-                    <input
-                      style={`border: ${item.error ? "1px solid red " : ""}`}
-                      class={"flex-col"}
-                      {...props.meta?.P}
-                      placeholder={"Write Expression..."}
-                      onchange={(e: any) => handleChange(index(), e)}
-                      value={item.value}
-                      title={item.error ? "Please fill in this field" : ""}
+                  <input
+                    style={`border: ${item.error ? "1px solid red " : ""}`}
+                    class={"flex-col"}
+                    {...props.meta?.P}
+                    placeholder={"Write Expression..."}
+                    onchange={(e: any) => handleChange(index(), e)}
+                    value={item.value}
+                    title={item.error ? "Please fill in this field" : ""}
+                  />
+                  <NestedExpressionBuilder
+                    content={item.value}
+                    meta={props.meta}
+                    data={props.data}
+                    txnId={props.txnId}
+                    setValue={props.setValue}
+                    onClose={handleCancel}
+                  />
+                  <div class={"flex"}>
+                    <MultiSelectField
+                      selectedValues={() => []}
+                      displayValueParent="P"
+                      displayValueChild="name"
+                      options={Object.keys(binops).map((key) => ({
+                        id: key,
+                        P: { name: key },
+                      }))}
+                      placeholder={"Binary"}
+                      onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
+                      onRemove={(e) => onBinaryOperatorChange(index())}
+                      selectionLimit={1}
                     />
-                    <NestedExpressionBuilder
-                      content={item.value}
-                      meta={props.meta}
-                      data={props.data}
-                      txnId={props.txnId}
-                      setValue={props.setValue}
-                      onClose={handleCancel}
-                    />
-                    <div class={"flex"}>
-                      <MultiSelectField
-                        selectedValues={() => []}
-                        displayValueParent="P"
-                        displayValueChild="name"
-                        options={Object.keys(binops).map((key) => ({
-                          id: key,
-                          P: { name: key },
-                        }))}
-                        placeholder={"Binary"}
-                        onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
-                        onRemove={(e) => onBinaryOperatorChange(index())}
-                        selectionLimit={1}
-                      />
-                    </div>
                   </div>
                 </div>
-              )}
-            </For>
-          </div>
-        }
-        footer={(toggle) => (
-          <div class={"flex ai:center jc:end"}>
-            <button
-              onclick={handleInsert}
-              {...props.meta.P}
-            >
-              Add
-            </button>
-            <button
-              // variant={"outlined"}
-              class="border-color:#FF0000 color:#FF0000 ml:5"
-              onclick={toggle}
-              {...props.meta.P}
-            >
-              Cancel
-            </button>
+              </div>
+            )}
+          </For>
+        </div>
+      }
+      footer={(toggle) => (
+        <div class={"flex ai:center jc:end"}>
+          <button
+            onclick={handleInsert}
+            {...props.meta.P}
+          >
+            Add
+          </button>
+          <button
+            // variant={"outlined"}
+            class="border-color:#FF0000 color:#FF0000 ml:5"
+            onclick={toggle}
+            {...props.meta.P}
+          >
+            Cancel
+          </button>
 
-            <button
-              // variant="contained"
-              onclick={() => {
-                handleSubmit();
-                toggle((v) => !v);
-              }}
-              {...props.meta.P}
-            >
-              Submit
-            </button>
-          </div>
-        )}
-        dialogClass="min-w:30% r:10px p:0"
-      />
-    </div>
+          <button
+            // variant="contained"
+            onclick={() => {
+              handleSubmit();
+              toggle((v) => !v);
+            }}
+            {...props.meta.P}
+          >
+            Submit
+          </button>
+        </div>
+      )}
+      dialogClass="min-w:30% r:10px p:0"
+    />
   );
 }

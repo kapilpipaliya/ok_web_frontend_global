@@ -210,7 +210,7 @@ export function GenericField(
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <Switch>
-              <Match when={props.data?.P[props.meta.P.name] ?? props.meta.P.children}>
+              <Match when={props.data?.P?.[props.meta.P.name] ?? props.meta.P.children}>
                 {props.data?.P[props.meta.P.name]}
               </Match>
               <Match when={true}>
