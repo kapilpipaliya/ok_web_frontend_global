@@ -52,7 +52,7 @@ export async function findVertexMGCallId(
   try {
     const result = await (context.tx ? context.tx.run(query, params) : session!.run(query, params));
     if (label === "ALL_LABELS") {
-      return result.records.map(record => record.get(0));
+      return result.records.map(record => record.get(0)[0]);
     }
     return result.records.map((record) => {
       const vertex = convertNodeToJson(record.get("n"));

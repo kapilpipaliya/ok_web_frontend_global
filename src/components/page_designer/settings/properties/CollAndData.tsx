@@ -14,10 +14,10 @@ export function CollAndData() {
   const [layoutStore] = useDesignerLayoutStore();
 
   const metaVertexId = getNewGraphId();
-  const txnId = getNewTxnId(graph, setGraph);
+  const metaTxnId = getNewTxnId(graph, setGraph);
 
   addNewVertex(
-    txnId,
+    metaTxnId,
     newVertex(metaVertexId, ["MetaAttr"], {
       name: "Attr",
       type: "Attr",
@@ -35,6 +35,7 @@ export function CollAndData() {
       component: "SelectBox",
       collection: "g:'ALL_LABELS'",
       parentLabel: "Coll",
+      saveValue: true
     },
     {
       name: "data",
@@ -48,10 +49,10 @@ export function CollAndData() {
     },
   ];
 
-  addMetaVertexes(graph, setGraph, txnId, graph.vertexes[metaVertexId], attributes);
+  addMetaVertexes(graph, setGraph, metaTxnId, graph.vertexes[metaVertexId], attributes);
 
   onCleanup(() => {
-    revertTransaction(txnId, graph);
+    revertTransaction(metaTxnId, graph);
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
@@ -62,30 +63,30 @@ export function CollAndData() {
       <br />
       <span class="float:left mt:5">Collection:</span>
       <SelectInputField
-        data={graph.vertexes[layoutStore.selectedId]}
-        meta={collMetaVertex.vertexes?.[0]!}
-        disabled={false}
-        title={"Collection:"}
-        component={"SelectBox"}
         txnId={layoutStore.formData.txnId}
+        title={"Collection:"}
+        meta={collMetaVertex.vertexes?.[0]!}
+        data={graph.vertexes[layoutStore.selectedId]}
+        disabled={false}
+        component={"SelectBox"}
         isRealTime={false}
       />
       <span class="float:left mt:5">Data:</span>
       <SelectInputField
-        data={graph.vertexes[layoutStore.selectedId]}
-        meta={collMetaVertex.vertexes?.[1]!}
-        disabled={false}
-        title={"Data:"}
-        component={"SelectBox"}
         txnId={layoutStore.formData.txnId}
+        title={"Data:"}
+        meta={collMetaVertex.vertexes?.[1]!}
+        data={graph.vertexes[layoutStore.selectedId]}
+        disabled={false}
+        component={"SelectBox"}
         isRealTime={false}
       />
       <span class="float:left mt:5">Expression:</span>
       <GenericInputField
-        txnId={txnId}
+        txnId={layoutStore.formData.txnId}
         title={""}
-        data={graph.vertexes[layoutStore.selectedId]}
         meta={collMetaVertex.vertexes?.[2]!}
+        data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
         component={"TextBox"}
       />
