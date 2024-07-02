@@ -1,6 +1,6 @@
 import type { ToggleField } from "./FieldType";
 
-import { Icons } from "../Icons";
+import { Icons } from "./Icons";
 
 
 

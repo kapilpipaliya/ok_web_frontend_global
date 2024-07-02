@@ -2,9 +2,9 @@ import { createSignal } from "solid-js";
 
 import type { DataEditorField, DividerField, FieldWithCustomProperty, SelectField, TextFieldOptionsField, ToggleField } from "./FieldType";
 
-import { sizeTypes, timesTypes } from "../context";
-import { createGridOptions } from "./FieldType";
-import { createSelectOptions } from "./FieldType";
+import { createGridOptions , createSelectOptions } from "./FieldType";
+import { timesTypes } from "./constants";
+import { sizeTypes } from "./constants";
 
 
 export const EffectsSection = {
@@ -121,9 +121,9 @@ export const EffectsSection = {
       "text",
     ],
     true
-  ) as SelectField,
-  divider: { component: "divider" } as DividerField,
-  divider2: { component: "divider" } as DividerField,
+  ),
+  divider: { component: "divider", label: "" } as DividerField,
+  divider2: { component: "divider", label: "" } as DividerField,
   divider4: { component: "divider", title: "Children transform" } as DividerField,
   filter: {
     children: {

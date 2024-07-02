@@ -32,7 +32,7 @@ export interface ColorPickerField extends Field {
 }
 
 export interface GridField extends Field {
-  children: Field[]
+  children: GenericField[]
   component: "grid";
   gap: string;
   "grid-template-columns": string;
@@ -104,6 +104,8 @@ export interface StringField extends Field {
 
 export interface DividerField extends Field {
   component: "divider";
+  label: string;
+  title?: string;
 }
 
 export type GenericField = 
@@ -140,7 +142,7 @@ export function createButtonGroupOptions(name: string,
   });
 }
 
-export const createGridOptions = (name: string, label: string, children: any): GridField => ({
+export const createGridOptions = (name: string, label: string, children: GenericField[]): GridField => ({
   children,
   component: "grid",
   gap: "5px 10px",

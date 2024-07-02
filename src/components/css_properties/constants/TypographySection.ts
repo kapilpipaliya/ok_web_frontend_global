@@ -2,9 +2,9 @@
 
 import type { ColorPickerField, SelectField, TextFieldOptionsField } from "./FieldType";
 
-import { sizeTypes } from "../context";
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
+import { sizeTypes } from "./constants";
 
 export const TypographySection = {
   colorPicker: {

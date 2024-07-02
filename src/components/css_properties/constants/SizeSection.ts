@@ -2,8 +2,8 @@
 
 import type { TextFieldOptionsField } from "./FieldType";
 
-import { sizeTypes } from "../context";
 import { createGridOptions } from "./FieldType";
+import { sizeTypes } from "./constants";
 
 type SizeSectionType = {
   size: ReturnType<typeof createGridOptions>;

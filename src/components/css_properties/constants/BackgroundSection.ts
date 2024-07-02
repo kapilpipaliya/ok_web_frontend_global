@@ -2,9 +2,9 @@ import { createSignal } from "solid-js";
 
 import type { ColorPickerField, DataEditorField, TextFieldOptionsField, ToggleField } from "./FieldType";
 
-import { sizeTypes } from "../context";
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
+import { sizeTypes } from "./constants";
 
 export const BackgroundSection = {
   background: {

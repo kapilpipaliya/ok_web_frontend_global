@@ -7,12 +7,13 @@ import type { Vertex } from "~/lib/graph/graph";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { Container } from "~/components/css_properties/components/CssUtils";
-import { type CSSStore, cssStateToString, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
+import { cssStateToString, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
 import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
 
 import { MultiSelectField } from "../MultiSelect";
 import { cssSelectorTree } from "./StateSelector";
 import { Select } from "./components/Select";
+import { type CSSStore } from "./context";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 
 export const AddNewState = () => {

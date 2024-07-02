@@ -12,7 +12,8 @@ import {
 
 import "~/css/componentUtilCSS.css";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext, sizeTypes } from "../context";
+import { sizeTypes } from "../constants/constants";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { CenterDiv, Container, ContainerLabel } from "./CssUtils";
 
 export const TextFieldWithSelect = (props: {

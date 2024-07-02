@@ -2,9 +2,7 @@ import { recursive } from "merge";
 
 import { isObject } from "~/lib/utils";
 
-export interface CSSStore {
-  [state: string]: { [key: string]: string }
-}
+import { CSSStore } from "./context";
 
 export const parseAndApplyCssRules = (valueString: string) => {
   const cssRules = {} as CSSStore;

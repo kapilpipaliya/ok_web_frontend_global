@@ -1,9 +1,9 @@
 import type { DividerField, FieldWithCustomProperty, TextFieldOptionsField } from "./FieldType";
 
-import { Icons } from "../Icons";
-import { sizeTypes } from "../context";
 import { createButtonGroupOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
+import { Icons } from "./Icons";
+import { sizeTypes } from "./constants";
 
 
 export const LayoutSection = {
