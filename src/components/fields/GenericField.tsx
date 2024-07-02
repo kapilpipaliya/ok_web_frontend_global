@@ -8,7 +8,6 @@ import { Dynamic } from "solid-js/web";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
-import { mergeCSS } from "~/components/css_properties/cssUtils";
 import { FormWrapper } from "~/components/fields/FormWrapper";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { PageAttrRender, } from "~/components/page_attr_render/PageAttrRender";
@@ -40,6 +39,7 @@ import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/gr
 import { deNullify } from "~/lib/utils";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
+import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { Label } from "../solid_blocks/Label";
 
 // This component support rendering Child Themselves by calling PageRender.

@@ -4,7 +4,6 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { MultiSelectField } from "~/components/MultiSelect";
-import { mergeCSS } from "~/components/css_properties/cssUtils";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import {
 
@@ -20,6 +19,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { deNullify, ifNotNull } from "~/lib/utils";
 
 import { Signature } from "../SignatureBox";
+import { mergeCSS } from "../css_properties/utils/mergeCSS";
 
 export function GenericInputField(
   props: {
