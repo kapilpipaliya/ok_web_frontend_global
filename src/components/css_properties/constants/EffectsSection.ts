@@ -1,13 +1,15 @@
 import { createSignal } from "solid-js";
 
+import type { DataEditorField, DividerField, FieldWithCustomProperty, SelectField, TextFieldOptionsField, ToggleField } from "./FieldType";
+
 import { sizeTypes, timesTypes } from "../context";
-import { createGridOptions } from "./createGridOptions";
-import { createSelectOptions } from "./createSelectOptions";
+import { createGridOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldType";
+
 
 export const EffectsSection = {
   backdropFilter: {
     children: {
-      // TODO: Fix duplicate code
       shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
         {
           component: "select",
@@ -24,7 +26,7 @@ export const EffectsSection = {
             "saturate",
             "sepia",
           ],
-        },
+        } as SelectField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -32,7 +34,7 @@ export const EffectsSection = {
           name: "value",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
     },
     component: "dataEditor",
@@ -40,7 +42,7 @@ export const EffectsSection = {
     label: "Backdrop Filter",
     name: "backdrop-filter",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
   backface: {
     component: "toggleButton",
     isLabelOnTop: true,
@@ -50,7 +52,7 @@ export const EffectsSection = {
       { key: "Visible", value: "visible" },
       { key: "Hidden", value: "hidden" },
     ],
-  },
+  } as ToggleField,
   boxShadow: {
     children: {
       shadow: createGridOptions("Shadow Grid", "Box Shadow", [
@@ -61,7 +63,7 @@ export const EffectsSection = {
           name: "X Offset",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -69,7 +71,7 @@ export const EffectsSection = {
           name: "Y Offset",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -77,7 +79,7 @@ export const EffectsSection = {
           name: "Blur",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -85,17 +87,17 @@ export const EffectsSection = {
           name: "Spread",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
       style: {
         component: "toggleButton",
-        label: false,
+        label: "",
         name: "Style",
         options: [
           { key: "Outside", value: "" },
           { key: "Inside", value: "inset" },
         ],
-      },
+      } as ToggleField,
     },
     component: "dataEditor",
     dialogLabel: "Adjust Shadow",
@@ -103,7 +105,7 @@ export const EffectsSection = {
     label: "Box Shadow",
     name: "box-shadow",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
   cursors: createSelectOptions(
     "cursor",
     "Cursor",
@@ -119,10 +121,10 @@ export const EffectsSection = {
       "text",
     ],
     true
-  ),
-  divider: { component: "divider" },
-  divider2: { component: "divider" },
-  divider4: { component: "divider", title: "Children transform" },
+  ) as SelectField,
+  divider: { component: "divider" } as DividerField,
+  divider2: { component: "divider" } as DividerField,
+  divider4: { component: "divider", title: "Children transform" } as DividerField,
   filter: {
     children: {
       shadow: createGridOptions("Shadow Grid", "Filter", [
@@ -149,7 +151,7 @@ export const EffectsSection = {
           name: "value",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
     },
     component: "dataEditor",
@@ -158,7 +160,7 @@ export const EffectsSection = {
     label: "Filter",
     name: "filter",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
   opacity: createGridOptions("size Grid", "Opacity", [
     {
       component: "textFieldOptions",
@@ -167,7 +169,7 @@ export const EffectsSection = {
       name: "opacity",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "select",
       isLabelOnTop: true,
@@ -209,7 +211,7 @@ export const EffectsSection = {
     name: "overflow",
     options: ["visible", "hidden", "scroll", "auto"],
     padding: "5px",
-  },
+  } as FieldWithCustomProperty,
   perspective: createGridOptions("size Grid", "Perspective", [
     {
       component: "textFieldOptions",
@@ -218,7 +220,7 @@ export const EffectsSection = {
       name: "perspective",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "buttonGroups",
       isLabelOnTop: true,
@@ -232,7 +234,6 @@ export const EffectsSection = {
   ]),
   textShadow: {
     children: {
-      // TODO: Fix duplicate code
       shadow: createGridOptions("Shadow Grid", "Text Shadow", [
         {
           component: "textFieldOptions",
@@ -241,7 +242,7 @@ export const EffectsSection = {
           name: "X Offset",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -249,7 +250,7 @@ export const EffectsSection = {
           name: "Y Offset",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -257,7 +258,7 @@ export const EffectsSection = {
           name: "Blur",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -265,7 +266,7 @@ export const EffectsSection = {
           name: "Spread",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
     },
     component: "dataEditor",
@@ -274,7 +275,7 @@ export const EffectsSection = {
     label: "Text Shadow",
     name: "text-shadow",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
   transform: {
     children: {
       shadow: createGridOptions("Grid", "Transform", [
@@ -305,7 +306,7 @@ export const EffectsSection = {
           name: "value",
           options: sizeTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
     },
     component: "dataEditor",
@@ -313,7 +314,7 @@ export const EffectsSection = {
     label: "Transform",
     name: "transform",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
   transformOrigin: {
     align: "end",
     component: "fieldWithCustomProperty",
@@ -331,7 +332,7 @@ export const EffectsSection = {
     options: sizeTypes,
     padding: "5px",
     type: "number",
-  },
+  } as FieldWithCustomProperty,
   transition: {
     children: {
       easing: createSelectOptions(
@@ -348,7 +349,7 @@ export const EffectsSection = {
           name: "duration",
           options: timesTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -356,7 +357,7 @@ export const EffectsSection = {
           name: "delay",
           options: timesTypes,
           type: "number",
-        },
+        } as TextFieldOptionsField,
       ]),
       type: createSelectOptions(
         "type",
@@ -395,5 +396,5 @@ export const EffectsSection = {
     label: "Transition",
     name: "transition",
     openMenu: createSignal(null),
-  },
+  } as DataEditorField,
 };

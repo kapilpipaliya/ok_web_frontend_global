@@ -3,8 +3,8 @@ import { For, Match, Show, Switch } from "solid-js";
 import { ButtonGroups } from "~/components/css_properties/components/ButtonGroups";
 import { ColorPickerInput } from "~/components/css_properties/components/ColorPickerInput";
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
-import { DisplaySelector } from "~/components/css_properties/components/DisplaySelector";
 import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
+import { Select } from "~/components/css_properties/components/Select";
 import { TextFieldWithSelect } from "~/components/css_properties/components/TextFieldWithSelect";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
 
@@ -22,7 +22,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "select"}>
-        <DisplaySelector
+        <Select
           infoLink={props.value.infoLink}
           isAddToClass={props.value.isAddToClass ?? true}
           isLabelOnTop={props.value.isLabelOnTop}

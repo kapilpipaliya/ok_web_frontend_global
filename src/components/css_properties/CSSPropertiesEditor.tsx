@@ -10,8 +10,35 @@ import { Container } from "~/components/css_properties/components/CssUtils";
 import { type CSSStore, cssStateToString, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
 import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
 
-import { DisplaySelector } from "./components/DisplaySelector";
+import { MultiSelectField } from "../MultiSelect";
+import { cssSelectorTree } from "./StateSelector";
+import { Select } from "./components/Select";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
+
+export const AddNewState = () => {
+  const [selectedAllState, setSelectedAllState] = createSignal([]);
+  const addNewState = () => {
+    if (selectedAllState()) {
+      // setCssState(state(), { [selectedAllState()]: '' });
+      // setSelectedAllState('');
+    }
+  };
+  const removeState = (key: string) => {
+    // setCssState(state(), { [key]: undefined });
+  };
+  return (
+    <div class="flex jc:space-between mt:10">
+    <MultiSelectField
+      displayValueChild="title"
+      onRemove={(value) => setSelectedAllState(value)}
+      onSelect={(value) => setSelectedAllState(value)}
+      options={cssSelectorTree}
+      selectedValues={selectedAllState}
+    />
+    <button onClick={addNewState}>Add State</button>
+  </div>
+  );
+}
 
 export function CSSPropertiesEditor(props: Readonly<{
   data?: Vertex; // temp vertex
@@ -43,10 +70,14 @@ export function CSSPropertiesEditor(props: Readonly<{
   initializeState(cssValue, setCssState);
 
   const onCSSStateChange = (...args: Parameters<SetStoreFunction<CSSStore>>) => {
-    // @ts-ignore
+    // @ts-expect-error
     setCssState(...args);
-    props.setValue?.(cssState);
+    props.setValue?.(JSON.parse(JSON.stringify(cssState)));
   };
+
+
+
+
 
   const ResetButton = () => (
     <Show when={Object.entries(cssState).length}>
@@ -65,9 +96,10 @@ export function CSSPropertiesEditor(props: Readonly<{
         <Tab class={"w:50%"}>Code</Tab>
       </TabList>
       <TabContainer>
+
         <Container>
           <div class="block p:20px|10px|0px|10px w:inherit">
-            <DisplaySelector
+            <Select
               infoLink=":target"
               isAddToClass={false}
               isLabelOnTop={false}
@@ -78,6 +110,14 @@ export function CSSPropertiesEditor(props: Readonly<{
               options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']}
               value={state()} />
             <StyleEditorTab />
+            {/* <div class="mt:10">
+              {Object.keys(cssState[state()] || {}).map((key) => (
+                <div class="flex jc:space-between mt:5">
+                  <span>{key}</span>
+                  <button onClick={() => removeState(key)}>Remove</button>
+                </div>
+              ))}
+            </div> */}
           </div>
         </Container>
       </TabContainer>

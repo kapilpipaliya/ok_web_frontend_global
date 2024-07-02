@@ -1,7 +1,15 @@
-import { sizeTypes } from "../context";
-import { createGridOptions } from "./createGridOptions";
 
-export const SizeSection = {
+
+import type { TextFieldOptionsField } from "./FieldType";
+
+import { sizeTypes } from "../context";
+import { createGridOptions } from "./FieldType";
+
+type SizeSectionType = {
+  size: ReturnType<typeof createGridOptions>;
+};
+
+export const SizeSection: SizeSectionType = {
   size: createGridOptions("size Grid", "Size", [
     {
       component: "textFieldOptions",
@@ -10,7 +18,7 @@ export const SizeSection = {
       name: "height",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -18,7 +26,7 @@ export const SizeSection = {
       name: "width",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -26,7 +34,7 @@ export const SizeSection = {
       name: "min-height",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -34,7 +42,7 @@ export const SizeSection = {
       name: "min-width",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -42,7 +50,7 @@ export const SizeSection = {
       name: "max-height",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -50,6 +58,6 @@ export const SizeSection = {
       name: "max-width",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
   ])
 };

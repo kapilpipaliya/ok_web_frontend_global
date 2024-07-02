@@ -1,4 +1,4 @@
-import { createSelectOptions } from "./createSelectOptions";
+import { createSelectOptions } from "./FieldType";
 
 export const PositionSection = {
   position: createSelectOptions("position", "Position", [
@@ -9,3 +9,4 @@ export const PositionSection = {
     "sticky",
   ])
 };
+

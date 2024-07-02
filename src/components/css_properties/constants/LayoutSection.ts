@@ -1,7 +1,10 @@
+import type { DividerField, FieldWithCustomProperty, TextFieldOptionsField } from "./FieldType";
+
 import { Icons } from "../Icons";
 import { sizeTypes } from "../context";
-import { createButtonGroupOptions } from "./createButtonGroupOptions";
-import { createSelectOptions } from "./createSelectOptions";
+import { createButtonGroupOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldType";
+
 
 export const LayoutSection = {
   alignFlex: createButtonGroupOptions("align-items", "Align", [
@@ -30,7 +33,7 @@ export const LayoutSection = {
     "flex",
     "none",
   ]),
-  divider4: { component: "divider", title: "Flex Child" },
+  divider4: { component: "divider", title: "Flex Child" } as DividerField,
   flex: createButtonGroupOptions("flex", "Flex", [
     { key: "mdi:close", tooltip: "auto", value: "0 0 auto" },
     { key: Icons.flex.expand, tooltip: "expand", value: "1 1 0%" },
@@ -55,7 +58,7 @@ export const LayoutSection = {
     name: "gap",
     options: sizeTypes,
     type: "number",
-  },
+  } as FieldWithCustomProperty,
   justify: createButtonGroupOptions("justify-content", "Justify", [
     { key: Icons.justify.start, value: "start" },
     { key: Icons.justify.center, value: "center" },
@@ -69,5 +72,5 @@ export const LayoutSection = {
     label: "Order",
     name: "order",
     type: "number",
-  },
+  } as TextFieldOptionsField,
 };

@@ -3,57 +3,42 @@ import { For, Show, createMemo, createSignal } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
+import type { CSSJSONSchemaSearchType, GenericField } from "./constants/FieldType";
+
 import { JSONSchema } from "./constants/CssPropertiesMap";
 
-type Property = typeof JSONSchema[keyof typeof JSONSchema]
-
 export const StyleEditorTab = () => {
-  const [search, setSearch] = createSignal("");
-  const [filteredSections, setFilteredSections] = createSignal<Record<string, Section>>(filterSections(search()));
-  const length = createMemo(() => Object.keys(filteredSections()).length);
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [filteredSections, setFilteredSections] = createSignal(filterSections(searchQuery()));
+  const sectionCount = createMemo(() => Object.keys(filteredSections()).length);
 
   function filterSections(query: string) {
-    return Object.entries(JSONSchema)
-      .map(([sectionName, properties]) => {
-        const isOpen = !!query; // Set isOpen to true if there's a query
-        const filteredProperties = filterProperties(properties, query);
-        return { [sectionName]: { isOpen, properties: filteredProperties } };
-      })
-      .reduce((acc, section) => {
-        const [sectionName, data] = Object.entries(section)[0];
-        if (Object.entries(data.properties).length > 0) {
-          // @ts-ignore
-          acc[sectionName] = data;
-        }
-        return acc;
-      }, {} as typeof JSONSchema);
+    return Object.entries(JSONSchema).reduce((acc, [sectionName, propertyFieldMap]) => {
+      const filteredProperties = filterProperties(propertyFieldMap, query);
+      if (Object.keys(filteredProperties).length > 0) {
+        acc[sectionName] = { isOpen: !!query, propertyFieldMap: filteredProperties };
+      }
+      return acc;
+    }, {} as CSSJSONSchemaSearchType);
   }
 
-  function filterProperties(properties: Property, query: string) {
-    return Object.entries(properties)
-      .map(([propertyName, property]) => {
-        if (shouldIncludeProperty(property, query)) {
-          return [propertyName, property];
-        }
-        return null;
-      })
-      .filter(Boolean)
-      .reduce((acc, [propertyName, property]) => {
-        acc[propertyName] = property;
-        return acc;
-      }, {} as Property);
+  function filterProperties(propertyFieldMap: { [key: string]: GenericField }, query: string) {
+    return Object.fromEntries(
+      Object.entries(propertyFieldMap)
+        .filter(([_, field]) => shouldIncludeProperty(field, query))
+    );
   }
 
-  function shouldIncludeProperty(property: Property, query: string): boolean {
-    if (property.label?.toLowerCase().includes(query.toLowerCase())) {
+  function shouldIncludeProperty(field: GenericField, query: string): boolean {
+    if (field.label?.toLowerCase().includes(query.toLowerCase())) {
       return true;
     }
-    if (property.component === "grid" && property.children?.length > 0) {
-      const matchingChildren = property.children.filter((child: { label: string }) =>
+    if (field.component === "grid" && field.children?.length > 0) {
+      const matchingChildren = field.children.filter((child: { label: string }) =>
         child.label?.toLowerCase().includes(query.toLowerCase())
       );
       if (matchingChildren.length > 0) {
-        property.children = matchingChildren;
+        field.children = matchingChildren;
         return true;
       }
     }
@@ -61,14 +46,14 @@ export const StyleEditorTab = () => {
   }
 
   function handleSearch(value: string) {
-    setSearch(value);
+    setSearchQuery(value);
     setFilteredSections(filterSections(value));
   }
 
   const CollapsibleSection = (props: Readonly<{
     index: number;
     isOpen: boolean;
-    properties: Property;
+    propertyFieldMap: { [key: string]: GenericField };
     title: string;
   }>) => {
     const [isOpen, setIsOpen] = createSignal(props.isOpen ?? false);
@@ -77,9 +62,9 @@ export const StyleEditorTab = () => {
       <div
         class="b:1px|solid|lightgray p:5|10 w:full"
         classList={{
-          "r:0|0|5|5": props.index === length() - 1,
-          "r:5": props.index === 0 && length() === 1,
-          "r:5|5|0|0": props.index === 0 && length() > 1,
+          "r:0|0|5|5": props.index === sectionCount() - 1,
+          "r:5": props.index === 0 && sectionCount() === 1,
+          "r:5|5|0|0": props.index === 0 && sectionCount() > 1,
         }}
       >
         <button
@@ -101,7 +86,7 @@ export const StyleEditorTab = () => {
         </button>
         <Show when={isOpen()}>
           <hr class="color:#e1e1e1 m:2" />
-          <For each={Object.entries(props.properties)}>
+          <For each={Object.entries(props.propertyFieldMap)}>
             {([, value]) => <DynamicCSSComponent value={value} />}
           </For>
         </Show>
@@ -119,19 +104,19 @@ export const StyleEditorTab = () => {
             onInput={(e) => handleSearch(e.target.value)}
             placeholder="Search Style..."
             type="search"
-            value={search()}
+            value={searchQuery()}
           />
         </div>
       </nav>
       <For each={Object.entries(filteredSections())} fallback={""}>
         {(section, index) => {
-          const [sectionName, { isOpen, properties }] = section;
+          const [sectionName, { isOpen, propertyFieldMap }] = section;
           return (
-            <Show when={Object.keys(properties).length > 0}>
+            <Show when={Object.keys(propertyFieldMap).length > 0}>
               <CollapsibleSection
                 index={index()}
                 isOpen={isOpen}
-                properties={properties}
+                propertyFieldMap={propertyFieldMap}
                 title={sectionName}
               />
             </Show>

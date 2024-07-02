@@ -1,6 +1,10 @@
+
+
+import type { ColorPickerField, SelectField, TextFieldOptionsField } from "./FieldType";
+
 import { sizeTypes } from "../context";
-import { createGridOptions } from "./createGridOptions";
-import { createSelectOptions } from "./createSelectOptions";
+import { createGridOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldType";
 
 export const TypographySection = {
   colorPicker: {
@@ -8,7 +12,7 @@ export const TypographySection = {
     isLabelOnTop: true,
     label: "Color",
     name: "color",
-  },
+  } as ColorPickerField,
   fontFamily: createSelectOptions(
     "font-family",
     "Font",
@@ -36,7 +40,7 @@ export const TypographySection = {
       name: "font-size",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "select",
       isLabelOnTop: true,
@@ -53,7 +57,7 @@ export const TypographySection = {
         "800",
         "900",
       ],
-    },
+    } as SelectField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -61,7 +65,7 @@ export const TypographySection = {
       name: "line-height",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isLabelOnTop: true,
@@ -69,28 +73,28 @@ export const TypographySection = {
       name: "letter-spacing",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "select",
       isLabelOnTop: true,
       label: "Align",
       name: "text-align",
       options: ["left", "center", "right", "justify"],
-    },
+    } as SelectField,
     {
       component: "select",
       isLabelOnTop: true,
       label: "Decoration",
       name: "text-decoration",
       options: ["none", "underline", "overline", "line through"],
-    },
+    } as SelectField,
     {
       component: "select",
       isLabelOnTop: true,
       label: "Transform",
       name: "text-transform",
       options: ["none", "capitalize", "uppercase", "lowercase"],
-    },
+    } as SelectField,
     {
       component: "select",
       isLabelOnTop: true,
@@ -100,7 +104,7 @@ export const TypographySection = {
         { label: "RTL", value: "rtl" },
         { label: "LTR", value: "ltr" },
       ],
-    },
+    } as SelectField,
   ]),
   whiteSpace: createSelectOptions(
     "white-space",

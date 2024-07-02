@@ -1,6 +1,10 @@
+import type { FieldWithCustomProperty } from "./FieldType";
+
 import { sizeTypes } from "../context";
 
-export const BorderSection = {
+
+
+export const BorderSection: {[key: string]: FieldWithCustomProperty} = {
   borderColor: {
     component: "fieldWithCustomProperty",
     customProperty: [

@@ -356,7 +356,13 @@ export function GenericField(
           </Label>
         </Match>
         <Match when={true}>
-          <Dynamic class={props.meta.P.class} component={props.meta.P.as || "div"}>
+          <Dynamic
+            component={props.meta.P.as || "div"}
+            {...defaultValues()}
+            {...deNullify(props.meta.P)}
+            {...getAttrs(props.meta)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+          >
             {props.children}
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Dynamic>

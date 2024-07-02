@@ -1,4 +1,6 @@
 
+import type { CSSJSONSchemaType } from "./FieldType";
+
 import { BackgroundSection } from "./BackgroundSection";
 import { BorderSection } from "./BorderSection";
 import { EffectsSection } from "./EffectsSection";
@@ -9,7 +11,7 @@ import { SizeSection } from "./SizeSection";
 import { SpaceSection } from "./SpaceSection";
 import { TypographySection } from "./TypographySection";
 
-export const JSONSchema = {
+export const JSONSchema: CSSJSONSchemaType= {
   Background: BackgroundSection,
   Border: BorderSection,
   Effects: EffectsSection,

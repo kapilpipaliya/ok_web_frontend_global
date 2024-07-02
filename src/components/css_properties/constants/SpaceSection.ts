@@ -1,7 +1,15 @@
-import { sizeTypes } from "../context";
-import { createGridOptions } from "./createGridOptions";
+import type { TextFieldOptionsField } from "./FieldType";
 
-export const SpaceSection = {
+import { sizeTypes } from "../context";
+import { createGridOptions } from "./FieldType";
+
+
+type SpaceSectionType = {
+  margin: ReturnType<typeof createGridOptions>;
+  padding: ReturnType<typeof createGridOptions>;
+};
+
+export const SpaceSection: SpaceSectionType = {
   margin: createGridOptions("margin", "Margin", [
     {
       component: "textFieldOptions",
@@ -11,7 +19,7 @@ export const SpaceSection = {
       name: "margin-top",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -20,7 +28,7 @@ export const SpaceSection = {
       name: "margin-left",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField  ,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -29,7 +37,7 @@ export const SpaceSection = {
       name: "margin-right",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -38,7 +46,7 @@ export const SpaceSection = {
       name: "margin-bottom",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
   ]),
   padding: createGridOptions("padding", "Padding", [
     {
@@ -49,7 +57,7 @@ export const SpaceSection = {
       name: "padding-top",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -58,7 +66,7 @@ export const SpaceSection = {
       name: "padding-left",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -67,7 +75,7 @@ export const SpaceSection = {
       name: "padding-right",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,
@@ -76,6 +84,6 @@ export const SpaceSection = {
       name: "padding-bottom",
       options: sizeTypes,
       type: "number",
-    },
+    } as TextFieldOptionsField,
   ]),
 };

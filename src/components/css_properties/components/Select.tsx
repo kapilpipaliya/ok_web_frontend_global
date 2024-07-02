@@ -14,7 +14,7 @@ import "~/css/componentUtilCSS.css";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { Container, ContainerLabel } from "./CssUtils";
 
-export const DisplaySelector = (props: {
+export const Select = (props: {
   infoLink?: string;
   isAddToClass: boolean;
   isLabelOnTop: boolean;

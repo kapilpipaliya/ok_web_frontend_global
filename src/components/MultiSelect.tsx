@@ -41,22 +41,26 @@ export function MultiSelectField(props: Readonly<{
   const [inputValue, setInputValue] = createSignal("");
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
-  const getOptionProperty = (option: {
-    [x: string]: { [x: string]: any }; // Vertex
-    label?: any;
-    value?: any;
-  }, property: 'label' | 'value') => {
+
+  const getOptionValue = (option: { [x: string]: { [x: string]: any }; value: any }) => {
+    if (props.optionValueKey) {
+      return option[props.optionValueKey];
+    }
+    return typeof option === "object" ? option.value : option;
+  };
+
+  const getOptionLabel = (option: { [x: string]: { [x: string]: any }; label: any }) => {
     if (typeof option === "object" && props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
         option[props.displayValueParent]?.name
       );
+    } else if (typeof option === "object" && props.displayValueChild) {
+      return option[props.displayValueChild];
     }
-    return typeof option === "object" ? option[property] : option;
+    return typeof option === "object" ? option.label : option;
   };
 
-  const getOptionValue = (option: { [x: string]: { [x: string]: any }; value: any; }) => getOptionProperty(option, 'value');
-  const getOptionLabel = (option: { [x: string]: { [x: string]: any }; label: any; }) => getOptionProperty(option, 'label');
 
   // Handle changes in selection
   const handleSelectChange = (value: any) => {
@@ -118,12 +122,17 @@ export function MultiSelectField(props: Readonly<{
   const optionSelectedStyle = "background: #ddd;opacity: 0.5;";
 
   // Filter options based on input value
+  const filterOptions = (options: any[], inputValue: string) => {
+    return options.filter((option) => {
+      const label = getOptionLabel(option)?.toLowerCase();
+      const matches = label.includes(inputValue.toLowerCase());
+      const children = option.children ? filterOptions(option.children, inputValue) : [];
+      return matches || children.length > 0;
+    });
+  };
+
   const filteredOptions = createMemo(() => {
-    return (props.options || []).filter((option) =>
-      getOptionLabel(option)
-        ?.toLowerCase()
-        .includes(inputValue().toLowerCase()),
-    );
+    return filterOptions(props.options || [], inputValue());
   });
 
   const handleInputFocus = (e: Event) => {
@@ -157,6 +166,55 @@ export function MultiSelectField(props: Readonly<{
       document.removeEventListener("mousedown", handleClickOutside);
     });
 
+    const Option = (p: { option: any }) => {
+      return (
+        <Show
+          fallback={
+            <button
+              class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
+              onMouseDown={() => !p.option.children && handleSelectChange(getOptionValue(p.option))}
+              style={`${optionStyle} ${selected().some(
+                (item: { value: any }) =>
+                  getOptionValue(item) === getOptionValue(p.option),
+              )
+                ? optionSelectedStyle
+                : ""
+                }`}
+              type="button"
+            >
+              {props.renderLabel
+                ? props.renderLabel(p.option)
+                : getOptionLabel(p.option)}
+            </button>
+          }
+          when={p.option.children && p.option.children.length > 0}
+        >
+          <div>
+            <div
+              class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
+              onMouseDown={() => handleSelectChange(getOptionValue(p.option))}
+              style={`${optionStyle} ${selected().some(
+                (item: { value: any }) =>
+                  getOptionValue(item) === getOptionValue(p.option),
+              )
+                ? optionSelectedStyle
+                : ""
+                }`}
+            >
+              {props.renderLabel
+                ? props.renderLabel(p.option)
+                : getOptionLabel(p.option)}
+            </div>
+            <div style="padding-left: 20px;">
+              <For each={p.option.children}>
+                {(childOption) => Option({ option: childOption })}
+              </For>
+            </div>
+          </div>
+        </Show>
+      );
+    };
+
     return (
       <Portal mount={document.body}>
         {/* z-index greater than drawers z-index */}
@@ -170,29 +228,7 @@ export function MultiSelectField(props: Readonly<{
               each={filteredOptions()}
               fallback={<div style={optionStyle}>No item found </div>}
             >
-              {(option, index) => (
-                <button
-                class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
-                classList={{
-                   
-                    "r:0|0|5|5": index() === filteredOptions().length - 1,
-                   
-                  }}
-                  onMouseDown={() => handleSelectChange(getOptionValue(option))}
-                  style={`${optionStyle} ${selected().some(
-                    (item: { value: any }) =>
-                      getOptionValue(item) === getOptionValue(option),
-                  )
-                    ? optionSelectedStyle
-                    : ""
-                    }`}
-                  type="button"
-                >
-                  {props.renderLabel
-                    ? props.renderLabel(option)
-                    : getOptionLabel(option)}
-                </button>
-              )}
+              {(option) => <Option option={option} />}
             </For>
           </Show>
         </div>
@@ -221,6 +257,7 @@ export function MultiSelectField(props: Readonly<{
           )}
         </For>
         <input
+          auto-complete="off"
           disabled={props.disable}
           onFocus={handleInputFocus}
           onInput={(e) => setInputValue(e.target.value)}

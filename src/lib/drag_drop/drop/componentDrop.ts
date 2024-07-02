@@ -52,7 +52,7 @@ export function componentDrop(
 
   const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
 
-  let rowResult: { edgeId?: string | undefined;; error: boolean; vertexId?: string | undefined }
+  let rowResult: { edgeId?: string | undefined; error: boolean; vertexId?: string | undefined }
   batch(() => {
     rowResult = addNewRow(
       txnId,
@@ -62,7 +62,6 @@ export function componentDrop(
       toParentVertex,
       toIndex ? { name: uniqueName, pos: toIndex } : { name: uniqueName },
       false,
-      {} as any
     );
 
     const rowVertex = graph.vertexes[rowResult.vertexId!];
