@@ -37,6 +37,7 @@ export type EdgeMap = { [key: string]: Edge };
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {
+  activeClickOutside: number
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   isSideBarOpen?: boolean;

@@ -205,6 +205,7 @@ export function SelectInputField(
           loadOptions={loadOptions}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
+          optionValueKey={!isCommaSeparated() ? "id" : undefined}
           options={options()}
           placeholder={`${props.title}`}
           selectedValues={() => {

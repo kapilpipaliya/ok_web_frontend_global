@@ -1,16 +1,20 @@
-import { autoUpdate } from '@floating-ui/dom';
-import { useFloating } from 'solid-floating-ui';
-import { type JSX, createSignal, onCleanup, onMount, splitProps } from "solid-js";
-import { Portal } from "solid-js/web";
+import {type Placement, autoUpdate} from '@floating-ui/dom';
+import {makeEventListener} from "@solid-primitives/event-listener";
+import {useFloating} from 'solid-floating-ui';
+import {type JSX, createSignal, onMount, splitProps, useContext} from "solid-js";
+import {Portal} from "solid-js/web";
 
-export function DropdownMenu(props: { onClickOutside: () => void, parentRef: HTMLElement } & JSX.HTMLAttributes<HTMLDivElement>) {
-    let dropdownRef: HTMLDivElement;
+import {useActiveClickOutside} from "~/components/useActiveClickOutside";
+import {GraphContext} from '~/lib/graph/graph';
 
+export function DropdownMenu(props: { onClickOutside: () => void, parentRef: HTMLElement, plaement?: Placement } & JSX.HTMLAttributes<HTMLDivElement>) {
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+    const [graph, setGraph] = useContext(GraphContext)!;
+  const activeClickOutside = useActiveClickOutside(graph, setGraph);
 
-    const position = useFloating(reference, floating, {
-        placement: 'bottom-start',
+  const position = useFloating(reference, floating, {
+        placement: props.plaement ?? 'bottom-start',
         strategy: 'fixed',
         whileElementsMounted: autoUpdate,
     });
@@ -19,19 +23,14 @@ export function DropdownMenu(props: { onClickOutside: () => void, parentRef: HTM
         setReference(props.parentRef);
     });
 
-    onCleanup(() => {
-        document.removeEventListener('mousedown', handleClickOutside);
-    });
-
     const handleClickOutside = (event: MouseEvent) => {
+        if (activeClickOutside !== graph.activeClickOutside) return;
         const path = event.composedPath();
-        if (!path.includes(dropdownRef) && !path.includes(props.parentRef)) {
+        if (!path.includes(floating()!) && !path.includes(props.parentRef)) {
             props.onClickOutside?.();
         }
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
+    makeEventListener(window, "mousedown", handleClickOutside);
     return (
         <Portal mount={document.body}>
             <div

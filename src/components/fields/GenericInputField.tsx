@@ -209,6 +209,7 @@ export function GenericInputField(
                   false,
                 );
             }}
+            optionValueKey="id"
             options={props.meta?.P.options ?? []}
             placeholder={props.meta?.P.placeholder ?? "Select Item"}
             selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}

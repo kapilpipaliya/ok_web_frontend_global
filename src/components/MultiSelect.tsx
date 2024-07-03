@@ -148,7 +148,7 @@ export function MultiSelectField(props: Readonly<{
 
   const Options = () => {
     const [graph, setGraph] = useContext(GraphContext)!;
-    useActiveClickOutside(setGraph, graph);
+    useActiveClickOutside(graph, setGraph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
 

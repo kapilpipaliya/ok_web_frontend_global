@@ -14,7 +14,7 @@ export const isPageDesignerPath = (path: string) => {
 
   return pageDesignerPath.some(Path => lowerPath.includes(Path));
 };
-export function isObject(i: any) {
+export function isObject(i: any): i is Record<string, any>  {
   if (i && !Array.isArray(i)) {
     return "object" === typeof i;
   }

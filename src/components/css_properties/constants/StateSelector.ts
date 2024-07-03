@@ -1,7 +1,19 @@
 /* eslint-disable perfectionist/sort-objects */
-export const cssSelectorTree = [
-    {
+
+type CssSelector = {
+  children: CssSelector[];
+  title: string;
+} | {
+  children?: CssSelector[];
+  description: string;
+  selector: string;
+  title: string;
+};
+
+export const cssSelectorTree: CssSelector[] = [
+/*    {
       title: "Basic Usage",
+      selector: "basic-usage",
       children: [
         {
           title: "Universal Selector",
@@ -62,6 +74,7 @@ export const cssSelectorTree = [
     },
     {
       title: "Combinators",
+      selector: "combinators",
       children: [
         {
           title: "Descendant Combinator",
@@ -84,9 +97,10 @@ export const cssSelectorTree = [
           description: "Matches the second element only if it immediately follows the first element"
         }
       ]
-    },
+    },*/
     {
       title: "Pseudo-classes",
+      selector: "pseudo-classes",
       children: [
         {
           title: ":lang()",
@@ -332,113 +346,113 @@ export const cssSelectorTree = [
     },
     {
       title: "Pseudo-elements",
+      selector: "pseudo-elements",
       children: [
         {
           title: "::after",
-          selector: "::after",
+          selector: ":after",
           description: "Creates a pseudo-element that is the last child of the selected element"
         },
         {
           title: "::before",
-          selector: "::before",
+          selector: ":before",
           description: "Creates a pseudo-element that is the first child of the selected element"
         },
         {
           title: "::backdrop",
-          selector: "::backdrop",
+          selector: ":backdrop",
           description: "A box the size of the viewport which is rendered immediately beneath any element being presented in full-screen mode"
         },
         {
           title: "::cue",
-          selector: "::cue",
+          selector: ":cue",
           description: "Matches WebVTT cues within a selected element"
         },
         {
           title: "::first-letter",
-          selector: "::first-letter",
+          selector: ":first-letter",
           description: "Applies styles to the first letter of the first line of a block-level element"
         },
         {
           title: "::first-line",
-          selector: "::first-line",
+          selector: ":first-line",
           description: "Applies styles to the first line of a block-level element"
         },
         {
           title: "::file-selector-button",
-          selector: "::file-selector-button",
+          selector: ":file-selector-button",
           description: "Represents the button of an <input> of type='file'"
         },
         {
           title: "::marker",
-          selector: "::marker",
+          selector: ":marker",
           description: "Selects the marker box of a list item"
         },
         {
           title: "::part()",
-          selector: "::part()",
+          selector: ":part()",
           description: "Represents any element within a shadow tree that has a matching part attribute"
         },
         {
           title: "::placeholder",
-          selector: "::placeholder",
+          selector: ":placeholder",
           description: "Represents the placeholder text in an <input> or <textarea> element"
         },
         {
           title: "::selection",
-          selector: "::selection",
+          selector: ":selection",
           description: "Applies styles to the part of a document that has been highlighted by the user"
         },
         {
           title: "::slotted()",
-          selector: "::slotted()",
+          selector: ":slotted()",
           description: "Represents any element that has been placed into a slot inside an HTML template"
         },
         {
           title: "::scrollbar",
-          selector: "::scrollbar",
+          selector: ":scrollbar",
           description: "The style of an element's scrollbar"
         },
         {
           title: "::scrollbar-button",
-          selector: "::scrollbar-button",
+          selector: ":scrollbar-button",
           description: "The buttons on the scrollbar"
         },
         {
           title: "::scrollbar-thumb",
-          selector: "::scrollbar-thumb",
+          selector: ":scrollbar-thumb",
           description: "The draggable scrolling handle"
         },
         {
           title: "::scrollbar-track",
-          selector: "::scrollbar-track",
+          selector: ":scrollbar-track",
           description: "The track of the scrollbar"
         },
         {
           title: "::scrollbar-track-piece",
-          selector: "::scrollbar-track-piece",
+          selector: ":scrollbar-track-piece",
           description: "The part of the track not covered by the handle"
         },
         {
           title: "::scrollbar-corner",
-          selector: "::scrollbar-corner",
+          selector: ":scrollbar-corner",
           description: "The bottom corner of the scrollbar"
         },
         {
           title: "::resizer",
-          selector: "::resizer",
+          selector: ":resizer",
           description: "The bottom corner of the scrollbar, often the bottom-right corner of the browser window"
         },
         {
           title: "::search-cancel-button",
-          selector: "::search-cancel-button",
+          selector: ":search-cancel-button",
           description: "A button at the edge of an <input> of type='search' which clears away the current value"
         },
         {
           title: "::search-results-button",
-          selector: "::search-results-button",
+          selector: ":search-results-button",
           description: "A button at the left edge of an <input> of type='search' which displays a menu for previous search queries"
         }
       ]
     }
   ]
-  

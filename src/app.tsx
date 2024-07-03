@@ -29,6 +29,7 @@ export default function App() {
   const loadingSite = createSignal(false);
 
   const graph = createStore<GraphInterface>({
+    activeClickOutside: 0,
     componentIdMap: {},
     edges: {} as EdgeMap,
     isSideBarOpen: true,
@@ -38,7 +39,7 @@ export default function App() {
     transactions: new ReactiveMap(),
     txnId: 0,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    vertexes: {} as VertexMap,
+    vertexes: {} as VertexMap
   });
 
   return (

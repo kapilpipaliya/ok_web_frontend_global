@@ -175,8 +175,10 @@ export function ExpressionBuilder(props: Readonly<{
                     <MultiSelectField
                       displayValueChild="name"
                       displayValueParent="P"
-                      onRemove={(e) => onUnaryOperatorChange(index())}
+                      onRemove={() => onUnaryOperatorChange(index())}
                       onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
+                      optionValueKey="id"
+                      // @ts-expect-error ignore
                       options={Object.keys(unops).map((key) => ({
                         P: { name: key },
                         id: key,
@@ -209,6 +211,8 @@ export function ExpressionBuilder(props: Readonly<{
                       displayValueParent="P"
                       onRemove={(e) => onBinaryOperatorChange(index())}
                       onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
+                      optionValueKey="id"
+                      // @ts-expect-error ignore
                       options={Object.keys(binops).map((key) => ({
                         P: { name: key },
                         id: key,

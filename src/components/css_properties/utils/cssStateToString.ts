@@ -1,6 +1,6 @@
 import { isObject } from "~/lib/utils";
 
-import { CSSStore } from "../context";
+import type { CSSStore } from "../context";
 
 
 export function cssStateToString(cssState: CSSStore) {
@@ -13,7 +13,7 @@ export function cssStateToString(cssState: CSSStore) {
       if (!isObject(value)) return `${state}:${stateValue}`;
       return Object.entries(value).map(([key, value]) => {
         const stateValue = value.toString().replaceAll(" ", "|");
-        return `${key}:${stateValue}${state && state !== 'undefined' ? `:${state}` : ""}`;
+        return `${key}:${stateValue}${state && state !== 'undefined' ? `${state}` : ""}`;
       }).join("\n");
     })
     .join("\n");
