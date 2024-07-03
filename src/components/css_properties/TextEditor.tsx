@@ -2,12 +2,12 @@ import type { JSX } from "solid-js";
 
 import { createWritableMemo } from "@solid-primitives/memo";
 
-export function TextEditor(props: Readonly<
-  {
-    onValueChange: (valueString: string) => void;
-    value: string;
-  } & JSX.HTMLAttributes<HTMLTextAreaElement>
->) {
+interface TextAreaProps extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  onValueChange: (valueString: string) => void;
+  value: string;
+}
+
+export function TextEditor(props: TextAreaProps) {
   const [text, setText] = createWritableMemo(() => props.value);
 
   return (

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, createSignal, useContext } from "solid-js";
+import { Show, createMemo, createSignal, useContext } from "solid-js";
 import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
@@ -103,10 +103,13 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
           <div class="content mt:5">
             Default Value(Read only)
             <TextEditor
+              disabled={true}
               onValueChange={handleDefaultStateChange}
-              value={cssStateToString(cssDefaultState)} />
+              value={cssStateToString(cssDefaultState)}
+               />
             Property value
             <TextEditor
+              disabled={true}
               onValueChange={handleCSSStateChange}
               value={cssStateToString(cssState)} />
           </div>
