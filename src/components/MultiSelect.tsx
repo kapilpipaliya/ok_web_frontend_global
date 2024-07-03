@@ -1,5 +1,6 @@
 import { autoUpdate } from '@floating-ui/dom';
 import { Icon } from "@iconify-icon/solid";
+import { type Ref, mergeRefs } from "@solid-primitives/refs";
 import { useFloating } from 'solid-floating-ui';
 import {
   For,
@@ -7,179 +8,223 @@ import {
   Show,
   createMemo,
   createSignal,
-  onCleanup,
+  useContext,
 } from "solid-js";
 import { Portal, } from "solid-js/web";
 
+import { useActiveClickOutside } from "~/components/useActiveClickOutside";
+import { GraphContext, type Vertex } from '~/lib/graph/graph';
+import { isObject } from '~/lib/utils';
+
 import { useToast } from "./Toast";
 
+export type Option = {
+  children?: Option[];
+  label: string;
+  value: string;
+} | Vertex | string;
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: Readonly<{
-   disable?: boolean;
-   displayValueChild?: string;
-   displayValueParent?: string;
-   isLoadingOptions?: boolean;
-   loadOptions?: () => Promise<void>;
-   onRemove: (arg0: any, arg1: any) => void;
-   onSelect: (arg0: any, arg1: any) => void;
-   options: any[];
-   placeholder?: string;
-   renderLabel?: ((arg0: any) => JSX.Element);
-   selectedValues: () => any;
-   selectionLimit?: number;
+  disable?: boolean;
+  displayValueChild?: string;
+  displayValueParent?: string;
+  isLoadingOptions?: boolean;
+  loadOptions?: () => Promise<void>;
+  onRemove: (newSelected: Option[], value: Option) => void;
+  onSelect: (newSelected: Option[], value: Option) => void;
+  optionValueKey?: string;
+  options: Option[];
+  placeholder?: string;
+  ref?: Ref<HTMLDivElement>;
+  renderLabel?: ((option: Option) => JSX.Element);
+  selectedValues: () => Option[];
+  selectionLimit?: number;
 }>) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
+  let optionTimeout: NodeJS.Timeout;
 
-  const [isRefetch, setIsRefetch] = createSignal(1);
+  const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
 
   // Define signals for managing state
   const selected = createMemo(
-    () => (isRefetch() && props.selectedValues()) || ([] as any[]),
+    () => (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
   );
 
   const [inputValue, setInputValue] = createSignal("");
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
-
-  const getOptionValue = (option: { [x: string]: { [x: string]: any }; value: any }) => {
+  const getOptionValue = (option: Option) => {
+    if (!isObject(option)) return option;
     if (props.optionValueKey) {
-      return option[props.optionValueKey];
+      return option[props.optionValueKey as keyof Option];
     }
-    return typeof option === "object" ? option.value : option;
+    // @ts-expect-error ignore
+    return option.value;
   };
 
-  const getOptionLabel = (option: { [x: string]: { [x: string]: any }; label: any }) => {
-    if (typeof option === "object" && props.displayValueParent && props.displayValueChild) {
+  const getOptionLabel = (option: Option) => {
+    if (isObject(option) && props.displayValueParent && props.displayValueChild) {
       return (
+        // @ts-expect-error ignore
         option[props.displayValueParent]?.[props.displayValueChild] ||
+        // @ts-expect-error ignore
         option[props.displayValueParent]?.name
       );
-    } else if (typeof option === "object" && props.displayValueChild) {
+    } else if (isObject(option) && props.displayValueChild) {
+      // @ts-expect-error ignore
       return option[props.displayValueChild];
     }
-    return typeof option === "object" ? option.label : option;
+    // @ts-expect-error ignore
+    return isObject(option) ? option.label : option;
   };
 
-
-  // Handle changes in selection
-  const handleSelectChange = (value: any) => {
-    let newSelected: any[];
-    if (selected().some((item: any) => getOptionValue(item) === value)) {
-      newSelected = selected().filter(
-        (item: any) => getOptionValue(item) !== value,
-      );
-      
-      props.onRemove?.(newSelected, value);
-    } else {
-      if (props.selectionLimit && selected().length >= props.selectionLimit) {
-        showErrorToast("Selection limit reached");
-        setDropdownVisible(false);
-        return; // Exit if selection limit is reached
-      }
-      const selectedOption = (props.options || []).find(
-        (option: any) => getOptionValue(option) === value,
-      );
-      newSelected = [...selected(), selectedOption];
-      
-      props.onSelect?.(newSelected, value);
-    }
-    if (props.selectionLimit === 1) {
-      setDropdownVisible(false);
-    }
-    setIsRefetch((v) => v + 1);
-  };
   // Remove tag from selected values
-  const handleRemoveTag = (value: any) => {
+  const handleRemoveTag = (option: Option) => {
     const newSelected = selected().filter(
-      (item: any) => getOptionValue(item) !== value,
+      (item) => getOptionValue(item) !== option,
     );
-    
-    props.onRemove?.(newSelected, value);
+
+    props.onRemove?.(newSelected, option);
   };
 
-  // Inline styles
-  const containerStyle =
-    "position:relative; display: inline-block; width: 100%; padding: 0px 3px; border: 1px solid #ccc; border-radius: 4px; background: white;";
-  const inputContainerStyle =
-    "padding:4px 0px;display: flex; flex-wrap: wrap; align-items: center; gap: 5px; width: 100%;";
-  const tagStyle =
-    "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
-  const closeButtonStyle = "cursor: pointer; display: flex;";
-  const inputStyle = () => ({
-    border: "none",
-    display:
-      props.selectedValues().length === 1 && props.selectionLimit === 1
-        ? "none"
-        : "",
-    flex: 1,
-    outline: "none",
-    padding: "5px",
-    "smin-width": "100px",
-  });
-
-  const optionStyle = "padding: 8px; cursor: pointer; width: 100%;";
-  const optionSelectedStyle = "background: #ddd;opacity: 0.5;";
+  // Master CSS classes
+  const inputContainerClass = "p:4px|0px d:flex flex:wrap ai:center gap:5px w:100%";
+  const tagClass = "bg:#3377cc c:#fff p:2px|5px r:4px d:flex ai:center gap:5px cursor:default";
+  const closeButtonClass = "cursor:pointer d:flex";
 
   // Filter options based on input value
-  const filterOptions = (options: any[], inputValue: string) => {
+  const filterOptions = (options: Option[], inputValue: string) => {
     return options.filter((option) => {
+      if (!option) {
+        return false;
+      }
+      if (!isObject(option)) {
+        return option.toLowerCase().includes(inputValue.toLowerCase());
+      }
       const label = getOptionLabel(option)?.toLowerCase();
-      const matches = label.includes(inputValue.toLowerCase());
-      const children = option.children ? filterOptions(option.children, inputValue) : [];
-      return matches || children.length > 0;
+      const matches = label?.includes(inputValue.toLowerCase());
+
+      // @ts-expect-error ignore
+      if (option.children && option.children.length > 0) {
+        // @ts-expect-error ignore
+        const originalOptions = JSON.parse(JSON.stringify(option.children));
+        // @ts-expect-error ignore
+        const filteredChildren = filterOptions(option.children, inputValue);
+
+        if (matches && filteredChildren.length === 0) {
+          // If the parent matches and no children match, include all children
+          // @ts-expect-error ignore
+          option.children = originalOptions;
+          return true;
+        } else {
+          // Otherwise, filter the children
+          // @ts-expect-error ignore
+          option.children = filteredChildren;
+          // Include the parent if it matches or any children match
+          // @ts-expect-error ignore
+          return matches || option.children.length > 0;
+        }
+      }
+
+      // Return true if the parent matches and there are no children
+      return matches;
     });
   };
 
-  const filteredOptions = createMemo(() => {
-    return filterOptions(props.options || [], inputValue());
-  });
-
-  const handleInputFocus = (e: Event) => {
-    setDropdownVisible(true);
-    if (!props.isLoadingOptions) {
-      props.loadOptions?.();
+  const handleInputFocus = () => {
+    if (dropdownVisible()) {
+      clearTimeout(optionTimeout);
+    }
+    else {
+      setDropdownVisible(true);
+      if (!props.isLoadingOptions) {
+        props.loadOptions?.();
+      }
     }
   };
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
+    const [graph, setGraph] = useContext(GraphContext)!;
+    useActiveClickOutside(setGraph, graph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+    const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
 
+    const optionClass = "p:8px cursor:pointer w:100%";
+    const optionSelectedClass = "bg:#ddd opacity:0.5";
+
+    // Handle changes in selection
+    const handleSelectChange = (option: Option) => {
+      const value = getOptionValue(option);
+      let newSelected: Option[];
+      if (selected().some((item) => getOptionValue(item) === value)) {
+        newSelected = selected().filter(
+          (item) => getOptionValue(item) !== value,
+        );
+
+        props.onRemove?.(newSelected, value);
+      } else {
+        if (props.selectionLimit && props.selectionLimit > 1 && selected().length >= props.selectionLimit) {
+          showErrorToast("Selection limit reached");
+          setDropdownVisible(false);
+          return; // Exit if selection limit is reached
+        }
+        if (props.selectionLimit === 1) {
+          newSelected = [option];
+        } else {
+          newSelected = [...selected(), option];
+        }
+
+        props.onSelect?.(newSelected, value);
+      }
+
+      if (props.selectionLimit === 1) {
+        setDropdownVisible(false);
+      }
+      setInputValue(""); // mostimes user wants to clear the input after selecting an option
+      if (props.selectionLimit !== 1) {
+        inputRef?.focus();
+      }
+
+      setIsReFetchSelectedValues((v) => v + 1);
+    };
+
+    const toggleExpandOption = (option: Option) => {
+      const newHiddenOptions = new Set(hiddenOptions());
+      if (newHiddenOptions.has(option)) {
+        newHiddenOptions.delete(option);
+      } else {
+        newHiddenOptions.add(option);
+      }
+      setHiddenOptions(newHiddenOptions);
+    };
+
+    const filteredOptions = createMemo(() => {
+      return filterOptions(JSON.parse(JSON.stringify(props.options || [])), inputValue());
+    });
     const position = useFloating(reference, floating, {
       placement: 'bottom-start', // By default, this is 'bottom'
       strategy: 'fixed',
       whileElementsMounted: autoUpdate,
     });
-    const handleClickOutside = (event: MouseEvent) => {
-      const path = event.composedPath();
-      if (path.includes(reference()!) || path.includes(floating()!)) {
-        return;
-      }
-      setDropdownVisible(false);
-    };
 
-    document.addEventListener("mousedown", handleClickOutside);
-
-    onCleanup(() => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    });
-
-    const Option = (p: { option: any }) => {
+    const Option = (p: { option: Option }) => {
+      const isExpanded = () => !hiddenOptions().has(p.option);
       return (
         <Show
           fallback={
             <button
-              class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
-              onMouseDown={() => !p.option.children && handleSelectChange(getOptionValue(p.option))}
-              style={`${optionStyle} ${selected().some(
-                (item: { value: any }) =>
-                  getOptionValue(item) === getOptionValue(p.option),
-              )
-                ? optionSelectedStyle
-                : ""
-                }`}
+              class="bg:#e0e0e0:hover f:14 m:3 r:5 t:left w:full"
+              classList={{
+                [optionClass]: true, [optionSelectedClass]: selected().some(
+                  (item) =>
+                    getOptionValue(item) === getOptionValue(p.option),
+                )
+              }}
+              // @ts-expect-error ignore
+              onClick={() => (!p.option.children || p.option.children.length === 0) && handleSelectChange(p.option)}
               type="button"
             >
               {props.renderLabel
@@ -187,29 +232,32 @@ export function MultiSelectField(props: Readonly<{
                 : getOptionLabel(p.option)}
             </button>
           }
+          // @ts-expect-error ignore
           when={p.option.children && p.option.children.length > 0}
         >
           <div>
-            <div
-              class="bg:#e0e0e0:hover f:14 m:3 r:5 w:full"
-              onMouseDown={() => handleSelectChange(getOptionValue(p.option))}
-              style={`${optionStyle} ${selected().some(
-                (item: { value: any }) =>
-                  getOptionValue(item) === getOptionValue(p.option),
-              )
-                ? optionSelectedStyle
-                : ""
-                }`}
+            <button class="bg:#e0e0e0:hover f:14 m:3 r:5 t:left w:full"
+              classList={{
+                [optionClass]: true, [optionSelectedClass]: selected().some(
+                  (item) =>
+                    getOptionValue(item) === getOptionValue(p.option),
+                )
+              }}
+              onClick={() => toggleExpandOption(p.option)}
+              type="button"
             >
-              {props.renderLabel
+              {isExpanded() ? '-' : '+'} {props.renderLabel
                 ? props.renderLabel(p.option)
                 : getOptionLabel(p.option)}
-            </div>
-            <div style="padding-left: 20px;">
-              <For each={p.option.children}>
-                {(childOption) => Option({ option: childOption })}
-              </For>
-            </div>
+            </button>
+            <Show when={isExpanded()}>
+              <div class="p-l:20px">
+                {/* @ts-expect-error ignore */}
+                <For each={p.option.children}>
+                  {(childOption) => Option({ option: childOption })}
+                </For>
+              </div>
+            </Show>
           </div>
         </Show>
       );
@@ -223,10 +271,10 @@ export function MultiSelectField(props: Readonly<{
           position: position.strategy,
           top: `${position.y ?? 0}px`,
         }}>
-          <Show fallback={<div style={optionStyle}>Loading...</div>} when={!props.isLoadingOptions}>
+          <Show fallback={<div class={optionClass}>Loading...</div>} when={!props.isLoadingOptions}>
             <For
               each={filteredOptions()}
-              fallback={<div style={optionStyle}>No item found </div>}
+              fallback={<div class={optionClass}>No item found </div>}
             >
               {(option) => <Option option={option} />}
             </For>
@@ -237,33 +285,48 @@ export function MultiSelectField(props: Readonly<{
   }
 
   return (
-    <div class="grid text-align:left" ref={setReference} style={containerStyle}>
-      <div style={inputContainerStyle}>
+    <div
+      class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
+      ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}>
+      <div class={inputContainerClass}>
         <For each={selected()}>
           {(tag) => (
-            <div class="f:14" style={tagStyle}>
+            <div class={`${tagClass} f:14`}>
               {props.renderLabel ? props.renderLabel(tag) : getOptionLabel(tag)}
-              <span
+              <button
+                class={closeButtonClass}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopImmediatePropagation();
                   return handleRemoveTag(getOptionValue(tag));
                 }}
-                style={closeButtonStyle}
+                type="button"
               >
                 <Icon height={21} icon="ic:round-close" width={21} />
-              </span>
+              </button>
             </div>
           )}
         </For>
+        {/* ${props.selectedValues().length === 1 && props.selectionLimit === 1 ? "display:none" : ""} */}
         <input
+          // @ts-expect-error disable lastpass
+          AutoComplete="off"
           auto-complete="off"
+          class={`border:none flex:1 min-w:100px outline:none p:5`}
           disabled={props.disable}
+          onBlur={() => {
+            if (dropdownVisible()) {
+              // This is working fine, but its giving some bad user experience.
+              optionTimeout = setTimeout(() => setDropdownVisible(false), 100);
+              if (props.selectionLimit === 1) {
+                setInputValue('');
+              }
+            }
+          }}
           onFocus={handleInputFocus}
           onInput={(e) => setInputValue(e.target.value)}
           placeholder={props.placeholder ?? "Select options"}
           ref={inputRef}
-          style={inputStyle()}
           type="text"
           value={inputValue()}
         />
