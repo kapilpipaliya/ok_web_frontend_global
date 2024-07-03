@@ -1,22 +1,12 @@
 import { For, Show, createSignal, useContext } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import "~/css/componentUtilCSS.css";
 
+import type { FieldWithCustomProperty } from "../constants/FieldType";
 import { CssEditorContext, CssStateContext } from "../context";
 import { ButtonGroups } from "./ButtonGroups";
 
-export const FieldWithCustomBox = (props: {
-  component: string;
-  customProperty: any;
-  gridType?: string;
-  inputType?: string;
-  isLabelOnTop: boolean;
-  label: string;
-  mainFieldType?: string;
-  name: string;
-  options: any;
-}) => {
+export const FieldWithCustomBox = (props: FieldWithCustomProperty) => {
   const [optionType, setOptionType] = createSignal("all");
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);

@@ -231,7 +231,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
         onDragEnter={(e) => handleDragOverAndSetDropPosition(e,layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
         onDragLeave={() => handleDragLeave(setLayoutStore)}
         onDragOver={(e) => handleDragOver(e, layoutStore, setLayoutStore, props.item, isPreview(), () => [], children, graph, setGraph, layoutStore.formData.formData)}
-        onDrop={async (e) => {debugger
+        onDrop={async (e) => {
           await handleDrop(e, layoutStore, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
           resetDragDropState(setLayoutStore);
         }}

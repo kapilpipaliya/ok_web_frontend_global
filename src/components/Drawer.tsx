@@ -87,10 +87,10 @@ export function Drawer(props: Readonly<DrawerProps>) {
           onMouseLeave={() => setMainDivHover(false)}
         />
       </div>
-      <div
+      {/* <div
         class={`${isOpen() ? "block" : "none"} h:100% left:0 position:fixed top:0 w:100% z:10`}
         onClick={toggleDrawer}
-      />
+      /> */}
     </>
   );
 }

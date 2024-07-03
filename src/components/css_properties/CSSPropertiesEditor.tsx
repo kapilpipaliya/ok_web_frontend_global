@@ -9,6 +9,7 @@ import { ResetButton } from "./ResetButton";
 import { TabsContainer } from "./TabsContainer";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+import { isObject } from "~/lib/utils";
 
 export function CSSPropertiesEditor(props: Readonly<{
   data?: Vertex; // temp vertex
@@ -19,20 +20,18 @@ export function CSSPropertiesEditor(props: Readonly<{
   title?: string;
   txnId?: number;
 }>) {
-  const [cssState, setCssState] = createStore({} as CSSStore);
-  const [cssDefaultState, setCssDefaultCssState] = createStore({} as CSSStore);
+  const [cssState, setCssState] = createStore({'': {}} as CSSStore);
+  const [cssDefaultState, setCssDefaultCssState] = createStore({'': {}} as CSSStore);
   const [state, setState] = createSignal('');
 
   const defaultValues = props.meta.P.value || "";
   const cssValue = props.data?.P[props.meta.P.name] as string || "";
 
   const initializeState = (value: string, setStateFunction: SetStoreFunction<CSSStore>) => {
-    if (value) {
-      if (typeof value === 'string') {
-        setStateFunction(reconcile(parseAndApplyCssRules(value)));
-      } else {
-        setStateFunction(value);
-      }
+    if (typeof value === 'string') {
+      setStateFunction(reconcile(parseAndApplyCssRules(value)));
+    } else if (isObject(value)) {
+      setStateFunction(value);
     }
   };
 

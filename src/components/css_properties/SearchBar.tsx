@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor } from "solid-js";
+import type { Accessor } from "solid-js";
 
 export function SearchBar(props: Readonly<{ handleChange: (value: string) => void; value: Accessor<string>; }>) {
   return (

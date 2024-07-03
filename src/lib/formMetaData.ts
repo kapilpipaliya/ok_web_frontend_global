@@ -127,23 +127,19 @@ for (let i = 0; i < 5; i++) {
 
 const pageAttr = [
   {
-    collection: "g:'Coll'",
+    collection: "g:'ALL_LABELS'",
     component: "SelectBox",
     displayName: "Collection",
-    
-      name: "coll",
-      parentLabel: "Coll",
-    
+    name: "collection",
+    saveValue: true
   },
   {
-    collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
+    // collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
     component: "SelectBox",
     // displayExpr: "P.displayName||P.name",
       displayExpr: "$P.displayName ($P.name)",
-    
-      displayName: "Attribute",
-      name: "Att",
-    
+      displayName: "Data",
+      name: "data",
   },
   {
     component: "TextBox",

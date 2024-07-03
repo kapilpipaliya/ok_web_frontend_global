@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, useContext } from "solid-js";
 
-import { MultiSelectField, Option } from "../MultiSelect";
+import { MultiSelectField, type Option } from "../MultiSelect";
 import { PROPERTIES } from "../page_designer/settings/properties/constant";
 import { cssSelectorTree } from "./constants/StateSelector";
 import { CssEditorContext, CssStateContext } from "./context";

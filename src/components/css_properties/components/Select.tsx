@@ -1,36 +1,27 @@
 import { Icon } from "@iconify-icon/solid";
+import { makeEventListener } from "@solid-primitives/event-listener";
 import {
   For,
+  Match,
   Show,
-  createEffect,
+  Switch,
   createMemo,
   createSignal,
-  onCleanup,
   useContext,
 } from "solid-js";
 
-import "~/css/componentUtilCSS.css";
-
+import type { SelectField } from "../constants/FieldType";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { Container, ContainerLabel } from "./CssUtils";
-
-export const Select = (props: {
-  infoLink?: string;
-  isAddToClass: boolean;
-  isLabelOnTop: boolean;
-  label: string;
-  name: string;
-  onChangeInput?: (label: any, value: any) => void;
-  onRemoveIconClick?: () => void
-  options: any;
-  value: any;
-}) => {
+import { Container } from "./Container";
+import { ContainerLabel } from "./ContainerLabel";
   function formatString(str: string) {
     return str
       .split("-") // Split the string by hyphen
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each part
       .join(" "); // Join the parts with a space
   }
+export const Select = (props: SelectField) => {
+
 
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);
@@ -55,45 +46,37 @@ export const Select = (props: {
       setIsActive(false);
     }
   };
-
-  createEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    onCleanup(() =>
-      document.removeEventListener("mousedown", handleClickOutside),
-    );
-  });
-
+  makeEventListener(document, "mousedown", handleClickOutside);
   const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
-
-
   return (
     <Container>
-      <Show
-        fallback={
-          <Show fallback={<Content />} when={props.label}>
-            <div class={"flex ai:center jc:space-between w:100%"}>
-              <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
-                setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
-                if (props.value) {
-                  props.onRemoveIconClick?.();
-                }
-              }} showIcon={isDefaultValue()} title={props.label} />
-              <Content />
-            </div>
-          </Show>
-        }
-        when={props.isLabelOnTop}
-      >
-        <div class={"w:full"}>
-          <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
-            if (props.value) {
-              props.onRemoveIconClick?.();
-            }
-            setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
-          }} showIcon={isDefaultValue()} title={props.label} />
+      <Switch>
+        <Match when={props.isLabelOnTop}>
+          <div class={"w:full"}>
+            <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
+              if (props.value) {
+                props.onRemoveIconClick?.();
+              }
+              setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
+                       }} showIcon={isDefaultValue()} title={props.label} />
+            <Content />
+          </div>
+        </Match>
+        <Match when={props.label}>
+          <div class={"flex ai:center jc:space-between w:100%"}>
+            <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
+              setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
+              if (props.value) {
+                props.onRemoveIconClick?.();
+              }
+            }} showIcon={isDefaultValue()} title={props.label} />
+            <Content />
+          </div>
+        </Match>
+        <Match when={true}>
           <Content />
-        </div>
-      </Show>
+        </Match>
+      </Switch>
     </Container>
   );
 

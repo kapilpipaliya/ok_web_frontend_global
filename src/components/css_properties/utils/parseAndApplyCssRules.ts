@@ -2,7 +2,7 @@ import type { CSSStore } from "../context";
 
 
 export const parseAndApplyCssRules = (valueString: string) => {
-  const cssRules = {} as CSSStore;
+  const cssRules = { '': {} } as CSSStore;
 
   for (const rule of valueString.split(/[\s\n]+/)) {
     const [property, value, state = ''] = rule.split(":");

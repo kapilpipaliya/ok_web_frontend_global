@@ -10,7 +10,7 @@ import {
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
-import { MultiSelectField } from "~/components/MultiSelect";
+import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { FormContext } from "~/lib/contexts";
 import {
@@ -31,6 +31,7 @@ import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { ensureArray } from "./ensureArray";
 import { isValidResponse } from "./isValidResponse";
 import { selectedValue } from "./selectedValue";
+import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
@@ -106,7 +107,7 @@ export function SelectInputField(
 
   const outerOwner = getOwner();
 
-  const onChangeSelect = (value: Vertex[], isRemove: any) => {
+  const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {
       batch(() => {
         if (!value) return;
@@ -136,12 +137,30 @@ export function SelectInputField(
             );
         } else {
           let data: Id | Id[];
+          let vertexes: Vertex[];
           if (isRemove && getComponent() === "SelectBox") {
             data = [];
+            vertexes = [];
           } else if (getComponent() === "SelectBox") {
+            // @ts-expect-error ignore
             data = value[0].id;
+            vertexes = [value[0]] as Vertex[];
           } else {
+            // @ts-expect-error ignore
             data = value.map((e) => e.id);
+            vertexes = value as Vertex[];
+          }
+          if (Array.isArray(data)) {
+            for (const vertex of vertexes) {
+              if (!graph.vertexes[vertex.id]) {
+                addNewVertex(
+                  0,
+                  vertex,
+                  graph,
+                  setGraph,
+                );
+              }
+            }
           }
           if (props.meta.P.inward) {
             setParentValue(

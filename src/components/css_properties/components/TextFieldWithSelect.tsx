@@ -1,7 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   For,
-  type JSXElement,
   Show,
   createEffect,
   createMemo,
@@ -10,58 +9,45 @@ import {
   useContext,
 } from "solid-js";
 
-import "~/css/componentUtilCSS.css";
-
+import type { TextFieldOptionsField } from "../constants/FieldType";
 import { sizeTypes } from "../constants/constants";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { CenterDiv, Container, ContainerLabel } from "./CssUtils";
+import { CenterDiv } from "./CenterDiv";
+import { Container } from "./Container";
+import { ContainerLabel } from "./ContainerLabel";
 
-export const TextFieldWithSelect = (props: {
-  infoLink?: string;
-  inputType?: string;
-  isAddToClass?: boolean;
-  isLabelOnTop?: boolean;
-  label?: string;
-  leftIcon?: JSXElement;
-  name: string;
-  onChangeInput?: any;
-  options?: string[];
-  placeholder?: string;
-  showInside?: boolean;
-  value?: () => any;
-}) => {
+export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'component'>) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state, setState] = useContext(CssStateContext);
-  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+  const [state] = useContext(CssStateContext);
+  const [cssDefault] = useContext(CssDefaultEditorContext);
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
   const [startValue, setStartValue] = createSignal(selected());
-  
-
-  createEffect((v) => {
-    setOption(determineSelectedOption());
-  });
   const determineSelectedOption = () => {
     return sizeTypes.find((unit) => selected().includes(unit)) || 'px';
   };
-
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
 
-  const handleChange = (event: any) => {
-    const value = event.target.value;
-    if(value === "") {
-      setCssState(state(),{[props.name]: ""});
-      return
+  createEffect(() => {
+    setOption(determineSelectedOption());
+  });
+
+  const handleChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    if (value === "") {
+      setCssState(state(), { [props.name]: "" });
+      return;
     }
     const numericValue = Number.parseFloat(value);
     if (props.isAddToClass) {
-      if(props.options) {
-        setCssState(state(),{[props.name]: `${value}${selectedOption()}`});
-      }else{
-        setCssState(state(),{[props.name]: `${numericValue}`});
+      if (props.options) {
+        setCssState(state(), { [props.name]: `${value}${selectedOption()}` });
+      } else {
+        setCssState(state(), { [props.name]: `${numericValue}` });
       }
     }
     if (props.onChangeInput) {
@@ -69,7 +55,7 @@ export const TextFieldWithSelect = (props: {
     }
   };
 
-  const toggleDropdown = (event: any) => {
+  const toggleDropdown = (event: MouseEvent) => {
     event.stopPropagation(); // Prevent click from immediately closing the dropdown
     setIsDropdownOpen(!isDropdownOpen());
   };
@@ -78,13 +64,13 @@ export const TextFieldWithSelect = (props: {
     if (option === "") {
       setIsDropdownOpen(false);
       setOption(option);
-      setCssState(state(),{[props.name]: ""});
+      setCssState(state(), { [props.name]: "" });
       return;
     }
     setIsDropdownOpen(false);
     setOption(option);
     const value = getValueWithoutUnits(selected());
-    setCssState(state(), {[props.name]: `${value}${option}`});
+    setCssState(state(), { [props.name]: `${value}${option}` });
   };
 
   const getValueWithoutUnits = (valueWithUnits: string) => {
@@ -95,23 +81,19 @@ export const TextFieldWithSelect = (props: {
   };
 
   // Function to normalize and set the new value based on mouse movement
-  const moveIncrement = (event: any) => {
+  const moveIncrement = (event: MouseEvent) => {
     if (isMoving()) {
       const diff = startY() - event.pageY;
-      setCssState(state(), {[props.name]: `${startValue() + diff}${selectedOption()}`}); // Assuming each pixel move changes the value by 1
+      setCssState(state(), { [props.name]: `${startValue() + diff}${selectedOption()}` });
     }
   };
 
   // Function to start the increment process
-  const downIncrement = (event: any) => {
+  const downIncrement = (event: MouseEvent) => {
     event.preventDefault();
     setIsMoving(true);
     setStartY(event.pageY);
-    setStartValue(
-      getValueWithoutUnits(
-        props.value ? props.value() : selected(),
-      ),
-    );
+    setStartValue(getValueWithoutUnits(props.value ? props.value() : selected()));
 
     document.addEventListener("mousemove", moveIncrement);
     document.addEventListener("mouseup", upIncrement);
@@ -129,6 +111,7 @@ export const TextFieldWithSelect = (props: {
     document.removeEventListener("mousemove", moveIncrement);
     document.removeEventListener("mouseup", upIncrement);
   });
+
   const Content = () => (
     <div
       class={`${
@@ -229,11 +212,11 @@ export const TextFieldWithSelect = (props: {
   const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== "");
 
   const resetValue = () => {
-    setCssState(state(), {[props.name]: cssDefault[state() ?? '']?.[props.name]});
+    setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] });
     setStartValue(cssDefault[state() ?? '']?.[props.name]);
     setOption(determineSelectedOption());
   };
-  
+
   return (
     <Container>
       <Show

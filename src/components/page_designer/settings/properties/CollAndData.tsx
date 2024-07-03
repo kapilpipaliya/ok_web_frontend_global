@@ -9,6 +9,7 @@ import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 
@@ -62,24 +63,24 @@ export function CollAndData() {
   const metaVertex = graph.vertexes[metaVertexId];
   const collMetaVertex = getChildVertexes(graph, ["MetaAttr"], [metaVertex]);
 
-  const handleCollectionChange = (value: any) => {
+  const handleCollectionChange = (value: string) => {
     setValueGlobal(
       graph,
       setGraph,
       layoutStore.formData.txnId,
-      collMetaVertex.vertexes?.[0]!,
+      collMetaVertex.vertexes![0]!,
       graph.vertexes[layoutStore.selectedId],
       value,
       false,
     )
-    setValueGlobal(
+    setSelectionValue(
+      layoutStore.formData.txnId,
+      graph.vertexes[layoutStore.selectedId],
+     
       graph,
       setGraph,
-      layoutStore.formData.txnId,
-      collMetaVertex.vertexes?.[1]!,
-      graph.vertexes[layoutStore.selectedId],
-      null,
-      false,
+      collMetaVertex.vertexes![1]!,
+      undefined,
     );
   };
 
@@ -93,7 +94,7 @@ export function CollAndData() {
             component={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
-            meta={collMetaVertex.vertexes?.[2]!}
+            meta={collMetaVertex.vertexes![2]!}
             title={""}
             txnId={layoutStore.formData.txnId}
           />
@@ -101,13 +102,13 @@ export function CollAndData() {
             component={"TextBox"}
             content={graph.vertexes[layoutStore.selectedId]?.P.data || ""}
             data={graph.vertexes[layoutStore.selectedId]}
-            meta={collMetaVertex.vertexes?.[2]!}
+            meta={collMetaVertex.vertexes![2]!}
             setValue={(value) =>
               setValueGlobal(
                 graph,
                 setGraph,
                 layoutStore.formData.txnId,
-                collMetaVertex.vertexes?.[2]!,
+                collMetaVertex.vertexes![2]!,
                 graph.vertexes[layoutStore.selectedId],
                 value,
                 false,
@@ -130,9 +131,9 @@ export function CollAndData() {
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
         isRealTime={false}
-        meta={collMetaVertex.vertexes?.[0]!}
+        meta={collMetaVertex.vertexes![0]!}
         setValue={handleCollectionChange}
-        title={"Collection:"}
+        title={"Select Collection"}
         txnId={layoutStore.formData.txnId}
       />
       <span class="flex.5 mt:5">Data:</span>
@@ -141,8 +142,8 @@ export function CollAndData() {
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
         isRealTime={false}
-        meta={collMetaVertex.vertexes?.[1]!}
-        title={"Data:"}
+        meta={collMetaVertex.vertexes![1]!}
+        title={"Select Data"}
         txnId={layoutStore.formData.txnId}
       />
     </>

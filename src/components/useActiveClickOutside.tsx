@@ -1,7 +1,7 @@
 import { onCleanup } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/graph";
 
 export function useActiveClickOutside(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>) {

@@ -2,10 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
   For,
-  type JSX,
-  type JSXElement,
   Match,
-  type Setter,
   Show,
   Switch,
   createMemo,
@@ -13,26 +10,16 @@ import {
 } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import "~/css/componentUtilCSS.css";
 
+import type { DataEditorField } from "../constants/FieldType";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { ContainerLabel } from "./CssUtils";
+import { ContainerLabel } from "./ContainerLabel";
 
-export const DataEditWithCustomDialog = (props: {
-  centerComponent?: JSXElement;
-  children: JSX.Element;
-  dialogLabel: any;
-  fallback?: any;
-  infoLink?: string;
-  label: any;
-  name: string;
-  openMenu: Accessor<any>;
-  setOpenMenu: Setter<any>;
-}) => {
+export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component'>) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state, setState] = useContext(CssStateContext);
-  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
-  const [changedData, setChangedData] = createSignal<any>({});
+  const [state] = useContext(CssStateContext);
+  const [cssDefault] = useContext(CssDefaultEditorContext);
+  const [changedData, setChangedData] = createSignal<Record<string, string>>({});
 
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
@@ -132,17 +119,17 @@ export const DataEditWithCustomDialog = (props: {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
       const data = selected()
         .split(",")
-        .filter((_: any, i: any) => i !== index);
+        .filter((_, i) => i !== index);
       setCssState(state(),{[ props.name]: data.join(",")});
     } else if (props.label.includes("Filter")) {
       const data = selected()
         .split("|")
-        .filter((_: any, i: any) => i !== index);
+        .filter((_, i) => i !== index);
       setCssState(state(),{[ props.name]: data.join("|")});
     } else if (props.label.includes("Transform")) {
       const data = selected()
         .split("|")
-        .filter((_: any, i: any) => i !== index);
+        .filter((_, i) => i !== index);
       setCssState(state(),{[ props.name]: data.join("|")});
     }
   };
@@ -154,7 +141,7 @@ export const DataEditWithCustomDialog = (props: {
   const closePopup = () => {
     props.setOpenMenu(null);
   };
-  const renderPopup = (option: any, index: number) => {
+  const renderPopup = (option: string, index: number) => {
     const setCssStateFromProperties = (property: {
       children?: any[];
       name: keyof CssProperties;
@@ -162,12 +149,13 @@ export const DataEditWithCustomDialog = (props: {
       const data = getCssParts(option);
 
       if (property.name === "grid" && property.children) {
-        property.children.forEach((child: any) =>
+        property.children.forEach((child) =>
           setCssStateFromProperties(child),
         );
         return;
       }
 
+      // @ts-expect-error ignore
       if (data.hasOwnProperty(property.name)) {
         setCssState(state(), {[property.name]: data[property.name]});
       }
@@ -181,7 +169,7 @@ export const DataEditWithCustomDialog = (props: {
 
       // If properties.children is an array, iterate over it and enhance each child
       if (Array.isArray(properties.children)) {
-        properties.children = properties.children.map((child: any) =>
+        properties.children = properties.children.map((child) =>
           addOnChangeToProperties(child),
         );
       }
@@ -190,7 +178,7 @@ export const DataEditWithCustomDialog = (props: {
       return {
         ...properties,
         isAddToClass: false,
-        onChangeInput: (value: any) => {
+        onChangeInput: (value: string) => {
           setChangedData({ ...changedData(), [properties.name]: value });
           createCssOption(changedData());
           setCssState(state(), {[properties.name]: value});
@@ -250,13 +238,13 @@ export const DataEditWithCustomDialog = (props: {
     setCssState(state(), {[props.name]: cssDefault[state() ?? '']?.[props.name]});
     setChangedData({});
   };
-  const Component = (p: { i: any; option: any }) => {
+  const Component = (p: { i: Accessor<number>; option: string }) => {
     return (
       <Switch>
         <Match when={props.label.includes("Shadow")}>
           <span
             class={"f:14"}
-            onClick={(e) => {
+            onClick={() => {
               openPopup(p.i());
             }}
             style={{
@@ -274,7 +262,7 @@ export const DataEditWithCustomDialog = (props: {
         <Match when={props.label.includes("Filter")}>
           <span
             class={"f:14"}
-            onClick={(e) => {
+            onClick={() => {
               openPopup(p.i());
             }}
             style={{
@@ -288,7 +276,7 @@ export const DataEditWithCustomDialog = (props: {
         <Match when={props.label.includes("Transition")}>
           <span
             class={"f:14"}
-            onClick={(e) => {
+            onClick={() => {
               openPopup(p.i());
             }}
             style={{
@@ -302,7 +290,7 @@ export const DataEditWithCustomDialog = (props: {
         <Match when={props.label.includes("Transform")}>
           <span
             class={"f:14"}
-            onClick={(e) => {
+            onClick={() => {
               openPopup(p.i());
             }}
             style={{
@@ -349,7 +337,6 @@ export const DataEditWithCustomDialog = (props: {
       <For each={getOptions()}>
         {(option, i) => (
           <div
-          id={`option${i()}`}
             style={{
               "align-items": "center",
               border: "1px solid #ccc",

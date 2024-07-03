@@ -1,31 +1,25 @@
-import { Show, createMemo, useContext } from "solid-js";
+import { type JSX, Match, Switch, createMemo, useContext } from "solid-js";
 
-import "~/css/componentUtilCSS.css";
-
+import type { ColorPickerField } from "../constants/FieldType";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { Container, ContainerLabel } from "./CssUtils";
+import { Container } from "./Container";
+import { ContainerLabel } from "./ContainerLabel";
 
-export const ColorPickerInput = (props: {
-  infoLink?: string;
-  isAddToClass: boolean;
-  isLabelOnTop: boolean;
-  label: any;
-  name: string;
-  onChangeInput: any;
-}) => {
+export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
-     const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
-  const [state, setState] = useContext(CssStateContext);
+  const [cssDefault] = useContext(CssDefaultEditorContext);
+  const [state] = useContext(CssStateContext);
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
-  const handleChange = (event: any) => {
+  const handleChange: JSX.InputEventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
     if (props.onChangeInput) {
       props.onChangeInput(event.target.value);
     }
     if (props.isAddToClass) {
-      setCssState(state(),{[props.name]: event.target.value});
+      setCssState(state(), { [props.name]: event.target.value });
     }
   };
+
   const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '#000000');
 
   const Content = () => (
@@ -46,24 +40,33 @@ export const ColorPickerInput = (props: {
     </div>
   );
 
+  const Label = () => (
+    <ContainerLabel
+      info={props.name}
+      onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })}
+      showIcon={isDefaultValue()}
+      title={props.label}
+    />
+  );
+
   return (
     <Container>
-      <Show
-        fallback={
-          <Show fallback={<Content />} when={props.label}>
-            <div class={"flex ai:center jc:space-between w:100%"}>
-              <ContainerLabel info={props.name} onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
-              <Content />
-            </div>
-          </Show>
-        }
-        when={props.isLabelOnTop}
-      >
-        <div class={"w:full"}>
-          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
+      <Switch>
+        <Match when={props.isLabelOnTop}>
+          <div class={"w:full"}>
+            <Label /><Content />
+          </div>
+        </Match>
+        <Match when={props.label}>
+          <div class={"flex ai:center jc:space-between w:100%"}>
+            <Label />
+            <Content />
+          </div>
+        </Match>
+        <Match when={true}>
           <Content />
-        </div>
-      </Show>
+        </Match>
+      </Switch>
     </Container>
   );
 };

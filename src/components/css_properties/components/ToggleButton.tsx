@@ -1,19 +1,12 @@
-import { For, type JSX, type JSXElement, Show, createMemo, useContext } from "solid-js";
+import { For, Match, Switch, createMemo, useContext } from "solid-js";
 
-import "~/css/componentUtilCSS.css";
-
+import type { ToggleField } from "../constants/FieldType";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
+import { CenterDiv } from "./CenterDiv";
+import { ContainerLabel } from "./ContainerLabel";
+import { IconifyIcon } from "./IconifyIcon";
 
-export const ToggleButton = (props: {
-  infoLink?: string;
-  isAddToClass: boolean;
-  isLabelOnTop: boolean;
-  label: JSXElement;
-  name: string;
-  onChangeInput: any;
-  options: { icon?: string; key: JSX.Element; value: string }[];
-}) => {
+export const ToggleButton = (props: ToggleField) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
   const [state, setState] = useContext(CssStateContext);
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
@@ -68,21 +61,23 @@ export const ToggleButton = (props: {
   );
 
   return (
-    <Show
-      fallback={
-        <Show fallback={<Content />} when={props.label}>
-          <CenterDiv>
-            <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
-            <Content />
-          </CenterDiv>
-        </Show>
-      }
-      when={props.isLabelOnTop}
-    >
-      <div class={"w:full"}>
-        <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+    <Switch>
+      <Match when={props.isLabelOnTop}>
+        <div class={"w:full"}>
+          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <Content />
+        </div>
+      </Match>
+      <Match when={props.label}>
+        <CenterDiv>
+          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <Content />
+        </CenterDiv>
+      </Match>
+      <Match when={true}>
         <Content />
-      </div>
-    </Show>
+      </Match>
+    </Switch>
   );
 };
+

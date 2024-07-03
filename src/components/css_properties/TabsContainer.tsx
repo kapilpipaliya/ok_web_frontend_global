@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, createMemo, createSignal, useContext } from "solid-js";
+import { Show, batch, createSignal, useContext } from "solid-js";
 import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { Container } from "~/components/css_properties/components/CssUtils";
+import { Container } from "./components/Container";
 import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
 
 import type { CSSStore } from "./context";
@@ -37,7 +37,7 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
 
   function getSelectedValues( ) {
     const label = state() in cssState 
-        ? `${state() === '' ? defaultStateLabel : state()} (${Object.values(cssState[state()]).length})` 
+        ? `${state() === '' ? defaultStateLabel : state()} (${Object.keys(cssState[state()] ?? {}).length})` 
         : state();
     return [  { label, value: state() }];
   }
@@ -55,9 +55,10 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
     setShowDropdown(!showDropdown());
   };
   const removeState = () => {
-    // @ts-expect-error clear the state
-    setCssState(state(), undefined);
-    setState('');
+    batch(() => {
+      setCssState(state(), reconcile({}));
+      setState('');
+    });
   };
 
   return (
@@ -79,7 +80,7 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
                 placeholder="Select Current State"
                 selectedValues={getSelectedValues}
                 selectionLimit={1} />
-              <Show when={state() !== ""}>
+              <Show when={Object.keys(cssState[state()] || {}).length > 0}>
                 <button onClick={removeState} title="Remove State">
                   <Icon height={21} icon="ic:round-remove" width={21} />
                 </button>

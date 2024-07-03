@@ -1,31 +1,20 @@
-import { For, type JSX, Show, createMemo, useContext } from "solid-js";
+import { For, type JSX, Match, Switch, createMemo, useContext } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
-import "~/css/componentUtilCSS.css";
 
+import type { ButtonGroupField } from "../constants/FieldType";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
-import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
+import { CenterDiv } from "./CenterDiv";
+import { ContainerLabel } from "./ContainerLabel";
+import { IconifyIcon } from "./IconifyIcon";
 
-export const ButtonGroups = (props: {
-  infoLink?: string;
-  isAddToClass?: boolean;
-  isLabelOnTop: boolean;
-  label: any;
-  name: string;
-  onChangeInput?: any;
-  options: {
-    icon?: boolean;
-    key: JSX.Element;
-    tooltip?: string;
-    value: string;
-  }[];
-}) => {
-  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
+  const [cssDefault] = useContext(CssDefaultEditorContext);
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state, setState] = useContext(CssStateContext);
+  const [state] = useContext(CssStateContext);
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() || '']?.[props.name] || '';
   const handleChange = (
-    e: any,
+    e: Event,
     option: { key: JSX.Element; value: string },
   ) => {
     if (props.onChangeInput) {
@@ -37,19 +26,20 @@ export const ButtonGroups = (props: {
   };
 
   const Content = () => (
-    <div class={"radio-inputs w:100%"}>
+    <div class="flex border:1px|solid|rgb(211,211,211) box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border f:14px flex:wrap min-w:max position:relative px:4px py:2px r:0.3rem" style="width: 100%;">
       <For each={props.options}>
-        {(option, index) => {
+        {(option) => {
           return (
-            <label class={"radio"}>
+            <label class="flex:1 text:center">
               <CustomTooltip message={option.tooltip ?? option.value}>
                 <input
                   checked={selected() === option.value}
+                  class={`hidden`}
                   name={props.name}
                   onChange={(e) => handleChange(e, option)}
                   type="radio"
                 />
-                <span class={"name"}>
+                <span class={`${selected() === option.value ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>
                   {option.icon ? (
                     <IconifyIcon icon={option.key as string} />
                   ) : (
@@ -66,21 +56,23 @@ export const ButtonGroups = (props: {
 
   const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
   return (
-    <Show
-      fallback={
-        <Show fallback={<Content />} when={props.label}>
-          <CenterDiv>
-            <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
-            <Content />
-          </CenterDiv>
-        </Show>
-      }
-      when={props.isLabelOnTop}
-    >
-      <div class={"w:full"}>
-        <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+    <Switch>
+      <Match when={props.isLabelOnTop}>
+        <div class={"w:full"}>
+          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <Content />
+        </div>
+      </Match>
+      <Match when={props.label}>
+        <CenterDiv>
+          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <Content />
+        </CenterDiv>
+      </Match>
+      <Match when={true}>
         <Content />
-      </div>
-    </Show>
+      </Match>
+    </Switch>
   );
 };
+

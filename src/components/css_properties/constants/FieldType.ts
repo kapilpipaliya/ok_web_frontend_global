@@ -1,4 +1,4 @@
-import type { Signal } from "solid-js";
+import type { Accessor, JSXElement, Setter } from "solid-js";
 
 export type CustomProperty = {
   label: string;
@@ -15,6 +15,7 @@ export interface FieldWithCustomProperty extends Field {
   customProperty: CustomProperty[];
   "grid-template-columns"?: string;
   gridType: string;
+  inputType?: string;
   isLabelOnTop: boolean;
   label: string;
   mainFieldType: string;
@@ -26,9 +27,12 @@ export interface FieldWithCustomProperty extends Field {
 
 export interface ColorPickerField extends Field {
   component: "colorPicker";
+  infoLink?: string;
+  isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
   name: string;
+  onChangeInput?: (value: string) => void;
 }
 
 export interface GridField extends Field {
@@ -42,18 +46,29 @@ export interface GridField extends Field {
 
 export interface TextFieldOptionsField extends Field {
   component: "textFieldOptions";
+  infoLink?: string;
+  inputType?: string;
   isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
+  leftIcon?: JSXElement;
   name: string;
-  options: string[]// { label: string; value: string }[];
+  onChangeInput?: (value: string) => void;
+  options: string[]; // { label: string; value: string }[];
+  placeholder?: string;
+  showInside?: boolean;
   type: string;
+  value?: any;
 }
 
 export interface ToggleField extends Field {
   component: "toggleButton",
-  label: string,
-  name: string,
+  infoLink?: string;
+  isAddToClass?: boolean;
+  isLabelOnTop?: boolean;
+  label: string;
+  name: string;
+  onChangeInput?: (value: string) => void;
   options: { icon?: boolean, key: string, value: string }[],
 }
 
@@ -70,22 +85,30 @@ export interface DataEditorField extends Field {
   fallback: string;
   label: string;
   name: string;
-  openMenu: Signal<boolean | null>;
+  openMenu: Accessor<boolean | null>;
+  setOpenMenu?: Setter<boolean | null>;
 }
-
 export interface SelectField extends Field {
   component: "select";
-  isLabelOnTop: boolean,
-  label: string,
-  name: string,
-  options:{label: string, value: string}[] | string[]
+  infoLink?: string;
+  isAddToClass?: boolean;
+  isLabelOnTop: boolean;
+  label: string;
+  name: string;
+  onChangeInput?: (label: any, value: any) => void;
+  onRemoveIconClick?: () => void;
+  options: { label: string, value: string }[] | string[];
+  value?: any;
 }
 
 export interface ButtonGroupField extends Field {
   component: "buttonGroups";
+  infoLink?: string;
+  isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
   name: string;
+  onChangeInput?: (value: string) => void;
   options: {
     icon: true,
     key: string,
