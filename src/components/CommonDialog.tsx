@@ -59,7 +59,7 @@ export function CustomModal(props: CustomModalProps) {
           width={props.iconSize ?? 25}
         />
       </Show>
-      <Dismiss menuButton={btnEl!} modal open={open} setOpen={setOpen}>
+      <Dismiss menuButton={btnEl!} modal open={open} overlay={false} setOpen={setOpen}>
         <div
           class="modal-container"
           onClick={onClickOverlay}

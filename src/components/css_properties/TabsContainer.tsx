@@ -11,11 +11,22 @@ import type { CSSStore } from "./context";
 
 import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
-import { ensureArray } from "../fields/ensureArray";
 import { AddNewState } from "./AddNewState";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { cssStateToString } from "./utils/cssStateToString";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+const defaultStateLabel = "Default State";
+function getOptions(cssState: CSSStore) {
+  const pseudoClasses = ["", ":active", ":hover", ":focus", ":disabled", ":visited", ":focus-within", ":focus-visible", ":target"];
+  const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
+
+  return Array.from(uniqueStates).map(value => {
+    const label = value in cssState 
+      ? `${value === '' ? defaultStateLabel : value} (${Object.values(cssState[value]).length})` 
+      : value;
+    return { label, value };
+  });
+}
 
 export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => void; }>) {
   const [state, setState] = useContext(CssStateContext);
@@ -23,6 +34,13 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
   const [cssDefaultState, setCssDefaultCssState] = useContext(CssDefaultEditorContext);
   const [showDropdown, setShowDropdown] = createSignal(false);
   let buttonRef: HTMLInputElement;
+
+  function getSelectedValues( ) {
+    const label = state() in cssState 
+        ? `${state() === '' ? defaultStateLabel : state()} (${Object.values(cssState[state()]).length})` 
+        : state();
+    return [  { label, value: state() }];
+  }
 
   const handleCSSStateChange = (valueString: string) => {
     setCssState(reconcile(parseAndApplyCssRules(valueString)));
@@ -57,9 +75,9 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
               <MultiSelectField
                 onRemove={() => setState('')}
                 onSelect={(_, value) => setState(value as string)}
-                options={Object.keys(cssState)}
+                options={getOptions(cssState)}
                 placeholder="Select Current State"
-                selectedValues={() => ensureArray(state())}
+                selectedValues={getSelectedValues}
                 selectionLimit={1} />
               <Show when={state() !== ""}>
                 <button onClick={removeState} title="Remove State">
@@ -77,15 +95,6 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
             </div>
 
             <StyleEditor />
-
-            {/* <div class="mt:10">
-              {Object.keys(cssState[state()] || {}).map((key) => (
-                <div class="flex jc:space-between mt:5">
-                  <span>{key}</span>
-                  <button onClick={() => removeState(key)}>Remove</button>
-                </div>
-              ))}
-            </div> */}
           </div>
         </Container>
       </TabContainer>

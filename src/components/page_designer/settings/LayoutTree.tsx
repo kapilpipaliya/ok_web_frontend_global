@@ -434,7 +434,7 @@ export function LayoutTree() {
       <Show when={layoutStore.showPropertiesDrawer}>
         <Drawer
           customButton={() => false}
-          drawerStyle={"padding: 10px"}
+          drawerStyle={"padding:10px"}
           open={() => layoutStore.showPropertiesDrawer}
           setIsOpen={((v: boolean) =>
             setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}

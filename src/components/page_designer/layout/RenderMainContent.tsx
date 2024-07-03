@@ -21,7 +21,7 @@ export function RenderMainContent() {
       <Show
         fallback={<Drawer
           customButton={() => false}
-          drawerStyle={'padding: 10px'}
+          drawerStyle={'padding:10px'}
           open={() => layoutStore.isLeftOpen}
           setIsOpen={((v: boolean) => setLayoutStore("isLeftOpen", v)) as Setter<boolean>}
           width="75%"
@@ -44,7 +44,7 @@ export function RenderMainContent() {
       <Show
         fallback={<Drawer
           customButton={() => false}
-          drawerStyle={'padding: 10px'}
+          drawerStyle={'padding:10px'}
           open={() => layoutStore.isRightOpen}
           setIsOpen={((isOpen: boolean) => setLayoutStore("isRightOpen", isOpen)) as Setter<boolean>}
           width="75%"

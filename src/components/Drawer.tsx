@@ -1,4 +1,9 @@
-import { type Accessor, type JSX, type Setter, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { makeEventListener } from "@solid-primitives/event-listener";
+import { type Accessor, type JSX, type Setter, Show, createSignal, useContext } from "solid-js";
+
+import { GraphContext } from "~/lib/graph/graph";
+
+import { useActiveClickOutside } from "./useActiveClickOutside";
 
 interface DrawerProps {
   children: JSX.Element;
@@ -13,11 +18,14 @@ interface DrawerProps {
 }
 
 export function Drawer(props: Readonly<DrawerProps>) {
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const activeClickOutside = useActiveClickOutside(graph, setGraph);
   const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]
     : createSignal(false);
   const [drawerWidth, setDrawerWidth] = createSignal(props.width || "450px");
   const [mainDivHover, setMainDivHover] = createSignal(false);
+  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
@@ -43,70 +51,45 @@ export function Drawer(props: Readonly<DrawerProps>) {
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
+  const handleEscClose = (event: KeyboardEvent) => {
     if (event.key === "Escape" && isOpen()) {
       toggleDrawer();
     }
   };
 
-  onMount(() => {
-    document.addEventListener("keydown", handleKeyDown);
-  });
+  const handleClickOutside = (event: MouseEvent) => {
+    if (activeClickOutside !== graph.activeClickOutside) return;
+    const path = event.composedPath();
+    if (!path.includes(floating()!)) {
+      setIsOpen(false);
+    }
+  };
 
-  onCleanup(() => {
-    document.removeEventListener("keydown", handleKeyDown);
-  });
+  makeEventListener(document, "keydown", handleEscClose);
+  makeEventListener(window, "mousedown", handleClickOutside);
 
   return (
     <>
       <Show when={props.customButton}>
-        {props.customButton && (
-          <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
-        )}
+        {/* @ts-expect-error ignore */}
+        <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <div
+        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:20`}
         id="drawer"
-        style={`
-          position: fixed;
-          top: 0;
-          right: ${isOpen() ? "0" : `-${drawerWidth()}`};
-          width: ${drawerWidth()};
-          height: 100%;
-          color: black;
-          background-color: white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-          border-radius: 15px 0px 0px 15px;
-          z-index: 20;
-          transition: right 0.5s;
-          border-left: ${mainDivHover()?"2px solid #37c":"none"};
-        `}
+        ref={setFloating}
       >
-        <div class="h:100%  overflow:auto" style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`}>{props.children}</div>
+        <div class={`scrollbar-width:thin ${props.drawerStyle} h:100% overflow:auto p:20px`}>{props.children}</div>
         <div
+          class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
           onMouseDown={handleMouseDown}
           onMouseEnter={() => setMainDivHover(true)}
           onMouseLeave={() => setMainDivHover(false)}
-          style={`
-            position: absolute;
-            top: 0;
-            left: -5px;
-            width: 10px;
-            height: 100%;
-            cursor: ew-resize;
-          `}
         />
       </div>
       <div
+        class={`${isOpen() ? "block" : "none"} h:100% left:0 position:fixed top:0 w:100% z:10`}
         onClick={toggleDrawer}
-        style={`
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 10;
-          display: ${isOpen() ? "block" : "none"};
-        `}
       />
     </>
   );

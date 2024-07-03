@@ -29,3 +29,7 @@ https://primitives.solidjs.community/package/memo#createLatest
 
 To fix eslint errors:
 npx eslint --fix src
+
+Node:
+in master css have to write position:absolute full.
+
