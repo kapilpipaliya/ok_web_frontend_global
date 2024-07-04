@@ -21,7 +21,7 @@ import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
 import { addFormComponentAttr } from "~/lib/drag_drop/drop/addFormComponentAttr";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
-import { getNewTxnId, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
+import { deleteTxnId, getNewTxnId, isDisabledTxn, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
@@ -73,10 +73,11 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     navigate(removeLastPathSegment());
   };
 
-  const onSubmit = formSubmit(txnId, id() as Id, formData,  props.closePopUp);
+  const onSubmit = formSubmit(formData,  props.closePopUp);
 
   const onCancel = () => {
     revertTransaction(txnId, graph);
+    deleteTxnId(txnId, graph);
     if (!props.closePopUp) {
       navigateToParentRoute();
     } else {
@@ -248,7 +249,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                     !props.isLoginRegister
                   }
                 >
-                  <SubmitButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
+                  <SubmitButton buttonAlign={props.buttonAlign} disabled={isDisabledTxn(txnId, graph)} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
                 </Show>
               </FormContext.Provider>
             </Show>

@@ -93,7 +93,7 @@ export function onMutatDataGet(
       vertexOldIdToNewIdMap.clear();
       edgeOldIdToNewIdMap.clear();
     } else {
-      // commitTransaction(txnId, graph);
+      // commitTxn(txnId, graph);
     }
   });
 }

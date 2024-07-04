@@ -7,7 +7,7 @@ import { GraphContext, type Id } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import {
   ProcessStatus,
-  commitTransaction,
+  commitTxn,
   getNewTxnId
 } from "~/lib/graph/transaction";
 
@@ -24,7 +24,7 @@ export  function deleteRowConfirm(id: Id) {
         return;
       }
       graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
-      const data = commitTransaction(txnId, graph);
+      const data = commitTxn(txnId, graph);
       if (!data) {
         return;
       }

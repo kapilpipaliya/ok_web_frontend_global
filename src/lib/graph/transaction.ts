@@ -28,6 +28,11 @@ export enum ProcessStatus {
   Sent = 2,
   Unset = 0,
 }
+export function isDisabledTxn(txnId: number, graph: Store<GraphInterface>): boolean {
+  const txn = graph.transactions.get(txnId);
+  if (!txn) return true;
+  return txn.steps.length === 0 || txn.submittedStep === txn.steps.length - 1;
+}
 
 export type TransactionValue = { data: any } & InsertFn & Revert;
 
@@ -55,25 +60,42 @@ export function transactionDetailAdd(
 
   graph.transactions.set(txnId, existingTxnValue);
 }
+const getDefaultTxnValue = () => {
+  return {
+    revertSteps: [],
+    status: ProcessStatus.Unset,
+    steps: [],
+    submittedStep: 0,
+    undoPoints: [],
+    undoStep: 0,
+  };
+}
 
 export function getNewTxnId(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   setGraph("txnId", (v) => (v ?? 0) + 1);
+
+  graph.transactions.set(graph.txnId, getDefaultTxnValue());
   return graph.txnId;
 }
 
+export function deleteTxnId(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  graph.transactions.delete(txnId);
+}
+export function updateSubmittedStepToLast(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  existingTxnValue.submittedStep = existingTxnValue.steps.length - 1;
+  graph.transactions.set(txnId, existingTxnValue);
+}
+
+
 export function getExistingOrDefaultTxnValue(txnId: number, graph: Store<GraphInterface>) {
   return (
-    graph.transactions.has(txnId) ? {...graph.transactions.get(txnId)!} : {
-      revertSteps: [],
-      status: ProcessStatus.Unset,
-      steps: [],
-      submittedStep: 0,
-      undoPoints: [],
-      undoStep: 0,
-    }
+    graph.transactions.has(txnId) ? {...graph.transactions.get(txnId)!} : getDefaultTxnValue()
   );
 }
 
@@ -155,28 +177,25 @@ export function getTransactionData(txnId: number, graph: Store<GraphInterface>) 
 export const vertexOldIdToNewIdMap = new Map<Id, Id>();
 export const edgeOldIdToNewIdMap = new Map<Id, Id>();
 
-export function commitTransaction(txnId: number, graph: Store<GraphInterface>) {
+// Bug: if commitTxn is called many times it is sending event many times.
+// TODO: currently we can only run this function once.
+// we need to set seperate txnId once commited. Fix this.
+export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
     const existingTxnValue = getTransactionData(txnId, graph);
-    if (existingTxnValue.length) {
+    const submittedStep = graph.transactions.get(txnId)?.submittedStep ?? 0;
+    const startFromNextStep = submittedStep === 0 ? 0 : submittedStep + 1;
+    const stepsToCommit = existingTxnValue.slice(startFromNextStep);
+    if (stepsToCommit.length) {
       const data =  {
           edgeIdMap: [...edgeOldIdToNewIdMap],
-          transactions: existingTxnValue,
+          transactions: stepsToCommit,
           txnId: txnId,
           vertexIdMap: [...vertexOldIdToNewIdMap],
         }
       return data;
     }
 }
-// Bug: if commitTxn is called many times it is sending event many times.
-// TODO: currently we can only run this function once.
-// we need to set seperate txnId once commited. Fix this.
-export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
-  console.log("In commitTxn");
-  if (graph.transactions.has(txnId)) {
-    console.log("In transactions commitTxn");
-    return commitTransaction(txnId, graph);
-  }
-}
+
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 
 export function getNewGraphId(): Id {
