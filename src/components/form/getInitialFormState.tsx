@@ -11,7 +11,7 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { groupBy } from "~/lib/utils";
 
-export function getInitialState(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, id: Id | undefined, txnId: number, label: string) {
+export function getInitialFormState(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, id: Id | undefined, txnId: number, label: string) {
   let dataVertex: Vertex | undefined;
   if (!id) {
     const createResult = createForm(

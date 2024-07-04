@@ -3,7 +3,7 @@ import type {SetStoreFunction, Store} from "solid-js/store";
 import {toTitle} from "case-switcher-js";
 import {For, Match, Switch, createMemo} from "solid-js";
 
-import {getComponentForCollRow} from "~/components/form/getComponentForCollRow";
+import {getComponentForCollRow} from "~/lib/graph/get/sync/getComponentForCollRow";
 import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 
 import {DynamicComponent} from "./DynamicComponent";

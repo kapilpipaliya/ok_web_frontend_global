@@ -5,7 +5,7 @@ import { type Accessor, For, Match, Show, Switch, createMemo, createUniqueId, on
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
+import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";

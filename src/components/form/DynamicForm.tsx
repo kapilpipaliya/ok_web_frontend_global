@@ -16,11 +16,10 @@ import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
-import { useToast } from "~/components/Toast";
-import { addFormComponentAttr } from "~/lib/drag_drop/drop/addFormComponentAttr";
 import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
+import { addFormComponentAttr } from "~/lib/drag_drop/drop/addFormComponentAttr";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
 import { getNewTxnId, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
@@ -32,7 +31,7 @@ import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SubmitButton } from "./SubmitButton";
 import { getFormData } from "./getFormData";
-import { getInitialState } from "./getInitialState";
+import { getInitialFormState } from "./getInitialFormState";
 
 export interface DynamicFormProps {
   buttonAlign?: string;
@@ -53,7 +52,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
   const navigate = useNavigate();
   const location = useLocation();
-  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
@@ -75,9 +73,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     navigate(removeLastPathSegment());
   };
 
-  const onSubmit = async () => {
-    return formSubmit(formData, id() as Id, txnId, graph, setGraph, showLoadingToast, showWarningToast, showErrorToast, navigateToParentRoute, props.closePopUp);
-  };
+  const onSubmit = formSubmit(txnId, id() as Id, formData,  props.closePopUp);
 
   const onCancel = () => {
     revertTransaction(txnId, graph);
@@ -102,7 +98,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         );
       }
     }
-    const initFormStateResult = getInitialState(graph, setGraph, id(), txnId, props.formId);
+    const initFormStateResult = getInitialFormState(graph, setGraph, id(), txnId, props.formId);
     if (initFormStateResult.error) {
       setError(initFormStateResult.error);
       return;
