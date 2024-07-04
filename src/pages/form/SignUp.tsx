@@ -100,10 +100,10 @@ export function SignUp() {
           src={"../../public/graphics/register_vector.png"}
         />
         <div class="grid align-content:center m:0|30@lg w:50% w:100%@<md">
-          <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
+          <div class="flex f:20 font-weight:bold jc:left mb:5">
             Sign Up
           </div>
-          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
             Let's Bright up your future!
           </div>
           <div class="grid gap:0|10 grid-template-columns:1fr|50%">

@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
-import "~/css/sideBarSearch.css";
 import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { GraphContext } from "~/lib/graph/graph";

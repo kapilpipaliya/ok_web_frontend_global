@@ -5,10 +5,14 @@ import {
   createSignal,
 } from "solid-js";
 
+import { useZIndex } from "~/components/ZIndex";
+
 import { ComponentList } from "./ComponentList";
 import { PagesList } from "./PagesList";
 
 export function FormElementTabs() {
+  const zIndex = useZIndex();
+
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
     { collection: "Page", title: "Pages" },
@@ -20,15 +24,16 @@ export function FormElementTabs() {
   ]
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
+
   const Tabs = () => (
-    <div class="bg:white p:4 position:sticky top:0 z:1">
+    <div class={`bg:white p:4 position:sticky top:0 z-index:${zIndex}`}>
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128) f:0.875rem font-weight:500 mb:10 text-align:center">
         <ul class="flex flex-wrap:wrap jc:space-around margin-bottom:-1px">
           <For each={leftMenuTabs}>
             {(data) => (
               <li class="me-2 cursor:pointer">
                 <button
-                  class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px"
+                  class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px white-space:nowrap"
                   classList={{
                     "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover": selectedTab() !== data,
                     "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)": selectedTab() === data

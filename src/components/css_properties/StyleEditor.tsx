@@ -15,7 +15,7 @@ export function StyleEditor() {
 
   return (
     <div class="flex ai:start flex-direction:column jc:space-between mb:10 mt:10 w:full">
-      <SearchBar handleChange={handleSearch} value={searchQuery} />
+      <SearchBar handleChange={handleSearch} placeholder="Search Style..." value={searchQuery()} />
       <SectionList filteredSections={filteredSections} />
     </div>
   );

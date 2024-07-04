@@ -75,10 +75,10 @@ export function ContactForm() {
           />
         </div>
         <div class="grid align-content:center m:0|30@lg mt:25 w:-webkit-fill-available w:100%@<md">
-          <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
+          <div class="flex f:20 font-weight:bold jc:left mb:5">
             Contact Us
           </div>
-          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
             We are open or any suggestions, please don't hesitate to contact us.
           </div>
           <div class="grid gap:10 grid-template-columns:1fr|50%@>md ">

@@ -1,21 +1,22 @@
 
+import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
+import { type JSX, type JSXElement, Show, splitProps, useContext } from "solid-js";
 
 import type { DisplayComponentProps } from "~/components/fields/ComponentType";
 
-import "~/css/sideBarSearch.css";
+import { GraphContext } from "~/lib/graph/graph";
 
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
+  const [graph, setGraph] = useContext(GraphContext)!;
   return (
-    <>
-      <input id="checkbox" onClick={props.toggleSidebar} type="checkbox" />
-      <label class="toggle" for="checkbox">
-        <div class="bars" id="bar1" />
-        <div class="bars" id="bar2" />
-        <div class="bars" id="bar3" />
-      </label>
-    </>
+    <button onClick={props.toggleSidebar} style={{ transition: "transform 0.3s ease" }}>
+      <Icon
+        height="24"
+        icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"}
+        width="24"
+              />
+    </button>
   );
 }
 

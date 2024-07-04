@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal, useContext } from "solid-js";
 
+import { useZIndex } from "~/components/ZIndex";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
@@ -15,6 +16,7 @@ import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
 
 export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
+  const zIndex = useZIndex();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const getComponentName = () => getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
@@ -25,7 +27,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
 
   return (
     <span class="position:relative ">
-      <div class="flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:50">
+      <div class={`flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}>
         <Tooltip content={"Name"} nowrap>
           <div style={{ display: "flex", "font-size": "0.875rem", "line-height": "1.25rem", "margin-right": "4px" }}>
             {getComponentName()}

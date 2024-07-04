@@ -200,7 +200,7 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
             padding: "10px",
             position: "absolute",
             width: "280px",
-            "z-index": 1000,
+            "z-index": 4,
           }}
         >
           <div class={"flex ai:center jc:space-between mb:5"}>
@@ -220,6 +220,7 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
             }}
           </For>
         </div>
+        {/* TODO Remove this div */}
         <div
           onClick={closePopup}
           style={`
@@ -228,7 +229,7 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
           left: 0;
           width: 100%;
           height: 100%;
-          z-index: 10;
+          z-index: 3;
           display: ${props.openMenu() ? "block" : "none"};
         `}
         />

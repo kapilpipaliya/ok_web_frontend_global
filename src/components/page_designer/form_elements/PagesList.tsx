@@ -1,4 +1,4 @@
-import { Icon } from "@iconify-icon/solid";
+
 import {
   For,
   Match,
@@ -11,6 +11,7 @@ import {
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
+import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { type NavItem, getTreeData } from "~/lib/graph/get/sync/traverse";
@@ -89,25 +90,10 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       <Match when={data.error}>Error: {data.error}</Match>
       <Match when={!isFetchingData()}>
         <>
-          <nav class="abs bg:white p:5 z:10">
-            <div class="group">
-              <Icon
-                class="icon"
-                icon="iconamoon:search"
-                style={{ color: "#9e9ea7" }}
-              />
-              <input
-                class="inputSearch f:14"
-                onInput={(e) => {
-                  setSearchQuery(e.target.value);
-                  updateFilteredData(); // Update filteredData when searchQuery changes
-                }}
-                placeholder={`Search ${props.coll}...`}
-                type="search"
-                value={searchQuery()}
-              />
-            </div>
-          </nav>
+          <SearchBar handleChange={(value) => {
+            setSearchQuery(value);
+            updateFilteredData();
+          }} placeholder={`Search ${props.coll}...`} value={searchQuery()}/>
           <div
             class="grid h:full overflow:auto"
             style={{

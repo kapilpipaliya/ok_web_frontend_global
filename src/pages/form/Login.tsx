@@ -139,8 +139,8 @@ export function Login() {
           style={{ width: "25rem" }}
         />
         <div class="grid align-content:center m:0|30@lg mt:25 w:100%@<md">
-          <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">Log In</div>
-          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+          <div class="flex f:20 font-weight:bold jc:left mb:5">Log In</div>
+          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
             You Will be Redirected to Home Page
           </div>
           <label

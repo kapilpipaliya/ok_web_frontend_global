@@ -97,10 +97,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5">
                 Forgot Password
               </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
                 Provide the email address associated with your account. We will
                 send you a link to reset your password.
               </div>
@@ -162,10 +162,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5">
                 OTP Verification
               </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
                 We have sent an OTP to your email. Please enter it below to
                 proceed.
               </div>
@@ -226,10 +226,10 @@ export function ForgotPassword() {
                 padding: "20px 30px",
               }}
             >
-              <div class="flex f:20 font-weight:bold jc:left mb:5 z:10">
+              <div class="flex f:20 font-weight:bold jc:left mb:5">
                 Reset Password
               </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10 z:10">
+              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
                 Below you can enter your new password.
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>

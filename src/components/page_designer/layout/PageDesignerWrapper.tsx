@@ -4,6 +4,7 @@ import { type JSX, onMount, } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
+import { ZIndex } from "~/components/ZIndex";
 import { DesignerLayoutStoreContext, getInitialDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 import { HeaderRow } from "../header/HeaderRow";
@@ -33,15 +34,17 @@ export function PageDesignerWrapper(): JSX.Element {
   });
 
   return (
-    <DesignerLayoutStoreContext.Provider value={[layoutStore, setLayoutStore]}>
-      <HeaderRow/>
-      <div classList={{ 'display:none': layoutStore.selectedSection === 'setting' }}>
-        <LayoutGridRowOne />
-        <RenderMainContent />
-      </div>
-      <div classList={{ 'display:none': layoutStore.selectedSection === 'build' }}>
-        <PageSetting />
-      </div>
-    </DesignerLayoutStoreContext.Provider>
+    <ZIndex>
+      <DesignerLayoutStoreContext.Provider value={[layoutStore, setLayoutStore]}>
+        <HeaderRow />
+        <div classList={{ 'display:none': layoutStore.selectedSection === 'setting' }}>
+          <LayoutGridRowOne />
+          <RenderMainContent />
+        </div>
+        <div classList={{ 'display:none': layoutStore.selectedSection === 'build' }}>
+          <PageSetting />
+        </div>
+      </DesignerLayoutStoreContext.Provider>
+    </ZIndex>
   );
 }

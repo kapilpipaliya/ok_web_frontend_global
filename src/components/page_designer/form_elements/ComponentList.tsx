@@ -1,4 +1,4 @@
-import { Icon } from "@iconify-icon/solid";
+
 import {
   For,
   Show,
@@ -10,6 +10,7 @@ import {
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
+import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
@@ -122,25 +123,13 @@ export function ComponentList() {
 
   return (
     <>
-      <nav class="abs bg:white p:5">
-        <div class="group">
-          <Icon
-            class="icon"
-            icon="iconamoon:search"
-            style={{ color: "#9e9ea7" }}
-          />
-          <input
-            class="inputSearch f:14"
-            onInput={(e) => {
-              setSearchQuery(e.target.value);
-              updateFilteredData(); // Update filteredData when searchQuery changes
-            }}
-            placeholder="Search Component..."
-            type="search"
-            value={searchQuery()}
-          />
-        </div>
-      </nav>
+  
+      <SearchBar handleChange={(value) => {
+        setSearchQuery(value);
+        updateFilteredData(); // Update filteredData when searchQuery changes
+      }} placeholder="Search Component..."
+      value={searchQuery()}
+      />
       <div
         class="h:full overflow:auto"
         style={{

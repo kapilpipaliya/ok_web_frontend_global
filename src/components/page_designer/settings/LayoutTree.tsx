@@ -358,7 +358,7 @@ export function LayoutTree() {
                   e.stopPropagation();
                   toggleExpand(props.metaVertex.id);
                 }}
-                style={{ "z-index": "1" }}
+              
               >
                 <Icon
                   class={"transform 2s ease-in-out"}

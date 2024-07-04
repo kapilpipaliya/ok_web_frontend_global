@@ -21,8 +21,8 @@ import { PageContext } from "~/lib/contexts";
 import { type EdgeMap, GraphContext, type Id, type Vertex, type VertexMap, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
+import { SearchBar } from "../css_properties/SearchBar";
 import { AddNewButton } from "./AddNew";
-import { Search } from "./Search";
 import { deleteRowConfirm } from "./deleteRowConfirm";
 import { getTableData } from "./getTableData";
 import { setGridHeaders } from "./setGridHeaders";
@@ -125,7 +125,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <div class="flex ai:center jc:space-between p:5">
           <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">
-            <Search setValue={handleSearch} value={search()}/>
+            <SearchBar handleChange={handleSearch} placeholder="Search Data..." value={search()}/>
           </nav>
         </div>
         <CommonTable

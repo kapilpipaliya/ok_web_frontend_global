@@ -1,6 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { useLocation } from "@solidjs/router";
 import { type Accessor, For, type Setter, Show } from "solid-js";
+
+import { SearchBar } from "~/components/css_properties/SearchBar";
 type MainSideBarProps = {
   activeSection: Accessor<string>;
   expandedSections: Accessor<Map<string, boolean>>;
@@ -27,28 +29,11 @@ export const SubSideBar = (props: MainSideBarProps) => {
         class={"@fade|.3s bg:ghostwhite p:10|20 r:0|0|15|0 w:max-content"}
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
-        <nav class="0px 0px 10px 10px flex pt:13">
-          <div class="group">
-            <Icon
-              class="icon"
-              icon="iconamoon:search"
-              style={{ color: "#9e9ea7" }}
-            />
-
-            <form action="" autocomplete="off" method="post">
-              <input
-                autocomplete="none"
-                class="inputSearch f:14"
-                onInput={(e) => {
-                  props.handleSearch(e.target.value);
-                }}
-                placeholder="Search..."
-                type="search"
-                value={props.searchTerm()}
-              />
-            </form>
-          </div>
-        </nav>
+        <SearchBar
+          handleChange={props.handleSearch}
+          placeholder="Search..."
+          value={props.searchTerm()}
+        />
         <nav
           class="scrollbar-width:thin ml:-12 mr:-12 mt:10 overflow:auto"
           style={{

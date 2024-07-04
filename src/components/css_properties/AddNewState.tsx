@@ -25,7 +25,7 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
   };
 
   return (
-    <div class="radius-b:5 flex flex:column px:2 py:5 z:25">
+    <div class="radius-b:5 flex flex:column px:2 py:5">
       <span>Add New State</span>
       <div class="flex flex:column gap:4 jc:space-between mt:10">
         <label class="flex flex:column">

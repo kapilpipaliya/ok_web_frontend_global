@@ -369,7 +369,7 @@ export function SyncData() {
             </svg>
           </button>
           <div
-            class="abs bg:rgb(255,255,255) box-shadow:0|1px|3px|0|rgba(0,0,0,0.1),0|1px|2px|0|rgba(0,0,0,0.06) display:none r:0.5rem  w:11rem  z:10 "
+            class="abs bg:rgb(255,255,255) box-shadow:0|1px|3px|0|rgba(0,0,0,0.1),0|1px|2px|0|rgba(0,0,0,0.06) display:none r:0.5rem  w:11rem  "
             id="dropdownAction"
             style={{ display: showModal() ? "block" : "none" }}
           >
