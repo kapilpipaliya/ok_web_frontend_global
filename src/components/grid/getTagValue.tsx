@@ -8,6 +8,7 @@ import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 
 import { selectedValue } from "../fields/selectedValue";
 
+// seems like not correct, test it.
 export const getTagValue = (props: {
   attribute: FieldAttribute;
   graph: GraphInterface;

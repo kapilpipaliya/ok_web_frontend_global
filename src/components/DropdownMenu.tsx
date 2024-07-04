@@ -7,7 +7,7 @@ import {Portal} from "solid-js/web";
 import {useActiveClickOutside} from "~/components/useActiveClickOutside";
 import {GraphContext} from '~/lib/graph/graph';
 
-export function DropdownMenu(props: { onClickOutside: () => void, parentRef: HTMLElement, plaement?: Placement } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function DropdownMenu(props: { onClickOutside?: () => void, parentRef: HTMLElement, plaement?: Placement } & JSX.HTMLAttributes<HTMLDivElement>) {
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [graph, setGraph] = useContext(GraphContext)!;

@@ -18,7 +18,7 @@ import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 
-import { PageAttrDnDWrapper } from "./PageAttrDnDWrapper";
+import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vertex }>) {
   const parentItems = useContext(PageRenderVertexContext);
