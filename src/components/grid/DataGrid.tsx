@@ -18,12 +18,12 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { useToast } from "~/components/Toast";
 import { PageContext } from "~/lib/contexts";
-import { EdgeMap, GraphContext, VertexMap, type Id, type Vertex, } from "~/lib/graph/graph";
+import { type EdgeMap, GraphContext, type Id, type Vertex, type VertexMap, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { AddNewButton } from "./AddNew";
 import { Search } from "./Search";
-import { deleteRowConfirm } from "./deleteRow";
+import { deleteRowConfirm } from "./deleteRowConfirm";
 import { getTableData } from "./getTableData";
 import { setGridHeaders } from "./setGridHeaders";
 
@@ -113,6 +113,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setFilteredData(nodes);
  
   }
+  const onDelete  = deleteRowConfirm(deleteRowId()!);
 
   return (
     <Switch>
@@ -140,7 +141,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <Show when={deleteRowId()}>
           <DeleteDialog
             message="Are you sure you want to delete this item?"
-            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate)}
+            onConfirm={onDelete}
             open={true}
             title="Delete Item"
           />

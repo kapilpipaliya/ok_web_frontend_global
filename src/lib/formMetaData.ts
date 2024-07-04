@@ -283,7 +283,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                   return false;
                 }
                 return !findVertexByLabelAndUniqueIdWithSkip(
-                  "Coll",
+                  "Form",
                   "id",
                   val,
                   formData.id,
@@ -879,13 +879,13 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       { component: "CheckBox", name: "public" },
       { component: "CheckBox", name: "isRealTime" },
       {
-        collection: "g:'Coll'",
+        collection: "g:'Form'",
         component: "SelectBox",
         displayName: "Collection",
         
           name: "coll",
           // inward: true,
-          parentLabel: "Coll",
+          parentLabel: "Form",
         
       },
       {

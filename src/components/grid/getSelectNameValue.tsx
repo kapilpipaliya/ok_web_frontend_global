@@ -7,9 +7,9 @@ import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
 import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 
 import { selectedValue } from "../fields/selectedValue";
-import { collectionNameDisplayExpr } from "./collectionNameDisplayExpr";
+import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
 
-export function getSelectValue(props: {
+export function getSelectNameValue(props: {
   attribute: FieldAttribute;
   graph: GraphInterface;
   info: CellContext<any, any>;
@@ -28,7 +28,7 @@ export function getSelectValue(props: {
       props.setGraph,
       [props.graph.vertexes[vertex[0]]],
       props.attribute.props?.displayExpr ||
-      collectionNameDisplayExpr(
+      formNameDisplayExprFromVertex(
         props.graph,
         props.attribute.props?.collection
       ) ||

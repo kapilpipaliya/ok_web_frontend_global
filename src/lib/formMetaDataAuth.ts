@@ -41,7 +41,7 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
           // },
           { component: "TextBox", displayName: "Attribute ID", name: "attrId" },
           {
-            collection: "g:'Coll'",
+            collection: "g:'Form'",
             component: "SelectBox",
             displayExpr: "name",
             
@@ -151,13 +151,6 @@ Url`,
             
           },
           {
-            collection: "g:'Coll'",
-            component: "SelectBox",
-            
-              name: "Coll",
-            
-          },
-          {
             collection: "g:'Form'",
             component: "SelectBox",
             
@@ -219,13 +212,6 @@ Url`,
                 
                   name: "func",
 
-              },
-              {
-                collection: "g:'Coll'",
-                component: "SelectBox",
-                
-                  name: "Coll",
-          
               },
               {
                 collection: "g:'Form'",
@@ -291,13 +277,6 @@ Url`,
                     
                   },
                   {
-                    collection: "g:'Coll'",
-                    component: "SelectBox",
-                    
-                      name: "Coll",
-                    
-                  },
-                  {
                     collection: "g:'Form'",
                     component: "SelectBox",
                     
@@ -358,13 +337,6 @@ Form
 Url`,
                         
                           name: "func",
-                        
-                      },
-                      {
-                        collection: "g:'Coll'",
-                        component: "SelectBox",
-                        
-                          name: "Coll",
                         
                       },
                       {

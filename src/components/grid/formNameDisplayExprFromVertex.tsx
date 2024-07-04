@@ -7,14 +7,14 @@ import { getNameKeyForCollection } from "~/lib/graph/get/sync/getNameKeyForColle
 
 // so in future can use more operators.
 
-export function collectionNameDisplayExpr(
+export function formNameDisplayExprFromVertex(
   graph: Store<GraphInterface>,
   collection?: string
 ) {
   if (!collection) return;
   const collectionVertex = findVertexByLabelAndUniqueId(
     graph,
-    "Coll",
+    "Form",
     "name",
     collection
   );
