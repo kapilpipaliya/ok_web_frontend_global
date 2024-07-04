@@ -3,13 +3,14 @@ import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { isObject } from "~/lib/utils";
+
 import type { CSSStore } from "./context";
 
 import { ResetButton } from "./ResetButton";
 import { TabsContainer } from "./TabsContainer";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
-import { isObject } from "~/lib/utils";
 
 export function CSSPropertiesEditor(props: Readonly<{
   data?: Vertex; // temp vertex

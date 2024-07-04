@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../constants/FieldType";
+
 import { sizeTypes } from "../constants/constants";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { CenterDiv } from "./CenterDiv";

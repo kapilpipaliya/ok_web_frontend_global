@@ -12,26 +12,23 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { FormContext } from "~/lib/contexts";
 import {
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import {
   GraphContext,
-  type Id,
   IdAttr,
   type Vertex,
 } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { setParentValue } from "~/lib/graph/mutate/setParentValue";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 
 import { ensureArray } from "./ensureArray";
-import { isValidResponse } from "./isValidResponse";
 import { selectedValue } from "./selectedValue";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { setSelectValueHelper } from "./setSelectValueHelper";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
@@ -136,51 +133,7 @@ export function SelectInputField(
               false,
             );
         } else {
-          let data: Id | Id[];
-          let vertexes: Vertex[];
-          if (isRemove && getComponent() === "SelectBox") {
-            data = [];
-            vertexes = [];
-          } else if (getComponent() === "SelectBox") {
-            // @ts-expect-error ignore
-            data = value[0].id;
-            vertexes = [value[0]] as Vertex[];
-          } else {
-            // @ts-expect-error ignore
-            data = value.map((e) => e.id);
-            vertexes = value as Vertex[];
-          }
-          if (Array.isArray(data)) {
-            for (const vertex of vertexes) {
-              if (!graph.vertexes[vertex.id]) {
-                addNewVertex(
-                  0,
-                  vertex,
-                  graph,
-                  setGraph,
-                );
-              }
-            }
-          }
-          if (props.meta.P.inward) {
-            setParentValue(
-              graph,
-              setGraph,
-              props.txnId ?? 0,
-              props.data!,
-              props.meta,
-              data,
-            );
-          } else {
-            setSelectionValue(
-              props.txnId ?? 0,
-              props.data!,
-              graph,
-              setGraph,
-              props.meta,
-              data,
-            );
-          }
+          setSelectValueHelper(props.txnId ?? 0, props.meta, props.data as Vertex, getComponent(), value, isRemove, graph, setGraph);
         }
         onChangeHandler(
           props.txnId ?? 0,

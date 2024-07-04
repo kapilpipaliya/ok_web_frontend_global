@@ -1,5 +1,6 @@
-import { onCleanup } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { onCleanup } from "solid-js";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 

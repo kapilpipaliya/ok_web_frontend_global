@@ -4,7 +4,6 @@ import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { Container } from "./components/Container";
 import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
 
 import type { CSSStore } from "./context";
@@ -12,6 +11,7 @@ import type { CSSStore } from "./context";
 import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
 import { AddNewState } from "./AddNewState";
+import { Container } from "./components/Container";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { cssStateToString } from "./utils/cssStateToString";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";

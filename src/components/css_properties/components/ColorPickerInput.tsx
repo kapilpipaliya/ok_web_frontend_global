@@ -1,6 +1,7 @@
 import { type JSX, Match, Switch, createMemo, useContext } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldType";
+
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";

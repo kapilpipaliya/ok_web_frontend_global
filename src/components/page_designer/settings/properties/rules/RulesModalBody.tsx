@@ -2,7 +2,7 @@ import { onCleanup, useContext } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
-import { TableInputField } from "~/components/fields/TableInputField";
+import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getChildVertex, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";

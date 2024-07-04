@@ -4,7 +4,7 @@ import { Dynamic } from "solid-js/web";
 import { GenericField } from "~/components/fields/GenericField";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
-import { TableInputField } from "~/components/fields/TableInputField";
+import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
