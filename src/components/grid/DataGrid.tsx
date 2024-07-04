@@ -1,6 +1,5 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
-import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
 import {
   Match,
@@ -19,24 +18,25 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { useToast } from "~/components/Toast";
 import { PageContext } from "~/lib/contexts";
-import { GraphContext, type Id, type Vertex, } from "~/lib/graph/graph";
+import { EdgeMap, GraphContext, VertexMap, type Id, type Vertex, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { AddNewButton } from "./AddNew";
+import { Search } from "./Search";
 import { deleteRowConfirm } from "./deleteRow";
 import { getTableData } from "./getTableData";
 import { setGridHeaders } from "./setGridHeaders";
+
 interface DataGridProps {
   tableId: string;
 }
-
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const navigate = useNavigate();
   const { events } = useContext(PageContext);
   const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal<Id | null>(null);
-  const [tableStore, setTableStore]: any = createStore({
+  const [tableStore, setTableStore] = createStore({
     data: [],
     tableColumns: [],
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
@@ -51,12 +51,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     error?: string;
     form?: IFormMetaData;
     graph?: {
-      edges: {
-        [key: string]: any;
-      };
-      vertexes: {
-        [key: string]: any;
-      };
+      edges: EdgeMap;
+      vertexes: VertexMap;
     };
     result?: any;
   };
@@ -83,7 +79,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     if (value && value.length > 0) {
       setIsSearching(true);
 
-      const filtered: any = tableStore.data.filter(
+      const filtered = tableStore.data.filter(
         (item: Vertex) =>
           Object.values(item.P).some((prop: any) =>
             prop?.toString().toLowerCase().includes(value.toLowerCase())
@@ -117,24 +113,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setFilteredData(nodes);
  
   }
-  
-  const Search = () => <div class="group">
-    <Icon
-      class="icon"
-      icon="iconamoon:search"
-      style={{ color: "#9e9ea7" }}
-    />
-    <input
-      autocomplete="none"
-      class="inputSearch f:14"
-      onInput={(e) => {
-        handleSearch(e.target.value);
-      }}
-      placeholder="Search Data..."
-      type="search"
-      value={search()}
-    />
-  </div>
 
   return (
     <Switch>
@@ -146,7 +124,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <div class="flex ai:center jc:space-between p:5">
           <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">
-            <Search />
+            <Search setValue={handleSearch} value={search()}/>
           </nav>
         </div>
         <CommonTable
