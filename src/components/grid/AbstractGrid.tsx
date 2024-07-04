@@ -1,12 +1,5 @@
-import { useLocation, useNavigate } from "@solidjs/router";
-import { Show, createEffect, createResource, createSignal } from "solid-js";
-import { useContext } from "solid-js";
 
-import {Breadcrumb} from "~/components/Breadcrumb";
-import { breadcrumbData } from "~/lib/constants";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { getTreeData } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, } from "~/lib/graph/graph";
+import { Show, createEffect, createSignal } from "solid-js";
 
 import {DataGrid} from "./DataGrid";
 
@@ -15,14 +8,20 @@ interface AbstractGridProps {
 }
 
 export function AbstractGrid(props: AbstractGridProps) {
-  const [locationData, setLocationData] = createSignal([]);
+  const [tableId, setTableId] = createSignal(props.tableId);
+  createEffect(() => {
+    setTableId("");
+    props.tableId;
+    setTimeout(() => setTableId(props.tableId));
+  });
+
+  /* Dont need breadcrumb for now
+  const [, setLocationData] = createSignal([]);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const param = useLocation();
-  const navigate = useNavigate();
-  
+  const param = useLocation();  
 
   async function getNavData() {
-    const data: any = getTreeData(graph, setGraph, {
+    const data = getTreeData(graph, setGraph, {
       child: {
         child: { child: { collection: "->NavAttr" }, collection: "->NavAttr" },
         collection: "->NavAttr",
@@ -32,15 +31,8 @@ export function AbstractGrid(props: AbstractGridProps) {
     return data?.[0]?.children || [];
   }
 
-  const [tableId, setTableId] = createSignal(props.tableId);
-  createEffect(() => {
-    setTableId("");
-    props.tableId;
-    setTimeout(() => setTableId(props.tableId));
-  });
-
   // @ts-ignore
-  const getCurrentLocation = (data: any, path = []) => {
+  const getCurrentLocation = (data: NavItem[], path = []) => {
     for (const item of data) {
       if (item.P.url === param.pathname) {
         return [...path, item.name];
@@ -56,17 +48,17 @@ export function AbstractGrid(props: AbstractGridProps) {
     return [];
   };
 
-  const [nav, { refetch }] = createResource(tableId, async () => {
+  const [nav] = createResource(tableId, async () => {
     const navData = await getNavData();
     const filtered = getCurrentLocation(navData);
 
     setLocationData(filtered);
     return filtered;
-  });
+  });*/
 
   return (
     <>
-      <Show when={nav()}>
+      {/* <Show when={nav()}>
         <Breadcrumb
           breadcrumb={[
             ...breadcrumbData,
@@ -75,7 +67,7 @@ export function AbstractGrid(props: AbstractGridProps) {
           ]}
           title={`${nav()[2]}`}
         />
-      </Show>
+      </Show> */}
 
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
