@@ -17,7 +17,7 @@ import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
 import { useToast } from "~/components/Toast";
-import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
+import { addFormComponentAttr } from "~/lib/drag_drop/drop/addFormComponentAttr";
 import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
@@ -118,7 +118,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     });
 
     if (initFormStateResult.dataVertex?.L[0] === "Form") {
-      const layoutRowId = addFormComponentAttr(graph, initFormStateResult.dataVertex, txnId, setGraph);
+      const layoutRowId = addFormComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
       if (layoutRowId === -1) {
         setError("Layout Row Id Error");
         return;
