@@ -20,7 +20,6 @@ export function getInitialDesignerLayoutStore() {
     isSmallScreen: false,
     labelColor: "black", // Default label color
     // this propes may required on preview too
-    labelPosition: "top", // Default position
     position: null as "after" | "before" | "center" | "left" | "right" | null,
     prevTxnIds: [] as Array<Id | number>,
     selectedComponent: -1 as Id | number,

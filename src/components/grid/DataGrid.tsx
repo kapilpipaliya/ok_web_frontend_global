@@ -113,7 +113,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setFilteredData(nodes);
  
   }
-  const onDelete  = deleteRowConfirm(deleteRowId()!);
+  const onDelete  = deleteRowConfirm(deleteRowId);
 
   return (
     <Switch>

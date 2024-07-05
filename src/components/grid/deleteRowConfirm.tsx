@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { useContext } from "solid-js";
+import { Accessor, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
@@ -11,14 +11,17 @@ import {
   getNewTxnId
 } from "~/lib/graph/transaction";
 
-export  function deleteRowConfirm(id: Id) {
+export  function deleteRowConfirm(id: Accessor<Id | null>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
 
   return async() => {
+    if (!id()) {
+      return;
+    }
       const txnId = getNewTxnId(graph, setGraph);
-      const deleteResult = deleteVertex(txnId, id, graph, setGraph);
+      const deleteResult = deleteVertex(txnId, id()!, graph, setGraph);
       if (deleteResult?.error) {
         showErrorToast(deleteResult?.error.toString());
         return;
@@ -29,10 +32,10 @@ export  function deleteRowConfirm(id: Id) {
         return;
       }
       await showLoadingToast({
-        loadMessage: "Submitting Data...",
+        loadMessage: "Deleting Row...",
         onSuccess: () => setTimeout(() => navigate(-1), 0),
         promise: submitDataCall(data, graph, setGraph, txnId),
-        successMessage: "Data submitted successfully",
+        successMessage: "Row deleted successfully",
       });
   }
 }

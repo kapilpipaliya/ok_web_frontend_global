@@ -121,7 +121,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     </div>
   );
 
-  const HighlightSetValue = (p: { component: Accessor<string>, id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
+  const HighlightSetValueContent = (p: { component: Accessor<string>, id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
     <div class={`${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
       <span class="f:15 flex:.5" id={p.id}>
         <Label metaVertex={p.metaVertex} />
@@ -224,7 +224,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                   <Content component={component} meta={meta} />
                 </Match>
                 <Match when={props.selectedLayout}>
-                  <HighlightSetValue component={component} id={id} meta={meta} metaVertex={metaVertex} />
+                  <HighlightSetValueContent component={component} id={id} meta={meta} metaVertex={metaVertex} />
                 </Match>
               </Switch>
             </div>
