@@ -1,5 +1,6 @@
-import { type JSX, Show, createSignal, onMount, splitProps, useContext } from "solid-js";
+import { type JSX, Show, createSignal, onMount, splitProps, useContext, createMemo } from "solid-js";
 
+import { FormContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
@@ -15,13 +16,15 @@ interface LabeledFieldProps {
 
 export function Label(props: ComponentProps & JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & LabeledFieldProps) {
   const [layoutStore] = useDesignerLayoutStore() || [];
+  const formData = useContext(FormContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label ?? "");
 
+  const position = createMemo(() => (!props.position || props.position === "system") ? (formData.formMeta?.P.position || "top") : props.position);
+
   const getFlexDirection = () => {
-    const position = props.position === "system" ? layoutStore?.labelPosition : props.position;
-    switch (position) {
+    switch (position()) {
       case "top":
         return "column";
       case "bottom":
@@ -36,7 +39,7 @@ export function Label(props: ComponentProps & JSX.IntrinsicAttributes & JSX.Labe
   };
 
   const containerStyle = () => ({
-    "align-items": props.position === "left" || props.position === "right" ? "center" : "flex-start",
+    "align-items": position() === "left" || position() === "right" ? "center" : "flex-start",
     display: "flex",
     "flex-direction": getFlexDirection(),
     margin: "10px 0",
@@ -45,10 +48,10 @@ export function Label(props: ComponentProps & JSX.IntrinsicAttributes & JSX.Labe
   }) as JSX.CSSProperties;
 
   const labelStyle = () => ({
-    "margin-bottom": props.position === "top" ? "5px" : "0",
-    "margin-left": props.position === "right" ? "5px" : "0",
-    "margin-right": props.position === "left" ? "5px" : "0",
-    "margin-top": props.position === "bottom" ? "5px" : "0",
+    "margin-bottom": position() === "top" ? "5px" : "0",
+    "margin-left": position() === "right" ? "5px" : "0",
+    "margin-right": position() === "left" ? "5px" : "0",
+    "margin-top": position() === "bottom" ? "5px" : "0",
   });
 
   const handleBlur = (e: FocusEvent) => {

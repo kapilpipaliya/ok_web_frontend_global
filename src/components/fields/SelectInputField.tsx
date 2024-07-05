@@ -33,7 +33,7 @@ import { setSelectValueHelper } from "./setSelectValueHelper";
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
   props: {
-    component: string;
+    componentName: string;
     isRealTime?: boolean;
     title: string;
     txnId?: number;
@@ -95,11 +95,12 @@ export function SelectInputField(
   };
 
   function getComponent() {
+    // TODO: find when the direction is set?
     const direction = props.meta.P.dir;
-    if (!props.component && direction) {
-      props.component = direction === "->" ? "SelectBox" : "TagBox";
+    if (!props.componentName && direction) {
+      props.componentName = direction === "->" ? "SelectBox" : "TagBox";
     }
-    return props.component;
+    return props.componentName;
   }
 
   const outerOwner = getOwner();

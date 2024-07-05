@@ -56,7 +56,13 @@ export function FormWrapper(
   }, {} as { [key: string]: any });
   const createResult = createForm(graph, setGraph, txnId, props.label ?? props.meta.P[IdAttr], defaultValues);
   if (createResult.error) return createResult.error;
-  setFormData('formData', createResult.vertex!);
+  setFormData({
+    formData: createResult.vertex!,
+    formMeta: props.meta,
+    groupByTabsAndGroup: {},
+    tabs: [],
+    txnId,
+  });
 
   // } else {
   //   const loadResult = loadForm(graph, props.id);
