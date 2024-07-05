@@ -2,6 +2,9 @@ import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import PreviewPage from "~/components/PreviewPage";
+import { ZIndex, useZIndex } from "~/components/ZIndex";
+import PageView from "~/components/page_attr_render/PageView";
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -17,6 +20,34 @@ export function PreviewButton() {
   const handleCloseClick = () => {
     setIsModalOpen(false);
   };
+  const Content = () => {
+    return (
+      <PreviewPage>
+      <PageView
+        // data={dataVertex()}
+        isPreview={true}
+        metaVertex={layoutStore.formData.formData}
+      />
+    </PreviewPage>
+    );
+  }
+
+  const Modal = () => {
+    const zIndex = useZIndex();
+    return  <Portal>
+    <div class={`flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full z-index:${zIndex}`}>
+      <div class="bg:white h:full p:4 position:relative w:full">
+        <button
+          class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
+          onClick={handleCloseClick}
+        >
+          <Icon height={22} icon={"ph:x"} width={22} />
+        </button>
+        <Content />
+      </div>
+    </div>
+  </Portal>
+  }
 
   return (
     <>
@@ -30,19 +61,9 @@ export function PreviewButton() {
         </button>
       </Tooltip>
       <Show when={isModalOpen()}>
-        <Portal>
-          <div class="flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full">
-            <div class="bg:white h:full p:4 position:relative w:full">
-              <button
-                class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
-                onClick={handleCloseClick}
-              >
-                <Icon height={22} icon={"ph:x"} width={22} />
-              </button>
-              Content
-            </div>
-          </div>
-        </Portal>
+        <ZIndex>
+          <Modal />
+        </ZIndex>
       </Show>
     </>
   );

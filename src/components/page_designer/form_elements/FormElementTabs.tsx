@@ -5,13 +5,10 @@ import {
   createSignal,
 } from "solid-js";
 
-import { useZIndex } from "~/components/ZIndex";
-
 import { ComponentList } from "./ComponentList";
 import { PagesList } from "./PagesList";
 
 export function FormElementTabs() {
-  const zIndex = useZIndex();
 
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
@@ -26,7 +23,7 @@ export function FormElementTabs() {
 
 
   const Tabs = () => (
-    <div class={`bg:white p:4 position:sticky top:0 z-index:${zIndex}`}>
+    <div class={`bg:white p:4 position:sticky top:0`}>
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128) f:0.875rem font-weight:500 mb:10 text-align:center">
         <ul class="flex flex-wrap:wrap jc:space-around margin-bottom:-1px">
           <For each={leftMenuTabs}>
@@ -52,7 +49,7 @@ export function FormElementTabs() {
   );
 
   return (
-    <div class={"direction:ltr p:5 "}>
+    <div class={"h:full p:5"}>
         <Tabs/>
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
