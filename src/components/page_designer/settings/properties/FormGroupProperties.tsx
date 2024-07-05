@@ -46,122 +46,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     deleteVertex(0, defaultValueVertexId, graph, setGraph);
   });
 
-  const Label = (props: { metaVertex: Vertex }) => (
-    <>
-      {toTitle(
-        props.metaVertex.P.displayName ||
-        props.metaVertex.P[IdAttr] ||
-        props.metaVertex.P.key ||
-        "",
-      )}
-    </>
-  );
-
-  const Content = (p: { component: Accessor<string>, meta: Accessor<Vertex> }) => (
-    <DynamicComponent
-      component={p.component()}
-      data={props.selectedLayout}
-      isRealTime={false}
-      meta={p.meta()}
-      setValue={(data) => props.setValue(p.meta(), data)}
-      txnId={props.txnId}
-    />
-  );
-
-  const DefaultValueContent = (p: { meta: Accessor<Vertex> }) => (
-    <DynamicComponent
-      component={graph.vertexes[layoutStore.selectedComponent].P.name}
-      data={props.selectedLayout}
-      isRealTime={false}
-      meta={graph.vertexes[layoutStore.selectedComponent]}
-      setValue={(data) => props.setValue(p.meta(), data)}
-      txnId={props.txnId}
-    />
-  );
-
-  function setUniqueNameValue(metaVertex: Vertex, data: string) {
-    if (metaVertex.P.name === "name") {
-      if (data.length) {
-        if (isUniqueIdUsed(graph, setGraph, layoutStore.formData.formData, props.selectedLayout, data)) {
-          return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-            error: "Name is not unique",
-          });
-        }
-        mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-          error: null,
-        });
-        return props.setValue(metaVertex, data);
-      } else {
-        return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-          error: "Name is required",
-        });
-      }
-    }
-    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-      error: null,
-    });
-    return props.setValue(metaVertex, data);
-  }
-
-  const UniqueNameField = (p: { id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
-    <div class={`${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
-      <span class="f:15 flex:.5" id={p.id}>
-        <Label metaVertex={p.metaVertex} />
-      </span>
-      <span class="f:15 flex:1">
-        <DynamicComponent
-          component={"TextBox"}
-          data={props.selectedLayout}
-          isRealTime={false}
-          meta={p.meta()}
-          setValue={(data: string) => setUniqueNameValue(p.metaVertex, data)}
-          txnId={0}
-        />
-      </span>
-    </div>
-  );
-
-  const HighlightSetValueContent = (p: { component: Accessor<string>, id: string, meta: Accessor<Vertex>, metaVertex: Vertex }) => (
-    <div class={`${props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
-      <span class="f:15 flex:.5" id={p.id}>
-        <Label metaVertex={p.metaVertex} />
-      </span>
-      <span class="f:15 flex:1">
-        <Switch>
-          <Match when={p.metaVertex.P.name === "defaultValue"}>
-            <DefaultValueContent meta={p.meta} />
-          </Match>
-          <Match when={true}>
-            <Content component={p.component} meta={p.meta} />
-          </Match>
-        </Switch>
-        {/* Select Rules: */}
-        {/* <SelectInputField
-          component={"SelectBox"}
-          data={{ P: {} } as Vertex}
-          meta={{
-            P: {
-              [IdAttr]: "import",
-              displayExpr: "$P.name",
-              collection: `ids:'${props.selectedLayout.id}'->Rules`
-            },
-          } as unknown as Vertex}
-          setValue={(attr, vertex, data) => 0}
-        /> */}
-      </span>
-      <Show when={props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[p.metaVertex.P[IdAttr]] !== null}>
-        <span>
-          <Icon
-            class="color:#ff0000 cursor:pointer"
-            data-testid="clearIcon"
-            icon="mdi:close"
-            onClick={() => props.setValue(p.metaVertex, null)}
-          />
-        </span>
-      </Show>
-    </div>
-  );
-
   return (
     <>
       <div class="">
@@ -208,11 +92,10 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
             <div>
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
-                  <UniqueNameField id={id} meta={meta} metaVertex={metaVertex} />
+                  <UniqueNameField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
                 </Match>
                 <Match when={metaVertex.P.name === "class"}>
                   <CSSPropertiesEditor
-                    component={component()}
                     data={props.selectedLayout}
                     meta={metaVertex}
                     setValue={(data) => props.setValue(metaVertex, data)}
@@ -221,10 +104,10 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 </Match>
                 <Match when={component() === "Table"}>
                   <h3><Label metaVertex={metaVertex} /></h3>
-                  <Content component={component} meta={meta} />
+                  <Content component={component} meta={meta} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
                 </Match>
                 <Match when={props.selectedLayout}>
-                  <HighlightSetValueContent component={component} id={id} meta={meta} metaVertex={metaVertex} />
+                  <HighlightSetValueContent component={component} id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
                 </Match>
               </Switch>
             </div>
@@ -232,5 +115,128 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         }}
       </For>
     </>
+  );
+}
+
+const Label = (props: { metaVertex: Vertex }) => (
+  <>
+    {toTitle(
+      props.metaVertex.P.displayName ||
+      props.metaVertex.P[IdAttr] ||
+      props.metaVertex.P.key ||
+      "",
+    )}
+  </>
+);
+
+function Content(props: Readonly<{ component: Accessor<string>; meta: Accessor<Vertex>; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+  return (
+    <DynamicComponent
+      component={props.component()}
+      data={props.selectedLayout}
+      isRealTime={false}
+      meta={props.meta()}
+      setValue={(data) => props.setValue(props.meta(), data)}
+      txnId={props.txnId} />
+  );
+}
+
+function DefaultValueContent(props: Readonly<{ meta: Accessor<Vertex>; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+  const [graph] = useContext(GraphContext)!;
+  const [layoutStore] = useDesignerLayoutStore();
+
+  return (
+    <DynamicComponent
+      component={graph.vertexes[layoutStore.selectedComponent].P.name}
+      data={props.selectedLayout}
+      isRealTime={false}
+      meta={graph.vertexes[layoutStore.selectedComponent]}
+      setValue={(data) => props.setValue(props.meta(), data)}
+      txnId={props.txnId} />
+  );
+}
+function UniqueNameField(props: Readonly<{ id: string; meta: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const [layoutStore] = useDesignerLayoutStore();
+  function setUniqueNameValue(metaVertex: Vertex, data: string) {
+    if (metaVertex.P.name === "name") {
+      if (data.length) {
+        if (isUniqueIdUsed(graph, setGraph, layoutStore.formData.formData, props.selectedLayout, data)) {
+          return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+            error: "Name is not unique",
+          });
+        }
+        mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+          error: null,
+        });
+        return props.setValue(metaVertex, data);
+      } else {
+        return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+          error: "Name is required",
+        });
+      }
+    }
+    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+      error: null,
+    });
+    return props.setValue(metaVertex, data);
+  }
+  return (
+    <div class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
+      <span class="f:15 flex:.5" id={props.id}>
+        <Label metaVertex={props.metaVertex} />
+      </span>
+      <span class="f:15 flex:1">
+        <DynamicComponent
+          component={"TextBox"}
+          data={props.selectedLayout}
+          isRealTime={false}
+          meta={props.meta()}
+          setValue={(data: string) => setUniqueNameValue(props.metaVertex, data)}
+          txnId={0} />
+      </span>
+    </div>
+  );
+}
+
+function HighlightSetValueContent(props: Readonly<{ component: Accessor<string>; id: string; meta: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+  return (
+    <div class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
+      <span class="f:15 flex:.5" id={props.id}>
+        <Label metaVertex={props.metaVertex} />
+      </span>
+      <span class="f:15 flex:1">
+        <Switch>
+          <Match when={props.metaVertex.P.name === "defaultValue"}>
+            <DefaultValueContent meta={props.meta} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+          </Match>
+          <Match when={true}>
+            <Content component={props.component} meta={props.meta} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+          </Match>
+        </Switch>
+        {/* Select Rules: */}
+        {/* <SelectInputField
+                  component={"SelectBox"}
+                  data={{ P: {} } as Vertex}
+                  meta={{
+                    P: {
+                      [IdAttr]: "import",
+                      displayExpr: "$P.name",
+                      collection: `ids:'${props.selectedLayout.id}'->Rules`
+                    },
+                  } as unknown as Vertex}
+                  setValue={(attr, vertex, data) => 0}
+                /> */}
+      </span>
+      <Show when={props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null}>
+        <span>
+          <Icon
+            class="color:#ff0000 cursor:pointer"
+            data-testid="clearIcon"
+            icon="mdi:close"
+            onClick={() => props.setValue(props.metaVertex, null)} />
+        </span>
+      </Show>
+    </div>
   );
 }

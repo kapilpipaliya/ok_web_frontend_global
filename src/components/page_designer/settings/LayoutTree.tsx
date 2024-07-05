@@ -30,7 +30,7 @@ export function LayoutTree() {
 
   const rootVertexes = () => {
     if (isFormRootVertetx()) {
-      if (layoutStore.activeStepId) {
+      if (layoutStore.activeStepId && graph.vertexes[layoutStore.activeStepId]) {
         return [graph.vertexes[layoutStore.activeStepId]];
       }
       return steps()[0]
