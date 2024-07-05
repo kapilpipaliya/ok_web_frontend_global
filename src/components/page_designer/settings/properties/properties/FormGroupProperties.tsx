@@ -1,0 +1,119 @@
+import { createWritableMemo } from "@solid-primitives/memo";
+import { For, Match, Switch, createMemo, createUniqueId, onCleanup, useContext } from "solid-js";
+
+import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
+import { FormMetaData } from "~/lib/formMetaData";
+import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
+import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
+
+import { useDesignerLayoutStore } from "../../../LayoutContext";
+import { ValidationConfig } from "../../ValidationConfig";
+import { PROPERTIES } from "../constant";
+import { Content } from "./Content";
+import { HighlightSetValueContent } from "./HighlightSetValueContent";
+import { Label } from "./Label";
+import { UniqueNameField } from "./UniqueNameField";
+
+interface FormGroupPropertiesProps {
+  metaAttributes: Vertex[];
+  selectedLayout: Vertex;
+  setValue(meta: Vertex, data: any): void;
+  txnId: number;
+}
+
+export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const [layoutStore] = useDesignerLayoutStore();
+
+  const nameVertexId = `nameVertex${createUniqueId()}`;
+  const classVertexId = `classVertex${createUniqueId()}`;
+  const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
+
+  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { class: PROPERTIES.Css.TextBox, component: "TextBox", displayName: 'Unique Name', name: 'name' }), graph, setGraph);
+  addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { displayName: 'Class', name: 'class' }), graph, setGraph);
+  addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { displayName: 'Default Value', name: 'defaultValue' }), graph, setGraph);
+
+  function moveClassToLast(vertices: Vertex[]) {
+    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue');
+    return [graph.vertexes[nameVertexId], graph.vertexes[defaultValueVertexId], ...otherVertices, graph.vertexes[classVertexId]];
+  }
+
+  onCleanup(() => {
+    deleteVertex(0, nameVertexId, graph, setGraph);
+    deleteVertex(0, classVertexId, graph, setGraph);
+    deleteVertex(0, defaultValueVertexId, graph, setGraph);
+  });
+
+  return (
+    <>
+      <div class="">
+        <ValidationConfig
+          componentMeta={graph.vertexes[layoutStore.selectedComponent]}
+          data={props.selectedLayout}
+          meta={{ P: { name: "validation" } } as unknown as Vertex}
+          setValue={props.setValue}
+        />
+      </div>
+
+      <For each={moveClassToLast(props.metaAttributes)}>
+        {(metaVertex) => {
+          const id = `${props.selectedLayout.id + metaVertex.P[IdAttr]}Label`;
+          const form = FormMetaData.Comp;
+          const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
+          const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
+          const [meta, setMeta] = createWritableMemo(() => {
+            const P = {
+              ...metaVertex.P,
+              component: valueAttribute.component,
+              meta: valueAttribute.meta
+            }
+            return { ...metaVertex, P };
+          });
+
+          const component = createMemo(() =>
+            getComponentForCollRow(
+              meta(),
+              meta(),
+              graph,
+              setGraph,
+            ),
+          );
+          const metaProps = getPropsFromMetaExpression(graph, setGraph, meta(), meta());
+          const P = {
+            ...meta().P,
+            ...metaProps
+          }
+          const v = { ...metaVertex, P };
+          setMeta(v);
+
+          return (
+            <div>
+              <Switch>
+                <Match when={metaVertex.P.name === "name"}>
+                  <UniqueNameField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                </Match>
+                <Match when={metaVertex.P.name === "class"}>
+                  <CSSPropertiesEditor
+                    data={props.selectedLayout}
+                    meta={metaVertex}
+                    setValue={(data) => props.setValue(metaVertex, data)}
+                    txnId={props.txnId}
+                  />
+                </Match>
+                <Match when={component() === "Table"}>
+                  <h3><Label metaVertex={metaVertex} /></h3>
+                  <Content component={component} meta={meta} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                </Match>
+                <Match when={props.selectedLayout}>
+                  <HighlightSetValueContent component={component} id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                </Match>
+              </Switch>
+            </div>
+          );
+        }}
+      </For>
+    </>
+  );
+}

@@ -6,8 +6,8 @@ import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
-import { FormGroupProperties } from "./FormGroupProperties";
 import { ImportModal } from "./import/ImportModal";
+import { FormGroupProperties } from "./properties/FormGroupProperties";
 import { RenderModal } from "./rules/RenderModal";
 import { RulesModalBody } from "./rules/RulesModalBody";
 

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Accessor, For, Show, createMemo, createSelector, onMount, useContext } from "solid-js";
+import { type Accessor, For, Show, createMemo, createSelector, onMount, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { GenericField } from "~/components/fields/GenericField";
