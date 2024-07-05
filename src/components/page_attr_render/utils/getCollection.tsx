@@ -7,5 +7,5 @@ export function getCollection(
  graph: Store<GraphInterface>,
  item?: Vertex
 ): string | undefined {
- return item && item.P.collection;
+ return item?.P.collection;
 }

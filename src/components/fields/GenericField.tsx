@@ -95,17 +95,15 @@ export function GenericField(
         <Match when={component() === "Repeater"}>
           <Repeater data={props.data} meta={props.meta} />
         </Match>
-        <Match when={component() === "Text"}>
-          <Show
-            fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
-            when={props.meta.P.as}
-          >
-            <Dynamic class={props.meta.P.class} component={props.meta.P.as}>
-              {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
-              {props.children}
-              <PageAttrRender data={props.data} metaVertex={props.meta} />
-            </Dynamic>
-          </Show>
+        <Match when={component() === "Text" && props.meta.P.as}>
+          <Dynamic class={props.meta.P.class} component={props.meta.P.as}>
+            {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
+            {props.children}
+            <PageAttrRender data={props.data} metaVertex={props.meta} />
+          </Dynamic>
+        </Match>
+        <Match when={component() === "Text" && !props.meta.P.as}>
+          {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
         </Match>
         <Match when={component() === "A"}>
           <Switch>

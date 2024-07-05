@@ -18,10 +18,14 @@ export function setGraphData(
     timestamp?: number;
     vertexLabelIdMap?: { [key: string]: Id[]; };
     vertexes: VertexMap;
-  }
+  },
+  skipExisting: boolean = false
 ) {
   batch(() => {
     for (const vertexId in args.vertexes) {
+      if (skipExisting && graph.vertexes[vertexId]) {
+        continue;
+      }
       setGraph("vertexes", vertexId, (prev) => {
         if (prev) {
           const IN = { ...prev.IN, ...args.vertexes[vertexId].IN };
@@ -41,6 +45,9 @@ export function setGraphData(
     }
 
     for (const edgeId in args.edges) {
+      if (skipExisting && graph.edges[edgeId]) {
+        continue;
+      }
       setGraph("edges", edgeId, args.edges[edgeId]);
     }
 

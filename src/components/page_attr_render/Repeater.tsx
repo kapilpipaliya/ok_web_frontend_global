@@ -2,7 +2,6 @@ import {
   For,
   Show,
   createEffect,
-  createResource,
   createSignal,
   useContext,
 } from "solid-js";
@@ -16,48 +15,55 @@ import {
 import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
-import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
-import { GraphContext } from "~/lib/graph/graph";
+import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { getChildVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [options, setOptions] = createSignal([]);
+  const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
-  const [hasFetched, setHasFetched] = createSignal(false);
+  const repeaterContext = useContext(RepeaterVertexContext);
 
-  const fetchOptions = async () => {
-    const mgData = await getSelectionOptionsMGCall(
-      [props.data],
-      `g:'${getCollection(graph, props.meta)!}'`,
-    );
-    return { mgData };
-  };
-
-  const [data] = createResource(fetchOptions);
-
-  createEffect(() => {
+  const setInitialState = async (expression?: string, collection?: string) => {
     setIsFetching(true);
-    if (!hasFetched() && data.state === "ready") {
-      const result = data();
 
-      if (result?.mgData) {
-        setGraphData(graph, setGraph, result.mgData.graph!);
-        setOptions(
-          props.data ||
-            getSelectionOptions(
-              graph,
-              setGraph,
-              [props.meta],
-              `g:'${getCollection(graph, props.meta)!}'`,
-            ).vertexes,
-        );
+    const result = await getSelectionOptionsMGCall(
+      [props.data],
+      expression ?? `g:'${collection}'`,
+    );
 
-        setHasFetched(true);
+    if (result) {
+      setGraphData(graph, setGraph, result.graph!, true);
+      setOptions(
+        // props.data ||
+        getSelectionOptions(
+          graph,
+          setGraph,
+          repeaterContext,
+          expression ?? `g:'${collection}'`,
+        ).vertexes,
+      );
+    }
+
+    setIsFetching(false);
+  }
+  createEffect(() => {
+    const expression = props.meta.P.data;
+    if (expression) {
+      setInitialState(expression);
+      return;
+    }
+    const data = getChildVertex(graph, ["$0Data"], props.meta).vertex
+    if (data) {
+      setOptions([data]);
+    } else {
+      const collection = getCollection(graph, props.meta);
+      if (collection) {
+        setInitialState(undefined, collection);
       }
     }
-    setIsFetching(false);
   });
 
   return (
