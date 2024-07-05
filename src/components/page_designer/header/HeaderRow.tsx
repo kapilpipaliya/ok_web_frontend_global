@@ -2,12 +2,12 @@ import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
-import { ExportSection } from "./ExportSection";
-import { LeftIcons } from "./LeftIcons";
-import { MiddleSectionButtons } from "./MiddleSectionButtons";
-import { PreviewButton } from "./PreviewButton";
-import { ResizeViewButtons } from "./ResizeViewButtons";
-import { SaveButton } from "./SaveButton";
+import { LeftIcons } from "./left/LeftIcons";
+import { MiddleSectionButtons } from "./middle/MiddleSectionButtons";
+import { ResizeViewButtons } from "./middle/ResizeViewButtons";
+import { ExportSection } from "./right/ExportSection";
+import { PreviewButton } from "./right/PreviewButton";
+import { SaveButton } from "./right/SaveButton";
 
 export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);

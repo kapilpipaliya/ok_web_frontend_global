@@ -7,7 +7,7 @@ import { ZIndex, useZIndex } from "~/components/ZIndex";
 import PageView from "~/components/page_attr_render/PageView";
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function PreviewButton() {
   const [layoutStore] = useDesignerLayoutStore();

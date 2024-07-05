@@ -3,7 +3,7 @@ import { For } from "solid-js";
 
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export const ResizeViewButtons = () => {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();

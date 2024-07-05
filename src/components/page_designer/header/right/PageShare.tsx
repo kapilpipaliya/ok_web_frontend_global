@@ -3,7 +3,7 @@ import { createEffect, createSignal } from "solid-js";
 
 import { Tooltip } from "~/components/solid_blocks";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function ShareSection() {
   const [layoutStore] = useDesignerLayoutStore() || [];
