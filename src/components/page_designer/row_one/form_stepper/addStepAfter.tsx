@@ -1,28 +1,14 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { addStepComponentAttr } from "~/lib/drag_drop/drop/addStepComponentAttr";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import type { PageLayoutObject } from "../../LayoutContext";
 
 export function addStepAfter(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, toVertex: Vertex) {
-  // add form component
-  const formVertex = findVertexByLabelAndUniqueId(
-    graph,
-    "Comp",
-    IdAttr,
-    "Form"
-  );
-  const layoutRowId = componentDrop(
-    layoutStore.formData.formData,
-    layoutStore.formData.txnId,
-    formVertex!,
-    layoutStore.formData.formData,
-    graph,
-    setGraph
-  );
+  const layoutRowId = addStepComponentAttr(layoutStore.formData.formData, layoutStore.formData.txnId, graph, setGraph);
 
   if (layoutRowId === -1) return;
 

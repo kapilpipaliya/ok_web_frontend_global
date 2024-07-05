@@ -19,7 +19,7 @@ import { TableTabs } from "~/components/TableTabs";
 import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
-import { addFormComponentAttr } from "~/lib/drag_drop/drop/addFormComponentAttr";
+import { addStepComponentAttr } from "~/lib/drag_drop/drop/addStepComponentAttr";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
 import { deleteTxnId, getNewTxnId, isDisabledTxn, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
@@ -115,7 +115,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     });
 
     if (initFormStateResult.dataVertex?.L[0] === "Form") {
-      const layoutRowId = addFormComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
+      const layoutRowId = addStepComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
       if (layoutRowId === -1) {
         setError("Layout Row Id Error");
         return;

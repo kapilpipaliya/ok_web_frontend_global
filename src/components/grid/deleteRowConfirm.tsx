@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { Accessor, useContext } from "solid-js";
+import { type Accessor, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/api_functions";

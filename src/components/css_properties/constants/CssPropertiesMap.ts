@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-objects */
 
 import type { CSSJSONSchemaType } from "./FieldType";
 
@@ -12,11 +13,11 @@ import { SpaceSection } from "./SpaceSection";
 import { TypographySection } from "./TypographySection";
 
 export const JSONSchema: CSSJSONSchemaType= {
+  Layout: LayoutSection,
   Background: BackgroundSection,
   Border: BorderSection,
   Effects: EffectsSection,
   General: GeneralSection,
-  Layout: LayoutSection,
   Position: PositionSection,
   Size: SizeSection,
   Space: SpaceSection,

@@ -6,24 +6,24 @@ import {componentDrop} from "~/lib/drag_drop/drop/componentDrop";
 import {findVertexByLabelAndUniqueId} from "~/lib/graph/get/sync/findVertex";
 import { IdAttr } from "~/lib/graph/graph";
 
-export function addFormComponentAttr(
+export function addStepComponentAttr(
   dataVertex: Vertex,
   txnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  // add form component
+  // add Step component
   const formCompVertex = findVertexByLabelAndUniqueId(
     graph,
     "Comp",
     IdAttr,
-    "Form",
+    "Step",
   );
   return componentDrop(
     dataVertex,
     txnId,
     formCompVertex!,
-    dataVertex!,
+    dataVertex,
     graph,
     setGraph,
   );

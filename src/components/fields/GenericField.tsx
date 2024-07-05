@@ -315,7 +315,7 @@ export function GenericField(
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           />
         </Match>
-        <Match when={component() === "Form"}>
+        <Match when={component() === "Form" || component() === "Step"}>
           <FormWrapper meta={props.meta} />
         </Match>
         <Match when={component() === "Divider"}>

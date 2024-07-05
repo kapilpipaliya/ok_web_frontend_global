@@ -48,6 +48,7 @@ export const genericComponents2 = [
   "Rating",
   "Button",
   "Form",
+  "Step",
   "Text",
   "Repeater",
   "A",
