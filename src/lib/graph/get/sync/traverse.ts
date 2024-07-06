@@ -60,57 +60,6 @@ export function getParentVertexValue(
   return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
 
-export function getParentVertexes(
-  graph: Store<GraphInterface>,
-  path: string[],
-  currentVertexes: Vertex[],
-): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = new Map<Id, Vertex>();
-  if (path.length === 0) {
-    return { error: true };
-  }
-  let type = path[path.length - 1];
-  for (const currentVertex of currentVertexes) {
-    if (type.includes("$0")) {
-      if (!currentVertex.L) continue;
-      type = type.replace("$0", currentVertex.L[0]);
-    }
-    const edgeIds = currentVertex.IN[type];
-    if (!edgeIds) {
-      continue;
-    }
-
-    for (const edgeId of edgeIds) {
-      const edge = graph.edges[edgeId];
-      if (edge) {
-        const newVertex = graph.vertexes[edge.S];
-        if (newVertex) {
-          stepVertexes.set(newVertex.id, newVertex);
-        } else {
-          return {
-            error: true,
-          };
-        }
-      } else {
-        return {
-          error: true,
-        };
-      }
-    }
-  }
-
-  if (path.length > 1) {
-    return getParentVertexes(
-      graph,
-      path.slice(0, -1),
-      Array.from(stepVertexes.values()),
-    );
-  }
-  return {
-    error: false,
-    vertexes: Array.from(stepVertexes.values()),
-  };
-}
 
 export function calculateFilter(input: string) {
   let type = ""; // baseString
