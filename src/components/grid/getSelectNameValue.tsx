@@ -3,7 +3,7 @@ import type {SetStoreFunction} from "solid-js/store";
 
 import type {FieldAttribute} from "~/lib/FormMetadataType";
 
-import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 
 import { selectedValue } from "../fields/selectedValue";

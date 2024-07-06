@@ -13,7 +13,9 @@ import {
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
-import { getChildVertex, getSelectionOptions, getToEdge } from "../../get/sync/traverse";
+import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
+import { getToEdge } from "../../get/sync/getToEdge";
+import { getChildVertex } from "../../get/sync/traverse";
 import {
   commitTxn,
   getNewGraphId,

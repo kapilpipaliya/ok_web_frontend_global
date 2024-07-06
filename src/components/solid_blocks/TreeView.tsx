@@ -8,7 +8,7 @@ import {
   useContext,
 } from "solid-js";
 
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(

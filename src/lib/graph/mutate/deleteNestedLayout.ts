@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "../get/sync/traverse";
+import { getSelectionOptions } from "../get/sync/getSelectionOptions";
 import { deleteRow } from "./deleteRow";
 
 export function deleteNestedLayout(

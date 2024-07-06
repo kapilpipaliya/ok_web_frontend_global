@@ -2,8 +2,8 @@ import type {SetStoreFunction, Store} from "solid-js/store";
 
 import type {GraphInterface, } from "~/lib/graph/graph";
 
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
-import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
 
 export function getComponentFromLayoutRow(layoutRowId: number | string,
   graph: Store<GraphInterface>,

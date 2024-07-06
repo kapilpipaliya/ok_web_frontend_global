@@ -14,9 +14,7 @@ import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { FormContext } from "~/lib/contexts";
-import {
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import {
   GraphContext,
   IdAttr,

@@ -5,7 +5,7 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";

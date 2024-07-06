@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "./getSelectionOptions";
 
 export function replaceExpressionToLabel(
  graph: Store<GraphInterface>,

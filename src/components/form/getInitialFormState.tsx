@@ -6,7 +6,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { groupBy } from "~/lib/utils";

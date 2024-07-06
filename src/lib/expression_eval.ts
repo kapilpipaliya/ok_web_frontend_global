@@ -13,7 +13,8 @@ import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/utils";
 
-import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
+import { calculateFilter } from "./graph/get/sync/calculateFilter";
+import { getTextValue } from "./graph/get/sync/getTextValue";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

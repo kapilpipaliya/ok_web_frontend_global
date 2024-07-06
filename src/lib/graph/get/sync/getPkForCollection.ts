@@ -2,7 +2,7 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./traverse";
+import { getSelectionOptions } from "./getSelectionOptions";
 
 
 export function getPkForCollection(

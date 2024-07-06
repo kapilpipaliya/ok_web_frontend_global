@@ -10,7 +10,7 @@ import { FormMetaData } from "~/lib/formMetaData";
 
 import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
 import { getPkForCollection } from "../../get/sync/getPkForCollection";
-import { getToEdge } from "../../get/sync/traverse";
+import { getToEdge } from "../../get/sync/getToEdge";
 import { getSublistRows, getSublistRowsForType } from "./rowFunction";
 
 

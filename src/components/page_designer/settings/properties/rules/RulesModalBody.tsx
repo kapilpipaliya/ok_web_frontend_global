@@ -4,7 +4,8 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { FormMetaData } from "~/lib/formMetaData";
-import { getChildVertex, getTreeData } from "~/lib/graph/get/sync/traverse";
+import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

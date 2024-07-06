@@ -15,7 +15,7 @@ import {
   IsPreviewContext
   } from "~/lib/contexts";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";

@@ -2,7 +2,7 @@ import type {Store} from "solid-js/store";
 
 import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
 
-import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 
 export function addPropsToLayoutRow(
   graph: Store<GraphInterface>,

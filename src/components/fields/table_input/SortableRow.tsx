@@ -23,8 +23,9 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCal
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { FormContext } from "~/lib/contexts";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
-import { getChildVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow, getColumnProps, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";

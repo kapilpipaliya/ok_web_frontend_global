@@ -2,7 +2,7 @@ import { useContext } from "solid-js";
 
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./traverse";
+import { getSelectionOptions } from "./getSelectionOptions";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];

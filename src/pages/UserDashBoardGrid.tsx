@@ -3,7 +3,7 @@ import { For, useContext } from "solid-js";
 
 import { APP_BASE_URL } from "~/lib/constants";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 
 export function UserDashBoardGrid() {

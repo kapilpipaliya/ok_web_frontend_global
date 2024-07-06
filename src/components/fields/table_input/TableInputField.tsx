@@ -20,9 +20,7 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
-import {
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   getSublistRows

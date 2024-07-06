@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./traverse";
+import { getSelectionOptions } from "./getSelectionOptions";
 
 export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
   return (getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []).reduce(

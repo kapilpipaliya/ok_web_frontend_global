@@ -12,7 +12,7 @@ import {
   isObject
 } from "~/lib/utils";
 
-import { getSelectionOptions } from "../../get/sync/traverse";
+import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 
 // Select On Change Handler
 export function onChangeHandler(

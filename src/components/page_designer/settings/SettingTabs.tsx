@@ -1,8 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { Vertex } from "~/lib/graph/graph";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 import { useDesignerLayoutStore } from "../LayoutContext";

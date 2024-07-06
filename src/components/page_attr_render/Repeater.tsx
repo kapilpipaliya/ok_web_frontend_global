@@ -16,8 +16,9 @@ import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
-import { getChildVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {

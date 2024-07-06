@@ -1,6 +1,6 @@
 
 import {findVertexMGCallId} from "~/cypher/get/evaluate/findVertexMGCallId";
-import {calculateFilter} from "~/lib/graph/get/sync/traverse";
+import { calculateFilter } from "~/lib/graph/get/sync/calculateFilter";
 
 import type { ContextType } from "./ContextType";
 

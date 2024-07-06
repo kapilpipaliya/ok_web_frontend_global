@@ -19,7 +19,7 @@ export function setGraphData(
     vertexLabelIdMap?: { [key: string]: Id[]; };
     vertexes: VertexMap;
   },
-  skipExisting: boolean = false
+  skipExisting = false
 ) {
   batch(() => {
     for (const vertexId in args.vertexes) {
