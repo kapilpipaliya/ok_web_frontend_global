@@ -4,7 +4,7 @@ import { klona } from "klona/json";
 import { batch, onCleanup } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import { getUniqueName } from "~/lib/drag_drop/getChildrenAttrs";
+import { getUniqueName } from "~/components/page_designer/functions/getChildrenAttrs";
 import {
   type GraphInterface,
   type Id,

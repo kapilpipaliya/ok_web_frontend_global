@@ -2,8 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addStepComponentAttr } from "~/lib/drag_drop/drop/addStepComponentAttr";
-import { sortChildren } from "~/lib/drag_drop/sortChildren";
+import { addStepComponentAttr } from "~/components/page_designer/functions/drop/addStepComponentAttr";
+import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
 import type { PageLayoutObject } from "../../LayoutContext";
 

@@ -5,7 +5,7 @@ import { batch, } from "solid-js";
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getComponentFromLayoutRow } from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
+import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
 
 
 export function onLayoutItemClick( setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {

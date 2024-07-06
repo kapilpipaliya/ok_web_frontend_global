@@ -1,7 +1,7 @@
 import { type Accessor, useContext } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
+import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 

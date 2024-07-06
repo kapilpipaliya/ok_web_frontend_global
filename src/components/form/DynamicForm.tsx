@@ -19,7 +19,7 @@ import { TableTabs } from "~/components/TableTabs";
 import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
-import { addStepComponentAttr } from "~/lib/drag_drop/drop/addStepComponentAttr";
+import { addStepComponentAttr } from "~/components/page_designer/functions/drop/addStepComponentAttr";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
 import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";

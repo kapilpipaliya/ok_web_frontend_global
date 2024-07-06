@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, Show, createMemo, useContext } from "solid-js";
 
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

@@ -12,9 +12,9 @@ import { resetDragDropState } from "~/components/page_designer/event_handler/res
 import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { IsPreviewContext } from "~/lib/contexts";
-import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { getRowProps } from "~/lib/graph/get/sync/getProps";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";

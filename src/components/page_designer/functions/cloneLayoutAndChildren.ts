@@ -2,9 +2,9 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
+import { componentDrop } from "~/components/page_designer/functions/drop/componentDrop";
 
-import { getParentVertex } from "../graph/get/sync/traverse";
+import { getParentVertex } from "../../../lib/graph/get/sync/traverse";
 import { saveUndoPoint } from "./saveUndoPoint";
 import { sortChildren } from "./sortChildren";
 

@@ -9,9 +9,9 @@ import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import { validateInput } from "~/components/page_designer/settings/validateInput";
 import { evaluate } from "~/lib/expression_eval";
 
-import type { FieldAttribute, IFormMetaData } from "../FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "../../../lib/FormMetadataType";
 
-import { mergeVertexProperties } from "../graph/mutate/vertex";
+import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,

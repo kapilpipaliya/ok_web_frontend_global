@@ -5,13 +5,13 @@ import { batch } from "solid-js";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/Toast";
-import { createAttrCompMetaVertex } from "~/lib/drag_drop/drop/createAttrCompMetaVertex";
-import { createAttrMetaVertex } from "~/lib/drag_drop/drop/createAttrMetaVertex";
-import { handleAttrVertex } from "~/lib/drag_drop/drop/handleAttrVertex";
-import { handleCompVertex } from "~/lib/drag_drop/drop/handleCompVertex";
-import { processChildrenAttrs } from "~/lib/drag_drop/drop/processChildrenAttrs";
+import { createAttrCompMetaVertex } from "~/components/page_designer/functions/drop/createAttrCompMetaVertex";
+import { createAttrMetaVertex } from "~/components/page_designer/functions/drop/createAttrMetaVertex";
+import { handleAttrVertex } from "~/components/page_designer/functions/drop/handleAttrVertex";
+import { handleCompVertex } from "~/components/page_designer/functions/drop/handleCompVertex";
+import { processChildrenAttrs } from "~/components/page_designer/functions/drop/processChildrenAttrs";
 
-import { addNewRow } from "../../graph/mutate/form/rowFunction";
+import { addNewRow } from "../../../../lib/graph/mutate/form/rowFunction";
 import { PageDesignerLabels } from "../constant";
 import { getUniqueName } from "../getChildrenAttrs";
 

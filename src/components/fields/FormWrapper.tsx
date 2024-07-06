@@ -8,7 +8,7 @@ import { useToast } from "~/components/Toast";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { FormContext } from "~/lib/contexts";
-import { getFormMetaData, isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
+import { getFormMetaData, isAnyFieldInvalid } from "~/components/page_designer/functions/getChildrenAttrs";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";

@@ -14,7 +14,7 @@ import {
   FormContext,
   IsPreviewContext
   } from "~/lib/contexts";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 

@@ -4,10 +4,10 @@ import jsep from "jsep";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import {getComponentFromLayoutRow} from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
+import {getComponentFromLayoutRow} from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 
-import { evaluate } from "../expression_eval";
+import { evaluate } from "../../../lib/expression_eval";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,
@@ -50,13 +50,13 @@ export function validateDragOver(
       return;
     }
 
-    const rootChildren = () => evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [formData] }) || [];
-    const isFormRootVertetx = () => formData?.L?.[0] === "Form";
+    // const rootChildren = () => evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [formData] }) || [];
+    // const isFormRootVertetx = () => formData?.L?.[0] === "Form";
     const rootVertexes = () =>
       {
-        if (isFormRootVertetx()) {
-          return rootChildren();
-        }
+        // if (isFormRootVertetx()) {
+        //   return rootChildren();
+        // }
         return [formData];
       }; 
     if (rootVertexes().includes(graph.vertexes[toVertexId])) {

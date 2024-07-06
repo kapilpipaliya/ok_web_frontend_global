@@ -4,7 +4,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 
 import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosition";
 

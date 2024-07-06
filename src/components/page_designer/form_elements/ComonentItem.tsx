@@ -8,7 +8,7 @@ import { Checkbox } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
-import { onClickAddComponent } from "../../../lib/drag_drop/onClickAddComponent";
+import { onClickAddComponent } from "../functions/onClickAddComponent";
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { OpenComponentSettings } from "../OpenComponentSettings";
 

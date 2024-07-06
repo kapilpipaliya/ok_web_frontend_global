@@ -2,11 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { handleComponentDrag } from "~/lib/drag_drop/handleComponentDrag";
-import { handlePageDrag } from "~/lib/drag_drop/handlePageDrag";
-import { handleParentChange } from "~/lib/drag_drop/handleParentChange";
-import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { handleComponentDrag } from "~/components/page_designer/functions/handleComponentDrag";
+import { handlePageDrag } from "~/components/page_designer/functions/handlePageDrag";
+import { handleParentChange } from "~/components/page_designer/functions/handleParentChange";
+import { sortChildren } from "~/components/page_designer/functions/sortChildren";
+import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 
 import { PageDesignerLabels } from "./constant";

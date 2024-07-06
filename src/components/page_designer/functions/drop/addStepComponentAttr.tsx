@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type {GraphInterface, Vertex} from "~/lib/graph/graph";
 
-import {componentDrop} from "~/lib/drag_drop/drop/componentDrop";
+import {componentDrop} from "~/components/page_designer/functions/drop/componentDrop";
 import {findVertexByLabelAndUniqueId} from "~/lib/graph/get/sync/findVertex";
 import { IdAttr } from "~/lib/graph/graph";
 

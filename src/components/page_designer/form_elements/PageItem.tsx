@@ -8,7 +8,7 @@ import {
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
-import { onClickAddComponent } from "~/lib/drag_drop/onClickAddComponent";
+import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 

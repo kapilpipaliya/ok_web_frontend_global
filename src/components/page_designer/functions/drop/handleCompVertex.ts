@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addPropsToLayoutRow } from "~/lib/drag_drop/drop/addPropsToLayoutRow";
+import { addPropsToLayoutRow } from "~/components/page_designer/functions/drop/addPropsToLayoutRow";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 

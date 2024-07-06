@@ -4,7 +4,7 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { getFormMetaData } from "~/lib/drag_drop/getChildrenAttrs";
+import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";

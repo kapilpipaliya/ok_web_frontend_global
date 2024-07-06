@@ -1,6 +1,6 @@
 import { Show, createSignal, useContext } from "solid-js";
 
-import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
+import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 

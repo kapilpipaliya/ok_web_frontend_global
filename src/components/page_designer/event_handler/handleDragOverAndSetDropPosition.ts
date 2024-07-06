@@ -4,8 +4,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
-import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { getIndicatorPosition } from "~/components/page_designer/functions/getIndicatorPosition";
+import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 
 
 export function handleDragOverAndSetDropPosition(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
