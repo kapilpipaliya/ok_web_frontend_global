@@ -56,8 +56,8 @@ export function PageView(props: Readonly<{
                 getSelectionOptions(
                   graph,
                   setGraph,
-                  [props.vertex!],
                   `'g:${collection()!}'`,
+                  [props.vertex!],
                 ).vertexes
               }
             >

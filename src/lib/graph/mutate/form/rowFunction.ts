@@ -13,7 +13,7 @@ import {
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
-import { getChildVertex, getChildVertexes, getToEdge } from "../../get/sync/traverse";
+import { getChildVertex, getSelectionOptions, getToEdge } from "../../get/sync/traverse";
 import {
   commitTxn,
   getNewGraphId,
@@ -26,7 +26,7 @@ export function getSublistRowsForType(
   type: string,
   vertex: Vertex
 ) {
-  return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
+  return (getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []).sort(
     (a, b) => a.P.pos - b.P.pos
   );
 }
@@ -39,7 +39,7 @@ export function getSublistRows(
   if (!vertex) return [];
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
-  return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
+  return (getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []).sort(
     (a, b) => a.P.pos - b.P.pos
   );
 }

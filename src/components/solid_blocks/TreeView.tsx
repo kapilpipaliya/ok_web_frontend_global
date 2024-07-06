@@ -8,7 +8,7 @@ import {
   useContext,
 } from "solid-js";
 
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
@@ -34,7 +34,7 @@ export function TreeView(props: Readonly<{ children: JSX.Element; meta: Vertex; 
   const RenderTreeNode = (TreeItemProps: any) => {
     const isExpanded = () => expandedItems().has(props.meta.id);
     const childrenLength = () =>
-      getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length || 0;
+      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length || 0;
     return (
       <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
         <span class={"display:inline-flex"}>

@@ -18,8 +18,8 @@ export function replaceExpressionToLabel(
    getSelectionOptions(
     graph,
     setGraph,
+    collection.match(/{{(.*)}}/)?.[1]! || "",
     [vertex],
-    collection.match(/{{(.*)}}/)?.[1]! || ""
    ).vertexes || ""
   );
  }

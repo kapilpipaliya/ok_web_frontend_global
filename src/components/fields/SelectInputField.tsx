@@ -72,7 +72,7 @@ export function SelectInputField(
   };
 
   const getDynamicOptions = () => {
-    return getSelectionOptions(graph, setGraph, [props.data as Vertex], getCollection())
+    return getSelectionOptions(graph, setGraph, getCollection(), [props.data as Vertex])
       .vertexes || [];
   };
 
@@ -160,8 +160,8 @@ export function SelectInputField(
                   getSelectionOptions(
                     graph,
                     setGraph,
-                    [graph.vertexes[vertexId]],
                     props.meta.P.displayExpr || `::'P.${IdAttr}'`,
+                    [graph.vertexes[vertexId]],
                   ).vertexes
                 }
               </>

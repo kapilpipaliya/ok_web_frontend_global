@@ -41,8 +41,8 @@ export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
         getSelectionOptions(
           graph,
           setGraph,
-          repeaterContext,
           expression ?? `g:'${collection}'`,
+          repeaterContext,
         ).vertexes,
       );
     }

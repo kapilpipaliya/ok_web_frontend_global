@@ -226,23 +226,23 @@ export function getTextValue(value: any) {
 export function getSelectionOptions(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  vertex: Vertex[],
   collection: string,
+  vertexes: Vertex[],
   strict?: boolean,
 ): { error: boolean; vertexes?: any } {
-  collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
+  collection = replaceExpressionToLabel(graph, setGraph, collection, vertexes[0]);
   try {
     const value = evaluate(jsep(collection), {
       graph,
       setGraph,
-      vertexes: vertex,
+      vertexes: vertexes,
     });
     if (value) {
       return { error: false, vertexes: value };
     }
     return { error: true };
   } catch (e) {
-    console.error(e, vertex, collection);
+    console.error(e, vertexes, collection);
     return { error: true };
   }
 }
@@ -337,65 +337,5 @@ export function getParentVertex(
   }
   return {
     error: true,
-  };
-}
-
-export function getChildVertexes(
-  graph: Store<GraphInterface>,
-  path: string[],
-  currentVertexes: Vertex[],
-  strict?: boolean,
-): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = new Map<Id, Vertex>();
-  if (path.length === 0) {
-    return { error: true };
-  }
-  let type = path[0];
-  for (const currentVertex of currentVertexes) {
-    if (type.includes("$0")) {
-      if (!currentVertex.L) continue;
-      type = type.replace("$0", currentVertex.L[0]);
-    }
-    const edgeIds = currentVertex.OUT?.[type] || [];
-    if (edgeIds.length === 0) {
-      // we only return error if its in middle of path
-      if (strict && path.length > 1) {
-        return {
-          error: true,
-        };
-      }
-      continue;
-    }
-
-    for (const edgeId of edgeIds) {
-      const edge = graph.edges[edgeId];
-      if (edge) {
-        const newVertex = graph.vertexes[edge.E];
-        if (newVertex) {
-          stepVertexes.set(newVertex.id, newVertex);
-        } else {
-          return {
-            error: true,
-          };
-        }
-      } else {
-        return {
-          error: true,
-        };
-      }
-    }
-  }
-
-  if (path.length > 1) {
-    return getChildVertexes(
-      graph,
-      path.slice(1),
-      Array.from(stepVertexes.values()),
-      strict,
-    );
-  }
-  return {
-    error: false,
-    vertexes: Array.from(stepVertexes.values()),
   };
 }

@@ -2,13 +2,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import {
-  getChildVertexes,
-  getSelectionOptions,
-} from "./traverse";
+import { getSelectionOptions } from "./traverse";
 
 export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
-  return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
+  return (getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []).reduce(
     (acc, curr) => {
       if (curr.P.name && curr.P.value !== undefined) {
         acc[curr.P.name] = curr.P.value;
@@ -24,13 +21,13 @@ export function getRowProps(
   setGraph: SetStoreFunction<GraphInterface>,
   comp: Vertex,
 ) {
-  return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
+  return (getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []).reduce(
     (acc, curr) => {
       const key = getSelectionOptions(
         graph,
         setGraph,
-        [curr],
         "->$0Name::'P.name'",
+        [curr],
       ).vertexes;
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
@@ -52,8 +49,8 @@ function getComponentProperties(
       const key = getSelectionOptions(
         graph,
         setGraph,
-        [curr],
         "->$0Name::'P.name'||::'P.name'",
+        [curr],
       ).vertexes;
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
@@ -77,7 +74,7 @@ export function getPropsFromMetaExpression(
   const results = [] as { [key: string]: any }[];
   for (const metaPart of meta) {
     const metaRows =
-      getSelectionOptions(graph, setGraph, [data], metaPart).vertexes || [];
+      getSelectionOptions(graph, setGraph, metaPart, [data]).vertexes || [];
     const metaData = getComponentProperties(graph, setGraph, metaRows);
     results.push(metaData);
   }

@@ -31,7 +31,6 @@ export function Properties() {
 // import type { FieldAttribute } from "~/lib/FormMetadataType";
 // import {
 //   getChildVertex,
-//   getChildVertexes,
 // } from "~/lib/graph/get/sync/traverse";
 // import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
 // import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";

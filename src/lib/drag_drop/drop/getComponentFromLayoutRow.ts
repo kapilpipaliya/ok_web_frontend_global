@@ -13,8 +13,8 @@ export function getComponentFromLayoutRow(layoutRowId: number | string,
   const compVertex = getSelectionOptions(
     graph,
     setGraph,
+    "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default",
     [currentVertex],
-    "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default"
   ).vertexes || [];
   if (compVertex[0]) {
     return compVertex[0];

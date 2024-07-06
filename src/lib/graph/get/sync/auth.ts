@@ -2,16 +2,16 @@ import { useContext } from "solid-js";
 
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
-import { getChildVertexes } from "./traverse";
+import { getSelectionOptions } from "./traverse";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
   const [graph, setGraph] = useContext(GraphContext)!;
 
-  const roleRows = getChildVertexes(graph, ["$0Role"], [meta]);
+  const roleRows = getSelectionOptions(graph, setGraph, "->$0Role", [meta]);
   if (!roleRows.error) {
     for (const roleRow of roleRows.vertexes!) {
-      const roles = getChildVertexes(graph, ["$0Role"], [roleRow]);
+      const roles = getSelectionOptions(graph, setGraph, "->$0Role", [roleRow]);
       if (!roles.error) {
         const allowedRoleIds = new Set<Id>();
         for (const role of roles.vertexes!) {
@@ -20,12 +20,13 @@ export function getPermissions(meta: Vertex) {
           }
         }
         if (allowedRoleIds.size > 0) {
-          const permissionRows = getChildVertexes(graph, ["$0Perm"], [roleRow]);
+          const permissionRows = getSelectionOptions(graph, setGraph, "->$0Perm", [roleRow]);
           if (!permissionRows.error) {
             for (const permissionRow of permissionRows.vertexes!) {
-              const permissions = getChildVertexes(
+              const permissions = getSelectionOptions(
                 graph,
-                ["$0Perm"],
+                setGraph,
+                "->$0Perm",
                 [permissionRow],
               );
               if (!permissions.error) {

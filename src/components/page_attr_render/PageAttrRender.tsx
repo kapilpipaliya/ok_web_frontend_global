@@ -66,8 +66,8 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
               getSelectionOptions(
                 graph,
                 setGraph,
-                [...useContext(RepeaterVertexContext)],
                 item.P.data,
+                [...useContext(RepeaterVertexContext)],
               ).vertexes ||
               getDataVertex(graph, item)
             }

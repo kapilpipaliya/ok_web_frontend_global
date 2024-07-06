@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getChildVertexes } from "../get/sync/traverse";
+import { getSelectionOptions } from "../get/sync/traverse";
 import { deleteRow } from "./deleteRow";
 
 export function deleteNestedLayout(
@@ -16,13 +16,13 @@ export function deleteNestedLayout(
   },
 ) {
   const deleteChildren = (vertexes: Vertex[]) => {
-    const children = getChildVertexes(graph, ["Attr"], vertexes);
+    const children = getSelectionOptions(graph, () => 0, "->Attr", vertexes);
     for (const child of children.vertexes || []) {
       // delete children
       deleteChildren([child]);
 
       // delete properties:
-      const AttrProps = getChildVertexes(graph, ["AttrProp"], vertexes);
+      const AttrProps = getSelectionOptions(graph, () => 0, "->$0Prop", vertexes);
       if (!AttrProps.error) {
         for (const vertex of AttrProps.vertexes!) {
           // delete in edges and out edges of properties

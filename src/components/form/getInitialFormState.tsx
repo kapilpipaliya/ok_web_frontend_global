@@ -6,7 +6,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { groupBy } from "~/lib/utils";
@@ -34,14 +34,15 @@ export function getInitialFormState(graph: Store<GraphInterface>, setGraph: SetS
   }
 
   const groupByTabsAndGroupFn = () => {
-    const mainAttributes = getChildVertexes(
+    const mainAttributes = getSelectionOptions(
       graph,
-      ["MetaAttr"],
+      setGraph,
+      "->MetaAttr",
       [metaVertexResult.vertex!]
-    ); //.sort((a, b) => a.P.pos - b.P.pos);
+    ).vertexes || [];//.sort((a, b) => a.P.pos - b.P.pos);
 
     const groupByTabs = groupBy(
-      mainAttributes.vertexes!,
+      mainAttributes,
       (item) => item.P.tab!
     ) as unknown as {
       [tab: string]: Vertex[];

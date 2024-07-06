@@ -34,7 +34,7 @@ import { APP_BASE_URL } from "~/lib/constants";
 import { PageDesignerLabels } from "~/lib/drag_drop/constant";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
-import { getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { deNullify } from "~/lib/utils";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
@@ -53,7 +53,7 @@ export function getText(
   projection: string,
   repeaterContext: Vertex[]
 ) {
-  return getSelectionOptions(graph, setGraph, repeaterContext, projection)
+  return getSelectionOptions(graph, setGraph, projection, repeaterContext)
     .vertexes as string || projection;
 }
 
@@ -63,7 +63,7 @@ export function getUrl(
   projection: string,
   repeaterContext: Vertex[]
 ) {
-  const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
+  const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
     .vertexes as string | undefined;
   return typeof url === "string" && url.startsWith("/") ? url : undefined;
 }
@@ -222,7 +222,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "Table"}>
           <Table
-            headers={getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length || 0}
+            headers={getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length || 0}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
@@ -230,7 +230,7 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Table>
         </Match>
-        <Match when={component() === "TableHeader" && getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length}>
+        <Match when={component() === "TableHeader" && getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length}>
           <TableHeadCell class={"h:5 p:10 text:center"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableHeadCell>

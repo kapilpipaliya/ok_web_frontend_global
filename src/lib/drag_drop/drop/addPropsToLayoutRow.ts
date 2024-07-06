@@ -2,7 +2,7 @@ import type {Store} from "solid-js/store";
 
 import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
 
-import {getChildVertexes} from "~/lib/graph/get/sync/traverse";
+import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";
 
 export function addPropsToLayoutRow(
   graph: Store<GraphInterface>,
@@ -10,7 +10,7 @@ export function addPropsToLayoutRow(
   layoutRowId: Id,
   componentVertex: Vertex,
 ) {
-  const propVertexes = getChildVertexes(graph, ["$0Prop"], [componentVertex]);
+  const propVertexes = getSelectionOptions(graph, () => 0, "->$0Prop", [componentVertex]);
   if (propVertexes.vertexes) {
     const initialValues = propVertexes.vertexes.reduce(
       (acc, curr) => {

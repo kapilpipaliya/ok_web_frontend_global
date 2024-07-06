@@ -44,8 +44,8 @@ export function onChangeHandler(
       getSelectionOptions(
         graph,
         setGraph,
-        [changedFieldAttribute],
-        "-MetaAttr->MetaAttr"
+        "-MetaAttr->MetaAttr",
+        [changedFieldAttribute]
       ).vertexes || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
     if (!attribute) {

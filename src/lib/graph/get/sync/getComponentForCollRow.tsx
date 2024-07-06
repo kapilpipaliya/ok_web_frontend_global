@@ -19,7 +19,7 @@ export function getComponentForCollRow(
   }
 
   if (metaVertex.P.component.includes("-")) {
-    const component = getSelectionOptions(graph, setGraph, [data], metaVertex.P.component).vertexes;
+    const component = getSelectionOptions(graph, setGraph, metaVertex.P.component, [data]).vertexes;
     if (!component) {
       return getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
     }

@@ -1,7 +1,7 @@
 import { Show, createSignal, useContext } from "solid-js";
 
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -29,13 +29,12 @@ export function PropertiesBody() {
         value,
       );
     }
-    return;
   };
 
   const selectedComponentProperties = () => {
     const selectedComp = graph.vertexes[layoutStore.selectedComponent];
     if (!selectedComp) return { error: true };
-    return getChildVertexes(graph, ["$0Prop"], [selectedComp]);
+    return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
 
   const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);

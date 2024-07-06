@@ -3,7 +3,7 @@ import { For, useContext } from "solid-js";
 
 import { APP_BASE_URL } from "~/lib/constants";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 
 export function UserDashBoardGrid() {
@@ -19,7 +19,7 @@ export function UserDashBoardGrid() {
     return "No Dashboard Found";
   }
   const allFormTableLayouts =
-    getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
+    getSelectionOptions(graph, () => 0, "->$0Form", [dashboard]).vertexes || [];
 
   const allTableLayouts = () => [
     ...new Set([...allFormTableLayouts]),

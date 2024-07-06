@@ -104,7 +104,7 @@ export const SortableRow = (p: { dragFromIndex: Accessor<null | number>; dragToI
           const getComponent = (columnId: Id) => {
             const metaVertex = getMetaVertex(columnId);
             if (metaVertex.P.component.includes("-")) {
-              createComputed(on(() => getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex.P.component).vertexes, async (vertexes) => {
+              createComputed(on(() => getSelectionOptions(graph, setGraph, metaVertex.P.component, [p.joinVertex]).vertexes, async (vertexes) => {
                 const mutationData = formTxnId ? commitTxn(formTxnId, graph) : undefined;
                 const res = await getSelectionOptionsMGCall([p.joinVertex], metaVertex.P.component, mutationData, 10);
                 console.log("res", res);
@@ -126,7 +126,7 @@ export const SortableRow = (p: { dragFromIndex: Accessor<null | number>; dragToI
 
           const DefaultValue = () => (
             <Show when={metaVertex().P.defaultValue}>
-              {getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex().P.defaultValue).vertexes}
+              {getSelectionOptions(graph, setGraph, metaVertex().P.defaultValue, [p.joinVertex]).vertexes}
             </Show>
           );
 

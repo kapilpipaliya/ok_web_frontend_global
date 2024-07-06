@@ -21,11 +21,12 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import {
-  getChildVertexes,
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
-  getSublistRows} from "~/lib/graph/mutate/form/rowFunction";
+  getSublistRows
+} from "~/lib/graph/mutate/form/rowFunction";
 import {
   mergeVertexProperties,
 } from "~/lib/graph/mutate/vertex";
@@ -44,7 +45,12 @@ export function TableInputField(
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
-    getChildVertexes(graph, ["MetaAttr"], [props.meta]).vertexes || []
+    getSelectionOptions(
+      graph,
+      setGraph,
+      `->MetaAttr`,
+      [props.meta],
+    ).vertexes || []
   );
 
   const parentItems = useContext(PageRenderVertexContext);
