@@ -22,6 +22,6 @@ export function insertNewRow(txnId: number,
     return;
   }
   const outerOwner = getOwner();
-  return runWithOwner(outerOwner, () => addNewRow(txnId || 0, meta, graph, setGraph, data!, {}, isRealTime ?? false)
+  return runWithOwner(outerOwner, () => addNewRow(txnId || 0, meta, graph, setGraph, data, {}, isRealTime ?? false)
   );
 }

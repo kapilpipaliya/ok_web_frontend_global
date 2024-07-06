@@ -48,7 +48,7 @@ export function TableInputField(
     getSelectionOptions(
       graph,
       setGraph,
-      `->MetaAttr`,
+      `->MetaAttr++->Attr`,
       [props.meta],
     ).vertexes || []
   );
