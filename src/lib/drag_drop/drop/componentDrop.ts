@@ -27,6 +27,7 @@ export function componentDrop(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   toIndex?: number,
+  properties?: { [key: string]: string },
 ) {
   const { showErrorToast } = useToast();
 
@@ -60,7 +61,7 @@ export function componentDrop(
       graph,
       setGraph,
       toParentVertex,
-      toIndex ? { name: uniqueName, pos: toIndex } : { name: uniqueName },
+      toIndex ? { ...properties, name: uniqueName, pos: toIndex } : { ...properties, name: uniqueName },
       false,
     );
 

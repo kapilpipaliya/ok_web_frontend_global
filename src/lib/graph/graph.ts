@@ -54,7 +54,7 @@ export interface GraphInterface {
       steps: TransactionValue[];
       submittedStep: number;
       undoPoints: number[];
-      undoStep: number;
+      activeUndoPoint: number;
     }
   >
   vertexLabelIdMap: { [key: string]: Id[] };
