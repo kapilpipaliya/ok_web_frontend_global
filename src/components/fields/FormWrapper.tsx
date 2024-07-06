@@ -48,8 +48,7 @@ export function FormWrapper(
 
 
   // if (!props.data?.id) {
-
-  const form = getFormMetaData(graph as Store<GraphInterface>, () => { }, props.meta);
+  const form = getFormMetaData(graph, () => { }, props.meta);
   const defaultValues = form.attributes.reduce((acc, attr) => {
     acc[attr.name] = attr.defaultValue;
     return acc;

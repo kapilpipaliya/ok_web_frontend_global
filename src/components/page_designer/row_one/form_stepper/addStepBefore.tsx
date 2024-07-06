@@ -24,5 +24,5 @@ export function addStepBefore(graph: Store<GraphInterface>, setGraph: SetStoreFu
     "before"
   );
 
-  setLayoutStore('activeStepId', layoutRowId);
+  // setLayoutStore('activeStepId', layoutRowId);
 }

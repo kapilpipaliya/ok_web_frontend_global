@@ -20,9 +20,9 @@ export function LayoutGridRowOne(): JSX.Element {
       </Show>
       <div class="flex ai:center gap:5 jc:center p:8">
         <UndoRedoIcons />
-        <Show when={location.pathname.includes("/admin/Form/")}>
+        {/* <Show when={location.pathname.includes("/admin/Form/")}>
           <FormStepper />
-        </Show>
+        </Show> */}
       </div>
       <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
         <RightToggleButton />

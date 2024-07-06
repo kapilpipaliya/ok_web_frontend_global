@@ -120,7 +120,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         setError("Layout Row Id Error");
         return;
       }
-      setLayoutStore('activeStepId', layoutRowId);
+      // setLayoutStore('activeStepId', layoutRowId);
     }
     setLayoutStore?.("formData", formData);
     setIsLoading(false);

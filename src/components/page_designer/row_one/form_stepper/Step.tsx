@@ -28,7 +28,9 @@ export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; st
     if (props.index() < steps().length - 1) moveStep(graph, setGraph, layoutStore, setLayoutStore, props.steps, props.index(), props.index() + 1);
   };
 
-  const isActiveStep = () => layoutStore.activeStepId === props.step.id;
+  // const isActiveStep = () => layoutStore.activeStepId === props.step.id;
+  // Todo: Fix this:
+  const isActiveStep = () => false;
 
   return (
     <div

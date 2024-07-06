@@ -24,5 +24,5 @@ export function addStepAfter(graph: Store<GraphInterface>, setGraph: SetStoreFun
     "after"
   );
 
-  setLayoutStore('activeStepId', layoutRowId);
+  // setLayoutStore('activeStepId', layoutRowId);
 }

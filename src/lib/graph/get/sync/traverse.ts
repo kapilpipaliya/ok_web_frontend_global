@@ -5,7 +5,9 @@ import type {
   Vertex,
 } from "~/lib/graph/graph";
 
-
+/**
+ * @deprecated
+ */
 export function getChildVertex(
   graph: Store<GraphInterface>,
   path: string[],
@@ -63,6 +65,9 @@ export function getChildVertex(
   };
 }
 
+/**
+ * @deprecated
+ */
 export function getParentVertex(
   path: string[],
   currentVertex: Vertex,

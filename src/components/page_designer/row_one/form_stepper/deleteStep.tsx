@@ -14,9 +14,9 @@ export function deleteStep(graph: Store<GraphInterface>, setGraph: SetStoreFunct
   const currentStep = steps.findIndex(step => step.id === item.id);
   if (currentStep) {
     if (currentStep === 0) {
-      setLayoutStore('activeStepId', steps[currentStep + 1].id);
+      // setLayoutStore('activeStepId', steps[currentStep + 1].id);
     } else {
-      setLayoutStore('activeStepId', steps[currentStep - 1].id);
+      // setLayoutStore('activeStepId', steps[currentStep - 1].id);
     }
   }
   deleteLayoutAttr(layoutStore, setLayoutStore, item, graph, setGraph, layoutStore.formData.txnId, item.P.name, showSuccessToast);

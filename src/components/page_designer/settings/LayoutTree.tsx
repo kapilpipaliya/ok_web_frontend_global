@@ -21,22 +21,22 @@ export function LayoutTree() {
     );
   }
 
-  const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData)
-  );
+  // const steps = createMemo<Vertex[]>(() =>
+  //   getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData)
+  // );
 
-  const isFormRootVertetx = () =>
-    layoutStore.formData?.formData?.L?.[0] === "Form";
+  // const isFormRootVertetx = () =>
+  //   layoutStore.formData?.formData?.L?.[0] === "Form";
 
   const rootVertexes = () => {
-    if (isFormRootVertetx()) {
-      if (layoutStore.activeStepId && graph.vertexes[layoutStore.activeStepId]) {
-        return [graph.vertexes[layoutStore.activeStepId]];
-      }
-      return steps()[0]
-        ? [steps()[0]]
-        : [];
-    }
+    // if (isFormRootVertetx()) {
+    //   if (layoutStore.activeStepId && graph.vertexes[layoutStore.activeStepId]) {
+    //     return [graph.vertexes[layoutStore.activeStepId]];
+    //   }
+    //   return steps()[0]
+    //     ? [steps()[0]]
+    //     : [];
+    // }
     return layoutStore.formData?.formData
       ? [layoutStore.formData.formData]
       : [];

@@ -8,7 +8,6 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 export function getInitialDesignerLayoutStore() {
   return ({
     activeItem: null as Id | null | number,
-    activeStepId: 0 as Id | number,
     dragOverTargetId: -1 as Id | number,
     draggedVertices: [] as Array<Vertex>,
     formData: {} as IFormContext,
