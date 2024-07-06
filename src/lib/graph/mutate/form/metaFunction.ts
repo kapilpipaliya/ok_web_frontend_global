@@ -9,7 +9,7 @@ import { useToast } from "~/components/Toast";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
-import { getNewGraphId, getNewTxnId, revertTransaction } from "../../transaction";
+import { revertTransaction } from "../../transaction/revertTransaction";
 import { addNewVertex, newVertex } from "../vertex";
 import { newRow } from "./rowFunction";
 
@@ -64,9 +64,9 @@ export function addMetaVertexes(
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
-  const metaTxnId = getNewTxnId(graph, setGraph);
+  const metaTxnId = graph.newTxnId;
 
-  const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
+  const metaMainVertex = newVertex(graph.newVertexId, ["Temp"], custom);
   const { error } = addNewVertex(metaTxnId, metaMainVertex, graph, setGraph);
   if (error) {
     console.error(error);

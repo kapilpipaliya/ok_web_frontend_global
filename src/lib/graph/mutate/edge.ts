@@ -5,7 +5,7 @@ import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
 
 import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 
-import { transactionDetailAdd } from "../transaction";
+import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 export function newEdge(
   edgeId: Id,

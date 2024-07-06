@@ -2,7 +2,7 @@ import { klona } from "klona";
 import { describe, expect, test } from "vitest";
 
 import { graph } from "../../graph";
-import { getNewGraphId, transactions } from "../../transaction";
+import { transactions } from "../../transaction/TransactionType";
 import {
   addNewEdge,
   deleteEdge,
@@ -20,12 +20,12 @@ describe("addNewEdge", () => {
   test("modifying Edge dont change store", async () => {
     // in solid when we set an object to the store, we can mutate store with original object reference
     // to prevent accidental behaviour we clone the object.
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -40,7 +40,7 @@ describe("addNewEdge", () => {
     expect(error1).toBe(false);
     expect(txnDetailIndex1).toBe(1);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 11, b: 12, c: [13, 14, 15] },
       vertex1.id,
@@ -51,12 +51,12 @@ describe("addNewEdge", () => {
     expect(graph.edges[Edge1.id].P.a).to.eq(11);
   });
   test("Edge revert transaction", async () => {
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -72,7 +72,7 @@ describe("addNewEdge", () => {
     expect(txnDetailIndex1).toBe(1);
     const initialStore = klona(graph);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 11, b: 12, c: [13, 14, 15] },
       vertex1.id,
@@ -94,12 +94,12 @@ describe("replaceEdgeProperties", () => {
     transactions.clear();
   });
   test("modifying properties dont change store", async () => {
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -114,7 +114,7 @@ describe("replaceEdgeProperties", () => {
     expect(error1).toBe(false);
     expect(txnDetailIndex1).toBe(1);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 11, b: 12, c: [13, 14, 15] },
       vertex1.id,
@@ -135,12 +135,12 @@ describe("replaceEdgeProperties", () => {
   });
 
   test("Edge revert replace Properties", async () => {
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -155,7 +155,7 @@ describe("replaceEdgeProperties", () => {
     expect(error1).toBe(false);
     expect(txnDetailIndex1).toBe(1);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 11, b: 12, c: [13, 14, 15] },
       vertex1.id,
@@ -182,17 +182,17 @@ describe("updateEdgeStartAndEnd Test", () => {
     transactions.clear();
   });
   test("Edge revert replace Properties", async () => {
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
     });
-    const vertex3 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex3 = newVertex(graph.newVertexId, ["hello"], {
       a: 11,
       b: 12,
       c: [13, 14, 15],
@@ -213,14 +213,14 @@ describe("updateEdgeStartAndEnd Test", () => {
     expect(error2).toBe(false);
     expect(txnDetailIndex2).toBe(2);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 16, b: 17, c: [18, 19, 20] },
       vertex1.id,
       vertex2.id,
     );
     const Edge2 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 16, b: 17, c: [18, 19, 20] },
       vertex1.id,
@@ -261,12 +261,12 @@ describe("deleteEdge", () => {
     transactions.clear();
   });
   test("vertex revert transaction", async () => {
-    const vertex1 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex1 = newVertex(graph.newVertexId, ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(getNewGraphId(), ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -281,7 +281,7 @@ describe("deleteEdge", () => {
     expect(error1).toBe(false);
     expect(txnDetailIndex1).toBe(1);
     const Edge1 = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       "hello",
       { a: 11, b: 12, c: [13, 14, 15] },
       vertex1.id,

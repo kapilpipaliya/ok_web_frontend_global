@@ -4,7 +4,6 @@ import { Portal } from "solid-js/web";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
-import { getNewGraphId } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
@@ -16,8 +15,8 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   prevTxnIndex =
     graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
 
-  const metaVertexId = getNewGraphId();
-  const dataVertexId = getNewGraphId();
+  const metaVertexId = graph.newVertexId;
+  const dataVertexId = graph.newVertexId;
 
   setGraph("vertexes", metaVertexId, {
     P: { height: 700, name: "jsx", width: 700 },

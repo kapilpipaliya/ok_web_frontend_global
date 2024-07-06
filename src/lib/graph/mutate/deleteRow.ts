@@ -8,7 +8,7 @@ import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
-import { commitTxn, getNewTxnId } from "../transaction";
+import { commitTxn } from "../transaction/commitTxn";
 
 export function deleteRow(
   vertex: Vertex,
@@ -21,7 +21,7 @@ export function deleteRow(
 
   batch(() => {
     if (isRealTime) {
-      txnId = getNewTxnId(graph, setGraph);
+      txnId = graph.newTxnId;
     }
     // delete all vertex in edges
     const inEdges = vertex.IN;

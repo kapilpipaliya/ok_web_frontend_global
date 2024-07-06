@@ -9,7 +9,7 @@ import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
@@ -20,8 +20,8 @@ export function RulesModalBody() {
   prevTxnIndex =
     graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
 
-  const metaVertexId = getNewGraphId();
-  const txnId = getNewTxnId(graph, setGraph);
+  const metaVertexId = graph.newVertexId;
+  const txnId = graph.newTxnId;
   const metaAttributes = FormMetaData.Coll.attributes.find(
     (x) => x.name === "Rules"
   );

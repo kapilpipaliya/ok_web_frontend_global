@@ -32,8 +32,8 @@ export function componentDrop(
 
   if (!fromVertex) return -1;
 
-  const attrMetaVertex = createAttrMetaVertex();
-  const attrCompMetaVertex = createAttrCompMetaVertex();
+  const attrMetaVertex = createAttrMetaVertex(graph);
+  const attrCompMetaVertex = createAttrCompMetaVertex(graph);
 
   if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return (

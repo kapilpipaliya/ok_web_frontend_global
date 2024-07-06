@@ -30,7 +30,7 @@ import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow, getColumnProps, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { commitTxn } from "~/lib/graph/transaction";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 
 // Todo dont allow duplicate value in the select field

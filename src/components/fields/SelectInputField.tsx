@@ -22,7 +22,7 @@ import {
 } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { ensureArray } from "./ensureArray";
 import { selectedValue } from "./selectedValue";
@@ -108,7 +108,7 @@ export function SelectInputField(
       batch(() => {
         if (!value) return;
         if (props.isRealTime) {
-          props.txnId = getNewTxnId(graph, setGraph);
+          props.txnId = graph.newTxnId;
         }
         if (props.meta.P.options || props.meta.P.saveValue) {
           let parsedValue;

@@ -1,8 +1,7 @@
-import { For, type Setter, Show, createMemo, createSignal, useContext } from "solid-js";
+import { For, type Setter, Show, createSignal, useContext } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { TreeItem } from "./TreeItem";

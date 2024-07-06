@@ -5,13 +5,13 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { cloneLayoutAndChildren } from "~/lib/drag_drop/cloneLayoutAndChildren";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
-import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { DropdownMenu } from "../../DropdownMenu";
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
-export function SaveAsTemplateMenu(props: { item: Vertex; onClose: () => void; onMouseLeave: () => void; parentRef: HTMLElement; }) {
+export function SaveAsTemplateMenu(props: Readonly<{ item: Vertex; onClose: () => void; onMouseLeave: () => void; parentRef: HTMLElement; }>) {
   let nameInputRef: HTMLInputElement;
   const [layoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -20,7 +20,7 @@ export function SaveAsTemplateMenu(props: { item: Vertex; onClose: () => void; o
   const { showSuccessToast, showWarningToast } = useToast();
 
   const saveTemplate = async () => {
-    const newFormTxnId = getNewTxnId(graph, setGraph);
+    const newFormTxnId = graph.newTxnId;
     const createResult = createForm(graph, setGraph, newFormTxnId, "TemplatePage", { name: templateName() });
     const dataVertex = createResult.vertex!;
     cloneLayoutAndChildren(props.item, dataVertex, newFormTxnId, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData);

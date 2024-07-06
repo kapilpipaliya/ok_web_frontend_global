@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { Show, useContext } from "solid-js";
-import { type Store, createStore } from "solid-js/store";
+import { createStore } from "solid-js/store";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
@@ -9,9 +9,10 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { FormContext } from "~/lib/contexts";
 import { getFormMetaData, isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
-import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
-import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 export function FormWrapper(
   props: {
@@ -25,7 +26,7 @@ export function FormWrapper(
   const navigate = useNavigate();
 
   const cleanUpConfig = {} as { [key: string]: any };
-  const txnId = getNewTxnId(graph, setGraph);
+  const txnId = graph.newTxnId;
 
   // const [dataVertex, setDataVertex] = createSignal<Vertex>();
   // const [metaVertex, setMetaVertex] = createSignal<Vertex>();

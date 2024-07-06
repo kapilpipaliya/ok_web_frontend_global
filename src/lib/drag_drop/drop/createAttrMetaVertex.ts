@@ -1,8 +1,11 @@
-import {newVertex} from "~/lib/graph/mutate/vertex";
-import {getNewGraphId} from "~/lib/graph/transaction";
+import type { Store } from "solid-js/store";
 
-export function createAttrMetaVertex() {
-  return newVertex(getNewGraphId(), [], {
+import type { GraphInterface } from "~/lib/graph/graph";
+
+import {newVertex} from "~/lib/graph/mutate/vertex";
+
+export function createAttrMetaVertex(graph: Store<GraphInterface>) {
+  return newVertex(graph.newVertexId, [], {
     component: "Table",
     label: "Attr",
     name: "Attr",

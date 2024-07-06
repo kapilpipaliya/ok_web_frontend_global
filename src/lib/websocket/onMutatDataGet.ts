@@ -11,9 +11,9 @@ import { updateVertexId } from "~/lib/graph/mutate/vertex";
 import {
   ProcessStatus,
   edgeOldIdToNewIdMap,
-  isAllTxnProcessed,
   vertexOldIdToNewIdMap,
-} from "../graph/transaction";
+} from "../graph/transaction/TransactionType";
+import { isAllTxnProcessed } from "../graph/transaction/isAllTxnProcessed";
 
 export function onMutatDataGet(
   graph: GraphInterface,

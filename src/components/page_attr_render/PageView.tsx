@@ -7,10 +7,8 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import {  IsPreviewContext, } from "~/lib/contexts";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
-import { FormWrapper } from "../fields/FormWrapper";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export function PageView(props: Readonly<{

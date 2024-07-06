@@ -14,6 +14,7 @@ import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
+import { getDefaultTxnValue } from "./lib/graph/transaction/getDefaultTxnValue";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -28,6 +29,13 @@ export default function App() {
 
   const loadingSite = createSignal(false);
 
+  // we start from 500000 because newId should not conflict with existing Ids
+  let newVertexId = -500000;
+
+  let txnId = 0;
+
+  const transactions = new ReactiveMap() as GraphInterface["transactions"];
+
   const graph = createStore<GraphInterface>({
     activeClickOutside: 0,
     componentIdMap: {},
@@ -36,10 +44,18 @@ export default function App() {
     isSubSideBarOpen: true,
     member: {},
     navigationData: [],
-    transactions: new ReactiveMap(),
-    txnId: 0,
+    get newTxnId() {
+      txnId = txnId + 1;
+      transactions.set(txnId, getDefaultTxnValue());
+      return txnId;
+    },
+    get newVertexId() {
+      newVertexId = newVertexId + 1;
+      return newVertexId.toString();
+    },
+    transactions,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    vertexes: {} as VertexMap
+    vertexes: {} as VertexMap,
   });
 
   return (

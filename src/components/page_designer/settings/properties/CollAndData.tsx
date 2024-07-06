@@ -11,7 +11,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
@@ -20,8 +20,8 @@ export function CollAndData() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [layoutStore] = useDesignerLayoutStore();
 
-  const metaVertexId = getNewGraphId();
-  const metaTxnId = getNewTxnId(graph, setGraph);
+  const metaVertexId = graph.newVertexId;
+  const metaTxnId = graph.newTxnId;
 
   addNewVertex(
     metaTxnId,

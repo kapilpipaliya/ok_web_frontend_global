@@ -2,7 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { For, } from "solid-js";
 
 import { Tooltip } from "~/components/solid_blocks";
-import { redo, undo } from "~/lib/graph/transaction";
+import { redo } from "~/lib/graph/transaction/redo";
+import { undo } from "~/lib/graph/transaction/undo";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 

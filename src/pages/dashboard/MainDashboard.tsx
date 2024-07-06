@@ -24,7 +24,6 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
-import { getNewGraphId } from "~/lib/graph/transaction";
 import { isPageDesignerPath } from "~/lib/utils";
 import { Navbar } from "~/pages/dashboard/Navbar";
 
@@ -32,7 +31,7 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   const border = "|solid|rgb(212,219,231)";
 
   const [graph, setGraph] = useContext(GraphContext)!;
-  const vertexId = getNewGraphId();
+  const vertexId = graph.newVertexId;
   addNewVertex(
     0,
     newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }),

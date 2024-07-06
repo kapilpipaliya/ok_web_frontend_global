@@ -7,20 +7,19 @@ import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
-import { getNewTxnId } from "~/lib/graph/transaction";
 import { isObject } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 const PageView = clientOnly(() => import("~/components/page_attr_render/PageView"));
 
-export function PageViewWrapper(props: {
+export function PageViewWrapper(props: Readonly<{
   expression?: string,
   formId?: string,
   pageId?: string,
   pageVertexLabel?: string,
   pageVertexName?: string,
-}) {
+}>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const txnId = getNewTxnId(graph, setGraph);
+  const txnId = graph.newTxnId;
 
   const [dataVertex, setDataVertex] = createSignal<Vertex>();
   const [metaVertex, setMetaVertex] = createSignal<Vertex>();

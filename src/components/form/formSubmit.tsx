@@ -8,7 +8,10 @@ import type { IFormContext } from "~/lib/contexts";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, } from "~/lib/graph/graph";
-import { ProcessStatus, commitTxn, isDisabledTxn, updateSubmittedStepToLast } from "~/lib/graph/transaction";
+import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { updateSubmittedStepToLast } from "~/lib/graph/transaction/updateSubmittedStepToLast";
 
 import { useToast } from "../Toast";
 

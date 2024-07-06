@@ -21,7 +21,10 @@ import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
 import { addStepComponentAttr } from "~/lib/drag_drop/drop/addStepComponentAttr";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
-import { deleteTxnId, getNewTxnId, isDisabledTxn, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
+import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
+import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { txnHasSteps } from "~/lib/graph/transaction/txnHasSteps";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
@@ -54,7 +57,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const location = useLocation();
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
-  const txnId = getNewTxnId(graph, setGraph);
+  const txnId = graph.newTxnId;
   const [_, setLayoutStore] = useDesignerLayoutStore() || [];
 
   const [formData, setFormData] = createStore({

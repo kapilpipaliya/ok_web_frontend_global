@@ -7,11 +7,7 @@ import type {
 
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId
-} from "../../transaction";
+import { commitTxn } from "../../transaction/commitTxn";
 
 
 export function createForm(
@@ -32,9 +28,9 @@ export function createForm(
 
   const isRealTime = false;
   if (isRealTime) {
-    txnId = getNewTxnId(graph, setGraph);
+    txnId = graph.newTxnId;
   }
-  const newVertexObj = newVertex(getNewGraphId(), [label], properties || {});
+  const newVertexObj = newVertex(graph.newVertexId, [label], properties || {});
   // TODO: Do Create Transformation for the vertex
   const addNewVertexResult = addNewVertex(txnId, newVertexObj, graph, setGraph);
   if (addNewVertexResult.error) {

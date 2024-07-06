@@ -5,7 +5,6 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/Toast";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { getNewGraphId } from "~/lib/graph/transaction";
 
 import { getToEdge } from "../get/sync/getToEdge";
 
@@ -47,7 +46,7 @@ export function setSelectionValue(
     }
     const insertEdgeResult = addNewEdge(
       txnId,
-      newEdge(getNewGraphId(), type, {}, vertex.id, vertexId),
+      newEdge(graph.newVertexId, type, {}, vertex.id, vertexId),
       graph,
       setGraph,
     );

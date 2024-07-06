@@ -8,9 +8,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
-import {
-  transactionDetailAdd,
-} from "../transaction";
+import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 // return a new Vertex
 export function newVertex(

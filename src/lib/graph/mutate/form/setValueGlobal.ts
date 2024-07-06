@@ -9,7 +9,7 @@ import {
 } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { commitTxn, getNewTxnId } from "../../transaction";
+import { commitTxn } from "../../transaction/commitTxn";
 import { onChangeHandler } from "./onChangeHandler";
 
 
@@ -28,7 +28,7 @@ export function setValueGlobal(
 
   // after commit, we can not use same txnId();
   if (isRealTime) {
-    txnId = getNewTxnId(graph, setGraph);
+    txnId = graph.newTxnId;
   }
   let error = "" as string | undefined;
   batch(() => {

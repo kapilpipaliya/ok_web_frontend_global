@@ -16,11 +16,7 @@ import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString"
 import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { getChildVertex } from "../../get/sync/traverse";
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId
-} from "../../transaction";
+import { commitTxn } from "../../transaction/commitTxn";
 import { addNewEdge, newEdge } from "../edge";
 
 export function getSublistRowsForType(
@@ -59,7 +55,7 @@ export function newRow(
 
   return batch(() => {
     const vertexNew = newVertex(
-      getNewGraphId(),
+      graph.newVertexId,
       [label || edgeType!],
       properties
     );
@@ -72,7 +68,7 @@ export function newRow(
     }
 
     const edgeNew = newEdge(
-      getNewGraphId(),
+      graph.newVertexId,
       edgeType || label!,
       {},
       parentVertex.id,
@@ -104,7 +100,7 @@ export function addNewRow(
   isRealTime: boolean,
 ) {
   if (isRealTime) {
-    txnId = getNewTxnId(graph, setGraph);
+    txnId = graph.newTxnId;
   }
   const type = getToEdge(meta, parentVertex);
   const label = meta.P.label;
@@ -158,7 +154,7 @@ export function rowMetaInitialize(
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   if (rowMetaAttrInst.error) {
     const rows = {} as { [key: Id]: Id; };
-    const metaTxnId = getNewTxnId(graph, setGraph);
+    const metaTxnId = graph.newTxnId;
     const P = klona(meta.P);
     P.templateId = meta.id;
     batch(() => {

@@ -2,7 +2,7 @@ import type { createStore } from "solid-js/store";
 
 import { createContext } from "solid-js";
 
-import type {ProcessStatus, TransactionValue} from "~/lib/graph/transaction";
+import type {ProcessStatus, TransactionValue} from "~/lib/graph/transaction/TransactionType";
 
 export type Id = string;
 
@@ -44,6 +44,8 @@ export interface GraphInterface {
   isSubSideBarOpen?: boolean;
   member?: { [key: string]: any } | null;
   navigationData?: { [key: string]: any }[];
+  newTxnId: number;
+  newVertexId: Id,
   transactions: Map<
     number,
     {
@@ -55,7 +57,6 @@ export interface GraphInterface {
       undoStep: number;
     }
   >
-  txnId: number;
   vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
 }

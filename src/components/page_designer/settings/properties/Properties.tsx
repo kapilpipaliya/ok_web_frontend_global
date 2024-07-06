@@ -123,8 +123,8 @@ export function Properties() {
 //     //   prevTxnIndex =
 //     //     graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
 
-//     //   const metaVertexId = getNewGraphId();
-//     //   const txnId = getNewTxnId(graph, setGraph);
+//     //   const metaVertexId = graph.newVertexId;
+//     //   const txnId = graph.newTxnId;
 //     //   const metaAttributes = FormMetaData.Coll.attributes.find(
 //     //     (x) => x.name === "Rules",
 //     //   );
@@ -228,8 +228,8 @@ export function Properties() {
 //     //   prevTxnIndex =
 //     //     graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
 
-//     //   const metaVertexId = getNewGraphId();
-//     //   const dataVertexId = getNewGraphId();
+//     //   const metaVertexId = graph.newVertexId;
+//     //   const dataVertexId = graph.newVertexId;
 
 //     //   setGraph("vertexes", metaVertexId, {
 //     //     P: { name: "jsx", width: 700, height: 700 },
@@ -339,8 +339,8 @@ export function Properties() {
 //     // };
 
 //     const CollAndData = () => {
-//       const metaVertexId = getNewGraphId();
-//       const txnId = getNewTxnId(graph, setGraph);
+//       const metaVertexId = graph.newVertexId;
+//       const txnId = graph.newTxnId;
 
 //       addNewVertex(
 //         txnId,

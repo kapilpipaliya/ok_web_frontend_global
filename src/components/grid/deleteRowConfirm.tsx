@@ -6,10 +6,8 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, type Id } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import {
-  ProcessStatus,
-  commitTxn,
-  getNewTxnId
-} from "~/lib/graph/transaction";
+  ProcessStatus} from "~/lib/graph/transaction/TransactionType";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 export  function deleteRowConfirm(id: Accessor<Id | null>) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -20,7 +18,7 @@ export  function deleteRowConfirm(id: Accessor<Id | null>) {
     if (!id()) {
       return;
     }
-      const txnId = getNewTxnId(graph, setGraph);
+      const txnId = graph.newTxnId;
       const deleteResult = deleteVertex(txnId, id()!, graph, setGraph);
       if (deleteResult?.error) {
         showErrorToast(deleteResult?.error.toString());
