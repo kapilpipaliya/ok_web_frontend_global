@@ -5,8 +5,8 @@ import { useZIndex } from "~/components/ZIndex";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
-import { Tooltip } from "~/components/solid_blocks";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
+import { Tooltip } from "~/components/solid_blocks";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 

@@ -1,13 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import {getComponentFromLayoutRow} from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
-
-import { evaluate } from "../../../lib/expression_eval";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,

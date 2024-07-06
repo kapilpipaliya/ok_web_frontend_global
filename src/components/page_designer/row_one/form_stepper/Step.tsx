@@ -1,8 +1,8 @@
 import { type Accessor, createMemo, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import { Tooltip } from "~/components/solid_blocks";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { Tooltip } from "~/components/solid_blocks";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

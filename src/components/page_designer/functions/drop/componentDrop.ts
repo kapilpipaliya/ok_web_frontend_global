@@ -1,5 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
+import { klona } from "klona";
 import { batch } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
@@ -7,13 +8,14 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { createAttrCompMetaVertex } from "~/components/page_designer/functions/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/components/page_designer/functions/drop/createAttrMetaVertex";
-import { handleAttrVertex } from "~/components/page_designer/functions/drop/handleAttrVertex";
-import { handleCompVertex } from "~/components/page_designer/functions/drop/handleCompVertex";
 import { processChildrenAttrs } from "~/components/page_designer/functions/drop/processChildrenAttrs";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/rowFunction";
 import { PageDesignerLabels } from "../constant";
 import { getUniqueName } from "../getChildrenAttrs";
+import { getCompPropsObj } from "./getCompPropsObj";
+import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
 
 // @Note:
 // From Component To Layout drag:
@@ -27,7 +29,7 @@ export function componentDrop(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   toIndex?: number,
-  properties?: { [key: string]: string },
+  properties?: { [key: string]: number | string },
 ) {
   const { showErrorToast } = useToast();
 
@@ -54,6 +56,22 @@ export function componentDrop(
   const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
 
   let rowResult: { edgeId?: string | undefined; error: boolean; vertexId?: string | undefined }
+  let props = properties ?? {};
+  if (toIndex) {
+    props = { ...props, name: uniqueName, pos: toIndex };
+  } else {
+    props = { ...props, name: uniqueName };
+  }
+  if (fromVertex.L[0] === "Comp") {
+    props = { ...props, ...getCompPropsObj(graph, fromVertex) };
+    if (fromVertex.P.name === "Text") {
+      props = { ...props, text: "Sample Text" };
+    }
+  } else if (fromVertex.L[0] === "Attr") {
+    const p = klona(fromVertex.P);
+    delete p.pos;
+    props = { ...props, ...p };
+  }
   batch(() => {
     rowResult = addNewRow(
       txnId,
@@ -61,24 +79,33 @@ export function componentDrop(
       graph,
       setGraph,
       toParentVertex,
-      toIndex ? { ...properties, name: uniqueName, pos: toIndex } : { ...properties, name: uniqueName },
+      props,
       false,
     );
 
     const rowVertex = graph.vertexes[rowResult.vertexId!];
 
     if (["Comp"].includes(fromVertex.L[0])) {
-      handleCompVertex(
-        fromVertex,
+      // set Component to the row
+      setSelectionValue(
         txnId,
         rowVertex,
         graph,
         setGraph,
         attrCompMetaVertex,
-        showErrorToast,
+        fromVertex.id,
       );
     } else if (fromVertex.L[0] === "Attr") {
-      handleAttrVertex(
+      const compVertex = getComponentFromLayoutRow(fromVertex.id, graph, setGraph);
+      setSelectionValue(
+        txnId,
+        rowVertex,
+        graph,
+        setGraph,
+        attrCompMetaVertex,
+        compVertex.id,
+      );
+      processChildrenAttrs(
         pageDesignerVertex,
         fromVertex,
         rowVertex,

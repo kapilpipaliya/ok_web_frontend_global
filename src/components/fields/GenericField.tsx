@@ -17,6 +17,7 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
+import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import {
   Accordion,
   Avatar,
@@ -31,7 +32,6 @@ import { Heading } from "~/components/solid_blocks/Heading";
 import { StarRating } from "~/components/solid_blocks/Rating";
 import { TreeView } from "~/components/solid_blocks/TreeView";
 import { APP_BASE_URL } from "~/lib/constants";
-import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";

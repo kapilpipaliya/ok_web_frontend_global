@@ -8,9 +8,9 @@ import { Checkbox } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 
-import { onClickAddComponent } from "../functions/onClickAddComponent";
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { OpenComponentSettings } from "../OpenComponentSettings";
+import { onClickAddComponent } from "../functions/onClickAddComponent";
 
 export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
   const [graph, setGraph] = useContext(GraphContext)!;

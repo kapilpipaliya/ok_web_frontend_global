@@ -117,19 +117,8 @@ export function addNewRow(
   if (isRealTime) commitTxn(txnId, graph);
   return newRowResult;
 }
-export function cloneRowProps(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formVertex: Vertex,
-  txnId: number,
-  fromVertex: Vertex,
-  toVertex: Vertex
-) {
-  const props = JSON.parse(JSON.stringify(fromVertex.P));
-  delete props.pos;
-  const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {id: 0} as unknown as Vertex);
-  mergeVertexProperties(txnId, toVertex.id, graph, setGraph, {...props, name: uniqueName});
-}
+
+
 
 export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
   const P = klona(attrColumn.P);

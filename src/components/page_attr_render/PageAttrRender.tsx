@@ -9,12 +9,12 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { Tab, TabContainer } from "~/components/solid_blocks";
 import {
   FormContext,
   IsPreviewContext
   } from "~/lib/contexts";
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 

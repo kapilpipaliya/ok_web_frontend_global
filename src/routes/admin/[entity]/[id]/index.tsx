@@ -2,8 +2,8 @@ import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { Match, Switch, useContext } from "solid-js";
 
-import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
+import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
 import { GraphContext } from "~/lib/graph/graph";
 
 const DynamicForm = clientOnly(() => import("~/components/form/DynamicForm"));
