@@ -3,8 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
-import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { getParentVertex } from "../graph/get/sync/traverse";
 import { saveUndoPoint } from "./saveUndoPoint";
