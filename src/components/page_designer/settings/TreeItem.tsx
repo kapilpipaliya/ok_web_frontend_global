@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Show, createMemo, createSelector, onMount, useContext } from "solid-js";
+import { type Accessor, For, Show, createMemo, createSelector, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { GenericField } from "~/components/fields/GenericField";
@@ -15,10 +15,8 @@ import { validateDragOver } from "~/components/page_designer/functions/validateD
 import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { IsPreviewContext } from "~/lib/contexts";
-import { getRowProps } from "~/lib/graph/get/sync/getProps";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { nameExpr } from "./utils/nameExpr";
@@ -41,20 +39,6 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.metaVertex)
   );
   const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
-
-  // TODO: remove this function after testing
-  onMount(() => {
-    const layoutPropRows = getRowProps(graph, setGraph, props.metaVertex);
-    if (Object.keys(layoutPropRows).length) {
-      mergeVertexProperties(
-        layoutStore.formData.txnId,
-        props.metaVertex.id,
-        graph,
-        setGraph,
-        layoutPropRows
-      );
-    }
-  });
 
   let startTime = 0;
 

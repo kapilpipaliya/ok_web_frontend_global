@@ -5,28 +5,30 @@ import type { TransactionValue } from "./TransactionType";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 
-// @ts-ignore
-
 export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue, graph: Store<GraphInterface>
 ) {
   if (!txnId) return;
+
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
 
-  if (existingTxnValue.activeUndoPoint < existingTxnValue.steps.length - 1) {
-    if (existingTxnValue.submittedStep < existingTxnValue.activeUndoPoint) {
-      // delete steps after undoStep
-      existingTxnValue.steps = existingTxnValue.steps.slice(0, existingTxnValue.activeUndoPoint + 1);
-    } else {
-      // remove steps after undoStep to submittedStep and add to revertSteps, descard steps after submittedStep
-      const removedSteps = existingTxnValue.steps.slice(existingTxnValue.activeUndoPoint + 1, existingTxnValue.submittedStep + 1);
-      existingTxnValue.steps = existingTxnValue.steps.slice(0, existingTxnValue.activeUndoPoint + 1);
+  const activeUndoIndex = existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
+
+  if (activeUndoIndex < existingTxnValue.steps.length - 1) {
+    const activeUndoPointIndex = existingTxnValue.undoStepIndexes.findIndex((index) => index > activeUndoIndex);
+    existingTxnValue.undoStepIndexes = existingTxnValue.undoStepIndexes.slice(0, activeUndoPointIndex);
+
+    if (existingTxnValue.submittedIndex >= activeUndoIndex) {
+      const removedSteps = existingTxnValue.steps.slice(activeUndoIndex + 1, existingTxnValue.submittedIndex + 1);
+      console.log('removedSteps', removedSteps, activeUndoIndex + 1, existingTxnValue.submittedIndex + 1);
       existingTxnValue.revertSteps = [...removedSteps, ...existingTxnValue.revertSteps];
     }
+    existingTxnValue.steps = existingTxnValue.steps.slice(0, activeUndoIndex + 1);
   }
-  existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
-  existingTxnValue.activeUndoPoint = existingTxnValue.steps.length - 1;
+
+  existingTxnValue.steps.push(txnValue);
+  existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
 
   graph.transactions.set(txnId, existingTxnValue);
 }

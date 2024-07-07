@@ -2,9 +2,21 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { getExistingOrDefaultTxnValue } from "../../../lib/graph/transaction/getExistingOrDefaultTxnValue";
 
-export function saveUndoPoint(txnId2: number, graph: GraphInterface) {
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId2, graph);
-  existingTxnValue.activeUndoPoint = existingTxnValue.steps.length - 1;
-  existingTxnValue.undoPoints.push(existingTxnValue.activeUndoPoint);
-  graph.transactions.set(txnId2, existingTxnValue);
+export function saveUndoPoint(txnId: number, graph: GraphInterface) {
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+
+  let activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+  if (activeUndoIndex === -1) {
+    activeUndoIndex = 0;
+  }
+
+  if (!txnValue.undoStepIndexes.includes(activeUndoIndex)) {
+    const insertIndex = txnValue.undoStepIndexes.findIndex(index => index > activeUndoIndex);
+    if (insertIndex === -1) {
+      txnValue.undoStepIndexes.push(activeUndoIndex);
+    } else {
+      txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
+    }
+  }
+  graph.transactions.set(txnId, txnValue);
 }

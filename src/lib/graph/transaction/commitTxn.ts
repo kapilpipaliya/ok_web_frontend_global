@@ -1,23 +1,66 @@
 import type { Store } from "solid-js/store";
 
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+
 import type { GraphInterface } from "../graph";
+import type { TransactionValue } from "./TransactionType";
 
 import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "./TransactionType";
-import { getTransactionData } from "./getTransactionData";
-
-// Bug: if commitTxn is called many times it is sending event many times.
-// TODO: currently we can only run this function once.
-// we need to set seperate txnId once commited. Fix this.
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
-  const existingTxnValue = getTransactionData(txnId, graph);
-  const submittedStep = graph.transactions.get(txnId)?.submittedStep ?? 0;
-  const startFromNextStep = submittedStep === 0 ? 0 : submittedStep + 1;
-  const stepsToCommit = existingTxnValue.slice(startFromNextStep);
-  if (stepsToCommit.length) {
+  if (!graph.transactions.has(txnId)) return;
+  const txnValue = graph.transactions.get(txnId);
+
+  const submittedIndex = txnValue?.submittedIndex ?? 0;
+
+  const activeUndoIndex = txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
+
+  if (submittedIndex === activeUndoIndex) return;
+
+  let revertSteps: TransactionValue[] = [];
+  let steps: TransactionValue[];
+  if (activeUndoIndex < submittedIndex) {
+    const removedSteps = txnValue!.steps.slice(activeUndoIndex + 1, submittedIndex + 1);
+    revertSteps = [...removedSteps, ...txnValue!.revertSteps];
+    steps = [];
+  } else {
+    const startFromNextStep = submittedIndex === 0 ? 0 : submittedIndex + 1;
+    steps = txnValue!.steps.slice(startFromNextStep, activeUndoIndex + 1);
+    revertSteps = txnValue?.revertSteps || [];
+  }
+
+  const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
+    return removeUndefinedProperties({
+      deleteEdge: txnDetail.insertEdge ? txnDetail.insertEdge() : undefined,
+      deleteVertex: txnDetail.insert ? txnDetail.insert() : undefined,
+      insertEdge: txnDetail.deleteEdge ? txnDetail.deleteEdge() : undefined,
+      insertVertex: txnDetail.deleteVertex ? txnDetail.deleteVertex() : undefined,
+      merge: txnDetail.merge ? txnDetail.merge() : undefined,
+      replace: txnDetail.replace ? txnDetail.replace() : undefined,
+      replaceEdge: txnDetail.replaceEdge ? txnDetail.replaceEdge() : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? txnDetail.replaceEdgeEnd() : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart ? txnDetail.replaceEdgeStart() : undefined,
+    });
+  });
+
+  const stepsToCommit = steps.map((txnDetail) => {
+    return removeUndefinedProperties({
+      deleteEdge: txnDetail.deleteEdge?.(),
+      deleteVertex: txnDetail.deleteVertex?.(),
+      insert: txnDetail.insert?.(),
+      insertEdge: txnDetail.insertEdge?.(),
+      merge: txnDetail.merge?.(),
+      replace: txnDetail.replace?.(),
+      replaceEdge: txnDetail.replaceEdge?.(),
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
+      replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
+    });
+  });
+
+  if (stepsToCommit.length || txnValue!.revertSteps.length) {
     const data = {
       edgeIdMap: [...edgeOldIdToNewIdMap],
-      transactions: stepsToCommit,
+      transactions: [...reverseStepsToCommit, ...stepsToCommit],
       txnId: txnId,
       vertexIdMap: [...vertexOldIdToNewIdMap],
     };

@@ -19,13 +19,6 @@ export function SaveButton() {
 
   return (
     <Tooltip content={"Save"} position={"s"}>
-      {/* <Show when={layoutStore.formData.txnId}>
-        <div>
-          <span>Txn ID: {layoutStore.formData.txnId}</span>
-          <span>Steps: {graph.transactions.get(layoutStore.formData.txnId)?.steps.length}</span>
-          <span>Submitted Step: {graph.transactions.get(layoutStore.formData.txnId)?.submittedStep}</span>
-        </div>
-      </Show> */}
       <button
         class={`${isDisabled() ? 'cursor:not-allowed' : 'color:#000:hover cursor:pointer'} flex ai:center b:1px|solid|lightgrey bg:white color:grey h:35px jc:center r:7 w:37px`}
         disabled={isDisabled()}

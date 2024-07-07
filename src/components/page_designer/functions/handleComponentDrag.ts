@@ -17,6 +17,7 @@ export function handleComponentDrag(
   formData: Vertex,
   position: string,
 ) {
+
   handleComponentDropAndSort(
     graph,
     setGraph,

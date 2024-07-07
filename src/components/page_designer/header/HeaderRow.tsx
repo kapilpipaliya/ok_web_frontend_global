@@ -10,8 +10,10 @@ import { PreviewButton } from "./right/PreviewButton";
 import { SaveButton } from "./right/SaveButton";
 
 export function HeaderRow() {
+  // const [graph] = useContext(GraphContext)!;
   const [openDialog, setOpenDialog] = createSignal(false);
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+
   return (
     <header class="h:50px" style={{ "grid-area": "header" }}>
       <div class="grid flex-grow:1 ji:center min-w:400">
@@ -30,6 +32,15 @@ export function HeaderRow() {
                 />
               </div>
             </Show>
+            {/* <Show when={layoutStore.formData.txnId}>
+              <div class="flex flex:row gap:2">
+                <span>Txn ID: {layoutStore.formData.txnId}</span>
+                <span>Steps: {graph.transactions.get(layoutStore.formData.txnId)?.steps.length}</span>
+                <span>Submitted Step: {graph.transactions.get(layoutStore.formData.txnId)?.submittedIndex}</span>
+                <span>Active Undo Point: {graph.transactions.get(layoutStore.formData.txnId)?.activeUndoIndex}</span>
+                <span>Undo Points: {graph.transactions.get(layoutStore.formData.txnId)?.undoStepIndexes.join(", ")}</span>
+              </div>
+            </Show> */}
             <Show when={layoutStore.selectedSection === "setting"}>
               <MiddleSectionButtons />
             </Show>

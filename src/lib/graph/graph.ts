@@ -49,12 +49,12 @@ export interface GraphInterface {
   transactions: Map<
     number,
     {
-      activeUndoPoint: number;
+      activeUndoIndex: number;
       revertSteps: TransactionValue[];
       status: ProcessStatus;
       steps: TransactionValue[];
-      submittedStep: number;
-      undoPoints: number[];
+      submittedIndex: number;
+      undoStepIndexes: number[];
     }
   >
   vertexLabelIdMap: { [key: string]: Id[] };

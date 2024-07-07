@@ -4,7 +4,7 @@ import type { Id } from "../graph";
 
 
 
-export type Revert = { revert: () => any };
+export type Revert = { redo: () => void, revert: () => void };
 export type InsertFn = {
   [key in
   | "deleteEdge"
@@ -15,7 +15,7 @@ export type InsertFn = {
   | "replace"
   | "replaceEdge"
   | "replaceEdgeEnd"
-  | "replaceEdgeStart"]?: () => any;
+  | "replaceEdgeStart"]?: () => void;
 };
 
 export enum ProcessStatus {

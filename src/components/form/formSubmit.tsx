@@ -11,7 +11,7 @@ import { GraphContext, } from "~/lib/graph/graph";
 import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { updateSubmittedStepToLast } from "~/lib/graph/transaction/updateSubmittedStepToLast";
+import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
 
 import { useToast } from "../Toast";
 
@@ -67,7 +67,7 @@ export function formSubmit(formData: IFormContext, closePopUp?: () => void) {
         loadMessage: `Saving ${label}...`,
         onSuccess: (value) => {
           graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
-          updateSubmittedStepToLast(txnId, graph);
+          updateSubmittedIndex(txnId, graph);
           // currently we are navigating back.
           if (closePopUp) {
             closePopUp();

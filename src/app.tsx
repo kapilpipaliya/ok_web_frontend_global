@@ -46,7 +46,7 @@ export default function App() {
     navigationData: [],
     get newTxnId() {
       txnId = txnId + 1;
-      transactions.set(txnId, getDefaultTxnValue());
+      transactions.set(txnId, { ...getDefaultTxnValue(),  undoStepIndexes: [0]});
       return txnId;
     },
     get newVertexId() {
