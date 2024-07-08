@@ -70,6 +70,7 @@ export function componentDrop(
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);
     delete p.pos;
+    delete p.name;
     props = { ...props, ...p };
   }
   batch(() => {
