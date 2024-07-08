@@ -1,0 +1,20 @@
+
+export const genericInputComponents = [
+  // "Autocomplete",
+  "CheckBox",
+  "ColorBox",
+  // "FormSubmit",
+  // "FormCancel",
+  "SignatureBox",
+  "FileUploader",
+  "HtmlEditor",
+  "NumberBox",
+  "ProgressBar",
+  "Radio",
+  "RadioGroup",
+  "SelectBox",
+  // "Switch",
+  "TextArea",
+  "TextBox",
+  // "TextInput",
+];

@@ -1,4 +1,4 @@
-import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate, } from "@solidjs/router";
+import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation } from "@solidjs/router";
 import {
   For,
   type JSXElement,
@@ -9,7 +9,6 @@ import {
   createSignal,
   onCleanup,
   onMount,
-  
 } from "solid-js";
 import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 
@@ -19,19 +18,17 @@ import { TableTabs } from "~/components/TableTabs";
 import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext, useRepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
-import { type GraphInterface, type Id, type Vertex, useGraph, } from "~/lib/graph/graph";
-import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
+import { type GraphInterface, type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { txnHasSteps } from "~/lib/graph/transaction/txnHasSteps";
-import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
-import { SubmitButton } from "./SubmitButton";
+import { SaveButton } from "./SaveButton";
+import { formCancel } from "./formCancel";
 import { getFormData } from "./getFormData";
 import { getInitialFormState } from "./getInitialFormState";
 
@@ -50,42 +47,30 @@ export interface DynamicFormProps {
   showSubmitButtonOnTop?: boolean;
   submitButton?: JSXElement;
 }
+
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
-  const navigate = useNavigate();
+
   const location = useLocation();
   const [graph, setGraph] = useGraph();
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
-  const [_, setLayoutStore] = useDesignerLayoutStore() || [];
+  const [, setLayoutStore] = useDesignerLayoutStore() || [];
 
-  const [formData, setFormData] = createStore({
+  const [formData, setFormData] = createStore<IFormContext>({
     cleanUpConfig: () => cleanUpConfig,
     txnId,
-  } as IFormContext);
+  });
   const [activeTab, setActiveTab] = createSignal("main");
   const [error, setError] = createSignal<null | string>(null);
   const [isLoading, setIsLoading] = createSignal(false);
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   const [popup, setPopup] = createSignal(false);
-  const [discradPopup, setDiscradPopup] = createSignal(false);
+  const [discardPopup, setDiscardPopup] = createSignal(false);
   let onConfirmExit: () => void;
 
-  const navigateToParentRoute = () => {
-    navigate(removeLastPathSegment());
-  };
-
-  const onSubmit = formSubmit(formData,  props.closePopUp);
-
-  const onCancel = () => {
-    revertTransaction(txnId, graph);
-    deleteTxnId(txnId, graph);
-    if (!props.closePopUp) {
-      navigateToParentRoute();
-    } else {
-      props.closePopUp();
-    }
-  };
+  const onSubmit = formSubmit(props.closePopUp);
+  const onCancel = formCancel(props.closePopUp);
 
   onMount(async () => {
     setIsLoading(true);
@@ -94,11 +79,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       if (data.error) {
         setError(data.error);
       } else if (data.graph) {
-        setGraphData(
-          graph,
-          setGraph,
-          data.graph,
-        );
+        setGraphData(graph, setGraph, data.graph);
       }
     }
     const initFormStateResult = getInitialFormState(graph, setGraph, id(), txnId, props.formId);
@@ -116,13 +97,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       txnId,
     });
 
-    // if (initFormStateResult.dataVertex?.L[0] === "Form") {
-    //   const layoutRowId = addStepComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
-    //   if (layoutRowId === -1) {
-    //     setError("Layout Row Id Error");
-    //     return;
-    //   }
-    // }
     setLayoutStore?.("formData", formData);
     setIsLoading(false);
 
@@ -131,7 +105,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   });
 
   onCleanup(() => {
-    // @ts-ignore
+    // @ts-expect-error ignore
     setLayoutStore?.("formData", undefined);
 
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
@@ -139,13 +113,9 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    // TODO: only consider not submitted steps
-    if (!txnHasSteps(formData.txnId, graph)) {
-      return;
-    }
     e.preventDefault();
     setTimeout(() => {
-      setDiscradPopup(true);
+      setDiscardPopup(true);
     }, 100);
     onConfirmExit = () => {
       e.retry(true);
@@ -161,113 +131,81 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       <Match when={error()}>{error()}</Match>
 
       <Match when={formData.formData}>
-        <RepeaterVertexContext.Provider
-          value={[formData.formData, ...useRepeaterVertexContext()]}
-        >
-          <div
-            ref={(el) => {
-              setDivRef(el);
-            }}
-          >
-            <Show when={props.showSubmitButtonOnTop ?? false}>
-              <SubmitButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
-            </Show>
+        <RepeaterVertexContext.Provider value={[formData.formData, ...useRepeaterVertexContext()]}>
+          <FormContext.Provider value={formData}>
+            <div ref={setDivRef}>
+              <Show when={props.showSubmitButtonOnTop ?? false}>
+                <SaveButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton} />
+              </Show>
 
-            <Show when={divRef()}>
-              <FormContext.Provider value={formData}>
-                <Show when={formData.groupByTabsAndGroup !== undefined}>
-                  {/* Main Tab is displayed as top level fields */}
-                  <For each={Object.keys(formData.groupByTabsAndGroup.main)}>
-                    {(group) => (
-                      <div
-                        class="dx-fieldset"
-                        style={{ "max-width": "100%" }}
-                      >
-                        <Show when={props.importExportButtons ?? true}>
-                          <ImportExportButtons setPopup={setPopup} />
-                        </Show>
+              <Show when={formData.groupByTabsAndGroup !== undefined}>
+                {/* Main Tab is displayed as top level fields */}
+                <For each={Object.keys(formData.groupByTabsAndGroup.main)}>
+                  {(group) => (
+                    <div class="dx-fieldset" style={{ "max-width": "100%" }}>
+                      <Show when={props.importExportButtons ?? true}>
+                        <ImportExportButtons setPopup={setPopup} />
+                      </Show>
 
-                        <div class="b:1 b:rgb(214,214,216) bg:rgb(237,237,237,.75) r:10|10|10|10 w:100%">
-                          <div class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10  grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}>
-                            <FormGroup
-                              graph={graph}
-                              labelPrefix={"Form"}
-                              metaAttributes={
-                                formData.groupByTabsAndGroup.main[group]
-                              }
-                              setGraph={setGraph}
-                              txnId={formData.txnId}
-                              vertex={formData.formData}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </For>
-                </Show>
-                <Show
-                  when={
-                    formData.tabs?.length > 0 &&
-                    !(props.showMainFieldsOnly ?? false)
-                  }
-                >
-                  <TableTabs setActiveTab={setActiveTab} tabs={formData.tabs} />
-                  <br />
-                  <For
-                    each={Object.keys(
-                      formData.groupByTabsAndGroup[activeTab()],
-                    )}
-                  >
-                    {(group) => {
-                      return (
-                        <div
-                          class="dx-fieldset"
-                        >
-                          <Show when={group !== "main"}>
-                            <div class="dx-fieldset-header">{group}</div>
-                          </Show>
+                      <div class="b:1 b:rgb(214,214,216) bg:rgb(237,237,237,.75) r:10|10|10|10 w:100%">
+                        <div class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10 grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}>
                           <FormGroup
                             graph={graph}
-                            labelPrefix={""}
-                            metaAttributes={
-                              formData.groupByTabsAndGroup[activeTab()][group]
-                            }
+                            labelPrefix={"Form"}
+                            metaAttributes={formData.groupByTabsAndGroup.main[group]}
                             setGraph={setGraph}
                             txnId={formData.txnId}
                             vertex={formData.formData}
                           />
                         </div>
-                      );
-                    }}
-                  </For>
-                </Show>
+                      </div>
+                    </div>
+                  )}
+                </For>
+              </Show>
+              <Show when={formData.tabs?.length > 0 && !(props.showMainFieldsOnly ?? false)}>
+                <TableTabs setActiveTab={setActiveTab} tabs={formData.tabs} />
                 <br />
-                <div />
+                <For each={Object.keys(formData.groupByTabsAndGroup[activeTab()])}>
+                  {(group) => (
+                    <div class="dx-fieldset">
+                      <Show when={group !== "main"}>
+                        <div class="dx-fieldset-header">{group}</div>
+                      </Show>
+                      <FormGroup
+                        graph={graph}
+                        labelPrefix={""}
+                        metaAttributes={formData.groupByTabsAndGroup[activeTab()][group]}
+                        setGraph={setGraph}
+                        txnId={formData.txnId}
+                        vertex={formData.formData}
+                      />
+                    </div>
+                  )}
+                </For>
+              </Show>
+              <br />
+              <div />
 
-                <Show
-                  when={
-                    !(props.showSubmitButtonOnTop ?? false) &&
-                    !props.isLoginRegister
-                  }
-                >
-                  <SubmitButton buttonAlign={props.buttonAlign} disabled={isDisabledTxn(txnId, graph)} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton}/>
-                </Show>
-              </FormContext.Provider>
-            </Show>
-            <Show when={popup()}>PopOver</Show>
-            <Show when={discradPopup()}>
-              <DeleteDialog
-                message="Discard unsaved changes - are you sure?"
-                onConfirm={() => {
-                  revertTransaction(formData.txnId, graph);
-                  setDiscradPopup(false);
-                  onConfirmExit();
-                }}
-                open={discradPopup()}
-                title="Discard changes"
-              />
-            </Show>
-          </div>
+              <Show when={!(props.showSubmitButtonOnTop ?? false) && !props.isLoginRegister}>
+                <SaveButton buttonAlign={props.buttonAlign} disabled={isDisabledTxn(txnId, graph)} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton} />
+              </Show>
+
+              <Show when={popup()}>PopOver</Show>
+              <Show when={discardPopup()}>
+                <DeleteDialog
+                  message="Discard unsaved changes - are you sure?"
+                  onConfirm={() => {
+                    revertTransaction(formData.txnId, graph);
+                    setDiscardPopup(false);
+                    onConfirmExit();
+                  }}
+                  open={discardPopup()}
+                  title="Discard changes"
+                />
+              </Show>
+            </div>
+          </FormContext.Provider>
         </RepeaterVertexContext.Provider>
       </Match>
     </Switch>

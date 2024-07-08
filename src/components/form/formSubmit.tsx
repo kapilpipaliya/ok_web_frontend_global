@@ -2,10 +2,9 @@
 
 import { useNavigate } from "@solidjs/router";
 
-import type { IFormContext } from "~/lib/contexts";
-
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
+import { useFormContext, } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
 import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -14,8 +13,9 @@ import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedInd
 
 import { useToast } from "../Toast";
 
-export function formSubmit(formData: IFormContext, closePopUp?: () => void) {
+export function formSubmit(closePopUp?: () => void) {
   const navigate = useNavigate();
+  const formData = useFormContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useGraph();
 

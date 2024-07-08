@@ -1,13 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
+import { FormContext } from "~/lib/contexts";
+
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { LeftIcons } from "./left/LeftIcons";
 import { MiddleSectionButtons } from "./middle/MiddleSectionButtons";
 import { ResizeViewButtons } from "./middle/ResizeViewButtons";
 import { ExportSection } from "./right/ExportSection";
 import { PreviewButton } from "./right/PreviewButton";
-import { SaveButton } from "./right/SaveButton";
+import { SaveIconButton } from "./right/SaveIconButton";
 
 export function HeaderRow() {
   // const [graph] = useGraph();
@@ -46,7 +48,7 @@ export function HeaderRow() {
             </Show>
           </div>
           <div class="flex ai:center gap:5 justify-content:space-between">
-            <SaveButton />
+          <FormContext.Provider value={layoutStore.formData}><SaveIconButton /></FormContext.Provider>
             <PreviewButton />
             <ExportSection openDialog={openDialog} setOpenDialog={setOpenDialog} />
           </div>

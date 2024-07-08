@@ -1,6 +1,6 @@
 import { type JSXElement, Show } from "solid-js";
 
-export function SubmitButton(props: Readonly<{buttonAlign?: string; disabled?: boolean; onCancel: () => void; onSubmit: () => void; submitButton?: JSXElement; }>) {
+export function SaveButton(props: Readonly<{buttonAlign?: string; disabled?: boolean; onCancel: () => void; onSubmit: () => void; submitButton?: JSXElement; }>) {
   return (
     <div
       style={{

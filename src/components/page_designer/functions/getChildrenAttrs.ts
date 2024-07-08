@@ -4,7 +4,7 @@ import jsep from "jsep";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { genericInputComponents } from "~/components/form/DynamicComponent";
+import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import { validateInput } from "~/components/page_designer/settings/validateInput";
 import { evaluate } from "~/lib/expression_eval";
