@@ -1,5 +1,6 @@
 import { Show, createSignal } from "solid-js";
 
+import { ZIndex } from "~/components/ZIndex";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
@@ -56,12 +57,14 @@ export function PropertiesBody() {
           txnId={layoutStore.formData.txnId}
         />
       </Show>
-      <RenderModal isOpen={isRulesModalOpen()} toggle={toggleRulesModal}>
-        <RulesModalBody />
-      </RenderModal>
-      <Show when={isImportModalOpen()}>
-        <ImportModal toggleModal={toggleImportsModal} />
-      </Show>
+      <ZIndex>
+        <RenderModal isOpen={isRulesModalOpen()} toggle={toggleRulesModal}>
+          <RulesModalBody />
+        </RenderModal>
+        <Show when={isImportModalOpen()}>
+          <ImportModal toggleModal={toggleImportsModal} />
+        </Show>
+      </ZIndex>
     </>
   );
 }

@@ -1,13 +1,15 @@
 import { type JSX, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import { useZIndex } from "~/components/ZIndex";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 
 export function RenderModal(props: { children: JSX.Element; isOpen: boolean; toggle: () => void; }) {
+  const zIndex = useZIndex();
   return (
     <Show when={props.isOpen}>
       <Portal>
-        <div class="sb-modal r:10|10|10|10" role="dialog">
+        <div class={`sb-modal r:10|10|10|10 z:${zIndex}`} role="dialog">
           <ModalContent>
             <ModalHeader>
               Header

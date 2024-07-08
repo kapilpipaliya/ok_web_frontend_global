@@ -3,6 +3,7 @@ import { For, Match, Show, Switch, createMemo,  } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
+  PageRenderVertexContext,
   usePageRenderVertexContext,
   useRepeaterVertexContext
 } from "~/components/page_attr_render/Context";

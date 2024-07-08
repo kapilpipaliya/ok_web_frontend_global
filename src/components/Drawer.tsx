@@ -3,6 +3,7 @@ import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-
 
 import { useGraph } from "~/lib/graph/graph";
 
+import { useZIndex } from "./ZIndex";
 import { useActiveClickOutside } from "./useActiveClickOutside";
 
 interface DrawerProps {
@@ -20,6 +21,7 @@ interface DrawerProps {
 export function Drawer(props: Readonly<DrawerProps>) {
   const [graph, setGraph] = useGraph();
   const activeClickOutside = useActiveClickOutside(graph, setGraph);
+  const zIndex = useZIndex();
   const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]
     : createSignal(false);
@@ -75,7 +77,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <div
-        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:20`}
+        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
         id="drawer"
         ref={setFloating}
       >

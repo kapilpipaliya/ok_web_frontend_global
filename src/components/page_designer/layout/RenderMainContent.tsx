@@ -2,6 +2,7 @@ import { type Setter, Show } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
 import { ResizableContainer } from "~/components/ResizableDivView";
+import { ZIndex } from "~/components/ZIndex";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
@@ -19,7 +20,7 @@ export function RenderMainContent() {
           : `repeat(2, ${!layoutStore.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
     }}>
       <Show
-        fallback={<Drawer
+        fallback={<ZIndex><Drawer
           customButton={() => false}
           drawerStyle={'padding:10px'}
           open={() => layoutStore.isLeftOpen}
@@ -27,7 +28,7 @@ export function RenderMainContent() {
           width="75%"
         >
           <FormElementsWrapper />
-        </Drawer>}
+        </Drawer></ZIndex>}
         when={!layoutStore.isSmallScreen}
       >
         <div class={`${!layoutStore.isLeftOpen ? 'd:none' : ''}`}>
@@ -42,7 +43,7 @@ export function RenderMainContent() {
         </ResizableContainer>
       </Show>
       <Show
-        fallback={<Drawer
+        fallback={<ZIndex><Drawer
           customButton={() => false}
           drawerStyle={'padding:10px'}
           open={() => layoutStore.isRightOpen}
@@ -50,7 +51,7 @@ export function RenderMainContent() {
           width="75%"
         >
           <SettingsWrapper />
-        </Drawer>}
+        </Drawer></ZIndex>}
         when={!layoutStore.isSmallScreen}
       >
         <div class={`${!layoutStore.isRightOpen ? "hidden" : ""}`}>

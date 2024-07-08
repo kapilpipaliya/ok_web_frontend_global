@@ -1,10 +1,10 @@
 import clsx from 'clsx';
-import { JSX, splitProps } from 'solid-js';
+import { type JSX, splitProps } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
 
 import type { buttonColors, buttonSizes } from '../core';
 
 import Spinner from './Spinner';
-import { Dynamic } from 'solid-js/web';
 
 type ButtonProps = {
     as?: string;

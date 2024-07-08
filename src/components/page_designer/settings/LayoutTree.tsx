@@ -1,6 +1,7 @@
 import { For, type Setter, Show, createSignal } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
+import { ZIndex } from "~/components/ZIndex";
 import { type Id, useGraph, } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -44,15 +45,17 @@ export function LayoutTree() {
   return (
     <>
       <Show when={layoutStore.showPropertiesDrawer}>
-        <Drawer
-          customButton={() => false}
-          drawerStyle={"padding:10px"}
-          open={() => layoutStore.showPropertiesDrawer}
-          setIsOpen={((v: boolean) =>
-            setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}
-        >
-          <Properties />
-        </Drawer>
+        <ZIndex>
+          <Drawer
+            customButton={() => false}
+            drawerStyle={"padding:10px"}
+            open={() => layoutStore.showPropertiesDrawer}
+            setIsOpen={((v: boolean) =>
+              setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}
+          >
+            <Properties />
+          </Drawer>
+        </ZIndex>
       </Show>
       <For each={rootVertexes()}>
         {(item) => (
