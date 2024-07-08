@@ -15,7 +15,6 @@ import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
-import { formSubmit } from "~/components/form/formSubmit";
 import { RepeaterVertexContext, useRepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
 import { type GraphInterface, type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -27,8 +26,7 @@ import { setGraphData } from "~/lib/websocket/setGraphData";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
-import { SaveButton } from "./SaveButton";
-import { formCancel } from "./formCancel";
+import { SaveCancelButton } from "./SaveCancelButton";
 import { getFormData } from "./getFormData";
 import { getInitialFormState } from "./getInitialFormState";
 
@@ -68,9 +66,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [popup, setPopup] = createSignal(false);
   const [discardPopup, setDiscardPopup] = createSignal(false);
   let onConfirmExit: () => void;
-
-  const onSubmit = formSubmit(props.closePopUp);
-  const onCancel = formCancel(props.closePopUp);
 
   onMount(async () => {
     setIsLoading(true);
@@ -135,7 +130,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           <FormContext.Provider value={formData}>
             <div ref={setDivRef}>
               <Show when={props.showSubmitButtonOnTop ?? false}>
-                <SaveButton buttonAlign={props.buttonAlign} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton} />
+                <SaveCancelButton buttonAlign={props.buttonAlign} closePopUp={props.closePopUp} disabled={isDisabledTxn(txnId, graph)} submitButton={props.submitButton} />
               </Show>
 
               <Show when={formData.groupByTabsAndGroup !== undefined}>
@@ -188,7 +183,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
               <div />
 
               <Show when={!(props.showSubmitButtonOnTop ?? false) && !props.isLoginRegister}>
-                <SaveButton buttonAlign={props.buttonAlign} disabled={isDisabledTxn(txnId, graph)} onCancel={onCancel} onSubmit={onSubmit} submitButton={props.submitButton} />
+                <SaveCancelButton buttonAlign={props.buttonAlign} closePopUp={props.closePopUp} disabled={isDisabledTxn(txnId, graph)} submitButton={props.submitButton} />
               </Show>
 
               <Show when={popup()}>PopOver</Show>

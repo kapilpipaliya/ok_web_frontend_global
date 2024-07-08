@@ -2,11 +2,11 @@ import { ProcessStatus } from "./TransactionType";
 
 export function getDefaultTxnValue() {
   return {
-    activeUndoIndex: 0,
+    activeUndoIndex: -1,
     revertSteps: [],
     status: ProcessStatus.Unset,
     steps: [],
-    submittedIndex: 0,
+    submittedIndex: -1,
     undoStepIndexes: [],
   };
 }

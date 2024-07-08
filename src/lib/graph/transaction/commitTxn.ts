@@ -11,7 +11,7 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   if (!graph.transactions.has(txnId)) return;
   const txnValue = graph.transactions.get(txnId);
 
-  const submittedIndex = txnValue?.submittedIndex ?? 0;
+  const submittedIndex = txnValue?.submittedIndex ?? -1;
 
   const activeUndoIndex = txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
 

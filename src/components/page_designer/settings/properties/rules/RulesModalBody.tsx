@@ -3,6 +3,7 @@ import { onCleanup } from "solid-js";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
+import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
@@ -15,6 +16,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function RulesModalBody() {
   const [graph, setGraph] = useGraph();
+  useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
   let prevTxnIndex = -1;
   prevTxnIndex =

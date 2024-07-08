@@ -20,7 +20,6 @@ import {
 } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
@@ -59,9 +58,9 @@ export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
       setInitialState(expression);
       return;
     }
-    const data = getChildVertex(graph, ["$0Data"], props.meta).vertex
+    const data = getSelectionOptions(graph, setGraph, "->$0Data", props.meta).vertexes
     if (data) {
-      setOptions([data]);
+      setOptions(data);
     } else {
       const collection = getCollection(graph, props.meta);
       if (collection) {

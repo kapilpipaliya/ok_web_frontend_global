@@ -17,7 +17,6 @@ export const QuickEditModal = (p: {
   const [open, setOpen] = createSignal(false);
 
   let btnEl;
-  let btnPopUp;
 
   const closePopUp = () => {
     setOpen(false);
@@ -43,12 +42,11 @@ export const QuickEditModal = (p: {
         animation={{appendToElement: "menuPopup", name: "fade"}}
         closeWhenEscapeKeyIsPressed={true}
         menuButton={btnEl}
-        menuPopup={btnPopUp}
         modal
         open={open}
         setOpen={setOpen}
       >
-        <div class="modal-container" ref={btnPopUp} role="presentation">
+        <div class="modal-container" role="presentation">
           <div
             aria-modal="true"
             class="modal min-w:30% p:0 r:10px"
