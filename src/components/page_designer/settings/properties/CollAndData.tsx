@@ -38,6 +38,7 @@ export function CollAndData() {
     {
       collection: "g:'ALL_LABELS'",
       component: "SelectBox",
+      componentName: "SelectBox",
       displayName: "Collection",
       name: "collection",
       saveValue: true
@@ -127,7 +128,7 @@ export function CollAndData() {
       <div class="text-center mb:2 mt:2">OR</div>
       <span class="flex.5 mt:5">Collection:</span>
       <SelectInputField
-        component={"SelectBox"}
+        componentName={"SelectBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
         isRealTime={false}
@@ -138,7 +139,7 @@ export function CollAndData() {
       />
       <span class="flex.5 mt:5">Data:</span>
       <SelectInputField
-        component={"SelectBox"}
+        componentName={"TagBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
         isRealTime={false}

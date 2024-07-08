@@ -2,23 +2,20 @@ import { Icon } from "@iconify-icon/solid";
 import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import { GenericField } from "~/components/fields/GenericField";
-import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
-import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { useIsPreview } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
+import { AttrConfigIcons } from "./AttrConfigIcons";
 import { nameExpr } from "./utils/nameExpr";
 
 export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVertex: Vertex; toggleExpand: (itemId: Id) => void; }>) {
@@ -26,16 +23,11 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
-  const { showErrorToast, showSuccessToast } = useToast();
+  const { showErrorToast } = useToast();
   const [isPreview] = useIsPreview();
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
-  function toggleHidden(itemId: Id) {
-    setLayoutStore("hiddenNodes", (prev) => prev.includes(itemId)
-      ? prev.filter((item) => item !== itemId)
-      : [...prev, itemId]
-    );
-  }
+
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.metaVertex)
   );
   const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
@@ -146,108 +138,7 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
     setLayoutStore("hoverId", -1);
   };
 
-  const SelectedAttrConfigIcons = () => {
-    return <div class="flex ai:center mt:4">
-      <Show
-        when={(isSelectedLayoutId(props.metaVertex.id) ||
-          isSelectedHoverId(props.metaVertex.id))}
-      >
-        <Tooltip content={"Properties"} nowrap>
-          <Icon
-            class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-            height={22}
-            icon={"mingcute:settings-5-line"}
-            onclick={() => setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer)}
-            width={22} />
-        </Tooltip>
-      </Show>
 
-      {/* <Show when={!rootVertexes().includes(props.metaVertex)}> */}
-      <Show
-        when={isSelectedLayoutId(props.metaVertex.id) ||
-          isSelectedHoverId(props.metaVertex.id) ||
-          layoutStore.hiddenNodes.includes(props.metaVertex.id)}
-      >
-        <Tooltip content={"Duplicate"} nowrap>
-          <Icon
-            class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-            color={"black"}
-            height={18}
-            icon={"mage:copy"}
-            onclick={(e) => {
-              cloneLayoutAndChildren(
-                props.metaVertex,
-                undefined,
-                undefined,
-                layoutStore.formData.txnId,
-                graph,
-                setGraph,
-                layoutStore.formData.formData
-              );
-            }}
-            width={18} />
-        </Tooltip>
-        <Tooltip content={"Delete"} nowrap>
-          <GenericField
-            meta={{
-              P: {
-                class: "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
-                component: "Icon",
-                height: 18,
-                icon: "mage:trash",
-                onClick: () => {
-                  const name = getComponent();
-                  deleteLayoutAttr(
-                    layoutStore,
-                    setLayoutStore,
-                    props.metaVertex,
-                    graph,
-                    setGraph,
-                    layoutStore.formData.txnId,
-                    name,
-                    showSuccessToast
-                  );
-                },
-                style: { color: "red" },
-                width: 18,
-              },
-            } as any} />
-        </Tooltip>
-
-        <Tooltip
-          content={`${!layoutStore.hiddenNodes.includes(props.metaVertex.id)
-            ? "Hide"
-            : "Show"}`}
-          nowrap
-        >
-          <button
-            class="opacity:.5 opacity:1:hover"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleHidden(props.metaVertex.id);
-            }}
-          >
-            <Show
-              fallback={<Icon
-                class="transition: 0.5s ease-in-out;"
-                height={18}
-                icon="mdi:eye-off-outline"
-                width={18} />}
-              when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
-            >
-              <Icon
-                class="transition: 0.5s ease-in-out;"
-                height={18}
-                icon="mdi:eye-outline"
-                width={18} />
-            </Show>
-          </button>
-        </Tooltip>
-        &nbsp;
-      </Show>
-      {/* </Show> */}
-    </div>;
-  };
 
   return (
     <div>
@@ -321,7 +212,9 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
           &nbsp;&nbsp;
           {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}
         </div>
-        <SelectedAttrConfigIcons />
+        <Show when={layoutStore.formData.formData.id !== props.metaVertex.id}>
+          <AttrConfigIcons metaVertex={props.metaVertex} />
+        </Show>
       </button>
 
       <Show
