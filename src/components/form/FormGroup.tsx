@@ -73,7 +73,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
 
             <Match when={true}>
               <div class="align-content:center">
-                <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
+                <div class="grid-cols:2 pt:5px">
                   <div id={id}>
                     <Label />
                   </div>

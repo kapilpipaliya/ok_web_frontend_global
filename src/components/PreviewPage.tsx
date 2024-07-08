@@ -21,13 +21,14 @@ const PreviewPage = (props: any) => {
           {(viewData, index) => (
             <Tooltip content={viewData.value} position={"s"}>
               <button
-                class={`${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""
-                  } rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem`}
-                onclick={() => setView(viewData.value)}
-                style={{
-                  "background-color": viewData.value === view() ? "#E0E7F3" : "",
-                  color: viewData.value === view() ? "#5252F1" : "grey",
+                classList={{
+                  "bg:#E0E7F3 color:#5252F1": viewData.value === view(),
+                  "color:grey": viewData.value !== view(),
+                  "r:0|5|5|0": index() === 2,
+                  "r:5|0|0|5": index() === 0,
+                  "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true
                 }}
+                onclick={() => setView(viewData.value)}
                 type="button"
               >
                 <Icon height={22} icon={viewData.key} width={22} />
@@ -38,9 +39,14 @@ const PreviewPage = (props: any) => {
       </div>
       <div class="flex ai:center h:full jc:center w:full">
         <div 
-          class={`b:1px|solid|lightblue 
-                 h:${view() === 'Mobile' || view() === 'Tablet' ? 'calc(100vh-130px)' : '90vh'} 
-                 overflow:auto r:5 w:${view() === 'Mobile' ? '375px' : view() === 'Tablet' ? '768px' : 'full'} `}
+          classList={{
+            "b:1px|solid|lightblue r:5 overflow:auto": true,
+            "h:90vh": view() !== 'Mobile' && view() !== 'Tablet',
+            "h:calc(100vh-130px)": view() === 'Mobile' || view() === 'Tablet',
+            "w:375px": view() === 'Mobile',
+            "w:768px": view() === 'Tablet',
+            "w:full": view() === 'Desktop'
+          }}
         >
           {props.children}
         </div>

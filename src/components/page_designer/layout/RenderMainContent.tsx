@@ -12,17 +12,15 @@ import { SettingsWrapper } from "../settings/SettingsWrapper";
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <div class={`grid gap:4px`} style={{
-      'grid-template-columns': (!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
-        ? 'repeat(1, 1fr)'
-        : (layoutStore.isLeftOpen && layoutStore.isRightOpen)
-          ? 'repeat(3, 22% 53% 25%)'
-          : `repeat(2, ${!layoutStore.isLeftOpen ? '70% 30%' : '30% 70%'} )`,
-    }}>
+    <div class={`${(!layoutStore.isLeftOpen && !layoutStore.isRightOpen)
+      ? 'grid-template-columns:repeat(1,1fr)'
+      : (layoutStore.isLeftOpen && layoutStore.isRightOpen)
+        ? 'grid-template-columns:repeat(3,22%|53%|25%)'
+        : `grid-template-columns:repeat(2,${!layoutStore.isLeftOpen ? '70%|30%' : '30%|70%'}`} grid gap:4px`}>
       <Show
         fallback={<ZIndex><Drawer
           customButton={() => false}
-          drawerStyle={'padding:10px'}
+          drawerClass={'padding:10px'}
           open={() => layoutStore.isLeftOpen}
           setIsOpen={((v: boolean) => setLayoutStore("isLeftOpen", v)) as Setter<boolean>}
           width="75%"
@@ -45,7 +43,7 @@ export function RenderMainContent() {
       <Show
         fallback={<ZIndex><Drawer
           customButton={() => false}
-          drawerStyle={'padding:10px'}
+          drawerClass={'padding:10px'}
           open={() => layoutStore.isRightOpen}
           setIsOpen={((isOpen: boolean) => setLayoutStore("isRightOpen", isOpen)) as Setter<boolean>}
           width="75%"

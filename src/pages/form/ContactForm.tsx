@@ -38,34 +38,16 @@ export function ContactForm() {
 
   return (
     <div
-      class="@fade|.5s"
-      style={{
-        "align-items": "center",
-        "background-color": "rgb(239,235,233)",
-        "background-image":
-          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
-        "background-size": "cover",
-        display: "flex",
-        flex: "auto",
-        "flex-direction": "column",
-        height: "100vh",
-        "justify-content": "center",
-      }}
+      class="flex @fade|.5s ai:center bg:cover bg:rgb(239,235,233) bg:url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais') flex:auto flex:column h:100vh jc:center"
     >
       <img
         alt="logo"
-        class="h:70px mb:100px"
+        class="h:70px js:center mb:100px"
         src={logo}
-        style={{ "justify-self": "center" }}
       />
       <form
-        class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
+        class="flex bg:white jc:center m:10px mb:5rem p:20px|30px r:10 shadow:0|4px|8px|rgba(0,0,0,0.1) w:inherit"
         onSubmit={handleSubmit}
-        style={{
-          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-          display: "flex",
-          padding: "20px 30px",
-        }}
       >
         <div class="flex d:none@<md jc:center w:-webkit-fill-available">
           <img
@@ -84,13 +66,13 @@ export function ContactForm() {
           <div class="grid gap:10 grid-template-columns:1fr|50%@>md ">
             <div>
               <label
-                class="f:14"
+                class="block f:14 mb:5px"
                 for="fullname"
-                style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Full Name
               </label>
               <input
+                class="border:1px|solid|#ccc p:8px r:4px w:100%"
                 id="name"
                 name="name"
                 onInput={(e) =>
@@ -98,25 +80,19 @@ export function ContactForm() {
                 }
                 placeholder="Your name"
                 required
-                style={{
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                  padding: "8px",
-                  width: "100%",
-                }}
                 type="text"
                 value={formData().name}
               />
             </div>
             <div>
               <label
-                class="f:14"
+                class="block f:14 mb:5px"
                 for="email"
-                style={{ display: "block", "margin-bottom": "5px" }}
               >
                 Email Address
               </label>
               <input
+                class="border:1px|solid|#ccc p:8px r:4px w:100%"
                 id="email"
                 name="email"
                 onInput={(e) =>
@@ -124,26 +100,20 @@ export function ContactForm() {
                 }
                 placeholder="Your email"
                 required
-                style={{
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                  padding: "8px",
-                  width: "100%",
-                }}
                 type="email"
                 value={formData().email}
               />
             </div>
           </div>
-          <div style={{ margin: "10px 0" }}>
+          <div class="m:10px|0">
             <label
-              class="f:14"
+              class="block f:14 mb:5px"
               for="subject"
-              style={{ display: "block", "margin-bottom": "5px" }}
             >
               Subject
             </label>
             <input
+              class="border:1px|solid|#ccc p:8px r:4px w:100%"
               id="subject"
               name="subject"
               onInput={(e) =>
@@ -151,27 +121,20 @@ export function ContactForm() {
               }
               placeholder="What's the subject?"
               required
-              style={{
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-                padding: "8px",
-                width: "100%",
-              }}
               type="text"
               value={formData().subject}
             />
           </div>
-          <div style={{ "margin-bottom": "10px 0" }}>
+          <div class="mb:10px|0">
             <label
-              class="f:14"
+              class="block f:14 mb:5px"
               for="username"
-              style={{ display: "block", "margin-bottom": "5px" }}
             >
               Message
             </label>
             <textarea
               aria-multiline="true"
-              class="max-h:10rem"
+              class="border:1px|solid|#ccc max-h:10rem p:8px r:4px w:100%"
               id="message"
               name="text"
               onInput={(e) =>
@@ -180,27 +143,13 @@ export function ContactForm() {
               placeholder="Write your message.."
               required
               rows="4"
-              style={{
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-                padding: "8px",
-                width: "100%",
-              }}
               typeof="textarea"
               value={formData().message}
             />
           </div>
 
           <button
-            style={{
-              background: "rgb(226,65,74)",
-              border: "none",
-              "border-radius": "4px",
-              color: "white",
-              cursor: "pointer",
-              padding: "10px",
-              width: "100%",
-            }}
+            class="bg:rgb(226,65,74) border:none color:white cursor:pointer p:10px r:4px w:100%"
             type="submit"
           >
             Send Message

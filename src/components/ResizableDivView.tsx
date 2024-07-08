@@ -59,8 +59,11 @@ export function ResizableContainer(props: Readonly<{
         "min-h:100%": props.view === "Tablet"
       }}>
       <div
-        class="justify-self:center min-h:80% min-w:30% r:10|10|10|10"
-        style={`${width() ? `width:${width()};` : ""} height: ${height()}; max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
+        class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center max-h:80vh min-h:80% min-w:30% overflow:auto position:relative r:10|10|10|10"
+        classList={{
+          [`height:${height()}`]: !!height(),
+          [`width:${width()}`]: !!width()
+        }}
       >
         {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
@@ -75,3 +78,4 @@ export function ResizableContainer(props: Readonly<{
     </div>
   );
 }
+

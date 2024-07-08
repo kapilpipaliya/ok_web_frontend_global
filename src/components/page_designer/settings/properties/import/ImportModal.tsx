@@ -57,8 +57,9 @@ export function ImportModal(props: { toggleModal: () => void; }) {
             <ModalHeader>
               Import HTML
               <button
+                class="float:right"
                 onclick={props.toggleModal}
-                style={{ float: "right" }}
+                type="button"
               >
                 ✕
               </button>
@@ -75,11 +76,7 @@ export function ImportModal(props: { toggleModal: () => void; }) {
             </ModalBody>
             <ModalFooter>
               <div
-                style={{
-                  "align-items": "center",
-                  display: "flex",
-                  "justify-content": "center",
-                }}
+                class="flex ai:center jc:center"
               >
                 <button
                   class=""

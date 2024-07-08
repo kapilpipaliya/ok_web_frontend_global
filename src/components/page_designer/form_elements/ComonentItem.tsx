@@ -32,32 +32,15 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
     }
   };
 
-  const baseStyle = {
-    "align-items": "center",
-    "background-color": "white",
-    "border-radius": ".2rem",
-    "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
-    display: "flex",
-    "flex-direction": "row",
-    gap: "5px",
-    "justify-content": "space-between",
-    "margin-left": "3px",
-    "margin-right": "3px",
-    padding: "10px 0px",
-    "place-content": "center",
-    position: "relative",
-    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-  };
+  const baseStyle = "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:5px justify-content:space-between margin-left:3px margin-right:3px padding:10px|0px place-content:center position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
 
-  const hoverStyle = {
-    boxShadow: "4px 4px 4px",
-    cursor: "move",
-  };
+  const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
 
-  const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+  const itemStyle = () => isHovered() ? `${baseStyle} ${hoverStyle}` : baseStyle;
 
   return (
     <button
+      class={itemStyle()}
       draggable={true}
       onDragStart={(e) => {
         e.stopPropagation();
@@ -84,34 +67,32 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
         );
         setLayoutStore('draggedVertices', []);
       }}
-      style={itemStyle()}
       type="button"
     >
       <Show when={isHovered()}>
         <OpenComponentSettings class="cursor:pointer position:absolute right:3px top:3px" id={props.child.id} />
       </Show>
-      {/* @ts-ignore  */}
+      {/* @ts-expect-error */}
       <Show
         when={isHovered() ||
           selectedComponents().has(graph.vertexes[props.child.id])}
       >
         <Checkbox
-          // @ts-ignore
+          // @ts-expect-error
           checked={selectedComponents().has(graph.vertexes[props.child.id])}
+          class="left:7px position:absolute top:-2px"
           onChange={(e) => handleCheckboxChange(e, props.child.id)}
-          style={{ left: "7px", position: "absolute", top: "-2px" }}
-          wrapperStyle={{ height: "19px", width: "19px" }} />
+          wrapperClass="height:19px width:19px" />
       </Show>
       <div
-        class="flex ai:center gap:5px pt:5px"
-        style={{ "flex-flow": "column" }}
+        class="flex-flow:column flex ai:center gap:5px pt:5px"
       >
         <Icon
           height={24}
           icon={iconMap[props.child?.P.name] ??
             "material-symbols:widgets-outline-rounded"}
           width={24} />
-        <span style={{ "font-size": "14px" }}>{props.child?.P.label || props.child?.P.name}</span>
+        <span class="font-size:14px">{props.child?.P.label || props.child?.P.name}</span>
       </div>
     </button>
   );

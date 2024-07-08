@@ -167,7 +167,6 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "ProgressBar"}>
           <input
-            style={{ ...props.meta?.P }}
             type="progress"
             {...defaultValues()}
             {...deNullify(customMetaProps)}

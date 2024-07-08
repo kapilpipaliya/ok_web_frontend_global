@@ -7,15 +7,10 @@ export function SaveCancelButton(props: Readonly<{buttonAlign?: string; closePop
   const onSubmit = formSubmit(props.closePopUp);
   const onCancel = formCancel(props.closePopUp);
   return (
-    <div
-      style={{
-        display: "flex",
-        "justify-content": props.buttonAlign ?? "start",
-      }}
-    >
-      <button class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel} style={{ "margin-right": "7px" }} type="button">Cancel</button>
+    <div class={`${props.buttonAlign ? `jc:${props.buttonAlign}` : "jc:start"} flex`}>
+      <button class="danger border-red color-red mr-7" onClick={onCancel} type="button">Cancel</button>
       <Show
-        fallback={<button disabled={props.disabled}  onClick={onSubmit} type="button">Save</button>}
+        fallback={<button disabled={props.disabled} onClick={onSubmit} type="button">Save</button>}
         when={props.submitButton}
       >
         {props.submitButton}

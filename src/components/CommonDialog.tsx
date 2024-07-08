@@ -6,7 +6,7 @@ import "~/css/modal.css";
 
 interface CustomModalProps {
   body: JSX.Element;
-  bodyStyle?: JSX.CSSProperties;
+  bodyClass?: JSX.CSSProperties;
   buttonIcon?: string;
   buttonLabel?: JSX.Element;
   closeButton?: boolean;
@@ -76,9 +76,8 @@ export function CustomModal(props: CustomModalProps) {
               </Show>
               {props.closeButton !== false && (
                 <button
-                  class={"bg:lightgrey:hover p:0|5|0|5 r:5|5|5|5"}
+                  class={"bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5"}
                   onClick={onClickOverlay}
-                  style={{float: "right"}}
                   title={"Close"}
                 >
                   ✕
@@ -86,7 +85,7 @@ export function CustomModal(props: CustomModalProps) {
               )}
             </div>
             <hr class={"fg:lightgrey"}/>
-            <div class={"max-h:50vh overflow:auto p:3"} style={props.bodyStyle}>
+            <div class={`${props.bodyClass} overflow:auto p:3`}>
               {props.body}
             </div>
             <div class={"pt:5"}>{props.footer(setOpen)}</div>

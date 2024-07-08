@@ -97,11 +97,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
             updateFilteredData();
           }} placeholder={`Search ${props.coll}...`} value={searchQuery()}/>
           <div
-            class="grid h:full overflow:auto"
-            style={{
-              "scrollbar-color": "lightgrey",
-              "scrollbar-width": "thin",
-            }}
+            class="scrollbar-color:lightgrey scrollbar-width:thin grid h:full overflow:auto"
           >
             <For
               each={filteredData()}

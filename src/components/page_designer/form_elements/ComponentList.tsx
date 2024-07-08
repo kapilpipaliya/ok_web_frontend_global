@@ -1,4 +1,3 @@
-
 import {
   For,
   Show,
@@ -70,22 +69,9 @@ export function ComponentList() {
     setIsFetchingData(false);
   }
 
-  const titleStyle = {
-    "font-size": "17px",
-    "font-weight": "600",
-    "margin-bottom": "8px",
-    "margin-top": "8px",
-  };
-
-  const listStyle = {
-    "list-style-type": "none",
-  };
-
-  const listBoxStyle = {
-    display: "grid",
-    gap: "5px",
-    "grid-template-columns": "repeat(2, 1fr)",
-  };
+  const titleStyle = "font-size:17px font-weight:600 margin-bottom:8px margin-top:8px";
+  const listStyle = "list-style-type:none";
+  const listBoxStyle = "display:grid gap:5px grid-template-columns:repeat(2,1fr)";
 
   // Function to get icon by category
   const updateFilteredData = () => {
@@ -130,11 +116,7 @@ export function ComponentList() {
       value={searchQuery()}
       />
       <div
-        class="h:full overflow:auto"
-        style={{
-          "scrollbar-color": "lightgrey",
-          "scrollbar-width": "thin",
-        }}
+        class="scrollbar-color:lightgrey scrollbar-width:thin h:full overflow:auto"
       >
         <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isFetchingData()}>
           <For
@@ -147,8 +129,8 @@ export function ComponentList() {
           >
             {(item) => (
               <div class="m:20px|0px">
-                <div style={titleStyle}>{item.P.label || item.P.name}</div>
-                <ul style={{ ...listBoxStyle, ...listStyle }}>
+                <div class={titleStyle}>{item.P.label || item.P.name}</div>
+                <ul class={`${listBoxStyle} ${listStyle}`}>
                   <For each={item.children}>
                     {(child) => <ComonentItem child={child} />}
                   </For>

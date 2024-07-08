@@ -36,22 +36,20 @@ export function TableTabs(props: Readonly<TableTabProps>) {
       <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
           <button
-            class={`${currentTab() === item ? 'f:16' : 'color:slategray f:14'} bb:2px|solid|lightgrey:hover cursor:pointer p:5|0`}
+            classList={{
+              'bb:2px|solid|#37c': currentTab() === item,
+              'bb:2px|solid|lightgrey:hover': true,
+              'color:slategray f:14': currentTab() !== item,
+              'cursor:pointer': true,
+              'f:16': currentTab() === item,
+              'p:5|0': true,
+            }}
             id={`tabletab-${item}`}
             onClick={() => handleTabClick(item)}
-            style={{
-              "border-bottom": currentTab() === item ? "2px solid #37c" : '',
-            }}
             type="button"
           >
             <div
-              class={"f-15"}
-              style={{
-                "align-items": "center",
-                cursor: "pointer",
-                display: "flex",
-                "font-weight": "bold",
-              }}
+              class="flex ai:center cursor:pointer f:15 font-weight:bold"
             >
               {dynamicIcon(item)}&nbsp;{item}
             </div>

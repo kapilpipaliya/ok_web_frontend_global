@@ -62,9 +62,9 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
   };
 
   return (
-    <Tabs style={{ padding: "10px" }}>
-      <TabList class={"m:5px"}>
-        <Tab class={"w:50%"}>Design</Tab>
+    <Tabs class="p:10px">
+      <TabList class="m:5px">
+        <Tab class="w:50%">Design</Tab>
         <Tab class={"w:50%"}>Code</Tab>
       </TabList>
       <TabContainer>

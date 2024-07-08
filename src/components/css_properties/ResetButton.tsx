@@ -10,7 +10,7 @@ export function ResetButton() {
   return (
     <Show when={Object.entries(cssState).length}>
       <div class="flex jc:end p:10|0">
-        <button onClick={() => setCssState(reconcile({}))} style={{ display: "flex" }}>
+        <button class="display:flex" onClick={() => setCssState(reconcile({}))}>
           <Icon icon="mdi:close" /> Reset
         </button>
       </div>

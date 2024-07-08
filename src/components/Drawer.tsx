@@ -12,7 +12,7 @@ interface DrawerProps {
     isOpen: boolean;
     onClick: () => void;
   }>) => JSX.Element;
-  drawerStyle?: string;
+  drawerClass?: string;
   open?: Accessor<boolean>;
   setIsOpen?: Setter<boolean>;
   width?: string;
@@ -81,7 +81,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
         id="drawer"
         ref={setFloating}
       >
-        <div class={`scrollbar-width:thin ${props.drawerStyle} h:100% overflow:auto p:20px`}>{props.children}</div>
+        <div class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto p:20px`}>{props.children}</div>
         <div
           class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
           onMouseDown={handleMouseDown}

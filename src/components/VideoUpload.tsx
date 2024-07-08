@@ -35,18 +35,17 @@ export function UploadVideo() {
     };
 
     return (
-      <div
-        style="display: flex; flex-direction: column; align-items: center; padding: 16px; border: 1px solid #ccc; border-radius: 8px; width: 300px;">
+      <div class="align-items:center border-radius:8px border:1px|solid|#ccc display:flex flex-direction:column padding:16px width:300px">
           <input
             accept="video/*"
+            class="margin-bottom:16px"
             onChange={handleUpload}
-            style="margin-bottom: 16px;"
             type="file"
           />
-          {uploading() && <p style="color: blue;">Uploading...</p>}
-          {error() && <p style="color: red;">{error()}</p>}
+          {uploading() && <p class="color:blue">Uploading...</p>}
+          {error() && <p class="color:red">{error()}</p>}
           {videoUrl() && (
-            <video controls src={videoUrl()} style="width: 100%; height: auto;"></video>
+            <video class="height:auto width:100%" controls src={videoUrl()}></video>
           )}
       </div>
     );

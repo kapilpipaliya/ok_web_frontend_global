@@ -13,7 +13,7 @@ export function RenderModal(props: { children: JSX.Element; isOpen: boolean; tog
           <ModalContent>
             <ModalHeader>
               Header
-              <button onclick={props.toggle} style={{ float: "right" }}>
+              <button class="float:right" onclick={props.toggle}>
                 ✕
               </button>
             </ModalHeader>
@@ -22,11 +22,7 @@ export function RenderModal(props: { children: JSX.Element; isOpen: boolean; tog
             </ModalBody>
             <ModalFooter>
               <div
-                style={{
-                  "align-items": "center",
-                  display: "flex",
-                  "justify-content": "center",
-                }}
+                class="flex ai:center jc:center"
               >
                 <button onClick={props.toggle}>Submit</button>
                 <button class="border-color:#FF0000 color:#FF0000" onClick={props.toggle}>Cancel</button>

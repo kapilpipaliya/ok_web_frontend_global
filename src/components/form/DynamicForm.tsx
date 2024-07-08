@@ -137,7 +137,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                 {/* Main Tab is displayed as top level fields */}
                 <For each={Object.keys(formData.groupByTabsAndGroup.main)}>
                   {(group) => (
-                    <div class="dx-fieldset" style={{ "max-width": "100%" }}>
+                    <div class="dx-fieldset max-w:100%">
                       <Show when={props.importExportButtons ?? true}>
                         <ImportExportButtons setPopup={setPopup} />
                       </Show>

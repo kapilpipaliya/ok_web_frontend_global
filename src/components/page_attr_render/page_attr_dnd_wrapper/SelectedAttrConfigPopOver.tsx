@@ -29,7 +29,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
     <span class="position:relative ">
       <div class={`flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}>
         <Tooltip content={"Name"} nowrap>
-          <div style={{ display: "flex", "font-size": "0.875rem", "line-height": "1.25rem", "margin-right": "4px" }}>
+          <div class="display:flex font-size:0.875rem line-height:1.25rem margin-right:4px">
             {getComponentName()}
           </div>
         </Tooltip>

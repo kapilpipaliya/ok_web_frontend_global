@@ -121,19 +121,15 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
         !props.isLabelOnTop ? "max-w:50%" : ""
       } flex rel ai:center jc:space-between r:5`}
     >
-      <div class={"flex ai:center"} style={{ flex: "1" }}>
+      <div class={"flex ai:center flex:1"}>
         <Show when={props.leftIcon || props.inputType === "number"}>
           <Show
             fallback={
               <button
+                class="bg:transparent border:none cursor:ns-resize"
                 onMouseDown={downIncrement}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "ns-resize",
-                }}
               >
-                <Icon icon="gg:scroll-v" style={{ color: "grey" }} />
+                <Icon class="color:grey" icon="gg:scroll-v" />
               </button>
             }
             when={props.inputType !== "number"}
@@ -145,12 +141,12 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
           fallback={
             <label>{props.label}<input
               class={"f:14"}
+              class="w:100%" // Set width to 100%
               onInput={handleChange}
               placeholder={`${
                 props.inputType === "number" ? "0" : props.placeholder
               }`}
               step="any"
-              style={{ width: "100%" }} // Set width to 100%
               type={props.inputType || "text"}
               value={getValueWithoutUnits(selected())}
             /></label>
@@ -158,13 +154,12 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
           when={props.showInside}
         >
           <input
-            class="f:14 outline:none p:5"
+            class="f:14 outline:none p:5 w:100%"
             onInput={handleChange}
             placeholder={`${
               props.inputType === "number" ? "0" : props.placeholder
             }`}
             step="any"
-            style={{ width: "100%" }}
             type={props.inputType || "text"}
             value={getValueWithoutUnits(
               props.value ? props.value() : selected(),

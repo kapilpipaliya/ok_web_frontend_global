@@ -24,27 +24,11 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
 
   let menuRef: HTMLButtonElement;
 
-  const baseStyle = {
-    "align-items": "center",
-    "background-color": "white",
-    "border-radius": ".2rem",
-    "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
-    display: "flex",
-    "flex-direction": "row",
-    gap: "10px",
-    height: "35px",
-    margin: "5px",
-    padding: "10px",
-    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-  };
+  const baseStyle = "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
 
-  const hoverStyle = {
-    "background-color": "#F2EDED",
-    boxShadow: "4px 4px 4px",
-    cursor: "move",
-  };
+  const hoverStyle = "background-color:#F2EDED box-shadow:4px|4px|4px cursor:move";
 
-  const itemStyle: any = () => hoverPageId() === props.child.id ? { ...baseStyle, ...hoverStyle } : baseStyle;
+  const itemStyle = () => hoverPageId() === props.child.id ? `${baseStyle} ${hoverStyle}` : baseStyle;
 
   let timeoutId: NodeJS.Timeout;
 
@@ -98,17 +82,17 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
     <Show when={props.child.name}>
       <button
         class="relative"
+        class={itemStyle()}
         draggable={true}
         onDragStart={handleDragStart}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         ondblclick={handleDoubleClick}
         ref={menuRef!}
-        style={itemStyle()}
         type="button"
       >
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
-        <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+        <div class="font-size:14px">{toTitle(props.child.name)}</div>
         <Show when={props.previewPageId === props.child.id}>
           <DropdownMenu onClickOutside={() => props.setPreviewPageId(null)} onMouseLeave={() => props.setPreviewPageId(null)} parentRef={menuRef!}>
             {toTitle(props.child.name)} Preview

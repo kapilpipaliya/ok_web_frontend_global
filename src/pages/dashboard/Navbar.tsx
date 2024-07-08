@@ -1,7 +1,6 @@
-
 import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
+import { type JSXElement, Show, splitProps } from "solid-js";
 
 import type { DisplayComponentProps } from "~/components/fields/ComponentType";
 
@@ -10,7 +9,7 @@ import { useGraph } from "~/lib/graph/graph";
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
   const [graph, setGraph] = useGraph();
   return (
-    <button onClick={props.toggleSidebar} style={{ transition: "transform 0.3s ease" }}>
+    <button class="transition:transform|0.3s|ease" onClick={props.toggleSidebar}>
       <Icon
         height="24"
         icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"}
@@ -39,20 +38,9 @@ export function Navbar(
   // let {events} = usePageContext();
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
-  const navbarStyle = () =>
-    ({
-      "align-items": "center",
-      "background-color": "white",
-      "box-shadow": "3px -1px 4px 3px lightgrey",
-      display: "flex",
-      "justify-content": "space-between",
-      padding: "6px",
-      width: "-webkit-fill-available",
-    }) as JSX.CSSProperties;
   return (
     <div
-      class="bb:1|solid|rgb(212,219,231) p:5|10 r:0|0|10|10"
-      style={navbarStyle()}
+      class="flex ai:center bb:1|solid|rgb(212,219,231) bg:white box-shadow:3px|-1px|4px|3px|lightgrey jc:justify-between p:5|10 r:0|0|10|10"
     >
       <Show
         when={

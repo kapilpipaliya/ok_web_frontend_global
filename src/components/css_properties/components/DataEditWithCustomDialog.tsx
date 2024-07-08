@@ -191,24 +191,14 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
     return (
       <Show when={props.openMenu() === index} >
         <div
-          class={"popup"}
-          style={{
-            "background-color": "#fff",
-            border: "1px solid #ccc",
-            "border-radius": "10px",
-            "margin-right": "100px",
-            padding: "10px",
-            position: "absolute",
-            width: "280px",
-            "z-index": 4,
-          }}
+          class={"popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"}
         >
           <div class={"flex ai:center jc:space-between mb:5"}>
             <div class={"f:15 font-weight:bold"}>{props.dialogLabel}</div>
             <Icon
+              class={"fg:grey"}
               icon={"mdi:close"}
               onClick={closePopup}
-              style={{ color: "grey" }}
             />
           </div>
           <For each={Object.entries(props.children)}>
@@ -222,16 +212,8 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         </div>
         {/* TODO Remove this div */}
         <div
+          class={`${props.openMenu() ? "display:block" : "display:none"} h:100% left:0 position:fixed top:0 w:100% z:3`}
           onClick={closePopup}
-          style={`
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 3;
-          display: ${props.openMenu() ? "block" : "none"};
-        `}
         />
       </Show>
     );
@@ -246,12 +228,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         <Match when={props.label.includes("Shadow")}>
           <span
             class={"f:14"}
+            class={"flex:1 mr:8px"}
             onClick={() => {
               openPopup(p.i());
-            }}
-            style={{
-              flex: "1",
-              "margin-right": "8px",
             }}
           >
             {p.option.replaceAll("|", " ")}
@@ -264,12 +243,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         <Match when={props.label.includes("Filter")}>
           <span
             class={"f:14"}
+            class={"flex:1 mr:8px"}
             onClick={() => {
               openPopup(p.i());
-            }}
-            style={{
-              flex: "1",
-              "margin-right": "8px",
             }}
           >
             {p.option.replaceAll(")", "").replaceAll("(", " ")}
@@ -278,12 +254,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         <Match when={props.label.includes("Transition")}>
           <span
             class={"f:14"}
+            class={"flex:1 mr:8px"}
             onClick={() => {
               openPopup(p.i());
-            }}
-            style={{
-              flex: "1",
-              "margin-right": "8px",
             }}
           >
             {p.option.replaceAll("|", " ")}
@@ -292,12 +265,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         <Match when={props.label.includes("Transform")}>
           <span
             class={"f:14"}
+            class={"flex:1 mr:8px"}
             onClick={() => {
               openPopup(p.i());
-            }}
-            style={{
-              flex: "1",
-              "margin-right": "8px",
             }}
           >
             {p.option.replaceAll(")", "").replaceAll("(", " ")}
@@ -310,24 +280,12 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
 
   return (
     <div
-      class={"b:1px|solid|lightgray p:.2rem|.3rem r:5"}
-      style={{
-        color: "#333",
-        margin: "10px",
-        position: "relative",
-        width: "-webkit-fill-available",
-      }}
+      class={"b:1px|solid|lightgray color:#333 m:10px p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"}
     >
       <div
         class={`${
           getOptions().length > 0 ? "bb:1|solid|lightgrey m:1 pb:5" : ""
-        }`}
-        style={{
-          "align-items": "center",
-          display: "flex",
-          "justify-content": "space-between",
-          "margin-bottom": "6px",
-        }}
+        } flex ai:center jc:space-between mb:6px`}
       >
         <ContainerLabel info={props.name} onIconClick={resetValues} showIcon={isDefaultValue()} title={props.label} />
         <Icon
@@ -339,15 +297,7 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
       <For each={getOptions()}>
         {(option, i) => (
           <div
-            style={{
-              "align-items": "center",
-              border: "1px solid #ccc",
-              "border-radius": "4px",
-              cursor: "pointer",
-              display: "flex",
-              "margin-bottom": "3px",
-              padding: "5px",
-            }}
+            class={"flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:5px r:4px"}
           >
             <Icon
               class={"cursor:pointer mr:8"}
@@ -356,10 +306,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
             />
             <Component i={i} option={option} />
             <Icon
-              class={"cursor:pointer mr:8"}
+              class={"cursor:pointer fg:red mr:8"}
               icon={"mdi:close"}
               onClick={() => deleteOption(i())}
-              style={{ color: "red" }}
             />
             {renderPopup(option, i())}
           </div>

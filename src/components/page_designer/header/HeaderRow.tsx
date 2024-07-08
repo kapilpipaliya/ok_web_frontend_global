@@ -20,7 +20,7 @@ export function HeaderRow() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
 
   return (
-    <header class="h:50px" style={{ "grid-area": "header" }}>
+    <header class="grid-area:header h:50px">
       <div class="grid flex-grow:1 ji:center min-w:400">
         <div class="flex ai:center bg:#f3f3f4 h:49px jc:space-between mb:5 p:10 r:7 w:99%">
           <LeftIcons />

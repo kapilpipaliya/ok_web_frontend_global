@@ -20,7 +20,7 @@ export const LeftIcons = () => {
           width={30} />
       </button>
       <a href="/">
-        <img alt="logo" src={logo} style="height: 35px;" />
+        <img alt="logo" class="h:35px" src={logo} />
       </a>
     </div>
   );

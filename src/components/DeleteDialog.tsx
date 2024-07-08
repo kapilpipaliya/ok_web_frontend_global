@@ -1,4 +1,3 @@
-
 import type { JSX } from "solid-js";
 
 import {CustomModal} from "./CommonDialog";
@@ -26,28 +25,26 @@ export function DeleteDialog(props: Readonly<{
           {props.message || "Are you sure you want to delete this item?"}
         </p>
       }
-      bodyStyle={{ "max-height": "none", overflow: "auto" }}
       buttonLabel={props.buttonLabel}
       customTitle={<span>{props.title || "Delete Confirmation"}</span>}
       dialogClass="min-w:20% r:10px p:0"
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <button
-            class="danger"
+            class="danger mr:7px"
             onClick={() => {
               handleCancel();
               toggle((v) => !v);
             }}  
-            style={{ "margin-right": "7px" }}
           >
             Cancel
           </button>
           <button
+            class="mr:10px"
             onClick={() => {
               handleConfirm();
               toggle((v) => !v);
             }}
-            style="margin-right: 10px;"
           >
             Confirm
           </button>

@@ -154,14 +154,14 @@ export function ExpressionBuilder(props: Readonly<{
         <div>
           <For each={contentList}>
             {(item, index) => (
-              <div class={"p:2"}>
-                <div class={"flex ai:center jc:space-between mb:2 mt:4"}>
-                  <span class={"f:14 font-weight:medium"}>
+              <div class="p:2">
+                <div class="flex ai:center jc:space-between mb:2 mt:4">
+                  <span class="f:14 font-weight:medium">
                     Expression : {index() + 1}
                   </span>
                   <Show when={index() > 0}>
                     <Icon
-                      class={"cursor:pointer"}
+                      class="cursor:pointer"
                       height={20}
                       icon={"fluent:delete-28-regular"}
                       onclick={() => handleDelete(index())}
@@ -170,8 +170,8 @@ export function ExpressionBuilder(props: Readonly<{
                     />
                   </Show>
                 </div>
-                <div class={"flex ai:center jc:space-between"}>
-                  <div class={"flex"}>
+                <div class="flex ai:center jc:space-between">
+                  <div class="flex">
                     <MultiSelectField
                       displayValueChild="name"
                       displayValueParent="P"
@@ -189,8 +189,10 @@ export function ExpressionBuilder(props: Readonly<{
                     />
                   </div>
                   <input
-                    class={"flex-col"}
-                    style={`border: ${item.error ? "1px solid red " : ""}`}
+                    classList={{
+                      "border:1px|solid|red": item.error,
+                      "flex:column": true,
+                    }}
                     {...props.meta?.P}
                     onchange={(e: any) => handleChange(index(), e)}
                     placeholder={"Write Expression..."}
@@ -205,7 +207,7 @@ export function ExpressionBuilder(props: Readonly<{
                     setValue={props.setValue}
                     txnId={props.txnId}
                   />
-                  <div class={"flex"}>
+                  <div class="flex">
                     <MultiSelectField
                       displayValueChild="name"
                       displayValueParent="P"
@@ -231,7 +233,7 @@ export function ExpressionBuilder(props: Readonly<{
       buttonIcon={"carbon:settings-edit"}
       dialogClass="min-w:30% r:10px p:0"
       footer={(toggle) => (
-        <div class={"flex ai:center jc:end"}>
+        <div class="flex ai:center jc:end">
           <button
             onclick={handleInsert}
             {...props.meta.P}

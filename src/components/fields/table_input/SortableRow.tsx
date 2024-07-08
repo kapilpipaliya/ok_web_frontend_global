@@ -185,30 +185,33 @@ export const SortableRow = (p: { dragFromIndex: Accessor<null | number>; dragToI
     <>
       <tr
         class="border-bottom:1px|solid|#dddddd border-radius:10px"
+        classList={{
+          "background-color:#e0e0e0": p.rowIndex === p.dragFromIndex(),
+          "background-color:#f0f0f0": p.rowIndex === p.dragToIndex(),
+          "background-color:white": p.rowIndex !== p.dragFromIndex() && p.rowIndex !== p.dragToIndex(),
+          "border:1px|solid|#ddd": p.rowIndex !== p.dragToIndex(),
+          "border:2px|solid|green": p.rowIndex === p.dragToIndex(),
+          "text-align:center": true,
+          "transition:background-color|0.2s|ease": true,
+          "width:50px": true,
+        }}
         draggable={true}
         onDragEnter={() => p.setDragToIndex(p.rowIndex)}
         onDragOver={(event) => event.preventDefault()}
         onDragStart={() => p.setDragFromIndex(p.rowIndex)}
         onDrop={p.handleDrop}
-        style={{
-          "background-color": getBackgroundColor(p.rowIndex, p.dragFromIndex(), p.dragToIndex()),
-          border: getBorder(p.rowIndex, p.dragToIndex()),
-          "text-align": "center",
-          transition: "background-color 0.2s ease",
-          width: "50px",
-        }}
       >
         <td>
           <div class={"flex ai:center jc:center"}>
-            <button class="cursor: grab;">
-              <Icon class={"transform 2s ease-in-out"} icon="material-symbols:drag-indicator" />
+            <button class="cursor:grab;">
+              <Icon class={"transition:transform|2s|ease-in-out"} icon="material-symbols:drag-indicator" />
             </button>
-            <button class="cursor: pointer;" onClick={() => setExpanded(!expanded())}>
-              <Icon class={"transform 2s ease-in-out"} icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} style={{ "margin-top": "7px" }} />
+            <button class="cursor:pointer;" onClick={() => setExpanded(!expanded())}>
+              <Icon class={"transition:transform|2s|ease-in-out"} classList={{ "margin-top:7px": true }} icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} />
             </button>
-            <Icon class="cursor:pointer m:5px" height={20} icon="mingcute:delete-line" onClick={() => deleteRow(p.joinVertex, p.isRealTime!, graph, setGraph, p.txnId!)} style={{ color: "red" }} width={20} />
+            <Icon class="color:red cursor:pointer m:5px" height={20} icon="mingcute:delete-line" onClick={() => deleteRow(p.joinVertex, p.isRealTime!, graph, setGraph, p.txnId!)} width={20} />
             <Show when={expandVertex()}>
-              <Icon class="cursor:pointer " height={20} icon="icon-park-outline:plus" onClick={() => addNewRow(p.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, p.isRealTime ?? false)} style={{ color: "green" }} width={20} />
+              <Icon class="color:green cursor:pointer" height={20} icon="icon-park-outline:plus" onClick={() => addNewRow(p.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, p.isRealTime ?? false)} width={20} />
             </Show>
           </div>
           {/*<Show when={!disabled}>*/}
@@ -252,15 +255,4 @@ const getComponentClass = (component: string) => {
     default:
       return "";
   }
-};
-
- const getBackgroundColor = (index: number, dragFromIndex: null | number, dragToIndex: null | number) => {
-  if (dragFromIndex === index) return "#e0e0e0";
-  if (dragToIndex === index) return "#f0f0f0";
-  return "white";
-};
-
- const getBorder = (index: number, dragToIndex: null | number) => {
-  if (dragToIndex === index) return "2px solid green";
-  return "1px solid #ddd";
 };

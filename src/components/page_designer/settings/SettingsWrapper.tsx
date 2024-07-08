@@ -8,12 +8,7 @@ export function SettingsWrapper() {
       classList={{ "display:none": !layoutStore.isRightOpen }}
     >
       <div
-        class={"flex-col border:1|solid|lightgrey h:100vh m:5 overflow-x:auto r:5|5|5|5"}
-        style={{
-          "max-height": "calc(100vh - 70px)",
-          "scrollbar-color": "lightgrey",
-          "scrollbar-width": "thin",
-        }}
+        class={"scrollbar-color:lightgrey scrollbar-width:thin border:1|solid|lightgrey flex:column h:100vh m:5 max-height:calc(100vh-70px) overflow-x:auto r:5|5|5|5"}
       >
         <SettingTabs />
       </div>

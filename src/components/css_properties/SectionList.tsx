@@ -30,13 +30,9 @@ export const CollapsibleSection = (props: Readonly<{
       >
         <span class="f:15 font-weight:600">{props.title}</span>
         <Icon
-          class="transform 1s ease-in-out cursor:pointer"
+          class={`transform ${isOpen() ? "rotate:0deg" : "rotate:180deg"} cursor:pointer transition:transform|0.2s|linear`}
           height={25}
           icon="uil:angle-up"
-          style={{
-            transform: `${isOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
-            transition: "transform 0.2s linear",
-          }}
           width={25}
         />
       </button>

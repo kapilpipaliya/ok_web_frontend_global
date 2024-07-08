@@ -24,12 +24,7 @@ export const FieldWithCustomBox = (props: FieldWithCustomProperty) => {
   return (
     <div>
       <div
-        style={{
-          "align-items": "end",
-          display: "grid",
-          gap: "10px",
-          "grid-template-columns": "1fr 20%",
-        }}
+        class="grid ai:end gap:10px grid-template-columns:1fr|20%"
       >
         <DynamicCSSComponent
           value={{
@@ -75,13 +70,7 @@ export const FieldWithCustomBox = (props: FieldWithCustomProperty) => {
       </div>
       <Show when={optionType() === "custom"}>
         <div
-          class={"b:1px|solid|lightgray m:5|10 p:0|10 pb:7 r:5"}
-          style={{
-            "align-items": "end",
-            display: "grid",
-            gap: "10px",
-            "grid-template-columns": props.gridType ?? "repeat(2,auto)",
-          }}
+          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${props.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
         >
           <For each={props.customProperty}>
             {(item) => {

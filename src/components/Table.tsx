@@ -63,7 +63,7 @@ export function CommonTable(props: Readonly<TableProps>) {
   };
 
   return (
-    <div style="box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); width: 100%; border-radius: 10px;">
+    <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) width:100%">
       <Table headers={props.headers.length}>
         <For each={props.headers}>
           {(header) => (
@@ -76,8 +76,7 @@ export function CommonTable(props: Readonly<TableProps>) {
           each={displayedRows()}
           fallback={
             <div
-              class={`grid-column-span:${props.headers.length}`}
-              style="display: flex; justify-content: center; padding: 1rem; "
+              class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}
             >
               No records to display
             </div>
@@ -128,7 +127,7 @@ export function CommonTable(props: Readonly<TableProps>) {
           !props.isSearching
         }
       >
-        <div style="display: flex; justify-content: end; padding: 5px 10px;">
+        <div class="display:flex justify-content:end padding:5px|10px">
           <button
             onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
           >
@@ -155,13 +154,13 @@ const TableActions = (props: Readonly<{
 }>) => {
   return (
     <Show when={props.displayedRows().length > 0}>
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem;">
-        <div style="margin-right: 1rem;">
+      <div class="align-items:center display:flex justify-content:space-between padding:.5rem|1rem">
+        <div class="margin-right:1rem">
           <label html-for="rowsPerPage">Rows per page:</label>
           <select
+            class="margin-left:0.5rem"
             id="rowsPerPage"
             onChange={props.handleRowsPerPageChange}
-            style="margin-left: 0.5rem;"
             value={props.rowsPerPage()}
           >
             <For each={props.rowsPerPageOptions || [10,20,50,100]}>
@@ -169,7 +168,7 @@ const TableActions = (props: Readonly<{
             </For>
           </select>
         </div>
-        <div class="font-weight:500" style="margin-right: 1rem;">
+        <div class="font-weight:500 margin-right:1rem">
           <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
             (props.currentPage() + 1) * props.rowsPerPage(),
             props.data.length,
@@ -179,11 +178,12 @@ const TableActions = (props: Readonly<{
           <Tooltip content="Move first">
             <button
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
+              classList={{
+                "color:black": props.currentPage() !== 0,
+                "color:lightgrey": props.currentPage() === 0,
+              }}
               disabled={props.currentPage() === 0}
               onClick={props.handleFirstPage}
-              style={{
-                color: props.currentPage() === 0 ? "lightgrey" : "black",
-              }}
             >
               <Icon
                 height={22}
@@ -195,11 +195,12 @@ const TableActions = (props: Readonly<{
           <Tooltip content="Previous">
             <button
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
+              classList={{
+                "color:black": props.currentPage() !== 0,
+                "color:lightgrey": props.currentPage() === 0,
+              }}
               disabled={props.currentPage() === 0}
               onClick={props.handlePreviousPage}
-              style={{
-                color: props.currentPage() === 0 ? "lightgrey" : "black",
-              }}
             >
               <Icon height={22} icon={"icon-park-outline:left"} width={22} />
             </button>
@@ -207,14 +208,12 @@ const TableActions = (props: Readonly<{
           <Tooltip content="Next">
             <button
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
+              classList={{
+                "color:black": props.currentPage() !== props.totalPages() - 1,
+                "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+              }}
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleNextPage}
-              style={{
-                color:
-                  props.currentPage() === props.totalPages() - 1
-                    ? "lightgrey"
-                    : "black",
-              }}
             >
               <Icon height={22} icon={"icon-park-outline:right"} width={22} />
             </button>
@@ -222,14 +221,12 @@ const TableActions = (props: Readonly<{
           <Tooltip content="Move last">
             <button
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
+              classList={{
+                "color:black": props.currentPage() !== props.totalPages() - 1,
+                "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+              }}
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleLastPage}
-              style={{
-                color:
-                  props.currentPage() === props.totalPages() - 1
-                    ? "lightgrey"
-                    : "black",
-              }}
             >
               <Icon height={22} icon={"icon-park-outline:go-end"} width={22} />
             </button>
@@ -243,12 +240,18 @@ const TableActions = (props: Readonly<{
 export function Table(props: Readonly<{ children: JSX.Element; class?: string; headers: number }>) {
   return (
     <div
-      class="rel overflow:visible r:10"
-      style={{ "scrollbar-width": "thin" }}
+      class="scrollbar-width:thin rel overflow:visible r:10"
     >
       <div
         class={`${props.class || ""} grid bb:2px|solid|#37c`}
-        style={`grid-template-columns: repeat(${props.headers}, 1fr);width: 100%; border-radius: 10px;overflow: auto;scrollbar-width: thin;font-size: 0.9em;`}
+        classList={{
+          [`grid-template-columns:repeat(${props.headers},1fr)`]: true,
+          "border-radius:10px": true,
+          "font-size:0.9em": true,
+          "overflow:auto": true,
+          "scrollbar-width:thin": true,
+          "width:100%": true,
+        }}
       >
         {props.children}
       </div>
@@ -259,8 +262,8 @@ export function Table(props: Readonly<{ children: JSX.Element; class?: string; h
 export function TableHeadCell(props: any) {
   return (
     <div
-      class="bg:#37c border:1px|solid|#347fdd; color:white font-weight:600 p:10"
-      style="padding: 10px; text-align: center;"
+      class="bg:#37c border:1px|solid|#347fdd color:white font-weight:600 p:10px"
+      classList={{ "text-align:center": true }}
     >
       {props.children}
     </div>
@@ -274,10 +277,15 @@ export function TableBodyCell(props: Readonly<{
 }>) {
   return (
     <div
-      class={`${props.class} @fade|.4s bg:${
-        props.index ? (props.index % 2 === 0 ? "white" : "#3478cc0d") : ""
-      } h:50 text:center`}
-      style="padding: 7px; align-content: center;"
+      class={`${props.class} @fade|.4s`}
+      classList={{
+        "align-content:center": true,
+        "bg:#3478cc0d": props.index ? props.index % 2 !== 0 : false,
+        "bg:white": props.index ? props.index % 2 === 0 : false,
+        "h:50": true,
+        "padding:7px": true,
+        "text:center": true,
+      }}
     >
       {props.children}
     </div>

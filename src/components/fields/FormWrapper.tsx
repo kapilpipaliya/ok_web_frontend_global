@@ -104,7 +104,7 @@ export function FormWrapper(
         >
           {props.submitButton}
         </Show>
-        <button class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel} style={{ "margin-left": "7px" }}>Cancel</button>
+        <button class="danger border-color:#FF0000 color:#FF0000 margin-left:7px" onClick={onCancel}>Cancel</button>
       </div>
     );
   };

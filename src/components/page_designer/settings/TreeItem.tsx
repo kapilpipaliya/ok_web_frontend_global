@@ -97,13 +97,8 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
     e.preventDefault();
   };
 
-  const handleDragLeave = (e: DragEvent) => {
-    // e.stopPropagation();
+  const handleDragLeave = () => {
     setLayoutStore({ activeItem: null, position: null });
-    // console.log('leave',layoutVertex.id)
-    // Do not uncomment this, because drag is called before on drop
-    // setDraggedVertex(null);
-    // resetDragDropState();
   };
 
   const handleDropEvent = async (e: DragEvent) => {
@@ -137,15 +132,23 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
     <div>
       <button
         classList={{
+          "align-items:center": true,
           "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
           "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
           "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!layoutStore.position,
           "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)": isActiveTargetItem() && layoutStore.position === "after",
           "box-shadow:inset|0|0|0|2px|rgb(0,125,0)": isActiveTargetItem() && layoutStore.position === "center",
           "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)": isActiveTargetItem() && layoutStore.position === "before",
+          "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px": !(isActiveTargetItem() && layoutStore.position === "center") && children().length,
+          "display:flex": true,
+          "font-size:14px": true,
+          "font-weight:bold": !!children().length,
+          "font-weight:normal": !children().length,
+          "height:25px": true,
+          "justify-content:space-between": true,
           "r:0|5|5|0": !children().length,
           "r:5|5|5|5": !!children().length,
-          "w:100%": true,
+          "w:100%": true
         }}
         draggable={true}
         onClick={handleClick}
@@ -156,18 +159,6 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
         onDrop={handleDropEvent}
         onMouseOver={handleMouseOver}
         onmouseleave={handleMouseLeave}
-        style={{
-          "align-items": "center",
-          "box-shadow": !(isActiveTargetItem() && layoutStore.position === "center") &&
-            children().length
-            ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
-            : undefined,
-          display: "flex",
-          "font-size": "14px",
-          "font-weight": children().length ? "bold" : "normal",
-          height: "25px",
-          "justify-content": "space-between",
-        }}
         type="button"
       >
         <TreeItemContent collapsedKeys={props.collapsedKeys} metaVertex={props.metaVertex} toggleExpand={props.toggleExpand} />

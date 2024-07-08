@@ -18,16 +18,16 @@ export const ContainerLabel = (props: {
     <Show when={props.showIcon ?? false}>
       &nbsp;
       <Icon
-        class={"cursor:pointer"}
+        class={"cursor:pointer fg:purple"}
         icon={"mdi:close"}
         onClick={props.onIconClick}
-        style={{ 'color': 'purple' }} />
+      />
     </Show>
     <Show when={props.info}>
       <CustomTooltip message={'Click for more Info'} title={props.title}>
         <div class={"flex cursor:pointer"} onClick={() => {
           window.open(`https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`, '_blank');
-        }}><Icon height={21} icon={"mdi:information-outline"} style={{ 'color': 'lightgray', 'margin-left': '2px' }} width={21} /></div>
+        }}><Icon class="bg:lightgrey ml:2px" height={21} icon={"mdi:information-outline"} width={21} /></div>
       </CustomTooltip>
     </Show>
   </span>

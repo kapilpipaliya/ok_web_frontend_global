@@ -52,16 +52,10 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
     handleUrlChange(); // Call the function initially
     return location.pathname; // Track changes in pathname
   });
-  const mainContentStyle = {
-    display: "flex",
-    "flex-direction": "column",
-    "flex-grow": 1,
-    overflow: "auto",
-    "scrollbar-width": "thin",
-  };
+
 
   return (
-    <div style={mainContentStyle as any}>
+    <div class="scrollbar-width:thin d:flex flex-grow:1 flex:column overflow:auto">
       <PageContext.Provider
         value={{
           events: {
@@ -81,9 +75,8 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
           />
         </Show>
         <div
-          class={" overflow-y:auto p:4|10"}
+          class={" scrollbar-width:thin overflow-y:auto  p:4|10"}
           classList={{ "height:93vh": graph.isSideBarOpen }}
-          style={{ "scrollbar-width": "thin" }}
         >
           {props.children}
         </div>
@@ -160,23 +153,19 @@ const DropdownMenu = () => {
         setOpen={setIsOpen}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-            isOpen() ? 1 : 0
-          }; pointer-events: ${
-            isOpen() ? "auto" : "none"
-          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          class="bg:white border:1px|solid|#ccc position:absolute r:5px right:-15px shadow:0|2px|5px|rgba(0,0,0,0.1) top:calc(100%+5px) transition:opacity|0.2s|ease-in-out width:max-content z-index:100"
+          classList={{ "opacity:0 pointer-events:none": !isOpen(), "opacity:1 pointer-events:auto": isOpen() }}
         >
           <div
+            class="fixed bg:#01093138 bottom:0 left:0 right:0 top:0 z-index:-1"
             onClick={handleClose}
-            style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
           />
           <ul
             class="@fade|.3s"
-            style="list-style-type: none; padding: 0; margin: 0; position:relative;"
+            classList={{ "list-style-type:none p:0 m:0 position:relative": true }}
           >
-            <li class={"flex p:13"} style="margin-bottom: 5px; padding: 10px; ">
+            <li class={"flex mb:5px p:10px"}>
               <div
-                // alt="profile"
                 class="h:45 r:50% w:45"
                 style={`background-size:cover;background-image: url(${
                   graph.member?.properties?.profileImage ||
@@ -209,36 +198,36 @@ const DropdownMenu = () => {
             <Show
               fallback={
                 <div>
-                  <li class={"m:5|10"} style="margin-top: 5px; ">
+                  <li class={"m:5|10 mt:5px"}>
                     <A
                       class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                      classList={{ "text-decoration:none color:#333 d:flex ai:center p:5px|7px": true }}
                       href={`${APP_BASE_URL}/setting`}
                       onclick={() => {
                         setIsOpen(false);
                       }}
-                      style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                     >
                       Account Setting
                     </A>
                   </li>
-                  <li class={"m:5|10"} style="margin-top: 5px; ">
+                  <li class={"m:5|10 mt:5px"}>
                     <A
                       class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                      classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
                       href={"/contact-us"}
                       onclick={() => {
                         setIsOpen(false);
                       }}
-                      style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                     >
                       Help
                     </A>
                   </li>
                   <hr class={"color:rgb(223,223,223)"} />
 
-                  {/*<hr style="color:lightgrey" class={'mt:.5rem'}/>*/}
-                  <li class={"m:5|10"} style="margin-top: 5px; ">
+                  <li class={"m:5|10 mt:5px"}>
                     <a
                       class="cursor:default r:5|5|5|5"
+                      classList={{ "text-decoration:none color:#333 flex ai:center p:10px|7px": true }}
                       onclick={async () => {
                         setIsOpen(false);
                         setLoadingSite(true);
@@ -254,7 +243,6 @@ const DropdownMenu = () => {
                         });
                         setLoadingSite(false);
                       }}
-                      style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 10px 7px;"
                     >
                       Sign Out
                     </a>
@@ -264,28 +252,28 @@ const DropdownMenu = () => {
               when={!graph.member?.properties?.email}
             >
               <div>
-                <li class={"m:5|10"} style="margin-top: 5px; ">
+                <li class={"m:5|10 mt:5px"}>
                   <A
                     class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                    classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
                     href={"/auth/login"}
                     onclick={() => {
                       setIsOpen(false);
                     }}
                     replace={true}
-                    style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                   >
                     Log In
                   </A>
                 </li>
-                <li class={"m:5|10"} style="margin-top: 5px; ">
+                <li class={"m:5|10 mt:5px"}>
                   <A
                     class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                    classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
                     href={"/auth/signup"}
                     onclick={() => {
                       setIsOpen(false);
                     }}
                     replace={true}
-                    style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
                   >
                     Sign Up
                   </A>

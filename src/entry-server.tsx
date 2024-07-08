@@ -6,7 +6,7 @@ import "~/css/modal.css";
 export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => (
-      <html lang="en" style="display: none">
+      <html lang="en">
         <head>
           <meta charset="utf-8" />
           <meta content="width=device-width, initial-scale=1" name="viewport" />

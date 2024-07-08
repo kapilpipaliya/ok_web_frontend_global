@@ -88,58 +88,55 @@ export const SupportTicketSection = (props: Readonly<{
     return (
       <Show
         fallback={
-          <div class="text-align:-webkit-center">
+          <div class="text-align:center">
             <img
               class="h:30vh"
               src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
             />
-            <div class="font-weight:600" style="text-align:center;">
+            <div class="font-weight:600 text-align:center">
               No messages yet
             </div>
           </div>
         }
         when={messages().length > 0}
       >
-        <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="display:flex flex-direction:column justify-content:space-between left:50% max-height:500px overflow:hidden top:50% z-index:2">
           <div
-            class="flex-col grid"
+            class="flex-col grid overflow-y:auto padding:10px"
             ref={(el) => {
               messageContainer = el;
             }}
-            style="overflow-y: auto; padding: 10px;"
           >
             <For each={messages()}>
               {(msg: any) => (
                 <>
                   <div class="rel @fade|.5s mb:10 mt:10">
                     <div
-                      style={`color: #fff; float: ${
-                        msg.personal ? "right" : "left"
-                      }; text-align: ${
-                        msg.personal ? "right" : "left"
-                      }; background: ${
-                        msg.personal
-                          ? "linear-gradient(120deg, #248A52, #257287)"
-                          : "rgb(29 92 194 / 76%)"
-                      }; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}
+                      class="border-radius:5px margin-bottom:5px padding:5px"
+                      classList={{
+                        "color:#fff": true,
+                        "float:left text-align:left background:rgb(29|92|194|/|76%)": !msg.personal,
+                        "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)": msg.personal,
+                      }}
                     >
                       {msg.text}
                     </div>
                     <div
-                      class={`${
-                        msg.personal ? "right:0" : "left:0"
-                      } abs bottom:-10`}
-                      style="font-size: 8px;"
+                      classList={{
+                        "abs bottom:-10 font-size:8px": true,
+                        "left:0": !msg.personal,
+                        "right:0": msg.personal,
+                      }}
                     >
                       {msg.timestamp}
                     </div>
                     <div
+                      class="font-size:8px transform:skew(298deg,22deg) width:10px"
                       classList={{
                         abs: true,
                         "left:0 bg:#5783d2 h:7px bottom:8px": !msg.personal,
                         "right:0 bg:#267e70 h:7px bottom:7px": msg.personal
                       }}
-                      style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;"
                     />
                   </div>
                 </>
@@ -159,18 +156,17 @@ export const SupportTicketSection = (props: Readonly<{
             <Chat id={props.id} />
           </div>
         }
-        bodyStyle={{ "max-height": "none", overflow: "auto" }}
         buttonLabel={
           <Icon class="color:#37c" height={22} icon="bi:chat-text" width={22} />
         }
         dialogClass="min-w:30% r:10px p:0"
         footer={() => (
-          <div class={"flex ai:center jc:center"}>
+          <div class="flex ai:center jc:center">
             <div
-              class="b:1.5px|solid|lightseagreen r:5"
-              style="width: 100%;position: relative;"
+              class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%"
             >
               <input
+                class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
                 onInput={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -178,14 +174,12 @@ export const SupportTicketSection = (props: Readonly<{
                   }
                 }}
                 placeholder="Type message..."
-                style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
                 type="text"
                 value={inputMessage()}
               />
               <div
-                class="flex jc:center"
+                class="flex background:#248A52 border-radius:10px border:none color:#fff cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
                 onClick={() => sendMessage(props.id)}
-                style="position: absolute; top: 5px; right: 10px; color: #fff; border: none; background: #248A52; font-size: 10px; text-transform: uppercase;padding: 4px 6px; border-radius: 10px; cursor: pointer;"
               >
                 <Icon height={22} icon={"fluent:send-48-filled"} width={22} />
               </div>
@@ -237,10 +231,10 @@ export const SupportTicketSection = (props: Readonly<{
   };
 
   return (
-    <div class={"w:100% w:80%@>md"}>
-      <div class={"m:10|20"}>
-        <div class={"font-weight:700"}>Support Ticket Details</div>
-        <span class={"color:grey f:14 font-weight:500"}>
+    <div class="w:100% w:80%@>md">
+      <div class="m:10|20">
+        <div class="font-weight:700">Support Ticket Details</div>
+        <span class="color:grey f:14 font-weight:500">
           List of all your contacts with our platforms
         </span>
       </div>
@@ -256,8 +250,7 @@ export const SupportTicketSection = (props: Readonly<{
             each={props.contactList()}
             fallback={
               <div
-                class={"grid-column-span:6"}
-                style="display: flex; justify-content: center; padding: 1rem; "
+                class="display:flex grid-column-span:6 justify-content:center padding:1rem"
               >
                 No Tickets Found
               </div>
@@ -279,7 +272,7 @@ export const SupportTicketSection = (props: Readonly<{
                     />
                   </TableBodyCell>
                   <TableBodyCell>
-                    <div class={"flex ai:center jc:center"}>
+                    <div class="flex ai:center jc:center">
                       <OpenDialog id={row.id} />
                       <DeleteDialog
                         buttonLabel={

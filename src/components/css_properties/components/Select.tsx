@@ -85,8 +85,10 @@ export const Select = (props: SelectField) => {
     return (
       <div class={`${props.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
         <div
-          class={`${isActive() ? "open" : ""
-            } flex ai:center b:1px|solid|lightgray f:14 jc:space-between p:2|7 r:5`}
+          classList={{
+            "flex ai:center b:1px|solid|lightgray f:14 jc:space-between p:2|7 r:5": true,
+            "open": isActive()
+          }}
           onClick={toggleDropdown}
         >
           <button
@@ -110,31 +112,34 @@ export const Select = (props: SelectField) => {
         </div>
 
         <ul
-          class={`popup ${isActive() ? "visible" : "hidden"
-            } b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available`}
+          class="scrollbar-width:thin border-radius:.28571429rem border:1px|solid|rgba(34,36,38,.15) box-shadow:-1px|0px|14px|3px|rgba(17,36,38,.15) cursor:auto max-h:15rem outline:0 overflow:auto position:absolute text-align:left text-shadow:none top:100% transition:opacity|.1s|ease will-change:transform,opacity z-index:11"
+          classList={{
+            "hidden": !isActive(),
+            "popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:full": true,
+            "visible": isActive()
+          }}
           id={`select-dropdown${props.label}`}
-          style={
-            "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
-          }
         >
           <For each={props.options}>
             {(option) => {
               const label = () => option.value || option;
               return (
                 <li
-                  class={`${selected() !== label()
-                    ? "bg:#efefef:hover"
-                    : "bg:rgb(229,234,253):hover"
-                    } ${selected() === label() ? "bg:rgb(229,234,253)" : ""
-                    } flex rel ai:center cursor:pointer f:14 font-weight:${selected() === label() ? "medium" : ""} jc:space-between p:5 r:5`}
+                  classList={{
+                    "bg:#efefef:hover": selected() !== label(),
+                    "bg:rgb(229,234,253)": selected() === label(),
+                    "bg:rgb(229,234,253):hover": selected() === label(),
+                    "flex rel ai:center cursor:pointer f:14 jc:space-between p:5 r:5": true,
+                    "font-weight:medium": selected() === label()
+                  }}
                   onClick={() => selectOption(option)}
                 >
                   <label>{formatString(label())}</label>
                   <Show when={selected() === label()}>
                     <Icon
+                      class="color:dodgerblue"
                       height={22}
                       icon={"icon-park-outline:check-one"}
-                      style={{ color: "dodgerblue" }}
                       width={22}
                     />
                   </Show>

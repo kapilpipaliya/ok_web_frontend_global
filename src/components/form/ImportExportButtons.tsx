@@ -3,15 +3,12 @@ import { Icon } from "@iconify-icon/solid";
 export function ImportExportButtons(props: Readonly<{ setPopup: (value: boolean) => void; }>) {
   return (
     <div
-      style={{
-        display: "flex",
-        "justify-content": "end",
-        "margin-bottom": "10px",
-      }}
+      class="flex justify-content:end mb:10px"
+
     >
       <button
+        class="flex"
         onClick={() => props.setPopup(true)}
-        style={{ display: "flex" }}
         type="button"
       >
         <Icon
@@ -21,9 +18,8 @@ export function ImportExportButtons(props: Readonly<{ setPopup: (value: boolean)
         Import
       </button>
       <button
-        class="b:blue"
+        class="flex b:blue"
         onClick={() => props.setPopup(true)}
-        style={{ display: "flex" }}
         type="button"
       >
         <Icon

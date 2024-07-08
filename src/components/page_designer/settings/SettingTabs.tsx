@@ -25,11 +25,10 @@ export function SettingTabs() {
   const Tabs = () => <div class="bg:white position:sticky top:0">
     <div class="flex ai:center jc:space-between position:relative">
       <Icon
-        class="bg:white:hover cursor:pointer position:absolute right:0 top:0"
+        class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
         icon={"iconamoon:close-duotone"}
         onClick={() => setLayoutStore('isRightOpen', false)}
-        style={{ color: "#c1c1c1" }}
         width={30} />
     </div>
     <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128)  f:0.875rem  font-weight:500  mb:10  text-align:center ">

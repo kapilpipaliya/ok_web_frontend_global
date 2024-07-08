@@ -13,25 +13,18 @@ export function PropertiesHeader() {
         (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) ? graph.vertexes[layoutStore.selectedComponent].P.name || "" : "";
     return (
         <div
-            style={{
-                "align-items": "center",
-                cursor: "pointer",
-                display: "flex",
-                "justify-content": "space-between",
-            }}
+            class="flex ai:center cursor:pointer jc:space-between"
         >
             <div
-                class="f:16 mb:2px ml:5px p:3|0"
-                style="flex-grow: 1; font-weight: bold;text-align-last: left;"
+                class="f:16 flex:grow font-weight:bold mb:2px ml:5px p:3|0 text-align:left"
             >
                 {getComponentName()} Properties <OpenComponentSettings id={layoutStore.selectedComponent as string} />
             </div>
             <Icon
-                class="bg:#ededed:hover r:50%"
+                class="bg:#ededed:hover color:lightgray cursor:pointer r:50%"
                 height={24}
                 icon={"iconamoon:close-light"}
                 onclick={()=>setLayoutStore('showPropertiesDrawer', false)}
-                style={{ color: "lightgray", cursor: "pointer" }}
                 width={24}
             />
         </div>

@@ -91,7 +91,7 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
         return (
           <Switch>
             <Match when={parentComponent() === "TabList"}>
-              <Tab style={item.P}>
+              <Tab>
                 <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
                   <PageAttrDnDWrapper item={item}>
                     <Content />

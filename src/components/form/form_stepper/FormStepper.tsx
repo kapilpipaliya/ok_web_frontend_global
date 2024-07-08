@@ -25,15 +25,15 @@ export function FormStepper() {
   };
 
   return (
-    <div class="m:0|10 w:100% w:50%@>md" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
+    <div class="flex flex:row flex:wrap gap:0.5rem m:0|10 p:0.75rem position:relative w:100% w:50%@>md">
       <For each={steps()}>
         {(step, index) => (
           <>
             <Icon
+              class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
               height={20}
               icon="mdi:plus"
               onClick={(e) => handleAddStepBefore(e, step)}
-              style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
               width={20}
             />
             <Step
@@ -43,10 +43,10 @@ export function FormStepper() {
             />
             <Show when={index() === steps().length - 1}>
               <Icon
+                class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
                 height={20}
                 icon="mdi:plus"
                 onClick={(e) => handleAddStepAfter(e, step)}
-                style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
                 width={20}
               />
             </Show>

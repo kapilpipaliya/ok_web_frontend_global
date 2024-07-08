@@ -79,13 +79,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "grid"}>
         <div
-          style={{
-            "align-items": props.value.align || "center",
-            display: "grid",
-            gap: props.value.gap || 10,
-            "grid-template-columns": props.value["grid-template-columns"],
-            padding: props.value.padding || 0,
-          }}
+          class={`grid ai:${props.value.align || "center"} gap:${props.value.gap || 10} grid-template-cols:${props.value["grid-template-columns"]} p:${props.value.padding || 0}`}
         >
           <For each={props.value.children}>
             {(item) => {

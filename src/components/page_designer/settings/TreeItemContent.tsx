@@ -14,8 +14,10 @@ export function TreeItemContent(props: Readonly<{ collapsedKeys: Accessor<Id[]>;
   const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
 
   return <div
-    class={`${!children().length ? "bl:1px|dashed|black pl:10" : ""}`}
-    style="display: flex;align-items: center;"
+    classList={{
+      "bl:1px|dashed|black pl:10": !children().length,
+      "d:flex ai:center": true
+    }}
   >
     &nbsp;
     <Show when={children().length}>
@@ -28,15 +30,15 @@ export function TreeItemContent(props: Readonly<{ collapsedKeys: Accessor<Id[]>;
 
       >
         <Icon
-          class={"transform 2s ease-in-out"}
+          classList={{
+            "mt:7px": true,
+            "transform 2s ease-in-out": true,
+            "transform:rotate(0deg)": props.collapsedKeys().includes(props.metaVertex.id),
+            "transform:rotate(180deg)": !props.collapsedKeys().includes(props.metaVertex.id),
+            "transition:transform 0.2s|linear": true
+          }}
           icon="mingcute:down-fill"
-          style={{
-            "margin-top": "7px",
-            transform: `${props.collapsedKeys().includes(props.metaVertex.id)
-              ? "rotate(0deg)"
-              : "rotate(180deg)"}`,
-            transition: "transform 0.2s linear",
-          }} />
+        />
       </button>
     </Show>
     &nbsp;

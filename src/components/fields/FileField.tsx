@@ -117,8 +117,8 @@ export function FileField(props: Properties) {
   return (
     <>
       <progress
+        class="width:300px"
         max={progressBar.max}
-        style="width: 300px;"
         value={progressBar.value}
       />
       <span>{percentageText()}</span>

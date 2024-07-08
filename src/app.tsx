@@ -72,18 +72,7 @@ export default function App() {
 
                   <Show fallback={<Toaster />} when={loadingSite[0]()}>
                     <div
-                      style={{
-                        "align-items": "center",
-                        background: "rgba(0, 0, 0, 0.5)",
-                        display: "flex",
-                        height: "100%",
-                        "justify-content": "center",
-                        left: "0",
-                        position: "fixed",
-                        top: "0",
-                        width: "100%",
-                        "z-index": "9999",
-                      }}
+                      class="fixed flex ai:center bg:rgba(0,0,0,0.5) h:100% jc:center left:0 top:0 w:100% z:9999"
                     >
                       <Toaster />
                     </div>

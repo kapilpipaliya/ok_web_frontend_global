@@ -13,39 +13,23 @@ export function PageSetting() {
   const selectedSection=() => createMemo(() => menuItems.find((item: any) => item.id === selected()));
   
   return (
-    <div class="flex:column@<sm mt:1rem w:98vw" style={{display: "flex"}}>
+    <div class="flex flex:column@<sm mt:1rem w:98vw">
       <div
-        class="h:90vh@>sm"
-        style={{
-          "background-color": "rgb(64,74,86)",
-          "border-radius": "5px",
-          color: "#fff",
-          padding: "20px",
-          width: "250px",
-        }}
+        class="bg:rgb(64,74,86) border-radius:5px color:#fff h:90vh@>sm p:20 w:250px"
       >
         <For each={menuItems}>
           {(item) => (
             <button
+              class={`${selected() === item.id ? 'bg:#343a40' : 'bg:transparent'} align-items:center border-radius:4px cursor:pointer display:flex mb:10px p:10px|20px`}
               onClick={() => setSelected(item.id)}
-              style={{
-                "align-items": "center",
-                "background-color":
-                  selected() === item.id ? "#343a40" : "transparent",
-                "border-radius": "4px",
-                cursor: "pointer",
-                display: "flex",
-                "margin-bottom": "10px",
-                padding: "10px 20px",
-              }}
             >
-              <span style={{"margin-right": "10px"}}>{item.icon}</span>
+              <span class="mr:10px">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           )}
         </For>
       </div>
-      <div style={{"background-color": "#f8f9fa", flex: 1, padding: "20px"}}>
+      <div class="bg:#f8f9fa flex:1 p:20">
         <Switch>
           <Match when={selected() === "thank-you-page"}>
             <ThankYouPage selectedSection={selectedSection()}/>
@@ -58,7 +42,7 @@ export function PageSetting() {
 
 const ThankYouPage = (selectedSection: any) => {
   return <>
-    <h2 class="font-weight:700 font:18 ">
+    <h2 class="font-weight:700 font:18">
       {selectedSection.icon}&nbsp;
       {selectedSection.label}
     </h2>

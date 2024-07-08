@@ -94,12 +94,12 @@ export function TableInputField(
         <AddNewButton onClick={() => insertNewRow(props.txnId || 0, props.meta, props.data!, props.isRealTime ?? false, graph, setGraph)} />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <div class={"m:2 overflow:auto r:10"} style={{ 'border': sortedVertexes().length ? '1px solid #37c' : '', "scrollbar-width": "thin" }}>
-          <table class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
+        <div class="m:2 overflow:auto r:10" classList={{ 'border:1px|solid|#37c': sortedVertexes().length, "scrollbar-width:thin": true }}>
+          <table class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em" classList={{ 'width:-webkit-fill-available': props.isTableInside }}>
             <Show when={sortedVertexes().length}>
               <thead>
-                <tr class="background-color:#37c   color:#ffffff height:35px text-align:center " style={{ width: "max-content" }}>
-                  <td class={"align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
+                <tr class="background-color:#37c color:#ffffff height:35px text-align:center width:max-content">
+                  <td class="text-align-last:center align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left">&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
                       <Switch>
@@ -108,7 +108,7 @@ export function TableInputField(
                           <span />
                         </Match>
                         <Match when={!attribute.P.hidden || attribute.P.defaultValue}>
-                          <th class={"font-weight:medium p:0px|10px"} style={{ "justify-content": "center" }}>
+                          <th class="font-weight:medium jc:center p:0px|10px">
                             {toTitle(attribute.P.displayName || attribute.P[IdAttr] || "")}
                           </th>
                         </Match>
