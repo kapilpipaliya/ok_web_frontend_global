@@ -4,7 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
-import type { PageLayoutObject } from "../../LayoutContext";
+import type { PageLayoutObject } from "../../page_designer/LayoutContext";
 
 export function moveStep(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, steps: Vertex[], fromIndex: number, toIndex: number) {
   const fromVertex = steps[fromIndex];

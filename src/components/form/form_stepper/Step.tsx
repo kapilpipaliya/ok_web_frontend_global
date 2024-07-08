@@ -5,7 +5,7 @@ import { getChildrenAttrs } from "~/components/page_designer/functions/getChildr
 import { Tooltip } from "~/components/solid_blocks";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 

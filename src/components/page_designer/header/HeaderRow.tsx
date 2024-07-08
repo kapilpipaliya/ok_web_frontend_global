@@ -5,10 +5,13 @@ import { FormContext } from "~/lib/contexts";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { LeftIcons } from "./left/LeftIcons";
+import { LeftToggleButton } from "./left/LeftToggleButton";
 import { MiddleSectionButtons } from "./middle/MiddleSectionButtons";
 import { ResizeViewButtons } from "./middle/ResizeViewButtons";
+import { UndoRedoIcons } from "./middle/UndoRedoIcons";
 import { ExportSection } from "./right/ExportSection";
 import { PreviewButton } from "./right/PreviewButton";
+import { RightToggleButton } from "./right/RightToggleButton";
 import { SaveIconButton } from "./right/SaveIconButton";
 
 export function HeaderRow() {
@@ -21,9 +24,13 @@ export function HeaderRow() {
       <div class="grid flex-grow:1 ji:center min-w:400">
         <div class="flex ai:center bg:#f3f3f4 h:49px jc:space-between mb:5 p:10 r:7 w:99%">
           <LeftIcons />
+          <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
+            <LeftToggleButton />
+          </Show>
           <div>
             <Show when={layoutStore.selectedSection === "build"}>
               <div class="flex ai:center ml:38% w:150">
+                <UndoRedoIcons />
                 <ResizeViewButtons />
                 <Icon
                   class="ml:10"
@@ -48,7 +55,10 @@ export function HeaderRow() {
             </Show>
           </div>
           <div class="flex ai:center gap:5 justify-content:space-between">
-          <FormContext.Provider value={layoutStore.formData}><SaveIconButton /></FormContext.Provider>
+            <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
+              <RightToggleButton />
+            </Show>
+            <FormContext.Provider value={layoutStore.formData}><SaveIconButton /></FormContext.Provider>
             <PreviewButton />
             <ExportSection openDialog={openDialog} setOpenDialog={setOpenDialog} />
           </div>

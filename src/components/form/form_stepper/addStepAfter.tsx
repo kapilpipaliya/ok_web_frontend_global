@@ -5,7 +5,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { addStepComponentAttr } from "~/components/page_designer/functions/drop/addStepComponentAttr";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
-import type { PageLayoutObject } from "../../LayoutContext";
+import type { PageLayoutObject } from "../../page_designer/LayoutContext";
 
 export function addStepAfter(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, toVertex: Vertex) {
   const layoutRowId = addStepComponentAttr(layoutStore.formData.formData, layoutStore.formData.txnId, graph, setGraph);

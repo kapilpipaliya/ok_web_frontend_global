@@ -8,7 +8,6 @@ import { ZIndex } from "~/components/ZIndex";
 import { DesignerLayoutStoreContext, getInitialDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 import { HeaderRow } from "../header/HeaderRow";
-import { LayoutGridRowOne } from "../row_one/LayoutGridRowOne";
 import { PageSetting } from "./PageSetting";
 import { RenderMainContent } from "./RenderMainContent";
 
@@ -38,7 +37,6 @@ export function PageDesignerWrapper(): JSX.Element {
       <DesignerLayoutStoreContext.Provider value={[layoutStore, setLayoutStore]}>
         <HeaderRow />
         <div classList={{ 'display:none': layoutStore.selectedSection === 'setting' }}>
-          <LayoutGridRowOne />
           <RenderMainContent />
         </div>
         <div classList={{ 'display:none': layoutStore.selectedSection === 'build' }}>

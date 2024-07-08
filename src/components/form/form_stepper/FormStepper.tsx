@@ -4,7 +4,7 @@ import { For, Show, createMemo } from "solid-js";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { Step } from "./Step";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
