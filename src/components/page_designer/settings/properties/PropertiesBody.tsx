@@ -1,8 +1,8 @@
-import { Show, createSignal, useContext } from "solid-js";
+import { Show, createSignal } from "solid-js";
 
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
@@ -14,7 +14,7 @@ import { RulesModalBody } from "./rules/RulesModalBody";
 export function PropertiesBody() {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
   const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
   const setPropertyValue = (meta: Vertex, value: any) => {

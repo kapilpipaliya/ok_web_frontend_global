@@ -1,17 +1,17 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, useContext } from "solid-js";
+import { createSignal } from "solid-js";
 
 import { MultiSelectField, type Option } from "../MultiSelect";
 import { PROPERTIES } from "../page_designer/settings/properties/constant";
 import { cssSelectorTree } from "./constants/StateSelector";
-import { CssEditorContext, CssStateContext } from "./context";
+import { useCssEditor, useCssState } from "./context";
 
 
 export function AddNewState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
   const [stateName, setStateName] = createSignal("");
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [, setState] = useContext(CssStateContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [, setState] = useCssState();
 
   let inputRef: HTMLTextAreaElement;
 

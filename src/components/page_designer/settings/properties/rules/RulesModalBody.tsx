@@ -1,4 +1,4 @@
-import { onCleanup, useContext } from "solid-js";
+import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
@@ -6,7 +6,7 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { FormMetaData } from "~/lib/formMetaData";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -14,7 +14,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function RulesModalBody() {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let prevTxnIndex = -1;
   prevTxnIndex =

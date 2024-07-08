@@ -1,13 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { createSignal, useContext } from "solid-js";
+import { createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
 import "~/css/base.css";
 import { registerUserCall } from "~/lib/api/api_functions";
 import { APP_BASE_URL } from "~/lib/constants";
-import { LoadingContext } from "~/lib/contexts";
+import { useLoading } from "~/lib/contexts";
 import {
   validateEmail,
   validatePassword,
@@ -17,7 +17,7 @@ import {
 export function SignUp() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
-  const [loadingSite, setLoadingSite] = useContext(LoadingContext);
+  const [loadingSite, setLoadingSite] = useLoading();
 
   const [formData, setFormData] = createSignal({
     email: "",

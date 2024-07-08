@@ -5,13 +5,13 @@ import {
   createEffect,
   createSignal,
   onMount,
-  useContext,
+  
 } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { MainSideBar } from "./MainSideBar";
@@ -31,7 +31,7 @@ export function Sidebar() {
   const [activeSection, setActiveSection] = createSignal("Home");
   const [searchTerm, setSearchTerm] = createSignal("");
   const [isSearchMode, setIsSearchMode] = createSignal(false);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [expandedSections, setExpandedSections] = createSignal<
     Map<string, boolean>
   >(new Map());

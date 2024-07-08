@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createMemo, createSignal, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
 
 import {
   PageAttrRender
@@ -7,7 +7,7 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import {  IsPreviewContext, } from "~/lib/contexts";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
@@ -16,7 +16,7 @@ export function PageView(props: Readonly<{
   isPreview?: boolean
   metaVertex?: Vertex;
 }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore() || [];
   
   const dataVertex = createMemo(() =>

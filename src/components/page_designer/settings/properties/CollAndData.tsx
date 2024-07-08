@@ -1,4 +1,4 @@
-import { onCleanup, useContext, } from "solid-js";
+import { onCleanup,  } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
@@ -6,7 +6,7 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
@@ -17,7 +17,7 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
 
 export function CollAndData() {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
   const metaVertexId = graph.newVertexId;

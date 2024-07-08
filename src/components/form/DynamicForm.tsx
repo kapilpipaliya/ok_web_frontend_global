@@ -9,7 +9,7 @@ import {
   createSignal,
   onCleanup,
   onMount,
-  useContext,
+  
 } from "solid-js";
 import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 
@@ -17,10 +17,9 @@ import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
 import { formSubmit } from "~/components/form/formSubmit";
-import { RepeaterVertexContext } from "~/components/page_attr_render/Context";
-import { addStepComponentAttr } from "~/components/page_designer/functions/drop/addStepComponentAttr";
+import { RepeaterVertexContext, useRepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
-import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, type Vertex, useGraph, } from "~/lib/graph/graph";
 import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -55,7 +54,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
   const navigate = useNavigate();
   const location = useLocation();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
   const [_, setLayoutStore] = useDesignerLayoutStore() || [];
@@ -163,7 +162,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
       <Match when={formData.formData}>
         <RepeaterVertexContext.Provider
-          value={[formData.formData, ...useContext(RepeaterVertexContext)]}
+          value={[formData.formData, ...useRepeaterVertexContext()]}
         >
           <div
             ref={(el) => {

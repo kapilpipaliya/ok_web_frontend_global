@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, createSignal, useContext } from "solid-js";
+import { Show, createSignal } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
@@ -8,7 +8,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { Tooltip } from "~/components/solid_blocks";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
@@ -18,7 +18,7 @@ import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
 export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
   const zIndex = useZIndex();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const getComponentName = () => getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
   const { showSuccessToast } = useToast();
 

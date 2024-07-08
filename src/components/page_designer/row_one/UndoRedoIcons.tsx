@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, useContext, } from "solid-js";
+import { For,  } from "solid-js";
 
 import { Tooltip } from "~/components/solid_blocks";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/undo";
 
@@ -10,7 +10,7 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function UndoRedoIcons() {
   const [layoutStore] = useDesignerLayoutStore();
-  const [graph] = useContext(GraphContext)!;
+  const [graph] = useGraph();
   const icons = [
     { disabled: () => !undoAllowed(layoutStore.formData.txnId, graph), icon: "ci:arrow-undo-up-left", onClick: () => undo(layoutStore.formData.txnId, graph), tooltip: "Undo" },
     { disabled: () => !redoAllowed(layoutStore.formData.txnId, graph), icon: "ci:arrow-undo-up-right", onClick: () => redo(layoutStore.formData.txnId, graph), tooltip: "Redo" },

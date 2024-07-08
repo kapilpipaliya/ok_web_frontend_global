@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { Show, useContext } from "solid-js";
+import { Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -9,7 +9,7 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getFormMetaData, isAnyFieldInvalid } from "~/components/page_designer/functions/getChildrenAttrs";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { FormContext } from "~/lib/contexts";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -21,7 +21,7 @@ export function FormWrapper(
     submitButton?: any;
   } & ComponentProps,
 ) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const navigate = useNavigate();
 

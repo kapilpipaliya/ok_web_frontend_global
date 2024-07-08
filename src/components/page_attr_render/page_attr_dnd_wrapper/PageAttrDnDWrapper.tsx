@@ -1,7 +1,7 @@
 import { Popover } from "@kobalte/core/popover";
-import { type JSX, createMemo, createSelector, useContext, } from "solid-js";
+import { type JSX, createMemo, createSelector,  } from "solid-js";
 
-import { PageRenderVertexContext } from "~/components/page_attr_render/Context";
+import { PageRenderVertexContext, usePageRenderVertexContext } from "~/components/page_attr_render/Context";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
 import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
@@ -9,8 +9,8 @@ import { handleDrop } from "~/components/page_designer/event_handler/handleDrop"
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { IsPreviewContext } from "~/lib/contexts";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { useIsPreview } from "~/lib/contexts";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
@@ -18,9 +18,9 @@ import { AttrConfigPopOver } from "./AttrConfigPopOver";
 
 export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item: Vertex; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const [isPreview] = useContext(IsPreviewContext);
+  const [isPreview] = useIsPreview();
   const isSelectedDragOverTargetId = createSelector(() => layoutStore.dragOverTargetId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
@@ -55,7 +55,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
   };
 
   return (
-    <PageRenderVertexContext.Provider value={[...useContext(PageRenderVertexContext), props.item]}>
+    <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
       <button
         class={`${getBorder() || ""} contents`}
         onClick={(e) => {

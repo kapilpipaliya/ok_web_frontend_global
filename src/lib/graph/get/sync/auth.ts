@@ -1,12 +1,12 @@
-import { useContext } from "solid-js";
 
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { getSelectionOptions } from "./getSelectionOptions";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
 
   const roleRows = getSelectionOptions(graph, setGraph, "->$0Role", [meta]);
   if (!roleRows.error) {

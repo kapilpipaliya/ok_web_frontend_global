@@ -1,16 +1,16 @@
 import {type Placement, autoUpdate} from '@floating-ui/dom';
 import {makeEventListener} from "@solid-primitives/event-listener";
 import {useFloating} from 'solid-floating-ui';
-import {type JSX, createSignal, onMount, splitProps, useContext} from "solid-js";
+import {type JSX, createSignal, onMount, splitProps, } from "solid-js";
 import {Portal} from "solid-js/web";
 
 import {useActiveClickOutside} from "~/components/useActiveClickOutside";
-import {GraphContext} from '~/lib/graph/graph';
+import { useGraph } from '~/lib/graph/graph';
 
 export function DropdownMenu(props: { onClickOutside?: () => void, parentRef: HTMLElement, plaement?: Placement } & JSX.HTMLAttributes<HTMLDivElement>) {
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
-    const [graph, setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useGraph();
   const activeClickOutside = useActiveClickOutside(graph, setGraph);
 
   const position = useFloating(reference, floating, {

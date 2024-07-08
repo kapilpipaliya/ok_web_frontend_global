@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, useContext } from "solid-js";
+import { Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { CssEditorContext } from "./context";
+import { useCssEditor } from "./context";
 
 export function ResetButton() {
-  const [cssState, setCssState] = useContext(CssEditorContext);
+  const [cssState, setCssState] = useCssEditor();
 
   return (
     <Show when={Object.entries(cssState).length}>

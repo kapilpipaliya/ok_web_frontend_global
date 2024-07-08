@@ -10,7 +10,7 @@ import { PreviewButton } from "./right/PreviewButton";
 import { SaveButton } from "./right/SaveButton";
 
 export function HeaderRow() {
-  // const [graph] = useContext(GraphContext)!;
+  // const [graph] = useGraph();
   const [openDialog, setOpenDialog] = createSignal(false);
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
 

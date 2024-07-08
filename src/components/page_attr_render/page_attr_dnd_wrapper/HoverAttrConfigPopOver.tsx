@@ -1,15 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
 import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 export const HoverAttrConfigPopOver = (props: { item: Vertex; }) => {
   const zIndex = useZIndex();
-  const [graph] = useContext(GraphContext)!;
+  const [graph] = useGraph();
   const getComponentName = () => getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
   return (
     <span class="position:relative ">

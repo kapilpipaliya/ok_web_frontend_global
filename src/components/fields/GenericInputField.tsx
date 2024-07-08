@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createMemo, splitProps, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
@@ -14,7 +14,7 @@ import {
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
-import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { deNullify, ifNotNull } from "~/lib/utils";
 
@@ -30,7 +30,7 @@ export function GenericInputField(
     txnId: number;
   } & ComponentProps,
 ) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const component = () => props.component ?? props.componentName ?? props.meta.P.component;
 
   // todo: make a common onChange if possible.

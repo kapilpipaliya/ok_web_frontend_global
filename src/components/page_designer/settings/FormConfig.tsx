@@ -1,12 +1,11 @@
 import { useParams } from "@solidjs/router";
-import { useContext } from "solid-js";
 
 import { DynamicForm } from "~/components/form/DynamicForm";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 export function FormConfig() {
   const params = useParams();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   return (
     <DynamicForm
       buttonAlign={"center"}

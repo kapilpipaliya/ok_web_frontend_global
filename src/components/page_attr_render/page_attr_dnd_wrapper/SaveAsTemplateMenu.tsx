@@ -1,9 +1,9 @@
-import { Show, createSignal, onMount, useContext } from "solid-js";
+import { Show, createSignal, onMount } from "solid-js";
 
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
@@ -14,7 +14,7 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 export function SaveAsTemplateMenu(props: Readonly<{ item: Vertex; onClose: () => void; onMouseLeave: () => void; parentRef: HTMLElement; }>) {
   let nameInputRef: HTMLInputElement;
   const [layoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
   const { showSuccessToast, showWarningToast } = useToast();

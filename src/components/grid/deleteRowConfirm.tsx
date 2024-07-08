@@ -1,16 +1,17 @@
+import type { Accessor } from "solid-js";
+
 import { useNavigate } from "@solidjs/router";
-import { type Accessor, useContext } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { GraphContext, type Id } from "~/lib/graph/graph";
+import { type Id, useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import {
   ProcessStatus} from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 export  function deleteRowConfirm(id: Accessor<Id | null>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
 

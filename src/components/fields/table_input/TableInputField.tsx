@@ -7,21 +7,22 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  useContext,
+  
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { AddNewButton } from "~/components/grid/AddNew";
-import {
-  PageRenderVertexContext, RepeaterVertexContext
+import {RepeaterVertexContext,
+  usePageRenderVertexContext,
+  useRepeaterVertexContext
 } from "~/components/page_attr_render/Context";
 import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   getSublistRows
 } from "~/lib/graph/mutate/form/rowFunction";
@@ -39,7 +40,7 @@ export function TableInputField(
     txnId?: number;
   } & ComponentProps,
 ) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
@@ -51,7 +52,7 @@ export function TableInputField(
     ).vertexes || []
   );
 
-  const parentItems = useContext(PageRenderVertexContext);
+  const parentItems = usePageRenderVertexContext();
   const parentData = createMemo(() => getDataVertex(graph, getLastItem(parentItems, 1)));
 
   // load data:
@@ -123,7 +124,7 @@ export function TableInputField(
             <tbody>
               <For each={sortedVertexes()}>
                 {(vertex, index) => (
-                  <RepeaterVertexContext.Provider value={[vertex, ...useContext(RepeaterVertexContext)]}>
+                  <RepeaterVertexContext.Provider value={[vertex, ...useRepeaterVertexContext()]}>
                     <SortableRow
                       dragFromIndex={dragFromIndex}
                       dragToIndex={dragToIndex}

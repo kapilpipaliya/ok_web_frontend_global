@@ -1,12 +1,12 @@
 
 import { clientOnly } from "@solidjs/start";
-import { Show, createEffect, createSignal, on, onMount, useContext } from "solid-js";
+import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { isObject } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 const PageView = clientOnly(() => import("~/components/page_attr_render/PageView"));
@@ -18,7 +18,7 @@ export function PageViewWrapper(props: Readonly<{
   pageVertexLabel?: string,
   pageVertexName?: string,
 }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const txnId = graph.newTxnId;
 
   const [dataVertex, setDataVertex] = createSignal<Vertex>();

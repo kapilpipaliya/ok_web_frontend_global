@@ -12,7 +12,6 @@ import {
   getOwner,
   on,
   runWithOwner,
-  useContext
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -21,12 +20,12 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { FormContext } from "~/lib/contexts";
+import { useFormContext } from "~/lib/contexts";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { type Id, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow, getColumnProps, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
@@ -35,9 +34,9 @@ import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 
 // Todo dont allow duplicate value in the select field
 export const SortableRow = (p: { dragFromIndex: Accessor<null | number>; dragToIndex: Accessor<null | number>; handleDrop: (event: DragEvent) => void; isRealTime: boolean; joinVertex: Vertex; rowIndex: number; setDragFromIndex: (index: number) => void; setDragToIndex: (index: number) => void; tableColumnsTemplate: Accessor<Vertex[]>; txnId: number; } & ComponentProps) => {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
-  const { cleanUpConfig, txnId: formTxnId } = useContext(FormContext);
+  const { cleanUpConfig, txnId: formTxnId } = useFormContext();
   createComputed(on(p.tableColumnsTemplate, (columns) => {
     const metaTxnId = rowMetaInitialize(graph, setGraph, p.joinVertex, p.meta, columns);
     if (metaTxnId && cleanUpConfig) {

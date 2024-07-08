@@ -1,7 +1,7 @@
-import { For, type Setter, Show, createSignal, useContext } from "solid-js";
+import { For, type Setter, Show, createSignal } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
-import { GraphContext, type Id, } from "~/lib/graph/graph";
+import { type Id, useGraph, } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { TreeItem } from "./TreeItem";
@@ -9,7 +9,7 @@ import { Properties } from "./properties/Properties";
 
 export function LayoutTree() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
   function toggleExpand(itemId: Id) {

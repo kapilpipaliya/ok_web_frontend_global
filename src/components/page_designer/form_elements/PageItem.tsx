@@ -2,20 +2,20 @@ import { Icon } from "@iconify-icon/solid";
 import { toTitle } from "case-switcher-js";
 import {
   Show,
-  createSignal, onCleanup, useContext
+  createSignal, onCleanup, 
 } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(

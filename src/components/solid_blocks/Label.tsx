@@ -1,7 +1,7 @@
-import { type JSX, Show, createMemo, createSignal, onMount, splitProps, useContext } from "solid-js";
+import { type JSX, Show, createMemo, createSignal, onMount, splitProps } from "solid-js";
 
-import { FormContext } from "~/lib/contexts";
-import { GraphContext } from "~/lib/graph/graph";
+import { useFormContext } from "~/lib/contexts";
+import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { ComponentProps } from "../fields/ComponentType";
@@ -16,8 +16,8 @@ interface LabeledFieldProps {
 
 export function Label(props: ComponentProps & JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & LabeledFieldProps) {
   const [layoutStore] = useDesignerLayoutStore() || [];
-  const formData = useContext(FormContext);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const formData = useFormContext();
+  const [graph, setGraph] = useGraph();
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label ?? "");
 

@@ -1,7 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
-import { type Accessor, type JSX, type Setter, Show, createSignal, useContext } from "solid-js";
+import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
 
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 import { useActiveClickOutside } from "./useActiveClickOutside";
 
@@ -18,7 +18,7 @@ interface DrawerProps {
 }
 
 export function Drawer(props: Readonly<DrawerProps>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const activeClickOutside = useActiveClickOutside(graph, setGraph);
   const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]

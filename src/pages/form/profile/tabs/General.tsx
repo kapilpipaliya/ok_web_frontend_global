@@ -1,13 +1,13 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { equals } from "rambda";
-import { Show, createSignal, useContext } from "solid-js";
+import { Show, createSignal } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import {getAPI} from "~/lib/api/getApi";
 import {postAPI} from "~/lib/api/postApi";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validations";
 
 type GenralProps = {
@@ -26,7 +26,7 @@ type GenralProps = {
 };
 
 export const GeneralSection = (props: GenralProps) => {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
   const [selectedImage, setSelectedImage] = createSignal(null);

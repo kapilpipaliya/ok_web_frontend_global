@@ -1,11 +1,12 @@
-import { useContext } from "solid-js";
+
 
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import type { IFormContext } from "~/lib/contexts";
 
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
-import { GraphContext } from "~/lib/graph/graph";
+
+import { useGraph } from "./graph/graph";
 
 const collectionAttr = [
   {
@@ -274,7 +275,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
                   ({} as IFormContext);
-                const [graph, setGraph] = useContext(GraphContext)!;
+                const [graph, setGraph] = useGraph();
                 const val = options.value;
                 if (
                   Object.keys(FormMetaData).includes(val) ||
@@ -852,7 +853,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
                   ({} as IFormContext);
-                const [graph, setGraph] = useContext(GraphContext)!;
+                const [graph, setGraph] = useGraph();
                 const val = options.value;
                 return !findVertexByLabelAndUniqueIdWithSkip(
                   "Page",

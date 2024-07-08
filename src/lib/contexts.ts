@@ -1,4 +1,4 @@
-import { createContext, createSignal } from "solid-js";
+import { createContext, createSignal, useContext } from "solid-js";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
@@ -23,3 +23,8 @@ export interface IFormContext {
 
 export const FormContext = createContext({} as IFormContext);
 export const PageContext = createContext({} as { [key: string]: any });
+
+export const useLoading = () => useContext(LoadingContext);
+export const useIsPreview = () => useContext(IsPreviewContext);
+export const useFormContext = () => useContext(FormContext);
+export const usePageContext = () => useContext(PageContext);

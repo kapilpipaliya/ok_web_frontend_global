@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, useContext } from "solid-js";
+import { For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { binops, unops } from "~/lib/expression_eval";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import { CustomModal } from "./CommonDialog";
@@ -75,7 +75,7 @@ export function ExpressionBuilder(props: Readonly<{
   // };
   // const data =  fetchData(jsep(props.content));
   // console.log(data);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [contentList, setContentList] = createStore(state);
   const handleInsert = () => {
     setContentList((prev) => [...prev, { error: false, value: "" }]);

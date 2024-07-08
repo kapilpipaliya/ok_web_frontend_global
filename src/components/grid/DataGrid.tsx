@@ -7,7 +7,7 @@ import {
   Switch,
   createSignal,
   onMount,
-  useContext,
+  
 } from "solid-js";
 import { createStore } from "solid-js/store";
 
@@ -17,8 +17,8 @@ import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { useToast } from "~/components/Toast";
-import { PageContext } from "~/lib/contexts";
-import { type EdgeMap, GraphContext, type Id, type Vertex, type VertexMap, } from "~/lib/graph/graph";
+import { usePageContext } from "~/lib/contexts";
+import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { SearchBar } from "../css_properties/SearchBar";
@@ -31,9 +31,9 @@ interface DataGridProps {
   tableId: string;
 }
 export function DataGrid(props: Readonly<DataGridProps>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
-  const { events } = useContext(PageContext);
+  const { events } = usePageContext();
   const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal<Id | null>(null);
   const [tableStore, setTableStore] = createStore({

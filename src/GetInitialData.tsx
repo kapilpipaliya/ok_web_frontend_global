@@ -1,11 +1,12 @@
-import { type JSX, Match, Switch, createSignal, onMount, useContext } from "solid-js";
+import { type JSX, Match, Switch, createSignal, onMount } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
-import { GraphContext } from "~/lib/graph/graph";
+
+import { useGraph } from "./lib/graph/graph";
 
 export function GetInitialData(props: Readonly<{ children: JSX.Element; }>) {
-  const graph = useContext(GraphContext)!;
+  const graph = useGraph();
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);
   const [error, setError] = createSignal<null | string>(null);
 

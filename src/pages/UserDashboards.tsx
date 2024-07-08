@@ -1,11 +1,11 @@
 import { A } from "@solidjs/router";
-import { For, useContext } from "solid-js";
+import { For } from "solid-js";
 
 import { APP_BASE_URL } from "~/lib/constants";
-import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { IdAttr, useGraph } from "~/lib/graph/graph";
 
 export function UserDashboards() {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const vertexes = () => graph.vertexLabelIdMap.Dashboard || [];
   return (
     <div class="">

@@ -1,19 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   Show, createSignal,
-  useContext
 } from "solid-js";
 
 import { Checkbox } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { OpenComponentSettings } from "../OpenComponentSettings";
 import { onClickAddComponent } from "../functions/onClickAddComponent";
 
 export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [isHovered, setIsHovered] = createSignal(false);
   const [selectedComponents, setSelectedComponents] = createSignal(

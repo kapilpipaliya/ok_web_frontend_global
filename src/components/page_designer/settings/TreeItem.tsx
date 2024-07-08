@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Show, createMemo, createSelector, useContext } from "solid-js";
+import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { GenericField } from "~/components/fields/GenericField";
@@ -14,20 +14,20 @@ import { getChildrenAttrs } from "~/components/page_designer/functions/getChildr
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { Tooltip } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
-import { IsPreviewContext } from "~/lib/contexts";
+import { useIsPreview } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { nameExpr } from "./utils/nameExpr";
 
 export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVertex: Vertex; toggleExpand: (itemId: Id) => void; }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast, showSuccessToast } = useToast();
-  const [isPreview] = useContext(IsPreviewContext);
+  const [isPreview] = useIsPreview();
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
   function toggleHidden(itemId: Id) {

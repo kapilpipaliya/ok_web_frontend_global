@@ -1,8 +1,11 @@
 import { toTitle } from "case-switcher-js";
-import { For, Match, Show, Switch, createMemo, useContext, } from "solid-js";
+import { For, Match, Show, Switch, createMemo,  } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
+import {
+  usePageRenderVertexContext,
+  useRepeaterVertexContext
+} from "~/components/page_attr_render/Context";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
@@ -11,20 +14,17 @@ import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { Tab, TabContainer } from "~/components/solid_blocks";
-import {
-  FormContext,
-  IsPreviewContext
-  } from "~/lib/contexts";
+import { useFormContext, useIsPreview } from "~/lib/contexts";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vertex }>) {
-  const parentItems = useContext(PageRenderVertexContext);
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const { txnId } = useContext(FormContext);
-  const [isPreview, setIsPreview] = useContext(IsPreviewContext);
+  const parentItems = usePageRenderVertexContext();
+  const [graph, setGraph] = useGraph();
+  const { txnId } = useFormContext();
+  const [isPreview] = useIsPreview();
   return (
     <For
       each={getChildrenAttrs(
@@ -60,14 +60,14 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
             applyDefaults={true}
             // NOTE: For repeater we cant use parentData
             component={component()}
-            // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || getDataVertex(item) || parentData()}
+            // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
             data={
               props.data ||
               getSelectionOptions(
                 graph,
                 setGraph,
                 item.P.data,
-                [...useContext(RepeaterVertexContext)],
+                [...useRepeaterVertexContext()],
               ).vertexes ||
               getDataVertex(graph, item)
             }
@@ -81,7 +81,7 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
 
         const PageComponentWithPreview = () => (
           <PageRenderVertexContext.Provider
-            value={[...useContext(PageRenderVertexContext), item]}
+            value={[...usePageRenderVertexContext(), item]}
           >
             <Content />
           </PageRenderVertexContext.Provider>

@@ -1,15 +1,15 @@
-import { type JSX, Match, Switch, createMemo, useContext } from "solid-js";
+import { type JSX, Match, Switch, createMemo } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldType";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";
 
 export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => {
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [cssDefault] = useContext(CssDefaultEditorContext);
-  const [state] = useContext(CssStateContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [cssDefault] = useCssDefaultEditor();
+  const [state] = useCssState();
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
   const handleChange: JSX.InputEventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {

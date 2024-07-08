@@ -3,11 +3,14 @@ import {
   Show,
   createEffect,
   createSignal,
-  useContext,
+  
 } from "solid-js";
 
 import {
-  PageRenderVertexContext, RepeaterVertexContext
+  PageRenderVertexContext,
+  RepeaterVertexContext,
+  usePageRenderVertexContext,
+  useRepeaterVertexContext
 } from "~/components/page_attr_render/Context";
 import {
   PageAttrRender,
@@ -18,14 +21,14 @@ import {
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
-  const repeaterContext = useContext(RepeaterVertexContext);
+  const repeaterContext = useRepeaterVertexContext();
 
   const setInitialState = async (expression?: string, collection?: string) => {
     setIsFetching(true);
@@ -72,10 +75,10 @@ export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
       <For each={options()}>
         {(vertex) => (
           <RepeaterVertexContext.Provider
-            value={[vertex, ...useContext(RepeaterVertexContext)]}
+            value={[vertex, ...useRepeaterVertexContext()]}
           >
             <PageRenderVertexContext.Provider
-              value={[...useContext(PageRenderVertexContext), props.meta]}
+              value={[...usePageRenderVertexContext(), props.meta]}
             >
               <PageAttrRender data={vertex} metaVertex={props.meta} />
             </PageRenderVertexContext.Provider>

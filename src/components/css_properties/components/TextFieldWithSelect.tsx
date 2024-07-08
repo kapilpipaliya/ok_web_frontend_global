@@ -6,21 +6,21 @@ import {
   createMemo,
   createSignal,
   onCleanup,
-  useContext,
+  
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../constants/FieldType";
 
 import { sizeTypes } from "../constants/constants";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";
 
 export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'component'>) => {
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state] = useContext(CssStateContext);
-  const [cssDefault] = useContext(CssDefaultEditorContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [state] = useCssState();
+  const [cssDefault] = useCssDefaultEditor();
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);

@@ -1,9 +1,9 @@
-import { type Accessor, createMemo, useContext } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { Tooltip } from "~/components/solid_blocks";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { deleteStep } from "./deleteStep";
@@ -11,7 +11,7 @@ import { moveStep } from "./moveStep";
 
 export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[]; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
   const steps = createMemo<Vertex[]>(() => getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData));

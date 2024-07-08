@@ -1,14 +1,14 @@
 
 import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { type JSX, type JSXElement, Show, splitProps, useContext } from "solid-js";
+import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
 
 import type { DisplayComponentProps } from "~/components/fields/ComponentType";
 
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   return (
     <button onClick={props.toggleSidebar} style={{ transition: "transform 0.3s ease" }}>
       <Icon
@@ -36,7 +36,7 @@ export function Navbar(
     "meta",
     "data",
   ]);
-  // let {events} = useContext(PageContext);
+  // let {events} = usePageContext();
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
   const navbarStyle = () =>

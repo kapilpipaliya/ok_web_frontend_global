@@ -1,10 +1,11 @@
-import { useContext } from "solid-js";
+
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { IFormContext } from "~/lib/contexts";
 
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
-import { GraphContext } from "~/lib/graph/graph";
+
+import { useGraph } from "./graph/graph";
 
 export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
   Dashboard: {
@@ -109,7 +110,7 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
                 const { formData } =
                   (options.validator.context as IFormContext) ||
                   ({} as IFormContext);
-                const [graph, setGraph] = useContext(GraphContext)!;
+                const [graph, setGraph] = useGraph();
 
                 const val = options.value;
                 return !findVertexByLabelAndUniqueIdWithSkip(

@@ -1,16 +1,16 @@
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { Match, Switch, useContext } from "solid-js";
+import { Match, Switch } from "solid-js";
 
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 const DynamicForm = clientOnly(() => import("~/components/form/DynamicForm"));
 
 export default function FormEdit() {
   const params = useParams();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
 
   return (
     <Switch>

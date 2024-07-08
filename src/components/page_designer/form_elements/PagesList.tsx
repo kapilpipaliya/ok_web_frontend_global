@@ -6,7 +6,7 @@ import {
   createEffect,
   createResource,
   createSignal,
-  useContext,
+  
 } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
@@ -17,14 +17,14 @@ import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { GraphContext, type Id } from "~/lib/graph/graph";
+import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore() || [];
   const { showErrorToast } = useToast();
   let originalData: any[] = [];

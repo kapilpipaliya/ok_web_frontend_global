@@ -1,6 +1,6 @@
 import type { createStore } from "solid-js/store";
 
-import { createContext } from "solid-js";
+import { createContext, useContext, } from "solid-js";
 
 import type {ProcessStatus, TransactionValue} from "~/lib/graph/transaction/TransactionType";
 
@@ -64,3 +64,11 @@ export interface GraphInterface {
 export const GraphContext = createContext<
   ReturnType<typeof createStore<GraphInterface>>
 >([] as any);
+
+export function useGraph() {
+  const [graph, setGraph] = useContext(GraphContext)!;
+  if (!graph || !setGraph) {
+    throw new Error("useGraph must be used within a GraphProvider");
+  }
+  return [graph, setGraph] as const;
+}

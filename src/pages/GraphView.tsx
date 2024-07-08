@@ -3,10 +3,10 @@ import {
   createEffect,
   createSignal,
   onCleanup,
-  useContext,
+  
 } from "solid-js";
 
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 interface GraphViewProps {
   edges: any[];
@@ -65,7 +65,7 @@ export function GraphView() {
     );
   };
 
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
     if (graph.vertexes && graph.edges) {

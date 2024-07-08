@@ -6,20 +6,20 @@ import {
   Show,
   Switch,
   createMemo,
-  createSignal, useContext,
+  createSignal, 
 } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
 import type { DataEditorField } from "../constants/FieldType";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { ContainerLabel } from "./ContainerLabel";
 
 export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component'>) => {
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state] = useContext(CssStateContext);
-  const [cssDefault] = useContext(CssDefaultEditorContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [state] = useCssState();
+  const [cssDefault] = useCssDefaultEditor();
   const [changedData, setChangedData] = createSignal<Record<string, string>>({});
 
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';

@@ -5,7 +5,7 @@ import {
   createSignal,
   getOwner,
   runWithOwner,
-  useContext,
+  
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -13,12 +13,12 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { FormContext } from "~/lib/contexts";
+import { useFormContext } from "~/lib/contexts";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import {
-  GraphContext,
   IdAttr,
   type Vertex,
+  useGraph,
 } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -37,8 +37,8 @@ export function SelectInputField(
     txnId?: number;
   } & ComponentProps,
 ) {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const formData = useContext(FormContext);
+  const [graph, setGraph] = useGraph();
+  const formData = useFormContext();
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
 

@@ -1,18 +1,18 @@
-import { For, type JSX, Match, Switch, createMemo, useContext } from "solid-js";
+import { For, type JSX, Match, Switch, createMemo } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
 import type { ButtonGroupField } from "../constants/FieldType";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
 import { ContainerLabel } from "./ContainerLabel";
 import { IconifyIcon } from "./IconifyIcon";
 
 export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
-  const [cssDefault] = useContext(CssDefaultEditorContext);
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state] = useContext(CssStateContext);
+  const [cssDefault] = useCssDefaultEditor();
+  const [cssState, setCssState] = useCssEditor();
+  const [state] = useCssState();
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() || '']?.[props.name] || '';
   const handleChange = (
     e: Event,

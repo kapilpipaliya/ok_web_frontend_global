@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, batch, createSignal, useContext } from "solid-js";
+import { Show, batch, createSignal } from "solid-js";
 import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
@@ -12,7 +12,7 @@ import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
 import { AddNewState } from "./AddNewState";
 import { Container } from "./components/Container";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "./context";
 import { cssStateToString } from "./utils/cssStateToString";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 const defaultStateLabel = "Default State";
@@ -29,9 +29,9 @@ function getOptions(cssState: CSSStore) {
 }
 
 export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => void; }>) {
-  const [state, setState] = useContext(CssStateContext);
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [cssDefaultState, setCssDefaultCssState] = useContext(CssDefaultEditorContext);
+  const [state, setState] = useCssState();
+  const [cssState, setCssState] = useCssEditor();
+  const [cssDefaultState, setCssDefaultCssState] = useCssDefaultEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
   let buttonRef: HTMLInputElement;
 

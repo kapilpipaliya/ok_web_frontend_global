@@ -1,13 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext } from "solid-js";
 
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 
 export function PropertiesHeader() {
-    const [graph, setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useGraph();
     const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
     
     const getComponentName = () =>

@@ -2,14 +2,17 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { Icon } from "@iconify-icon/solid";
 import { A } from "@solidjs/router";
-import { type JSXElement, Match, Show, Switch, createMemo, useContext } from "solid-js";
+import { type JSXElement, Match, Show, Switch, createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { FormWrapper } from "~/components/fields/FormWrapper";
-import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
+import {
+  usePageRenderVertexContext,
+  useRepeaterVertexContext
+} from "~/components/page_attr_render/Context";
 import { PageAttrRender, } from "~/components/page_attr_render/PageAttrRender";
 import { Repeater } from "~/components/page_attr_render/Repeater";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
@@ -35,7 +38,7 @@ import { APP_BASE_URL } from "~/lib/constants";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
-import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { deNullify } from "~/lib/utils";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
@@ -79,11 +82,11 @@ export function GenericField(
     txnId?: number;
   } & ComponentProps,
 ) {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const parentItems = useContext(PageRenderVertexContext);
+  const [graph, setGraph] = useGraph();
+  const parentItems = usePageRenderVertexContext();
   const component = createMemo(() => props.component ?? props.componentName ?? props.meta.P.component);
   const parentComponent = createMemo(() => getComponent(graph, getLastItem(parentItems, 2))?.P[IdAttr]);
-  const repeaterContext = useContext(RepeaterVertexContext);
+  const repeaterContext = useRepeaterVertexContext();
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
 
   return (
@@ -211,8 +214,8 @@ export function GenericField(
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <Switch>
-              <Match when={props.data?.P?.[props.meta.P.name] ?? props.meta.P.children}>
-                {props.data?.P[props.meta.P.name]}
+              <Match when={props.data?.P?.[props.meta.P.name] ?? props.meta.P.text ?? props.meta.P.children}>
+                {props.data?.P?.[props.meta.P.name] ?? props.meta.P.text ?? props.meta.P.children}
               </Match>
               <Match when={true}>
                 <PageAttrRender data={props.data} metaVertex={props.meta} />

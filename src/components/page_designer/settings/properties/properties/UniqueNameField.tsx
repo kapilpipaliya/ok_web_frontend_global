@@ -1,15 +1,15 @@
-import { type Accessor, useContext } from "solid-js";
+import type { Accessor } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 import { Label } from "./Label";
 
 export function UniqueNameField(props: Readonly<{ id: string; meta: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   function setUniqueNameValue(metaVertex: Vertex, data: string) {
     if (metaVertex.P.name === "name") {

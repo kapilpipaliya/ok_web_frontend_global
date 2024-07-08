@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createMemo, useContext } from "solid-js";
+import { Match, Show, Switch, createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import { GenericField } from "~/components/fields/GenericField";
@@ -6,7 +6,7 @@ import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
@@ -71,7 +71,7 @@ export function DynamicComponent(props: Readonly<{
   title?: string;
   txnId?: number;
 }>) {
-  const [graph] = useContext(GraphContext)!;
+  const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore() || [];
 
   const component = createMemo(() => {

@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, createMemo, useContext } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { Step } from "./Step";
@@ -11,7 +11,7 @@ import { addStepBefore } from "./addStepBefore";
 
 export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const steps = createMemo<Vertex[]>(() => getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData));
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {

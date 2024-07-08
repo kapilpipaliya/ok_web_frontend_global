@@ -7,7 +7,7 @@ import {
   createEffect,
   createSignal,
   onMount,
-  useContext,
+  
 } from "solid-js";
 
 import { useToast } from "~/components/Toast";
@@ -17,8 +17,8 @@ import { signOutCall } from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";
 import {getAPI} from "~/lib/api/getApi";
 import { APP_BASE_URL } from "~/lib/constants";
-import { LoadingContext, PageContext } from "~/lib/contexts";
-import { GraphContext } from "~/lib/graph/graph";
+import { PageContext, useLoading } from "~/lib/contexts";
+import { useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   mergeVertexProperties,
@@ -30,7 +30,7 @@ import { Navbar } from "~/pages/dashboard/Navbar";
 export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   const border = "|solid|rgb(212,219,231)";
 
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const vertexId = graph.newVertexId;
   addNewVertex(
     0,
@@ -93,8 +93,8 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
 }
 
 const DropdownMenu = () => {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const [loadingSite, setLoadingSite] = useContext(LoadingContext);
+  const [graph, setGraph] = useGraph();
+  const [loadingSite, setLoadingSite] = useLoading();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);

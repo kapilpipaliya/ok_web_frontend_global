@@ -1,12 +1,12 @@
-import { type Accessor, useContext } from "solid-js";
+import type { Accessor } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { GraphContext, type Vertex } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function DefaultValueContent(props: Readonly<{ meta: Accessor<Vertex>; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
-  const [graph] = useContext(GraphContext)!;
+  const [graph] = useGraph()
   const [layoutStore] = useDesignerLayoutStore();
 
   return (

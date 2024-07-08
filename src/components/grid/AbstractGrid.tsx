@@ -17,7 +17,7 @@ export function AbstractGrid(props: AbstractGridProps) {
 
   /* Dont need breadcrumb for now
   const [, setLocationData] = createSignal([]);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const param = useLocation();  
 
   async function getNavData() {

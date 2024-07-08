@@ -1,11 +1,11 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { For, Match, Switch, createMemo, createUniqueId, onCleanup, useContext } from "solid-js";
+import { For, Match, Switch, createMemo, createUniqueId, onCleanup } from "solid-js";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
@@ -24,7 +24,7 @@ interface FormGroupPropertiesProps {
 }
 
 export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
   const nameVertexId = `nameVertex${createUniqueId()}`;

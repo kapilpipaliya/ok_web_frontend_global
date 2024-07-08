@@ -7,12 +7,12 @@ import {
   Switch,
   createMemo,
   createSignal,
-  useContext,
+  
 } from "solid-js";
 
 import type { SelectField } from "../constants/FieldType";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";
   function formatString(str: string) {
@@ -24,9 +24,9 @@ import { ContainerLabel } from "./ContainerLabel";
 export const Select = (props: SelectField) => {
 
 
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state, setState] = useContext(CssStateContext);
-  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [state, setState] = useCssState();
+  const [cssDefault, setCssDefault] = useCssDefaultEditor();
   const [isActive, setIsActive] = createSignal(false);
   const toggleDropdown = () => setIsActive(!isActive());
   const selected = () =>

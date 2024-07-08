@@ -8,12 +8,12 @@ import {
   Show,
   createMemo,
   createSignal,
-  useContext,
+  
 } from "solid-js";
 import { Portal, } from "solid-js/web";
 
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
-import { GraphContext, type Vertex } from '~/lib/graph/graph';
+import { type Vertex, useGraph } from '~/lib/graph/graph';
 import { isObject } from '~/lib/utils';
 
 import { useToast } from "./Toast";
@@ -147,7 +147,7 @@ export function MultiSelectField(props: Readonly<{
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
-    const [graph, setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useGraph();
     useActiveClickOutside(graph, setGraph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());

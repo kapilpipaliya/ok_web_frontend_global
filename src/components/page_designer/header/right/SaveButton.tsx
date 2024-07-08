@@ -1,16 +1,16 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, useContext } from "solid-js";
+import { createMemo } from "solid-js";
 
 import { formSubmit } from "~/components/form/formSubmit";
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function SaveButton() {
   const [layoutStore] = useDesignerLayoutStore();
-  const [graph] = useContext(GraphContext)!;
+  const [graph] = useGraph();
 
   const onSubmit = formSubmit(
     layoutStore.formData

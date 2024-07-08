@@ -5,7 +5,6 @@ import {
   createEffect,
   createResource,
   createSignal,
-  useContext
 } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
@@ -14,13 +13,13 @@ import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { ComonentItem } from "./ComonentItem";
 
 export function ComponentList() {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as
   const [isFetchingData, setIsFetchingData] = createSignal(true);

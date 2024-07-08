@@ -6,10 +6,11 @@ import {
   createContext,
   createSignal,
   useContext,
+  
 } from "solid-js";
 
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
   null,
@@ -29,7 +30,7 @@ const toggleExpansion = (id: Id) => {
 
 export function TreeView(props: Readonly<{ children: JSX.Element; meta: Vertex; title: string }>) {
   let parentValues = useContext(treeContext);
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   // Recursive function to render tree nodes
   const RenderTreeNode = (TreeItemProps: any) => {
     const isExpanded = () => expandedItems().has(props.meta.id);

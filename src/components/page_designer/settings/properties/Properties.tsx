@@ -16,7 +16,7 @@ export function Properties() {
 
 
 // import { Icon } from "@iconify-icon/solid";
-// import { useContext, createSignal, For, onCleanup, Show } from "solid-js";
+// import {  createSignal, For, onCleanup, Show } from "solid-js";
 // import { Portal } from "solid-js/web";
 // import { GenericInputField } from "~/components/fields/GenericInputField";
 // import { SelectInputField } from "~/components/fields/SelectInputField";
@@ -33,7 +33,7 @@ export function Properties() {
 //   getChildVertex,
 // } from "~/lib/graph/get/sync/traverse";
 // import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
-// import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+// import { IdAttr, type Vertex } from "~/lib/graph/graph";
 // import {
 //   revertTransactionUpTo,
 //   getNewGraphId,
@@ -55,7 +55,7 @@ export function Properties() {
 
 // export function Properties(props: { setShowDrawer?: any }) {
 //   const [pageConfig, setPageConfig] = useDesignerLayoutStore();
-//   const [graph, setGraph] = useContext(GraphContext)!;
+//   const [graph, setGraph] = useGraph();
 //   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
 
 //   const PropertiesPart = () => {

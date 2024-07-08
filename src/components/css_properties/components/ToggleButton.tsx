@@ -1,16 +1,16 @@
-import { For, Match, Switch, createMemo, useContext } from "solid-js";
+import { For, Match, Switch, createMemo } from "solid-js";
 
 import type { ToggleField } from "../constants/FieldType";
 
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
 import { ContainerLabel } from "./ContainerLabel";
 import { IconifyIcon } from "./IconifyIcon";
 
 export const ToggleButton = (props: ToggleField) => {
-  const [cssState, setCssState] = useContext(CssEditorContext);
-  const [state, setState] = useContext(CssStateContext);
-  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+  const [cssState, setCssState] = useCssEditor();
+  const [state, setState] = useCssState();
+  const [cssDefault, setCssDefault] = useCssDefaultEditor();
   const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
   const isSelected = (option: any) => selected() === option.value;
 

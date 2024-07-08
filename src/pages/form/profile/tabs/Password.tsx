@@ -1,14 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { useToast } from "~/components/Toast";
 import { resetPasswordCall } from "~/lib/api/api_functions";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validations";
 
 export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const [passwordData, setPasswordData] = createStore<{ [key: string]: any }>({

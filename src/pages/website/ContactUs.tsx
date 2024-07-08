@@ -1,10 +1,10 @@
 import { useNavigate } from "@solidjs/router";
-import { createSignal, useContext } from "solid-js";
+import { createSignal } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import "~/css/base.css";
 import { contactUsCall } from "~/lib/api/api_functions";
-import { LoadingContext } from "~/lib/contexts";
+import { useLoading } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
 import { Footer } from "~/pages/website/Footer";
 import "~/pages/website/krd.css";
@@ -22,7 +22,7 @@ export function ContactUs() {
     name: "",
     subject: "",
   });
-  const [loadingSite, setLoadingSite] = useContext(LoadingContext);
+  const [loadingSite, setLoadingSite] = useLoading();
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();

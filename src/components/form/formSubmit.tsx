@@ -1,13 +1,12 @@
 
 
 import { useNavigate } from "@solidjs/router";
-import { useContext } from "solid-js";
 
 import type { IFormContext } from "~/lib/contexts";
 
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { GraphContext, } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
@@ -18,7 +17,7 @@ import { useToast } from "../Toast";
 export function formSubmit(formData: IFormContext, closePopUp?: () => void) {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
 
   return async () => {
     const txnId = formData.txnId;

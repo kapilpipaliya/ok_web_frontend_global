@@ -1,15 +1,15 @@
-import { onCleanup, useContext } from "solid-js";
+import { onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
-import { GraphContext } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function ImportModal(props: { toggleModal: () => void; }) {
-  const [graph, setGraph] = useContext(GraphContext)!;
+  const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let prevTxnIndex = -1;
   prevTxnIndex =
