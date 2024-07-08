@@ -38,6 +38,7 @@ export type ModalProps = {
 
 let modalCount = 0;
 
+// Note: This class depends on class Name.
 export function Modal(props: ModalProps): JSX.Element {
   const [local, containerProps] = splitProps(props, [
     "open",
