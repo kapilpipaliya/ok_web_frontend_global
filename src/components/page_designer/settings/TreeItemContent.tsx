@@ -46,6 +46,6 @@ export function TreeItemContent(props: Readonly<{ collapsedKeys: Accessor<Id[]>;
         "material-symbols:widgets-outline-rounded"}
       width={17} />
     &nbsp;&nbsp;
-    {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}
+    {nameExpr(props.metaVertex, getComponent())}
   </div>;
 }

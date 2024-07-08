@@ -12,8 +12,8 @@ export function UndoRedoIcons() {
   const [layoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
   const icons = [
-    { disabled: () => !undoAllowed(layoutStore.formData.txnId, graph), icon: "ci:arrow-undo-up-left", onClick: () => undo(layoutStore.formData.txnId, graph), tooltip: "Undo" },
-    { disabled: () => !redoAllowed(layoutStore.formData.txnId, graph), icon: "ci:arrow-undo-up-right", onClick: () => redo(layoutStore.formData.txnId, graph), tooltip: "Redo" },
+    { disabled: () => !undoAllowed(layoutStore.formData?.txnId, graph), icon: "ci:arrow-undo-up-left", onClick: () => undo(layoutStore.formData.txnId, graph), tooltip: "Undo" },
+    { disabled: () => !redoAllowed(layoutStore.formData?.txnId, graph), icon: "ci:arrow-undo-up-right", onClick: () => redo(layoutStore.formData.txnId, graph), tooltip: "Redo" },
   ];
 
   return (

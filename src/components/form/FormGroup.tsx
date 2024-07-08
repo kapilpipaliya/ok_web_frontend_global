@@ -11,7 +11,6 @@ import {DynamicComponent} from "./DynamicComponent";
 interface FormGroupProps {
   graph: Store<GraphInterface>;
   isLoginRegister?: string;
-  labelPrefix: string;
   metaAttributes: Vertex[];
   setGraph: SetStoreFunction<GraphInterface>;
   txnId: number;
@@ -76,7 +75,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
               <div class="align-content:center">
                 <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
                   <div id={id}>
-                    {props.labelPrefix} <Label />
+                    <Label />
                   </div>
                 </div>
                 <div>

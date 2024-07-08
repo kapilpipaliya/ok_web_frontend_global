@@ -68,7 +68,7 @@ export function SettingTabs() {
       >
         <FormConfig />
       </div>
-      <Show when={layoutStore.formData.formData?.L[0] === "Form"}>
+      <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
         <div classList={{ "display:none": selectedTab() !== "Primary key" }}>
           <PrimaryKey />
           <NameKey />
@@ -91,7 +91,7 @@ const PrimaryKey = () => {
       <span class="f:15 flex:1">
         <DynamicComponent
           component={"TagBox"}
-          data={layoutStore.formData.formData}
+          data={layoutStore.formData?.formData}
           isRealTime={false}
           meta={{ P: { name: "pk" } } as unknown as Vertex}
           //  Todo Add tree options, only includes the top level fields.
@@ -112,7 +112,7 @@ const NameKey = () => {
       <span class="f:15 flex:1">
         <DynamicComponent
           component={"TagBox"}
-          data={layoutStore.formData.formData}
+          data={layoutStore.formData?.formData}
           isRealTime={false}
           meta={{ P: { name: "nameKey" } } as unknown as Vertex}
           //  Todo Add tree options, only includes the top level fields.

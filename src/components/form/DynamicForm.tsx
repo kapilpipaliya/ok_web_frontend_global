@@ -146,7 +146,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                         <div class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10 grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}>
                           <FormGroup
                             graph={graph}
-                            labelPrefix={"Form"}
                             metaAttributes={formData.groupByTabsAndGroup.main[group]}
                             setGraph={setGraph}
                             txnId={formData.txnId}
@@ -169,7 +168,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                       </Show>
                       <FormGroup
                         graph={graph}
-                        labelPrefix={""}
                         metaAttributes={formData.groupByTabsAndGroup[activeTab()][group]}
                         setGraph={setGraph}
                         txnId={formData.txnId}

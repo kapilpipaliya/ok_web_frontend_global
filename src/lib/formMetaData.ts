@@ -878,7 +878,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
         
       },
       { component: "CheckBox", name: "public" },
-      { component: "CheckBox", name: "isRealTime" },
+      /*{ component: "CheckBox", name: "isRealTime" },
       {
         collection: "g:'Form'",
         component: "SelectBox",
@@ -892,10 +892,8 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       {
         collection: `g:'{{->$0Coll::'P.name'}}'`,
         component: "SelectBox",
-        
           name: "data",
-      
-      },
+      },*/
       {
         attributes: pageAttr,
         component: "DynamicTable",
@@ -953,8 +951,9 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 };
 FormMetaData.Form = {
   attributes: [...FormMetaData.Page.attributes, {
-    collection: "g:'Form'",
+    collection: "g:'FormCategory'",
     component: "SelectBox",
+    displayName: "Form Category",
     inward: true,
     name: "form",
     parentLabel: "FormCategory",
