@@ -51,7 +51,6 @@ export const QuickEditModal = (p: {
             aria-modal="true"
             class="modal min-w:30% p:0 r:10px"
             role="dialog"
-            tabindex="-1"
           >
             <div class="font-weight:bold mb:4">
               Quick Edit

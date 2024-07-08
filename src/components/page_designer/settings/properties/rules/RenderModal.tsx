@@ -7,7 +7,7 @@ export function RenderModal(props: { children: JSX.Element; isOpen: boolean; tog
   return (
     <Show when={props.isOpen}>
       <Portal>
-        <div class="sb-modal r:10|10|10|10" role="dialog" tabIndex={-1}>
+        <div class="sb-modal r:10|10|10|10" role="dialog">
           <ModalContent>
             <ModalHeader>
               Header

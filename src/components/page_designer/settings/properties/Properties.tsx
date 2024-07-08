@@ -293,7 +293,7 @@ export function Properties() {
 //     //   return (
 //     //     <>
 //     //       <Portal>
-//     //         <div role="dialog" tabIndex={-1} class="sb-modal r:10|10|10|10">
+//     //         <div role="dialog" class="sb-modal r:10|10|10|10">
 //     //           <ModalContent class={"min-w:30%"}>
 //     //             <ModalHeader>
 //     //               Import HTML
@@ -473,7 +473,7 @@ export function Properties() {
 //         </Show>
 //         <Show when={isRulesModalOpen()}>
 //           <Portal>
-//             <div role="dialog" tabIndex={-1} class="sb-modal">
+//             <div role="dialog" class="sb-modal">
 //               <ModalContent>
 //                 <ModalHeader>
 //                   Header

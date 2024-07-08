@@ -69,7 +69,6 @@ export function CustomModal(props: CustomModalProps) {
             aria-modal="true"
             class={`modal ${props.dialogClass} r:10`}
             role="dialog"
-            tabindex="-1"
           >
             <div class={"font-weight:bold mb:4"}>
               <Show fallback={props.customTitle} when={!props.customTitle}>

@@ -52,7 +52,7 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   return (
     <>
       <Portal>
-        <div class="sb-modal r:10|10|10|10" role="dialog" tabIndex={-1}>
+        <div class="sb-modal r:10|10|10|10" role="dialog">
           <ModalContent class={"min-w:30%"}>
             <ModalHeader>
               Import HTML
