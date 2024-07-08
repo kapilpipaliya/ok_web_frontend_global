@@ -53,7 +53,7 @@ export function RenderMainContent() {
         </Drawer>}
         when={!layoutStore.isSmallScreen}
       >
-        <div class={`${!layoutStore.isRightOpen ? "hidden" : "contents"}`}>
+        <div class={`${!layoutStore.isRightOpen ? "hidden" : ""}`}>
           <SettingsWrapper />
         </div>
       </Show>

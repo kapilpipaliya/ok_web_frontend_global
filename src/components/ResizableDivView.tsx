@@ -53,9 +53,8 @@ export function ResizableContainer(props: Readonly<{
   // };
 
   return (
-    <div class="grid overflow:auto"
+    <div class="grid mt:5 overflow:auto"
       classList={{
-        "jc:center": props.view !== "Desktop",
         "min-h:80%": props.view === "Mobile",
         "min-h:100%": props.view === "Tablet"
       }}>

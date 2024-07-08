@@ -160,7 +160,7 @@ export function Sidebar() {
       background: "#f4f4f4",
       "border-right": "1px solid lightgray",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",
-      display: graph.isSideBarOpen ? "contents" : "none",
+      display: graph.isSideBarOpen ? "" : "none",
       transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       transition: "transform 0.3s ease-in-out",
       width: isCollapsed() ? "70px" : "310px",

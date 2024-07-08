@@ -16,7 +16,7 @@ export function SettingTabs() {
 
   const tabs = createMemo(() => {
     const baseTabs = ["layout", "form"];
-    if (layoutStore.formData.formData?.L[0] === "Form") {
+    if (layoutStore.formData?.formData?.L[0] === "Form") {
       baseTabs.push("Primary key", "Unique constrains");
     }
     return baseTabs;
