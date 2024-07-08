@@ -6,7 +6,7 @@ import {SiteTitle} from "~/pages/website/SiteTitle";
 export type PageHeaderProps = {
   breadcrumb: { href?: string; icon?: string; name: string }[];
   children?: JSX.Element;
-  className?: string;
+  class?: string;
   title: string;
 };
 
@@ -31,7 +31,7 @@ export function Breadcrumb(props: PageHeaderProps) {
     <header
       style={{
         ...headerStyle,
-        ...(props.className && { className: props.className }),
+        ...(props.class && { class: props.class }),
       }}
     >
       <div>

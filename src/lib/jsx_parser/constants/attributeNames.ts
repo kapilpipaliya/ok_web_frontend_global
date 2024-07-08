@@ -1,5 +1,5 @@
 export default {
-  class: "className",
+  class: "class",
   colspan: "colSpan",
   for: "htmlFor",
   maxlength: "maxLength",

@@ -1,5 +1,3 @@
-import type { Config } from "@master/css";
-
 import { ReactiveMap } from "@solid-primitives/map";
 import { MetaProvider } from "@solidjs/meta";
 import { Router, } from "@solidjs/router";
@@ -15,18 +13,10 @@ import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
 import { getDefaultTxnValue } from "./lib/graph/transaction/getDefaultTxnValue";
+import masterConfig from "./master.css";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
-  const config: Config = {
-    animations: {},
-    functions: {},
-    rules: {},
-    selectors: {},
-    styles: {},
-    variables: {},
-  };
-
   const loadingSite = createSignal(false);
 
   // we start from 500000 because newId should not conflict with existing Ids
@@ -62,7 +52,7 @@ export default function App() {
     <Router
       root={(props) => {
         return (
-          <CSSRuntimeProvider config={config}>
+          <CSSRuntimeProvider config={masterConfig}>
             <GraphContext.Provider value={graph}>
               <LoadingContext.Provider value={loadingSite}>
                 <MetaProvider>

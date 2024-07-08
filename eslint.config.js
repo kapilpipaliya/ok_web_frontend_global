@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 // get help from https://github.com/Suyashtnt/personal-website/blob/master/eslint.config.js
 export default [
     {
-        ignores: ['.output/**/*', '.vinxi/**/*', 'node_modules/**/*']
+        ignores: ['.output/**/*', '.vinxi/**/*', 'node_modules/**/*', 'src/components/master_ui/packages/core/src/**/*']
     },
     {files: ["**/*.{js,mjs,cjs,ts}"]},
     {languageOptions: { globals: {...globals.browser, ...globals.node} }},

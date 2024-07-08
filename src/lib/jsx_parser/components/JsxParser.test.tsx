@@ -8,8 +8,8 @@ import JsxParser from "./JsxParser";
 jest.unmock("acorn-jsx");
 jest.unmock("./JsxParser");
 
-const Custom = ({ children = [], className, text }) => (
-  <div class={className}>
+const Custom = ({ children = [], class, text }) => (
+  <div class={class}>
     {text}
     {children}
   </div>
@@ -73,7 +73,7 @@ describe("JsxParser Component", () => {
         <JsxParser
           bindings={{ foo: 1 }}
           jsx={`
-						<div className={foo === 1 ? 'isOne' : 'isNotOne'}>
+						<div class={foo === 1 ? 'isOne' : 'isNotOne'}>
 							{foo !== 1 ? 'isNotOne' : 'isOne'}
 						</div>
 					`}
@@ -231,7 +231,7 @@ describe("JsxParser Component", () => {
         <JsxParser
           components={{ Custom }}
           jsx={
-            "<h1>Header</h1>" + '<Custom className="blah" text="Test Text" />'
+            "<h1>Header</h1>" + '<Custom class="blah" text="Test Text" />'
           }
         />,
       );
@@ -254,7 +254,7 @@ describe("JsxParser Component", () => {
     });
     test("renders custom components with spread operator", () => {
       const first = {
-        className: "blah",
+        class: "blah",
         text: "Will Be Overwritten",
       };
       const second = {
@@ -277,7 +277,7 @@ describe("JsxParser Component", () => {
 
       const custom = component.ParsedChildren[0];
       expect(custom instanceof Custom);
-      expect(custom.props.className).toEqual("blah");
+      expect(custom.props.class).toEqual("blah");
       expect(custom.props.text).toEqual("Test Text");
 
       const customNode = rendered.childNodes[0];
@@ -292,8 +292,8 @@ describe("JsxParser Component", () => {
         <JsxParser
           components={{ Custom }}
           jsx={
-            '<Custom className="outer" text="outerText">' +
-            '<Custom className="inner" text="innerText">' +
+            '<Custom class="outer" text="outerText">' +
+            '<Custom class="inner" text="innerText">' +
             "<div>Non-Custom</div>" +
             "</Custom>" +
             "</Custom>"
@@ -305,7 +305,7 @@ describe("JsxParser Component", () => {
 
       const outer = rendered.childNodes[0];
       expect(outer.nodeName).toEqual("DIV");
-      expect(outer.className).toEqual("outer");
+      expect(outer.class).toEqual("outer");
       expect(outer.childNodes).toHaveLength(2);
 
       const [text, inner] = Array.from(outer.childNodes);
@@ -313,7 +313,7 @@ describe("JsxParser Component", () => {
       expect(text.textContent).toEqual("outerText");
       expect(inner.nodeType).toEqual(Node.ELEMENT_NODE);
       expect(inner.nodeName).toEqual("DIV");
-      expect(inner.className).toEqual("inner");
+      expect(inner.class).toEqual("inner");
       expect(inner.childNodes).toHaveLength(2);
 
       const [innerText, innerDiv] = Array.from(inner.childNodes);
@@ -428,7 +428,7 @@ describe("JsxParser Component", () => {
           components={{ Lib }}
           jsx={
             "<h1>Header</h1>" +
-            '<Lib.Custom className="blah" text="Test Text" />'
+            '<Lib.Custom class="blah" text="Test Text" />'
           }
         />,
       );
@@ -457,7 +457,7 @@ describe("JsxParser Component", () => {
           components={{ Lib }}
           jsx={
             "<h1>Header</h1>" +
-            '<Lib.SubLib.Custom className="blah" text="Test Text" />'
+            '<Lib.SubLib.Custom class="blah" text="Test Text" />'
           }
         />,
       );
@@ -516,7 +516,7 @@ describe("JsxParser Component", () => {
     test("renders errors with renderError prop, if supplied", () => {
       const onError = jest.fn();
        
-      const renderError = ({ error }) => <div className="error">{error}</div>;
+      const renderError = ({ error }) => <div class="error">{error}</div>;
       const { rendered } = render(
         <JsxParser {...{ onError, renderError }} jsx="<h2>No closing tag " />,
       );
@@ -666,7 +666,7 @@ describe("JsxParser Component", () => {
   describe("whitespace", () => {
     test("allows no-whitespace-element named custom components to take whitespace", () => {
       // eslint-disable-next-line react/prop-types
-      const tr = ({ children }) => <div className="tr">{children}</div>;
+      const tr = ({ children }) => <div class="tr">{children}</div>;
       const { rendered } = render(
         <JsxParser
           components={{ tr }}
@@ -726,7 +726,7 @@ describe("JsxParser Component", () => {
       expect(div.nodeType).toEqual(Node.ELEMENT_NODE);
       expect(div.nodeName).toEqual("DIV");
       expect(div.textContent).toEqual("Bar");
-      expect(div.className).toEqual("foo");
+      expect(div.class).toEqual("foo");
     });
     test("keeps non-breaking spaces as such", () => {
       const { rendered } = render(
@@ -1267,7 +1267,7 @@ describe("JsxParser Component", () => {
         allowUnknownElements={false}
         jsx="<foo />"
         renderInWrapper={false}
-        renderUnrecognized={(name) => <div className={name}>{name}</div>}
+        renderUnrecognized={(name) => <div class={name}>{name}</div>}
       />,
     );
     expect(html).toEqual('<div class="foo">foo</div>');
@@ -1378,8 +1378,8 @@ describe("JsxParser Component", () => {
       render(<JsxParser jsx="{ [1, 2, 3].find(num => num === 2) }" />),
     ).toThrow();
   });
-  test("supports className prop", () => {
-    const { html } = render(<JsxParser className="foo" jsx="Text" />);
+  test("supports class prop", () => {
+    const { html } = render(<JsxParser class="foo" jsx="Text" />);
     expect(html).toMatch('<div class="jsx-parser foo">Text</div>');
   });
 
@@ -1389,10 +1389,10 @@ describe("JsxParser Component", () => {
         <JsxParser
           components={{ Custom }}
           jsx={
-            '<Custom className="parent" text="parent">' +
-            '<Custom className="child-1" text="child-1" key="child-1" />' +
-            '<Custom className="child-2" text="child-2" />' +
-            '<Custom className="child-3" text="child-3" key="child-3" />' +
+            '<Custom class="parent" text="parent">' +
+            '<Custom class="child-1" text="child-1" key="child-1" />' +
+            '<Custom class="child-2" text="child-2" />' +
+            '<Custom class="child-3" text="child-3" key="child-3" />' +
             "</Custom>"
           }
         />,
@@ -1403,12 +1403,12 @@ describe("JsxParser Component", () => {
       expect(rendered.childNodes).toHaveLength(1);
       expect(component.ParsedChildren).toHaveLength(1);
 
-      expect(component.ParsedChildren[0].props.className).toEqual("parent");
+      expect(component.ParsedChildren[0].props.class).toEqual("parent");
       expect(component.ParsedChildren[0].props.text).toEqual("parent");
       expect(component.ParsedChildren[0].props.children).toHaveLength(3);
 
       expect(
-        component.ParsedChildren[0].props.children[0].props.className,
+        component.ParsedChildren[0].props.children[0].props.class,
       ).toEqual("child-1");
       expect(component.ParsedChildren[0].props.children[0].props.text).toEqual(
         "child-1",
@@ -1418,7 +1418,7 @@ describe("JsxParser Component", () => {
       );
 
       expect(
-        component.ParsedChildren[0].props.children[1].props.className,
+        component.ParsedChildren[0].props.children[1].props.class,
       ).toEqual("child-2");
       expect(component.ParsedChildren[0].props.children[1].props.text).toEqual(
         "child-2",
@@ -1426,7 +1426,7 @@ describe("JsxParser Component", () => {
       expect(component.ParsedChildren[0].props.children[1].key).toBeTruthy();
 
       expect(
-        component.ParsedChildren[0].props.children[2].props.className,
+        component.ParsedChildren[0].props.children[2].props.class,
       ).toEqual("child-3");
       expect(component.ParsedChildren[0].props.children[2].props.text).toEqual(
         "child-3",
@@ -1442,9 +1442,9 @@ describe("JsxParser Component", () => {
           components={{ Custom }}
           disableKeyGeneration
           jsx={
-            '<Custom className="parent" text="parent">' +
-            '<Custom className="child-1" text="child-1" key="child-1" />' +
-            '<Custom className="child-2" text="child-2" />' +
+            '<Custom class="parent" text="parent">' +
+            '<Custom class="child-1" text="child-1" key="child-1" />' +
+            '<Custom class="child-2" text="child-2" />' +
             "</Custom>"
           }
         />,
@@ -1455,12 +1455,12 @@ describe("JsxParser Component", () => {
       expect(rendered.childNodes).toHaveLength(1);
       expect(component.ParsedChildren).toHaveLength(1);
 
-      expect(component.ParsedChildren[0].props.className).toEqual("parent");
+      expect(component.ParsedChildren[0].props.class).toEqual("parent");
       expect(component.ParsedChildren[0].props.text).toEqual("parent");
       expect(component.ParsedChildren[0].props.children).toHaveLength(2);
 
       expect(
-        component.ParsedChildren[0].props.children[0].props.className,
+        component.ParsedChildren[0].props.children[0].props.class,
       ).toEqual("child-1");
       expect(component.ParsedChildren[0].props.children[0].props.text).toEqual(
         "child-1",
@@ -1470,7 +1470,7 @@ describe("JsxParser Component", () => {
       );
 
       expect(
-        component.ParsedChildren[0].props.children[1].props.className,
+        component.ParsedChildren[0].props.children[1].props.class,
       ).toEqual("child-2");
       expect(component.ParsedChildren[0].props.children[1].props.text).toEqual(
         "child-2",

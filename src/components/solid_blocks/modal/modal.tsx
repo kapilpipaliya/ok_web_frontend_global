@@ -52,14 +52,14 @@ export function Modal(props: ModalProps): JSX.Element {
     () =>
       getElements(
         local.children,
-        (node) => node.className.indexOf("sb-modal-content") !== -1,
+        (node) => node.class.indexOf("sb-modal-content") !== -1,
         [{ open, toggle }],
       ) ?? [],
   );
   const otherChildren = createMemo(() =>
     getElements(
       local.children,
-      (node) => node.className.indexOf("sb-modal-content") === -1,
+      (node) => node.class.indexOf("sb-modal-content") === -1,
       [{ open, toggle }],
     ),
   );

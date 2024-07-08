@@ -8,7 +8,7 @@ ReactDOM.render(
     autoCloseVoidElements
     jsx={`
 			<img src="http://placekitten.com/300/5000">{[1].map(x=>x)}
-			<div className="foo">bar</div>
+			<div class="foo">bar</div>
 		`}
     onError={console.error}
     showWarnings
