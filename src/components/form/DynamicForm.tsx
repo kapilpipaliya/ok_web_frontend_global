@@ -117,14 +117,13 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       txnId,
     });
 
-    if (initFormStateResult.dataVertex?.L[0] === "Form") {
-      const layoutRowId = addStepComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
-      if (layoutRowId === -1) {
-        setError("Layout Row Id Error");
-        return;
-      }
-      // setLayoutStore('activeStepId', layoutRowId);
-    }
+    // if (initFormStateResult.dataVertex?.L[0] === "Form") {
+    //   const layoutRowId = addStepComponentAttr(initFormStateResult.dataVertex, txnId, graph, setGraph);
+    //   if (layoutRowId === -1) {
+    //     setError("Layout Row Id Error");
+    //     return;
+    //   }
+    // }
     setLayoutStore?.("formData", formData);
     setIsLoading(false);
 
