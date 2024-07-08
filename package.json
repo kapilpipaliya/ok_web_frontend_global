@@ -15,9 +15,9 @@
     "@internationalized/message": "^3.1.4",
     "@kobalte/core": "^0.13.3",
     "@kobalte/utils": "^0.9.0",
-    "@master/css": "^2.0.0-rc.43",
-    "@master/css-runtime": "^2.0.0-rc.43",
-    "@master/eslint-plugin-css": "^2.0.0-rc.43",
+    "@master/css": "^2.0.0-rc.44",
+    "@master/css-runtime": "^2.0.0-rc.44",
+    "@master/eslint-plugin-css": "^2.0.0-rc.44",
     "@memgraph/orb": "^0.4.3",
     "@mobily/ts-belt": "^4.0.0-rc.5",
     "@orbit/data": "^0.17.0",
@@ -36,7 +36,7 @@
     "@tanstack/solid-table": "^8.17.3",
     "@thisbeyond/solid-dnd": "^0.7.5",
     "@untemps/solid-readotron": "^1.0.2",
-    "acorn": "^8.12.0",
+    "acorn": "^8.12.1",
     "acorn-jsx": "^5.3.2",
     "bcryptjs": "^2.4.3",
     "case-switcher-js": "^1.1.10",
@@ -112,12 +112,12 @@
     "@biomejs/biome": "1.8.3",
     "@eslint/js": "^9.6.0",
     "@types/formidable": "^3.4.5",
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.10",
     "@types/nodemailer": "^6.4.15",
     "@types/uuid": "^10.0.0",
     "eslint": "^9.6.0",
-    "globals": "^15.7.0",
+    "globals": "^15.8.0",
     "typescript": "^5.5.0",
-    "typescript-eslint": "^7.14.1"
+    "typescript-eslint": "^8.0.0-alpha.39"
   }
 }

@@ -23,13 +23,13 @@ export function RouteDesigner() {
     <div style="padding: 20px;">
       <form onSubmit={getFormFields}>
         <div style="margin-bottom: 20px;">
-          <button onClick={() => addElement("table")}>
+          <button onClick={() => addElement("table")} type="button">
             Add Table
           </button>
-          <button onClick={() => addElement("button")}>
+          <button onClick={() => addElement("button")} type="button">
             Add Button
           </button>
-          <button onClick={() => addElement("modal")}>
+          <button onClick={() => addElement("modal")} type="button">
             Add Modal
           </button>
         </div>
@@ -54,6 +54,7 @@ export function RouteDesigner() {
             <button
               // variant="outlined"
               onClick={() => setShowModal(false)}
+              type="button"
             >
               Close
             </button>
@@ -88,7 +89,7 @@ const DynamicElement = (props: {
         </Table>
       </Match>
       <Match when={props.element.type === "button"}>
-        <button style="margin-bottom: 20px; padding: 10px;">
+        <button style="margin-bottom: 20px; padding: 10px;" type="button">
           Button
         </button>
       </Match>
@@ -97,6 +98,7 @@ const DynamicElement = (props: {
           <button
             onClick={() => props.setShowModal(true)}
             style="padding: 10px;"
+            type="button"
           >
             Open Modal
           </button>
