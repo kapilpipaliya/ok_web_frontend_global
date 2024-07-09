@@ -7,8 +7,8 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
+import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { ImportModal } from "./import/ImportModal";
-import { FormGroupProperties } from "./properties/FormGroupProperties";
 import { RulesModal } from "./rules/RulesModal";
 
 export function PropertiesBody() {

@@ -6,7 +6,7 @@ import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { nameExpr } from "./utils/nameExpr";
+import { nameExpr } from "../utils/nameExpr";
 
 export function TreeItemContent(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVertex: Vertex; toggleExpand: (itemId: Id) => void; }>) {
   const [graph, setGraph] = useGraph();

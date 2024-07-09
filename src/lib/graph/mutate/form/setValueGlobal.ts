@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import { validateInput } from "~/components/page_designer/settings/validateInput";
+import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
 import {
   type GraphInterface, IdAttr,
   type Vertex

@@ -6,7 +6,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
-import { validateInput } from "~/components/page_designer/settings/validateInput";
+import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
 import { evaluate } from "~/lib/expression_eval";
 
 import type { FieldAttribute, IFormMetaData } from "../../../lib/FormMetadataType";

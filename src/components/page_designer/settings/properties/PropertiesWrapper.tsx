@@ -1,7 +1,7 @@
 import { PropertiesBody } from './PropertiesBody';
 import { PropertiesHeader } from './PropertiesHeader';
 
-export function Properties() {
+export function PropertiesWrapper() {
   return (
     <div class="ml:5 mr:5 ">
       <PropertiesHeader />

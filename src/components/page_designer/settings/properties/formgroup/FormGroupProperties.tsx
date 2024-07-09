@@ -9,8 +9,8 @@ import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
-import { ValidationConfig } from "../../ValidationConfig";
 import { PROPERTIES } from "../constant";
+import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";

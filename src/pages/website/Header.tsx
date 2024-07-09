@@ -18,7 +18,7 @@ export function Header() {
       <nav aria-label="Main Navigation" class="links">
         <ul>
           <li>
-            <a class="bodycopytext-16" href="/public">
+            <a class="bodycopytext-16" href="/">
               Home
             </a>
           </li>

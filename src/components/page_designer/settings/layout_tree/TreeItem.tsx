@@ -11,7 +11,7 @@ import { validateDragOver } from "~/components/page_designer/functions/validateD
 import { useIsPreview } from "~/lib/contexts";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContent } from "./TreeItemContent";
 

@@ -7,8 +7,8 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
-import { FormConfig } from "./FormConfig";
-import { LayoutTree } from "./LayoutTree";
+import { FormConfig } from "./form/FormConfig";
+import { LayoutTree } from "./layout_tree/LayoutTree";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();

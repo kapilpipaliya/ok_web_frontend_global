@@ -9,7 +9,7 @@ import { Tooltip } from "~/components/solid_blocks";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function AttrConfigIcons(props: { metaVertex: Vertex; }) {
   const [graph, setGraph] = useGraph();

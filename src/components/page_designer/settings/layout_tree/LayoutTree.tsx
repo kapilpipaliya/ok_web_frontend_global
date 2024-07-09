@@ -4,9 +4,9 @@ import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
 import { type Id, useGraph, } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
+import { PropertiesWrapper } from "../properties/PropertiesWrapper";
 import { TreeItem } from "./TreeItem";
-import { Properties } from "./properties/Properties";
 
 export function LayoutTree() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -53,7 +53,7 @@ export function LayoutTree() {
             setIsOpen={((v: boolean) =>
               setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}
           >
-            <Properties />
+            <PropertiesWrapper />
           </Drawer>
         </ZIndex>
       </Show>
