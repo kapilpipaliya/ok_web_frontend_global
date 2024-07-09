@@ -43,15 +43,24 @@ export function ImportModal(props: { toggleModal: () => void; }) {
     // layoutTreeViewInstance.option("items", getLayoutTreeData());
   }
   const onCancel = () => {
+    //     //   if (prevTxnIndex !== -1)
+//     //     revertTransactionUpTo(pageConfig.formData.txnId, prevTxnIndex, graph);
+//     //   // reset layout
+//     //   // layoutTreeViewInstance.option("items", getLayoutTreeData());
     props.toggleModal();
   }
   const onSubmit = () => {
+    //     //   // reset layout
+//     //   // layoutTreeViewInstance.option("items", getLayoutTreeData());
+//     //   // hack to refresh the select fields. no option is refereshing the label.
+//     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
+//     //     v ? [...v] : v,
+//     //   );
     props.toggleModal();
   }
 
   return (
-    <>
-      <Portal>
+    <Portal>
         <div class="sb-modal r:10|10|10|10" role="dialog">
           <ModalContent class={"min-w:30%"}>
             <ModalHeader>
@@ -79,20 +88,23 @@ export function ImportModal(props: { toggleModal: () => void; }) {
                 class="flex ai:center jc:center"
               >
                 <button
-                  class=""
+                class=""
                   onClick={onImport}
+                  type="button"
                 >
                   Import
                 </button>
                 <button
-                  class=""
+                class=""
                   onClick={onCancel}
+                  type="button"
                 >
                   Cancel
                 </button>
                 <button
-                  class="border-color:#FF0000 color:#FF0000"
+                class="border-color:#FF0000 color:#FF0000"
                   onClick={onSubmit}
+                  type="button"
                 >
                   Submit
                 </button>
@@ -101,6 +113,5 @@ export function ImportModal(props: { toggleModal: () => void; }) {
           </ModalContent>
         </div>
       </Portal>
-    </>
   );
 }

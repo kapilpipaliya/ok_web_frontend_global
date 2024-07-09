@@ -44,6 +44,7 @@ export function CollAndData() {
       saveValue: true
     },
     {
+      // collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
       collection: () => graph.vertexes[layoutStore.selectedId]?.P?.collection ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'` : "",
       component: "SelectBox",
       name: "data",

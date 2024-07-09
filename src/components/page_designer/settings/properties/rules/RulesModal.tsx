@@ -1,8 +1,11 @@
 import { onCleanup } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
+import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
+import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
@@ -11,10 +14,12 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
-export function RulesModalBody() {
+export function RulesModal(props: Readonly<{ toggleModal: () => void }>) {
+  const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
@@ -38,7 +43,7 @@ export function RulesModalBody() {
     setGraph
   );
   const attributes: FieldAttribute[] = JSON.parse(
-    JSON.stringify((metaAttributes?.attributes)!)
+    JSON.stringify((metaAttributes!.attributes))
   );
 
   for (const attribute of attributes) {
@@ -112,11 +117,46 @@ export function RulesModalBody() {
     revertTransaction(txnId, graph);
   });
 
+  const onRulesSubmit = () => {
+    // hack to refresh the select fields. no option is refereshing the label.
+    //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
+    //     v ? [...v] : v,
+    // );
+    props.toggleModal();
+  };
+  const onRulesCancel = () => {
+    if (prevTxnIndex !== -1) {
+      revertTransactionUpTo(layoutStore.formData.txnId, prevTxnIndex, graph);
+    }
+    props.toggleModal();
+  };
   return (
-    <TableInputField
-      data={graph.vertexes[layoutStore.selectedId]}
-      isRealTime={false}
-      meta={graph.vertexes[metaVertexId]}
-      txnId={layoutStore.formData.txnId} />
+    <Portal>
+      <dialog class={`sb-modal r:10|10|10|10 z:${zIndex}`}>
+        <ModalContent>
+          <ModalHeader>
+            Header
+            <button class="float:right" onclick={props.toggleModal} type="button">
+              ✕
+            </button>
+          </ModalHeader>
+          <ModalBody>
+            <TableInputField
+              data={graph.vertexes[layoutStore.selectedId]}
+              isRealTime={false}
+              meta={graph.vertexes[metaVertexId]}
+              txnId={layoutStore.formData.txnId} />
+          </ModalBody>
+          <ModalFooter>
+            <div
+              class="flex ai:center jc:center"
+            >
+              <button onClick={onRulesSubmit}>Submit</button>
+              <button class="border-color:#FF0000 color:#FF0000" onClick={onRulesCancel}>Cancel</button>
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </dialog>
+    </Portal>
   );
 }

@@ -9,8 +9,7 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { ImportModal } from "./import/ImportModal";
 import { FormGroupProperties } from "./properties/FormGroupProperties";
-import { RenderModal } from "./rules/RenderModal";
-import { RulesModalBody } from "./rules/RulesModalBody";
+import { RulesModal } from "./rules/RulesModal";
 
 export function PropertiesBody() {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
@@ -58,9 +57,9 @@ export function PropertiesBody() {
         />
       </Show>
       <ZIndex>
-        <RenderModal isOpen={isRulesModalOpen()} toggle={toggleRulesModal}>
-          <RulesModalBody />
-        </RenderModal>
+        <Show when={isRulesModalOpen()}>
+          <RulesModal toggleModal={toggleRulesModal} />
+        </Show>
         <Show when={isImportModalOpen()}>
           <ImportModal toggleModal={toggleImportsModal} />
         </Show>
