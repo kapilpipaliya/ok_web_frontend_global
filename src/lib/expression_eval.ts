@@ -575,7 +575,7 @@ function projectedValueUnOps(projection: any, context: any) {
   } else if (isObject(context.vertexes)) {
     vertex = context.vertexes;
   } else {
-    vertex = {};
+    vertex = context || {};
   }
   return getTextValue(path(projection, vertex));
 }

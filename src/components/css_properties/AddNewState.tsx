@@ -44,7 +44,7 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
           Find and add State Name
           <div class="items-center flex ">
             <MultiSelectField
-              displayValueChild="title"
+              displayValueKey="title"
               onRemove={() => {
                 setSelectedAllState([]);
               }}

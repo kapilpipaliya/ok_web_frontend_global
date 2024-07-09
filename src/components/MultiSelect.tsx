@@ -1,6 +1,7 @@
 import { autoUpdate } from '@floating-ui/dom';
 import { Icon } from "@iconify-icon/solid";
 import { type Ref, mergeRefs } from "@solid-primitives/refs";
+import jsep from 'jsep';
 import { useFloating } from 'solid-floating-ui';
 import {
   For,
@@ -13,6 +14,7 @@ import {
 import { Portal, } from "solid-js/web";
 
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
+import { evaluate } from '~/lib/expression_eval';
 import { type Vertex, useGraph } from '~/lib/graph/graph';
 import { isObject } from '~/lib/utils';
 
@@ -26,8 +28,7 @@ export type Option = {
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: Readonly<{
   disable?: boolean;
-  displayValueChild?: string;
-  displayValueParent?: string;
+  displayValueKey?: string;
   isLoadingOptions?: boolean;
   loadOptions?: () => Promise<void>;
   onRemove: (newSelected: Option[], value: Option) => void;
@@ -64,16 +65,8 @@ export function MultiSelectField(props: Readonly<{
   };
 
   const getOptionLabel = (option: Option) => {
-    if (isObject(option) && props.displayValueParent && props.displayValueChild) {
-      return (
-        // @ts-expect-error ignore
-        option[props.displayValueParent]?.[props.displayValueChild] ||
-        // @ts-expect-error ignore
-        option[props.displayValueParent]?.name
-      );
-    } else if (isObject(option) && props.displayValueChild) {
-      // @ts-expect-error ignore
-      return option[props.displayValueChild];
+    if (isObject(option) && props.displayValueKey) {
+      return evaluate(jsep(props.displayValueKey), option);
     }
     // @ts-expect-error ignore
     return isObject(option) ? option.label : option;

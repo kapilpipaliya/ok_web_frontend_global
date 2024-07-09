@@ -5,7 +5,7 @@ import {
   createSignal,
   getOwner,
   runWithOwner,
-  
+  createMemo,
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -46,7 +46,10 @@ export function SelectInputField(
     typeof props.meta.P.collection === 'function' ? props.meta.P.collection() : props.meta.P.collection
   );
 
-  const isCommaSeparated = () => props.meta.P.options?.includes(",");
+  const memoizedOptions = createMemo(() => {
+    const options = props.meta.P.options;
+    return typeof options === 'function' ? options() : options;
+  });
 
   const getStaticOptions = (options: { label: string; value: string; }[] | string) => {
     if (typeof options === "string") {
@@ -54,7 +57,7 @@ export function SelectInputField(
       return lines.map((item) => {
         const [label, val] = item.split(",");
         if (val === undefined) {
-          return !isCommaSeparated() ? label.trim() : { label: label.trim(), value: label.trim() };
+          return !props.meta.P.valueKey ? label.trim() : { label: label.trim(), value: label.trim() };
         }
         return { label: label.trim(), value: val.trim() };
       });
@@ -76,8 +79,8 @@ export function SelectInputField(
 
   const loadOptions = async () => {
     let parsedOptions = [];
-    if (props.meta.P.options) {
-      parsedOptions = getStaticOptions(props.meta.P.options);
+    if (memoizedOptions()) {
+      parsedOptions = getStaticOptions(memoizedOptions());
     } else if (props.disabled) {
       parsedOptions = getSelectedOptions();
     } else if (getCollection()) {
@@ -110,13 +113,13 @@ export function SelectInputField(
         if (props.isRealTime) {
           props.txnId = graph.newTxnId;
         }
-        if (props.meta.P.options || props.meta.P.saveValue) {
+        if (memoizedOptions() || props.meta.P.saveValue) {
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
           } else if (getComponent() === "SelectBox") {
-            // @ts-ignore
-            parsedValue = isCommaSeparated() ? value[0]["value"] : value[0];
+            // @ts-expect-error ignore
+            parsedValue = props.meta.P.valueKey ? value[0][props.meta.P.valueKey] : value[0];
           } else {
             parsedValue = value;
           }
@@ -170,25 +173,24 @@ export function SelectInputField(
       >
         <MultiSelectField
           disable={props.disabled}
-          displayValueChild={!isCommaSeparated() ? "displayName" : undefined}
-          displayValueParent={!isCommaSeparated() ? "P" : undefined}
+          displayValueKey={props.meta.P.labelKey ? props.meta.P.labelKey : "::'P.displayName'||::'P.name'||::'P.id'"}
           isLoadingOptions={loading()}
           loadOptions={loadOptions}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
-          optionValueKey={!isCommaSeparated() ? "id" : undefined}
+          optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
           options={options()}
           placeholder={`${props.title}`}
           selectedValues={() => {
-            if (!props.meta.P.options && !props.meta.P.saveValue) {
+            if (!memoizedOptions() && !props.meta.P.saveValue) {
               return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
                 return graph.vertexes[id];
               });
             } else {
               const value = props.data?.P[props.meta.P[IdAttr]];
               if(!value) return [];
-              if (!Array.isArray(value) && isCommaSeparated() && getComponent() === "SelectBox") {
-                const option = options().find((option) => (value?.value || value) === (option?.value || option));
+              if (!Array.isArray(value) && props.meta.P.valueKey && getComponent() === "SelectBox") {
+                const option = options().find((option) => (value?.[props.meta.P.valueKey] || value) === (option?.[props.meta.P.valueKey] || option));
                 return option ? [option] : [{label: value, value}];
               }
               return ensureArray(value);

@@ -173,8 +173,7 @@ export function ExpressionBuilder(props: Readonly<{
                 <div class="flex ai:center jc:space-between">
                   <div class="flex">
                     <MultiSelectField
-                      displayValueChild="name"
-                      displayValueParent="P"
+                      displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
                       onRemove={() => onUnaryOperatorChange(index())}
                       onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
                       optionValueKey="id"
@@ -209,8 +208,7 @@ export function ExpressionBuilder(props: Readonly<{
                   />
                   <div class="flex">
                     <MultiSelectField
-                      displayValueChild="name"
-                      displayValueParent="P"
+                      displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
                       onRemove={(e) => onBinaryOperatorChange(index())}
                       onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
                       optionValueKey="id"

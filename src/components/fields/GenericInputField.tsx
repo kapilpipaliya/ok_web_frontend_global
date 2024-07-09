@@ -178,8 +178,7 @@ export function GenericInputField(
           <MultiSelectField
             {...defaultValues()}
             disable={props.disabled}
-            displayValueChild="name"
-            displayValueParent="P"
+            displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
             onRemove={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
