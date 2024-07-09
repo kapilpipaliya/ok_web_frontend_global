@@ -7,9 +7,9 @@ import { Checkbox } from "~/components/solid_blocks";
 import { iconMap } from "~/lib/constants";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
-import { OpenComponentSettings } from "../OpenComponentSettings";
-import { onClickAddComponent } from "../functions/onClickAddComponent";
+import { useDesignerLayoutStore } from "../../LayoutContext";
+import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { onClickAddComponent } from "../../functions/onClickAddComponent";
 
 export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
   const [graph, setGraph] = useGraph();
@@ -72,13 +72,12 @@ export function ComonentItem(props: Readonly<{ child: Vertex; }>) {
       <Show when={isHovered()}>
         <OpenComponentSettings class="cursor:pointer position:absolute right:3px top:3px" id={props.child.id} />
       </Show>
-      {/* @ts-expect-error */}
+
       <Show
         when={isHovered() ||
           selectedComponents().has(graph.vertexes[props.child.id])}
       >
         <Checkbox
-          // @ts-expect-error
           checked={selectedComponents().has(graph.vertexes[props.child.id])}
           class="left:7px position:absolute top:-2px"
           onChange={(e) => handleCheckboxChange(e, props.child.id)}

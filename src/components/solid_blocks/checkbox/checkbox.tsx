@@ -18,7 +18,7 @@ export type CheckboxProps = {
   setChecked?: (checked: boolean) => void;
   switch?: boolean;
   value?: string;
-  wrapperStyle?: JSX.CSSProperties;
+  wrapperClass?: string;
 } & JSX.HTMLAttributes<HTMLInputElement>;
 
 export function Checkbox(props: CheckboxProps) {
@@ -58,7 +58,7 @@ export function Checkbox(props: CheckboxProps) {
           {content.children}
         </span>
       </Show>
-      <div class={"checkbox-wrapper m:-5px"} style={props.wrapperStyle}>
+      <div class={`checkbox-wrapper ${props.wrapperClass ?? ''} m:-5px`}>
         <input
           ref={props.ref}
           role={content.switch ? "switch" : undefined}

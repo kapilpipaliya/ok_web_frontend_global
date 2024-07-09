@@ -12,7 +12,7 @@ import { onClickAddComponent } from "~/components/page_designer/functions/onClic
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
   const [graph, setGraph] = useGraph();

@@ -5,8 +5,8 @@ import {
   createSignal,
 } from "solid-js";
 
-import { ComponentList } from "./ComponentList";
-import { PagesList } from "./PagesList";
+import { ComponentList } from "./components/ComponentList";
+import { PagesList } from "./pages/PagesList";
 
 export function FormElementTabs() {
 
@@ -20,7 +20,6 @@ export function FormElementTabs() {
     { collection: "EmailTemplate", title: "Email Template" }
   ]
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
-
 
   const Tabs = () => (
     <div class={`bg:white p:4 position:sticky top:0`}>

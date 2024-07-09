@@ -20,7 +20,7 @@ import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression"
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
