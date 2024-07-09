@@ -1,14 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
-import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";
-import { LayoutTree } from "./layout_tree/LayoutTree";
+import { NameKey } from "./keys/NameKey";
+import { PrimaryKey } from "./keys/PrimaryKey";
+import { LayoutTree } from "./layout/LayoutTree";
+import { Rules } from "./rules/Rules";
+import { UniqueConstrains } from "./unique_constrains/UniqueConstrains";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -17,8 +18,9 @@ export function SettingTabs() {
   const tabs = createMemo(() => {
     const baseTabs = ["layout", "form"];
     if (layoutStore.formData?.formData?.L[0] === "Form") {
-      baseTabs.push("Primary key", "Unique constrains");
+      baseTabs.push("Keys", "Unique constrains");
     }
+    baseTabs.push("Rules")
     return baseTabs;
   });
 
@@ -55,7 +57,7 @@ export function SettingTabs() {
   </div>
 
   return (
-    <div class={"direction:ltr p:5"}>
+    <div class={"p:5"}>
       <Tabs />
 
       <div classList={{ "display:none": selectedTab() !== "layout" }}>
@@ -68,7 +70,7 @@ export function SettingTabs() {
         <FormConfig />
       </div>
       <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
-        <div classList={{ "display:none": selectedTab() !== "Primary key" }}>
+        <div classList={{ "display:none": selectedTab() !== "Keys" }}>
           <PrimaryKey />
           <NameKey />
         </div>
@@ -76,51 +78,9 @@ export function SettingTabs() {
           <UniqueConstrains />
         </div>
       </Show>
+      <div classList={{ "display:none": selectedTab() !== "Rules" }}>
+        <Rules />
+      </div>
     </div>
   );
-}
-
-const PrimaryKey = () => {
-  const [layoutStore] = useDesignerLayoutStore();
-  return (
-    <div class="flex ai:center gap:2 justify-content:space-between mt:6">
-      <span class="f:15 flex:.5">
-        Primary Key
-      </span>
-      <span class="f:15 flex:1">
-        <DynamicComponent
-          component={"TagBox"}
-          data={layoutStore.formData?.formData}
-          isRealTime={false}
-          meta={{ P: { name: "pk" } } as unknown as Vertex}
-          //  Todo Add tree options, only includes the top level fields.
-          txnId={layoutStore.formData.txnId}
-        />
-      </span>
-    </div>
-  );
-}
-
-const NameKey = () => {
-  const [layoutStore] = useDesignerLayoutStore();
-  return (
-    <div class="flex ai:center gap:2 justify-content:space-between mt:6">
-      <span class="f:15 flex:.5">
-        Name Key
-      </span>
-      <span class="f:15 flex:1">
-        <DynamicComponent
-          component={"TagBox"}
-          data={layoutStore.formData?.formData}
-          isRealTime={false}
-          meta={{ P: { name: "nameKey" } } as unknown as Vertex}
-          //  Todo Add tree options, only includes the top level fields.
-          txnId={layoutStore.formData.txnId}
-        />
-      </span>
-    </div>
-  );
-}
-const UniqueConstrains = () => {
-  return <div>Unique Constrains:</div>
 }

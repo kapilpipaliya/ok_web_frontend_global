@@ -23,7 +23,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
-export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
+export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
   const [graph, setGraph] = useGraph();
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
@@ -58,7 +58,7 @@ export const Repeater = (props: Readonly<{ data: any; meta: any }>) => {
       setInitialState(expression);
       return;
     }
-    const data = getSelectionOptions(graph, setGraph, "->$0Data", props.meta).vertexes
+    const data = getSelectionOptions(graph, setGraph, "->$0Data", [props.meta]).vertexes
     if (data) {
       setOptions(data);
     } else {

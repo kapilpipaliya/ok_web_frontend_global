@@ -40,22 +40,19 @@ export function PropertiesBody() {
   const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);
   const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
 
-
   return (
-    <>
-      <Show when={layoutStore.selectedId !== -1}>
-        <div class="flex gap:2 jc:start">
-          <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
-          <button onClick={toggleImportsModal}>Import HTML</button>
-        </div>
-        <CollAndData />
-        <FormGroupProperties
-          metaAttributes={selectedComponentProperties().vertexes ?? []}
-          selectedLayout={graph.vertexes[layoutStore.selectedId]}
-          setValue={setPropertyValue}
-          txnId={layoutStore.formData.txnId}
-        />
-      </Show>
+    <Show when={layoutStore.selectedId !== -1}>
+      <div class="flex gap:2 jc:start">
+        <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
+        {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
+      </div>
+      <CollAndData />
+      <FormGroupProperties
+        metaAttributes={selectedComponentProperties().vertexes ?? []}
+        selectedLayout={graph.vertexes[layoutStore.selectedId]}
+        setValue={setPropertyValue}
+        txnId={layoutStore.formData.txnId}
+      />
       <ZIndex>
         <Show when={isRulesModalOpen()}>
           <RulesModal toggleModal={toggleRulesModal} />
@@ -64,7 +61,7 @@ export function PropertiesBody() {
           <ImportModal toggleModal={toggleImportsModal} />
         </Show>
       </ZIndex>
-    </>
+    </Show>
   );
 }
 

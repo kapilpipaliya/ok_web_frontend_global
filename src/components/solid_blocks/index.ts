@@ -6,7 +6,6 @@ export * from "./checkbox/checkbox";
 export * from "./menu/menu";
 export * from "./message/message";
 export * from "./meter/meter";
-export * from "./modal/modal";
 export * from "./progress/progress";
 export * from "./radio/radio";
 export * from "./select/select";

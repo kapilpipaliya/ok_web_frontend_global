@@ -46,7 +46,7 @@ const DEFAULT_PRECEDENCE = {
   "-": 9,
 };
 
-export const binops = {
+export const binopsInitial = {
   "!=": (a, b) => a !== b, // jshint ignore:line
   "!==": (a, b) => a !== b,
   "%": (a, b) => a % b,
@@ -70,12 +70,16 @@ export const binops = {
   "-": (a, b) => a - b,
 } as { [key: string]: (v1: any, v2: any, context: object) => any };
 
-export const unops = {
+export const binops = { ...binopsInitial };
+
+export const unaryOperatorsInitial = {
   "!": (a) => !a,
   "+": (a) => +a,
   "~": (a) => ~a,
   "-": (a) => -a,
 } as { [key: string]: (v: any, context: any) => any };
+
+export const unops = { ...unaryOperatorsInitial };
 
 declare type operand = any | number | string;
 declare type unaryCallback = (a: operand, context: object) => operand;

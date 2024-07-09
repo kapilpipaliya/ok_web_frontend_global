@@ -6,7 +6,7 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 
 export function PropertiesHeader() {
-    const [graph, setGraph] = useGraph();
+    const [graph] = useGraph();
     const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
     
     const getComponentName = () =>

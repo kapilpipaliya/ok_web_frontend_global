@@ -2,7 +2,6 @@ import { onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { GenericInputField } from "~/components/fields/GenericInputField";
-import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 import { useGraph } from "~/lib/graph/graph";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
@@ -24,9 +23,9 @@ export function ImportModal(props: { toggleModal: () => void; }) {
   setGraph("vertexes", dataVertexId, { P: {}, id: dataVertexId });
 
   onCleanup(() => {
-    // @ts-ignore
+    // @ts-expect-error
     setGraph("vertexes", metaVertexId, undefined);
-    // @ts-ignore
+    // @ts-expect-error
     setGraph("vertexes", dataVertexId, undefined);
   });
 
@@ -61,9 +60,9 @@ export function ImportModal(props: { toggleModal: () => void; }) {
 
   return (
     <Portal>
-        <div class="sb-modal r:10|10|10|10" role="dialog">
-          <ModalContent class={"min-w:30%"}>
-            <ModalHeader>
+        <dialog class={`${getModalClass()}`}>
+          <div class={"min-w:30%"}>
+            <div class="modal-header">
               Import HTML
               <button
                 class="float:right"
@@ -72,8 +71,8 @@ export function ImportModal(props: { toggleModal: () => void; }) {
               >
                 ✕
               </button>
-            </ModalHeader>
-            <ModalBody class={"mt:1rem"}>
+            </div>
+            <div class={"mt:1rem"}>
               <GenericInputField
                 component="TextArea"
                 data={graph.vertexes[dataVertexId]}
@@ -82,8 +81,8 @@ export function ImportModal(props: { toggleModal: () => void; }) {
                 setValue={(data: any) => setGraph("vertexes", dataVertexId, "P", { jsx: data })}
                 title={"Write HTML"}
                 txnId={layoutStore.formData.txnId} />
-            </ModalBody>
-            <ModalFooter>
+            </div>
+            <div class="modal-footer">
               <div
                 class="flex ai:center jc:center"
               >
@@ -109,9 +108,9 @@ export function ImportModal(props: { toggleModal: () => void; }) {
                   Submit
                 </button>
               </div>
-            </ModalFooter>
-          </ModalContent>
-        </div>
+            </div>
+          </div>
+        </dialog>
       </Portal>
   );
 }
