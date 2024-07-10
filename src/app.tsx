@@ -30,8 +30,8 @@ export default function App() {
     activeClickOutside: 0,
     componentIdMap: {},
     edges: {} as EdgeMap,
-    isSideBarOpen: true,
-    isSubSideBarOpen: true,
+    isSideBarOpen: false,
+    isSubSideBarOpen: false,
     member: {},
     navigationData: [],
     get newTxnId() {

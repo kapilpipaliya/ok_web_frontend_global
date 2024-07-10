@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, createSignal } from "solid-js";
 
-import { Tooltip } from "./solid_blocks";
+import { Tooltip } from "./solid_blocks/tooltip/tooltip";
 
 const PreviewPage = (props: any) => {
   const [view, setView] = createSignal("Desktop");

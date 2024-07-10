@@ -20,19 +20,17 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
-import {
-  Accordion,
-  Avatar,
-  Breadcrumbs,
-  Progress,
-  Select,
-  Spinner,
-  Tabs
-} from "~/components/solid_blocks";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import { Heading } from "~/components/solid_blocks/Heading";
 import { StarRating } from "~/components/solid_blocks/Rating";
 import { TreeView } from "~/components/solid_blocks/TreeView";
+import {
+  Accordion,
+} from "~/components/solid_blocks/accordion/accordion";
+import { Progress } from "~/components/solid_blocks/progress/progress";
+import { Select } from "~/components/solid_blocks/select/select";
+import { Spinner } from "~/components/solid_blocks/spinner/spinner";
+import { Tabs } from "~/components/solid_blocks/tabs/tabs";
 import { APP_BASE_URL } from "~/lib/constants";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
@@ -44,6 +42,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { Label } from "../solid_blocks/Label";
+import { Avatar } from "../solid_blocks/avatar/avatar";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {

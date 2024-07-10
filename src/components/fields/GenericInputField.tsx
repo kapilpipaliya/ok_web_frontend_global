@@ -5,13 +5,11 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { MultiSelectField } from "~/components/MultiSelect";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import {
-
-
   Radio,
   RadioGroup,
-} from "~/components/solid_blocks";
-import { FileUploader } from "~/components/solid_blocks/FileUploader";
+} from "~/components/solid_blocks/radio/radio";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
