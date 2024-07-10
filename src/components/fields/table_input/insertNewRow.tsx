@@ -15,13 +15,14 @@ export function insertNewRow(txnId: number,
   data: Vertex,
   isRealTime: boolean,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>) {
+  setGraph: SetStoreFunction<GraphInterface>,
+  properties: { [key: string]: any } = {}) {
   const { showErrorToast } = useToast();
   if (!data) {
     showErrorToast("Table data is not set");
     return;
   }
   const outerOwner = getOwner();
-  return runWithOwner(outerOwner, () => addNewRow(txnId || 0, meta, graph, setGraph, data, {}, isRealTime ?? false)
+  return runWithOwner(outerOwner, () => addNewRow(txnId || 0, meta, graph, setGraph, data, properties, isRealTime ?? false)
   );
 }

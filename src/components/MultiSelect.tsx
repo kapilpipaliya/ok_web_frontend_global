@@ -19,6 +19,7 @@ import { type Vertex, useGraph } from '~/lib/graph/graph';
 import { isObject } from '~/lib/utils';
 
 import { useToast } from "./Toast";
+import { ZIndex, useZIndex } from './ZIndex';
 
 export type Option = {
   children?: Option[];
@@ -67,7 +68,11 @@ export function MultiSelectField(props: Readonly<{
 
   const getOptionLabel = (option: Option) => {
     if (isObject(option) && props.displayValueKey) {
-      return evaluate(jsep(props.displayValueKey), option);
+      if (props.displayValueKey.includes('::')) {
+        return evaluate(jsep(props.displayValueKey), option);
+      } else {
+        return option[props.displayValueKey as keyof Option];
+      }
     }
     // @ts-expect-error ignore
     return isObject(option) ? option.label : option;
@@ -138,6 +143,7 @@ export function MultiSelectField(props: Readonly<{
 
   const Options = () => {
     const [graph, setGraph] = useGraph();
+    const zIndex = useZIndex();
     useActiveClickOutside(graph, setGraph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
@@ -259,8 +265,7 @@ export function MultiSelectField(props: Readonly<{
 
     return (
       <Portal mount={document.body}>
-        {/* z-index greater than drawers z-index */}
-        <div class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:1001" ref={setFloating} style={{
+        <div class={`radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:${zIndex}`} ref={setFloating} style={{
           left: `${position.x ?? 0}px`,
           position: position.strategy,
           top: `${position.y ?? 0}px`,
@@ -308,7 +313,7 @@ export function MultiSelectField(props: Readonly<{
           auto-complete="off"
           class={`${props.selectionLimit === 1 && selected().length === 1 ? 'w:100px' : 'min-w:100px'} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
-          onB6lur={() => {
+          onBlur={() => {
             if (dropdownVisible()) {
               // This is working fine, but its giving some bad user experience.
               optionTimeout = setTimeout(() => setDropdownVisible(false), 100);
@@ -326,7 +331,9 @@ export function MultiSelectField(props: Readonly<{
         />
       </div>
       <Show when={dropdownVisible()}>
-        <Options />
+        <ZIndex>
+          <Options />
+        </ZIndex>
       </Show>
     </div>
   );

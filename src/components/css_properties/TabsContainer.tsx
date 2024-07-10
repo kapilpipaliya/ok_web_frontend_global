@@ -10,6 +10,7 @@ import type { CSSStore } from "./context";
 
 import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
+import { ZIndex } from "../ZIndex";
 import { AddNewState } from "./AddNewState";
 import { Container } from "./components/Container";
 import { useCssDefaultEditor, useCssEditor, useCssState } from "./context";
@@ -21,8 +22,8 @@ function getOptions(cssState: CSSStore) {
   const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
 
   return Array.from(uniqueStates).map(value => {
-    const label = value in cssState 
-      ? `${value === '' ? defaultStateLabel : value} (${Object.values(cssState[value]).length})` 
+    const label = value in cssState
+      ? `${value === '' ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
       : value;
     return { label, value };
   });
@@ -35,11 +36,11 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
   const [showDropdown, setShowDropdown] = createSignal(false);
   let buttonRef: HTMLInputElement;
 
-  function getSelectedValues( ) {
-    const label = state() in cssState 
-        ? `${state() === '' ? defaultStateLabel : state()} (${Object.keys(cssState[state()] ?? {}).length})` 
-        : state();
-    return [  { label, value: state() }];
+  function getSelectedValues() {
+    const label = state() in cssState
+      ? `${state() === '' ? defaultStateLabel : state()} (${Object.keys(cssState[state()] ?? {}).length})`
+      : state();
+    return [{ label, value: state() }];
   }
 
   const handleCSSStateChange = (valueString: string) => {
@@ -89,9 +90,11 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
                 <Icon height={21} icon="ic:round-add" width={21} />
               </button>
               <Show when={showDropdown()}>
-                <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
-                  <AddNewState onClose={() => setShowDropdown(false)} />
-                </DropdownMenu>
+                <ZIndex>
+                  <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
+                    <AddNewState onClose={() => setShowDropdown(false)} />
+                  </DropdownMenu>
+                </ZIndex>
               </Show>
             </div>
 
@@ -107,7 +110,7 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
               disabled={true}
               onValueChange={handleDefaultStateChange}
               value={cssStateToString(cssDefaultState)}
-               />
+            />
             Property value
             <TextEditor
               disabled={true}

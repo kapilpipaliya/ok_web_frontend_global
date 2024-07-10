@@ -16,27 +16,25 @@ import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransaction
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
-export function RulesModal(props: Readonly<{ displayAllRules?: boolean, selectedRule?: Vertex, toggleModal: () => void }>) {
+export function RulesModal(props: Readonly<{ prevTxnIndex?: number; selectedRule?: Vertex | null, toggleModal: () => void }>) {
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
-  let prevTxnIndex = -1;
-  prevTxnIndex =
-    graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
+  const prevTxnIndex = props.prevTxnIndex ?? graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ?? 0;
 
   const metaVertexId = graph.newVertexId;
   const metaTxnId = graph.newTxnId;
-  let metaAttributes = FormMetaData.Form.attributes.find(
+  let metaAttribute = FormMetaData.Form.attributes.find(
     (x) => x.name === "Rules"
   )!;
 
-  if (!props.displayAllRules) {
-    metaAttributes = metaAttributes.attributes!.find(x => x.name === "Rule")!;
+  if (props.selectedRule) {
+    metaAttribute = metaAttribute.attributes!.find(x => x.name === "cond")!;
   }
 
   const attributes: FieldAttribute[] = JSON.parse(
-    JSON.stringify((metaAttributes.attributes))
+    JSON.stringify((metaAttribute.attributes))
   );
 
   for (const attribute of attributes) {
@@ -51,12 +49,10 @@ export function RulesModal(props: Readonly<{ displayAllRules?: boolean, selected
         }
       }
     }
-
-
   }
   addNewVertex(
     metaTxnId,
-    newVertex(metaVertexId, ["MetaAttr"], metaAttributes),
+    newVertex(metaVertexId, ["MetaAttr"], metaAttribute),
     graph,
     setGraph
   );
@@ -93,10 +89,10 @@ export function RulesModal(props: Readonly<{ displayAllRules?: boolean, selected
             <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:90vw@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
               <div>
                 <div class="">
-                  <h3 class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem" id="modal-title">{props.displayAllRules ? "All Rules" : "Rules"}:</h3>
+                  <h3 class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem" id="modal-title">{!props.selectedRule ? "All Rules" : `${props.selectedRule.P.name} Rules`}:</h3>
                   <div class="mt:0.5rem">
                     <TableInputField
-                      data={props.displayAllRules ? layoutStore.formData.formData : props.selectedRule}
+                      data={props.selectedRule ? props.selectedRule : layoutStore.formData.formData}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
                       txnId={layoutStore.formData.txnId} />

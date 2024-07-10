@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
-import { MultiSelectField, type Option } from "../MultiSelect";
-import { PROPERTIES } from "../page_designer/settings/properties/constant";
-import { cssSelectorTree } from "./constants/StateSelector";
-import { useCssEditor, useCssState } from "./context";
+import { MultiSelectField, type Option } from "~/components/MultiSelect";
+import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
+import { useCssEditor, useCssState } from "~/components/css_properties/context";
+import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 
 
 export function AddNewState(props: Readonly<{ onClose: () => void }>) {

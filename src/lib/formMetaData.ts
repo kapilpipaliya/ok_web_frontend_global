@@ -363,10 +363,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
             name: "name",
   
           },
-          {
-            component: "TextBox",
-            name: "label",
-          },
+          // {
+          //   component: "TextBox",
+          //   name: "label",
+          // },
           {
             attributes: [
               {
