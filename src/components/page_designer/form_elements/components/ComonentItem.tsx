@@ -3,7 +3,7 @@ import {
   Show, createSignal,
 } from "solid-js";
 
-import { Checkbox } from "~/components/solid_blocks";
+import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
 import { iconMap } from "~/lib/constants";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 

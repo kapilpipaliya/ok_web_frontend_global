@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For,  } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { useGraph } from "~/lib/graph/graph";
 import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/undo";

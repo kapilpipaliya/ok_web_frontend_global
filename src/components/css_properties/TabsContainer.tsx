@@ -4,7 +4,7 @@ import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks";
+import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks/tabs/tabs";
 
 import type { CSSStore } from "./context";
 

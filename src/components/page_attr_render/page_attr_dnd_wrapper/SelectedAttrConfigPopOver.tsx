@@ -6,7 +6,7 @@ import { deleteLayoutAttr } from "~/components/page_designer/event_handler/delet
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 

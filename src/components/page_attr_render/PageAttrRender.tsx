@@ -13,7 +13,7 @@ import {
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { Tab, TabContainer } from "~/components/solid_blocks";
+import { Tab, TabContainer } from "~/components/solid_blocks/tabs/tabs";
 import { useFormContext, useIsPreview } from "~/lib/contexts";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";

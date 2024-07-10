@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, createSelector } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 

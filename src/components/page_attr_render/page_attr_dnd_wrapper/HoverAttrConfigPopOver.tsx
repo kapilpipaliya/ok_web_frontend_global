@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 
 import { useZIndex } from "~/components/ZIndex";
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Vertex, useGraph } from "~/lib/graph/graph";

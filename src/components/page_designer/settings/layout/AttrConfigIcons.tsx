@@ -5,7 +5,7 @@ import { useToast } from "~/components/Toast";
 import { GenericField } from "~/components/fields/GenericField";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 

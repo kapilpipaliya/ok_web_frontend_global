@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createEffect, createSignal } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 

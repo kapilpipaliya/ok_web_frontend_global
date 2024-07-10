@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, Show, createSignal } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 export const Stepper = () => {
   const [steps, setSteps] = createSignal([

@@ -10,7 +10,7 @@ import {
   Switch, createSignal,
 } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 type TableProps = {
   data: any[];

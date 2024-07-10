@@ -2,7 +2,7 @@ import { type Accessor, createMemo } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { Tooltip } from "~/components/solid_blocks";
+import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
