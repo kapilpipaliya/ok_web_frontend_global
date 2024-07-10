@@ -15,7 +15,6 @@ import {
 } from "~/components/page_attr_render/Context";
 import { PageAttrRender, } from "~/components/page_attr_render/PageAttrRender";
 import { Repeater } from "~/components/page_attr_render/Repeater";
-import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
@@ -35,6 +34,7 @@ import { Heading } from "~/components/solid_blocks/Heading";
 import { StarRating } from "~/components/solid_blocks/Rating";
 import { TreeView } from "~/components/solid_blocks/TreeView";
 import { APP_BASE_URL } from "~/lib/constants";
+import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
@@ -85,7 +85,7 @@ export function GenericField(
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderVertexContext();
   const component = createMemo(() => props.component ?? props.componentName ?? props.meta.P.component);
-  const parentComponent = createMemo(() => getComponent(graph, getLastItem(parentItems, 2))?.P[IdAttr]);
+  const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems, 2),graph)?.P[IdAttr]);
   const repeaterContext = useRepeaterVertexContext();
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
 

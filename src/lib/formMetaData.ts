@@ -6,6 +6,7 @@ import type { IFormContext } from "~/lib/contexts";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
+import {  binopsInitial, unaryOperatorsInitial } from "./expression_eval";
 import { useGraph } from "./graph/graph";
 
 const collectionAttr = [
@@ -369,59 +370,46 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           {
             attributes: [
               {
-                attributes: [
-                  {
-                    component: "SelectBox",
-                    displayName: "Paren",
-                    items: `(
+                component: "SelectBox",
+                displayName: "Paren",
+                name: "left",
+                
+                  options: `(
 ((
 (((`,
-                    
-                      name: "left",
-                  
-                  },
-                  {
-                    component: "DropDownBoxTreeView",
-                    displayName: "Layout",
-                    name: "layout",
-                   
-                      // collection: "g:'DataType'",
-                 
-                  },
-                  {
-                    component: "SelectBox",
-                    displayName: "Field",
-                    name: "field",
-                    
-                      // collection: "g:'DataType'",
-                 
-                  },
-                  {
-                    component: "SelectBox",
-                    displayName: "Operator",
-                    items: `<
-<=
->=`,
-                  
-                      name: "operator",
-                    
-                  },
-                  {
-                    component: "SelectBox",
-                    displayName: "Paren",
-                    items: `)
-))
-)))`,
-                    
-                      name: "right",
-                   
-                  },
-                ],
-                component: "DynamicTable",
-                displayName: "Conditions",
-                name: "cond",
+              
               },
               {
+                component: "SelectBox",
+                displayName: "Field",
+                name: "leftField",
+                  // collection: "g:'DataType'",
+              },
+              // {
+              //   component: "TextBox",
+              //   displayName: "Value",
+              //   name: "leftValue",
+              // },
+              {
+                component: "SelectBox",
+                displayName: "Operator",
+                name: "operator",
+                  options: `${Object.keys(unaryOperatorsInitial).join('\n')}
+${Object.keys(binopsInitial).join('\n')}`,
+                
+              },
+              {
+                component: "SelectBox",
+                displayName: "Field",
+                name: "rightField",
+                  // collection: "g:'DataType'",
+              },
+              {
+                component: "TextBox",
+                displayName: "Value",
+                name: "rightValue",
+              },
+             /* {
                 collection: "g:'DataType'",
                 component: "SelectBox",
                 displayName: "DataType",
@@ -442,16 +430,31 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                 displayName: "Value",
                 meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
                 name: "value",
+              },*/
+              {
+                component: "SelectBox",
+                displayName: "Paren",
+                name: "right",
+                
+                  options: `)
+))
+)))`,
+               
+              },
+              {
+                component: "SelectBox",
+                displayName: "AndOr",
+                name: "andOr",
+                
+                  options: `AND
+OR`,
+               
               },
             ],
             component: "DynamicTable",
-            label: "Rule",
-
-              name: "Rule",
-              tab: "Rule",
-   
-            type: "Rule",
-          },
+            displayName: "Conditions",
+            name: "cond",
+          }
         ],
         component: "DynamicTable",
         label: "Rules",
@@ -459,7 +462,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           name: "Rules",
           tab: "Rules",
       
-        type: "Rules",
+        type: "Rule",
       },
 
       /*      {
@@ -949,6 +952,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
     title: "User",
   },
 };
+const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
+  (x) => x.name === "Rules"
+);
+
 FormMetaData.Form = {
   attributes: [...FormMetaData.Page.attributes, {
     collection: "g:'FormCategory'",
@@ -957,7 +964,7 @@ FormMetaData.Form = {
     inward: true,
     name: "form",
     parentLabel: "FormCategory",
-  }],
+  }, rulesMetaAttribute!],
   name: "Form",
   title: "Form",
 };

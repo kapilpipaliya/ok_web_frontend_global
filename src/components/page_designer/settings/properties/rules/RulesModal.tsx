@@ -5,11 +5,9 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
-import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
+import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { FormMetaData } from "~/lib/formMetaData";
-import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -18,7 +16,7 @@ import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransaction
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
-export function RulesModal(props: Readonly<{ toggleModal: () => void }>) {
+export function RulesModal(props: Readonly<{ displayAllRules?: boolean, selectedRule?: Vertex, toggleModal: () => void }>) {
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
@@ -28,93 +26,49 @@ export function RulesModal(props: Readonly<{ toggleModal: () => void }>) {
     graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
 
   const metaVertexId = graph.newVertexId;
-  const txnId = graph.newTxnId;
-  const metaAttributes = FormMetaData.Coll.attributes.find(
+  const metaTxnId = graph.newTxnId;
+  let metaAttributes = FormMetaData.Form.attributes.find(
     (x) => x.name === "Rules"
-  );
+  )!;
 
-  addNewVertex(
-    txnId,
-    newVertex(metaVertexId, ["MetaAttr"], {
-      name: metaAttributes?.name,
-      ...metaAttributes?.props,
-    }),
-    graph,
-    setGraph
-  );
+  if (!props.displayAllRules) {
+    metaAttributes = metaAttributes.attributes!.find(x => x.name === "Rule")!;
+  }
+
   const attributes: FieldAttribute[] = JSON.parse(
-    JSON.stringify((metaAttributes!.attributes))
+    JSON.stringify((metaAttributes.attributes))
   );
 
   for (const attribute of attributes) {
-    if (attribute.name === "Rule") {
-      for (const ruleattribute of attribute.attributes!) {
-        if (ruleattribute.name === "cond") {
-          for (const condAttribute of ruleattribute.attributes!) {
-            if (condAttribute.name === "layout") {
-              const data = getTreeData(
-                graph,
-                setGraph,
-                {
-                  child: {
-                    child: {
-                      child: {
-                        child: { collection: "->Attr" },
-                        collection: "->Attr",
-                      },
-                      collection: "->Attr",
-                    },
-                    collection: "->Attr",
-                  },
-                  collection: "->Attr",
-                },
-                layoutStore.formData?.formData
-                  ? [layoutStore.formData.formData]
-                  : [],
-                {
-                  nameExpr: (v: Vertex) => {
-                    const component = getChildVertex(graph, ["$0Comp"], v)
-                      .vertex?.P.name;
-                    return `${v.P.name || ''}${component ? ` (${component})` : ""}`;
-                  },
-                }
-              );
-
-              condAttribute!.props = {
-                dataSource: data,
-                displayExpr: "name",
-                itemsExpr: "children",
-                showClearButton: true,
-                treeProps: {
-                  dataStructure: "tree",
-                  displayExpr: "name",
-                  // focusStateEnabled: false,
-                  expandNodesRecursive: false,
-                  itemsExpr: "children",
-                  keyExpr: "id",
-                  // width: 200,
-                  // searchEnabled: true,
-                  // activeStateEnabled: false,
-                  selectionMode: "single",
-                },
-                valueExpr: "id",
-              };
-            }
-          }
+    if (attribute.name === "cond") {
+      for (const condAttribute of attribute.attributes!) {
+        if (condAttribute.name === "leftField" || condAttribute.name === "rightField") {
+          condAttribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
+          condAttribute.valueKey = "id";
+          condAttribute.saveEdge = true
+          condAttribute.childrenKey = "attributes";
+          condAttribute.options = () => getFormMetaData(graph, setGraph, layoutStore.formData.formData).attributes;
         }
       }
     }
-  }
 
+
+  }
+  addNewVertex(
+    metaTxnId,
+    newVertex(metaVertexId, ["MetaAttr"], metaAttributes),
+    graph,
+    setGraph
+  );
   addMetaVertexes(
     graph,
     setGraph,
-    txnId,
+    metaTxnId,
     graph.vertexes[metaVertexId],
     attributes
   );
   onCleanup(() => {
-    revertTransaction(txnId, graph);
+    revertTransaction(metaTxnId, graph);
   });
 
   const onRulesSubmit = () => {
@@ -132,31 +86,34 @@ export function RulesModal(props: Readonly<{ toggleModal: () => void }>) {
   };
   return (
     <Portal>
-      <dialog class={`sb-modal r:10|10|10|10 z:${zIndex}`}>
-        <ModalContent>
-          <ModalHeader>
-            Header
-            <button class="float:right" onclick={props.toggleModal} type="button">
-              ✕
-            </button>
-          </ModalHeader>
-          <ModalBody>
-            <TableInputField
-              data={graph.vertexes[layoutStore.selectedId]}
-              isRealTime={false}
-              meta={graph.vertexes[metaVertexId]}
-              txnId={layoutStore.formData.txnId} />
-          </ModalBody>
-          <ModalFooter>
-            <div
-              class="flex ai:center jc:center"
-            >
-              <button onClick={onRulesSubmit}>Submit</button>
-              <button class="border-color:#FF0000 color:#FF0000" onClick={onRulesCancel}>Cancel</button>
+      <div aria-labelledby="Rules Modal" aria-modal="true" class={`position:relative z:${zIndex}`} role="dialog">
+        <Overlay />
+        <div class="inset:0px overflow-y:auto position:fixed width:100vw z:10">
+          <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
+            <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:90vw@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
+              <div>
+                <div class="">
+                  <h3 class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem" id="modal-title">{props.displayAllRules ? "All Rules" : "Rules"}:</h3>
+                  <div class="mt:0.5rem">
+                    <TableInputField
+                      data={props.displayAllRules ? layoutStore.formData.formData : props.selectedRule}
+                      isRealTime={false}
+                      meta={graph.vertexes[metaVertexId]}
+                      txnId={layoutStore.formData.txnId} />
+                  </div>
+                </div>
+              </div>
+              <div class="display:grid@sm gap:0.75rem@sm grid-auto-flow:row|dense@sm grid-cols:2@sm mt:1.25rem mt:1.5rem@sm">
+                <button onClick={onRulesSubmit}>Submit</button>
+                <button class="border-color:#FF0000 color:#FF0000" onClick={onRulesCancel}>Cancel</button>
+              </div>
             </div>
-          </ModalFooter>
-        </ModalContent>
-      </dialog>
+          </div>
+        </div>
+      </div>
     </Portal>
   );
 }
+const Overlay = () => {
+  return <div class="--bg-opacity:0.75 ~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:opacity bg:rgb(107,114,128) inset:0px position:fixed"></div>;
+};

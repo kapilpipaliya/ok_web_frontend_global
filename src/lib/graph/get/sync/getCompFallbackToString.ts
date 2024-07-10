@@ -7,9 +7,10 @@ import { getChildVertex } from "./traverse";
 
 
 export function getCompFallbackToString(
-  attrVertex: Vertex,
+  attrVertex: Vertex | undefined,
   graph: Store<GraphInterface>
 ): Vertex | undefined {
+  if (!attrVertex) return;
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
   if (attrComp) return attrComp;
 

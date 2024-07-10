@@ -2,13 +2,12 @@ import { Icon } from "@iconify-icon/solid";
 import jsep from "jsep";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
-import { ZIndex, useZIndex } from "~/components/ZIndex";
+import { ZIndex, } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
-import { getModalClass } from "./getModalClass";
 
 export function Rules() {
   const [graph, setGraph] = useGraph();

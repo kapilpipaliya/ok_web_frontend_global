@@ -2,10 +2,10 @@ import {
   For,
   Show,
   batch,
+  createMemo,
   createSignal,
   getOwner,
   runWithOwner,
-  createMemo,
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -113,7 +113,9 @@ export function SelectInputField(
         if (props.isRealTime) {
           props.txnId = graph.newTxnId;
         }
-        if (memoizedOptions() || props.meta.P.saveValue) {
+        if (props.meta.P.saveEdge) {
+          setSelectValueHelper(props.txnId ?? 0, props.meta, props.data as Vertex, getComponent(), value, isRemove, graph, setGraph);
+        } else if (memoizedOptions() || props.meta.P.saveValue) {
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
@@ -172,6 +174,7 @@ export function SelectInputField(
         when={!props.disabled}
       >
         <MultiSelectField
+          childrenKey={props.meta.P.childrenKey}
           disable={props.disabled}
           displayValueKey={props.meta.P.labelKey ? props.meta.P.labelKey : "::'P.displayName'||::'P.name'||::'P.id'"}
           isLoadingOptions={loading()}
@@ -182,7 +185,7 @@ export function SelectInputField(
           options={options()}
           placeholder={`${props.title}`}
           selectedValues={() => {
-            if (!memoizedOptions() && !props.meta.P.saveValue) {
+            if (props.meta.P.saveEdge && !props.meta.P.saveValue) {
               return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
                 return graph.vertexes[id];
               });

@@ -27,6 +27,7 @@ export type Option = {
 } | Vertex | string;
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: Readonly<{
+  childrenKey?: string;
   disable?: boolean;
   displayValueKey?: string;
   isLoadingOptions?: boolean;
@@ -81,11 +82,6 @@ export function MultiSelectField(props: Readonly<{
     props.onRemove?.(newSelected, option);
   };
 
-  // Master CSS classes
-  const inputContainerClass = "p:4px|0px d:flex flex:wrap ai:center gap:5px w:100%";
-  const tagClass = "bg:#3377cc c:#fff p:2px|5px r:4px d:flex ai:center gap:5px cursor:default";
-  const closeButtonClass = "cursor:pointer d:flex";
-
   // Filter options based on input value
   const filterOptions = (options: Option[], inputValue: string) => {
     return options.filter((option) => {
@@ -98,25 +94,26 @@ export function MultiSelectField(props: Readonly<{
       const label = getOptionLabel(option)?.toLowerCase();
       const matches = label?.includes(inputValue.toLowerCase());
 
+      const childrenKey = props.childrenKey || 'children';
       // @ts-expect-error ignore
-      if (option.children && option.children.length > 0) {
+      if (option[childrenKey] && option[childrenKey].length > 0) {
         // @ts-expect-error ignore
-        const originalOptions = JSON.parse(JSON.stringify(option.children));
+        const originalOptions = JSON.parse(JSON.stringify(option[childrenKey]));
         // @ts-expect-error ignore
-        const filteredChildren = filterOptions(option.children, inputValue);
+        const filteredChildren = filterOptions(option[childrenKey], inputValue);
 
         if (matches && filteredChildren.length === 0) {
           // If the parent matches and no children match, include all children
           // @ts-expect-error ignore
-          option.children = originalOptions;
+          option[childrenKey] = originalOptions;
           return true;
         } else {
           // Otherwise, filter the children
           // @ts-expect-error ignore
-          option.children = filteredChildren;
+          option[childrenKey] = filteredChildren;
           // Include the parent if it matches or any children match
           // @ts-expect-error ignore
-          return matches || option.children.length > 0;
+          return matches || option[childrenKey].length > 0;
         }
       }
 
@@ -144,9 +141,6 @@ export function MultiSelectField(props: Readonly<{
     useActiveClickOutside(graph, setGraph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
-
-    const optionClass = "p:8px cursor:pointer w:100%";
-    const optionSelectedClass = "bg:#ddd opacity:0.5";
 
     // Handle changes in selection
     const handleSelectChange = (option: Option) => {
@@ -178,6 +172,7 @@ export function MultiSelectField(props: Readonly<{
       }
       setInputValue(""); // mostimes user wants to clear the input after selecting an option
       if (props.selectionLimit !== 1) {
+        // if we don't focus options list will be closed.
         inputRef?.focus();
       }
 
@@ -192,6 +187,8 @@ export function MultiSelectField(props: Readonly<{
         newHiddenOptions.add(option);
       }
       setHiddenOptions(newHiddenOptions);
+      // if we don't focus options list will be closed.
+      inputRef?.focus();
     };
 
     const filteredOptions = createMemo(() => {
@@ -205,19 +202,20 @@ export function MultiSelectField(props: Readonly<{
 
     const Option = (p: { option: Option }) => {
       const isExpanded = () => !hiddenOptions().has(p.option);
+      const childrenKey = () => props.childrenKey || 'children';
       return (
         <Show
           fallback={
             <button
-              class="bg:#e0e0e0:hover f:14 m:3 r:5 t:left w:full"
+              class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left w:100%"
               classList={{
-                [optionClass]: true, [optionSelectedClass]: selected().some(
+                "bg:#ddd opacity:0.5": selected().some(
                   (item) =>
                     getOptionValue(item) === getOptionValue(p.option),
                 )
               }}
               // @ts-expect-error ignore
-              onClick={() => (!p.option.children || p.option.children.length === 0) && handleSelectChange(p.option)}
+              onClick={() => (!p.option[childrenKey()] || p.option[childrenKey()].length === 0) && handleSelectChange(p.option)}
               type="button"
             >
               {props.renderLabel
@@ -226,12 +224,12 @@ export function MultiSelectField(props: Readonly<{
             </button>
           }
           // @ts-expect-error ignore
-          when={p.option.children && p.option.children.length > 0}
+          when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
         >
           <div>
-            <button class="bg:#e0e0e0:hover f:14 m:3 r:5 t:left w:full"
+            <button class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left w:100%"
               classList={{
-                [optionClass]: true, [optionSelectedClass]: selected().some(
+                "bg:#ddd opacity:0.5": selected().some(
                   (item) =>
                     getOptionValue(item) === getOptionValue(p.option),
                 )
@@ -239,14 +237,17 @@ export function MultiSelectField(props: Readonly<{
               onClick={() => toggleExpandOption(p.option)}
               type="button"
             >
-              {isExpanded() ? '-' : '+'} {props.renderLabel
-                ? props.renderLabel(p.option)
-                : getOptionLabel(p.option)}
+              <Icon icon={isExpanded() ? 'icon-park-solid:down-one' : 'icon-park-solid:right-one'} />
+              <span>
+                {props.renderLabel
+                  ? props.renderLabel(p.option)
+                  : getOptionLabel(p.option)}
+              </span>
             </button>
             <Show when={isExpanded()}>
-              <div class="p-l:20px">
+              <div class="pl:20px">
                 {/* @ts-expect-error ignore */}
-                <For each={p.option.children}>
+                <For each={p.option[childrenKey()]}>
                   {(childOption) => Option({ option: childOption })}
                 </For>
               </div>
@@ -264,10 +265,10 @@ export function MultiSelectField(props: Readonly<{
           position: position.strategy,
           top: `${position.y ?? 0}px`,
         }}>
-          <Show fallback={<div class={optionClass}>Loading...</div>} when={!props.isLoadingOptions}>
+          <Show fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>} when={!props.isLoadingOptions}>
             <For
               each={filteredOptions()}
-              fallback={<div class={optionClass}>No item found </div>}
+              fallback={<div class="cursor:pointer p:8px w:100%">No item found </div>}
             >
               {(option) => <Option option={option} />}
             </For>
@@ -281,13 +282,13 @@ export function MultiSelectField(props: Readonly<{
     <div
       class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}>
-      <div class={inputContainerClass}>
+      <div class={`${props.selectionLimit !== 1 ? 'flex:wrap' : ''} ai:center d:flex gap:5px p:4px|0px w:100%`}>
         <For each={selected()}>
           {(tag) => (
-            <div class={`${tagClass} f:14`}>
+            <div class="c:#fff ai:center bg:#3377cc cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
               {props.renderLabel ? props.renderLabel(tag) : getOptionLabel(tag)}
               <button
-                class={closeButtonClass}
+                class="cursor:pointer d:flex"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopImmediatePropagation();
@@ -305,9 +306,9 @@ export function MultiSelectField(props: Readonly<{
           // @ts-expect-error disable lastpass
           AutoComplete="off"
           auto-complete="off"
-          class={`border:none flex:1 min-w:100px outline:none p:5`}
+          class={`${props.selectionLimit === 1 && selected().length === 1 ? 'w:100px' : 'min-w:100px'} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
-          onBlur={() => {
+          onB6lur={() => {
             if (dropdownVisible()) {
               // This is working fine, but its giving some bad user experience.
               optionTimeout = setTimeout(() => setDropdownVisible(false), 100);

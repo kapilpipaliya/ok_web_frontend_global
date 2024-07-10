@@ -7,7 +7,6 @@ import {
   usePageRenderVertexContext,
   useRepeaterVertexContext
 } from "~/components/page_attr_render/Context";
-import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
@@ -16,6 +15,7 @@ import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { Tab, TabContainer } from "~/components/solid_blocks";
 import { useFormContext, useIsPreview } from "~/lib/contexts";
+import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
@@ -38,12 +38,12 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
         const component = createMemo(
           () =>
             item.P.component ||
-            getComponent(graph, item)?.P[IdAttr],
+          getCompFallbackToString(item, graph)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
-          return getComponent(
-            graph,
+          return getCompFallbackToString(
             getLastItem(parentItems, 1),
+            graph,
           )?.P[IdAttr];
         });
         // TODO: Is This Parent Vertex is ok?
