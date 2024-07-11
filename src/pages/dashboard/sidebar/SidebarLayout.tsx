@@ -5,11 +5,11 @@ import {
   createEffect,
   createSignal,
   onMount,
-  
+
 } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
-import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
@@ -163,11 +163,11 @@ export function Sidebar() {
       display: graph.isSideBarOpen ? "" : "none",
       transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       transition: "transform 0.3s ease-in-out",
-      width: isCollapsed() ? "70px" : "310px",
+      // width: isCollapsed() ? "70px" : "310px",
     }) as JSX.CSSProperties;
 
   return (
-    <div class="rel r:0|10|10|0" style={sidebarStyle()}>
+    <aside class="flex rel r:0|10|10|0" style={sidebarStyle()}>
       <Show
         fallback={
           <div class="flex ai:center jc:center">
@@ -176,33 +176,27 @@ export function Sidebar() {
         }
         when={navData()}
       >
-        <ul>
-          <div>
-            <aside class="flex">
-              <MainSideBar
-                activeSection={activeSection}
-                isCollapsed={isCollapsed}
-                mainIcon={sidebarIcon}
-                navData={navData()}
-                setActiveSection={setActiveSection}
-                toggleCollapse={toggleSectionCollapse}
-              />
+        <MainSideBar
+          activeSection={activeSection}
+          isCollapsed={isCollapsed}
+          mainIcon={sidebarIcon}
+          navData={navData()}
+          setActiveSection={setActiveSection}
+          toggleCollapse={toggleSectionCollapse}
+        />
 
-              <SubSideBar
-                activeSection={activeSection}
-                expandedSections={expandedSections}
-                handleSearch={handleSearch}
-                isCollapsed={isCollapsed}
-                mainIcon={sidebarIcon}
-                searchData={searchData}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                toggleSection={toggleMainSection}
-              />
-            </aside>
-          </div>
-        </ul>
+        <SubSideBar
+          activeSection={activeSection}
+          expandedSections={expandedSections}
+          handleSearch={handleSearch}
+          isCollapsed={isCollapsed}
+          mainIcon={sidebarIcon}
+          searchData={searchData}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          toggleSection={toggleMainSection}
+        />
       </Show>
-    </div>
+    </aside>
   );
 }

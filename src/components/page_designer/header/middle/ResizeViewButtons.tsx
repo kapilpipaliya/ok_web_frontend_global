@@ -13,7 +13,8 @@ export const ResizeViewButtons = () => {
     { icon: true, key: "humbleicons:desktop", value: "Desktop" },
   ];
   return (
-    <For each={views}>
+    <div>
+      <For each={views}>
       {(view, index) => (
         <Tooltip content={view.value} position={"s"}>
           <button
@@ -33,5 +34,6 @@ export const ResizeViewButtons = () => {
         </Tooltip>
       )}
     </For>
+    </div>
   );
 };

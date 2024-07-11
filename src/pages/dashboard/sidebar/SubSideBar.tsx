@@ -25,7 +25,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
       );
   return (
     <Show when={!props.isCollapsed()}>
-      <div
+      <nav
         class={"@fade|.3s bg:ghostwhite p:10|20 r:0|0|15|0 w:max-content"}
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
@@ -124,7 +124,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
             </For>
           </Show>
         </nav>
-      </div>
+      </nav>
     </Show>
   );
 };

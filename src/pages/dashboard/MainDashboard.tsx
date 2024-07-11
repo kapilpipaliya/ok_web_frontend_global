@@ -54,7 +54,7 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
 
 
   return (
-    <div class="scrollbar-width:thin d:flex flex-grow:1 flex:column overflow:auto">
+    <div class="scrollbar-width:thin flex flex-grow:1 flex:column overflow:auto">
       <PageContext.Provider
         value={{
           events: {
