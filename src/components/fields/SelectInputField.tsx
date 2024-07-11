@@ -188,6 +188,7 @@ export function SelectInputField(
         optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
         options={options()}
         placeholder={`${props.title}`}
+        renderLabel={props.meta.P.renderLabel}
         selectedValues={() => {
           if (props.meta.P.saveEdge && !props.meta.P.saveValue) {
             return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {

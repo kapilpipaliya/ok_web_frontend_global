@@ -36,7 +36,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { class: PROPERTIES.Css.TextBox, component: "TextBox", displayName: 'Unique Name', name: 'name' }), graph, setGraph);
   addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { displayName: 'Class', name: 'class' }), graph, setGraph);
   addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { displayName: 'Default Value', name: 'defaultValue' }), graph, setGraph);
-  addNewVertex(0, newVertex(hiddenVertexId, ["MetaTemp"], { class:'flex:1', collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`, component: "TagBox", displayName: 'Hidden', name: 'hidden', saveEdge: true, useLocalStorage: true }), graph, setGraph);
+  addNewVertex(0, newVertex(hiddenVertexId, ["MetaTemp"], {displayName: 'Hidden', name: 'hidden' }), graph, setGraph);
 
   function moveClassToLast(vertices: Vertex[]) {
     const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue' && vertex.P.name !== 'hidden');

@@ -13,13 +13,13 @@ import {
 } from "solid-js";
 import { Portal, } from "solid-js/web";
 
-import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { evaluate } from '~/lib/expression_eval';
 import { type Vertex, useGraph } from '~/lib/graph/graph';
 import { isObject } from '~/lib/utils';
 
 import { useToast } from "./Toast";
 import { ZIndex, useZIndex } from './ZIndex';
+import { DropdownMenu } from './DropdownMenu';
 
 export type Option = {
   children?: Option[];
@@ -39,7 +39,7 @@ export function MultiSelectField(props: Readonly<{
   options: Option[];
   placeholder?: string;
   ref?: Ref<HTMLDivElement>;
-  renderLabel?: ((option: Option) => JSX.Element);
+  renderLabel?: ((option: Option, isSelected: boolean) => JSX.Element);
   selectedValues: () => Option[];
   selectionLimit?: number;
 }>) {
@@ -142,9 +142,7 @@ export function MultiSelectField(props: Readonly<{
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
-    const [graph, setGraph] = useGraph();
     const zIndex = useZIndex();
-    useActiveClickOutside(graph, setGraph);
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
 
@@ -225,7 +223,7 @@ export function MultiSelectField(props: Readonly<{
               type="button"
             >
               {props.renderLabel
-                ? props.renderLabel(p.option)
+                ? props.renderLabel(p.option, false)
                 : getOptionLabel(p.option)}
             </button>
           }
@@ -246,7 +244,7 @@ export function MultiSelectField(props: Readonly<{
               <Icon icon={isExpanded() ? 'icon-park-solid:down-one' : 'icon-park-solid:right-one'} />
               <span>
                 {props.renderLabel
-                  ? props.renderLabel(p.option)
+                  ? props.renderLabel(p.option, false)
                   : getOptionLabel(p.option)}
               </span>
             </button>
@@ -264,7 +262,7 @@ export function MultiSelectField(props: Readonly<{
     };
 
     return (
-      <Portal mount={document.body}>
+
         <div class={`radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:${zIndex}`} ref={setFloating} style={{
           left: `${position.x ?? 0}px`,
           position: position.strategy,
@@ -279,7 +277,7 @@ export function MultiSelectField(props: Readonly<{
             </For>
           </Show>
         </div>
-      </Portal>
+
     )
   }
 
@@ -291,7 +289,7 @@ export function MultiSelectField(props: Readonly<{
         <For each={selected()}>
           {(tag) => (
             <div class="c:#fff ai:center bg:#3377cc cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-              {props.renderLabel ? props.renderLabel(tag) : getOptionLabel(tag)}
+              {props.renderLabel ? props.renderLabel(tag, true) : getOptionLabel(tag)}
               <button
                 class="cursor:pointer d:flex"
                 onClick={(e) => {
@@ -313,15 +311,15 @@ export function MultiSelectField(props: Readonly<{
           auto-complete="off"
           class={`${props.selectionLimit === 1 && selected().length === 1 ? 'w:100px' : 'min-w:100px'} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
-          onBlur={() => {
-            if (dropdownVisible()) {
-              // This is working fine, but its giving some bad user experience.
-              optionTimeout = setTimeout(() => setDropdownVisible(false), 100);
-              if (props.selectionLimit === 1) {
-                setInputValue('');
-              }
-            }
-          }}
+          // onBlur={() => {
+          //   if (dropdownVisible()) {
+          //     // This is working fine, but its giving some bad user experience.
+          //     optionTimeout = setTimeout(() => setDropdownVisible(false), 100);
+          //     if (props.selectionLimit === 1) {
+          //       setInputValue('');
+          //     }
+          //   }
+          // }}
           onFocus={handleInputFocus}
           onInput={(e) => setInputValue(e.target.value)}
           placeholder={props.placeholder ?? "Select options"}
@@ -331,8 +329,10 @@ export function MultiSelectField(props: Readonly<{
         />
       </div>
       <Show when={dropdownVisible()}>
-        <ZIndex>
-          <Options />
+      <ZIndex>
+          <DropdownMenu class="r:5" onClickOutside={() => setDropdownVisible(false)} parentRef={reference()!}>
+            <Options />
+          </DropdownMenu>
         </ZIndex>
       </Show>
     </div>
