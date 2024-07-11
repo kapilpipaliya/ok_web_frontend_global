@@ -9,7 +9,8 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
-import { AddNewState } from "./AddNewState";
+import { AddNewRule } from "./AddNewRule";
+
 
 export function Rules() {
   return (
@@ -19,7 +20,7 @@ export function Rules() {
     </div>
   );
 }
-function AddNewRule() {
+function AddNewRuleButton() {
   let buttonRef: HTMLButtonElement;
   const [showDropdown, setShowDropdown] = createSignal(false);
 
@@ -33,7 +34,7 @@ function AddNewRule() {
     <Show when={showDropdown()}>
       <ZIndex>
         <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
-          <AddNewState onClose={() => setShowDropdown(false)} />
+          <AddNewRule onClose={() => setShowDropdown(false)} />
         </DropdownMenu>
       </ZIndex>
     </Show>
@@ -60,7 +61,7 @@ function Header() {
   return <>
     <h2>Rules:</h2>
     <div class="flex ai:center jc:space-between">
-      <AddNewRule />
+      <AddNewRuleButton />
       <DisplayAllRules />
     </div>
   </>;

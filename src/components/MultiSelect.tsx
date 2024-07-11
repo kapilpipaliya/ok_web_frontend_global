@@ -17,9 +17,9 @@ import { evaluate } from '~/lib/expression_eval';
 import { type Vertex, useGraph } from '~/lib/graph/graph';
 import { isObject } from '~/lib/utils';
 
+import { DropdownMenu } from './DropdownMenu';
 import { useToast } from "./Toast";
 import { ZIndex, useZIndex } from './ZIndex';
-import { DropdownMenu } from './DropdownMenu';
 
 export type Option = {
   children?: Option[];
@@ -142,8 +142,6 @@ export function MultiSelectField(props: Readonly<{
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
-    const zIndex = useZIndex();
-    const [floating, setFloating] = createSignal<HTMLElement | null>(null);
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
 
     // Handle changes in selection
@@ -198,11 +196,6 @@ export function MultiSelectField(props: Readonly<{
     const filteredOptions = createMemo(() => {
       return filterOptions(JSON.parse(JSON.stringify(props.options || [])), inputValue());
     });
-    const position = useFloating(reference, floating, {
-      placement: 'bottom-start', // By default, this is 'bottom'
-      strategy: 'fixed',
-      whileElementsMounted: autoUpdate,
-    });
 
     const Option = (p: { option: Option }) => {
       const isExpanded = () => !hiddenOptions().has(p.option);
@@ -211,7 +204,7 @@ export function MultiSelectField(props: Readonly<{
         <Show
           fallback={
             <button
-              class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left w:100%"
+              class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selected().some(
                   (item) =>
@@ -231,7 +224,7 @@ export function MultiSelectField(props: Readonly<{
           when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
         >
           <div>
-            <button class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left w:100%"
+            <button class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selected().some(
                   (item) =>
@@ -262,12 +255,7 @@ export function MultiSelectField(props: Readonly<{
     };
 
     return (
-
-        <div class={`radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:${zIndex}`} ref={setFloating} style={{
-          left: `${position.x ?? 0}px`,
-          position: position.strategy,
-          top: `${position.y ?? 0}px`,
-        }}>
+        <div class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100%`}>
           <Show fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>} when={!props.isLoadingOptions}>
             <For
               each={filteredOptions()}
@@ -277,7 +265,6 @@ export function MultiSelectField(props: Readonly<{
             </For>
           </Show>
         </div>
-
     )
   }
 

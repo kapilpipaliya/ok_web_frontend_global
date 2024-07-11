@@ -72,6 +72,9 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
             ref={el => saveAsTemplateRef = el}
             width={20} />
         </Tooltip>
+        <Show when={showModal()}>
+          <SaveAsTemplateMenu item={props.item} onClose={() => setShowModal(false)} onMouseLeave={() => setShowModal(false)} parentRef={saveAsTemplateRef!} />
+        </Show>
         <Tooltip content={"Delete"}>
           <Icon
             class="flex cursor:pointer"
@@ -80,9 +83,6 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex; }) {
             onClick={() => deleteLayoutAttr(layoutStore, setLayoutStore, props.item, graph, setGraph, layoutStore.formData.txnId, getComponentName(), showSuccessToast)}
             width={20} />
         </Tooltip>
-        <Show when={showModal()}>
-          <SaveAsTemplateMenu item={props.item} onClose={() => setShowModal(false)} onMouseLeave={() => setShowModal(false)} parentRef={saveAsTemplateRef!} />
-        </Show>
       </div>
     </span>
   );

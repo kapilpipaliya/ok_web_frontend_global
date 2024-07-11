@@ -6,7 +6,6 @@ import { GenericInputField } from "~/components/fields/GenericInputField";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { getDynamicComponent } from "./getDynamicComponent";
 
 export function DynamicComponent(props: Readonly<{
@@ -22,13 +21,12 @@ export function DynamicComponent(props: Readonly<{
   txnId?: number;
 }>) {
   const [graph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore() || [];
   const component = createMemo(() => getDynamicComponent(props.component));
   const isApplyDefault = () => component() !== GenericInputField && component() !== GenericField;
   return (
     <Switch>
       <Match when={!component()}>NO INPUT</Match>
-      <Match keyed when={!layoutStore?.hiddenNodes.includes(props.meta?.id) && component()}>
+      <Match keyed when={component()}>
         <Dynamic
           component={component()!}
           {...(props.applyDefaults && isApplyDefault() && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}

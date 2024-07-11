@@ -9,11 +9,11 @@ import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
 
-import { AddNewState } from "../../rules/AddNewState";
+import { AddNewRule } from "../../rules/AddNewRule";
 import { RulesModal } from "../rules/RulesModal";
 import { Label } from "./Label";
 
-export function HiddenField(props: Readonly<{ id: string; meta2: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
   const [showDropdown, setShowDropdown] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
@@ -49,10 +49,10 @@ export function HiddenField(props: Readonly<{ id: string; meta2: Accessor<Vertex
       data={props.selectedLayout}
       isRealTime={false}
       meta={meta}
-      txnId={0} />
+      txnId={layoutStore.formData.txnId} />
   }
 
-  const AddNewRule = () => {
+  const AddNewRuleButton = () => {
     const handleAddNewClick = () => {
       setShowDropdown(true);
     };
@@ -78,14 +78,14 @@ export function HiddenField(props: Readonly<{ id: string; meta2: Accessor<Vertex
       <Show when={showDropdown()}>
         <ZIndex>
           <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
-            <AddNewState onClose={onAddNewRule} />
+            <AddNewRule onClose={onAddNewRule} />
           </DropdownMenu>
         </ZIndex>
       </Show>
     </>
   }
 
-  const DisplayAllRules = () => {
+  /*const DisplayAllRules = () => {
     const [showRuleSettings, setShowRuleSettings] = createSignal(false);
     const onDisplayAllRules = () => {
       setShowRuleSettings(true);
@@ -104,7 +104,7 @@ export function HiddenField(props: Readonly<{ id: string; meta2: Accessor<Vertex
         </ZIndex>
       </Show>
     </>
-  }
+  }*/
 
   return (
     <div class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
@@ -113,8 +113,8 @@ export function HiddenField(props: Readonly<{ id: string; meta2: Accessor<Vertex
       </span>
       <div class="flex f:15 flex:1" ref={buttonRef!}>
         <SelectRules />
-        <AddNewRule />
-        <DisplayAllRules />
+        <AddNewRuleButton />
+        {/* <DisplayAllRules /> */}
       </div>
     </div>
   );

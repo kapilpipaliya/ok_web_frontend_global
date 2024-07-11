@@ -59,6 +59,10 @@ const collectionAttr = [
     name: "disabled",
   },
   {
+    component: "TagBox",
+    name: "hidden",
+  },
+  {
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
@@ -147,6 +151,10 @@ const pageAttr = [
     component: "TextBox",
     displayName: "ID",
     name: "name",
+  },
+  {
+    component: "TagBox",
+    name: "hidden",
   },
   // {
   //   name: "definition",

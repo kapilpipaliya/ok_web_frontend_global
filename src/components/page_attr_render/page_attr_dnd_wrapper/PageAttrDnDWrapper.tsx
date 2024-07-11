@@ -1,5 +1,5 @@
 import { Popover } from "@kobalte/core/popover";
-import { type JSX, createMemo, createSelector,  } from "solid-js";
+import { type JSX, createMemo, createSelector, Show,  } from "solid-js";
 
 import { PageRenderVertexContext, usePageRenderVertexContext } from "~/components/page_attr_render/Context";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
@@ -80,7 +80,9 @@ export function PageAttrDnDWrapper(props: Readonly<{ children: JSX.Element; item
       >
         <Popover open={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id)} placement={`${isSelectedLayoutId(props.item.id) ? "top-start" : "top-end"}`}>
           <Popover.Anchor>
+          <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
             {props.children}
+          </Show>
           </Popover.Anchor>
           <Popover.Portal>
             <Popover.Content class="popover__content">

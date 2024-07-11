@@ -12,7 +12,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
 
-export function AddNewState(props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>) {
+export function AddNewRule(props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>) {
   const [stateName, setStateName] = createSignal("");
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
@@ -26,21 +26,33 @@ export function AddNewState(props: Readonly<{ onClose: (rowVertex?: Vertex) => v
   });
 
   const addNewState = () => {
-    const metaVertexId = graph.newVertexId;
+    const rulesMetaVertexId = graph.newVertexId;
 
     const metaAttribute = FormMetaData.Form.attributes.find(
       (x) => x.name === "Rules"
     )!;
     addNewVertex(
       metaTxnId,
-      newVertex(metaVertexId, ["MetaAttr"], metaAttribute),
+      newVertex(rulesMetaVertexId, ["MetaAttr"], metaAttribute),
       graph,
       setGraph
     );
 
-    const rowResult = insertNewRow(layoutStore.formData.txnId, graph.vertexes[metaVertexId], layoutStore.formData.formData, false, graph, setGraph, { name: stateName() });
+    const rowResult = insertNewRow(layoutStore.formData.txnId, graph.vertexes[rulesMetaVertexId], layoutStore.formData.formData, false, graph, setGraph, { name: stateName() });
 
     const rule = graph.vertexes[rowResult!.vertexId!];
+
+    const condMetaVertexId = graph.newVertexId;
+    const condMetaAttribute = metaAttribute.attributes!.find(x => x.name === "cond")!;
+    addNewVertex(
+      metaTxnId,
+      newVertex(condMetaVertexId, ["MetaAttr"], condMetaAttribute),
+      graph,
+      setGraph
+    );
+
+    insertNewRow(layoutStore.formData.txnId, graph.vertexes[condMetaVertexId], rule, false, graph, setGraph);
+
     setSelectedRule(rule);
   };
   onMount(() => inputRef?.focus());

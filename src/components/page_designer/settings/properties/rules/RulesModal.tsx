@@ -15,6 +15,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
+import { klona } from "klona";
 
 export function RulesModal(props: Readonly<{ closeModal: () => void; onSubmit: () => void, prevTxnIndex?: number, selectedRule?: Vertex | null }>) {
   const zIndex = useZIndex();
@@ -25,31 +26,22 @@ export function RulesModal(props: Readonly<{ closeModal: () => void; onSubmit: (
 
   const metaVertexId = graph.newVertexId;
   const metaTxnId = graph.newTxnId;
-  let metaAttribute = FormMetaData.Form.attributes.find(
+  let metaAttribute = klona(FormMetaData.Form.attributes.find(
     (x) => x.name === "Rules"
-  )!;
-
-  if (props.selectedRule) {
-    metaAttribute = metaAttribute.attributes!.find(x => x.name === "cond")!;
-  }
-
-  const attributes: FieldAttribute[] = JSON.parse(
-    JSON.stringify((metaAttribute.attributes))
-  );
-
-  for (const attribute of attributes) {
+  )!);
+  for (const attribute of metaAttribute.attributes!) {
     if (attribute.name === "cond") {
       for (const condAttribute of attribute.attributes!) {
         if (condAttribute.name === "leftField" || condAttribute.name === "rightField") {
-          condAttribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
-          condAttribute.valueKey = "id";
-          condAttribute.saveEdge = true
-          condAttribute.childrenKey = "attributes";
-          condAttribute.options = () => getFormMetaData(graph, setGraph, layoutStore.formData.formData).attributes;
+          modifyFieldMeta(condAttribute);
         }
       }
     }
   }
+  if (props.selectedRule) {
+    metaAttribute = metaAttribute.attributes!.find(x => x.name === "cond")!;
+  }
+
   addNewVertex(
     metaTxnId,
     newVertex(metaVertexId, ["MetaAttr"], metaAttribute),
@@ -61,7 +53,7 @@ export function RulesModal(props: Readonly<{ closeModal: () => void; onSubmit: (
     setGraph,
     metaTxnId,
     graph.vertexes[metaVertexId],
-    attributes
+    metaAttribute.attributes!
   );
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
@@ -109,6 +101,14 @@ export function RulesModal(props: Readonly<{ closeModal: () => void; onSubmit: (
       </div>
     </Portal>
   );
+
+  function modifyFieldMeta(attribute: FieldAttribute) {
+    attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
+    attribute.valueKey = "id";
+    attribute.saveEdge = true;
+    attribute.childrenKey = "attributes";
+    attribute.options = () => getFormMetaData(graph, setGraph, layoutStore.formData.formData).attributes;
+  }
 }
 const Overlay = () => {
   return <div class="--bg-opacity:0.75 ~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:opacity bg:rgb(107,114,128) inset:0px position:fixed"></div>;

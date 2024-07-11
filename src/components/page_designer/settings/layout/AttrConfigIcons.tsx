@@ -27,6 +27,30 @@ export function AttrConfigIcons(props: { metaVertex: Vertex; }) {
 
   const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
 
+  const HideShowIcon = () => {
+    const isHidden = () => layoutStore.hiddenNodes.includes(props.metaVertex.id);
+    const icon = () => isHidden() ? "mdi:eye-off-outline" : "mdi:eye-outline";
+    const tooltipContent = () => isHidden() ? "Show" : "Hide";
+
+    return (
+      <Tooltip content={tooltipContent()} nowrap>
+        <button
+          class="opacity:.5 opacity:1:hover"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleHidden(props.metaVertex.id);
+          }}
+        >
+          <Icon
+            class="transition: 0.5s ease-in-out;"
+            height={18}
+            icon={icon()}
+            width={18}
+          />
+        </button>
+      </Tooltip>
+    );
+  };
   return <div class="flex ai:center mt:4">
     <Show
       when={(isSelectedLayoutId(props.metaVertex.id) ||
@@ -67,6 +91,7 @@ export function AttrConfigIcons(props: { metaVertex: Vertex; }) {
           }}
           width={18} />
       </Tooltip>
+      <HideShowIcon />
       <Tooltip content={"Delete"} nowrap>
         <GenericField
           meta={{
@@ -93,35 +118,7 @@ export function AttrConfigIcons(props: { metaVertex: Vertex; }) {
           } as any} />
       </Tooltip>
 
-      <Tooltip
-        content={`${!layoutStore.hiddenNodes.includes(props.metaVertex.id)
-          ? "Hide"
-          : "Show"}`}
-        nowrap
-      >
-        <button
-          class="opacity:.5 opacity:1:hover"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleHidden(props.metaVertex.id);
-          }}
-        >
-          <Show
-            fallback={<Icon
-              class="transition: 0.5s ease-in-out;"
-              height={18}
-              icon="mdi:eye-off-outline"
-              width={18} />}
-            when={!layoutStore.hiddenNodes.includes(props.metaVertex.id)}
-          >
-            <Icon
-              class="transition: 0.5s ease-in-out;"
-              height={18}
-              icon="mdi:eye-outline"
-              width={18} />
-          </Show>
-        </button>
-      </Tooltip>
+
       &nbsp;
     </Show>
     {/* </Show> */}
