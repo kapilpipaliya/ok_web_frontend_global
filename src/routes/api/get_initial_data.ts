@@ -8,7 +8,7 @@ import {
   convertNodeToJson,
   convertRelationshipToJson,
 } from "~/lib/convertNodeToJson";
-import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { getSubDomain } from "~/server/getSubDomain";
 

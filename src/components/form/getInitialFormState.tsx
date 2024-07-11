@@ -4,8 +4,8 @@ import { untrack } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { FormMetaData } from "~/lib/formMetaData";
-import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/FormMetaDataAuth.1";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";

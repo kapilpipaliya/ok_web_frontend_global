@@ -5,8 +5,8 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
-import { FormMetaData } from "../../../lib/formMetaData";
-import { FormMetaDataAuth } from "../../../lib/formMetaDataAuth";
+import { FormMetaData } from "../../../lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/FormMetaDataAuth.1";
 import { setGraphData } from "../../../lib/websocket/setGraphData";
 
 export async function loadPageData(

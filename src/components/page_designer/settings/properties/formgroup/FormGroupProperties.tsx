@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
-import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";

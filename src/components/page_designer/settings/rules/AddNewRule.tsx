@@ -4,7 +4,7 @@ import { Show, createSignal, onCleanup, onMount } from "solid-js";
 import { ZIndex } from "~/components/ZIndex";
 import { insertNewRow } from "~/components/fields/table_input/insertNewRow";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
-import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";

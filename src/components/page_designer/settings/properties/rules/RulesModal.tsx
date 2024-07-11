@@ -1,21 +1,33 @@
+import jsep from "jsep";
 import { klona } from "klona";
 import { onCleanup } from "solid-js";
+import { SetStoreFunction, Store } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
-import { FormMetaData } from "~/lib/formMetaData";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { evaluate } from "~/lib/expression_eval";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
 
-import { useDesignerLayoutStore } from "../../../LayoutContext";
+export const getConditionsExpression = (rule: Vertex, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) => {
+  const conditionRows =   evaluate(jsep('->RulesCond'), {graph, setGraph, vertexes: [rule]});
+  let expression = "";
+  for (const condition of conditionRows) {
+    expression += `${condition.leftField} ${condition.operator} ${condition.rightField} ${condition.operator} `;
+  }
+  return expression;
+
+}
 
 export function RulesModal(
   props: Readonly<{
@@ -77,6 +89,7 @@ export function RulesModal(
     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
     //     v ? [...v] : v,
     // );
+    console.log(getConditionsExpression(props.selectedRule!, graph, setGraph));
     props.onSubmit();
   };
   const onRulesCancel = () => {

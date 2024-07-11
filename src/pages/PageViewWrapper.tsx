@@ -3,7 +3,7 @@ import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { isObject } from "~/lib/utils";

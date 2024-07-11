@@ -6,7 +6,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/Toast";
 import { AdminAttrKeys } from "~/lib/constants";
-import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
 import { getPkForCollection } from "../../get/sync/getPkForCollection";
