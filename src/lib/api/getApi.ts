@@ -1,4 +1,4 @@
-import { useToast } from "../../components/Toast";
+import { useToast } from "~/components/Toast";
 
 /**
  * Common function to make GET requests to a specified URL.

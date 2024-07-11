@@ -1,8 +1,11 @@
 import type { createStore } from "solid-js/store";
 
-import { createContext, useContext, } from "solid-js";
+import { createContext, useContext } from "solid-js";
 
-import type {ProcessStatus, TransactionValue} from "~/lib/graph/transaction/TransactionType";
+import type {
+  ProcessStatus,
+  TransactionValue,
+} from "~/lib/graph/transaction/TransactionType";
 
 export type Id = string;
 
@@ -37,7 +40,7 @@ export type EdgeMap = { [key: string]: Edge };
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {
-  activeClickOutside: number
+  activeClickOutside: number;
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   isSideBarOpen?: boolean;
@@ -45,7 +48,7 @@ export interface GraphInterface {
   member?: { [key: string]: any } | null;
   navigationData?: { [key: string]: any }[];
   newTxnId: number;
-  newVertexId: Id,
+  newVertexId: Id;
   transactions: Map<
     number,
     {
@@ -56,7 +59,7 @@ export interface GraphInterface {
       submittedIndex: number;
       undoStepIndexes: number[];
     }
-  >
+  >;
   vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
 }

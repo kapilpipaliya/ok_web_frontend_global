@@ -26,7 +26,7 @@ const PreviewPage = (props: any) => {
                   "color:grey": viewData.value !== view(),
                   "r:0|5|5|0": index() === 2,
                   "r:5|0|0|5": index() === 0,
-                  "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true
+                  "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
                 }}
                 onclick={() => setView(viewData.value)}
                 type="button"
@@ -38,14 +38,14 @@ const PreviewPage = (props: any) => {
         </For>
       </div>
       <div class="flex ai:center h:full jc:center w:full">
-        <div 
+        <div
           classList={{
             "b:1px|solid|lightblue r:5 overflow:auto": true,
-            "h:90vh": view() !== 'Mobile' && view() !== 'Tablet',
-            "h:calc(100vh-130px)": view() === 'Mobile' || view() === 'Tablet',
-            "w:375px": view() === 'Mobile',
-            "w:768px": view() === 'Tablet',
-            "w:full": view() === 'Desktop'
+            "h:90vh": view() !== "Mobile" && view() !== "Tablet",
+            "h:calc(100vh-130px)": view() === "Mobile" || view() === "Tablet",
+            "w:375px": view() === "Mobile",
+            "w:768px": view() === "Tablet",
+            "w:full": view() === "Desktop",
           }}
         >
           {props.children}

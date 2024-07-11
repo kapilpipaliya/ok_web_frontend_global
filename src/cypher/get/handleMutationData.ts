@@ -8,7 +8,6 @@ import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 import { mutateData } from "../mutate/mutate_api/mutateData";
 
-
 export async function handleMutationData(
   mutationData: any,
   vertex: Vertex[],

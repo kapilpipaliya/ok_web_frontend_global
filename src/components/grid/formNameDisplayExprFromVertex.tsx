@@ -9,14 +9,14 @@ import { getNameKeyForCollection } from "~/lib/graph/get/sync/getNameKeyForColle
 
 export function formNameDisplayExprFromVertex(
   graph: Store<GraphInterface>,
-  collection?: string
+  collection?: string,
 ) {
   if (!collection) return;
   const collectionVertex = findVertexByLabelAndUniqueId(
     graph,
     "Form",
     "name",
-    collection
+    collection,
   );
   if (collectionVertex) {
     const nameKeys = getNameKeyForCollection(graph, collectionVertex);

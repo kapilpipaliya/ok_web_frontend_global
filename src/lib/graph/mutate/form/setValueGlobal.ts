@@ -3,15 +3,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { batch } from "solid-js";
 
 import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
-import {
-  type GraphInterface, IdAttr,
-  type Vertex
-} from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { commitTxn } from "../../transaction/commitTxn";
 import { onChangeHandler } from "./onChangeHandler";
-
 
 export function setValueGlobal(
   graph: Store<GraphInterface>,
@@ -20,7 +16,7 @@ export function setValueGlobal(
   metaVertex: Vertex,
   dataVertex: Vertex,
   data: any,
-  isRealTime: boolean
+  isRealTime: boolean,
 ) {
   if (!dataVertex) {
     return;
@@ -35,22 +31,22 @@ export function setValueGlobal(
     if (metaVertex.P.validation) {
       error = validateInput(metaVertex.P.validation, data);
       mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-        error: error || ""
+        error: error || "",
       });
     }
-  
+
     mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {
       [metaVertex.P[IdAttr]]: data,
     });
-  
+
     // we directly save the dataType on vertex:
     // @ts-ignore
     setGraph("vertexes", dataVertex.id, "D", {
       [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
     });
-  
+
     onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
-  })
+  });
 
   if (isRealTime) commitTxn(txnId, graph);
 }

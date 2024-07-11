@@ -15,7 +15,7 @@ export async function mutateData(
 
   const validationResult = mutateArgsValidation(args);
   if (!validationResult) {
-    return { error: true, message: 'Invalid argument shape' };
+    return { error: true, message: "Invalid argument shape" };
   }
   if (Object.keys(validationResult).length > 0) {
     return validationResult;
@@ -26,8 +26,18 @@ export async function mutateData(
 
   const txnResult = [] as any[];
   for (const mutationObject of args.transactions) {
-    await handleMutationObject(mutationObject, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleMutationObject(
+      mutationObject,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
-  return { clientToServerEdgeIdMap, clientToServerVertexIdMap, data: txnResult, txnId: args.txnId };
+  return {
+    clientToServerEdgeIdMap,
+    clientToServerVertexIdMap,
+    data: txnResult,
+    txnId: args.txnId,
+  };
 }
-

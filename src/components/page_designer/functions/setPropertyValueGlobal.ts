@@ -4,7 +4,7 @@ import { untrack } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { mergeVertexProperties, } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function setPropertyValueGlobal(
   graph: Store<GraphInterface>,
@@ -18,6 +18,8 @@ export function setPropertyValueGlobal(
 ) {
   return untrack(() => {
     if (valueSet ?? true)
-      mergeVertexProperties(txnId, layoutVertex.id, graph, setGraph, { [meta.P.name]: value });
+      mergeVertexProperties(txnId, layoutVertex.id, graph, setGraph, {
+        [meta.P.name]: value,
+      });
   });
-} 
+}

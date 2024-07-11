@@ -8,15 +8,20 @@ function getDefaultTxnValue() {
   };
 }
 
-const transactions = new Map<number, {
-  activeUndoIndex: number;
-  steps: any[];
-  submittedIndex: number;
-  undoStepIndexes: number[];
-}>();
+const transactions = new Map<
+  number,
+  {
+    activeUndoIndex: number;
+    steps: any[];
+    submittedIndex: number;
+    undoStepIndexes: number[];
+  }
+>();
 
 export function getExistingOrDefaultTxnValue(txnId: number) {
-  return transactions.has(txnId) ? { ...transactions.get(txnId)! } : getDefaultTxnValue();
+  return transactions.has(txnId)
+    ? { ...transactions.get(txnId)! }
+    : getDefaultTxnValue();
 }
 
 export function undoAllowed(txnId: number): boolean {
@@ -47,9 +52,10 @@ export function undo(txnId: number) {
   const nearestLowestIndex = txnValue.undoStepIndexes
     .slice()
     .reverse()
-    .find(index => index < activeUndoIndex);
+    .find((index) => index < activeUndoIndex);
 
-  const newUndoIndex = nearestLowestIndex !== undefined ? nearestLowestIndex : activeUndoIndex - 1;
+  const newUndoIndex =
+    nearestLowestIndex !== undefined ? nearestLowestIndex : activeUndoIndex - 1;
   if (nearestLowestIndex === undefined) {
     // Commented out code for slicing steps and revertSteps
     // txnValue.steps = txnValue.steps.slice(0, newUndoPoint + 1);
@@ -71,14 +77,18 @@ export function redo(txnId: number) {
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
 
-  const nextUndoIndex = txnValue.undoStepIndexes.find(index => index > activeUndoIndex);
+  const nextUndoIndex = txnValue.undoStepIndexes.find(
+    (index) => index > activeUndoIndex,
+  );
   if (nextUndoIndex !== undefined) {
     txnValue.activeUndoIndex = nextUndoIndex;
-    txnValue.steps.slice(activeUndoIndex + 1, nextUndoIndex + 1).forEach(step => {
-      if (step.redo) {
-        step.redo();
-      }
-    });
+    txnValue.steps
+      .slice(activeUndoIndex + 1, nextUndoIndex + 1)
+      .forEach((step) => {
+        if (step.redo) {
+          step.redo();
+        }
+      });
   }
 
   transactions.set(txnId, txnValue);
@@ -93,7 +103,9 @@ export function saveUndoPoint(txnId: number) {
   }
 
   if (!txnValue.undoStepIndexes.includes(activeUndoIndex)) {
-    const insertIndex = txnValue.undoStepIndexes.findIndex(index => index > activeUndoIndex);
+    const insertIndex = txnValue.undoStepIndexes.findIndex(
+      (index) => index > activeUndoIndex,
+    );
     if (insertIndex === -1) {
       txnValue.undoStepIndexes.push(activeUndoIndex);
     } else {
@@ -103,23 +115,46 @@ export function saveUndoPoint(txnId: number) {
   transactions.set(txnId, txnValue);
 }
 
-export function transactionDetailAdd(txnId: number, txnValue: TransactionValue) {
+export function transactionDetailAdd(
+  txnId: number,
+  txnValue: TransactionValue,
+) {
   if (!txnId) return;
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
 
-  const activeUndoIndex = existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
+  const activeUndoIndex =
+    existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
 
   if (activeUndoIndex < existingTxnValue.steps.length - 1) {
-    const activeUndoPointIndex = existingTxnValue.undoStepIndexes.findIndex((index) => index > activeUndoIndex);
-    existingTxnValue.undoStepIndexes = existingTxnValue.undoStepIndexes.slice(0, activeUndoPointIndex);
+    const activeUndoPointIndex = existingTxnValue.undoStepIndexes.findIndex(
+      (index) => index > activeUndoIndex,
+    );
+    existingTxnValue.undoStepIndexes = existingTxnValue.undoStepIndexes.slice(
+      0,
+      activeUndoPointIndex,
+    );
 
     if (existingTxnValue.submittedIndex >= activeUndoIndex) {
-      const removedSteps = existingTxnValue.steps.slice(activeUndoIndex + 1, existingTxnValue.submittedIndex + 1);
-      console.log('removedSteps', removedSteps, activeUndoIndex + 1, existingTxnValue.submittedIndex + 1);
-      existingTxnValue.revertSteps = [...removedSteps, ...existingTxnValue.revertSteps];
+      const removedSteps = existingTxnValue.steps.slice(
+        activeUndoIndex + 1,
+        existingTxnValue.submittedIndex + 1,
+      );
+      console.log(
+        "removedSteps",
+        removedSteps,
+        activeUndoIndex + 1,
+        existingTxnValue.submittedIndex + 1,
+      );
+      existingTxnValue.revertSteps = [
+        ...removedSteps,
+        ...existingTxnValue.revertSteps,
+      ];
     }
-    existingTxnValue.steps = existingTxnValue.steps.slice(0, activeUndoIndex + 1);
+    existingTxnValue.steps = existingTxnValue.steps.slice(
+      0,
+      activeUndoIndex + 1,
+    );
   }
 
   existingTxnValue.steps.push(txnValue);

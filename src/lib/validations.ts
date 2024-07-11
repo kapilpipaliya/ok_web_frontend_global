@@ -29,16 +29,16 @@ export function validatePassword(password: any) {
 }
 
 export function validateEmail(email: string) {
- const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
- if (!emailRegex.test(email)) {
-  return "Please enter a valid email address";
- }
- return undefined; // No error, email is valid
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return "Please enter a valid email address";
+  }
+  return undefined; // No error, email is valid
 }
 
 export function validateUsername(username: string) {
- if (username.length < 3) {
-  return "Please enter a valid username";
- }
- return undefined; // No error, email is valid
+  if (username.length < 3) {
+    return "Please enter a valid username";
+  }
+  return undefined; // No error, email is valid
 }

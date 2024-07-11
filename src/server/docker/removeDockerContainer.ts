@@ -1,5 +1,5 @@
 // @ts-ignore
-import Docker from 'dockerode';
+import Docker from "dockerode";
 
 export async function removeDockerContainer(
   containerId: string,

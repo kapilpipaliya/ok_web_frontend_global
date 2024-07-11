@@ -1,23 +1,13 @@
-import {
-  For,
-  Show,
-  createEffect,
-  createSignal,
-  
-} from "solid-js";
+import { For, Show, createEffect, createSignal } from "solid-js";
 
 import {
   PageRenderVertexContext,
   RepeaterVertexContext,
   usePageRenderVertexContext,
-  useRepeaterVertexContext
+  useRepeaterVertexContext,
 } from "~/components/page_attr_render/Context";
-import {
-  PageAttrRender,
-} from "~/components/page_attr_render/PageAttrRender";
-import {
-  getCollection
-} from "~/components/page_attr_render/utils/getCollection";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
@@ -51,14 +41,16 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
     }
 
     setIsFetching(false);
-  }
+  };
   createEffect(() => {
     const expression = props.meta.P.data;
     if (expression) {
       setInitialState(expression);
       return;
     }
-    const data = getSelectionOptions(graph, setGraph, "->$0Data", [props.meta]).vertexes
+    const data = getSelectionOptions(graph, setGraph, "->$0Data", [
+      props.meta,
+    ]).vertexes;
     if (data) {
       setOptions(data);
     } else {

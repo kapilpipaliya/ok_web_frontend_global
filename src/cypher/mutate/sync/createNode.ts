@@ -1,7 +1,7 @@
 // Function to create a new node.
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function createNode(
   session: Session,
@@ -10,7 +10,7 @@ export async function createNode(
 ) {
   const result = await session.run(
     `CREATE (n:${nodeType}) SET n = $properties SET n.createdAt = localDateTime() RETURN n;`,
-    {properties},
+    { properties },
   );
   return convertNodeToJson(result.records[0].get("n"));
 }

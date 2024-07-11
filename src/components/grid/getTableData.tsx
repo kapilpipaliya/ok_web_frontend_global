@@ -10,7 +10,9 @@ import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
-async function getFormAttr(tableId: string): Promise<{ error: string, form?: IFormMetaData }> {
+async function getFormAttr(
+  tableId: string,
+): Promise<{ error: string; form?: IFormMetaData }> {
   let form = FormMetaData[tableId] || FormMetaDataAuth[tableId];
   if (!form) {
     form = FormMetaData.Form;
@@ -21,23 +23,33 @@ async function getFormAttr(tableId: string): Promise<{ error: string, form?: IFo
       outgoing,
     });
     if (data.result.length > 0) {
-      form = getFormMetaData(data.graph as Store<GraphInterface>, () => { }, data.result[0]);
+      form = getFormMetaData(
+        data.graph as Store<GraphInterface>,
+        () => {},
+        data.result[0],
+      );
     }
     if (!form) {
       return { error: "Form not found" };
     }
   }
-  return { error: "", form};
+  return { error: "", form };
 }
 
-export async function getTableData(tableId: string, skip?: number, limit?: number) {
+export async function getTableData(
+  tableId: string,
+  skip?: number,
+  limit?: number,
+) {
   try {
     const formAttrResult = await getFormAttr(tableId);
     if (formAttrResult.error) {
       return { error: formAttrResult.error };
     }
 
-    const { incoming, outgoing } = getEdgesFromRowsAttr(formAttrResult.form!.attributes);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(
+      formAttrResult.form!.attributes,
+    );
     const expression = paginationExpression({
       coll: tableId,
       filter: "",

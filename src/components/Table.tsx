@@ -7,7 +7,8 @@ import {
   type JSX,
   Match,
   Show,
-  Switch, createSignal,
+  Switch,
+  createSignal,
 } from "solid-js";
 
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
@@ -66,11 +67,7 @@ export function CommonTable(props: Readonly<TableProps>) {
     <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) width:100%">
       <Table headers={props.headers.length}>
         <For each={props.headers}>
-          {(header) => (
-            <TableHeadCell>
-              {header.header}
-            </TableHeadCell>
-          )}
+          {(header) => <TableHeadCell>{header.header}</TableHeadCell>}
         </For>
         <For
           each={displayedRows()}
@@ -139,19 +136,21 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 }
 
-const TableActions = (props: Readonly<{
-  currentPage: Accessor<number>;
-  data: any;
-  displayedRows: Accessor<any[]>;
-  handleFirstPage: () => void;
-  handleLastPage: () => void;
-  handleNextPage: () => void;
-  handlePreviousPage: () => void;
-  handleRowsPerPageChange: (e: Event) => void;
-  rowsPerPage: Accessor<number>;
-  rowsPerPageOptions?: number[];
-  totalPages: Accessor<number>;
-}>) => {
+const TableActions = (
+  props: Readonly<{
+    currentPage: Accessor<number>;
+    data: any;
+    displayedRows: Accessor<any[]>;
+    handleFirstPage: () => void;
+    handleLastPage: () => void;
+    handleNextPage: () => void;
+    handlePreviousPage: () => void;
+    handleRowsPerPageChange: (e: Event) => void;
+    rowsPerPage: Accessor<number>;
+    rowsPerPageOptions?: number[];
+    totalPages: Accessor<number>;
+  }>,
+) => {
   return (
     <Show when={props.displayedRows().length > 0}>
       <div class="align-items:center display:flex justify-content:space-between padding:.5rem|1rem">
@@ -163,7 +162,7 @@ const TableActions = (props: Readonly<{
             onChange={props.handleRowsPerPageChange}
             value={props.rowsPerPage()}
           >
-            <For each={props.rowsPerPageOptions || [10,20,50,100]}>
+            <For each={props.rowsPerPageOptions || [10, 20, 50, 100]}>
               {(option) => <option value={option}>{option}</option>}
             </For>
           </select>
@@ -210,7 +209,8 @@ const TableActions = (props: Readonly<{
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               classList={{
                 "color:black": props.currentPage() !== props.totalPages() - 1,
-                "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+                "color:lightgrey":
+                  props.currentPage() === props.totalPages() - 1,
               }}
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleNextPage}
@@ -223,7 +223,8 @@ const TableActions = (props: Readonly<{
               class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
               classList={{
                 "color:black": props.currentPage() !== props.totalPages() - 1,
-                "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+                "color:lightgrey":
+                  props.currentPage() === props.totalPages() - 1,
               }}
               disabled={props.currentPage() === props.totalPages() - 1}
               onClick={props.handleLastPage}
@@ -237,11 +238,11 @@ const TableActions = (props: Readonly<{
   );
 };
 
-export function Table(props: Readonly<{ children: JSX.Element; class?: string; headers: number }>) {
+export function Table(
+  props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,
+) {
   return (
-    <div
-      class="scrollbar-width:thin rel overflow:visible r:10"
-    >
+    <div class="scrollbar-width:thin rel overflow:visible r:10">
       <div
         class={`${props.class || ""} grid bb:2px|solid|#37c`}
         classList={{
@@ -270,11 +271,13 @@ export function TableHeadCell(props: any) {
   );
 }
 
-export function TableBodyCell(props: Readonly<{
-  children: JSX.Element;
-  class?: string;
-  index?: number;
-}>) {
+export function TableBodyCell(
+  props: Readonly<{
+    children: JSX.Element;
+    class?: string;
+    index?: number;
+  }>,
+) {
   return (
     <div
       class={`${props.class} @fade|.4s`}

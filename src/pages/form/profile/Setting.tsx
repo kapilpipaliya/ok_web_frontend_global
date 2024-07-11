@@ -9,13 +9,13 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import {Breadcrumb} from "~/components/Breadcrumb";
+import { Breadcrumb } from "~/components/Breadcrumb";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import "~/css/tab.css";
 import { API } from "~/lib/api/endpoints";
-import {getAPI} from "~/lib/api/getApi";
-import {postAPI} from "~/lib/api/postApi";
+import { getAPI } from "~/lib/api/getApi";
+import { postAPI } from "~/lib/api/postApi";
 
 import { GeneralSection } from "./tabs/General";
 import { PasswordSection } from "./tabs/Password";
@@ -140,47 +140,77 @@ export function Settings() {
     </>
   );
 }
-const TabSection = (props: Readonly<{
-  selectedTab: Accessor<string>;
-  setSelectedTab: Setter<string>;
-}>) => {
+const TabSection = (
+  props: Readonly<{
+    selectedTab: Accessor<string>;
+    setSelectedTab: Setter<string>;
+  }>,
+) => {
   return (
     <div class="border:1px|solid|lightgrey box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border display:flex f:14px flex:wrap min-w:max position:relative px:4px py:2px r:0.3rem">
-      <label class="flex:1 text:center" onClick={() => props.setSelectedTab("General")}>
+      <label
+        class="flex:1 text:center"
+        onClick={() => props.setSelectedTab("General")}
+      >
         <input
           checked={props.selectedTab() === "General"}
           class="hidden"
           name="radio"
           type="radio"
         />
-        <span class={`${props.selectedTab() === "General" ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>General</span>
+        <span
+          class={`${props.selectedTab() === "General" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+        >
+          General
+        </span>
       </label>
-      <label class="flex:1 text:center" onClick={() => props.setSelectedTab("Pricing")}>
+      <label
+        class="flex:1 text:center"
+        onClick={() => props.setSelectedTab("Pricing")}
+      >
         <input
           checked={props.selectedTab() === "Pricing"}
           class="hidden"
           name="radio"
           type="radio"
         />
-        <span class={`${props.selectedTab() === "Pricing" ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>Pricing</span>
+        <span
+          class={`${props.selectedTab() === "Pricing" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+        >
+          Pricing
+        </span>
       </label>
-      <label class="flex:1 text:center" onClick={() => props.setSelectedTab("Password")}>
+      <label
+        class="flex:1 text:center"
+        onClick={() => props.setSelectedTab("Password")}
+      >
         <input
           checked={props.selectedTab() === "Password"}
           class="hidden"
           name="radio"
           type="radio"
         />
-        <span class={`${props.selectedTab() === "Password" ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>Password</span>
+        <span
+          class={`${props.selectedTab() === "Password" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+        >
+          Password
+        </span>
       </label>
-      <label class="flex:1 text:center" onClick={() => props.setSelectedTab("Support")}>
+      <label
+        class="flex:1 text:center"
+        onClick={() => props.setSelectedTab("Support")}
+      >
         <input
           checked={props.selectedTab() === "Support"}
           class="hidden"
           name="radio"
           type="radio"
         />
-        <span class={`${props.selectedTab() === "Support" ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>Support</span>
+        <span
+          class={`${props.selectedTab() === "Support" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+        >
+          Support
+        </span>
       </label>
     </div>
   );

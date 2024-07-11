@@ -36,7 +36,12 @@ export function deleteRow(
     const outEdge = vertex.OUT;
     for (const type in outEdge) {
       for (const edgeId of outEdge[type]) {
-        const deleteEdgeResult = deleteEdge(type === "AttrInst" ? 0 :txnId, edgeId, graph, setGraph);
+        const deleteEdgeResult = deleteEdge(
+          type === "AttrInst" ? 0 : txnId,
+          edgeId,
+          graph,
+          setGraph,
+        );
         if (deleteEdgeResult?.error)
           showErrorToast(deleteEdgeResult.error.toString());
       }

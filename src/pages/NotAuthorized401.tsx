@@ -1,5 +1,3 @@
-
-
 export function NotAuthorized401() {
   return (
     <main class="bg:rgb(255,255,255) display:grid  min-height:100vh  place-items:center  px:1.5rem px:2rem@lg py:6rem py:8rem@sm">

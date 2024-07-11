@@ -1,9 +1,12 @@
 import neo4j from "neo4j-driver";
 
-import {transferNodeTypes} from "~/cypher/mutate/sync/transferNodeTypes";
+import { transferNodeTypes } from "~/cypher/mutate/sync/transferNodeTypes";
 
 // Main function to initiate the migration process.
-export async function syncNodesMGCall(args: { nodesToTransfer: string[]; userport: string; }) {
+export async function syncNodesMGCall(args: {
+  nodesToTransfer: string[];
+  userport: string;
+}) {
   "use server";
 
   const nodesToTransfer = args.nodesToTransfer;
@@ -39,4 +42,3 @@ export async function syncNodesMGCall(args: { nodesToTransfer: string[]; userpor
     console.log("Database sessions closed.");
   }
 }
-

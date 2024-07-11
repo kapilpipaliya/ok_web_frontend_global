@@ -13,14 +13,18 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
 
   const submittedIndex = txnValue?.submittedIndex ?? -1;
 
-  const activeUndoIndex = txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
+  const activeUndoIndex =
+    txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
 
   if (submittedIndex === activeUndoIndex) return;
 
   let revertSteps: TransactionValue[] = [];
   let steps: TransactionValue[];
   if (activeUndoIndex < submittedIndex) {
-    const removedSteps = txnValue!.steps.slice(activeUndoIndex + 1, submittedIndex + 1);
+    const removedSteps = txnValue!.steps.slice(
+      activeUndoIndex + 1,
+      submittedIndex + 1,
+    );
     revertSteps = [...removedSteps, ...txnValue!.revertSteps];
     steps = [];
   } else {
@@ -34,12 +38,18 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
       deleteEdge: txnDetail.insertEdge ? txnDetail.insertEdge() : undefined,
       deleteVertex: txnDetail.insert ? txnDetail.insert() : undefined,
       insertEdge: txnDetail.deleteEdge ? txnDetail.deleteEdge() : undefined,
-      insertVertex: txnDetail.deleteVertex ? txnDetail.deleteVertex() : undefined,
+      insertVertex: txnDetail.deleteVertex
+        ? txnDetail.deleteVertex()
+        : undefined,
       merge: txnDetail.merge ? txnDetail.merge() : undefined,
       replace: txnDetail.replace ? txnDetail.replace() : undefined,
       replaceEdge: txnDetail.replaceEdge ? txnDetail.replaceEdge() : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? txnDetail.replaceEdgeEnd() : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart ? txnDetail.replaceEdgeStart() : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd
+        ? txnDetail.replaceEdgeEnd()
+        : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart
+        ? txnDetail.replaceEdgeStart()
+        : undefined,
     });
   });
 

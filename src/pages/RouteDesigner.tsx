@@ -7,7 +7,7 @@ export function RouteDesigner() {
   const [showModal, setShowModal] = createSignal(false);
 
   const addElement = (type: any) => {
-    setElements([...elements(), {id: Date.now(), type}]);
+    setElements([...elements(), { id: Date.now(), type }]);
   };
   const getFormFields = (event: any) => {
     event.preventDefault();
@@ -47,8 +47,7 @@ export function RouteDesigner() {
       </form>
 
       <Show when={showModal()}>
-        <div
-          style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
           <div style="background: white; padding: 20px; border-radius: 5px;">
             <p>This is a modal</p>
             <button

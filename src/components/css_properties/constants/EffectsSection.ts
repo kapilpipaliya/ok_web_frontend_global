@@ -1,11 +1,17 @@
 import { createSignal } from "solid-js";
 
-import type { DataEditorField, DividerField, FieldWithCustomProperty, SelectField, TextFieldOptionsField, ToggleField } from "./FieldType";
+import type {
+  DataEditorField,
+  DividerField,
+  FieldWithCustomProperty,
+  SelectField,
+  TextFieldOptionsField,
+  ToggleField,
+} from "./FieldType";
 
-import { createGridOptions , createSelectOptions } from "./FieldType";
+import { createGridOptions, createSelectOptions } from "./FieldType";
 import { timesTypes } from "./constants";
 import { sizeTypes } from "./constants";
-
 
 export const EffectsSection = {
   backdropFilter: {
@@ -120,11 +126,14 @@ export const EffectsSection = {
       "move",
       "text",
     ],
-    true
+    true,
   ),
   divider: { component: "divider", label: "" } as DividerField,
   divider2: { component: "divider", label: "" } as DividerField,
-  divider4: { component: "divider", title: "Children transform" } as DividerField,
+  divider4: {
+    component: "divider",
+    title: "Children transform",
+  } as DividerField,
   filter: {
     children: {
       shadow: createGridOptions("Shadow Grid", "Filter", [
@@ -339,7 +348,7 @@ export const EffectsSection = {
         "easing",
         "Easing",
         ["ease", "ease-in", "ease-in-out", "ease-out", "linear"],
-        true
+        true,
       ),
       shadow: createGridOptions("size Grid", "Transition", [
         {
@@ -387,7 +396,7 @@ export const EffectsSection = {
           "transform",
           "all",
         ],
-        true
+        true,
       ),
     },
     component: "dataEditor",

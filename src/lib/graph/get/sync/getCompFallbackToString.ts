@@ -5,10 +5,9 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getStringComponent } from "./getStringComponent";
 import { getChildVertex } from "./traverse";
 
-
 export function getCompFallbackToString(
   attrVertex: Vertex | undefined,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): Vertex | undefined {
   if (!attrVertex) return;
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
@@ -17,8 +16,7 @@ export function getCompFallbackToString(
   const attrDataTypeVertex = getChildVertex(
     graph,
     ["$0DataType"],
-    attrVertex
+    attrVertex,
   ).vertex;
   return getStringComponent(graph, attrDataTypeVertex);
 } // This method read all property vertexes and make an object.
-

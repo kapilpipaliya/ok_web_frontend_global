@@ -1,4 +1,3 @@
-
 import {
   For,
   Match,
@@ -6,7 +5,6 @@ import {
   createEffect,
   createResource,
   createSignal,
-  
 } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
@@ -32,7 +30,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<NavItem[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
-  
+
   // Fetch data function
   async function fetchData(): Promise<{
     data?: any;
@@ -60,18 +58,18 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-          if (result.graph.vertexes[layoutStore.formData.formData.id]) {
-            delete result.graph.vertexes[layoutStore.formData.formData.id];
-          }
-          setGraphData(graph, setGraph, result.graph);
-
-          const data2 = getTreeData(graph, setGraph, {
-            collection: paginationExpression({ coll: props.coll }),
-          }).filter((item) => item.id !== layoutStore.formData.formData.id);
-          originalData = data2;
-          setFilteredData(data2);
-          setIsFetchingData(false);
+        if (result.graph.vertexes[layoutStore.formData.formData.id]) {
+          delete result.graph.vertexes[layoutStore.formData.formData.id];
         }
+        setGraphData(graph, setGraph, result.graph);
+
+        const data2 = getTreeData(graph, setGraph, {
+          collection: paginationExpression({ coll: props.coll }),
+        }).filter((item) => item.id !== layoutStore.formData.formData.id);
+        originalData = data2;
+        setFilteredData(data2);
+        setIsFetchingData(false);
+      }
     }
   });
 
@@ -92,13 +90,15 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       <Match when={data.error}>Error: {data.error}</Match>
       <Match when={!isFetchingData()}>
         <>
-          <SearchBar handleChange={(value) => {
-            setSearchQuery(value);
-            updateFilteredData();
-          }} placeholder={`Search ${props.coll}...`} value={searchQuery()}/>
-          <div
-            class="scrollbar-color:lightgrey scrollbar-width:thin grid h:full overflow:auto"
-          >
+          <SearchBar
+            handleChange={(value) => {
+              setSearchQuery(value);
+              updateFilteredData();
+            }}
+            placeholder={`Search ${props.coll}...`}
+            value={searchQuery()}
+          />
+          <div class="scrollbar-color:lightgrey scrollbar-width:thin grid h:full overflow:auto">
             <For
               each={filteredData()}
               fallback={
@@ -107,7 +107,13 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 </div>
               }
             >
-              {(item) => <PageItem child={item} previewPageId={previewPageId()} setPreviewPageId={setPreviewPageId} />}
+              {(item) => (
+                <PageItem
+                  child={item}
+                  previewPageId={previewPageId()}
+                  setPreviewPageId={setPreviewPageId}
+                />
+              )}
             </For>
           </div>
         </>
@@ -115,4 +121,3 @@ export function PagesList(props: Readonly<{ coll: string }>) {
     </Switch>
   );
 }
-

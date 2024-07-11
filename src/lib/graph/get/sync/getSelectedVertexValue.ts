@@ -4,11 +4,10 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { getToEdge } from "./getToEdge";
 
-
 export function getSelectedVertexValue(
   graph: Store<GraphInterface>,
   vertex: Vertex,
-  meta: Vertex
+  meta: Vertex,
 ) {
   if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);

@@ -323,7 +323,7 @@ export function pad(str, width, char) {
  * @returns {object} - structure that represents the match(es)
  */
 export function evaluateMatcher(matcher, str) {
-  const result = matcher.apply(this, [str]);  
+  const result = matcher.apply(this, [str]);
   // if(isPromise(result)) {
   //     result = await result;
   // }
@@ -584,7 +584,7 @@ export function base64encode(str) {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "binary").toString("base64");  
+          return new global.Buffer.from(str, "binary").toString("base64");
         };
   return btoa(str);
 }
@@ -607,7 +607,7 @@ export function base64decode(str) {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "base64").toString("binary");  
+          return new global.Buffer.from(str, "base64").toString("binary");
         };
   return atob(str);
 }
@@ -892,7 +892,9 @@ export function formatNumber(value, picture, options) {
       mantissaPart = activePart.substring(0, exponentPosition);
       exponentPart = activePart.substring(exponentPosition + 1);
     }
-    const decimalPosition = mantissaPart.indexOf(properties["decimal-separator"]);
+    const decimalPosition = mantissaPart.indexOf(
+      properties["decimal-separator"],
+    );
     if (decimalPosition === -1) {
       integerPart = mantissaPart;
       fractionalPart = suffix;
@@ -1051,7 +1053,9 @@ export function formatNumber(value, picture, options) {
       }
       return positions;
     };
-    const integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
+    const integerPartGroupingPositions = getGroupingPositions(
+      parts.integerPart,
+    );
     const regular = (indexes) => {
       // are the grouping positions regular? i.e. same interval between each of them
       if (indexes.length === 0) {

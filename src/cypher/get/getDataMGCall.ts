@@ -1,10 +1,10 @@
 import jsep from "jsep";
 
-import type {ServerResult} from "~/cypher/get/ServerResult";
+import type { ServerResult } from "~/cypher/get/ServerResult";
 
-import {evalAsync} from "~/lib/expression_eval";
+import { evalAsync } from "~/lib/expression_eval";
 
-import type {NestedExpression} from "./NestedExpression";
+import type { NestedExpression } from "./NestedExpression";
 
 export async function getDataMGCall(
   expression: NestedExpression,

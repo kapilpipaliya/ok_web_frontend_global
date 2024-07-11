@@ -36,9 +36,7 @@ const FooterSection = (props: FooterSectionProps) => (
     <h5>{props.title}</h5>
     <ul>
       <For each={props.links}>
-        {(link) => (
-          <FooterLink href={link.href}>{link.text}</FooterLink>
-        )}
+        {(link) => <FooterLink href={link.href}>{link.text}</FooterLink>}
       </For>
     </ul>
   </div>
@@ -68,24 +66,32 @@ export function Footer() {
 
   return (
     <section aria-labelledby="footer-heading" class="footer">
-      <h2 class="sr-only" id="footer-heading">Footer</h2>
+      <h2 class="sr-only" id="footer-heading">
+        Footer
+      </h2>
       <div class="pb-3 flex ai:center flex-direction:row jc:space-around">
         <div class="info d-grid align-content-spacebetween">
           <div>
             <a aria-label="EasyFormForge Home" href="/">
-              <img alt="EasyFormForge Logo" class="headerLogo" src="graphics/logo.png" />
+              <img
+                alt="EasyFormForge Logo"
+                class="headerLogo"
+                src="graphics/logo.png"
+              />
             </a>
             <p>Design and publish forms faster, smoother</p>
           </div>
 
-          <a aria-label="Get Easy Form Forge" class="pb-1 btn-underline" href="#">
+          <a
+            aria-label="Get Easy Form Forge"
+            class="pb-1 btn-underline"
+            href="#"
+          >
             Get Easy Form Forge <Icon icon="fa-solid:arrow-right" />
           </a>
           <div class="footericon">
             <For each={socialIcons}>
-              {(icon) => (
-                <SocialIcon href={icon.href} icon={icon.icon} />
-              )}
+              {(icon) => <SocialIcon href={icon.href} icon={icon.icon} />}
             </For>
           </div>
         </div>
@@ -102,7 +108,12 @@ export function Footer() {
         <div>
           <For each={socialIcons}>
             {(icon) => (
-              <Icon aria-label={`Follow us on ${icon.icon.split(":")[1]}`} height={30} icon={icon.icon} width={30} />
+              <Icon
+                aria-label={`Follow us on ${icon.icon.split(":")[1]}`}
+                height={30}
+                icon={icon.icon}
+                width={30}
+              />
             )}
           </For>
         </div>

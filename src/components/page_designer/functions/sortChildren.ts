@@ -28,7 +28,9 @@ export function sortChildren(
       // childIndex === toIndex, childIndex may be undefined.
       if (position === "before" || position === "left") {
         if (fromVertex?.P.pos !== pos) {
-          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, { pos });
+          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
+            pos,
+          });
         }
         pos++;
         if (child.P.pos !== pos) {
@@ -41,7 +43,9 @@ export function sortChildren(
         }
         pos++;
         if (fromVertex?.P.pos !== pos) {
-          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, { pos });
+          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
+            pos,
+          });
         }
         pos++;
       }

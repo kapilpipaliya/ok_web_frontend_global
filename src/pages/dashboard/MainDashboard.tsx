@@ -1,20 +1,13 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import Dismiss from "solid-dismiss";
 // import {get, set} from "idb-keyval";
-import {
-  type JSX,
-  Show,
-  createEffect,
-  createSignal,
-  onMount,
-  
-} from "solid-js";
+import { type JSX, Show, createEffect, createSignal, onMount } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import "~/css/modal.css";
 import { signOutCall } from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";
-import {getAPI} from "~/lib/api/getApi";
+import { getAPI } from "~/lib/api/getApi";
 import { APP_BASE_URL } from "~/lib/constants";
 import { PageContext, useLoading } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
@@ -41,17 +34,13 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   // on form and page designer hide the sidebar
   const handleUrlChange = () => {
     const path = location.pathname;
-    setGraph(
-      "isSideBarOpen",
-      !(isPageDesignerPath(path)),
-    );
+    setGraph("isSideBarOpen", !isPageDesignerPath(path));
   };
 
   createEffect(() => {
     handleUrlChange(); // Call the function initially
     return location.pathname; // Track changes in pathname
   });
-
 
   return (
     <div class="scrollbar-width:thin flex flex-grow:1 flex:column overflow:auto">
@@ -63,7 +52,12 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
           },
         }}
       >
-        <Show when={location.pathname.includes("/admin/") && !isPageDesignerPath(location.pathname)}>
+        <Show
+          when={
+            location.pathname.includes("/admin/") &&
+            !isPageDesignerPath(location.pathname)
+          }
+        >
           <Navbar
             meta={graph.vertexes[vertexId]}
             right={<DropdownMenu />}
@@ -153,7 +147,10 @@ const DropdownMenu = () => {
       >
         <div
           class="bg:white border:1px|solid|#ccc position:absolute r:5px right:-15px shadow:0|2px|5px|rgba(0,0,0,0.1) top:calc(100%+5px) transition:opacity|0.2s|ease-in-out width:max-content z-index:100"
-          classList={{ "opacity:0 pointer-events:none": !isOpen(), "opacity:1 pointer-events:auto": isOpen() }}
+          classList={{
+            "opacity:0 pointer-events:none": !isOpen(),
+            "opacity:1 pointer-events:auto": isOpen(),
+          }}
         >
           <div
             class="fixed bg:#01093138 bottom:0 left:0 right:0 top:0 z-index:-1"
@@ -161,7 +158,9 @@ const DropdownMenu = () => {
           />
           <ul
             class="@fade|.3s"
-            classList={{ "list-style-type:none p:0 m:0 position:relative": true }}
+            classList={{
+              "list-style-type:none p:0 m:0 position:relative": true,
+            }}
           >
             <li class={"flex mb:5px p:10px"}>
               <div
@@ -200,7 +199,9 @@ const DropdownMenu = () => {
                   <li class={"m:5|10 mt:5px"}>
                     <A
                       class="bg:rgb(241,241,241):hover r:5|5|5|5"
-                      classList={{ "text-decoration:none color:#333 d:flex ai:center p:5px|7px": true }}
+                      classList={{
+                        "text-decoration:none color:#333 d:flex ai:center p:5px|7px": true,
+                      }}
                       href={`${APP_BASE_URL}/setting`}
                       onclick={() => {
                         setIsOpen(false);
@@ -212,7 +213,9 @@ const DropdownMenu = () => {
                   <li class={"m:5|10 mt:5px"}>
                     <A
                       class="bg:rgb(241,241,241):hover r:5|5|5|5"
-                      classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
+                      classList={{
+                        "text-decoration:none color:#333 flex ai:center p:5px|7px": true,
+                      }}
                       href={"/contact-us"}
                       onclick={() => {
                         setIsOpen(false);
@@ -226,7 +229,9 @@ const DropdownMenu = () => {
                   <li class={"m:5|10 mt:5px"}>
                     <a
                       class="cursor:default r:5|5|5|5"
-                      classList={{ "text-decoration:none color:#333 flex ai:center p:10px|7px": true }}
+                      classList={{
+                        "text-decoration:none color:#333 flex ai:center p:10px|7px": true,
+                      }}
                       onclick={async () => {
                         setIsOpen(false);
                         setLoadingSite(true);
@@ -254,7 +259,9 @@ const DropdownMenu = () => {
                 <li class={"m:5|10 mt:5px"}>
                   <A
                     class="bg:rgb(241,241,241):hover r:5|5|5|5"
-                    classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
+                    classList={{
+                      "text-decoration:none color:#333 flex ai:center p:5px|7px": true,
+                    }}
                     href={"/auth/login"}
                     onclick={() => {
                       setIsOpen(false);
@@ -267,7 +274,9 @@ const DropdownMenu = () => {
                 <li class={"m:5|10 mt:5px"}>
                   <A
                     class="bg:rgb(241,241,241):hover r:5|5|5|5"
-                    classList={{ "text-decoration:none color:#333 flex ai:center p:5px|7px": true }}
+                    classList={{
+                      "text-decoration:none color:#333 flex ai:center p:5px|7px": true,
+                    }}
                     href={"/auth/signup"}
                     onclick={() => {
                       setIsOpen(false);

@@ -25,10 +25,12 @@ export function StatusChip(props: Readonly<{ status: string }>) {
   );
 }
 
-export function ChipDropDown(props: Readonly<{
-  onChanged: (value: string) => void;
-  selectedItem: string;
-}>) {
+export function ChipDropDown(
+  props: Readonly<{
+    onChanged: (value: string) => void;
+    selectedItem: string;
+  }>,
+) {
   const options = ["pending", "completed", "cancelled"];
 
   const [status, setStatus] = createSignal(props.selectedItem);

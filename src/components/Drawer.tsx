@@ -1,5 +1,11 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
-import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
+import {
+  type Accessor,
+  type JSX,
+  type Setter,
+  Show,
+  createSignal,
+} from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 import { useClickOutside } from "~/lib/useClickOutside";
@@ -8,10 +14,12 @@ import { useZIndex } from "./ZIndex";
 
 interface DrawerProps {
   children: JSX.Element;
-  customButton?: (props: Readonly<{
-    isOpen: boolean;
-    onClick: () => void;
-  }>) => JSX.Element;
+  customButton?: (
+    props: Readonly<{
+      isOpen: boolean;
+      onClick: () => void;
+    }>,
+  ) => JSX.Element;
   drawerClass?: string;
   open?: Accessor<boolean>;
   setIsOpen?: Setter<boolean>;
@@ -21,10 +29,11 @@ interface DrawerProps {
 export function Drawer(props: Readonly<DrawerProps>) {
   const [graph, setGraph] = useGraph();
   const zIndex = useZIndex();
-  const [isOpen, setIsOpen] = props.open && props.setIsOpen
-    ? [props.open, props.setIsOpen]
-    : createSignal(false);
-    
+  const [isOpen, setIsOpen] =
+    props.open && props.setIsOpen
+      ? [props.open, props.setIsOpen]
+      : createSignal(false);
+
   const [drawerWidth, setDrawerWidth] = createSignal(props.width || "450px");
   const [mainDivHover, setMainDivHover] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
@@ -36,7 +45,11 @@ export function Drawer(props: Readonly<DrawerProps>) {
     }
   };
 
-  const activeClickOutside = useClickOutside(graph, setGraph, handleClickOutside);
+  const activeClickOutside = useClickOutside(
+    graph,
+    setGraph,
+    handleClickOutside,
+  );
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
@@ -71,13 +84,15 @@ export function Drawer(props: Readonly<DrawerProps>) {
       document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    return <div
-      class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
-      onMouseDown={handleMouseDown}
-      onMouseEnter={() => setMainDivHover(true)}
-      onMouseLeave={() => setMainDivHover(false)}
-    />
-  }
+    return (
+      <div
+        class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
+        onMouseDown={handleMouseDown}
+        onMouseEnter={() => setMainDivHover(true)}
+        onMouseLeave={() => setMainDivHover(false)}
+      />
+    );
+  };
 
   return (
     <>
@@ -90,7 +105,11 @@ export function Drawer(props: Readonly<DrawerProps>) {
         id="drawer"
         ref={setFloating}
       >
-        <div class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto p:20px`}>{props.children}</div>
+        <div
+          class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto p:20px`}
+        >
+          {props.children}
+        </div>
         <Resizer />
       </div>
       {/* <div

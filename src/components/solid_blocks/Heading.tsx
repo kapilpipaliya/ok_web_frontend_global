@@ -6,8 +6,8 @@ export function Heading(
     etc: any;
     heading?: string;
     subheading?: string;
-  } &
-    JSX.HTMLAttributes<HTMLDivElement> & JSX.IntrinsicAttributes,
+  } & JSX.HTMLAttributes<HTMLDivElement> &
+    JSX.IntrinsicAttributes,
 ) {
   const [local, customProps] = splitProps(props, [
     "heading",
@@ -24,7 +24,7 @@ export function Heading(
         <p class="text-base color:lightgrey f:13 mr:auto">{local.subheading}</p>
       )}
       {local.divider !== false && (
-        <hr class="color:lightgrey h:0.5 mb:2 mt:2 w:full"/>
+        <hr class="color:lightgrey h:0.5 mb:2 mt:2 w:full" />
       )}
     </div>
   );

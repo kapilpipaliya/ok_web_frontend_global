@@ -1,4 +1,3 @@
-
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
@@ -9,7 +8,15 @@ import { loadPageData } from "~/components/page_designer/functions/loadPageData"
 
 import { PageDesignerLabels } from "../functions/constant";
 
-export async function handleDrop(e: DragEvent,layoutStore: Store<PageLayoutObject>, graph: GraphInterface, showErrorToast: (message: string) => void, setGraph: SetStoreFunction<GraphInterface>, txnId: number, formData: Vertex) {
+export async function handleDrop(
+  e: DragEvent,
+  layoutStore: Store<PageLayoutObject>,
+  graph: GraphInterface,
+  showErrorToast: (message: string) => void,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
+  formData: Vertex,
+) {
   e.stopPropagation();
   for (const vertex of layoutStore.draggedVertices) {
     const fromVertex = vertex;
@@ -36,7 +43,7 @@ export async function handleDrop(e: DragEvent,layoutStore: Store<PageLayoutObjec
       formData,
       fromVertex,
       toVertex,
-      layoutStore.position
+      layoutStore.position,
     );
   }
 }

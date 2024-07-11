@@ -1,6 +1,6 @@
-import type {TransactionPromise} from "neo4j-driver-core";
+import type { TransactionPromise } from "neo4j-driver-core";
 
-import {findVertexesMGCall} from "~/cypher/get/findVertex";
+import { findVertexesMGCall } from "~/cypher/get/findVertex";
 
 export async function checkUserExistence(
   tx: TransactionPromise,
@@ -8,7 +8,11 @@ export async function checkUserExistence(
   email: string,
   subdomain: string,
 ) {
-  const checkIfExists = async (label: string, attribute: string, value: string) => {
+  const checkIfExists = async (
+    label: string,
+    attribute: string,
+    value: string,
+  ) => {
     return !(await findVertexesMGCall({ attribute, label, value })).error;
   };
 

@@ -1,12 +1,12 @@
 import type { createStore } from "solid-js/store";
 
-import {createContext, useContext} from "solid-js";
+import { createContext, useContext } from "solid-js";
 
 import type { IFormContext } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 export function getInitialDesignerLayoutStore() {
-  return ({
+  return {
     activeItem: null as Id | null | number,
     dragOverTargetId: -1 as Id | number,
     draggedVertices: [] as Array<Vertex>,
@@ -26,11 +26,11 @@ export function getInitialDesignerLayoutStore() {
     selectedSection: "build",
     showPropertiesDrawer: false, // properties drawer
     view: "Tablet",
-  });
+  };
 }
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
-type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>
+type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>;
 export const DesignerLayoutStoreContext = createContext<PageLayoutStore>();
 
 export function useDesignerLayoutStore() {

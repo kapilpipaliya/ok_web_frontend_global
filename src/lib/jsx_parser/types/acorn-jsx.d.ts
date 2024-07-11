@@ -1,4 +1,3 @@
- 
 declare module "acorn-jsx" {
   export interface BaseExpression {
     start: number;
@@ -186,4 +185,3 @@ declare module "acorn-jsx" {
 
   export default function (options?: PluginOptions): any;
 }
- 

@@ -21,15 +21,15 @@ export function onMutatDataGet(
   d: {
     data: {
       [key in
-      | "deleteEdge"
-      | "deleteVertex"
-      | "insert"
-      | "insertEdge"
-      | "replace"
-      | "replaceEdge"
-      | "replaceEdgeEnd"
-      | "replaceEdgeStart"]?: any;
-    }[],
+        | "deleteEdge"
+        | "deleteVertex"
+        | "insert"
+        | "insertEdge"
+        | "replace"
+        | "replaceEdge"
+        | "replaceEdgeEnd"
+        | "replaceEdgeStart"]?: any;
+    }[];
     txnId: number;
   },
 ) {

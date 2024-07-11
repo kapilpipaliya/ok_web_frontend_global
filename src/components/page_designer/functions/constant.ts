@@ -1,1 +1,7 @@
-export const PageDesignerLabels = ["Page", "Form", "ThankYouPage", "ErrorPage", "TemplatePage"]
+export const PageDesignerLabels = [
+  "Page",
+  "Form",
+  "ThankYouPage",
+  "ErrorPage",
+  "TemplatePage",
+];

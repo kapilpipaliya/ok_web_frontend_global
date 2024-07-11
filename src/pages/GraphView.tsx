@@ -1,10 +1,4 @@
-import {
-  Show,
-  createEffect,
-  createSignal,
-  onCleanup,
-  
-} from "solid-js";
+import { Show, createEffect, createSignal, onCleanup } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 

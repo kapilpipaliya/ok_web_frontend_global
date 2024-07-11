@@ -4,7 +4,12 @@ import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { Tab, TabContainer, TabList, Tabs } from "~/components/solid_blocks/tabs/tabs";
+import {
+  Tab,
+  TabContainer,
+  TabList,
+  Tabs,
+} from "~/components/solid_blocks/tabs/tabs";
 
 import type { CSSStore } from "./context";
 
@@ -18,18 +23,31 @@ import { cssStateToString } from "./utils/cssStateToString";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 const defaultStateLabel = "Default State";
 function getOptions(cssState: CSSStore) {
-  const pseudoClasses = ["", ":active", ":hover", ":focus", ":disabled", ":visited", ":focus-within", ":focus-visible", ":target"];
+  const pseudoClasses = [
+    "",
+    ":active",
+    ":hover",
+    ":focus",
+    ":disabled",
+    ":visited",
+    ":focus-within",
+    ":focus-visible",
+    ":target",
+  ];
   const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
 
-  return Array.from(uniqueStates).map(value => {
-    const label = value in cssState
-      ? `${value === '' ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
-      : value;
+  return Array.from(uniqueStates).map((value) => {
+    const label =
+      value in cssState
+        ? `${value === "" ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
+        : value;
     return { label, value };
   });
 }
 
-export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => void; }>) {
+export function TabsContainer(
+  props: Readonly<{ setValue?: (data: CSSStore) => void }>,
+) {
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [cssDefaultState, setCssDefaultCssState] = useCssDefaultEditor();
@@ -37,9 +55,10 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
   let buttonRef: HTMLInputElement;
 
   function getSelectedValues() {
-    const label = state() in cssState
-      ? `${state() === '' ? defaultStateLabel : state()} (${Object.keys(cssState[state()] ?? {}).length})`
-      : state();
+    const label =
+      state() in cssState
+        ? `${state() === "" ? defaultStateLabel : state()} (${Object.keys(cssState[state()] ?? {}).length})`
+        : state();
     return [{ label, value: state() }];
   }
 
@@ -58,7 +77,7 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
   const removeState = () => {
     batch(() => {
       setCssState(state(), reconcile({}));
-      setState('');
+      setState("");
     });
   };
 
@@ -69,18 +88,18 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
         <Tab class={"w:50%"}>Code</Tab>
       </TabList>
       <TabContainer>
-
         <Container>
           <div class="block p:20px|10px|0px|10px w:inherit">
             Current State
             <div class="flex" ref={buttonRef!}>
               <MultiSelectField
-                onRemove={() => setState('')}
+                onRemove={() => setState("")}
                 onSelect={(_, value) => setState(value as string)}
                 options={getOptions(cssState)}
                 placeholder="Select Current State"
                 selectedValues={getSelectedValues}
-                selectionLimit={1} />
+                selectionLimit={1}
+              />
               <Show when={Object.keys(cssState[state()] || {}).length > 0}>
                 <button onClick={removeState} title="Remove State">
                   <Icon height={21} icon="ic:round-remove" width={21} />
@@ -91,13 +110,16 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
               </button>
               <Show when={showDropdown()}>
                 <ZIndex>
-                  <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
+                  <DropdownMenu
+                    class="r:5"
+                    onClickOutside={() => setShowDropdown(false)}
+                    parentRef={buttonRef!}
+                  >
                     <AddNewState onClose={() => setShowDropdown(false)} />
                   </DropdownMenu>
                 </ZIndex>
               </Show>
             </div>
-
             <StyleEditor />
           </div>
         </Container>
@@ -115,7 +137,8 @@ export function TabsContainer(props: Readonly<{ setValue?: (data: CSSStore) => v
             <TextEditor
               disabled={true}
               onValueChange={handleCSSStateChange}
-              value={cssStateToString(cssState)} />
+              value={cssStateToString(cssState)}
+            />
           </div>
         </Container>
       </TabContainer>

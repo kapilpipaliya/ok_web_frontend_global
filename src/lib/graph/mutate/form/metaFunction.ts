@@ -1,7 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona/json";
-import { onCleanup, } from "solid-js";
+import { onCleanup } from "solid-js";
 
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 
@@ -18,7 +18,7 @@ export function addMetaVertexes(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Vertex,
-  attributes: FieldAttribute[]
+  attributes: FieldAttribute[],
 ) {
   const { showErrorToast } = useToast();
 
@@ -38,7 +38,7 @@ export function addMetaVertexes(
       vertex,
       "MetaAttr",
       "MetaAttr",
-      attr
+      attr,
     );
     if (addAttributeResult.error) {
       showErrorToast(addAttributeResult.error.toString());
@@ -51,16 +51,17 @@ export function addMetaVertexes(
         setGraph,
         txnId,
         graph.vertexes[addAttributeResult.vertexId!],
-        attribute.attributes
+        attribute.attributes,
       );
     }
     // todo discard transaction
   }
-}export function createMeta(
+}
+export function createMeta(
   form: IFormMetaData,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-): { error: boolean; txnId?: number; vertex?: Vertex; } {
+  setGraph: SetStoreFunction<GraphInterface>,
+): { error: boolean; txnId?: number; vertex?: Vertex } {
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
@@ -84,4 +85,3 @@ export function addMetaVertexes(
 
   return { error: false, txnId: metaTxnId, vertex: metaVertex };
 }
-

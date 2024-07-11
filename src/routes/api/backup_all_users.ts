@@ -1,4 +1,3 @@
-
 import type { APIEvent } from "@solidjs/start/server";
 import type { Node, Relationship } from "neo4j-driver";
 
@@ -22,7 +21,7 @@ export async function saveGraphToCypherQL() {
 
     const nodes = new Set<Node>();
     const relationships = new Set<Relationship>();
-    result.records.forEach(record => {
+    result.records.forEach((record) => {
       const node = record.get("n");
       const relationship = record.get("r");
       const relatedNode = record.get("m");
@@ -36,7 +35,7 @@ export async function saveGraphToCypherQL() {
     const folderPath = `./cypherql_backups/${timestamp}`;
     mkdirSync(folderPath, { recursive: true });
 
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       const nodeId = node.elementId;
       const nodeCypherQL = `CREATE (n${node.labels.length ? `:${node.labels.join(":")}` : ""} ${JSON.stringify(node.properties)})`;
       writeFileSync(`${folderPath}/node_${nodeId}.cypherql`, nodeCypherQL);
@@ -47,7 +46,10 @@ export async function saveGraphToCypherQL() {
       const startNodeId = relationship.startNodeElementId;
       const endNodeId = relationship.endNodeElementId;
       const relationshipCypherQL = `MATCH (a), (b) WHERE id(a) = ${startNodeId} AND id(b) = ${endNodeId} CREATE (a)-[r:${relationship.type} ${JSON.stringify(relationship.properties)}]->(b)`;
-      writeFileSync(`${folderPath}/relationship_${relationshipId}.cypherql`, relationshipCypherQL);
+      writeFileSync(
+        `${folderPath}/relationship_${relationshipId}.cypherql`,
+        relationshipCypherQL,
+      );
     });
 
     console.log(`Graph has been saved to ${folderPath}`);
@@ -58,17 +60,14 @@ export async function saveGraphToCypherQL() {
   }
 }
 
-
-
 export async function GET({ request }: APIEvent) {
-    // const { formName, formId } = await request.json();
-    const subdomain = await getSubDomain(request.headers.get("host")!);
-  
-    try {
-      return saveGraphToCypherQL();
-    } catch (error) {
-      console.error("Failed to backup all users", error);
-      return new Response("Internal Server Error", { status: 500 });
-    }
+  // const { formName, formId } = await request.json();
+  const subdomain = await getSubDomain(request.headers.get("host")!);
+
+  try {
+    return saveGraphToCypherQL();
+  } catch (error) {
+    console.error("Failed to backup all users", error);
+    return new Response("Internal Server Error", { status: 500 });
   }
-  
+}

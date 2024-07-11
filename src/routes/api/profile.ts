@@ -254,7 +254,12 @@ const supportTicket = async (
       }
       case "get": {
         const result = await findVertexesMGCall({ id: parentVertexId });
-        const messagesResult = await getSelectionOptionsMGCall([result.vertexes!], "->SupportUser", undefined, 10);
+        const messagesResult = await getSelectionOptionsMGCall(
+          [result.vertexes!],
+          "->SupportUser",
+          undefined,
+          10,
+        );
         return messagesResult.result;
       }
     }

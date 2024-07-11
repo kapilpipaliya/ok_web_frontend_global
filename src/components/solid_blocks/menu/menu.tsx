@@ -10,7 +10,6 @@ import {
   onMount,
   splitProps,
   useContext,
-  
 } from "solid-js";
 import { isServer } from "solid-js/web";
 
@@ -231,10 +230,7 @@ export const MenuOptionsContext = createContext<MenuOptionsContextValue>([
 export type MenuOptionProps = {
   onchange?: (checked?: boolean) => void;
   value: string;
-} & Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "onchange"
->;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
 export function MenuOption(props: MenuOptionProps) {
   const [local, divProps] = splitProps(props, ["value", "onchange"]);
@@ -272,23 +268,20 @@ export function MenuOption(props: MenuOptionProps) {
 }
 
 export type MenuOptionGroupProps = (
-    | {
-        onchange?: (value: string) => void;
-        title?: JSX.Element;
-        type?: "radio" | undefined;
-        value?: [string] | string;
-      }
-    | {
-        onchange?: (value: string[]) => void;
-        title?: JSX.Element;
-        type: "checkbox";
-        value?: string[];
-      }
-  ) &
-  Omit<
-  JSX.HTMLAttributes<HTMLDivElement>,
-  "onchange"
->;
+  | {
+      onchange?: (value: string) => void;
+      title?: JSX.Element;
+      type?: "radio" | undefined;
+      value?: [string] | string;
+    }
+  | {
+      onchange?: (value: string[]) => void;
+      title?: JSX.Element;
+      type: "checkbox";
+      value?: string[];
+    }
+) &
+  Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
 export function MenuOptionGroup(props: MenuOptionGroupProps): JSX.Element {
   const [local, divProps] = splitProps(props, [

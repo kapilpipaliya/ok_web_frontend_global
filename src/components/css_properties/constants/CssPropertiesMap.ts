@@ -12,7 +12,7 @@ import { SizeSection } from "./SizeSection";
 import { SpaceSection } from "./SpaceSection";
 import { TypographySection } from "./TypographySection";
 
-export const JSONSchema: CSSJSONSchemaType= {
+export const JSONSchema: CSSJSONSchemaType = {
   Layout: LayoutSection,
   Background: BackgroundSection,
   Border: BorderSection,
@@ -23,4 +23,3 @@ export const JSONSchema: CSSJSONSchemaType= {
   Space: SpaceSection,
   Typography: TypographySection,
 };
-

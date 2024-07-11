@@ -6,7 +6,15 @@ import { sortChildren } from "~/components/page_designer/functions/sortChildren"
 
 import type { PageLayoutObject } from "../../page_designer/LayoutContext";
 
-export function moveStep(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, steps: Vertex[], fromIndex: number, toIndex: number) {
+export function moveStep(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  steps: Vertex[],
+  fromIndex: number,
+  toIndex: number,
+) {
   const fromVertex = steps[fromIndex];
   const toVertex = steps[toIndex];
   const position = toIndex < fromIndex ? "before" : "after";
@@ -17,6 +25,6 @@ export function moveStep(graph: Store<GraphInterface>, setGraph: SetStoreFunctio
     fromVertex,
     layoutStore.formData.formData,
     toVertex,
-    position
+    position,
   );
 }

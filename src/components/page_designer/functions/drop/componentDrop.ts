@@ -53,9 +53,19 @@ export function componentDrop(
     );
   }
 
-  const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
+  const uniqueName = getUniqueName(
+    txnId,
+    graph,
+    setGraph,
+    pageDesignerVertex,
+    attrMetaVertex,
+  );
 
-  let rowResult: { edgeId?: string | undefined; error: boolean; vertexId?: string | undefined }
+  let rowResult: {
+    edgeId?: string | undefined;
+    error: boolean;
+    vertexId?: string | undefined;
+  };
   let props = properties ?? {};
   if (toIndex) {
     props = { ...props, name: uniqueName, pos: toIndex };
@@ -97,7 +107,11 @@ export function componentDrop(
         fromVertex.id,
       );
     } else if (fromVertex.L[0] === "Attr") {
-      const compVertex = getComponentFromLayoutRow(fromVertex.id, graph, setGraph);
+      const compVertex = getComponentFromLayoutRow(
+        fromVertex.id,
+        graph,
+        setGraph,
+      );
       setSelectionValue(
         txnId,
         rowVertex,
@@ -117,8 +131,7 @@ export function componentDrop(
         attrCompMetaVertex,
       );
     }
-  })
+  });
 
   return rowResult!.vertexId!;
 }
-

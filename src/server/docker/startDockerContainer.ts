@@ -1,7 +1,9 @@
 // @ts-ignore
-import Docker from 'dockerode';
+import Docker from "dockerode";
 
-export async function startDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
+export async function startDockerContainer(
+  containerId: string,
+): Promise<{ error: boolean; message: string }> {
   const docker = new Docker();
 
   try {

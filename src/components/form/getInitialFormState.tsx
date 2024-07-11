@@ -11,51 +11,49 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { groupBy } from "~/lib/utils";
 
-export function getInitialFormState(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, id: Id | undefined, txnId: number, label: string) {
+export function getInitialFormState(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  id: Id | undefined,
+  txnId: number,
+  label: string,
+) {
   let dataVertex: Vertex | undefined;
   if (!id) {
-    const createResult = createForm(
-      graph,
-      setGraph,
-      txnId,
-      label
-    );
+    const createResult = createForm(graph, setGraph, txnId, label);
 
     dataVertex = createResult.vertex!;
   }
-  const form = FormMetaData[label] || (FormMetaDataAuth[label]);
+  const form = FormMetaData[label] || FormMetaDataAuth[label];
 
   // Load Form Meta and Data from API
-  const metaVertexResult = untrack(() => createMeta(form, graph, setGraph)
-  );
+  const metaVertexResult = untrack(() => createMeta(form, graph, setGraph));
 
   if (metaVertexResult.error) {
     return { error: "Meta Vertex Error" };
   }
 
   const groupByTabsAndGroupFn = () => {
-    const mainAttributes = getSelectionOptions(
-      graph,
-      setGraph,
-      "->MetaAttr",
-      [metaVertexResult.vertex!]
-    ).vertexes || [];//.sort((a, b) => a.P.pos - b.P.pos);
+    const mainAttributes =
+      getSelectionOptions(graph, setGraph, "->MetaAttr", [
+        metaVertexResult.vertex!,
+      ]).vertexes || []; //.sort((a, b) => a.P.pos - b.P.pos);
 
     const groupByTabs = groupBy(
       mainAttributes,
-      (item) => item.P.tab!
+      (item) => item.P.tab!,
     ) as unknown as {
       [tab: string]: Vertex[];
     };
 
     const groupByTabsAndGroup = {} as {
-      [tab: string]: { [group: string]: Vertex[]; };
+      [tab: string]: { [group: string]: Vertex[] };
     };
 
     for (const tab in groupByTabs) {
       groupByTabsAndGroup[tab] = groupBy(
         groupByTabs[tab],
-        (item) => item.P.group!
+        (item) => item.P.group!,
       ) as unknown as {
         [group: string]: Vertex[];
       };
@@ -64,9 +62,7 @@ export function getInitialFormState(graph: Store<GraphInterface>, setGraph: SetS
   };
 
   const groupByTabsAndGroup = groupByTabsAndGroupFn();
-  const tabs = Object.keys(groupByTabsAndGroup).filter(
-    (tab) => tab !== "main"
-  );
+  const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
 
   return {
     dataVertex,

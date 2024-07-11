@@ -1,27 +1,23 @@
 import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
 
-import {
-  PageAttrRender
-} from "~/components/page_attr_render/PageAttrRender";
-import {
-  getDataVertex
-} from "~/components/page_attr_render/utils/getDataVertex";
-import {  IsPreviewContext, } from "~/lib/contexts";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
+import { IsPreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
-export function PageView(props: Readonly<{
-  data?: Vertex;
-  isPreview?: boolean
-  metaVertex?: Vertex;
-}>) {
+export function PageView(
+  props: Readonly<{
+    data?: Vertex;
+    isPreview?: boolean;
+    metaVertex?: Vertex;
+  }>,
+) {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore() || [];
-  
-  const dataVertex = createMemo(() =>
-    getDataVertex(graph, props.metaVertex)
-  );
+
+  const dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
   // const isFormRootVertetx = () => props.metaVertex?.L?.[0] === "Form";
   // const steps = createMemo<Vertex[]>(() =>
@@ -30,13 +26,12 @@ export function PageView(props: Readonly<{
   // const [activeStepId, setActiveStepId] = createSignal<string>(steps()[0]?.id);
 
   // const selectedFormVertex = () => {
-    // if (props.isPreview) {
-    //   return activeStepId() ? graph.vertexes[activeStepId()] : steps()[0];
-    // } else {
-    //   return layoutStore.activeStepId ? graph.vertexes[layoutStore.activeStepId] : steps()[0];
-    // }
+  // if (props.isPreview) {
+  //   return activeStepId() ? graph.vertexes[activeStepId()] : steps()[0];
+  // } else {
+  //   return layoutStore.activeStepId ? graph.vertexes[layoutStore.activeStepId] : steps()[0];
+  // }
   // };
-
 
   // Function to change active step
   // const changeActiveStep = (stepId: string) => {
@@ -70,13 +65,13 @@ export function PageView(props: Readonly<{
             <PageItemRender metaVertex={props.vertex!} />
           </Match> */}
           {/* <Match when={isFormRootVertetx()}> */}
-            {/* <Show when={props.isPreview && steps().length > 1}>
+          {/* <Show when={props.isPreview && steps().length > 1}>
               <div>
                 <button onClick={() => changeActiveStep(steps()[Math.max(steps().indexOf(selectedFormVertex()) - 1, 0)].id)}>Previous Step</button>
                 <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
               </div>
             </Show> */}
-            {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
+          {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
           {/* </Match> */}
           <Match when={true}>
             <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />

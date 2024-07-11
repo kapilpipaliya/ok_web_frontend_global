@@ -15,7 +15,13 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContent } from "./TreeItemContent";
 
-export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVertex: Vertex; toggleExpand: (itemId: Id) => void; }>) {
+export function TreeItem(
+  props: Readonly<{
+    collapsedKeys: Accessor<Id[]>;
+    metaVertex: Vertex;
+    toggleExpand: (itemId: Id) => void;
+  }>,
+) {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
@@ -25,7 +31,9 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
-  const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.metaVertex));
+  const children = createMemo(() =>
+    getChildrenAttrs(graph, setGraph, props.metaVertex),
+  );
 
   let startTime = 0;
 
@@ -41,7 +49,7 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData
+      layoutStore.formData.formData,
     );
   };
 
@@ -57,7 +65,7 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData
+      layoutStore.formData.formData,
     );
 
     const position = layoutStore.position;
@@ -80,14 +88,16 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
         return;
       }
 
-      if (!validateDragOver(
-        graph,
-        setGraph,
-        fromVertex,
-        toVertexId,
-        layoutStore.formData.formData,
-        position
-      )) {
+      if (
+        !validateDragOver(
+          graph,
+          setGraph,
+          fromVertex,
+          toVertexId,
+          layoutStore.formData.formData,
+          position,
+        )
+      ) {
         // Don't allow drag and drop
         return;
       }
@@ -109,7 +119,7 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
       showErrorToast,
       setGraph,
       layoutStore.formData.txnId,
-      layoutStore.formData.formData
+      layoutStore.formData.formData,
     );
     resetDragDropState(setLayoutStore);
   };
@@ -135,11 +145,19 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
           "align-items:center": true,
           "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
           "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
-          "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!layoutStore.position,
-          "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)": isActiveTargetItem() && layoutStore.position === "after",
-          "box-shadow:inset|0|0|0|2px|rgb(0,125,0)": isActiveTargetItem() && layoutStore.position === "center",
-          "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)": isActiveTargetItem() && layoutStore.position === "before",
-          "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px": !(isActiveTargetItem() && layoutStore.position === "center") && children().length,
+          "box-shadow:1px|1px|1px|1px#F2EDED":
+            !!children().length &&
+            !isActiveTargetItem() &&
+            !!layoutStore.position,
+          "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
+            isActiveTargetItem() && layoutStore.position === "after",
+          "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
+            isActiveTargetItem() && layoutStore.position === "center",
+          "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
+            isActiveTargetItem() && layoutStore.position === "before",
+          "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px":
+            !(isActiveTargetItem() && layoutStore.position === "center") &&
+            children().length,
           "display:flex": true,
           "font-size:14px": true,
           "font-weight:bold": !!children().length,
@@ -148,34 +166,46 @@ export function TreeItem(props: Readonly<{ collapsedKeys: Accessor<Id[]>; metaVe
           "justify-content:space-between": true,
           "r:0|5|5|0": !children().length,
           "r:5|5|5|5": !!children().length,
-          "w:100%": true
+          "w:100%": true,
         }}
         draggable={true}
         onClick={handleClick}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
-        onDragStart={(e) => handleDragStart(e, setLayoutStore, props.metaVertex)}
+        onDragStart={(e) =>
+          handleDragStart(e, setLayoutStore, props.metaVertex)
+        }
         onDrop={handleDropEvent}
         onMouseOver={handleMouseOver}
         onmouseleave={handleMouseLeave}
         type="button"
       >
-        <TreeItemContent collapsedKeys={props.collapsedKeys} metaVertex={props.metaVertex} toggleExpand={props.toggleExpand} />
+        <TreeItemContent
+          collapsedKeys={props.collapsedKeys}
+          metaVertex={props.metaVertex}
+          toggleExpand={props.toggleExpand}
+        />
         <Show when={layoutStore.formData.formData.id !== props.metaVertex.id}>
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
       </button>
 
       <Show
-        when={!props.collapsedKeys().includes(props.metaVertex.id) &&
-          children().length > 0}
+        when={
+          !props.collapsedKeys().includes(props.metaVertex.id) &&
+          children().length > 0
+        }
       >
         <ul class="pb:5 pl:8 pt:3">
           <For each={children()}>
             {(vertex) => (
               <Show when={layoutStore.formData}>
-                <TreeItem collapsedKeys={props.collapsedKeys} metaVertex={vertex} toggleExpand={props.toggleExpand} />
+                <TreeItem
+                  collapsedKeys={props.collapsedKeys}
+                  metaVertex={vertex}
+                  toggleExpand={props.toggleExpand}
+                />
               </Show>
             )}
           </For>

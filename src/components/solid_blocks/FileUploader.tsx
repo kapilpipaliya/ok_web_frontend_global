@@ -14,7 +14,7 @@ export function FileUploader(props: FileUploaderProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [],
-    ["setValue", "meta", "data", "label"]
+    ["setValue", "meta", "data", "label"],
   );
   const [file, setFile] = createSignal<File | any | null>(null);
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
@@ -98,7 +98,7 @@ export function FileUploader(props: FileUploaderProps) {
               />
             ) : (
               <video
-                  {...(props as JSX.HTMLAttributes<HTMLVideoElement>)}
+                {...(props as JSX.HTMLAttributes<HTMLVideoElement>)}
                 controls
                 src={fullBoxMedia()}
                 style={{

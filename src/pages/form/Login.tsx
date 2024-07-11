@@ -5,10 +5,14 @@ import { Show, createSignal, onMount } from "solid-js";
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
 import { signInCall } from "~/lib/api/api_functions";
-import {postAPI} from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/postApi";
 import { APP_BASE_URL } from "~/lib/constants";
 import { useLoading } from "~/lib/contexts";
-import { validateEmail, validatePassword, validateUsername } from "~/lib/validations";
+import {
+  validateEmail,
+  validatePassword,
+  validateUsername,
+} from "~/lib/validations";
 
 export function Login() {
   const navigate = useNavigate();
@@ -46,17 +50,17 @@ export function Login() {
     if (formData().email.includes("@")) {
       const emailError = validateEmail(formData().email);
       if (emailError) {
-          showErrorToast("Please enter a valid email address or username");
-          return;
+        showErrorToast("Please enter a valid email address or username");
+        return;
       }
     } else {
       const usernameError = validateUsername(formData().email);
       if (usernameError) {
-        showErrorToast("Please enter a valid email address or username"); 
+        showErrorToast("Please enter a valid email address or username");
         return;
       }
     }
-    
+
     const passwordError = validatePassword(formData().password);
     if (passwordError) {
       showErrorToast(passwordError);

@@ -118,7 +118,7 @@ describe("deleteVertex", () => {
       b: 2,
       c: [3, 4, 5],
     });
-      const vertex2 = newVertex(graph.newVertexId, ["hello"], {
+    const vertex2 = newVertex(graph.newVertexId, ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],

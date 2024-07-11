@@ -1,9 +1,6 @@
 import type { Store } from "solid-js/store";
 
-import type {
-  GraphInterface,
-  Vertex,
-} from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 /**
  * @deprecated

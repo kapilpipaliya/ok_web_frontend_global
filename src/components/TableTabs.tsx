@@ -21,7 +21,11 @@ export function TableTabs(props: Readonly<TableTabProps>) {
       Transform: "icon-park-outline:transform",
       "Unique Constrain": "material-symbols:inbox-customize-outline",
     };
-    return icons[name] ? <Icon height={22} icon={icons[name]} width={22} /> : <div />;
+    return icons[name] ? (
+      <Icon height={22} icon={icons[name]} width={22} />
+    ) : (
+      <div />
+    );
   };
 
   const handleTabClick = (item: string) => {
@@ -37,20 +41,18 @@ export function TableTabs(props: Readonly<TableTabProps>) {
         {(item) => (
           <button
             classList={{
-              'bb:2px|solid|#37c': currentTab() === item,
-              'bb:2px|solid|lightgrey:hover': true,
-              'color:slategray f:14': currentTab() !== item,
-              'cursor:pointer': true,
-              'f:16': currentTab() === item,
-              'p:5|0': true,
+              "bb:2px|solid|#37c": currentTab() === item,
+              "bb:2px|solid|lightgrey:hover": true,
+              "color:slategray f:14": currentTab() !== item,
+              "cursor:pointer": true,
+              "f:16": currentTab() === item,
+              "p:5|0": true,
             }}
             id={`tabletab-${item}`}
             onClick={() => handleTabClick(item)}
             type="button"
           >
-            <div
-              class="flex ai:center cursor:pointer f:15 font-weight:bold"
-            >
+            <div class="flex ai:center cursor:pointer f:15 font-weight:bold">
               {dynamicIcon(item)}&nbsp;{item}
             </div>
           </button>

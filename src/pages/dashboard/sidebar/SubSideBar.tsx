@@ -3,6 +3,7 @@ import { useLocation } from "@solidjs/router";
 import { type Accessor, For, type Setter, Show } from "solid-js";
 
 import { SearchBar } from "~/components/css_properties/SearchBar";
+
 type MainSideBarProps = {
   activeSection: Accessor<string>;
   expandedSections: Accessor<Map<string, boolean>>;

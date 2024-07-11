@@ -1,4 +1,4 @@
-import {newVertex} from "~/lib/graph/mutate/vertex";
+import { newVertex } from "~/lib/graph/mutate/vertex";
 
 export function createAttrCompMetaVertex(graph: GraphInterface) {
   return newVertex(graph.newVertexId, [], {
@@ -6,6 +6,5 @@ export function createAttrCompMetaVertex(graph: GraphInterface) {
     component: "SelectBox",
 
     name: "Comp",
-
   });
 }

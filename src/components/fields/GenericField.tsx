@@ -11,22 +11,18 @@ import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { FormWrapper } from "~/components/fields/FormWrapper";
 import {
   usePageRenderVertexContext,
-  useRepeaterVertexContext
+  useRepeaterVertexContext,
 } from "~/components/page_attr_render/Context";
-import { PageAttrRender, } from "~/components/page_attr_render/PageAttrRender";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { Repeater } from "~/components/page_attr_render/Repeater";
-import {
-  getDataVertex
-} from "~/components/page_attr_render/utils/getDataVertex";
+import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import { Heading } from "~/components/solid_blocks/Heading";
 import { StarRating } from "~/components/solid_blocks/Rating";
 import { TreeView } from "~/components/solid_blocks/TreeView";
-import {
-  Accordion,
-} from "~/components/solid_blocks/accordion/accordion";
+import { Accordion } from "~/components/solid_blocks/accordion/accordion";
 import { Progress } from "~/components/solid_blocks/progress/progress";
 import { Select } from "~/components/solid_blocks/select/select";
 import { Spinner } from "~/components/solid_blocks/spinner/spinner";
@@ -36,7 +32,12 @@ import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToS
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
-import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  IdAttr,
+  type Vertex,
+  useGraph,
+} from "~/lib/graph/graph";
 import { deNullify } from "~/lib/utils";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
@@ -53,17 +54,19 @@ export function getText(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  repeaterContext: Vertex[]
+  repeaterContext: Vertex[],
 ) {
-  return getSelectionOptions(graph, setGraph, projection, repeaterContext)
-    .vertexes as string || projection;
+  return (
+    (getSelectionOptions(graph, setGraph, projection, repeaterContext)
+      .vertexes as string) || projection
+  );
 }
 
 export function getUrl(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  repeaterContext: Vertex[]
+  repeaterContext: Vertex[],
 ) {
   const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
     .vertexes as string | undefined;
@@ -83,10 +86,19 @@ export function GenericField(
 ) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderVertexContext();
-  const component = createMemo(() => props.component ?? props.componentName ?? props.meta.P.component);
-  const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems, 2),graph)?.P[IdAttr]);
+  const component = createMemo(
+    () => props.component ?? props.componentName ?? props.meta.P.component,
+  );
+  const parentComponent = createMemo(
+    () =>
+      getCompFallbackToString(getLastItem(parentItems, 2), graph)?.P[IdAttr],
+  );
   const repeaterContext = useRepeaterVertexContext();
-  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
+  const defaultValues = createMemo(() =>
+    props.applyDefaults && graph.componentIdMap[component()]
+      ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]])
+      : {},
+  );
 
   return (
     <Show
@@ -119,7 +131,12 @@ export function GenericField(
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                 >
                   <Show
-                    fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
+                    fallback={getText(
+                      graph,
+                      setGraph,
+                      props.meta.P.text,
+                      repeaterContext,
+                    )}
                     when={!props.meta.P.text}
                   >
                     {props.children}
@@ -134,10 +151,18 @@ export function GenericField(
                 {...deNullify(props.meta.P)}
                 class={mergeCSS(defaultValues().class, props.meta.P.class)}
                 draggable
-                href={getUrl(graph, setGraph, props.meta.P.href, repeaterContext) || "#"}
+                href={
+                  getUrl(graph, setGraph, props.meta.P.href, repeaterContext) ||
+                  "#"
+                }
               >
                 <Show
-                  fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
+                  fallback={getText(
+                    graph,
+                    setGraph,
+                    props.meta.P.text,
+                    repeaterContext,
+                  )}
                   when={!props.meta.P.text}
                 >
                   {props.children}
@@ -153,10 +178,17 @@ export function GenericField(
             </Match>
           </Switch>
         </Match>
-        <Match when={PageDesignerLabels.filter(label => label !== "Form").includes(component())}>
+        <Match
+          when={PageDesignerLabels.filter((label) => label !== "Form").includes(
+            component(),
+          )}
+        >
           {/* g:'Page':-'*[P.name="book"]' */}
           {/* <Show when={props.meta.P.data} keyed> */}
-           <PageViewWrapper expression={props.meta.P.data} pageVertexLabel={component()} />
+          <PageViewWrapper
+            expression={props.meta.P.data}
+            pageVertexLabel={component()}
+          />
           {/* </Show> */}
         </Match>
         <Match when={component() === "Image"}>
@@ -213,8 +245,16 @@ export function GenericField(
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <Switch>
-              <Match when={props.data?.P?.[props.meta.P.name] ?? props.meta.P.text ?? props.meta.P.children}>
-                {props.data?.P?.[props.meta.P.name] ?? props.meta.P.text ?? props.meta.P.children}
+              <Match
+                when={
+                  props.data?.P?.[props.meta.P.name] ??
+                  props.meta.P.text ??
+                  props.meta.P.children
+                }
+              >
+                {props.data?.P?.[props.meta.P.name] ??
+                  props.meta.P.text ??
+                  props.meta.P.children}
               </Match>
               <Match when={true}>
                 <PageAttrRender data={props.data} metaVertex={props.meta} />
@@ -224,7 +264,10 @@ export function GenericField(
         </Match>
         <Match when={component() === "Table"}>
           <Table
-            headers={getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length || 0}
+            headers={
+              getSelectionOptions(graph, setGraph, "->Attr", [props.meta])
+                .vertexes?.length || 0
+            }
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
@@ -232,7 +275,13 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Table>
         </Match>
-        <Match when={component() === "TableHeader" && getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length}>
+        <Match
+          when={
+            component() === "TableHeader" &&
+            getSelectionOptions(graph, setGraph, "->Attr", [props.meta])
+              .vertexes?.length
+          }
+        >
           <TableHeadCell class={"h:5 p:10 text:center"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableHeadCell>

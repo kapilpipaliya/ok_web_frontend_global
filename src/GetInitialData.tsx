@@ -5,7 +5,7 @@ import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 
 import { useGraph } from "./lib/graph/graph";
 
-export function GetInitialData(props: Readonly<{ children: JSX.Element; }>) {
+export function GetInitialData(props: Readonly<{ children: JSX.Element }>) {
   const graph = useGraph();
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);
   const [error, setError] = createSignal<null | string>(null);
@@ -28,9 +28,7 @@ export function GetInitialData(props: Readonly<{ children: JSX.Element; }>) {
       <Match when={error()}>
         <div>{error()}</div>
       </Match>
-      <Match when={!initialDataLoading() && !error()}>
-        {props.children}
-      </Match>
+      <Match when={!initialDataLoading() && !error()}>{props.children}</Match>
     </Switch>
   );
 }

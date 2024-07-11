@@ -16,7 +16,7 @@ export async function POST({ request }: APIEvent) {
     return res;
   } catch (error: any) {
     await tx.rollback();
-    return { error: 'Transaction failed: ' + error.message };
+    return { error: "Transaction failed: " + error.message };
   } finally {
     await tx.close();
     await session.close();

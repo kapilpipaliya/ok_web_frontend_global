@@ -3,7 +3,6 @@ import { type JSXElement, Show } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
-
 export const ContainerLabel = (props: {
   class?: any;
   info?: any;
@@ -24,10 +23,23 @@ export const ContainerLabel = (props: {
       />
     </Show>
     <Show when={props.info}>
-      <CustomTooltip message={'Click for more Info'} title={props.title}>
-        <div class={"flex cursor:pointer"} onClick={() => {
-          window.open(`https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`, '_blank');
-        }}><Icon class="bg:lightgrey ml:2px" height={21} icon={"mdi:information-outline"} width={21} /></div>
+      <CustomTooltip message={"Click for more Info"} title={props.title}>
+        <div
+          class={"flex cursor:pointer"}
+          onClick={() => {
+            window.open(
+              `https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`,
+              "_blank",
+            );
+          }}
+        >
+          <Icon
+            class="bg:lightgrey ml:2px"
+            height={21}
+            icon={"mdi:information-outline"}
+            width={21}
+          />
+        </div>
       </CustomTooltip>
     </Show>
   </span>

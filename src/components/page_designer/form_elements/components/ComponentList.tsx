@@ -69,9 +69,11 @@ export function ComponentList() {
     setIsFetchingData(false);
   }
 
-  const titleStyle = "font-size:17px font-weight:600 margin-bottom:8px margin-top:8px";
+  const titleStyle =
+    "font-size:17px font-weight:600 margin-bottom:8px margin-top:8px";
   const listStyle = "list-style-type:none";
-  const listBoxStyle = "display:grid gap:5px grid-template-columns:repeat(2,1fr)";
+  const listBoxStyle =
+    "display:grid gap:5px grid-template-columns:repeat(2,1fr)";
 
   // Function to get icon by category
   const updateFilteredData = () => {
@@ -105,20 +107,21 @@ export function ComponentList() {
     }
   };
 
-
   return (
     <>
-  
-      <SearchBar handleChange={(value) => {
-        setSearchQuery(value);
-        updateFilteredData(); // Update filteredData when searchQuery changes
-      }} placeholder="Search Component..."
-      value={searchQuery()}
+      <SearchBar
+        handleChange={(value) => {
+          setSearchQuery(value);
+          updateFilteredData(); // Update filteredData when searchQuery changes
+        }}
+        placeholder="Search Component..."
+        value={searchQuery()}
       />
-      <div
-        class="scrollbar-color:lightgrey scrollbar-width:thin h:full overflow:auto"
-      >
-        <Show fallback={<LoaderNew loaderHeight="55vh" />} when={!isFetchingData()}>
+      <div class="scrollbar-color:lightgrey scrollbar-width:thin h:full overflow:auto">
+        <Show
+          fallback={<LoaderNew loaderHeight="55vh" />}
+          when={!isFetchingData()}
+        >
           <For
             each={filteredData()}
             fallback={
@@ -139,7 +142,6 @@ export function ComponentList() {
             )}
           </For>
         </Show>
-
       </div>
     </>
   );

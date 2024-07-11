@@ -1,7 +1,7 @@
 // @ts-ignore
-import Docker from 'dockerode';
+import Docker from "dockerode";
 
-import { startDockerContainer } from '~/server/docker/startDockerContainer';
+import { startDockerContainer } from "~/server/docker/startDockerContainer";
 
 // Docker API Reference: https://docs.docker.com/engine/api/v1.24/
 

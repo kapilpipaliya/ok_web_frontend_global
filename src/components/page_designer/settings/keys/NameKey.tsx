@@ -8,9 +8,7 @@ export function NameKey() {
   const [layoutStore] = useDesignerLayoutStore();
   return (
     <div class="flex ai:center gap:2 justify-content:space-between mt:6">
-      <span class="f:15 flex:.5">
-        Name Key
-      </span>
+      <span class="f:15 flex:.5">Name Key</span>
       <span class="f:15 flex:1">
         <DynamicComponent
           component={"TagBox"}
@@ -18,7 +16,8 @@ export function NameKey() {
           isRealTime={false}
           meta={{ P: { name: "nameKey" } } as unknown as Vertex}
           //  Todo Add tree options, only includes the top level fields.
-          txnId={layoutStore.formData.txnId} />
+          txnId={layoutStore.formData.txnId}
+        />
       </span>
     </div>
   );

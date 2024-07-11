@@ -11,7 +11,9 @@ export function saveUndoPoint(txnId: number, graph: GraphInterface) {
   }
 
   if (!txnValue.undoStepIndexes.includes(activeUndoIndex)) {
-    const insertIndex = txnValue.undoStepIndexes.findIndex(index => index > activeUndoIndex);
+    const insertIndex = txnValue.undoStepIndexes.findIndex(
+      (index) => index > activeUndoIndex,
+    );
     if (insertIndex === -1) {
       txnValue.undoStepIndexes.push(activeUndoIndex);
     } else {

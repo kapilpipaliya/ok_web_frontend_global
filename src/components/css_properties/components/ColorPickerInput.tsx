@@ -6,13 +6,21 @@ import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";
 
-export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => {
+export const ColorPickerInput = (
+  props: Omit<ColorPickerField, "component">,
+) => {
   const [cssState, setCssState] = useCssEditor();
   const [cssDefault] = useCssDefaultEditor();
   const [state] = useCssState();
-  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
+  const selected = () =>
+    cssState[state() || ""]?.[props.name] ||
+    cssDefault[state() ?? ""]?.[props.name] ||
+    "";
 
-  const handleChange: JSX.InputEventHandlerUnion<HTMLInputElement, InputEvent> = (event) => {
+  const handleChange: JSX.InputEventHandlerUnion<
+    HTMLInputElement,
+    InputEvent
+  > = (event) => {
     if (props.onChangeInput) {
       props.onChangeInput(event.target.value);
     }
@@ -21,7 +29,11 @@ export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => 
     }
   };
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '#000000');
+  const isDefaultValue = createMemo(
+    () =>
+      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
+      selected() !== "#000000",
+  );
 
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
@@ -44,7 +56,11 @@ export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => 
   const Label = () => (
     <ContainerLabel
       info={props.name}
-      onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })}
+      onIconClick={() =>
+        setCssState(state(), {
+          [props.name]: cssDefault[state() ?? ""]?.[props.name],
+        })
+      }
       showIcon={isDefaultValue()}
       title={props.label}
     />
@@ -55,7 +71,8 @@ export const ColorPickerInput = (props: Omit<ColorPickerField, 'component'>) => 
       <Switch>
         <Match when={props.isLabelOnTop}>
           <div class={"w:full"}>
-            <Label /><Content />
+            <Label />
+            <Content />
           </div>
         </Match>
         <Match when={props.label}>

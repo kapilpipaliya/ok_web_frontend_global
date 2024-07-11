@@ -1,4 +1,8 @@
-import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation } from "@solidjs/router";
+import {
+  type BeforeLeaveEventArgs,
+  useBeforeLeave,
+  useLocation,
+} from "@solidjs/router";
 import {
   For,
   type JSXElement,
@@ -15,9 +19,17 @@ import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
-import { RepeaterVertexContext, useRepeaterVertexContext } from "~/components/page_attr_render/Context";
+import {
+  RepeaterVertexContext,
+  useRepeaterVertexContext,
+} from "~/components/page_attr_render/Context";
 import { FormContext, type IFormContext } from "~/lib/contexts";
-import { type GraphInterface, type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  type Vertex,
+  useGraph,
+} from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { isPageDesignerPath } from "~/lib/utils";
@@ -77,7 +89,13 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         setGraphData(graph, setGraph, data.graph);
       }
     }
-    const initFormStateResult = getInitialFormState(graph, setGraph, id(), txnId, props.formId);
+    const initFormStateResult = getInitialFormState(
+      graph,
+      setGraph,
+      id(),
+      txnId,
+      props.formId,
+    );
     if (initFormStateResult.error) {
       setError(initFormStateResult.error);
       return;
@@ -126,11 +144,18 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       <Match when={error()}>{error()}</Match>
 
       <Match when={formData.formData}>
-        <RepeaterVertexContext.Provider value={[formData.formData, ...useRepeaterVertexContext()]}>
+        <RepeaterVertexContext.Provider
+          value={[formData.formData, ...useRepeaterVertexContext()]}
+        >
           <FormContext.Provider value={formData}>
             <div ref={setDivRef}>
               <Show when={props.showSubmitButtonOnTop ?? false}>
-                <SaveCancelButton buttonAlign={props.buttonAlign} closePopUp={props.closePopUp} disabled={isDisabledTxn(txnId, graph)} submitButton={props.submitButton} />
+                <SaveCancelButton
+                  buttonAlign={props.buttonAlign}
+                  closePopUp={props.closePopUp}
+                  disabled={isDisabledTxn(txnId, graph)}
+                  submitButton={props.submitButton}
+                />
               </Show>
 
               <Show when={formData.groupByTabsAndGroup !== undefined}>
@@ -143,10 +168,14 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                       </Show>
 
                       <div class="b:1 b:rgb(214,214,216) bg:rgb(237,237,237,.75) r:10|10|10|10 w:100%">
-                        <div class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10 grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}>
+                        <div
+                          class={`${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"} grid gap:0|10 grid-cols:auto grid-cols:1@<md p:5|15|15|15 w:full`}
+                        >
                           <FormGroup
                             graph={graph}
-                            metaAttributes={formData.groupByTabsAndGroup.main[group]}
+                            metaAttributes={
+                              formData.groupByTabsAndGroup.main[group]
+                            }
                             setGraph={setGraph}
                             txnId={formData.txnId}
                             vertex={formData.formData}
@@ -157,10 +186,17 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                   )}
                 </For>
               </Show>
-              <Show when={formData.tabs?.length > 0 && !(props.showMainFieldsOnly ?? false)}>
+              <Show
+                when={
+                  formData.tabs?.length > 0 &&
+                  !(props.showMainFieldsOnly ?? false)
+                }
+              >
                 <TableTabs setActiveTab={setActiveTab} tabs={formData.tabs} />
                 <br />
-                <For each={Object.keys(formData.groupByTabsAndGroup[activeTab()])}>
+                <For
+                  each={Object.keys(formData.groupByTabsAndGroup[activeTab()])}
+                >
                   {(group) => (
                     <div class="dx-fieldset">
                       <Show when={group !== "main"}>
@@ -168,7 +204,9 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                       </Show>
                       <FormGroup
                         graph={graph}
-                        metaAttributes={formData.groupByTabsAndGroup[activeTab()][group]}
+                        metaAttributes={
+                          formData.groupByTabsAndGroup[activeTab()][group]
+                        }
                         setGraph={setGraph}
                         txnId={formData.txnId}
                         vertex={formData.formData}
@@ -180,8 +218,18 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
               <br />
               <div />
 
-              <Show when={!(props.showSubmitButtonOnTop ?? false) && !props.isLoginRegister}>
-                <SaveCancelButton buttonAlign={props.buttonAlign} closePopUp={props.closePopUp} disabled={isDisabledTxn(txnId, graph)} submitButton={props.submitButton} />
+              <Show
+                when={
+                  !(props.showSubmitButtonOnTop ?? false) &&
+                  !props.isLoginRegister
+                }
+              >
+                <SaveCancelButton
+                  buttonAlign={props.buttonAlign}
+                  closePopUp={props.closePopUp}
+                  disabled={isDisabledTxn(txnId, graph)}
+                  submitButton={props.submitButton}
+                />
               </Show>
 
               <Show when={popup()}>PopOver</Show>

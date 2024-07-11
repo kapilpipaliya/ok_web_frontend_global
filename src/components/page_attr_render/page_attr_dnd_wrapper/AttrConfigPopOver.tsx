@@ -6,7 +6,7 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 
-export function AttrConfigPopOver(props: { item: Vertex; }) {
+export function AttrConfigPopOver(props: { item: Vertex }) {
   const [layoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);

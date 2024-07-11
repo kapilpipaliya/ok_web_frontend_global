@@ -8,16 +8,15 @@ import {
   type GraphInterface,
   type Id,
   IdAttr,
-  type Vertex
+  type Vertex,
 } from "~/lib/graph/graph";
 
 import { ensureArray } from "./ensureArray";
 
-
 export function selectedValue(
   meta: Vertex,
   data: Vertex,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): Id[] {
   if (meta.P.stringValue || meta.P.items) {
     // this is causing maximum call stack error when selecting an option

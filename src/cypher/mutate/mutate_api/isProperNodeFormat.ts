@@ -13,10 +13,12 @@ export function isProperNodeFormat(node: Partial<Vertex>): null | string {
   if (node.L.some((label: any) => typeof label !== "string")) {
     return "Each label in node L must be a string";
   }
-  if (!("P" in node) ||
+  if (
+    !("P" in node) ||
     typeof node.P !== "object" ||
     node === null ||
-    Array.isArray(node.P)) {
+    Array.isArray(node.P)
+  ) {
     return "Node must have P (properties) which must be an object";
   }
   if (!("id" in node)) {

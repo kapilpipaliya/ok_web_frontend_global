@@ -1,4 +1,4 @@
-import type { Accessor, } from "solid-js";
+import type { Accessor } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
@@ -7,17 +7,28 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { getIndicatorPosition } from "~/components/page_designer/functions/getIndicatorPosition";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 
-
-export function handleDragOverAndSetDropPosition(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
-  let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "after" |
-    "before" |
-    "center" |
-    "left" |
-    "right" |
-    null;
+export function handleDragOverAndSetDropPosition(
+  e: DragEvent,
+  layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutVertex: Vertex,
+  isPreview: boolean | undefined,
+  collapsedKeys: Accessor<Id[]>,
+  children: () => Vertex[],
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formData: Vertex,
+) {
+  let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
+    | "after"
+    | "before"
+    | "center"
+    | "left"
+    | "right"
+    | null;
   if (!position) {
     setLayoutStore({ activeItem: null, position: null });
-    setLayoutStore('dragOverTargetId', -1);
+    setLayoutStore("dragOverTargetId", -1);
     return;
   }
 
@@ -44,16 +55,18 @@ export function handleDragOverAndSetDropPosition(e: DragEvent, layoutStore: Stor
 
   const fromVertex = layoutStore.draggedVertices[0];
   const toVertexId = activeItem;
-  if (!validateDragOver(
-    graph,
-    setGraph,
-    fromVertex,
-    toVertexId,
-    formData,
-    position
-  )) {
+  if (
+    !validateDragOver(
+      graph,
+      setGraph,
+      fromVertex,
+      toVertexId,
+      formData,
+      position,
+    )
+  ) {
     return;
   }
   setLayoutStore({ activeItem, position });
-  setLayoutStore('dragOverTargetId', layoutVertex.id);
+  setLayoutStore("dragOverTargetId", layoutVertex.id);
 }

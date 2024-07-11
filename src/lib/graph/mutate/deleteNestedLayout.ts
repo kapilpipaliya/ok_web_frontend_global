@@ -22,7 +22,12 @@ export function deleteNestedLayout(
       deleteChildren([child]);
 
       // delete properties:
-      const AttrProps = getSelectionOptions(graph, () => 0, "->$0Prop", vertexes);
+      const AttrProps = getSelectionOptions(
+        graph,
+        () => 0,
+        "->$0Prop",
+        vertexes,
+      );
       if (!AttrProps.error) {
         for (const vertex of AttrProps.vertexes!) {
           // delete in edges and out edges of properties

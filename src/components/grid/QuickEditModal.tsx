@@ -1,12 +1,12 @@
-import type {SetStoreFunction} from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import {Icon} from "@iconify-icon/solid";
+import { Icon } from "@iconify-icon/solid";
 import Dismiss from "solid-dismiss";
-import {Show, createSignal} from "solid-js";
+import { Show, createSignal } from "solid-js";
 
-import type {GraphInterface} from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/graph";
 
-import {DynamicForm} from "~/components/form/DynamicForm";
+import { DynamicForm } from "~/components/form/DynamicForm";
 
 export const QuickEditModal = (p: {
   graph: GraphInterface;
@@ -39,7 +39,7 @@ export const QuickEditModal = (p: {
         width={22}
       />
       <Dismiss
-        animation={{appendToElement: "menuPopup", name: "fade"}}
+        animation={{ appendToElement: "menuPopup", name: "fade" }}
         closeWhenEscapeKeyIsPressed={true}
         menuButton={btnEl}
         modal
@@ -62,7 +62,7 @@ export const QuickEditModal = (p: {
                 ✕
               </button>
             </div>
-            <hr class="fg:lightgrey"/>
+            <hr class="fg:lightgrey" />
 
             <div class="max-h:50vh mt:10 overflow:auto p:3">
               <DynamicForm

@@ -2,8 +2,6 @@ import type { ToggleField } from "./FieldType";
 
 import { Icons } from "./Icons";
 
-
-
 export const GeneralSection = {
   visibility: {
     component: "toggleButton",

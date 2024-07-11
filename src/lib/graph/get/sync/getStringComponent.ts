@@ -6,17 +6,16 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 import { getChildVertex } from "./traverse";
 
-
 export function getStringComponent(
   graph: Store<GraphInterface>,
-  attrDataTypeVertex?: Vertex
+  attrDataTypeVertex?: Vertex,
 ) {
   if (!attrDataTypeVertex) {
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
       graph,
       "DataType",
       "name",
-      "String"
+      "String",
     );
     if (!attrDataTypeVertex) {
       return;

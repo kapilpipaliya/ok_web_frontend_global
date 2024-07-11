@@ -6,7 +6,6 @@ import {
   createMemo,
   createSignal,
   onCleanup,
-  
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../constants/FieldType";
@@ -17,18 +16,23 @@ import { CenterDiv } from "./CenterDiv";
 import { Container } from "./Container";
 import { ContainerLabel } from "./ContainerLabel";
 
-export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'component'>) => {
+export const TextFieldWithSelect = (
+  props: Omit<TextFieldOptionsField, "component">,
+) => {
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
-  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
+  const selected = () =>
+    cssState[state() || ""]?.[props.name] ||
+    cssDefault[state() ?? ""]?.[props.name] ||
+    "";
 
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
   const [startValue, setStartValue] = createSignal(selected());
   const determineSelectedOption = () => {
-    return sizeTypes.find((unit) => selected().includes(unit)) || 'px';
+    return sizeTypes.find((unit) => selected().includes(unit)) || "px";
   };
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
 
@@ -85,7 +89,9 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
   const moveIncrement = (event: MouseEvent) => {
     if (isMoving()) {
       const diff = startY() - event.pageY;
-      setCssState(state(), { [props.name]: `${startValue() + diff}${selectedOption()}` });
+      setCssState(state(), {
+        [props.name]: `${startValue() + diff}${selectedOption()}`,
+      });
     }
   };
 
@@ -94,7 +100,9 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
     event.preventDefault();
     setIsMoving(true);
     setStartY(event.pageY);
-    setStartValue(getValueWithoutUnits(props.value ? props.value() : selected()));
+    setStartValue(
+      getValueWithoutUnits(props.value ? props.value() : selected()),
+    );
 
     document.addEventListener("mousemove", moveIncrement);
     document.addEventListener("mouseup", upIncrement);
@@ -139,17 +147,20 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
         </Show>
         <Show
           fallback={
-            <label>{props.label}<input
-              class={"f:14"}
-              class="w:100%" // Set width to 100%
-              onInput={handleChange}
-              placeholder={`${
-                props.inputType === "number" ? "0" : props.placeholder
-              }`}
-              step="any"
-              type={props.inputType || "text"}
-              value={getValueWithoutUnits(selected())}
-            /></label>
+            <label>
+              {props.label}
+              <input
+                class={"f:14"}
+                class="w:100%" // Set width to 100%
+                onInput={handleChange}
+                placeholder={`${
+                  props.inputType === "number" ? "0" : props.placeholder
+                }`}
+                step="any"
+                type={props.inputType || "text"}
+                value={getValueWithoutUnits(selected())}
+              />
+            </label>
           }
           when={props.showInside}
         >
@@ -205,11 +216,17 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
     </div>
   );
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== "");
+  const isDefaultValue = createMemo(
+    () =>
+      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
+      selected() !== "",
+  );
 
   const resetValue = () => {
-    setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] });
-    setStartValue(cssDefault[state() ?? '']?.[props.name]);
+    setCssState(state(), {
+      [props.name]: cssDefault[state() ?? ""]?.[props.name],
+    });
+    setStartValue(cssDefault[state() ?? ""]?.[props.name]);
     setOption(determineSelectedOption());
   };
 
@@ -219,8 +236,12 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
         fallback={
           <Show fallback={<Content />} when={props.label}>
             <CenterDiv>
-              <ContainerLabel info={props.name} onIconClick={resetValue}
-                showIcon={isDefaultValue()} title={props.label} />
+              <ContainerLabel
+                info={props.name}
+                onIconClick={resetValue}
+                showIcon={isDefaultValue()}
+                title={props.label}
+              />
               <Content />
             </CenterDiv>
           </Show>
@@ -228,8 +249,12 @@ export const TextFieldWithSelect = (props: Omit<TextFieldOptionsField, 'componen
         when={props.isLabelOnTop}
       >
         <div class={"w:full"}>
-          <ContainerLabel info={props.name} onIconClick={resetValue}
-            showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel
+            info={props.name}
+            onIconClick={resetValue}
+            showIcon={isDefaultValue()}
+            title={props.label}
+          />
           <Content />
         </div>
       </Show>

@@ -4,11 +4,10 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
 
-
 export async function replaceExpressionToLabel(
   collection: string,
   vertex: Vertex,
-  tx: TransactionPromise
+  tx: TransactionPromise,
 ) {
   if (!collection) return "";
   // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression
@@ -18,10 +17,10 @@ export async function replaceExpressionToLabel(
       (
         await getSelectionOptionsBase(
           [vertex],
-          (collection.match(/{{(.*)}}/)?.[1])! || "",
-          tx
+          collection.match(/{{(.*)}}/)?.[1]! || "",
+          tx,
         )
-      ).result || ""
+      ).result || "",
     );
   }
   return collection;

@@ -18,17 +18,22 @@ export const MiddleSectionButtons = () => {
               "color:grey": section === "Build",
               "r:0|5|5|0": section !== "Build",
               "r:5|0|0|5": section === "Build",
-              "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true
+              "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
             }}
-            onclick={() => setLayoutStore("selectedSection", section.toLowerCase())}
+            onclick={() =>
+              setLayoutStore("selectedSection", section.toLowerCase())
+            }
             type="button"
           >
             <Icon
               height={22}
-              icon={section === "Build"
-                ? "material-symbols-light:build-circle-outline-rounded"
-                : "solar:settings-linear"}
-              width={22} />
+              icon={
+                section === "Build"
+                  ? "material-symbols-light:build-circle-outline-rounded"
+                  : "solar:settings-linear"
+              }
+              width={22}
+            />
           </button>
         </Tooltip>
       )}

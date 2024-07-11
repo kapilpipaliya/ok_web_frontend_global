@@ -6,10 +6,7 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { MultiSelectField } from "~/components/MultiSelect";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
-import {
-  Radio,
-  RadioGroup,
-} from "~/components/solid_blocks/radio/radio";
+import { Radio, RadioGroup } from "~/components/solid_blocks/radio/radio";
 import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
@@ -29,15 +26,22 @@ export function GenericInputField(
   } & ComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
-  const component = () => props.component ?? props.componentName ?? props.meta.P.component;
+  const component = () =>
+    props.component ?? props.componentName ?? props.meta.P.component;
 
   // todo: make a common onChange if possible.
-  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
-  const Error = () => <Show when={props.meta.P.error}>
-    <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
-  </Show>
+  const defaultValues = createMemo(() =>
+    props.applyDefaults && graph.componentIdMap[component()]
+      ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]])
+      : {},
+  );
+  const Error = () => (
+    <Show when={props.meta.P.error}>
+      <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
+    </Show>
+  );
 
-  const [select, customMetaProps] = splitProps(props.meta.P, ['validation'])
+  const [select, customMetaProps] = splitProps(props.meta.P, ["validation"]);
 
   return (
     <Show
@@ -51,23 +55,22 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             checked={
-              props.data?.P[props.meta.P[IdAttr]] ??
-              props.meta?.P.checked
+              props.data?.P[props.meta.P[IdAttr]] ?? props.meta?.P.checked
             }
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.checked)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.checked,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.checked,
+
+                    false,
+                  );
             }}
           />
           <Error />
@@ -83,15 +86,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
@@ -117,15 +120,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             placeholder={props.meta?.P.label ?? ""}
             {...defaultValues()}
@@ -148,15 +151,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.checked)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.checked,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.checked,
+
+                    false,
+                  );
             }}
           >
             {props.meta?.P.label ?? "radio"}
@@ -181,29 +184,29 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             onSelect={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             optionValueKey="id"
             options={props.meta?.P.options ?? []}
@@ -229,15 +232,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             placeholder={props.meta?.P.label ?? props.title}
             rows={props.meta?.P.rows ?? 4}
@@ -267,15 +270,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
@@ -290,16 +293,16 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue
                 : (value) =>
-                  setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    value,
-                    
-                    false,
-                  )
+                    setValueGlobal(
+                      graph,
+                      setGraph,
+                      props.txnId,
+                      props.meta,
+                      props.data!,
+                      value,
+
+                      false,
+                    )
             }
             title={props.title}
             txnId={props.txnId}
@@ -315,15 +318,15 @@ export function GenericInputField(
               props.setValue
                 ? props.setValue(e.target.value)
                 : setValueGlobal(
-                  graph,
-                  setGraph,
-                  props.txnId,
-                  props.meta,
-                  props.data!,
-                  e.target.value,
-                  
-                  false,
-                );
+                    graph,
+                    setGraph,
+                    props.txnId,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+
+                    false,
+                  );
             }}
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
@@ -334,7 +337,6 @@ export function GenericInputField(
           <Signature />
           <Error />
         </Match>
-
       </Switch>
     </Show>
   );
@@ -343,4 +345,3 @@ export function GenericInputField(
 // Note:
 // what if some properties are removed from meta.
 // We should remember previous keys and remove when some keys are changed.
-

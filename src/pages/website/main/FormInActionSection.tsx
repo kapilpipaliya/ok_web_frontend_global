@@ -12,8 +12,8 @@ export function FormInActionSection() {
         </p>
 
         <div class="formsecparent mt-5">
-          <FormTypes/>
-          <FormSection/>
+          <FormTypes />
+          <FormSection />
         </div>
       </div>
     </section>
@@ -27,7 +27,11 @@ const FormSection = () => {
         <a aria-label="Demo style 1" class="btn-mid-icon-filled" href="#">
           Demo style 1
         </a>
-        <a aria-label="Demo style 2" class="btn-transperant bg-transperant" href="#">
+        <a
+          aria-label="Demo style 2"
+          class="btn-transperant bg-transperant"
+          href="#"
+        >
           Demo style 2
         </a>
       </div>
@@ -68,7 +72,12 @@ const FormSection = () => {
             style="height:200px"
           />
 
-          <input aria-label="Submit" class="btn-small-icon-filled" type="submit" value="Submit" />
+          <input
+            aria-label="Submit"
+            class="btn-small-icon-filled"
+            type="submit"
+            value="Submit"
+          />
         </form>
       </div>
     </div>
@@ -92,7 +101,10 @@ const FormTypes = () => {
         <For each={formType}>
           {(form) => (
             <li>
-              <a aria-label={form.name} href="#">{form.name}</a> <span>({form.count})</span>
+              <a aria-label={form.name} href="#">
+                {form.name}
+              </a>{" "}
+              <span>({form.count})</span>
             </li>
           )}
         </For>

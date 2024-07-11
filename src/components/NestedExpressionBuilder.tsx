@@ -1,13 +1,15 @@
-import {CustomModal} from "./CommonDialog";
+import { CustomModal } from "./CommonDialog";
 
-export function NestedExpressionBuilder(props: Readonly<{
-  content: string;
-  data?: any;
-  meta: any; // Adjust type as per your requirement
-  onClose: () => void;
-  setValue: (value: any) => void;
-  txnId?: number;
-}>) {
+export function NestedExpressionBuilder(
+  props: Readonly<{
+    content: string;
+    data?: any;
+    meta: any; // Adjust type as per your requirement
+    onClose: () => void;
+    setValue: (value: any) => void;
+    txnId?: number;
+  }>,
+) {
   // Implement the logic for NestedExpressionBuilder here
   return (
     <CustomModal

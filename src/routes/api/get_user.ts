@@ -20,7 +20,8 @@ export async function GET({ request }: APIEvent) {
     if (email === undefined) {
       return { error: "Not Authorized Email or username" };
     }
-    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
+    const query =
+      "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await neo4jSession.run(query, { email: email });
 
     if (result.records.length === 0) {

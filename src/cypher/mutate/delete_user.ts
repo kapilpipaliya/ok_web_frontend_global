@@ -1,8 +1,8 @@
 import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
-import {removeDockerContainer} from "~/server/docker/removeDockerContainer";
-import {stopDockerContainer} from "~/server/docker/stopDockerContainer";
+import { removeDockerContainer } from "~/server/docker/removeDockerContainer";
+import { stopDockerContainer } from "~/server/docker/stopDockerContainer";
 import { getSubDomain } from "~/server/getSubDomain";
 
 // Main function to initiate the migration process.

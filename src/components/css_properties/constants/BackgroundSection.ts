@@ -1,6 +1,11 @@
 import { createSignal } from "solid-js";
 
-import type { ColorPickerField, DataEditorField, TextFieldOptionsField, ToggleField } from "./FieldType";
+import type {
+  ColorPickerField,
+  DataEditorField,
+  TextFieldOptionsField,
+  ToggleField,
+} from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
@@ -51,7 +56,7 @@ export const BackgroundSection = {
           name: "spread",
           options: sizeTypes,
           type: "number",
-          },
+        },
       ]),
       style: {
         component: "toggleButton",

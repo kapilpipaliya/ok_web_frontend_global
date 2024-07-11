@@ -7,10 +7,8 @@ export const hash = (value = "", radix = 16): string => {
   const string = String(value);
   let h = 0;
   string.split("").forEach((char: string) => {
-     
     h = (h << 5) - h + char.charCodeAt(0);
     h &= h; // Convert to 32-bit integer
-     
   });
   return Math.abs(h).toString(radix);
 };

@@ -1,23 +1,25 @@
-import type {SetStoreFunction} from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import {API} from "~/lib/api/endpoints";
-import {getAPI} from "~/lib/api/getApi";
+import { API } from "~/lib/api/endpoints";
+import { getAPI } from "~/lib/api/getApi";
 
 import { setGraphData } from "./lib/websocket/setGraphData";
 
-export function getInitialDataAndSetToGraph(graph: [get: GraphInterface, set: SetStoreFunction<GraphInterface>]) {
+export function getInitialDataAndSetToGraph(
+  graph: [get: GraphInterface, set: SetStoreFunction<GraphInterface>],
+) {
   function setComponentIdMap(vertexes: Vertex[]) {
-    const vertexMap = {} as { [key: string]: Id; };
+    const vertexMap = {} as { [key: string]: Id };
     for (const vertex of Object.values(vertexes)) {
-      if (vertex.L[0] === 'Comp') {
+      if (vertex.L[0] === "Comp") {
         const propName = vertex.P.name;
         const vertexId = vertex.id;
         vertexMap[propName] = vertexId;
       }
     }
-    graph[1]('componentIdMap', vertexMap);
+    graph[1]("componentIdMap", vertexMap);
   }
 
   const getData = async () => {

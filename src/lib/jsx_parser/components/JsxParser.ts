@@ -33,19 +33,18 @@ export type TProps = {
   disableFragments?: boolean;
   disableKeyGeneration?: boolean;
   // added props
-  formData: Vertex,
+  formData: Vertex;
   jsx?: string;
   onError?: (error: Error) => void;
-  parent: Vertex
+  parent: Vertex;
   renderError?: (props: { error: string }) => JSX.Element | null;
   renderInWrapper?: boolean;
   renderUnrecognized?: (tagName: string) => JSX.Element | null;
   showWarnings?: boolean;
-  txnId: number,
+  txnId: number;
 };
 type Scope = Record<string, any>;
 
- 
 export default class JsxParser {
   static defaultProps: TProps = {
     allowUnknownElements: true,
@@ -219,7 +218,6 @@ export default class JsxParser {
       key: this.props.disableKeyGeneration ? undefined : randomHash(),
     };
     attributes.forEach(
-       
       (
         expr:
           | AcornJSX.JSXAttribute
@@ -441,7 +439,6 @@ export default class JsxParser {
           this.#parseExpression(graph, setGraph, ele, scope),
         ) as ParsedTree;
       case "BinaryExpression":
-         
         switch (expression.operator) {
           case "-":
             return (
@@ -513,7 +510,6 @@ export default class JsxParser {
               this.#parseExpression(graph, setGraph, expression.left) >=
               this.#parseExpression(graph, setGraph, expression.right)
             );
-           
         }
         return undefined;
       case "CallExpression": {
@@ -634,7 +630,7 @@ export default class JsxParser {
       // @ts-ignore - AcornJsx doesn't have typescript typings
       parsed = parsed.body[0].expression.children || [];
     } catch (error) {
-      if (this.props.showWarnings) console.warn(error);  
+      if (this.props.showWarnings) console.warn(error);
       if (this.props.onError) this.props.onError(error);
       if (this.props.renderError) {
         return this.props.renderError({ error: String(error) });
@@ -653,7 +649,6 @@ export default class JsxParser {
     expression: AcornJSX.MemberExpression,
     scope?: Scope,
   ): any => {
-     
     let { object } = expression;
     const path = [
       expression.property?.name ?? JSON.parse(expression.property?.raw ?? '""'),
@@ -732,4 +727,3 @@ export default class JsxParser {
     }
   }
 }
- 

@@ -8,15 +8,23 @@ import { getParentVertex } from "../../../lib/graph/get/sync/traverse";
 import { saveUndoPoint } from "./saveUndoPoint";
 import { sortChildren } from "./sortChildren";
 
-
-export function cloneLayoutAndChildren(layoutVertex: Vertex, toExternalVertex: Vertex | undefined, externalTxnId: number | undefined, txnId: number, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
+export function cloneLayoutAndChildren(
+  layoutVertex: Vertex,
+  toExternalVertex: Vertex | undefined,
+  externalTxnId: number | undefined,
+  txnId: number,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formData: Vertex,
+) {
   let fromVertex = layoutVertex;
   const toVertex = toExternalVertex ?? layoutVertex;
   const txnId2 = externalTxnId ?? txnId;
 
   const position = toExternalVertex ? "center" : "after";
 
-  const toParentVertex = toExternalVertex ?? getParentVertex(["Attr"], toVertex, graph).vertex;
+  const toParentVertex =
+    toExternalVertex ?? getParentVertex(["Attr"], toVertex, graph).vertex;
 
   const layoutRowId = componentDrop(
     formData,
@@ -24,7 +32,7 @@ export function cloneLayoutAndChildren(layoutVertex: Vertex, toExternalVertex: V
     fromVertex,
     toParentVertex || formData,
     graph,
-    setGraph
+    setGraph,
   );
   if (layoutRowId === -1) return;
 
@@ -42,4 +50,3 @@ export function cloneLayoutAndChildren(layoutVertex: Vertex, toExternalVertex: V
 
   saveUndoPoint(txnId2, graph);
 }
-

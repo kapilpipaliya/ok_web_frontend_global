@@ -12,7 +12,12 @@ async function makeAPICall(url: string, payload: object) {
 }
 
 // Submit generic data to the server
-export async function submitDataCall(data: any, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number) {
+export async function submitDataCall(
+  data: any,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
+) {
   const result = await makeAPICall(API.submitDataUrl, data);
   // @ts-ignore
   onMutatDataGet(graph, setGraph, result);

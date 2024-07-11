@@ -1,12 +1,5 @@
 import { useLocation } from "@solidjs/router";
-import {
-  type JSX,
-  Show,
-  createEffect,
-  createSignal,
-  onMount,
-
-} from "solid-js";
+import { type JSX, Show, createEffect, createSignal, onMount } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";

@@ -1,5 +1,3 @@
-
-
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { getSelectionOptions } from "./getSelectionOptions";
@@ -20,7 +18,12 @@ export function getPermissions(meta: Vertex) {
           }
         }
         if (allowedRoleIds.size > 0) {
-          const permissionRows = getSelectionOptions(graph, setGraph, "->$0Perm", [roleRow]);
+          const permissionRows = getSelectionOptions(
+            graph,
+            setGraph,
+            "->$0Perm",
+            [roleRow],
+          );
           if (!permissionRows.error) {
             for (const permissionRow of permissionRows.vertexes!) {
               const permissions = getSelectionOptions(

@@ -1,9 +1,8 @@
-
 import type { TransactionPromise } from "neo4j-driver-core";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import {retryTransaction} from "~/cypher/mutate/mutate_api/retryTransaction";
+import { retryTransaction } from "~/cypher/mutate/mutate_api/retryTransaction";
 
 import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
 import { handleMutationData } from "./handleMutationData";
@@ -28,9 +27,8 @@ export async function getPropsFromMetaExpressionMGCall(
       const meta = metaVertex.P.meta.split("++");
       const results = [] as { [key: string]: any }[];
       for (const metaPart of meta) {
-        const metaRows =
-          await getSelectionOptionsBase(data, metaPart, tx);
-        const metaRowsResult = metaRows.result as Vertex[] || [];
+        const metaRows = await getSelectionOptionsBase(data, metaPart, tx);
+        const metaRowsResult = (metaRows.result as Vertex[]) || [];
         const metaData = await getComponentPropertiesMGCall(metaRowsResult, tx);
         results.push(metaData);
       }

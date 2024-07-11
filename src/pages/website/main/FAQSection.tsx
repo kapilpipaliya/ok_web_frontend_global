@@ -34,13 +34,13 @@ export function FAQSection() {
       <div>
         <h2>Frequently Asked Questions & Resources</h2>
         <p class="text-center p-12">
-          We get it - Here're some frequently asked questions <br/> to help you
+          We get it - Here're some frequently asked questions <br /> to help you
           along the way
         </p>
 
         <div class="accordionParent d-grid justify-content-center pt-5 gap:10px">
           {faqData.map((faq: any) => (
-            <AccordionItem answer={faq.answer} question={faq.question}/>
+            <AccordionItem answer={faq.answer} question={faq.question} />
           ))}
         </div>
       </div>
@@ -48,7 +48,9 @@ export function FAQSection() {
   );
 }
 
-const AccordionItem = (props: Readonly<{ answer: string; question: string }>) => {
+const AccordionItem = (
+  props: Readonly<{ answer: string; question: string }>,
+) => {
   const [isOpen, setIsOpen] = createSignal(false);
 
   const toggleOpen = () => {

@@ -1,8 +1,8 @@
 import jsep from "jsep";
 
-import type {Edge, Vertex} from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import {evalAsync} from "~/lib/expression_eval";
+import { evalAsync } from "~/lib/expression_eval";
 
 export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },

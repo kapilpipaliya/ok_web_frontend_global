@@ -1,16 +1,11 @@
 import type { Store } from "solid-js/store";
 
-import type {
-  GraphInterface,
-  Id,
-  Vertex
-} from "~/lib/graph/graph";
-
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 export function loadForm(
   graph: Store<GraphInterface>,
-  id: Id
-): { error: boolean | string; vertex?: Vertex; } {
+  id: Id,
+): { error: boolean | string; vertex?: Vertex } {
   if (!graph.vertexes[id]) {
     return { error: "vertex not found" };
   }

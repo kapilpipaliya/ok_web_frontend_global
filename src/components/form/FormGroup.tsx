@@ -1,12 +1,12 @@
-import type {SetStoreFunction, Store} from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
-import {toTitle} from "case-switcher-js";
-import {For, Match, Switch, createMemo} from "solid-js";
+import { toTitle } from "case-switcher-js";
+import { For, Match, Switch, createMemo } from "solid-js";
 
-import {getComponentForCollRow} from "~/lib/graph/get/sync/getComponentForCollRow";
-import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
+import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
-import {DynamicComponent} from "./DynamicComponent";
+import { DynamicComponent } from "./DynamicComponent";
 
 interface FormGroupProps {
   graph: Store<GraphInterface>;
@@ -89,4 +89,3 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
     </For>
   );
 }
-

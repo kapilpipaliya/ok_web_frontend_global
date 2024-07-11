@@ -1,16 +1,18 @@
 import type { JSX } from "solid-js";
 
-import {CustomModal} from "./CommonDialog";
+import { CustomModal } from "./CommonDialog";
 
-export function DeleteDialog(props: Readonly<{
-  buttonLabel?: JSX.Element;
-  message?: string;
-  onCancel?: () => void;
-  onConfirm: () => void;
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
-  title?: string;
-}>) {
+export function DeleteDialog(
+  props: Readonly<{
+    buttonLabel?: JSX.Element;
+    message?: string;
+    onCancel?: () => void;
+    onConfirm: () => void;
+    open?: boolean;
+    setOpen?: (open: boolean) => void;
+    title?: string;
+  }>,
+) {
   const handleConfirm = () => {
     props.onConfirm();
   };
@@ -35,7 +37,7 @@ export function DeleteDialog(props: Readonly<{
             onClick={() => {
               handleCancel();
               toggle((v) => !v);
-            }}  
+            }}
           >
             Cancel
           </button>

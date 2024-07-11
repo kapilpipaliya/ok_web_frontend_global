@@ -9,11 +9,14 @@ import { CenterDiv } from "./CenterDiv";
 import { ContainerLabel } from "./ContainerLabel";
 import { IconifyIcon } from "./IconifyIcon";
 
-export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
+export const ButtonGroups = (props: Omit<ButtonGroupField, "component">) => {
   const [cssDefault] = useCssDefaultEditor();
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
-  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() || '']?.[props.name] || '';
+  const selected = () =>
+    cssState[state() || ""]?.[props.name] ||
+    cssDefault[state() || ""]?.[props.name] ||
+    "";
   const handleChange = (
     e: Event,
     option: { key: JSX.Element; value: string },
@@ -21,7 +24,7 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
     if (props.onChangeInput) {
       props.onChangeInput(option.value);
     }
-    if (!props.isAddToClass==false) {
+    if (!props.isAddToClass == false) {
       setCssState(state(), { [props.name]: option.value });
     }
   };
@@ -40,7 +43,9 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
                   onChange={(e) => handleChange(e, option)}
                   type="radio"
                 />
-                <span class={`${selected() === option.value ? 'bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)' : ''} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}>
+                <span
+                  class={`${selected() === option.value ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+                >
                   {option.icon ? (
                     <IconifyIcon icon={option.key as string} />
                   ) : (
@@ -55,18 +60,40 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
     </div>
   );
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
+  const isDefaultValue = createMemo(
+    () =>
+      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
+      selected() !== "",
+  );
   return (
     <Switch>
       <Match when={props.isLabelOnTop}>
         <div class={"w:full"}>
-          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel
+            info={props.name}
+            onIconClick={() =>
+              setCssState(state(), {
+                [props.name]: cssDefault[state() ?? ""]?.[props.name],
+              })
+            }
+            showIcon={isDefaultValue()}
+            title={props.label}
+          />
           <Content />
         </div>
       </Match>
       <Match when={props.label}>
         <CenterDiv>
-          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel
+            info={props.name}
+            onIconClick={() =>
+              setCssState(state(), {
+                [props.name]: cssDefault[state() ?? ""]?.[props.name],
+              })
+            }
+            showIcon={isDefaultValue()}
+            title={props.label}
+          />
           <Content />
         </CenterDiv>
       </Match>
@@ -76,4 +103,3 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, 'component'>) => {
     </Switch>
   );
 };
-

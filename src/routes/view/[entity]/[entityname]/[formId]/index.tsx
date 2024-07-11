@@ -9,8 +9,11 @@ export default function PageShareView() {
 
   return (
     <GetInitialData>
-      <PageViewWrapper pageId={params.formId} pageVertexLabel={params.entity} pageVertexName={params.entityname} />
+      <PageViewWrapper
+        pageId={params.formId}
+        pageVertexLabel={params.entity}
+        pageVertexName={params.entityname}
+      />
     </GetInitialData>
   );
 }
-

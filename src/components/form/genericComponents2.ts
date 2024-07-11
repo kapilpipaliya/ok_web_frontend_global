@@ -1,4 +1,3 @@
-
 export const genericComponents2 = [
   "Label",
   "Box",

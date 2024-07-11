@@ -6,7 +6,7 @@ import { For, Show, createSignal } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { ChipDropDown } from "~/components/Chip";
-import {CustomModal} from "~/components/CommonDialog";
+import { CustomModal } from "~/components/CommonDialog";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
@@ -16,13 +16,15 @@ import {
   sendChatsSupportCall,
 } from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";
-import {postAPI} from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/postApi";
 
-export const SupportTicketSection = (props: Readonly<{
-  contactList: any;
-  setContactList: SetStoreFunction<any>;
-  setIsMainScreenLoad: SetStoreFunction<boolean>;
-}>) => {
+export const SupportTicketSection = (
+  props: Readonly<{
+    contactList: any;
+    setContactList: SetStoreFunction<any>;
+    setIsMainScreenLoad: SetStoreFunction<boolean>;
+  }>,
+) => {
   const [messages, setMessages] = createSignal<any>([]);
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
@@ -93,9 +95,7 @@ export const SupportTicketSection = (props: Readonly<{
               class="h:30vh"
               src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
             />
-            <div class="font-weight:600 text-align:center">
-              No messages yet
-            </div>
+            <div class="font-weight:600 text-align:center">No messages yet</div>
           </div>
         }
         when={messages().length > 0}
@@ -115,8 +115,10 @@ export const SupportTicketSection = (props: Readonly<{
                       class="border-radius:5px margin-bottom:5px padding:5px"
                       classList={{
                         "color:#fff": true,
-                        "float:left text-align:left background:rgb(29|92|194|/|76%)": !msg.personal,
-                        "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)": msg.personal,
+                        "float:left text-align:left background:rgb(29|92|194|/|76%)":
+                          !msg.personal,
+                        "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)":
+                          msg.personal,
                       }}
                     >
                       {msg.text}
@@ -135,7 +137,7 @@ export const SupportTicketSection = (props: Readonly<{
                       classList={{
                         abs: true,
                         "left:0 bg:#5783d2 h:7px bottom:8px": !msg.personal,
-                        "right:0 bg:#267e70 h:7px bottom:7px": msg.personal
+                        "right:0 bg:#267e70 h:7px bottom:7px": msg.personal,
                       }}
                     />
                   </div>
@@ -162,9 +164,7 @@ export const SupportTicketSection = (props: Readonly<{
         dialogClass="min-w:30% r:10px p:0"
         footer={() => (
           <div class="flex ai:center jc:center">
-            <div
-              class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%"
-            >
+            <div class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%">
               <input
                 class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
                 onInput={(e) => setInputMessage(e.target.value)}
@@ -249,9 +249,7 @@ export const SupportTicketSection = (props: Readonly<{
           <For
             each={props.contactList()}
             fallback={
-              <div
-                class="display:flex grid-column-span:6 justify-content:center padding:1rem"
-              >
+              <div class="display:flex grid-column-span:6 justify-content:center padding:1rem">
                 No Tickets Found
               </div>
             }

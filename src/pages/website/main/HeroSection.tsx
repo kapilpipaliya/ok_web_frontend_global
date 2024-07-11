@@ -7,7 +7,7 @@ export function HeroSection() {
     <section class="hero">
       <div class="heroInner container">
         <h1 class="m">
-          Think, Drag & Drop <br/> Create forms in minutes
+          Think, Drag & Drop <br /> Create forms in minutes
         </h1>
         <h4 class="mt-3 mb-5">Create your form — Smoother & faster!</h4>
 
@@ -45,22 +45,27 @@ export function HeroSection() {
           >
             Get Easy Form Forge
           </button>
-          <a aria-label="Explore Features" class="pb-05 btn-underline h3" href="#">
-            Explore Features <i class="fa-solid fa-arrow-right"/>
+          <a
+            aria-label="Explore Features"
+            class="pb-05 btn-underline h3"
+            href="#"
+          >
+            Explore Features <i class="fa-solid fa-arrow-right" />
           </a>
         </div>
       </div>
     </section>
   );
-};
+}
 
-
-export const IconCard = (props: Readonly<{
-  altText: string;
-  icon: any;
-  subtext: string;
-  text: string;
-}>) => {
+export const IconCard = (
+  props: Readonly<{
+    altText: string;
+    icon: any;
+    subtext: string;
+    text: string;
+  }>,
+) => {
   return (
     <div class="iconcard">
       <div
@@ -71,7 +76,12 @@ export const IconCard = (props: Readonly<{
           "justify-content": "center",
         }}
       >
-        <Icon aria-label={props.altText} height={40} icon={props.icon} width={40} />
+        <Icon
+          aria-label={props.altText}
+          height={40}
+          icon={props.icon}
+          width={40}
+        />
       </div>
       <p class="pt-2">
         {props.text} <br /> {props.subtext}

@@ -8,28 +8,38 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { getDynamicComponent } from "./getDynamicComponent";
 
-export function DynamicComponent(props: Readonly<{
-  applyDefaults?: boolean;
-  component: string; // component is required, cant refactor it to remove it, because parent component needs it too.
-  data?: Vertex;
-  disabled?: boolean;
-  isRealTime?: boolean;
-  isTableInside?: boolean;
-  meta: Vertex;
-  setValue?: (data: any) => void;
-  title?: string;
-  txnId?: number;
-}>) {
+export function DynamicComponent(
+  props: Readonly<{
+    applyDefaults?: boolean;
+    component: string; // component is required, cant refactor it to remove it, because parent component needs it too.
+    data?: Vertex;
+    disabled?: boolean;
+    isRealTime?: boolean;
+    isTableInside?: boolean;
+    meta: Vertex;
+    setValue?: (data: any) => void;
+    title?: string;
+    txnId?: number;
+  }>,
+) {
   const [graph] = useGraph();
   const component = createMemo(() => getDynamicComponent(props.component));
-  const isApplyDefault = () => component() !== GenericInputField && component() !== GenericField;
+  const isApplyDefault = () =>
+    component() !== GenericInputField && component() !== GenericField;
   return (
     <Switch>
       <Match when={!component()}>NO INPUT</Match>
       <Match keyed when={component()}>
         <Dynamic
           component={component()!}
-          {...(props.applyDefaults && isApplyDefault() && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+          {...(props.applyDefaults &&
+          isApplyDefault() &&
+          graph.componentIdMap[props.component]
+            ? getCompProps(
+                graph,
+                graph.vertexes[graph.componentIdMap[props.component]],
+              )
+            : {})}
           applyDefaults={props.applyDefaults}
           componentName={props.component}
           data={props.data}
@@ -41,7 +51,7 @@ export function DynamicComponent(props: Readonly<{
           setValue={props.setValue}
           title={props.title ?? ""}
           txnId={props.txnId}
-          />
+        />
       </Match>
     </Switch>
   );

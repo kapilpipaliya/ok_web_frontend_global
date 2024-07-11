@@ -1,4 +1,3 @@
-
 export const genericInputComponents = [
   // "Autocomplete",
   "CheckBox",

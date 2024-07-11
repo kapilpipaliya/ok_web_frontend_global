@@ -1,8 +1,8 @@
-import {A} from "@solidjs/router";
-import {For, } from "solid-js";
+import { A } from "@solidjs/router";
+import { For } from "solid-js";
 
-import {APP_BASE_URL} from "~/lib/constants";
-import {IdAttr, useGraph} from "~/lib/graph/graph";
+import { APP_BASE_URL } from "~/lib/constants";
+import { IdAttr, useGraph } from "~/lib/graph/graph";
 
 export function AllForms() {
   const [graph, setGraph] = useGraph();

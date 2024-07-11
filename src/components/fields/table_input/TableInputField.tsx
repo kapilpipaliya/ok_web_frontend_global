@@ -7,28 +7,22 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  
 } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { AddNewButton } from "~/components/grid/AddNew";
-import {RepeaterVertexContext,
-  usePageRenderVertexContext,
-  useRepeaterVertexContext
-} from "~/components/page_attr_render/Context";
 import {
-  getDataVertex
-} from "~/components/page_attr_render/utils/getDataVertex";
+  RepeaterVertexContext,
+  usePageRenderVertexContext,
+  useRepeaterVertexContext,
+} from "~/components/page_attr_render/Context";
+import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
-import {
-  getSublistRows
-} from "~/lib/graph/mutate/form/rowFunction";
-import {
-  mergeVertexProperties,
-} from "~/lib/graph/mutate/vertex";
+import { getSublistRows } from "~/lib/graph/mutate/form/rowFunction";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { SortableRow } from "./SortableRow";
 import { insertNewRow } from "./insertNewRow";
@@ -43,24 +37,27 @@ export function TableInputField(
   const [graph, setGraph] = useGraph();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
-  const tableColumnsTemplate = createMemo(() =>
-    getSelectionOptions(
-      graph,
-      setGraph,
-      `->MetaAttr++->Attr`,
-      [props.meta],
-    ).vertexes || []
+  const tableColumnsTemplate = createMemo(
+    () =>
+      getSelectionOptions(graph, setGraph, `->MetaAttr++->Attr`, [props.meta])
+        .vertexes || [],
   );
 
   const parentItems = usePageRenderVertexContext();
-  const parentData = createMemo(() => getDataVertex(graph, getLastItem(parentItems, 1)));
+  const parentData = createMemo(() =>
+    getDataVertex(graph, getLastItem(parentItems, 1)),
+  );
 
   // load data:
   // add row vertexes data to store
   createEffect(() => {
     // if a parent has data vertex use it,
     // TODO: else if it has a parent Form Container(Record) use it.
-    const vertexes = getSublistRows(graph, props.meta, props.data || parentData());
+    const vertexes = getSublistRows(
+      graph,
+      props.meta,
+      props.data || parentData(),
+    );
     setSortedVertexes(vertexes);
   });
 
@@ -68,13 +65,19 @@ export function TableInputField(
   const [dragFromIndex, setDragFromIndex] = createSignal<null | number>(null);
 
   const handleDrop = () => {
-    if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
+    if (
+      dragFromIndex() !== null &&
+      dragToIndex() !== null &&
+      dragFromIndex() !== dragToIndex()
+    ) {
       const updatedRows = [...sortedVertexes()];
       const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
       updatedRows.splice(dragToIndex()!, 0, draggedRow);
       setSortedVertexes(updatedRows);
       updatedRows.forEach((vertex, index) => {
-        mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, { pos: index + 1 });
+        mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, {
+          pos: index + 1,
+        });
       });
     }
     setDragFromIndex(null);
@@ -91,15 +94,37 @@ export function TableInputField(
         {/*  <FormGroup form={{title: '', label: props.meta.P.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
         {/* <Show when={props.isTableInside}> */}
-        <AddNewButton onClick={() => insertNewRow(props.txnId || 0, props.meta, props.data!, props.isRealTime ?? false, graph, setGraph)} />
+        <AddNewButton
+          onClick={() =>
+            insertNewRow(
+              props.txnId || 0,
+              props.meta,
+              props.data!,
+              props.isRealTime ?? false,
+              graph,
+              setGraph,
+            )
+          }
+        />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <div class="m:2 overflow:auto r:10" classList={{ 'border:1px|solid|#37c': sortedVertexes().length, "scrollbar-width:thin": true }}>
-          <table class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em" classList={{ 'width:-webkit-fill-available': props.isTableInside }}>
+        <div
+          class="m:2 overflow:auto r:10"
+          classList={{
+            "border:1px|solid|#37c": sortedVertexes().length,
+            "scrollbar-width:thin": true,
+          }}
+        >
+          <table
+            class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em"
+            classList={{ "width:-webkit-fill-available": props.isTableInside }}
+          >
             <Show when={sortedVertexes().length}>
               <thead>
                 <tr class="background-color:#37c color:#ffffff height:35px text-align:center width:max-content">
-                  <td class="text-align-last:center align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left">&nbsp;Actions</td>
+                  <td class="text-align-last:center align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left">
+                    &nbsp;Actions
+                  </td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
                       <Switch>
@@ -107,9 +132,15 @@ export function TableInputField(
                         <Match when={attribute.P.tab === "expand"}>
                           <span />
                         </Match>
-                        <Match when={!attribute.P.hidden || attribute.P.defaultValue}>
+                        <Match
+                          when={!attribute.P.hidden || attribute.P.defaultValue}
+                        >
                           <th class="font-weight:medium jc:center p:0px|10px">
-                            {toTitle(attribute.P.displayName || attribute.P[IdAttr] || "")}
+                            {toTitle(
+                              attribute.P.displayName ||
+                                attribute.P[IdAttr] ||
+                                "",
+                            )}
                           </th>
                         </Match>
                         <Match when={true}>
@@ -124,7 +155,9 @@ export function TableInputField(
             <tbody>
               <For each={sortedVertexes()}>
                 {(vertex, index) => (
-                  <RepeaterVertexContext.Provider value={[vertex, ...useRepeaterVertexContext()]}>
+                  <RepeaterVertexContext.Provider
+                    value={[vertex, ...useRepeaterVertexContext()]}
+                  >
                     <SortableRow
                       dragFromIndex={dragFromIndex}
                       dragToIndex={dragToIndex}

@@ -46,15 +46,17 @@ type Option =
 //     }
 // }
 
-export function ExpressionBuilder(props: Readonly<{
-  component: string;
-  content: string;
-  data?: any;
-  meta: Vertex;
-  setValue: (data: any) => void;
-  title: string;
-  txnId?: number;
-}>) {
+export function ExpressionBuilder(
+  props: Readonly<{
+    component: string;
+    content: string;
+    data?: any;
+    meta: Vertex;
+    setValue: (data: any) => void;
+    title: string;
+    txnId?: number;
+  }>,
+) {
   const state = props.content.split("+").map(
     (value) =>
       ({ value }) as {
@@ -232,10 +234,7 @@ export function ExpressionBuilder(props: Readonly<{
       dialogClass="min-w:30% r:10px p:0"
       footer={(toggle) => (
         <div class="flex ai:center jc:end">
-          <button
-            onclick={handleInsert}
-            {...props.meta.P}
-          >
+          <button onclick={handleInsert} {...props.meta.P}>
             Add
           </button>
           <button

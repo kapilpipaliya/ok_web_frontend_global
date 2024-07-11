@@ -10,7 +10,7 @@ import { useLoading } from "~/lib/contexts";
 import {
   validateEmail,
   validatePassword,
-  validateUsername
+  validateUsername,
 } from "~/lib/validations";
 
 export function SignUp() {
@@ -99,9 +99,7 @@ export function SignUp() {
           src={"../../public/graphics/register_vector.png"}
         />
         <div class="grid align-content:center m:0|30@lg w:50% w:100%@<md">
-          <div class="flex f:20 font-weight:bold jc:left mb:5">
-            Sign Up
-          </div>
+          <div class="flex f:20 font-weight:bold jc:left mb:5">Sign Up</div>
           <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
             Let's Bright up your future!
           </div>

@@ -1,11 +1,11 @@
-import neo4j, { type Driver } from 'neo4j-driver';
+import neo4j, { type Driver } from "neo4j-driver";
 
 export async function connectToNeo4jWithRetry(
   uri: string,
   username: string,
   password: string,
   maxRetries = 5,
-  initialDelay = 1000
+  initialDelay = 1000,
 ): Promise<Driver> {
   let retries = 0;
   const delay = initialDelay;
@@ -17,24 +17,27 @@ export async function connectToNeo4jWithRetry(
       });
       // Try to establish a connection by creating a session and running a simple query
       const session = driver.session();
-      await session.run('RETURN 1');
+      await session.run("RETURN 1");
       await session.close();
 
-      console.log('Connected to Neo4j!');
+      console.log("Connected to Neo4j!");
       return driver;
     } catch (error) {
-      console.error(`Failed to connect to Neo4j (attempt ${retries + 1}):`, error);
+      console.error(
+        `Failed to connect to Neo4j (attempt ${retries + 1}):`,
+        error,
+      );
       retries += 1;
       if (retries >= maxRetries) {
-        console.error('Max retries reached. Unable to connect to Neo4j.');
+        console.error("Max retries reached. Unable to connect to Neo4j.");
         throw error;
       }
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
       // delay *= 2; // Exponential backoff
     }
   }
 
-  throw new Error('Unable to connect to Neo4j after max retries.');
+  throw new Error("Unable to connect to Neo4j after max retries.");
 }
 
 /*

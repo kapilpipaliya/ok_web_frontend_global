@@ -10,39 +10,88 @@ import { handleReplaceEdge } from "./handleReplaceEdge";
 import { handleReplaceEdgeEnd } from "./handleReplaceEdgeEnd";
 import { handleReplaceEdgeStart } from "./handleReplaceEdgeStart";
 
-
 export async function handleMutationObject(
   mutationObject: any,
   tx: any,
   clientToServerVertexIdMap: Map<number, number>,
   clientToServerEdgeIdMap: Map<number, number>,
-  txnResult: any[]
+  txnResult: any[],
 ) {
   if (mutationObject.insert && isObject(mutationObject.insert)) {
-    await handleInsert(mutationObject.insert, tx, clientToServerVertexIdMap, txnResult);
+    await handleInsert(
+      mutationObject.insert,
+      tx,
+      clientToServerVertexIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.replace && isObject(mutationObject.replace)) {
-    await handleReplace(mutationObject.replace, tx, clientToServerVertexIdMap, txnResult);
+    await handleReplace(
+      mutationObject.replace,
+      tx,
+      clientToServerVertexIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.merge && isObject(mutationObject.merge)) {
-    await handleMerge(mutationObject.merge, tx, clientToServerVertexIdMap, txnResult);
+    await handleMerge(
+      mutationObject.merge,
+      tx,
+      clientToServerVertexIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.deleteVertex) {
-    await handleDeleteVertex(mutationObject.deleteVertex, tx, clientToServerVertexIdMap, txnResult);
+    await handleDeleteVertex(
+      mutationObject.deleteVertex,
+      tx,
+      clientToServerVertexIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.insertEdge) {
-    await handleInsertEdge(mutationObject.insertEdge, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleInsertEdge(
+      mutationObject.insertEdge,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.replaceEdge) {
-    await handleReplaceEdge(mutationObject.replaceEdge, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleReplaceEdge(
+      mutationObject.replaceEdge,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.replaceEdgeStart) {
-    await handleReplaceEdgeStart(mutationObject.replaceEdgeStart, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleReplaceEdgeStart(
+      mutationObject.replaceEdgeStart,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.replaceEdgeEnd) {
-    await handleReplaceEdgeEnd(mutationObject.replaceEdgeEnd, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleReplaceEdgeEnd(
+      mutationObject.replaceEdgeEnd,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
   if (mutationObject.deleteEdge) {
-    await handleDeleteEdge(mutationObject.deleteEdge, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+    await handleDeleteEdge(
+      mutationObject.deleteEdge,
+      tx,
+      clientToServerVertexIdMap,
+      clientToServerEdgeIdMap,
+      txnResult,
+    );
   }
 }

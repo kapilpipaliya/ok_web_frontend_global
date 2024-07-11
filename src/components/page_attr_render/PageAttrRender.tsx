@@ -1,15 +1,13 @@
 import { toTitle } from "case-switcher-js";
-import { For, Match, Show, Switch, createMemo,  } from "solid-js";
+import { For, Match, Show, Switch, createMemo } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
-  useRepeaterVertexContext
+  useRepeaterVertexContext,
 } from "~/components/page_attr_render/Context";
-import {
-  getDataVertex
-} from "~/components/page_attr_render/utils/getDataVertex";
+import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
@@ -21,39 +19,30 @@ import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
-export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vertex }>) {
+export function PageAttrRender(
+  props: Readonly<{ data?: Vertex; metaVertex: Vertex }>,
+) {
   const parentItems = usePageRenderVertexContext();
   const [graph, setGraph] = useGraph();
   const { txnId } = useFormContext();
   const [isPreview] = useIsPreview();
   return (
-    <For
-      each={getChildrenAttrs(
-        graph,
-        setGraph,
-        props.metaVertex,
-      )}
-    >
+    <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
       {(item, index) => {
         const component = createMemo(
           () =>
-            item.P.component ||
-          getCompFallbackToString(item, graph)?.P[IdAttr],
+            item.P.component || getCompFallbackToString(item, graph)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
-          return getCompFallbackToString(
-            getLastItem(parentItems, 1),
-            graph,
-          )?.P[IdAttr];
+          return getCompFallbackToString(getLastItem(parentItems, 1), graph)?.P[
+            IdAttr
+          ];
         });
         // TODO: Is This Parent Vertex is ok?
         // Need Repetitive parent checks?
         // @ts-ignore
         const parentData = () => {
-          return getDataVertex(
-            graph,
-            getLastItem(parentItems, 1),
-          );
+          return getDataVertex(graph, getLastItem(parentItems, 1));
         };
 
         // TODO: Find hidden rule and apply here.
@@ -65,12 +54,9 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
             // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
             data={
               props.data ||
-              getSelectionOptions(
-                graph,
-                setGraph,
-                item.P.data,
-                [...useRepeaterVertexContext()],
-              ).vertexes ||
+              getSelectionOptions(graph, setGraph, item.P.data, [
+                ...useRepeaterVertexContext(),
+              ]).vertexes ||
               getDataVertex(graph, item)
             }
             // setValue={props.setValue}
@@ -93,7 +79,10 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
           <Switch>
             <Match when={parentComponent() === "TabList"}>
               <Tab>
-                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
+                <Show
+                  fallback={<PageComponentWithPreview />}
+                  when={!isPreview()}
+                >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
                   </PageAttrDnDWrapper>
@@ -102,8 +91,10 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
             </Match>
             <Match when={parentComponent() === "TabContainer"}>
               <TabContainer>
-                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
-
+                <Show
+                  fallback={<PageComponentWithPreview />}
+                  when={!isPreview()}
+                >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
                   </PageAttrDnDWrapper>
@@ -112,8 +103,10 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
             </Match>
             <Match when={parentComponent() === "TreeViewChild"}>
               <li>
-                <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
-
+                <Show
+                  fallback={<PageComponentWithPreview />}
+                  when={!isPreview()}
+                >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
                   </PageAttrDnDWrapper>
@@ -122,7 +115,6 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
             </Match>
             <Match when={true}>
               <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
-
                 <PageAttrDnDWrapper item={item}>
                   <Content />
                 </PageAttrDnDWrapper>
@@ -134,5 +126,3 @@ export function PageAttrRender(props: Readonly<{ data?: Vertex; metaVertex: Vert
     </For>
   );
 }
-
-

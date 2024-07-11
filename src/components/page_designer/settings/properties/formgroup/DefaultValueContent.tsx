@@ -5,8 +5,15 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
-export function DefaultValueContent(props: Readonly<{ meta: Accessor<Vertex>; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
-  const [graph] = useGraph()
+export function DefaultValueContent(
+  props: Readonly<{
+    meta: Accessor<Vertex>;
+    selectedLayout: Vertex;
+    setValue: (meta: Vertex, data: any) => void;
+    txnId: number;
+  }>,
+) {
+  const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
   return (
@@ -16,6 +23,7 @@ export function DefaultValueContent(props: Readonly<{ meta: Accessor<Vertex>; se
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}
       setValue={(data) => props.setValue(props.meta(), data)}
-      txnId={props.txnId} />
+      txnId={props.txnId}
+    />
   );
 }

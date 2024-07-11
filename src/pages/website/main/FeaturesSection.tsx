@@ -56,10 +56,10 @@ export function FeaturesSection() {
     <section class="features container pb-5 pt-5">
       <div class="featureHeadingsec d-flex">
         <h2 class="text-left">
-          Experience a whole new & <br/> quicker way of making forms!
+          Experience a whole new & <br /> quicker way of making forms!
         </h2>
         <button class="btn-small-icon-filled bg-black">
-          View All Features <i class="fa-solid fa-chevron-right"/>
+          View All Features <i class="fa-solid fa-chevron-right" />
         </button>
       </div>
       <p class="font-600 mt-3">
@@ -81,15 +81,17 @@ export function FeaturesSection() {
       </div>
     </section>
   );
-};
+}
 
-const FeatureBox = (props: Readonly<{
-  description: string;
-  icon: string;
-  subtitle1: string;
-  subtitle2: string;
-  title: string;
-}>) => {
+const FeatureBox = (
+  props: Readonly<{
+    description: string;
+    icon: string;
+    subtitle1: string;
+    subtitle2: string;
+    title: string;
+  }>,
+) => {
   return (
     <div class="featurebox d-flex p-relative">
       <div class="iconbg" />

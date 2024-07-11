@@ -1,5 +1,3 @@
-
-
 import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { IFormContext } from "~/lib/contexts";
 
@@ -22,7 +20,8 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
       {
         component: "TextArea",
         height: 500,
-         name: "csv", width: 600,
+        name: "csv",
+        width: 600,
       },
       { component: "TextBox", name: "label" },
       { component: "CheckBox", name: "dry" },
@@ -35,7 +34,7 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
           // {
           //  name: "column",
           //  component: "SelectBox",
-          //  
+          //
           //   displayExpr: "key",
           //   collection: "Update Dynamically on meta based on first row",
           //  },
@@ -45,10 +44,9 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
             collection: "g:'Form'",
             component: "SelectBox",
             displayExpr: "name",
-            
-              displayName: "Lookup Collection",
-              name: "coll",
-            
+
+            displayName: "Lookup Collection",
+            name: "coll",
           },
           {
             component: "TextBox",
@@ -64,14 +62,13 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
           { component: "TextBox", displayName: "Edge Type", name: "edge" },
           {
             collection:
-                '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
+              '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
             component: "SelectBox",
             displayExpr: "key",
-            
-              displayName: "Function",
-              name: "func",
-              stringValue: true,
-            
+
+            displayName: "Function",
+            name: "func",
+            stringValue: true,
           },
           { component: "CheckBox", name: "skip" },
           { component: "TextArea", name: "skipRow" },
@@ -89,41 +86,39 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
       {
         component: "TextBox",
         name: "title",
-        
-          onchange: '{"new": ["name","id"]}',
-        
+
+        onchange: '{"new": ["name","id"]}',
       },
       {
         component: "TextBox",
         name: "name",
-        
-          validationRules: [
-            {
-              message: "ID is required",
-              type: "required",
-            },
-            {
-              ignoreEmptyValue: true,
-              message: "This ID is already taken",
-              type: "custom",
-              validationCallback: (options: any) => {
-                const { formData } =
-                  (options.validator.context as IFormContext) ||
-                  ({} as IFormContext);
-                const [graph, setGraph] = useGraph();
 
-                const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip(
-                  "Navigation",
-                  "id",
-                  val,
-                  formData.id,
-                  graph,
-                );
-              },
+        validationRules: [
+          {
+            message: "ID is required",
+            type: "required",
+          },
+          {
+            ignoreEmptyValue: true,
+            message: "This ID is already taken",
+            type: "custom",
+            validationCallback: (options: any) => {
+              const { formData } =
+                (options.validator.context as IFormContext) ||
+                ({} as IFormContext);
+              const [graph, setGraph] = useGraph();
+
+              const val = options.value;
+              return !findVertexByLabelAndUniqueIdWithSkip(
+                "Navigation",
+                "id",
+                val,
+                formData.id,
+                graph,
+              );
             },
-          ],
-        
+          },
+        ],
       },
       { component: "TextArea", name: "description" },
       {
@@ -132,7 +127,6 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
             component: "TextBox",
             displayName: "ID",
             name: "name",
-
           },
           {
             component: "TextArea",
@@ -147,16 +141,14 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
             items: `Table
 Form
 Url`,
-            
-              name: "func",
-            
+
+            name: "func",
           },
           {
             collection: "g:'Form'",
             component: "SelectBox",
-            
-              name: "Form",
-            
+
+            name: "Form",
           },
           {
             component: "TextBox",
@@ -167,18 +159,16 @@ Url`,
               {
                 collection: "g:'Role'",
                 component: "SelectBox",
-                
-                  name: "role",
-                
+
+                name: "role",
               },
               {
                 attributes: [
                   {
                     collection: "g:'Perm'",
                     component: "SelectBox",
-                    
-                      name: "perm",
-                    
+
+                    name: "perm",
                   },
                 ],
                 component: "DynamicTable",
@@ -195,7 +185,6 @@ Url`,
                 component: "TextBox",
                 displayName: "ID",
                 name: "name",
-                
               },
               {
                 component: "TextArea",
@@ -210,16 +199,14 @@ Url`,
                 items: `Table
 Form
 Url`,
-                
-                  name: "func",
 
+                name: "func",
               },
               {
                 collection: "g:'Form'",
                 component: "SelectBox",
-                
-                  name: "Form",
-                
+
+                name: "Form",
               },
               {
                 component: "TextBox",
@@ -230,18 +217,16 @@ Url`,
                   {
                     collection: "g:'Role'",
                     component: "SelectBox",
-                    
-                      name: "role",
-                    
+
+                    name: "role",
                   },
                   {
                     attributes: [
                       {
                         collection: "g:'Perm'",
                         component: "SelectBox",
-                        
-                          name: "perm",
-                        
+
+                        name: "perm",
                       },
                     ],
                     component: "DynamicTable",
@@ -258,7 +243,6 @@ Url`,
                     component: "TextBox",
                     displayName: "ID",
                     name: "name",
-                    
                   },
                   {
                     component: "TextArea",
@@ -273,16 +257,14 @@ Url`,
                     items: `Table
 Form
 Url`,
-                    
-                      name: "func",
-                    
+
+                    name: "func",
                   },
                   {
                     collection: "g:'Form'",
                     component: "SelectBox",
-                    
-                      name: "Form",
-                    
+
+                    name: "Form",
                   },
                   {
                     component: "TextBox",
@@ -293,18 +275,16 @@ Url`,
                       {
                         collection: "g:'Role'",
                         component: "SelectBox",
-                        
-                          name: "role",
-                        
+
+                        name: "role",
                       },
                       {
                         attributes: [
                           {
                             collection: "g:'Perm'",
                             component: "SelectBox",
-                            
-                              name: "perm",
-                            
+
+                            name: "perm",
                           },
                         ],
                         component: "DynamicTable",
@@ -321,7 +301,6 @@ Url`,
                         component: "TextBox",
                         displayName: "ID",
                         name: "name",
-                 
                       },
                       {
                         component: "TextArea",
@@ -336,16 +315,14 @@ Url`,
                         items: `Table
 Form
 Url`,
-                        
-                          name: "func",
-                        
+
+                        name: "func",
                       },
                       {
                         collection: "g:'Form'",
                         component: "SelectBox",
-                        
-                          name: "Form",
-                        
+
+                        name: "Form",
                       },
                       {
                         component: "TextBox",
@@ -356,18 +333,16 @@ Url`,
                           {
                             collection: "g:'Role'",
                             component: "SelectBox",
-                            
-                              name: "role",
-                            
+
+                            name: "role",
                           },
                           {
                             attributes: [
                               {
                                 collection: "g:'Perm'",
                                 component: "SelectBox",
-                                
-                                  name: "perm",
-                                
+
+                                name: "perm",
                               },
                             ],
                             component: "DynamicTable",
@@ -381,33 +356,33 @@ Url`,
                     ],
                     component: "DynamicTable",
                     name: "Attr",
-                    
-                      tab: "expand",
-                    
+
+                    tab: "expand",
+
                     type: "NavAttr",
                   },
                 ],
                 component: "DynamicTable",
                 name: "Attr",
-                
-                  tab: "expand",
-                
+
+                tab: "expand",
+
                 type: "NavAttr",
               },
             ],
             component: "DynamicTable",
             name: "Attr",
-            
-              tab: "expand",
- 
+
+            tab: "expand",
+
             type: "NavAttr",
           },
         ],
         component: "DynamicTable",
         name: "Attr",
-        
-          tab: "Attributes",
-        
+
+        tab: "Attributes",
+
         type: "NavAttr",
       },
     ],
@@ -434,9 +409,8 @@ Url`,
       {
         collection: "g:'Role'",
         component: "TagBox",
-        
-          name: "role",
-        
+
+        name: "role",
       },
     ],
     isInlineEditable: true,

@@ -1,6 +1,6 @@
 import { ReactiveMap } from "@solid-primitives/map";
 import { MetaProvider } from "@solidjs/meta";
-import { Router, } from "@solidjs/router";
+import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Show, Suspense, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -12,7 +12,13 @@ import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
-import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
+import {
+  type EdgeMap,
+  GraphContext,
+  type GraphInterface,
+  type Id,
+  type VertexMap,
+} from "./lib/graph/graph";
 import { getDefaultTxnValue } from "./lib/graph/transaction/getDefaultTxnValue";
 import masterConfig from "./master.css";
 
@@ -37,7 +43,10 @@ export default function App() {
     navigationData: [],
     get newTxnId() {
       txnId = txnId + 1;
-      transactions.set(txnId, { ...getDefaultTxnValue(),  undoStepIndexes: [0]});
+      transactions.set(txnId, {
+        ...getDefaultTxnValue(),
+        undoStepIndexes: [0],
+      });
       return txnId;
     },
     get newVertexId() {
@@ -72,9 +81,7 @@ export default function App() {
                   </div>
 
                   <Show fallback={<Toaster />} when={loadingSite[0]()}>
-                    <div
-                      class="fixed flex ai:center bg:rgba(0,0,0,0.5) h:100% jc:center left:0 top:0 w:100% z:9999"
-                    >
+                    <div class="fixed flex ai:center bg:rgba(0,0,0,0.5) h:100% jc:center left:0 top:0 w:100% z:9999">
                       <Toaster />
                     </div>
                   </Show>

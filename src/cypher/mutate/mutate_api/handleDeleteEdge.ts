@@ -1,7 +1,12 @@
 import { int } from "neo4j-driver";
 
-
-export async function handleDeleteEdge(deleteEdge: any, tx: any, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
+export async function handleDeleteEdge(
+  deleteEdge: any,
+  tx: any,
+  clientToServerVertexIdMap: Map<number, number>,
+  clientToServerEdgeIdMap: Map<number, number>,
+  txnResult: any[],
+) {
   const id = clientToServerEdgeIdMap.get(deleteEdge.id) || deleteEdge.id;
   const startId = clientToServerVertexIdMap.get(deleteEdge.S) || deleteEdge.S;
   const endId = clientToServerVertexIdMap.get(deleteEdge.E) || deleteEdge.E;
@@ -23,6 +28,8 @@ export async function handleDeleteEdge(deleteEdge: any, tx: any, clientToServerV
       txnResult.push({ deleteEdge: { error: false } });
     }
   } catch (error: any) {
-    throw new Error(`Can't delete edge due to an internal server error: ${error.message}`);
+    throw new Error(
+      `Can't delete edge due to an internal server error: ${error.message}`,
+    );
   }
 }

@@ -13,7 +13,16 @@ import { AddNewRule } from "../../rules/AddNewRule";
 import { RulesModal } from "../rules/RulesModal";
 import { Label } from "./Label";
 
-export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>; metaVertex: Vertex; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+export function HiddenField(
+  props: Readonly<{
+    id: string;
+    meta: Accessor<Vertex>;
+    metaVertex: Vertex;
+    selectedLayout: Vertex;
+    setValue: (meta: Vertex, data: any) => void;
+    txnId: number;
+  }>,
+) {
   const [showDropdown, setShowDropdown] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
@@ -21,36 +30,60 @@ export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>
 
   const RenderLabel = (option: Vertex, isSelected: boolean) => {
     const [isOpenRule, setIsOpenRule] = createSignal(false);
-    return <div class="flex ai:center gap:4">
-      <span>{option.P.name}</span>
-      <button class="center-content flex" onClick={(e) => {
-        e.stopPropagation();
-        setIsOpenRule(true);
-      }}>
-        <Icon
-          class={"cursor:pointer opacity:.5 opacity:1:hover"}
-          height={22}
-          icon={"mingcute:settings-5-line"}
-          width={22} />
-      </button>
-      <Show when={isOpenRule()}>
-        <ZIndex>
-          <RulesModal closeModal={() => setIsOpenRule(false)} onSubmit={() => setIsOpenRule(false)} selectedRule={option} />
-        </ZIndex>
-      </Show>
-    </div>
-  }
+    return (
+      <div class="flex ai:center gap:4">
+        <span>{option.P.name}</span>
+        <button
+          class="center-content flex"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpenRule(true);
+          }}
+        >
+          <Icon
+            class={"cursor:pointer opacity:.5 opacity:1:hover"}
+            height={22}
+            icon={"mingcute:settings-5-line"}
+            width={22}
+          />
+        </button>
+        <Show when={isOpenRule()}>
+          <ZIndex>
+            <RulesModal
+              closeModal={() => setIsOpenRule(false)}
+              onSubmit={() => setIsOpenRule(false)}
+              selectedRule={option}
+            />
+          </ZIndex>
+        </Show>
+      </div>
+    );
+  };
 
-  const meta = {P: { class:'flex:1', collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`, component: "TagBox", displayName: 'Hidden', name: 'hidden', renderLabel: RenderLabel, saveEdge: true, useLocalStorage: true }} as unknown as Vertex
+  const meta = {
+    P: {
+      class: "flex:1",
+      collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
+      component: "TagBox",
+      displayName: "Hidden",
+      name: "hidden",
+      renderLabel: RenderLabel,
+      saveEdge: true,
+      useLocalStorage: true,
+    },
+  } as unknown as Vertex;
 
   const SelectRules = () => {
-    return <DynamicComponent
-      component={"TagBox"}
-      data={props.selectedLayout}
-      isRealTime={false}
-      meta={meta}
-      txnId={layoutStore.formData.txnId} />
-  }
+    return (
+      <DynamicComponent
+        component={"TagBox"}
+        data={props.selectedLayout}
+        isRealTime={false}
+        meta={meta}
+        txnId={layoutStore.formData.txnId}
+      />
+    );
+  };
 
   const AddNewRuleButton = () => {
     const handleAddNewClick = () => {
@@ -61,7 +94,13 @@ export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>
         const type = getToEdge(meta, props.selectedLayout);
         const insertEdgeResult = addNewEdge(
           props.txnId,
-          newEdge(graph.newVertexId, type, {}, props.selectedLayout.id, rowVertex.id),
+          newEdge(
+            graph.newVertexId,
+            type,
+            {},
+            props.selectedLayout.id,
+            rowVertex.id,
+          ),
           graph,
           setGraph,
         );
@@ -70,20 +109,26 @@ export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>
         }
       }
       setShowDropdown(false);
-    }
-    return <>
-      <button onClick={handleAddNewClick} title="Add New Rule">
-        <Icon height={21} icon="ic:round-add" width={21} />
-      </button>
-      <Show when={showDropdown()}>
-        <ZIndex>
-          <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
-            <AddNewRule onClose={onAddNewRule} />
-          </DropdownMenu>
-        </ZIndex>
-      </Show>
-    </>
-  }
+    };
+    return (
+      <>
+        <button onClick={handleAddNewClick} title="Add New Rule">
+          <Icon height={21} icon="ic:round-add" width={21} />
+        </button>
+        <Show when={showDropdown()}>
+          <ZIndex>
+            <DropdownMenu
+              class="r:5"
+              onClickOutside={() => setShowDropdown(false)}
+              parentRef={buttonRef!}
+            >
+              <AddNewRule onClose={onAddNewRule} />
+            </DropdownMenu>
+          </ZIndex>
+        </Show>
+      </>
+    );
+  };
 
   /*const DisplayAllRules = () => {
     const [showRuleSettings, setShowRuleSettings] = createSignal(false);
@@ -107,7 +152,9 @@ export function HiddenField(props: Readonly<{ id: string; meta: Accessor<Vertex>
   }*/
 
   return (
-    <div class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px' : ''} flex ai:center gap:2 justify-content:space-between mt:6`}>
+    <div
+      class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+    >
       <span class="f:15 flex:.5" id={props.id}>
         <Label metaVertex={props.metaVertex} />
       </span>

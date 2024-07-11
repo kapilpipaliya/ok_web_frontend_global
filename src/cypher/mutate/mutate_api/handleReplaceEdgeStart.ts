@@ -1,10 +1,18 @@
 import { int } from "neo4j-driver";
 
-
-export async function handleReplaceEdgeStart(replaceEdgeStart: any, tx: any, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
-  const id = clientToServerEdgeIdMap.get(replaceEdgeStart.id) || replaceEdgeStart.id;
-  const startId = clientToServerVertexIdMap.get(replaceEdgeStart.S) || replaceEdgeStart.S;
-  const endId = clientToServerVertexIdMap.get(replaceEdgeStart.E) || replaceEdgeStart.E;
+export async function handleReplaceEdgeStart(
+  replaceEdgeStart: any,
+  tx: any,
+  clientToServerVertexIdMap: Map<number, number>,
+  clientToServerEdgeIdMap: Map<number, number>,
+  txnResult: any[],
+) {
+  const id =
+    clientToServerEdgeIdMap.get(replaceEdgeStart.id) || replaceEdgeStart.id;
+  const startId =
+    clientToServerVertexIdMap.get(replaceEdgeStart.S) || replaceEdgeStart.S;
+  const endId =
+    clientToServerVertexIdMap.get(replaceEdgeStart.E) || replaceEdgeStart.E;
   const type = replaceEdgeStart.T;
   const query = `match ()-[r:${type}]->()
                 WHERE id(r) = $edgeId 
@@ -28,6 +36,8 @@ export async function handleReplaceEdgeStart(replaceEdgeStart: any, tx: any, cli
       txnResult.push({ replaceEdgeStart: { error: false } });
     }
   } catch (error) {
-    throw new Error(`Can't replace edge start due to an internal server error: ${error}`);
+    throw new Error(
+      `Can't replace edge start due to an internal server error: ${error}`,
+    );
   }
 }

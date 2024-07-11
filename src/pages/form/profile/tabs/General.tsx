@@ -5,8 +5,8 @@ import { Show, createSignal } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
-import {getAPI} from "~/lib/api/getApi";
-import {postAPI} from "~/lib/api/postApi";
+import { getAPI } from "~/lib/api/getApi";
+import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validations";
 

@@ -11,9 +11,9 @@ export const FieldWithCustomBox = (props: FieldWithCustomProperty) => {
   const [optionType, setOptionType] = createSignal("all");
   const [cssState, setCssState] = useCssEditor();
   const [state, setState] = useCssState();
-  
+
   const onChangeAllField = () => {
-    const currentState = state() ?? '';
+    const currentState = state() ?? "";
     const newState: { [key: string]: string } = { ...cssState[currentState] };
     props.customProperty.forEach((property) => {
       newState[property.name] = cssState[currentState]?.[property.name] || "";
@@ -23,9 +23,7 @@ export const FieldWithCustomBox = (props: FieldWithCustomProperty) => {
 
   return (
     <div>
-      <div
-        class="grid ai:end gap:10px grid-template-columns:1fr|20%"
-      >
+      <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
         <DynamicCSSComponent
           value={{
             component: props.mainFieldType ?? "textFieldOptions",

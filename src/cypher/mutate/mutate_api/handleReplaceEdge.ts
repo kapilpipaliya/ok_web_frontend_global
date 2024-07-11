@@ -1,7 +1,12 @@
 import { int } from "neo4j-driver";
 
-
-export async function handleReplaceEdge(replaceEdge: any, tx: any, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
+export async function handleReplaceEdge(
+  replaceEdge: any,
+  tx: any,
+  clientToServerVertexIdMap: Map<number, number>,
+  clientToServerEdgeIdMap: Map<number, number>,
+  txnResult: any[],
+) {
   const id = clientToServerEdgeIdMap.get(replaceEdge.id) || replaceEdge.id;
   const startId = clientToServerVertexIdMap.get(replaceEdge.S) || replaceEdge.S;
   const endId = clientToServerVertexIdMap.get(replaceEdge.E) || replaceEdge.E;
@@ -28,6 +33,8 @@ export async function handleReplaceEdge(replaceEdge: any, tx: any, clientToServe
       txnResult.push({ replaceEdge: [oldId, edgeId] });
     }
   } catch (error: any) {
-    throw new Error(`Can't replace edge due to an internal server error: ${error.message}`);
+    throw new Error(
+      `Can't replace edge due to an internal server error: ${error.message}`,
+    );
   }
 }

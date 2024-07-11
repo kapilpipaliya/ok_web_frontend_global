@@ -1,17 +1,22 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, For, Show, createMemo, createSignal } from "solid-js";
 
-import type { CSSJSONSchemaSearchType, GenericField } from "./constants/FieldType";
+import type {
+  CSSJSONSchemaSearchType,
+  GenericField,
+} from "./constants/FieldType";
 
 import { DynamicCSSComponent } from "./components/DynamicCssComponent";
 
-export const CollapsibleSection = (props: Readonly<{
-  index: number;
-  isOpen: boolean;
-  propertyFieldMap: { [key: string]: GenericField };
-  sectionCount: Accessor<number>;
-  title: string;
-}>) => {
+export const CollapsibleSection = (
+  props: Readonly<{
+    index: number;
+    isOpen: boolean;
+    propertyFieldMap: { [key: string]: GenericField };
+    sectionCount: Accessor<number>;
+    title: string;
+  }>,
+) => {
   const [isOpen, setIsOpen] = createSignal(props.isOpen ?? false);
 
   return (
@@ -46,8 +51,12 @@ export const CollapsibleSection = (props: Readonly<{
   );
 };
 
-export const SectionList = (props: { filteredSections: () => CSSJSONSchemaSearchType; }) => {
-  const sectionCount = createMemo(() => Object.keys(props.filteredSections()).length);
+export const SectionList = (props: {
+  filteredSections: () => CSSJSONSchemaSearchType;
+}) => {
+  const sectionCount = createMemo(
+    () => Object.keys(props.filteredSections()).length,
+  );
   return (
     <For each={Object.entries(props.filteredSections())} fallback={""}>
       {(section, index) => {
@@ -59,7 +68,8 @@ export const SectionList = (props: { filteredSections: () => CSSJSONSchemaSearch
               isOpen={isOpen}
               propertyFieldMap={propertyFieldMap}
               sectionCount={sectionCount}
-              title={sectionName} />
+              title={sectionName}
+            />
           </Show>
         );
       }}

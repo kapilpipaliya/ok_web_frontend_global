@@ -23,10 +23,11 @@ export const MainSideBar = (props: MainSideBarProps) => {
           {(navNode) => (
             <Show when={navNode.P.url !== "undefined"}>
               <a
-                class={`${props.activeSection() === navNode.P.name
-                  ? "bg:white color:#37c"
-                  : ""
-                  } gap:10 `}
+                class={`${
+                  props.activeSection() === navNode.P.name
+                    ? "bg:white color:#37c"
+                    : ""
+                } gap:10 `}
                 href={navNode.P.url}
                 onClick={() => props.setActiveSection(navNode.P.name)}
                 style={
@@ -34,10 +35,11 @@ export const MainSideBar = (props: MainSideBarProps) => {
                 }
               >
                 <Icon
-                  color={`${props.activeSection() === navNode.P.name
-                    ? "#3B82F6"
-                    : "#4B5563"
-                    }`}
+                  color={`${
+                    props.activeSection() === navNode.P.name
+                      ? "#3B82F6"
+                      : "#4B5563"
+                  }`}
                   height={24}
                   icon={props.mainIcon[navNode.P.url]}
                   width={24}

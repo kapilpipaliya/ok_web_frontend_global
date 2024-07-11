@@ -1,4 +1,4 @@
-import type { Accessor, } from "solid-js";
+import type { Accessor } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
@@ -8,9 +8,31 @@ import { validateDragOver } from "~/components/page_designer/functions/validateD
 
 import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosition";
 
-export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: (() => Id[]), children: Accessor<Vertex[]>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
+export function handleDragOver(
+  e: DragEvent,
+  layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutVertex: Vertex,
+  isPreview: boolean | undefined,
+  collapsedKeys: () => Id[],
+  children: Accessor<Vertex[]>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formData: Vertex,
+) {
   e.stopPropagation();
-  handleDragOverAndSetDropPosition(e, layoutStore, setLayoutStore, layoutVertex, isPreview, collapsedKeys, children, graph, setGraph, formData);
+  handleDragOverAndSetDropPosition(
+    e,
+    layoutStore,
+    setLayoutStore,
+    layoutVertex,
+    isPreview,
+    collapsedKeys,
+    children,
+    graph,
+    setGraph,
+    formData,
+  );
 
   if (!layoutStore.position) {
     // Don't allow drag and drop
@@ -25,14 +47,16 @@ export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject
       return;
     }
 
-    if (!validateDragOver(
-      graph,
-      setGraph,
-      fromVertex,
-      toVertexId,
-      formData,
-      layoutStore.position
-    )) {
+    if (
+      !validateDragOver(
+        graph,
+        setGraph,
+        fromVertex,
+        toVertexId,
+        formData,
+        layoutStore.position,
+      )
+    ) {
       // Don't allow drag and drop
       return;
     }

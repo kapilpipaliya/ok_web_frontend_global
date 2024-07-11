@@ -1,10 +1,12 @@
-import {type JSX, Show, createSignal} from "solid-js";
+import { type JSX, Show, createSignal } from "solid-js";
 
-export function CustomTooltip(props: Readonly<{
-  children: JSX.Element;
-  message: JSX.Element;
-  title?: string;
-}>) {
+export function CustomTooltip(
+  props: Readonly<{
+    children: JSX.Element;
+    message: JSX.Element;
+    title?: string;
+  }>,
+) {
   const [isHovered, setIsHovered] = createSignal(false);
 
   const handleMouseEnter = () => {
@@ -29,12 +31,9 @@ export function CustomTooltip(props: Readonly<{
           <Show when={props.title}>
             <div class={"f:14 font-weight:500"}>{props.title}</div>
           </Show>
-          <Show when={props.message}>
-            {props.message}
-          </Show>
+          <Show when={props.message}>{props.message}</Show>
         </div>
       </Show>
     </div>
   );
 }
-

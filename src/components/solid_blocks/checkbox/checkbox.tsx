@@ -58,7 +58,7 @@ export function Checkbox(props: CheckboxProps) {
           {content.children}
         </span>
       </Show>
-      <div class={`checkbox-wrapper ${props.wrapperClass ?? ''} m:-5px`}>
+      <div class={`checkbox-wrapper ${props.wrapperClass ?? ""} m:-5px`}>
         <input
           ref={props.ref}
           role={content.switch ? "switch" : undefined}

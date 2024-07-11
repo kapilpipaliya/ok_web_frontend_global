@@ -1,15 +1,9 @@
-import {
-  For,
-  Match,
-  Switch,
-  createSignal,
-} from "solid-js";
+import { For, Match, Switch, createSignal } from "solid-js";
 
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
 
 export function FormElementTabs() {
-
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
     { collection: "Page", title: "Pages" },
@@ -17,8 +11,8 @@ export function FormElementTabs() {
     { collection: "Form", title: "Forms" },
     { collection: "ThankYouPage", title: "Thank You" },
     { collection: "ErrorPages", title: "Error Pages" },
-    { collection: "EmailTemplate", title: "Email Template" }
-  ]
+    { collection: "EmailTemplate", title: "Email Template" },
+  ];
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
   const Tabs = () => (
@@ -31,8 +25,10 @@ export function FormElementTabs() {
                 <button
                   class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px white-space:nowrap"
                   classList={{
-                    "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover": selectedTab() !== data,
-                    "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)": selectedTab() === data
+                    "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover":
+                      selectedTab() !== data,
+                    "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)":
+                      selectedTab() === data,
                   }}
                   onClick={() => setSelectedTab(data)}
                   type="button"
@@ -49,23 +45,25 @@ export function FormElementTabs() {
 
   return (
     <div class={"h:full p:5"}>
-        <Tabs/>
-        <Switch>
-          <Match when={selectedTab().collection === "Comp"}>
-            <ComponentList />
-          </Match>
-          <Match keyed when={[
+      <Tabs />
+      <Switch>
+        <Match when={selectedTab().collection === "Comp"}>
+          <ComponentList />
+        </Match>
+        <Match
+          keyed
+          when={[
             "Page",
             "TemplatePage",
             "Form",
             "ThankYouPage",
             "ErrorPage",
-            "EmailTemplate"
-          ].find((v)=> v ===selectedTab().collection)}>
-            <PagesList coll={selectedTab().collection} />
-          </Match>
-        </Switch>
-      </div>
+            "EmailTemplate",
+          ].find((v) => v === selectedTab().collection)}
+        >
+          <PagesList coll={selectedTab().collection} />
+        </Match>
+      </Switch>
+    </div>
   );
 }
-

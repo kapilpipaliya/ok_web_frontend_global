@@ -11,7 +11,6 @@ import {
   on,
   splitProps,
   useContext,
-  
 } from "solid-js";
 
 import { runEvent } from "../tools";

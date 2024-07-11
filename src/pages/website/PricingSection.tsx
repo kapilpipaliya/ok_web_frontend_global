@@ -75,13 +75,15 @@ function PricingContent() {
   };
 
   return (
-    <section aria-labelledby="pricing-heading" class="pricing-content mb-5 pt-100">
+    <section
+      aria-labelledby="pricing-heading"
+      class="pricing-content mb-5 pt-100"
+    >
       <div class="container d-grid justify-content-center justify-item-center">
-        <h2 id="pricing-heading">
-          Affordable Pricing Plans for Everyone
-        </h2>
+        <h2 id="pricing-heading">Affordable Pricing Plans for Everyone</h2>
         <p>
-          We believe that everyone should have access to valuable assets to improve their important work.
+          We believe that everyone should have access to valuable assets to
+          improve their important work.
         </p>
         <div class="tick mt-5">
           {["30 Days trial", "Cancel anytime", "24/7 Customer Support"].map(
@@ -107,10 +109,16 @@ function PricingContent() {
         </div>
 
         <div class="billing mt-5">
-          <a class={isMonthlyBilling() ? "monthbill active" : "monthbill"} onClick={toggleBilling}>
+          <a
+            class={isMonthlyBilling() ? "monthbill active" : "monthbill"}
+            onClick={toggleBilling}
+          >
             Monthly Billing
           </a>
-          <a class={!isMonthlyBilling() ? "annualbill active" : "annualbill"} onClick={toggleBilling}>
+          <a
+            class={!isMonthlyBilling() ? "annualbill active" : "annualbill"}
+            onClick={toggleBilling}
+          >
             Annual Billing
           </a>
         </div>
@@ -118,7 +126,9 @@ function PricingContent() {
         <h5 class="color-info mt-2">Save up to 20%</h5>
 
         <div
-          class={"mt-5 grid gap:20px grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg"}
+          class={
+            "mt-5 grid gap:20px grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg"
+          }
         >
           <For each={plans}>
             {(plan) => (
@@ -136,19 +146,26 @@ function PricingContent() {
   );
 }
 
-function PricingPlan(props: Readonly<{
-  features: string[];
-  price: number | string;
-  recommended: boolean;
-  title: string;
-}>) {
+function PricingPlan(
+  props: Readonly<{
+    features: string[];
+    price: number | string;
+    recommended: boolean;
+    title: string;
+  }>,
+) {
   return (
     <div
       aria-labelledby={`${props.title.toLowerCase().replace(" ", "-")}-heading`}
       class={`plan text-align-last:left ${props.recommended ? "recommended" : ""}`}
       style={{ display: "block" }}
     >
-      <h4 id={`${props.title.toLowerCase().replace(" ", "-")}-heading`} style={{ float: "left" }}>{props.title}</h4>
+      <h4
+        id={`${props.title.toLowerCase().replace(" ", "-")}-heading`}
+        style={{ float: "left" }}
+      >
+        {props.title}
+      </h4>
       <div class="plan-price flex f:14 pt:10 text-align:left">
         <h4 class="mr-2 f:35px">${props.price}</h4>
         <p class="line-height:1">
@@ -162,7 +179,9 @@ function PricingPlan(props: Readonly<{
   );
 }
 
-function PricingFeatures(props: Readonly<{ features: string[]; title: string }>) {
+function PricingFeatures(
+  props: Readonly<{ features: string[]; title: string }>,
+) {
   const [isOpen, setIsOpen] = createSignal(true);
   return (
     <div class="plan" style={{ display: "block" }}>

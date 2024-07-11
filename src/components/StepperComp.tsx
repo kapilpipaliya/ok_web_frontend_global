@@ -16,16 +16,20 @@ export const Stepper = () => {
       ...step,
       icon: `${index + 1}`,
       id: index + 1,
-      label: `Step ${index + 1}`
+      label: `Step ${index + 1}`,
     }));
   };
 
   const addStepBefore = (id: any) => {
     const newStepId = steps().length + 1;
     const newSteps: any = [];
-    steps().forEach(step => {
+    steps().forEach((step) => {
       if (step.id === id) {
-        newSteps.push({ icon: `${newStepId}`, id: newStepId, label: `Step ${newStepId}` });
+        newSteps.push({
+          icon: `${newStepId}`,
+          id: newStepId,
+          label: `Step ${newStepId}`,
+        });
       }
       newSteps.push(step);
     });
@@ -35,17 +39,21 @@ export const Stepper = () => {
   const addStepAfter = (id: any) => {
     const newStepId = steps().length + 1;
     const newSteps: any = [];
-    steps().forEach(step => {
+    steps().forEach((step) => {
       newSteps.push(step);
       if (step.id === id) {
-        newSteps.push({ icon: `${newStepId}`, id: newStepId, label: `Step ${newStepId}` });
+        newSteps.push({
+          icon: `${newStepId}`,
+          id: newStepId,
+          label: `Step ${newStepId}`,
+        });
       }
     });
     setSteps(updateIndices(newSteps));
   };
 
   const deleteStep = (id: any) => {
-    const newSteps: any = steps().filter(step => step.id !== id);
+    const newSteps: any = steps().filter((step) => step.id !== id);
     setSteps(updateIndices(newSteps));
     if (currentStep() === id) {
       // If the current step is deleted, set the current step to the first step
@@ -55,7 +63,10 @@ export const Stepper = () => {
 
   return (
     <>
-      <ul class="m:0|10 w:100% w:50%@>md" style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap">
+      <ul
+        class="m:0|10 w:100% w:50%@>md"
+        style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap"
+      >
         <For each={steps()}>
           {(step, index) => (
             <>
@@ -67,7 +78,8 @@ export const Stepper = () => {
                   addStepBefore(step.id);
                 }}
                 style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
-                width={20} />
+                width={20}
+              />
               <li
                 onClick={() => setCurrentStep(step.id)}
                 style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${currentStep() === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
@@ -81,7 +93,9 @@ export const Stepper = () => {
                     </span>
                   </Tooltip>
                 </span>
-                <span style="margin-right: 0.5rem; white-space: nowrap;">{step.label}</span>
+                <span style="margin-right: 0.5rem; white-space: nowrap;">
+                  {step.label}
+                </span>
                 <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);"></div>
                 <button
                   onClick={(e) => {
@@ -105,7 +119,8 @@ export const Stepper = () => {
                     addStepAfter(step.id);
                   }}
                   style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
-                  width={20} />
+                  width={20}
+                />
               </Show>
             </>
           )}

@@ -3,7 +3,8 @@ import {
   type Accessor,
   type JSX,
   type Setter,
-  createContext, createSignal,
+  createContext,
+  createSignal,
   createUniqueId,
 } from "solid-js";
 
@@ -13,20 +14,21 @@ export const collapsibleContext = createContext<
 >(null);
 
 // Parent component for the collapsible section
-export function Collapsible(props: Readonly<{
-  children: JSX.Element;
-  class?: string;
-  isOpen?: Accessor<boolean>;
-  setOpen?: Setter<boolean>;
-  title: any;
-}>) {
+export function Collapsible(
+  props: Readonly<{
+    children: JSX.Element;
+    class?: string;
+    isOpen?: Accessor<boolean>;
+    setOpen?: Setter<boolean>;
+    title: any;
+  }>,
+) {
   const [state, setState] = createSignal(props.isOpen ?? false);
 
   const toggleState = () => {
     const newState = !state();
     setState(newState);
   };
-
 
   return (
     <collapsibleContext.Provider value={createSignal(createUniqueId())}>

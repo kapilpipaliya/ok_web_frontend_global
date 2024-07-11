@@ -1,48 +1,44 @@
-import { autoUpdate } from '@floating-ui/dom';
 import { Icon } from "@iconify-icon/solid";
 import { type Ref, mergeRefs } from "@solid-primitives/refs";
-import jsep from 'jsep';
-import { useFloating } from 'solid-floating-ui';
-import {
-  For,
-  type JSX,
-  Show,
-  createMemo,
-  createSignal,
-  
-} from "solid-js";
-import { Portal, } from "solid-js/web";
+import jsep from "jsep";
+import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
 
-import { evaluate } from '~/lib/expression_eval';
-import { type Vertex, useGraph } from '~/lib/graph/graph';
-import { isObject } from '~/lib/utils';
+import type { Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from './DropdownMenu';
+import { evaluate } from "~/lib/expression_eval";
+import { isObject } from "~/lib/utils";
+
+import { DropdownMenu } from "./DropdownMenu";
 import { useToast } from "./Toast";
-import { ZIndex, useZIndex } from './ZIndex';
+import { ZIndex } from "./ZIndex";
 
-export type Option = {
-  children?: Option[];
-  label: string;
-  value: string;
-} | Vertex | string;
+export type Option =
+  | {
+      children?: Option[];
+      label: string;
+      value: string;
+    }
+  | Vertex
+  | string;
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
-export function MultiSelectField(props: Readonly<{
-  childrenKey?: string;
-  disable?: boolean;
-  displayValueKey?: string;
-  isLoadingOptions?: boolean;
-  loadOptions?: () => Promise<void>;
-  onRemove: (newSelected: Option[], value: Option) => void;
-  onSelect: (newSelected: Option[], value: Option) => void;
-  optionValueKey?: string;
-  options: Option[];
-  placeholder?: string;
-  ref?: Ref<HTMLDivElement>;
-  renderLabel?: ((option: Option, isSelected: boolean) => JSX.Element);
-  selectedValues: () => Option[];
-  selectionLimit?: number;
-}>) {
+export function MultiSelectField(
+  props: Readonly<{
+    childrenKey?: string;
+    disable?: boolean;
+    displayValueKey?: string;
+    isLoadingOptions?: boolean;
+    loadOptions?: () => Promise<void>;
+    onRemove: (newSelected: Option[], value: Option) => void;
+    onSelect: (newSelected: Option[], value: Option) => void;
+    optionValueKey?: string;
+    options: Option[];
+    placeholder?: string;
+    ref?: Ref<HTMLDivElement>;
+    renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+    selectedValues: () => Option[];
+    selectionLimit?: number;
+  }>,
+) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
   let optionTimeout: NodeJS.Timeout;
@@ -51,7 +47,8 @@ export function MultiSelectField(props: Readonly<{
 
   // Define signals for managing state
   const selected = createMemo(
-    () => (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
+    () =>
+      (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
   );
 
   const [inputValue, setInputValue] = createSignal("");
@@ -68,7 +65,7 @@ export function MultiSelectField(props: Readonly<{
 
   const getOptionLabel = (option: Option) => {
     if (isObject(option) && props.displayValueKey) {
-      if (props.displayValueKey.includes('::')) {
+      if (props.displayValueKey.includes("::")) {
         return evaluate(jsep(props.displayValueKey), option);
       } else {
         return option[props.displayValueKey as keyof Option];
@@ -99,7 +96,7 @@ export function MultiSelectField(props: Readonly<{
       const label = getOptionLabel(option)?.toLowerCase();
       const matches = label?.includes(inputValue.toLowerCase());
 
-      const childrenKey = props.childrenKey || 'children';
+      const childrenKey = props.childrenKey || "children";
       // @ts-expect-error ignore
       if (option[childrenKey] && option[childrenKey].length > 0) {
         // @ts-expect-error ignore
@@ -130,8 +127,7 @@ export function MultiSelectField(props: Readonly<{
   const handleInputFocus = () => {
     if (dropdownVisible()) {
       clearTimeout(optionTimeout);
-    }
-    else {
+    } else {
       setDropdownVisible(true);
       if (!props.isLoadingOptions) {
         props.loadOptions?.();
@@ -142,7 +138,9 @@ export function MultiSelectField(props: Readonly<{
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
-    const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(new Set());
+    const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(
+      new Set(),
+    );
 
     // Handle changes in selection
     const handleSelectChange = (option: Option) => {
@@ -155,7 +153,11 @@ export function MultiSelectField(props: Readonly<{
 
         props.onRemove?.(newSelected, value);
       } else {
-        if (props.selectionLimit && props.selectionLimit > 1 && selected().length >= props.selectionLimit) {
+        if (
+          props.selectionLimit &&
+          props.selectionLimit > 1 &&
+          selected().length >= props.selectionLimit
+        ) {
           showErrorToast("Selection limit reached");
           setDropdownVisible(false);
           return; // Exit if selection limit is reached
@@ -194,12 +196,15 @@ export function MultiSelectField(props: Readonly<{
     };
 
     const filteredOptions = createMemo(() => {
-      return filterOptions(JSON.parse(JSON.stringify(props.options || [])), inputValue());
+      return filterOptions(
+        JSON.parse(JSON.stringify(props.options || [])),
+        inputValue(),
+      );
     });
 
     const Option = (p: { option: Option }) => {
       const isExpanded = () => !hiddenOptions().has(p.option);
-      const childrenKey = () => props.childrenKey || 'children';
+      const childrenKey = () => props.childrenKey || "children";
       return (
         <Show
           fallback={
@@ -207,12 +212,15 @@ export function MultiSelectField(props: Readonly<{
               class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selected().some(
-                  (item) =>
-                    getOptionValue(item) === getOptionValue(p.option),
-                )
+                  (item) => getOptionValue(item) === getOptionValue(p.option),
+                ),
               }}
               // @ts-expect-error ignore
-              onClick={() => (!p.option[childrenKey()] || p.option[childrenKey()].length === 0) && handleSelectChange(p.option)}
+              onClick={() =>
+                (!p.option[childrenKey()] ||
+                  p.option[childrenKey()].length === 0) &&
+                handleSelectChange(p.option)
+              }
               type="button"
             >
               {props.renderLabel
@@ -224,17 +232,23 @@ export function MultiSelectField(props: Readonly<{
           when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
         >
           <div>
-            <button class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
+            <button
+              class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selected().some(
-                  (item) =>
-                    getOptionValue(item) === getOptionValue(p.option),
-                )
+                  (item) => getOptionValue(item) === getOptionValue(p.option),
+                ),
               }}
               onClick={() => toggleExpandOption(p.option)}
               type="button"
             >
-              <Icon icon={isExpanded() ? 'icon-park-solid:down-one' : 'icon-park-solid:right-one'} />
+              <Icon
+                icon={
+                  isExpanded()
+                    ? "icon-park-solid:down-one"
+                    : "icon-park-solid:right-one"
+                }
+              />
               <span>
                 {props.renderLabel
                   ? props.renderLabel(p.option, false)
@@ -255,28 +269,40 @@ export function MultiSelectField(props: Readonly<{
     };
 
     return (
-        <div class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100%`}>
-          <Show fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>} when={!props.isLoadingOptions}>
-            <For
-              each={filteredOptions()}
-              fallback={<div class="cursor:pointer p:8px w:100%">No item found </div>}
-            >
-              {(option) => <Option option={option} />}
-            </For>
-          </Show>
-        </div>
-    )
-  }
+      <div
+        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100%`}
+      >
+        <Show
+          fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>}
+          when={!props.isLoadingOptions}
+        >
+          <For
+            each={filteredOptions()}
+            fallback={
+              <div class="cursor:pointer p:8px w:100%">No item found </div>
+            }
+          >
+            {(option) => <Option option={option} />}
+          </For>
+        </Show>
+      </div>
+    );
+  };
 
   return (
     <div
       class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
-      ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}>
-      <div class={`${props.selectionLimit !== 1 ? 'flex:wrap' : ''} ai:center d:flex gap:5px p:4px|0px w:100%`}>
+      ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
+    >
+      <div
+        class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|0px w:100%`}
+      >
         <For each={selected()}>
           {(tag) => (
             <div class="c:#fff ai:center bg:#3377cc cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-              {props.renderLabel ? props.renderLabel(tag, true) : getOptionLabel(tag)}
+              {props.renderLabel
+                ? props.renderLabel(tag, true)
+                : getOptionLabel(tag)}
               <button
                 class="cursor:pointer d:flex"
                 onClick={(e) => {
@@ -296,7 +322,7 @@ export function MultiSelectField(props: Readonly<{
           // @ts-expect-error disable lastpass
           AutoComplete="off"
           auto-complete="off"
-          class={`${props.selectionLimit === 1 && selected().length === 1 ? 'w:100px' : 'min-w:100px'} border:none flex:1 outline:none p:5`}
+          class={`${props.selectionLimit === 1 && selected().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
           // onBlur={() => {
           //   if (dropdownVisible()) {
@@ -316,8 +342,12 @@ export function MultiSelectField(props: Readonly<{
         />
       </div>
       <Show when={dropdownVisible()}>
-      <ZIndex>
-          <DropdownMenu class="r:5" onClickOutside={() => setDropdownVisible(false)} parentRef={reference()!}>
+        <ZIndex>
+          <DropdownMenu
+            class="r:5"
+            onClickOutside={() => setDropdownVisible(false)}
+            parentRef={reference()!}
+          >
             <Options />
           </DropdownMenu>
         </ZIndex>

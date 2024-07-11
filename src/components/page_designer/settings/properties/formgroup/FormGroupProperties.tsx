@@ -1,12 +1,23 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { For, Match, Switch, createMemo, createUniqueId, onCleanup } from "solid-js";
+import {
+  For,
+  Match,
+  Switch,
+  createMemo,
+  createUniqueId,
+  onCleanup,
+} from "solid-js";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
-import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  deleteVertex,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
@@ -33,14 +44,60 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
   const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
 
-  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { class: PROPERTIES.Css.TextBox, component: "TextBox", displayName: 'Unique Name', name: 'name' }), graph, setGraph);
-  addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { displayName: 'Class', name: 'class' }), graph, setGraph);
-  addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { displayName: 'Default Value', name: 'defaultValue' }), graph, setGraph);
-  addNewVertex(0, newVertex(hiddenVertexId, ["MetaTemp"], {displayName: 'Hidden', name: 'hidden' }), graph, setGraph);
+  addNewVertex(
+    0,
+    newVertex(nameVertexId, ["MetaTemp"], {
+      class: PROPERTIES.Css.TextBox,
+      component: "TextBox",
+      displayName: "Unique Name",
+      name: "name",
+    }),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(classVertexId, ["MetaTemp"], {
+      displayName: "Class",
+      name: "class",
+    }),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(defaultValueVertexId, ["MetaTemp"], {
+      displayName: "Default Value",
+      name: "defaultValue",
+    }),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(hiddenVertexId, ["MetaTemp"], {
+      displayName: "Hidden",
+      name: "hidden",
+    }),
+    graph,
+    setGraph,
+  );
 
   function moveClassToLast(vertices: Vertex[]) {
-    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue' && vertex.P.name !== 'hidden');
-    return [graph.vertexes[nameVertexId], graph.vertexes[defaultValueVertexId], graph.vertexes[hiddenVertexId], ...otherVertices, graph.vertexes[classVertexId]];
+    const otherVertices = vertices.filter(
+      (vertex) =>
+        vertex.P.name !== "name" &&
+        vertex.P.name !== "class" &&
+        vertex.P.name !== "defaultValue" &&
+        vertex.P.name !== "hidden",
+    );
+    return [
+      graph.vertexes[nameVertexId],
+      graph.vertexes[defaultValueVertexId],
+      graph.vertexes[hiddenVertexId],
+      ...otherVertices,
+      graph.vertexes[classVertexId],
+    ];
   }
 
   onCleanup(() => {
@@ -65,34 +122,43 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         {(metaVertex) => {
           const id = `${props.selectedLayout.id + metaVertex.P[IdAttr]}Label`;
           const form = FormMetaData.Comp;
-          const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
-          const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
+          const propAttribute = form.attributes.find(
+            (attr) => attr.name === "Prop",
+          )!;
+          const valueAttribute = propAttribute.attributes!.find(
+            (attr) => attr.name === "value",
+          )!;
           const [meta, setMeta] = createWritableMemo(() => {
-            if (metaVertex.P.name === 'hidden' || metaVertex.P.name === 'name' || metaVertex.P.name === 'class' || metaVertex.P.name === 'defaultValue') {
-              return {...metaVertex }
+            if (
+              metaVertex.P.name === "hidden" ||
+              metaVertex.P.name === "name" ||
+              metaVertex.P.name === "class" ||
+              metaVertex.P.name === "defaultValue"
+            ) {
+              return { ...metaVertex };
             }
             const P = {
               ...metaVertex.P,
               // Adding component and meta from the FormMetaData
               component: valueAttribute.component,
-              meta: valueAttribute.meta
-            }
+              meta: valueAttribute.meta,
+            };
             return { ...metaVertex, P };
           });
 
           const component = createMemo(() =>
-            getComponentForCollRow(
-              meta(),
-              meta(),
-              graph,
-              setGraph,
-            ),
+            getComponentForCollRow(meta(), meta(), graph, setGraph),
           );
-          const metaProps = getPropsFromMetaExpression(graph, setGraph, meta(), meta());
+          const metaProps = getPropsFromMetaExpression(
+            graph,
+            setGraph,
+            meta(),
+            meta(),
+          );
           const P = {
             ...meta().P,
-            ...metaProps
-          }
+            ...metaProps,
+          };
           const v = { ...metaVertex, P };
           setMeta(v);
 
@@ -100,10 +166,24 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
             <div>
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
-                  <UniqueNameField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                  <UniqueNameField
+                    id={id}
+                    meta={meta}
+                    metaVertex={metaVertex}
+                    selectedLayout={props.selectedLayout}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
                 </Match>
                 <Match when={metaVertex.P.name === "hidden"}>
-                  <HiddenField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                  <HiddenField
+                    id={id}
+                    meta={meta}
+                    metaVertex={metaVertex}
+                    selectedLayout={props.selectedLayout}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
                 </Match>
                 <Match when={metaVertex.P.name === "class"}>
                   <CSSPropertiesEditor
@@ -114,11 +194,27 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                   />
                 </Match>
                 <Match when={component() === "Table"}>
-                  <h3><Label metaVertex={metaVertex} /></h3>
-                  <Content component={component} meta={meta} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                  <h3>
+                    <Label metaVertex={metaVertex} />
+                  </h3>
+                  <Content
+                    component={component}
+                    meta={meta}
+                    selectedLayout={props.selectedLayout}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
                 </Match>
                 <Match when={props.selectedLayout}>
-                  <HighlightSetValueContent component={component} id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                  <HighlightSetValueContent
+                    component={component}
+                    id={id}
+                    meta={meta}
+                    metaVertex={metaVertex}
+                    selectedLayout={props.selectedLayout}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
                 </Match>
               </Switch>
             </div>

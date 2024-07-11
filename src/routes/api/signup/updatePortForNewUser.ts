@@ -1,7 +1,11 @@
-import type {TransactionPromise} from "neo4j-driver-core";
+import type { TransactionPromise } from "neo4j-driver-core";
 
-export async function updatePortForNewUser(tx: TransactionPromise,
-                                           driverPort: number, logsPort: number, labPort: number) {
+export async function updatePortForNewUser(
+  tx: TransactionPromise,
+  driverPort: number,
+  logsPort: number,
+  labPort: number,
+) {
   // Update port configuration in the database for the new user
   const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${
     driverPort + 10

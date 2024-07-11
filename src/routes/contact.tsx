@@ -1,4 +1,4 @@
-import {ContactUs} from "~/pages/website/ContactUs";
+import { ContactUs } from "~/pages/website/ContactUs";
 import "~/pages/website/krd.css";
 import "~/pages/website/style.css";
 

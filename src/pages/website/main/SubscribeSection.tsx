@@ -4,16 +4,17 @@ export function SubscribeSection() {
   return (
     <section aria-labelledby="subscribe-heading" class="subscribe d-flex">
       <div class="subscribeinner container">
-        <h2 class="color-white" id="subscribe-heading">Let’s build forms together</h2>
+        <h2 class="color-white" id="subscribe-heading">
+          Let’s build forms together
+        </h2>
         <p class="color-white text-center">
           Subscribe for the latest news and exclusive deals!
         </p>
-        <SubscribeForm/>
+        <SubscribeForm />
       </div>
     </section>
   );
 }
-
 
 const SubscribeForm = () => {
   const [email, setEmail] = createSignal("");
@@ -25,7 +26,11 @@ const SubscribeForm = () => {
   };
 
   return (
-    <form aria-label="Subscribe Form" class="subs d-flex m-auto mt-3" onSubmit={handleSubmit}>
+    <form
+      aria-label="Subscribe Form"
+      class="subs d-flex m-auto mt-3"
+      onSubmit={handleSubmit}
+    >
       <input
         aria-label="Email Address"
         class="p-0 m-0"

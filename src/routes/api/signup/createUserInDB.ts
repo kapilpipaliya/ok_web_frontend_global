@@ -1,9 +1,9 @@
-import type {Node} from "neo4j-driver";
-import type {TransactionPromise} from "neo4j-driver-core";
+import type { Node } from "neo4j-driver";
+import type { TransactionPromise } from "neo4j-driver-core";
 
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
-import {getDriverWithPort} from "~/cypher/driver";
+import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInDB(
   tx: TransactionPromise,

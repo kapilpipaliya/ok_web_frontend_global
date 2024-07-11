@@ -1,4 +1,4 @@
-import { onCleanup,  } from "solid-js";
+import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
@@ -41,29 +41,40 @@ export function CollAndData() {
       componentName: "SelectBox",
       displayName: "Collection",
       name: "collection",
-      saveValue: true
+      saveValue: true,
     },
     {
       // collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
-      collection: () => graph.vertexes[layoutStore.selectedId]?.P?.collection ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'` : "",
+      collection: () =>
+        graph.vertexes[layoutStore.selectedId]?.P?.collection
+          ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'`
+          : "",
       component: "SelectBox",
       name: "data",
     },
     {
       class: PROPERTIES.Css.TextBox,
       component: "TextBox",
-      name: "data"
+      name: "data",
     },
   ];
 
-  addMetaVertexes(graph, setGraph, metaTxnId, graph.vertexes[metaVertexId], attributes);
+  addMetaVertexes(
+    graph,
+    setGraph,
+    metaTxnId,
+    graph.vertexes[metaVertexId],
+    attributes,
+  );
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = getSelectionOptions(graph, setGraph, "->MetaAttr", [metaVertex]);
+  const collMetaVertex = getSelectionOptions(graph, setGraph, "->MetaAttr", [
+    metaVertex,
+  ]);
 
   const handleCollectionChange = (value: string) => {
     setValueGlobal(
@@ -74,11 +85,11 @@ export function CollAndData() {
       graph.vertexes[layoutStore.selectedId],
       value,
       false,
-    )
+    );
     setSelectionValue(
       layoutStore.formData.txnId,
       graph.vertexes[layoutStore.selectedId],
-     
+
       graph,
       setGraph,
       collMetaVertex.vertexes![1],
@@ -88,7 +99,6 @@ export function CollAndData() {
 
   return (
     <>
-
       <div class="flex">
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
@@ -123,7 +133,6 @@ export function CollAndData() {
           <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" />
         </Tooltip> */}
         </div>
-
       </div>
 
       <div class="text-center mb:2 mt:2">OR</div>

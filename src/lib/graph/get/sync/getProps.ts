@@ -5,7 +5,9 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getSelectionOptions } from "./getSelectionOptions";
 
 export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
-  return (getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []).reduce(
+  return (
+    getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []
+  ).reduce(
     (acc, curr) => {
       if (curr.P.name && curr.P.value !== undefined) {
         acc[curr.P.name] = curr.P.value;
@@ -21,14 +23,13 @@ export function getRowProps(
   setGraph: SetStoreFunction<GraphInterface>,
   comp: Vertex,
 ) {
-  return (getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []).reduce(
+  return (
+    getSelectionOptions(graph, () => 0, "->$0Prop", [comp]).vertexes || []
+  ).reduce(
     (acc, curr) => {
-      const key = getSelectionOptions(
-        graph,
-        setGraph,
-        "->$0Name::'P.name'",
-        [curr],
-      ).vertexes;
+      const key = getSelectionOptions(graph, setGraph, "->$0Name::'P.name'", [
+        curr,
+      ]).vertexes;
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
       }
@@ -62,14 +63,13 @@ function getComponentProperties(
   return metaData;
 }
 
-
 export function getPropsFromMetaExpression(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   metaVertex: Vertex,
   data: Vertex,
 ) {
-  if(!metaVertex.P.meta) return {};
+  if (!metaVertex.P.meta) return {};
   const meta = metaVertex.P.meta.split("++");
   const results = [] as { [key: string]: any }[];
   for (const metaPart of meta) {
@@ -86,5 +86,3 @@ export function getPropsFromMetaExpression(
     {} as { [key: string]: any },
   );
 }
-
-

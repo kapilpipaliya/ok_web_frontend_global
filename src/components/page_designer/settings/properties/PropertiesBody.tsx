@@ -35,7 +35,7 @@ export function PropertiesBody() {
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
 
-  const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
+  const toggleImportsModal = () => setIsImportModalOpen((prev) => !prev);
 
   return (
     <Show when={layoutStore.selectedId !== -1}>
@@ -57,5 +57,3 @@ export function PropertiesBody() {
     </Show>
   );
 }
-
-

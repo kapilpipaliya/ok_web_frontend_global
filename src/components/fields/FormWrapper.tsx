@@ -6,7 +6,10 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 
 import { useToast } from "~/components/Toast";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { getFormMetaData, isAnyFieldInvalid } from "~/components/page_designer/functions/getChildrenAttrs";
+import {
+  getFormMetaData,
+  isAnyFieldInvalid,
+} from "~/components/page_designer/functions/getChildrenAttrs";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { FormContext } from "~/lib/contexts";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -47,14 +50,22 @@ export function FormWrapper(
     txnId: number;
   });
 
-
   // if (!props.data?.id) {
-  const form = getFormMetaData(graph, () => { }, props.meta);
-  const defaultValues = form.attributes.reduce((acc, attr) => {
-    acc[attr.name] = attr.defaultValue;
-    return acc;
-  }, {} as { [key: string]: any });
-  const createResult = createForm(graph, setGraph, txnId, props.label ?? props.meta.P[IdAttr], defaultValues);
+  const form = getFormMetaData(graph, () => {}, props.meta);
+  const defaultValues = form.attributes.reduce(
+    (acc, attr) => {
+      acc[attr.name] = attr.defaultValue;
+      return acc;
+    },
+    {} as { [key: string]: any },
+  );
+  const createResult = createForm(
+    graph,
+    setGraph,
+    txnId,
+    props.label ?? props.meta.P[IdAttr],
+    defaultValues,
+  );
   if (createResult.error) return createResult.error;
   setFormData({
     formData: createResult.vertex!,
@@ -71,8 +82,6 @@ export function FormWrapper(
   // }
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
-
-
 
   const SubmitCancelButtons = () => {
     const onSubmit = async () => {
@@ -97,14 +106,17 @@ export function FormWrapper(
     return (
       <div class="flex gap:1">
         <Show
-          fallback={
-            <button onClick={onSubmit}>Submit</button>
-          }
+          fallback={<button onClick={onSubmit}>Submit</button>}
           when={props.submitButton}
         >
           {props.submitButton}
         </Show>
-        <button class="danger border-color:#FF0000 color:#FF0000 margin-left:7px" onClick={onCancel}>Cancel</button>
+        <button
+          class="danger border-color:#FF0000 color:#FF0000 margin-left:7px"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
       </div>
     );
   };
@@ -121,7 +133,6 @@ export function FormWrapper(
         </div>
         <div />
         <SubmitCancelButtons />
-
       </FormContext.Provider>
     </div>
   );

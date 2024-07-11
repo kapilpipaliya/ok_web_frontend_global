@@ -7,9 +7,14 @@ import { useToast } from "~/components/Toast";
 import {
   type GraphInterface,
   type Id,
-  IdAttr, type Vertex
+  IdAttr,
+  type Vertex,
 } from "~/lib/graph/graph";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 
 import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
@@ -21,24 +26,24 @@ import { addNewEdge, newEdge } from "../edge";
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
   type: string,
-  vertex: Vertex
+  vertex: Vertex,
 ) {
-  return (getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
-  );
+  return (
+    getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
+  ).sort((a, b) => a.P.pos - b.P.pos);
 }
 
 export function getSublistRows(
   graph: Store<GraphInterface>,
   meta: Vertex,
-  vertex?: Vertex
+  vertex?: Vertex,
 ) {
   if (!vertex) return [];
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
-  return (getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
-  );
+  return (
+    getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
+  ).sort((a, b) => a.P.pos - b.P.pos);
 }
 
 export function newRow(
@@ -48,15 +53,15 @@ export function newRow(
   parentVertex: Vertex,
   label: string,
   edgeType?: string,
-  properties?: { [key: string]: any; }
-): { edgeId?: Id; error: boolean; vertexId?: Id; } {
+  properties?: { [key: string]: any },
+): { edgeId?: Id; error: boolean; vertexId?: Id } {
   const { showErrorToast } = useToast();
 
   return batch(() => {
     const vertexNew = newVertex(
       graph.newVertexId,
       [label || edgeType!],
-      properties
+      properties,
     );
     const insertVertex = addNewVertex(txnId, vertexNew, graph, setGraph);
     if (insertVertex.error) {
@@ -71,7 +76,7 @@ export function newRow(
       edgeType || label!,
       {},
       parentVertex.id,
-      vertexNew.id
+      vertexNew.id,
     );
     const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
     if (insertEdgeResult.error) {
@@ -95,7 +100,7 @@ export function addNewRow(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   parentVertex: Vertex,
-  properties: { [key: string]: any; },
+  properties: { [key: string]: any },
   isRealTime: boolean,
 ) {
   if (isRealTime) {
@@ -111,13 +116,11 @@ export function addNewRow(
     parentVertex,
     label,
     type,
-    properties
+    properties,
   );
   if (isRealTime) commitTxn(txnId, graph);
   return newRowResult;
 }
-
-
 
 export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
   const P = klona(attrColumn.P);
@@ -135,13 +138,13 @@ export function rowMetaInitialize(
   setGraph: SetStoreFunction<GraphInterface>,
   joinVertex: Vertex,
   meta: Vertex,
-  tableColumnsTemplate: Vertex[]
+  tableColumnsTemplate: Vertex[],
 ) {
   const { showErrorToast } = useToast();
 
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   if (rowMetaAttrInst.error) {
-    const rows = {} as { [key: Id]: Id; };
+    const rows = {} as { [key: Id]: Id };
     const metaTxnId = graph.newTxnId;
     const P = klona(meta.P);
     P.templateId = meta.id;
@@ -153,7 +156,7 @@ export function rowMetaInitialize(
         joinVertex,
         "AttrInst",
         undefined,
-        P
+        P,
       );
       if (metaInstanceResult.error) {
         showErrorToast("Error creating a row for attribute instance");
@@ -169,7 +172,7 @@ export function rowMetaInitialize(
           graph.vertexes[metaInstanceResult.vertexId!],
           "MetaAttr",
           undefined,
-          P
+          P,
         );
         if (AttrRowResult.error) {
           showErrorToast(AttrRowResult.error.toString());
@@ -177,7 +180,7 @@ export function rowMetaInitialize(
 
         rows[attrColumn.id] = AttrRowResult.vertexId!;
       }
-      
+
       mergeVertexProperties(
         metaTxnId,
         metaInstanceResult.vertexId!,
@@ -186,7 +189,7 @@ export function rowMetaInitialize(
         {
           metaTxnId,
           rows,
-        }
+        },
       );
     });
     onCleanup(() => {
@@ -209,7 +212,7 @@ export function rowMetaInitialize(
         setGraph,
         metaTxnId,
         graph.vertexes[rowMetaAttrInst.vertex!.id],
-        "MetaAttr"
+        "MetaAttr",
       );
       if (AttrRowResult.error) {
         showErrorToast(AttrRowResult.error.toString());
@@ -226,7 +229,7 @@ export function rowMetaInitialize(
         AttrRowResult.vertexId!,
         graph,
         setGraph,
-        P
+        P,
       );
       rows[attrColumn.id] = AttrRowResult.vertexId!;
     }
@@ -235,7 +238,7 @@ export function rowMetaInitialize(
       rowMetaAttrInst.vertex!.id,
       graph,
       setGraph,
-      { rows }
+      { rows },
     );
   });
   onCleanup(() => {
@@ -246,4 +249,3 @@ export function rowMetaInitialize(
   });
   return metaTxnId;
 }
-

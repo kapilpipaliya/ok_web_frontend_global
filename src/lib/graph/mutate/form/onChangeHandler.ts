@@ -1,16 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import {
-  type GraphInterface, IdAttr,
-  type Vertex
-} from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import {
-  getId,
-  getLabel,
-  isObject
-} from "~/lib/utils";
+import { getId, getLabel, isObject } from "~/lib/utils";
 
 import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 
@@ -21,7 +14,7 @@ export function onChangeHandler(
   vertex: Vertex,
   changedFieldAttribute: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!changedFieldAttribute.P.onchange) return;
   const isNew = typeof formVertex.id === "number" && formVertex.id < 0;
@@ -41,12 +34,9 @@ export function onChangeHandler(
     }
 
     const attribute = (
-      getSelectionOptions(
-        graph,
-        setGraph,
-        "-MetaAttr->MetaAttr",
-        [changedFieldAttribute]
-      ).vertexes || []
+      getSelectionOptions(graph, setGraph, "-MetaAttr->MetaAttr", [
+        changedFieldAttribute,
+      ]).vertexes || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
     if (!attribute) {
       return;

@@ -19,20 +19,22 @@ export async function getSelectionOptionsMGCall(
 ): Promise<{ error: boolean } & Partial<ServerResult>> {
   "use server";
 
-  try{
-  return await retryTransaction(async (tx) => {
-    if (mutationData) {
-      const mutationError = await handleMutationData( mutationData, vertex, tx);
-      if (mutationError.error) {
-        return { error: true };
+  try {
+    return await retryTransaction(async (tx) => {
+      if (mutationData) {
+        const mutationError = await handleMutationData(
+          mutationData,
+          vertex,
+          tx,
+        );
+        if (mutationError.error) {
+          return { error: true };
+        }
       }
-    }
-    return await getSelectionOptionsBase(vertex, collection, tx);
+      return await getSelectionOptionsBase(vertex, collection, tx);
     }, maxRetries ?? 10);
   } catch (e) {
     console.error("getSelectionOptionsMGCall", e, vertex, collection);
     return { error: true };
   }
 }
-
-

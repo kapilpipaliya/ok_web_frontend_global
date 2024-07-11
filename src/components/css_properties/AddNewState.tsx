@@ -6,7 +6,6 @@ import { cssSelectorTree } from "~/components/css_properties/constants/StateSele
 import { useCssEditor, useCssState } from "~/components/css_properties/context";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 
-
 export function AddNewState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
   const [stateName, setStateName] = createSignal("");
@@ -51,7 +50,9 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
               onSelect={(value) => {
                 setSelectedAllState(value);
                 // @ts-expect-error ignore
-                const joinedState = selectedAllState().map((option) => option.selector).join("");
+                const joinedState = selectedAllState()
+                  .map((option) => option.selector)
+                  .join("");
                 if (!stateName().includes(joinedState)) {
                   setStateName((prev) => `${prev}${joinedState}`);
                   // move text input cursor to the end
@@ -61,17 +62,15 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
               optionValueKey="selector"
               options={cssSelectorTree as unknown as Option[]}
               selectedValues={selectedAllState}
-              selectionLimit={1} />
-
+              selectionLimit={1}
+            />
           </div>
         </label>
 
         <button onClick={addNewState}>
-              <Icon class="ml:2" height={21} icon="ic:round-check" width={21} />
-            </button>
+          <Icon class="ml:2" height={21} icon="ic:round-check" width={21} />
+        </button>
       </div>
     </div>
   );
 }
-
-

@@ -3,12 +3,12 @@ import type { Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export function getID(item?: Vertex): string | undefined {
- return item?.P.name;
+  return item?.P.name;
 }
 
 export function getId(
- graph: Store<GraphInterface>,
- item?: Vertex
+  graph: Store<GraphInterface>,
+  item?: Vertex,
 ): string | undefined {
   return getID(item) || "";
 }

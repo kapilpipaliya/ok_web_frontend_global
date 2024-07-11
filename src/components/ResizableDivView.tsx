@@ -1,15 +1,17 @@
 import { type JSX, createEffect, createSignal } from "solid-js";
 
-export function ResizableContainer(props: Readonly<{
-  children: JSX.Element;
-  view: string;
-}>) {
+export function ResizableContainer(
+  props: Readonly<{
+    children: JSX.Element;
+    view: string;
+  }>,
+) {
   const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(100vh - 70px)");
   const DIMENSIONS = {
     desktop: { height: "1200px", width: "100%" },
     mobile: { height: "570px", width: "360px" },
-    tablet: { height: "1026px", width: "768px" }
+    tablet: { height: "1026px", width: "768px" },
   };
 
   createEffect(() => {
@@ -53,16 +55,18 @@ export function ResizableContainer(props: Readonly<{
   // };
 
   return (
-    <div class="grid mt:5 overflow:auto"
+    <div
+      class="grid mt:5 overflow:auto"
       classList={{
         "min-h:80%": props.view === "Mobile",
-        "min-h:100%": props.view === "Tablet"
-      }}>
+        "min-h:100%": props.view === "Tablet",
+      }}
+    >
       <div
         class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center max-h:80vh min-h:80% min-w:30% overflow:auto position:relative r:10|10|10|10"
         classList={{
           [`height:${height()}`]: !!height(),
-          [`width:${width()}`]: !!width()
+          [`width:${width()}`]: !!width(),
         }}
       >
         {/*<div
@@ -78,4 +82,3 @@ export function ResizableContainer(props: Readonly<{
     </div>
   );
 }
-

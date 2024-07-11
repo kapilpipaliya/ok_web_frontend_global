@@ -1,5 +1,3 @@
-
-
 export function NotFound404() {
   return (
     <main class="height:100vh  isolation:isolate  position:relative ">

@@ -12,12 +12,14 @@ export function SaveIconButton() {
   const [graph] = useGraph();
 
   const onSubmit = formSubmit();
-  const isDisabled = createMemo(() => !!formData.txnId && isDisabledTxn(formData.txnId, graph));
+  const isDisabled = createMemo(
+    () => !!formData.txnId && isDisabledTxn(formData.txnId, graph),
+  );
 
   return (
     <Tooltip content={"Save"} position={"s"}>
       <button
-        class={`${isDisabled() ? 'cursor:not-allowed' : 'color:#000:hover cursor:pointer'} flex ai:center b:1px|solid|lightgrey bg:white color:grey h:35px jc:center r:7 w:37px`}
+        class={`${isDisabled() ? "cursor:not-allowed" : "color:#000:hover cursor:pointer"} flex ai:center b:1px|solid|lightgrey bg:white color:grey h:35px jc:center r:7 w:37px`}
         disabled={isDisabled()}
         onClick={onSubmit}
         type="button"

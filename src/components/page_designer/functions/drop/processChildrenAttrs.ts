@@ -5,7 +5,10 @@ import { klona } from "klona";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
-import { getChildrenAttrs, getUniqueName } from "~/components/page_designer/functions/getChildrenAttrs";
+import {
+  getChildrenAttrs,
+  getUniqueName,
+} from "~/components/page_designer/functions/getChildrenAttrs";
 import { addNewRow } from "~/lib/graph/mutate/form/rowFunction";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
@@ -14,11 +17,13 @@ export function getRowProps(
   txnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  formVertex: Vertex
+  formVertex: Vertex,
 ) {
   const props = klona(fromVertex.P);
   delete props.pos;
-  const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, { id: 0 } as unknown as Vertex);
+  const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {
+    id: 0,
+  } as unknown as Vertex);
   return { ...props, name: uniqueName };
 }
 

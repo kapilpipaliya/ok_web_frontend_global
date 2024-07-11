@@ -1,7 +1,6 @@
-
 import { Show, createEffect, createSignal } from "solid-js";
 
-import {DataGrid} from "./DataGrid";
+import { DataGrid } from "./DataGrid";
 
 interface AbstractGridProps {
   tableId: string;

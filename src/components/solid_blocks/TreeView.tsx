@@ -2,11 +2,11 @@ import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
   type JSX,
-  type Setter, Show,
+  type Setter,
+  Show,
   createContext,
   createSignal,
   useContext,
-  
 } from "solid-js";
 
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -28,14 +28,17 @@ const toggleExpansion = (id: Id) => {
   setExpandedItems(expandedSet);
 };
 
-export function TreeView(props: Readonly<{ children: JSX.Element; meta: Vertex; title: string }>) {
+export function TreeView(
+  props: Readonly<{ children: JSX.Element; meta: Vertex; title: string }>,
+) {
   let parentValues = useContext(treeContext);
   const [graph, setGraph] = useGraph();
   // Recursive function to render tree nodes
   const RenderTreeNode = (TreeItemProps: any) => {
     const isExpanded = () => expandedItems().has(props.meta.id);
     const childrenLength = () =>
-      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes?.length || 0;
+      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes
+        ?.length || 0;
     return (
       <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
         <span class={"display:inline-flex"}>
@@ -73,7 +76,7 @@ export function TreeView(props: Readonly<{ children: JSX.Element; meta: Vertex; 
 
   return (
     <treeContext.Provider value={parentValues}>
-      <RenderTreeNode title={props.title}/>
+      <RenderTreeNode title={props.title} />
     </treeContext.Provider>
   );
 }

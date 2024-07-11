@@ -9,7 +9,9 @@ export function RightToggleButton() {
       class="flex align-items:center border-radius:5px gap:10px jc:center outline:2px|solid|transparent outline:offset|2px:focus"
       onClick={() => setLayoutStore("isRightOpen", !layoutStore.isRightOpen)}
     >
-      <span class="cursor:pointer d:none@<sm font:14 ml:10">View Form Settings</span>
+      <span class="cursor:pointer d:none@<sm font:14 ml:10">
+        View Form Settings
+      </span>
       <Icon
         class="color:#37c cursor:pointer"
         height={22}

@@ -1,4 +1,4 @@
-import type { RouteSectionProps, } from "@solidjs/router";
+import type { RouteSectionProps } from "@solidjs/router";
 
 import { Show, createSignal, onMount } from "solid-js";
 
@@ -19,15 +19,15 @@ export default function AuthLayout(props: RouteSectionProps) {
     }
   });
 
-
   // getAPI(API.getUserUrl).then((user) => {
   //   if (user?.id) {
   //     navigate(`${APP_BASE_URL}`);
   //   }
   // });
 
-
-  return <Show fallback={<LoaderNew />} when={!initialDataLoading()}>
-    {props.children}
-    </Show>;
+  return (
+    <Show fallback={<LoaderNew />} when={!initialDataLoading()}>
+      {props.children}
+    </Show>
+  );
 }

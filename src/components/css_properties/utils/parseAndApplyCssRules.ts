@@ -1,11 +1,10 @@
 import type { CSSStore } from "../context";
 
-
 export const parseAndApplyCssRules = (valueString: string) => {
-  const cssRules = { '': {} } as CSSStore;
+  const cssRules = { "": {} } as CSSStore;
 
   for (const rule of valueString.split(/[\s\n]+/)) {
-    const [property, value, state = ''] = rule.split(":");
+    const [property, value, state = ""] = rule.split(":");
     if (!property) continue;
 
     if (!cssRules[state]) {
@@ -22,8 +21,8 @@ export const parseAndApplyCssRules = (valueString: string) => {
 */
       console.log(`property '${property}' has no value`);
       continue;
-    };
-    cssRules[state][property] = value.replaceAll("|", " ");;
+    }
+    cssRules[state][property] = value.replaceAll("|", " ");
   }
 
   return cssRules;

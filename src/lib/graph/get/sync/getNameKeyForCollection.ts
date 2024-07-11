@@ -4,11 +4,12 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { getSelectionOptions } from "./getSelectionOptions";
 
-
 export function getNameKeyForCollection(
   graph: Store<GraphInterface>,
-  collVertex: Vertex
+  collVertex: Vertex,
 ) {
-  const pks = getSelectionOptions(graph, () => 0, "->$0NameKey", [collVertex]).vertexes || [];
+  const pks =
+    getSelectionOptions(graph, () => 0, "->$0NameKey", [collVertex]).vertexes ||
+    [];
   return pks.map((pk) => pk.P.name);
 }

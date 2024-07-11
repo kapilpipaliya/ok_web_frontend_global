@@ -1,7 +1,7 @@
-import {getRequestURL} from "vinxi/http";
+import { getRequestURL } from "vinxi/http";
 
-import {getDriver} from "~/cypher/driver";
-import {getSubDomain} from "~/server/getSubDomain";
+import { getDriver } from "~/cypher/driver";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export const checkIfNameExistsMGCall = async (
   label: string,
@@ -18,7 +18,7 @@ export const checkIfNameExistsMGCall = async (
       ? `MATCH (v:${label}) WHERE v.name = $name AND v.elementId != $id RETURN v`
       : `MATCH (v:${label}) WHERE v.name = $name RETURN v`;
 
-    const params = id ? {id, name} : {name};
+    const params = id ? { id, name } : { name };
     const checkResult = await session.run(checkQuery, params);
     if (checkResult.records.length > 0) {
       return {

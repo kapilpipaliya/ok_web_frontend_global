@@ -17,7 +17,6 @@ export function handleComponentDrag(
   formData: Vertex,
   position: string,
 ) {
-
   handleComponentDropAndSort(
     graph,
     setGraph,
@@ -26,7 +25,7 @@ export function handleComponentDrag(
     toVertex,
     toParentVertex,
     formData,
-    position
+    position,
   );
 
   saveUndoPoint(txnId, graph);
@@ -68,4 +67,3 @@ function handleComponentDropAndSort(
   );
   return layoutRowId;
 }
-

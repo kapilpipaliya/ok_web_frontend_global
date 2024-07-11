@@ -5,8 +5,9 @@ import type { GraphInterface } from "../graph";
 import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "./TransactionType";
 import { isAllTxnProcessed } from "./isAllTxnProcessed";
 
-
-export async function waitTillAllEventsAreProcessed(graph: Store<GraphInterface>) {
+export async function waitTillAllEventsAreProcessed(
+  graph: Store<GraphInterface>,
+) {
   if (isAllTxnProcessed(graph)) return true;
   return await new Promise((resolve, reject) => {
     const checkAllTxnCompleted = () => {

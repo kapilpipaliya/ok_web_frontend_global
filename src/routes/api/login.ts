@@ -40,7 +40,8 @@ async function authenticateUser(
   const session = (await getDriver(subdomain)).session();
 
   try {
-    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
+    const query =
+      "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await session.run(query, { email });
 
     if (result.records.length === 0) {
@@ -78,7 +79,8 @@ async function authenticateSuperUser(
   ).session();
 
   try {
-    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
+    const query =
+      "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await session.run(query, { email });
     const res = result.records[0].get("u");
 

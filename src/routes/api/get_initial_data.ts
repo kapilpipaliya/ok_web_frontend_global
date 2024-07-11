@@ -1,13 +1,16 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/dist/server";
 
-import {type Session, types} from "neo4j-driver";
+import { type Session, types } from "neo4j-driver";
 
-import {getDriver} from "~/cypher/driver";
+import { getDriver } from "~/cypher/driver";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/lib/convertNodeToJson";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import {getSubDomain} from "~/server/getSubDomain";
+import { getSubDomain } from "~/server/getSubDomain";
 
 type JsonData = Record<string, any>;
 // exporting this function breaks the api
@@ -90,7 +93,7 @@ async function fetchFromMGAndSaveToArray(
       });
     }
 
-    return {nodeObj, relationshipObj};
+    return { nodeObj, relationshipObj };
   } catch (error) {
     console.error("Failed to execute query:", query, "Error:", error);
     throw error;

@@ -5,7 +5,6 @@ import { FormContext } from "~/lib/contexts";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { LeftIcons } from "./left/LeftIcons";
-import { LeftToggleButton } from "./left/LeftToggleButton";
 import { MiddleSectionButtons } from "./middle/MiddleSectionButtons";
 import { ResizeViewButtons } from "./middle/ResizeViewButtons";
 import { UndoRedoIcons } from "./middle/UndoRedoIcons";
@@ -23,21 +22,20 @@ export function HeaderRow() {
     <header class="flex bg:#f3f3f4 grid-area:header jc:space-between r:7">
       <LeftIcons />
 
-
-        <Show when={layoutStore.selectedSection === "build"}>
-          <div class="flex ai:center gap:5">
-            <UndoRedoIcons />
-            <ResizeViewButtons />
-            <Icon
-              class="ml:10"
-              height={22}
-              icon="solar:settings-linear"
-              onClick={() => setLayoutStore("selectedSection", "setting")}
-              width={22}
-            />
-          </div>
-        </Show>
-        {/* <Show when={layoutStore.formData.txnId}>
+      <Show when={layoutStore.selectedSection === "build"}>
+        <div class="flex ai:center gap:5">
+          <UndoRedoIcons />
+          <ResizeViewButtons />
+          <Icon
+            class="ml:10"
+            height={22}
+            icon="solar:settings-linear"
+            onClick={() => setLayoutStore("selectedSection", "setting")}
+            width={22}
+          />
+        </div>
+      </Show>
+      {/* <Show when={layoutStore.formData.txnId}>
               <div class="flex flex:row gap:2">
                 <span>Txn ID: {layoutStore.formData.txnId}</span>
                 <span>Steps: {graph.transactions.get(layoutStore.formData.txnId)?.steps.length}</span>
@@ -46,19 +44,20 @@ export function HeaderRow() {
                 <span>Undo Points: {graph.transactions.get(layoutStore.formData.txnId)?.undoStepIndexes.join(", ")}</span>
               </div>
             </Show> */}
-        <Show when={layoutStore.selectedSection === "setting"}>
-          <MiddleSectionButtons />
-        </Show>
+      <Show when={layoutStore.selectedSection === "setting"}>
+        <MiddleSectionButtons />
+      </Show>
 
       <div class="flex ai:center gap:5">
         <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
           <RightToggleButton />
         </Show>
-        <FormContext.Provider value={layoutStore.formData}><SaveIconButton /></FormContext.Provider>
+        <FormContext.Provider value={layoutStore.formData}>
+          <SaveIconButton />
+        </FormContext.Provider>
         <PreviewButton />
         <ExportSection openDialog={openDialog} setOpenDialog={setOpenDialog} />
       </div>
-
     </header>
   );
 }

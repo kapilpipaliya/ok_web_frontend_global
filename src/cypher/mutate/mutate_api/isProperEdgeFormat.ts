@@ -15,10 +15,12 @@ export function isProperEdgeFormat(edge: Partial<Edge>): string {
     //  || typeof edge.E !== "number"
     return "edge must contain E (end) and it must be an integer.";
   }
-  if (edge.P === undefined ||
+  if (
+    edge.P === undefined ||
     typeof edge.P !== "object" ||
     edge.P === null ||
-    Array.isArray(edge.P)) {
+    Array.isArray(edge.P)
+  ) {
     return "edge must have P (properties) key and it must be an object";
   }
   if (edge.id === undefined) {

@@ -2,7 +2,7 @@ import { For, type Setter, Show, createSignal } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
-import { type Id, useGraph, } from "~/lib/graph/graph";
+import { type Id, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PropertiesWrapper } from "../properties/PropertiesWrapper";
@@ -17,7 +17,7 @@ export function LayoutTree() {
     setCollapsedKeys((prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
-        : [...prev, itemId]
+        : [...prev, itemId],
     );
   }
 
@@ -50,8 +50,10 @@ export function LayoutTree() {
             customButton={() => false}
             drawerClass={"padding:10px"}
             open={() => layoutStore.showPropertiesDrawer}
-            setIsOpen={((v: boolean) =>
-              setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>}
+            setIsOpen={
+              ((v: boolean) =>
+                setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>
+            }
           >
             <PropertiesWrapper />
           </Drawer>
@@ -60,7 +62,11 @@ export function LayoutTree() {
       <For each={rootVertexes()}>
         {(item) => (
           <Show when={layoutStore.formData}>
-            <TreeItem collapsedKeys={collapsedKeys} metaVertex={item} toggleExpand={toggleExpand} />
+            <TreeItem
+              collapsedKeys={collapsedKeys}
+              metaVertex={item}
+              toggleExpand={toggleExpand}
+            />
           </Show>
         )}
       </For>

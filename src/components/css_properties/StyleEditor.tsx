@@ -6,7 +6,9 @@ import { filterSections } from "./utils/filterSections";
 
 export function StyleEditor() {
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [filteredSections, setFilteredSections] = createSignal(filterSections(searchQuery()));
+  const [filteredSections, setFilteredSections] = createSignal(
+    filterSections(searchQuery()),
+  );
 
   function handleSearch(value: string) {
     setSearchQuery(value);
@@ -15,9 +17,12 @@ export function StyleEditor() {
 
   return (
     <div class="flex ai:start flex-direction:column jc:space-between mb:10 mt:10 w:full">
-      <SearchBar handleChange={handleSearch} placeholder="Search Style..." value={searchQuery()} />
+      <SearchBar
+        handleChange={handleSearch}
+        placeholder="Search Style..."
+        value={searchQuery()}
+      />
       <SectionList filteredSections={filteredSections} />
     </div>
   );
 }
-

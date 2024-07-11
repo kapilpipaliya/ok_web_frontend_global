@@ -20,7 +20,6 @@ describe("parseStyle", () => {
       "margin: 0 5px; padding: 1em 5px; text-decoration: underline";
     const after = parseStyle(before);
 
-     
     expect(after).toEqual({
       margin: "0 5px",
       padding: "1em 5px",

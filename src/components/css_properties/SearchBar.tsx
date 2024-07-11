@@ -1,7 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, splitProps } from "solid-js";
 
-export function SearchBar(props: Readonly<{ handleChange: (value: string) => void; } & JSX.InputHTMLAttributes<HTMLInputElement>>) {
+export function SearchBar(
+  props: Readonly<
+    {
+      handleChange: (value: string) => void;
+    } & JSX.InputHTMLAttributes<HTMLInputElement>
+  >,
+) {
   const [local, inputProps] = splitProps(props, ["handleChange"]);
   return (
     <div class="flex bg:white p:5|0 w:full">
@@ -12,7 +18,8 @@ export function SearchBar(props: Readonly<{ handleChange: (value: string) => voi
           onInput={(e) => props.handleChange(e.target.value)}
           type="search"
           value={props.value}
-          {...inputProps} />
+          {...inputProps}
+        />
       </div>
     </div>
   );

@@ -4,8 +4,10 @@ import type { GraphInterface } from "../graph";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 
-
-export function updateSubmittedIndex(txnId: number, graph: Store<GraphInterface>) {
+export function updateSubmittedIndex(
+  txnId: number,
+  graph: Store<GraphInterface>,
+) {
   if (!txnId || !graph.transactions.has(txnId)) return;
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   existingTxnValue.submittedIndex = existingTxnValue.activeUndoIndex;

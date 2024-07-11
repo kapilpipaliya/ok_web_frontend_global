@@ -9,12 +9,15 @@ import { useGraph } from "~/lib/graph/graph";
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
   const [graph, setGraph] = useGraph();
   return (
-    <button class="transition:transform|0.3s|ease" onClick={props.toggleSidebar}>
+    <button
+      class="transition:transform|0.3s|ease"
+      onClick={props.toggleSidebar}
+    >
       <Icon
         height="24"
         icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"}
         width="24"
-              />
+      />
     </button>
   );
 }
@@ -39,18 +42,13 @@ export function Navbar(
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
   return (
-    <div
-      class="flex ai:center bb:1|solid|rgb(212,219,231) bg:white box-shadow:3px|-1px|4px|3px|lightgrey jc:justify-between p:5|10 r:0|0|10|10"
-    >
+    <div class="flex ai:center bb:1|solid|rgb(212,219,231) bg:white box-shadow:3px|-1px|4px|3px|lightgrey jc:justify-between p:5|10 r:0|0|10|10">
       <Show
         when={
           field.meta?.P.menuPosition === "left" || !field.meta?.P.menuPosition
         }
       >
-        <Show
-          when={field.showCloseDrawerBtn}
-          
-        >
+        <Show when={field.showCloseDrawerBtn}>
           <NavToggleBtn toggleSidebar={field.toggleSidebar} />
         </Show>
       </Show>

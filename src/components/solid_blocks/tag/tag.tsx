@@ -3,7 +3,9 @@ import { type JSX, Show, mergeProps, splitProps } from "solid-js";
 import { getRandom } from "../tools";
 import "./tag.css";
 
-export type TagProps = { plain?: boolean } & (JSX.HTMLAttributes<HTMLSpanElement> &
+export type TagProps = {
+  plain?: boolean;
+} & (JSX.HTMLAttributes<HTMLSpanElement> &
   Partial<JSX.AnchorHTMLAttributes<HTMLAnchorElement>>);
 
 export function Tag(props: TagProps) {

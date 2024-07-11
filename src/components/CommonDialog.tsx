@@ -59,7 +59,13 @@ export function CustomModal(props: CustomModalProps) {
           width={props.iconSize ?? 25}
         />
       </Show>
-      <Dismiss menuButton={btnEl!} modal open={open} overlay={false} setOpen={setOpen}>
+      <Dismiss
+        menuButton={btnEl!}
+        modal
+        open={open}
+        overlay={false}
+        setOpen={setOpen}
+      >
         <div
           class="modal-container"
           onClick={onClickOverlay}
@@ -84,7 +90,7 @@ export function CustomModal(props: CustomModalProps) {
                 </button>
               )}
             </div>
-            <hr class={"fg:lightgrey"}/>
+            <hr class={"fg:lightgrey"} />
             <div class={`${props.bodyClass} overflow:auto p:3`}>
               {props.body}
             </div>

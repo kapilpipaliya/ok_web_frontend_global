@@ -5,7 +5,8 @@ import { Match, Show, Switch, createSignal } from "solid-js";
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
 import { validatePassword } from "~/lib/validations";
-import {sendEmail} from "~/server/sendEmail";
+import { sendEmail } from "~/server/sendEmail";
+
 export function ForgotPassword() {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");

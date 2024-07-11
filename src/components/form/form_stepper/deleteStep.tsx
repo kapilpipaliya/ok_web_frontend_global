@@ -6,12 +6,21 @@ import { deleteLayoutAttr } from "~/components/page_designer/event_handler/delet
 
 import type { PageLayoutObject } from "../../page_designer/LayoutContext";
 
-export function deleteStep(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, steps: Vertex[], item: Vertex, showErrorToast: (message: string) => void, showSuccessToast: (message: string) => void) {
+export function deleteStep(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  steps: Vertex[],
+  item: Vertex,
+  showErrorToast: (message: string) => void,
+  showSuccessToast: (message: string) => void,
+) {
   if (steps.length === 1) {
     showErrorToast("You cannot delete the last step");
     return;
   }
-  const currentStep = steps.findIndex(step => step.id === item.id);
+  const currentStep = steps.findIndex((step) => step.id === item.id);
   if (currentStep) {
     if (currentStep === 0) {
       // setLayoutStore('activeStepId', steps[currentStep + 1].id);
@@ -19,5 +28,14 @@ export function deleteStep(graph: Store<GraphInterface>, setGraph: SetStoreFunct
       // setLayoutStore('activeStepId', steps[currentStep - 1].id);
     }
   }
-  deleteLayoutAttr(layoutStore, setLayoutStore, item, graph, setGraph, layoutStore.formData.txnId, item.P.name, showSuccessToast);
+  deleteLayoutAttr(
+    layoutStore,
+    setLayoutStore,
+    item,
+    graph,
+    setGraph,
+    layoutStore.formData.txnId,
+    item.P.name,
+    showSuccessToast,
+  );
 }

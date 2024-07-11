@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
+
 const icons: any = {
   "Advanced Pro":
     "streamline:money-graph-arrow-increase-ascend-growth-up-arrow-stats-graph-right-grow",

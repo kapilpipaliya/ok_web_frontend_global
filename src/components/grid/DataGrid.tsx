@@ -1,14 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import {
-  Match,
-  Show,
-  Switch,
-  createSignal,
-  onMount,
-  
-} from "solid-js";
+import { Match, Show, Switch, createSignal, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
@@ -18,7 +11,13 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { useToast } from "~/components/Toast";
 import { usePageContext } from "~/lib/contexts";
-import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph, } from "~/lib/graph/graph";
+import {
+  type EdgeMap,
+  type Id,
+  type Vertex,
+  type VertexMap,
+  useGraph,
+} from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { SearchBar } from "../css_properties/SearchBar";
@@ -69,7 +68,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       onTableDataGet(data);
     }
     setIsLoading(false);
-  })
+  });
 
   const [search, setSearch] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([]);
@@ -79,11 +78,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     if (value && value.length > 0) {
       setIsSearching(true);
 
-      const filtered = tableStore.data.filter(
-        (item: Vertex) =>
-          Object.values(item.P).some((prop: any) =>
-            prop?.toString().toLowerCase().includes(value.toLowerCase())
-          ),
+      const filtered = tableStore.data.filter((item: Vertex) =>
+        Object.values(item.P).some((prop: any) =>
+          prop?.toString().toLowerCase().includes(value.toLowerCase()),
+        ),
       );
       setFilteredData(filtered);
     } else {
@@ -93,27 +91,33 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   };
 
   function onTableDataGet(data: TableData) {
-      const vertexCount = Object.keys(data.graph!.vertexes).length;
-      if (vertexCount < 10 || vertexCount === 0) {
-        setIsShowLoadMore(false);
-      } else {
-        setIsShowLoadMore(true);
-      }
-      setGraphData(graph, setGraph, data.graph!);
-      const resultData = Object.values(data.graph!.vertexes as Vertex[]).filter(
-        (v) => v.L[0] === props.tableId
-      );
-      const nodes: any = tableStore.data
-        ? [...tableStore.data, ...resultData]
-        : resultData;
-      events?.setTitle(data.form!.title);
-      const tableColumns = setGridHeaders(data.form!, graph, setGraph, setDeleteRowId, navigate, props.tableId);
-      setTableStore({ data: nodes, tableColumns });
-      setSearch("");
-      setFilteredData(nodes);
- 
+    const vertexCount = Object.keys(data.graph!.vertexes).length;
+    if (vertexCount < 10 || vertexCount === 0) {
+      setIsShowLoadMore(false);
+    } else {
+      setIsShowLoadMore(true);
+    }
+    setGraphData(graph, setGraph, data.graph!);
+    const resultData = Object.values(data.graph!.vertexes as Vertex[]).filter(
+      (v) => v.L[0] === props.tableId,
+    );
+    const nodes: any = tableStore.data
+      ? [...tableStore.data, ...resultData]
+      : resultData;
+    events?.setTitle(data.form!.title);
+    const tableColumns = setGridHeaders(
+      data.form!,
+      graph,
+      setGraph,
+      setDeleteRowId,
+      navigate,
+      props.tableId,
+    );
+    setTableStore({ data: nodes, tableColumns });
+    setSearch("");
+    setFilteredData(nodes);
   }
-  const onDelete  = deleteRowConfirm(deleteRowId);
+  const onDelete = deleteRowConfirm(deleteRowId);
 
   return (
     <Switch>
@@ -125,7 +129,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <div class="flex ai:center jc:space-between">
           <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">
-            <SearchBar handleChange={handleSearch} placeholder="Search Data..." value={search()}/>
+            <SearchBar
+              handleChange={handleSearch}
+              placeholder="Search Data..."
+              value={search()}
+            />
           </nav>
         </div>
         <CommonTable

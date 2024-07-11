@@ -1,27 +1,23 @@
-
-
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import type { IFormContext } from "~/lib/contexts";
 
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
-import {  binopsInitial, unaryOperatorsInitial } from "./expression_eval";
+import { binopsInitial, unaryOperatorsInitial } from "./expression_eval";
 import { useGraph } from "./graph/graph";
 
 const collectionAttr = [
   {
     component: "TextBox",
     name: "displayName",
-    
-      onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
 
+    onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
   },
   {
     component: "TextBox",
     displayName: "ID",
     name: "name",
-    
   },
   {
     component: "TextArea",
@@ -30,25 +26,22 @@ const collectionAttr = [
   {
     collection: "g:'DataType'",
     component: "SelectBox",
-    
-      name: "dataType",
-    
+
+    name: "dataType",
   },
   {
     collection: "->$0DataType->$0Comp",
     component: "SelectBox",
-    
-      name: "Comp",
-      // smaller version:
-      // collection: "g:'Comp'",
-    
+
+    name: "Comp",
+    // smaller version:
+    // collection: "g:'Comp'",
   },
   {
     collection: "g:'Coll'",
     component: "SelectBox",
-    
-      name: "coll",
-    
+
+    name: "coll",
   },
   {
     component: "CheckBox",
@@ -67,10 +60,9 @@ const collectionAttr = [
       {
         collection: "<-$0->$0Comp->$0Prop",
         component: "SelectBox",
-        
-          displayExpr: "::'P.name'",
-          name: "name",
-        
+
+        displayExpr: "::'P.name'",
+        name: "name",
       },
       {
         component:
@@ -88,18 +80,16 @@ const collectionAttr = [
       {
         collection: "g:'Role'",
         component: "SelectBox",
-        
-          name: "role",
-        
+
+        name: "role",
       },
       {
         attributes: [
           {
             collection: "g:'Perm'",
             component: "TagBox",
-            
-              name: "perm",
-            
+
+            name: "perm",
           },
           {
             component: "TextBox",
@@ -118,10 +108,9 @@ const collectionAttr = [
     component: "DynamicTable",
     label: "Attr",
     name: "Attr",
-    
-      tab: "expand",
-      type: "Attr",
-    
+
+    tab: "expand",
+    type: "Attr",
   },
 ] as FieldAttribute[];
 let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
@@ -137,15 +126,15 @@ const pageAttr = [
     component: "SelectBox",
     displayName: "Collection",
     name: "collection",
-    saveValue: true
+    saveValue: true,
   },
   {
     // collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
     component: "SelectBox",
     // displayExpr: "P.displayName||P.name",
-      displayExpr: "$P.displayName ($P.name)",
-      displayName: "Data",
-      name: "data",
+    displayExpr: "$P.displayName ($P.name)",
+    displayName: "Data",
+    name: "data",
   },
   {
     component: "TextBox",
@@ -163,7 +152,7 @@ const pageAttr = [
   // {
   //   name: "parent",
   //   component: "SelectBox",
-  //   
+  //
   //
   //     collection: "<-$0->Attr",
   //     focusRefresh: true
@@ -171,28 +160,25 @@ const pageAttr = [
   {
     collection: `g:'{{->$0Coll::'P.name'}}'`,
     component: "SelectBox",
-    
-      name: "data",
-  
+
+    name: "data",
   },
   {
     collection: "g:'Comp'",
     component: "SelectBox",
-    
-      name: "Comp",
-      // smaller version:
-      // collection: "g:'Comp'",
-    
+
+    name: "Comp",
+    // smaller version:
+    // collection: "g:'Comp'",
   },
   {
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
         component: "SelectBox",
-        
-          displayExpr: "::'P.name'",
-          name: "name",
-        
+
+        displayExpr: "::'P.name'",
+        name: "name",
       },
       {
         component:
@@ -210,18 +196,16 @@ const pageAttr = [
       {
         collection: "g:'Role'",
         component: "SelectBox",
-        
-          name: "role",
-        
+
+        name: "role",
       },
       {
         attributes: [
           {
             collection: "g:'Perm'",
             component: "SelectBox",
-            
-              name: "perm",
-            
+
+            name: "perm",
           },
         ],
         component: "DynamicTable",
@@ -235,10 +219,9 @@ const pageAttr = [
     component: "DynamicTable",
     label: "Attr",
     name: "Attr",
-    
-      tab: "expand",
-      type: "Attr",
-    
+
+    tab: "expand",
+    type: "Attr",
   },
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];
@@ -263,68 +246,64 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       {
         component: "TextBox",
         name: "title",
-        
-          onchange: '{"new": ["name","id"]}',
-        
+
+        onchange: '{"new": ["name","id"]}',
       },
       {
         component: "TextBox",
         name: "name",
-  
-          validationRules: [
-            {
-              message: "ID is required",
-              type: "required",
+
+        validationRules: [
+          {
+            message: "ID is required",
+            type: "required",
+          },
+          {
+            ignoreEmptyValue: true,
+            message: "This ID is already taken",
+            type: "custom",
+            validationCallback: (options: any) => {
+              const { formData } =
+                (options.validator.context as IFormContext) ||
+                ({} as IFormContext);
+              const [graph, setGraph] = useGraph();
+              const val = options.value;
+              if (
+                Object.keys(FormMetaData).includes(val) ||
+                Object.keys(FormMetaDataAuth).includes(val)
+              ) {
+                return false;
+              }
+              return !findVertexByLabelAndUniqueIdWithSkip(
+                "Form",
+                "id",
+                val,
+                formData.id,
+                graph,
+              );
             },
-            {
-              ignoreEmptyValue: true,
-              message: "This ID is already taken",
-              type: "custom",
-              validationCallback: (options: any) => {
-                const { formData } =
-                  (options.validator.context as IFormContext) ||
-                  ({} as IFormContext);
-                const [graph, setGraph] = useGraph();
-                const val = options.value;
-                if (
-                  Object.keys(FormMetaData).includes(val) ||
-                  Object.keys(FormMetaDataAuth).includes(val)
-                ) {
-                  return false;
-                }
-                return !findVertexByLabelAndUniqueIdWithSkip(
-                  "Form",
-                  "id",
-                  val,
-                  formData.id,
-                  graph,
-                );
-              },
-            },
-            // , {
-            //   type: 'email',
-            //   message: 'Email is invalid',
-            // }
-          ],
-        
+          },
+          // , {
+          //   type: 'email',
+          //   message: 'Email is invalid',
+          // }
+        ],
       },
       {
         collection: "g:'CollCategory'",
         component: "SelectBox",
-    
-          inward: true,
-          name: "category",
-          parentLabel: "CollCategory",
-        
+
+        inward: true,
+        name: "category",
+        parentLabel: "CollCategory",
       },
       {
         collection: "g:'Dashboard'",
         component: "TagBox",
-      
-          inward: true,
-          name: "dashboard",
-          parentLabel: "Dashboard",
-    
+
+        inward: true,
+        name: "dashboard",
+        parentLabel: "Dashboard",
       },
       { component: "TextArea", name: "description" },
       { component: "CheckBox", name: "public" },
@@ -336,32 +315,30 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
         collection: "->Attr",
         component: "TagBox",
         displayName: "Primary Key",
-      
-          name: "pk",
-          // TODO: add validation
-          // If there is not name attribute,
-          // then this field is required.
-        
+
+        name: "pk",
+        // TODO: add validation
+        // If there is not name attribute,
+        // then this field is required.
       },
       {
         collection: "->Attr",
         component: "TagBox",
-      
-          name: "nameKey",
-          // TODO: add validation
-          // If there is not name attribute,
-          // then this field is required.
-        
+
+        name: "nameKey",
+        // TODO: add validation
+        // If there is not name attribute,
+        // then this field is required.
       },
 
       {
         attributes: collectionAttr,
         component: "DynamicTable",
         label: "Attr",
-   
-          name: "Attr",
-          tab: "Attribute",
-        
+
+        name: "Attr",
+        tab: "Attribute",
+
         type: "Attr",
       },
       {
@@ -369,7 +346,6 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           {
             component: "TextBox",
             name: "name",
-  
           },
           // {
           //   component: "TextBox",
@@ -381,17 +357,16 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                 component: "SelectBox",
                 displayName: "Paren",
                 name: "left",
-                
-                  options: `(
+
+                options: `(
 ((
 (((`,
-              
               },
               {
                 component: "SelectBox",
                 displayName: "Field",
                 name: "leftField",
-                  // collection: "g:'DataType'",
+                // collection: "g:'DataType'",
               },
               // {
               //   component: "TextBox",
@@ -402,22 +377,21 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                 component: "SelectBox",
                 displayName: "Operator",
                 name: "operator",
-                  options: `${Object.keys(unaryOperatorsInitial).join('\n')}
-${Object.keys(binopsInitial).join('\n')}`,
-                
+                options: `${Object.keys(unaryOperatorsInitial).join("\n")}
+${Object.keys(binopsInitial).join("\n")}`,
               },
               {
                 component: "SelectBox",
                 displayName: "Field",
                 name: "rightField",
-                  // collection: "g:'DataType'",
+                // collection: "g:'DataType'",
               },
               {
                 component: "TextBox",
                 displayName: "Value",
                 name: "rightValue",
               },
-             /* {
+              /* {
                 collection: "g:'DataType'",
                 component: "SelectBox",
                 displayName: "DataType",
@@ -443,33 +417,31 @@ ${Object.keys(binopsInitial).join('\n')}`,
                 component: "SelectBox",
                 displayName: "Paren",
                 name: "right",
-                
-                  options: `)
+
+                options: `)
 ))
 )))`,
-               
               },
               {
                 component: "SelectBox",
                 displayName: "AndOr",
                 name: "andOr",
-                
-                  options: `AND
+
+                options: `AND
 OR`,
-               
               },
             ],
             component: "DynamicTable",
             displayName: "Conditions",
             name: "cond",
-          }
+          },
         ],
         component: "DynamicTable",
         label: "Rules",
 
-          name: "Rules",
-          tab: "Rules",
-      
+        name: "Rules",
+        tab: "Rules",
+
         type: "Rule",
       },
 
@@ -540,9 +512,8 @@ OR`,
           {
             collection: "g:'Coll'",
             component: "SelectBox",
-            
-              name: "coll",
-            
+
+            name: "coll",
           },
           {
             component: "TextBox",
@@ -557,10 +528,9 @@ OR`,
               {
                 collection: "g:'Comp[Table]'->$0Prop",
                 component: "SelectBox",
-                
-                  displayExpr: "::'P.name'",
-                  name: "name",
-                
+
+                displayExpr: "::'P.name'",
+                name: "name",
               },
               {
                 component:
@@ -583,16 +553,14 @@ OR`,
           {
             collection: "g:'Role'",
             component: "SelectBox",
-            
-              name: "role",
-            
+
+            name: "role",
           },
           {
             collection: "g:'Perm'",
             component: "TagBox",
-            
-              name: "perm",
-            
+
+            name: "perm",
           },
           {
             component: "TextBox",
@@ -609,9 +577,8 @@ OR`,
             collection: "<-$0->Attr",
             component: "TagBox",
             displayName: "Unique Constrain Keys",
-            
-              name: "pk",
-            
+
+            name: "pk",
           },
         ],
         component: "DynamicTable",
@@ -637,11 +604,10 @@ OR`,
       {
         collection: "g:'CompCategory'",
         component: "SelectBox",
-       
-          inward: true,
-          name: "category",
-          parentLabel: "CompCategory",
-     
+
+        inward: true,
+        name: "category",
+        parentLabel: "CompCategory",
       },
       { component: "TextBox", name: "name" },
       { component: "TextBox", name: "label" },
@@ -649,22 +615,20 @@ OR`,
         childLabel: "Child",
         collection: "g:'Comp'",
         component: "SelectBox",
-       
-          displayName: "Parent Component",
-          inward: true,
-          name: "parent",
-          parentLabel: "Comp",
-        
+
+        displayName: "Parent Component",
+        inward: true,
+        name: "parent",
+        parentLabel: "Comp",
       },
       {
         collection: "g:'DataType'",
         component: "TagBox",
         displayName: "DataType",
-    
-          inward: true,
-          name: "dataType",
-          parentLabel: "DataType",
-      
+
+        inward: true,
+        name: "dataType",
+        parentLabel: "DataType",
       },
       {
         component: "CheckBox",
@@ -695,29 +659,28 @@ OR`,
           {
             collection: "g:'DataType'",
             component: "SelectBox",
-            
-              name: "dataType",
-              onchange: '["Comp",null]',
-            
+
+            name: "dataType",
+            onchange: '["Comp",null]',
           },
           {
             collection: "->$0DataType->$0Comp",
             component: "SelectBox",
             displayName: "Component",
-            
-              name: "Comp",
-            
+
+            name: "Comp",
           },
           {
             attributes: [
               {
                 collection: "<-$0->$0Comp->$0Prop",
                 component: "SelectBox",
-                  displayExpr: "::'P.name'",
-                  name: "name",
+                displayExpr: "::'P.name'",
+                name: "name",
               },
               {
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                component:
+                  "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
                 meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
                 name: "value",
               },
@@ -738,22 +701,20 @@ OR`,
           {
             component: "TextArea",
             name: "description",
-            
-              // autoResizeEnabled: true,
-              width: "550px",
-            
+
+            // autoResizeEnabled: true,
+            width: "550px",
           },
           {
             children: "Reset",
             class: "border-color:#FF0000 color:#FF0000",
-            
-              component: "Button",
-              name: "reset",
-              variant: "outlined",
-              // TODO:
-              // function: "reset",
-              // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
-            
+
+            component: "Button",
+            name: "reset",
+            variant: "outlined",
+            // TODO:
+            // function: "reset",
+            // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
           },
         ],
         component: "DynamicTable",
@@ -773,10 +734,9 @@ OR`,
           {
             component: "TextArea",
             name: "description",
-            
-              // autoResizeEnabled: true,
-              width: "550px",
-            
+
+            // autoResizeEnabled: true,
+            width: "550px",
           },
         ],
         component: "DynamicTable",
@@ -806,9 +766,8 @@ OR`,
         collection: "g:'Comp'",
         component: "SelectBox",
         displayName: "Default Component",
-    
-          name: "default",
-     
+
+        name: "default",
       },
     ],
     isInlineEditable: true,
@@ -831,7 +790,7 @@ OR`,
       {
         component: "TextBox",
         mode: "password",
-         name: "pass",
+        name: "pass",
       },
     ],
     isRealTime: true,
@@ -843,50 +802,47 @@ OR`,
       {
         component: "TextBox",
         name: "title",
-        
-          onchange: '{"new": ["name","id"]}',
-      
+
+        onchange: '{"new": ["name","id"]}',
       },
       {
         component: "TextBox",
         name: "name",
-        
-          validationRules: [
-            {
-              message: "ID is required",
-              type: "required",
+
+        validationRules: [
+          {
+            message: "ID is required",
+            type: "required",
+          },
+          {
+            ignoreEmptyValue: true,
+            message: "This ID is already taken",
+            type: "custom",
+            validationCallback: (options: any) => {
+              const { formData } =
+                (options.validator.context as IFormContext) ||
+                ({} as IFormContext);
+              const [graph, setGraph] = useGraph();
+              const val = options.value;
+              return !findVertexByLabelAndUniqueIdWithSkip(
+                "Page",
+                "id",
+                val,
+                formData.id,
+                graph,
+              );
             },
-            {
-              ignoreEmptyValue: true,
-              message: "This ID is already taken",
-              type: "custom",
-              validationCallback: (options: any) => {
-                const { formData } =
-                  (options.validator.context as IFormContext) ||
-                  ({} as IFormContext);
-                const [graph, setGraph] = useGraph();
-                const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip(
-                  "Page",
-                  "id",
-                  val,
-                  formData.id,
-                  graph,
-                );
-              },
-            },
-          ],
-        
+          },
+        ],
       },
       { component: "TextArea", name: "description" },
       {
         collection: "g:'Dashboard'",
         component: "TagBox",
-        
-          inward: true,
-          name: "dashboard",
-          parentLabel: "Dashboard",
-        
+
+        inward: true,
+        name: "dashboard",
+        parentLabel: "Dashboard",
       },
       { component: "CheckBox", name: "public" },
       /*{ component: "CheckBox", name: "isRealTime" },
@@ -909,10 +865,10 @@ OR`,
         attributes: pageAttr,
         component: "DynamicTable",
         label: "Attr",
-        
-          name: "Attr",
-          tab: "Attribute",
-        
+
+        name: "Attr",
+        tab: "Attribute",
+
         type: "Attr",
       },
       {
@@ -920,18 +876,16 @@ OR`,
           {
             collection: "g:'Role'",
             component: "SelectBox",
-            
-              name: "role",
-            
+
+            name: "role",
           },
           {
             attributes: [
               {
                 collection: "g:'Perm'",
                 component: "SelectBox",
-                
-                  name: "perm",
-               
+
+                name: "perm",
               },
             ],
             component: "DynamicTable",
@@ -952,7 +906,7 @@ OR`,
       {
         component: "TextBox",
         mode: "password",
-         name: "pass",
+        name: "pass",
       },
     ],
     isRealTime: true,
@@ -961,18 +915,22 @@ OR`,
   },
 };
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.name === "Rules"
+  (x) => x.name === "Rules",
 );
 
 FormMetaData.Form = {
-  attributes: [...FormMetaData.Page.attributes, {
-    collection: "g:'FormCategory'",
-    component: "SelectBox",
-    displayName: "Form Category",
-    inward: true,
-    name: "form",
-    parentLabel: "FormCategory",
-  }, rulesMetaAttribute!],
+  attributes: [
+    ...FormMetaData.Page.attributes,
+    {
+      collection: "g:'FormCategory'",
+      component: "SelectBox",
+      displayName: "Form Category",
+      inward: true,
+      name: "form",
+      parentLabel: "FormCategory",
+    },
+    rulesMetaAttribute!,
+  ],
   name: "Form",
   title: "Form",
 };

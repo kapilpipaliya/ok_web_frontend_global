@@ -2,13 +2,13 @@ import { Icon } from "@iconify-icon/solid";
 
 import { Footer } from "../Footer";
 import { Header } from "../Header";
-import {SiteTitle} from "../SiteTitle";
-import {FAQSection} from "./FAQSection";
-import {FeaturesSection} from "./FeaturesSection";
-import {FormInActionSection} from "./FormInActionSection";
-import {HeroSection} from "./HeroSection";
-import {SubscribeSection} from "./SubscribeSection";
-import {TestimonialSection} from "./TestimonialSection";
+import { SiteTitle } from "../SiteTitle";
+import { FAQSection } from "./FAQSection";
+import { FeaturesSection } from "./FeaturesSection";
+import { FormInActionSection } from "./FormInActionSection";
+import { HeroSection } from "./HeroSection";
+import { SubscribeSection } from "./SubscribeSection";
+import { TestimonialSection } from "./TestimonialSection";
 
 export const MainPage = () => {
   return (

@@ -1,4 +1,3 @@
-
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -9,12 +8,12 @@ export const isPageDesignerPath = (path: string) => {
     "/admin/page/",
     "/admin/form/",
     "/admin/template/",
-    "/admin/thankyou/"
+    "/admin/thankyou/",
   ];
 
-  return pageDesignerPath.some(Path => lowerPath.includes(Path));
+  return pageDesignerPath.some((Path) => lowerPath.includes(Path));
 };
-export function isObject(i: any): i is Record<string, any>  {
+export function isObject(i: any): i is Record<string, any> {
   if (i && !Array.isArray(i)) {
     return "object" === typeof i;
   }
@@ -69,7 +68,6 @@ export function deNullify<T extends Record<string, any>>(obj: T): Partial<T> {
 
   return result;
 }
-
 
 export function ifNotNull<T>(value: T | null): T | undefined {
   return value !== null ? value : undefined;

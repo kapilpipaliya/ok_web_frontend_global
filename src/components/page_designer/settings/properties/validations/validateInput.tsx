@@ -1,6 +1,9 @@
 import type { ValidationConfigType } from "./ValidationConfig";
 
-export function validateInput(validation: ValidationConfigType, value?: string) {
+export function validateInput(
+  validation: ValidationConfigType,
+  value?: string,
+) {
   // Clear previous error
   // Check required rule
   if (validation.required && (!value || value.trim() === "")) {
@@ -28,11 +31,15 @@ export function validateInput(validation: ValidationConfigType, value?: string) 
       const regexRule = element;
       if (regexRule.enabled) {
         if (!value) {
-          return regexRule.message || "Input does not match the required pattern";
+          return (
+            regexRule.message || "Input does not match the required pattern"
+          );
         }
         const regex = new RegExp(regexRule.value);
         if (!regex.test(value)) {
-          return regexRule.message || "Input does not match the required pattern";
+          return (
+            regexRule.message || "Input does not match the required pattern"
+          );
         }
       }
     }

@@ -36,4 +36,3 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   //  return 'center';
   // }
 }
-

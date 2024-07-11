@@ -1,4 +1,3 @@
-
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
@@ -14,13 +13,13 @@ interface ValidationProps {
 }
 
 export const validations = {
-  CheckBox: 'required',
-  CheckBoxGroup: 'required',
-  DropDown: 'required|minLength|maxLength|regex',
-  RadioButton: 'required',
-  RadioButtonGroup: 'required',
-  TextArea: 'required|minLength|maxLength|regex',
-  TextBox: 'required|email|minLength|maxLength|regex',
+  CheckBox: "required",
+  CheckBoxGroup: "required",
+  DropDown: "required|minLength|maxLength|regex",
+  RadioButton: "required",
+  RadioButtonGroup: "required",
+  TextArea: "required|minLength|maxLength|regex",
+  TextBox: "required|email|minLength|maxLength|regex",
 };
 
 export interface ValidationConfigType {
@@ -36,19 +35,36 @@ export interface ValidationConfigType {
 }
 
 export function ValidationConfig(props: ValidationProps) {
-  const rules = validations[props.componentMeta.P.name as keyof typeof validations]?.split('|') || [];
-  const [values, setValues] = createStore<ValidationConfigType>(props.data.P.validation || {});
+  const rules =
+    validations[props.componentMeta.P.name as keyof typeof validations]?.split(
+      "|",
+    ) || [];
+  const [values, setValues] = createStore<ValidationConfigType>(
+    props.data.P.validation || {},
+  );
 
   const addRegex = () => {
-    setValues('regex', [...(values.regex || []), { enabled: true, message: '', value: '' }]);
+    setValues("regex", [
+      ...(values.regex || []),
+      { enabled: true, message: "", value: "" },
+    ]);
   };
 
   const deleteRegex = (index: number) => {
-    setValues('regex', values.regex.filter((_, i) => i !== index));
+    setValues(
+      "regex",
+      values.regex.filter((_, i) => i !== index),
+    );
     props.setValue(props.meta, values);
   };
 
-  const RuleInput = (inputProps: { label: string, onChange: (e: any) => void, rule: string, type: string, value: any }) => (
+  const RuleInput = (inputProps: {
+    label: string;
+    onChange: (e: any) => void;
+    rule: string;
+    type: string;
+    value: any;
+  }) => (
     <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
       <label class="f:15 flex:.5">{inputProps.label}</label>
       <input
@@ -64,13 +80,15 @@ export function ValidationConfig(props: ValidationProps) {
     </div>
   );
 
-  const RegexInput = (regexprops: { index: number, }) => (
+  const RegexInput = (regexprops: { index: number }) => (
     <div class="">
       <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
         <label class="f:15 flex:.5">Regex</label>
         <input
           class="border:1px|solid|#ccc f:15 flex:1 p:2"
-          onChange={(e) => setValues('regex', regexprops.index, 'value', e.target.value)}
+          onChange={(e) =>
+            setValues("regex", regexprops.index, "value", e.target.value)
+          }
           type="text"
           value={values.regex[regexprops.index].value}
         />
@@ -80,7 +98,9 @@ export function ValidationConfig(props: ValidationProps) {
         <input
           checked={values.regex[regexprops.index].enabled}
           class="border:1px|solid|#ccc f:15 flex:1 p:2"
-          onChange={(e) => setValues('regex', regexprops.index, 'enabled', e.target.checked)}
+          onChange={(e) =>
+            setValues("regex", regexprops.index, "enabled", e.target.checked)
+          }
           type="checkbox"
         />
       </div>
@@ -88,13 +108,21 @@ export function ValidationConfig(props: ValidationProps) {
         <label class="f:15 flex:.5">Message</label>
         <input
           class="border:1px|solid|#ccc f:15 flex:1 p:2"
-          onChange={(e) => setValues('regex', regexprops.index, 'message', e.target.value)}
+          onChange={(e) =>
+            setValues("regex", regexprops.index, "message", e.target.value)
+          }
           type="text"
           value={values.regex[regexprops.index].message}
         />
       </div>
       <div>
-        <button class="border:1px|solid|#ccc p:2" onClick={() => deleteRegex(regexprops.index)} type="button">Delete Regex</button>
+        <button
+          class="border:1px|solid|#ccc p:2"
+          onClick={() => deleteRegex(regexprops.index)}
+          type="button"
+        >
+          Delete Regex
+        </button>
       </div>
     </div>
   );
@@ -108,48 +136,52 @@ export function ValidationConfig(props: ValidationProps) {
         {(rule) => (
           <div>
             <Switch>
-              <Match when={rule === 'required'}>
+              <Match when={rule === "required"}>
                 <RuleInput
                   label="Required"
-                  onChange={(e) => setValues('required', e.target.checked)}
+                  onChange={(e) => setValues("required", e.target.checked)}
                   rule={rule}
                   type="checkbox"
                   value={values.required}
                 />
               </Match>
-              <Match when={rule === 'email'}>
+              <Match when={rule === "email"}>
                 <RuleInput
                   label="Email"
-                  onChange={(e) => setValues('email', e.target.checked)}
+                  onChange={(e) => setValues("email", e.target.checked)}
                   rule={rule}
                   type="checkbox"
                   value={values.email}
                 />
               </Match>
-              <Match when={rule === 'minLength'}>
+              <Match when={rule === "minLength"}>
                 <RuleInput
                   label="Min Length"
-                  onChange={(e) => setValues('minLength', Number.parseInt(e.target.value))}
+                  onChange={(e) =>
+                    setValues("minLength", Number.parseInt(e.target.value))
+                  }
                   rule={rule}
                   type="number"
                   value={values.minLength}
                 />
               </Match>
-              <Match when={rule === 'maxLength'}>
+              <Match when={rule === "maxLength"}>
                 <RuleInput
                   label="Max Length"
-                  onChange={(e) => setValues('maxLength', Number.parseInt(e.target.value))}
+                  onChange={(e) =>
+                    setValues("maxLength", Number.parseInt(e.target.value))
+                  }
                   rule={rule}
                   type="number"
                   value={values.maxLength}
                 />
               </Match>
-              <Match when={rule === 'regex'}>
-                <button onClick={addRegex} type="button">Add Regex</button>
+              <Match when={rule === "regex"}>
+                <button onClick={addRegex} type="button">
+                  Add Regex
+                </button>
                 <For each={values.regex}>
-                  {(regex, index) => (
-                    <RegexInput index={index()} />
-                  )}
+                  {(regex, index) => <RegexInput index={index()} />}
                 </For>
               </Match>
             </Switch>
@@ -162,7 +194,6 @@ export function ValidationConfig(props: ValidationProps) {
 export const ValidationConfigTest = (validations: ValidationConfigType) => {
   const [values, setValues] = createSignal("");
   const [error, setError] = createSignal("");
-
 
   const handleChange = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -182,4 +213,3 @@ export const ValidationConfigTest = (validations: ValidationConfigType) => {
     </div>
   );
 };
-

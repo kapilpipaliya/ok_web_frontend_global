@@ -12,12 +12,15 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
 
-export function AddNewRule(props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>) {
+export function AddNewRule(
+  props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
+) {
   const [stateName, setStateName] = createSignal("");
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let inputRef: HTMLInputElement;
-  const prevTxnIndex = graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ?? 0;
+  const prevTxnIndex =
+    graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ?? 0;
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
   const metaTxnId = graph.newTxnId;
 
@@ -29,29 +32,46 @@ export function AddNewRule(props: Readonly<{ onClose: (rowVertex?: Vertex) => vo
     const rulesMetaVertexId = graph.newVertexId;
 
     const metaAttribute = FormMetaData.Form.attributes.find(
-      (x) => x.name === "Rules"
+      (x) => x.name === "Rules",
     )!;
     addNewVertex(
       metaTxnId,
       newVertex(rulesMetaVertexId, ["MetaAttr"], metaAttribute),
       graph,
-      setGraph
+      setGraph,
     );
 
-    const rowResult = insertNewRow(layoutStore.formData.txnId, graph.vertexes[rulesMetaVertexId], layoutStore.formData.formData, false, graph, setGraph, { name: stateName() });
+    const rowResult = insertNewRow(
+      layoutStore.formData.txnId,
+      graph.vertexes[rulesMetaVertexId],
+      layoutStore.formData.formData,
+      false,
+      graph,
+      setGraph,
+      { name: stateName() },
+    );
 
     const rule = graph.vertexes[rowResult!.vertexId!];
 
     const condMetaVertexId = graph.newVertexId;
-    const condMetaAttribute = metaAttribute.attributes!.find(x => x.name === "cond")!;
+    const condMetaAttribute = metaAttribute.attributes!.find(
+      (x) => x.name === "cond",
+    )!;
     addNewVertex(
       metaTxnId,
       newVertex(condMetaVertexId, ["MetaAttr"], condMetaAttribute),
       graph,
-      setGraph
+      setGraph,
     );
 
-    insertNewRow(layoutStore.formData.txnId, graph.vertexes[condMetaVertexId], rule, false, graph, setGraph);
+    insertNewRow(
+      layoutStore.formData.txnId,
+      graph.vertexes[condMetaVertexId],
+      rule,
+      false,
+      graph,
+      setGraph,
+    );
 
     setSelectedRule(rule);
   };
@@ -85,9 +105,14 @@ export function AddNewRule(props: Readonly<{ onClose: (rowVertex?: Vertex) => vo
         </button>
         <Show when={selectedRule()}>
           <ZIndex>
-            <RulesModal closeModal={props.onClose} onSubmit={() => {
-              props.onClose(selectedRule());
-            }} prevTxnIndex={prevTxnIndex} selectedRule={selectedRule()} />
+            <RulesModal
+              closeModal={props.onClose}
+              onSubmit={() => {
+                props.onClose(selectedRule());
+              }}
+              prevTxnIndex={prevTxnIndex}
+              selectedRule={selectedRule()}
+            />
           </ZIndex>
         </Show>
       </div>

@@ -12,7 +12,9 @@ import { addStepBefore } from "./addStepBefore";
 export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
-  const steps = createMemo<Vertex[]>(() => getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData));
+  const steps = createMemo<Vertex[]>(() =>
+    getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData),
+  );
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {
     e.stopPropagation();
@@ -36,11 +38,7 @@ export function FormStepper() {
               onClick={(e) => handleAddStepBefore(e, step)}
               width={20}
             />
-            <Step
-              index={index}
-              step={step}
-              steps={steps()}
-            />
+            <Step index={index} step={step} steps={steps()} />
             <Show when={index() === steps().length - 1}>
               <Icon
                 class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"

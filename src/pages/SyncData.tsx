@@ -2,7 +2,7 @@ import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import {Breadcrumb} from "~/components/Breadcrumb";
+import { Breadcrumb } from "~/components/Breadcrumb";
 import { useToast } from "~/components/Toast";
 import { getUsers } from "~/cypher/get/adminFunctions";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
@@ -254,8 +254,10 @@ export function SyncData() {
                   <button
                     class="lh:1.25 flex ai:center bg:rgb(255,255,255) border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) h:2rem justify-content:center px:0.75rem"
                     classList={{
-                      "bg:rgb(243,244,246):hover color:rgb(55,65,81):hover bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark color:rgb(156,163,175)@dark bg:rgb(55,65,81):hover@dark color:rgb(255,255,255):hover@dark": page !== currentPage(),
-                      "color:rgb(37,99,235) border-color:rgb(209,213,219) bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark": page === currentPage()
+                      "bg:rgb(243,244,246):hover color:rgb(55,65,81):hover bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark color:rgb(156,163,175)@dark bg:rgb(55,65,81):hover@dark color:rgb(255,255,255):hover@dark":
+                        page !== currentPage(),
+                      "color:rgb(37,99,235) border-color:rgb(209,213,219) bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark":
+                        page === currentPage(),
                     }}
                     onClick={() => setCurrentPage(page)}
                   >

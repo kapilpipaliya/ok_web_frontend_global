@@ -9,7 +9,6 @@ import {
   onMount,
   splitProps,
   useContext,
-  
 } from "solid-js";
 
 import { runEvent } from "../tools";

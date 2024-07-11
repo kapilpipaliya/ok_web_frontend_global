@@ -1,9 +1,9 @@
 // ->
-import {int, } from "neo4j-driver";
+import { int } from "neo4j-driver";
 
-import type {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
-import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import type { ContextType } from "./ContextType";
 
@@ -17,14 +17,16 @@ export async function evalGetChildren(
   "use server";
   if (!vertexes || vertexes.length === 0) return;
 
-  const session = context.tx ? null : (context.session || await getSessionForSubdomain());
+  const session = context.tx
+    ? null
+    : context.session || (await getSessionForSubdomain());
   let type;
   if (edgeType.includes("$0")) {
     type = edgeType.replaceAll("$0", vertexes[0].L[0]);
   } else {
     type = edgeType;
   }
-  
+
   let query;
   let params;
   if (type.includes("|")) {
@@ -43,11 +45,13 @@ export async function evalGetChildren(
   WHERE id(parent) IN $parentIds
   RETURN r, child
 `;
-    params = {parentIds: vertexes.map((v) => int(v.id))};
+    params = { parentIds: vertexes.map((v) => int(v.id)) };
   }
 
   try {
-    const result = await (context.tx ? context.tx!.run(query, params) : session!.run(query, params));
+    const result = await (context.tx
+      ? context.tx!.run(query, params)
+      : session!.run(query, params));
     return processResult(result.records, context, "child", "r", false);
   } catch (error) {
     console.error(

@@ -1,10 +1,8 @@
-
-
 import { useNavigate } from "@solidjs/router";
 
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { useFormContext, } from "~/lib/contexts";
+import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
 import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -25,11 +23,11 @@ export function formSubmit(closePopUp?: () => void) {
       // navigate(removeLastPathSegment());
     };
 
-    const label = formData.formData.L[0].replace(/([A-Z])/g, ' $1').trim();
+    const label = formData.formData.L[0].replace(/([A-Z])/g, " $1").trim();
     if (graph.transactions.get(txnId)?.steps.length === 0) {
-      showWarningToast(`There is nothing to save for ${label}.`)
+      showWarningToast(`There is nothing to save for ${label}.`);
     } else if (isDisabledTxn(txnId, graph)) {
-      showWarningToast(`${label} is already saved.`)
+      showWarningToast(`${label} is already saved.`);
     }
 
     const isValid = true;
@@ -89,5 +87,5 @@ export function formSubmit(closePopUp?: () => void) {
     }
 
     return isValid;
-  }
+  };
 }

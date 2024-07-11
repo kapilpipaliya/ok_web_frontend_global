@@ -17,7 +17,7 @@ export interface FieldAttribute {
   meta?: string;
 
   name: string;
-   tab?: string;
-  
+  tab?: string;
+
   validationRules?: Array<{}>;
 }

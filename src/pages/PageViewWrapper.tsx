@@ -1,4 +1,3 @@
-
 import { clientOnly } from "@solidjs/start";
 import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
@@ -9,15 +8,19 @@ import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { isObject } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-const PageView = clientOnly(() => import("~/components/page_attr_render/PageView"));
+const PageView = clientOnly(
+  () => import("~/components/page_attr_render/PageView"),
+);
 
-export function PageViewWrapper(props: Readonly<{
-  expression?: string,
-  formId?: string,
-  pageId?: string,
-  pageVertexLabel?: string,
-  pageVertexName?: string,
-}>) {
+export function PageViewWrapper(
+  props: Readonly<{
+    expression?: string;
+    formId?: string;
+    pageId?: string;
+    pageVertexLabel?: string;
+    pageVertexName?: string;
+  }>,
+) {
   const [graph, setGraph] = useGraph();
   const txnId = graph.newTxnId;
 
@@ -30,16 +33,19 @@ export function PageViewWrapper(props: Readonly<{
   async function loadFormDesignerMetaData() {
     const form = FormMetaData[props.pageVertexLabel!] || FormMetaData.Form;
 
-    const { incoming, outgoing } =
-      getEdgesFromRowsAttr(form.attributes);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
     const data = await getDataMGCall({
-      expression: props.expression ?? (props.formId ? `id:'${props.formId}'` : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`),
+      expression:
+        props.expression ??
+        (props.formId
+          ? `id:'${props.formId}'`
+          : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`),
       incoming,
       outgoing,
     });
     if (!data) return;
-    setIsPreview(props.pageId === 'preview');
+    setIsPreview(props.pageId === "preview");
 
     // @ts-ignore
     if (data.error) {
@@ -47,13 +53,9 @@ export function PageViewWrapper(props: Readonly<{
       return { error: data.error };
     }
     if (props.formId) {
-      delete data.graph.vertexes[props.formId]
+      delete data.graph.vertexes[props.formId];
     }
-    setGraphData(
-      graph,
-      setGraph,
-      data.graph,
-    );
+    setGraphData(graph, setGraph, data.graph);
 
     if (Array.isArray(data.result)) {
       if (data.result.length > 0) {
@@ -96,15 +98,18 @@ export function PageViewWrapper(props: Readonly<{
   return (
     <Show keyed when={count()}>
       <Show when={mounted() && metaVertex()}>
-        <Show fallback={
-          <PreviewPage>
-            <PageView
-              data={dataVertex()}
-              isPreview={true}
-              metaVertex={metaVertex()}
-            />
-          </PreviewPage>
-        } when={!(isPreview())}>
+        <Show
+          fallback={
+            <PreviewPage>
+              <PageView
+                data={dataVertex()}
+                isPreview={true}
+                metaVertex={metaVertex()}
+              />
+            </PreviewPage>
+          }
+          when={!isPreview()}
+        >
           {/* <Show when={dataVertex()}> */}
           <PageView
             data={dataVertex()}

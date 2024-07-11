@@ -21,9 +21,7 @@ export function UserDashBoardGrid() {
   const allFormTableLayouts =
     getSelectionOptions(graph, () => 0, "->$0Form", [dashboard]).vertexes || [];
 
-  const allTableLayouts = () => [
-    ...new Set([...allFormTableLayouts]),
-  ];
+  const allTableLayouts = () => [...new Set([...allFormTableLayouts])];
   return (
     <div class="gap:15 gap:20@sm grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md">
       <For each={allTableLayouts()}>

@@ -7,6 +7,5 @@ export const PositionSection = {
     "absolute",
     "fixed",
     "sticky",
-  ])
+  ]),
 };
-

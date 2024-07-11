@@ -47,15 +47,20 @@ export function TestimonialSection() {
   );
 }
 
-function Testimonial(props: Readonly<{
-  feedback: string;
-  name: string;
-  profession: string;
-  rating: number;
-  title: string;
-}>) {
+function Testimonial(
+  props: Readonly<{
+    feedback: string;
+    name: string;
+    profession: string;
+    rating: number;
+    title: string;
+  }>,
+) {
   return (
-    <div aria-label={`Testimonial from ${props.name}, ${props.profession}`} class="personaltestimonial">
+    <div
+      aria-label={`Testimonial from ${props.name}, ${props.profession}`}
+      class="personaltestimonial"
+    >
       <p aria-label={`Rating: ${props.rating} stars`} class="ratestar">
         {Array.from({ length: props.rating }).map(() => (
           <Icon icon="heroicons:star-solid" style={{ color: "gold" }} />

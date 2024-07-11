@@ -4,7 +4,15 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
-export function Content(props: Readonly<{ component: Accessor<string>; meta: Accessor<Vertex>; selectedLayout: Vertex; setValue: (meta: Vertex, data: any) => void; txnId: number; }>) {
+export function Content(
+  props: Readonly<{
+    component: Accessor<string>;
+    meta: Accessor<Vertex>;
+    selectedLayout: Vertex;
+    setValue: (meta: Vertex, data: any) => void;
+    txnId: number;
+  }>,
+) {
   return (
     <DynamicComponent
       component={props.component()}
@@ -12,6 +20,7 @@ export function Content(props: Readonly<{ component: Accessor<string>; meta: Acc
       isRealTime={false}
       meta={props.meta()}
       setValue={(data) => props.setValue(props.meta(), data)}
-      txnId={props.txnId} />
+      txnId={props.txnId}
+    />
   );
 }

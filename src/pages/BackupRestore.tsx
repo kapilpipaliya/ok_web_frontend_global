@@ -5,11 +5,13 @@ import { A } from "@solidjs/router";
 import { APP_BASE_URL } from "~/lib/constants";
 
 export function BackupRestore() {
-  const C = (props: Readonly<{
-    children: JSX.Element;
-    subtitle: string;
-    title: string;
-  }>) => {
+  const C = (
+    props: Readonly<{
+      children: JSX.Element;
+      subtitle: string;
+      title: string;
+    }>,
+  ) => {
     return (
       <div class="b:2">
         <div class="bb:1 p:10">
@@ -42,6 +44,5 @@ export function BackupRestore() {
         </C>
       </div>
     </div>
-
   );
 }

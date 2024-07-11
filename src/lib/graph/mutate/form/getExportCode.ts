@@ -13,26 +13,27 @@ import { getPkForCollection } from "../../get/sync/getPkForCollection";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { getSublistRows, getSublistRowsForType } from "./rowFunction";
 
-
 export function getExportCode(
   graph: Store<GraphInterface>,
   meta: Vertex,
-  data: Vertex
+  data: Vertex,
 ) {
   const getChildren = (
     meta: Vertex,
     vertex: Vertex,
     result: {
       [key: string]: any;
-    }
+    },
   ) => {
     const { showErrorToast } = useToast();
 
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P;
-    const selectMetaVertexes = metaVertexes.filter((meta) => ["SelectBox", "TagBox"].includes(meta.P.component)
+    const selectMetaVertexes = metaVertexes.filter((meta) =>
+      ["SelectBox", "TagBox"].includes(meta.P.component),
     );
-    const tableMetaVertexes = metaVertexes.filter((meta) => ["Table"].includes(meta.P.component)
+    const tableMetaVertexes = metaVertexes.filter((meta) =>
+      ["Table"].includes(meta.P.component),
     );
 
     for (const metaVertex of selectMetaVertexes) {
@@ -50,11 +51,11 @@ export function getExportCode(
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
           if (FormMetaData[label] || AdminAttrKeys.includes(label)) {
-            const pksResult = {} as { [primaryKey: string]: any; };
+            const pksResult = {} as { [primaryKey: string]: any };
             pksResult.name = v.P.name;
             if (!result.OUT) {
               result.OUT = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any; }[];
+                [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
             result.OUT[type] = [pksResult];
@@ -64,7 +65,7 @@ export function getExportCode(
               graph,
               "Form",
               "name",
-              label
+              label,
             );
             if (!collVertex) {
               showErrorToast(`Collection not defined: ${label}`);
@@ -72,7 +73,7 @@ export function getExportCode(
             }
             const pks = getPkForCollection(graph, collVertex);
 
-            const pksResult = {} as { [primaryKey: string]: any; };
+            const pksResult = {} as { [primaryKey: string]: any };
             for (const pk of pks) {
               pksResult[pk] = v.P[pk];
             }
@@ -82,7 +83,7 @@ export function getExportCode(
 
             if (!result.OUT) {
               result.OUT = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any; }[];
+                [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
 
@@ -105,19 +106,20 @@ export function getExportCode(
         const type = getToEdge(metaVertex, vertex);
         const childVertexes = getSublistRows(graph, metaVertex, vertex);
 
-        const out = childVertexes.map((v) => getChildren(metaVertex, v, {
-          ...klona(v),
-          D: undefined,
-          IN: undefined,
-          L: v.L[0],
-          OUT: undefined,
-          id: undefined,
-        })
+        const out = childVertexes.map((v) =>
+          getChildren(metaVertex, v, {
+            ...klona(v),
+            D: undefined,
+            IN: undefined,
+            L: v.L[0],
+            OUT: undefined,
+            id: undefined,
+          }),
         );
         if (out.length > 0) {
           if (!result.OUT) {
             result.OUT = { [type]: out } as {
-              [EdgeType: string]: { [primaryKey: string]: any; }[];
+              [EdgeType: string]: { [primaryKey: string]: any }[];
             };
           } else result.OUT[type] = out;
         }

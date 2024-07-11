@@ -1,15 +1,15 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/dist/server";
 
-import {getDriver} from "~/cypher/driver";
+import { getDriver } from "~/cypher/driver";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
-import {checkUserExistence} from "~/routes/api/signup/checkUserExistence";
-import {createUserInDB} from "~/routes/api/signup/createUserInDB";
-import {getNewPortsForUser} from "~/routes/api/signup/getNewPortsForUser";
-import {updatePortForNewUser} from "~/routes/api/signup/updatePortForNewUser";
-import {updateSession} from "~/routes/api/signup/updateSession";
-import {waitForDockerCreate} from "~/routes/api/signup/waitForDockerCreate";
-import {getSubDomain} from "~/server/getSubDomain";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { checkUserExistence } from "~/routes/api/signup/checkUserExistence";
+import { createUserInDB } from "~/routes/api/signup/createUserInDB";
+import { getNewPortsForUser } from "~/routes/api/signup/getNewPortsForUser";
+import { updatePortForNewUser } from "~/routes/api/signup/updatePortForNewUser";
+import { updateSession } from "~/routes/api/signup/updateSession";
+import { waitForDockerCreate } from "~/routes/api/signup/waitForDockerCreate";
+import { getSubDomain } from "~/server/getSubDomain";
 
 async function signupAdmin(request: APIEvent["request"]) {
   const { email, password, subdomain, username } = await request.json();
@@ -44,8 +44,8 @@ async function signupAdmin(request: APIEvent["request"]) {
 
     syncNodesMGCall({
       nodesToTransfer: ["DataType", "CompCategory", "Comp", "Nav"],
-      userport: driverPort
-    })
+      userport: driverPort,
+    });
 
     // this should be in parent function
     const user = convertNodeToJson(createUserResult);
@@ -53,7 +53,7 @@ async function signupAdmin(request: APIEvent["request"]) {
     await tx.commit();
     await session.close();
     console.log("updateSession", createUserResult);
-    
+
     // Update session data with user's email
     await updateSession(user);
 
@@ -61,7 +61,7 @@ async function signupAdmin(request: APIEvent["request"]) {
 
     return {
       P,
-      id: user.id
+      id: user.id,
     };
   } catch (error: any) {
     console.error("Server error:", error.message, error);
@@ -71,10 +71,7 @@ async function signupAdmin(request: APIEvent["request"]) {
     await session.close();
   }
 }
-async function signupUser() {
-  
-}
-
+async function signupUser() {}
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
@@ -83,12 +80,11 @@ export async function POST({ request }: APIEvent) {
     request.headers.get("host")!,
     false,
   );
-  console.log("subdomainFromUrl", subdomainFromUrl );
-  
+  console.log("subdomainFromUrl", subdomainFromUrl);
+
   if (subdomainFromUrl === "super") {
     return signupAdmin(request);
   } else {
     return signupUser();
   }
 }
-

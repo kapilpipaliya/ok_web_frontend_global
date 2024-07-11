@@ -1,4 +1,4 @@
-import {Breadcrumb} from "~/components/Breadcrumb";
+import { Breadcrumb } from "~/components/Breadcrumb";
 import { breadcrumbData } from "~/lib/constants";
 import { UserDashBoardGrid } from "~/pages/UserDashBoardGrid";
 

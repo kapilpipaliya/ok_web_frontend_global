@@ -7,8 +7,19 @@ import { sortChildren } from "~/components/page_designer/functions/sortChildren"
 
 import type { PageLayoutObject } from "../../page_designer/LayoutContext";
 
-export function addStepBefore(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, toVertex: Vertex) {
-  const layoutRowId = addStepComponentAttr(layoutStore.formData.formData, layoutStore.formData.txnId, graph, setGraph);
+export function addStepBefore(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  toVertex: Vertex,
+) {
+  const layoutRowId = addStepComponentAttr(
+    layoutStore.formData.formData,
+    layoutStore.formData.txnId,
+    graph,
+    setGraph,
+  );
 
   if (layoutRowId === -1) return;
 
@@ -21,7 +32,7 @@ export function addStepBefore(graph: Store<GraphInterface>, setGraph: SetStoreFu
     fromVertex,
     layoutStore.formData.formData,
     toVertex,
-    "before"
+    "before",
   );
 
   // setLayoutStore('activeStepId', layoutRowId);

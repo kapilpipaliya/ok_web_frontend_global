@@ -4,6 +4,7 @@ import { Show } from "solid-js";
 
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
+
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { LeftToggleButton } from "./LeftToggleButton";
 
@@ -21,7 +22,8 @@ export const LeftIcons = () => {
           class={"color:lightgrey color:black:hover"}
           height={30}
           icon={"flowbite:caret-left-outline"}
-          width={30} />
+          width={30}
+        />
       </button>
       <a href="/">
         <img alt="logo" class="h:35px" src={logo} />

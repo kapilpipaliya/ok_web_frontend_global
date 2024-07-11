@@ -6,9 +6,7 @@ import { MainDashboard } from "~/pages/dashboard/MainDashboard";
 export default function AdminLayout(props: Readonly<RouteSectionProps>) {
   return (
     <GetInitialData>
-      <MainDashboard>
-        {props.children}
-      </MainDashboard>
+      <MainDashboard>{props.children}</MainDashboard>
     </GetInitialData>
   );
 }

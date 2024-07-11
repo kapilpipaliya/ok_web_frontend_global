@@ -1,7 +1,12 @@
-import {connectToNeo4jWithRetry} from "~/cypher/retry";
-import {createDockerContainer} from "~/server/docker/createDockerContainer";
+import { connectToNeo4jWithRetry } from "~/cypher/retry";
+import { createDockerContainer } from "~/server/docker/createDockerContainer";
 
-export async function waitForDockerCreate(username: string, driverPort: number, logsPort: number, labPort: number) {
+export async function waitForDockerCreate(
+  username: string,
+  driverPort: number,
+  logsPort: number,
+  labPort: number,
+) {
   // Create Docker container with configured ports
   await createDockerContainer("memgraph/memgraph-platform", username, {
     [driverPort]: "7687",
@@ -9,7 +14,12 @@ export async function waitForDockerCreate(username: string, driverPort: number, 
     [logsPort]: "7444",
   });
 
-  const driver = await connectToNeo4jWithRetry(`bolt://localhost:${driverPort}`, "", "", 20);
+  const driver = await connectToNeo4jWithRetry(
+    `bolt://localhost:${driverPort}`,
+    "",
+    "",
+    20,
+  );
   // Remember to close the driver when done
   // driver.close();
 

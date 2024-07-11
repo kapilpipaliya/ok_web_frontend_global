@@ -1,9 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { toTitle } from "case-switcher-js";
-import {
-  Show,
-  createSignal, onCleanup, 
-} from "solid-js";
+import { Show, createSignal, onCleanup } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 
@@ -14,21 +11,30 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
-export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
+export function PageItem(
+  props: Readonly<{
+    child: NavItem;
+    previewPageId: Id | null;
+    setPreviewPageId: (id: Id | null) => void;
+  }>,
+) {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(
-    new Set<Vertex>()
+    new Set<Vertex>(),
   );
 
   let menuRef: HTMLButtonElement;
 
-  const baseStyle = "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
+  const baseStyle =
+    "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
 
-  const hoverStyle = "background-color:#F2EDED box-shadow:4px|4px|4px cursor:move";
+  const hoverStyle =
+    "background-color:#F2EDED box-shadow:4px|4px|4px cursor:move";
 
-  const itemStyle = () => hoverPageId() === props.child.id ? `${baseStyle} ${hoverStyle}` : baseStyle;
+  const itemStyle = () =>
+    hoverPageId() === props.child.id ? `${baseStyle} ${hoverStyle}` : baseStyle;
 
   let timeoutId: NodeJS.Timeout;
 
@@ -49,18 +55,19 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    setLayoutStore('draggedVertices', []);
+    setLayoutStore("draggedVertices", []);
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
-    const dataTransfer = selectedComponents().size > 0
-      ? Array.from(selectedComponents())
-      : [graph.vertexes[props.child.id]];
-    setLayoutStore('draggedVertices', (prev) => [...prev, ...dataTransfer]);
+    const dataTransfer =
+      selectedComponents().size > 0
+        ? Array.from(selectedComponents())
+        : [graph.vertexes[props.child.id]];
+    setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    setLayoutStore('draggedVertices', [graph.vertexes[props.child.id]]);
+    setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
     onClickAddComponent(
       graph,
       setGraph,
@@ -69,9 +76,9 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
       layoutStore.formData || {},
       layoutStore.selectedId !== -1
         ? layoutStore.selectedId
-        : layoutStore.formData.formData.id
+        : layoutStore.formData.formData.id,
     );
-    setLayoutStore('draggedVertices', []);
+    setLayoutStore("draggedVertices", []);
   };
 
   onCleanup(() => {
@@ -94,7 +101,11 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
         <div class="font-size:14px">{toTitle(props.child.name)}</div>
         <Show when={props.previewPageId === props.child.id}>
-          <DropdownMenu onClickOutside={() => props.setPreviewPageId(null)} onMouseLeave={() => props.setPreviewPageId(null)} parentRef={menuRef!}>
+          <DropdownMenu
+            onClickOutside={() => props.setPreviewPageId(null)}
+            onMouseLeave={() => props.setPreviewPageId(null)}
+            parentRef={menuRef!}
+          >
             {toTitle(props.child.name)} Preview
             <PageViewWrapper formId={props.child.id} />
           </DropdownMenu>
@@ -103,4 +114,3 @@ export function PageItem(props: Readonly<{ child: NavItem; previewPageId: Id | n
     </Show>
   );
 }
-

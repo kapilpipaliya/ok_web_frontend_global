@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import {getComponentFromLayoutRow} from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
+import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 
 export function validateDragOver(
@@ -39,7 +39,11 @@ export function validateDragOver(
       }
     }
   } else {
-    const toParentVertex = getParentVertex(["Attr"], graph.vertexes[toVertexId], graph).vertex;
+    const toParentVertex = getParentVertex(
+      ["Attr"],
+      graph.vertexes[toVertexId],
+      graph,
+    ).vertex;
 
     if (!toParentVertex) {
       // Dont allow drag before and after first element
@@ -48,13 +52,12 @@ export function validateDragOver(
 
     // const rootChildren = () => evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [formData] }) || [];
     // const isFormRootVertetx = () => formData?.L?.[0] === "Form";
-    const rootVertexes = () =>
-      {
-        // if (isFormRootVertetx()) {
-        //   return rootChildren();
-        // }
-        return [formData];
-      }; 
+    const rootVertexes = () => {
+      // if (isFormRootVertetx()) {
+      //   return rootChildren();
+      // }
+      return [formData];
+    };
     if (rootVertexes().includes(graph.vertexes[toVertexId])) {
       // Dont allow drag before and after first element
       return;

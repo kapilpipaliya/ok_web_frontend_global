@@ -8,7 +8,10 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
-import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "../transaction/TransactionType";
+import {
+  edgeOldIdToNewIdMap,
+  vertexOldIdToNewIdMap,
+} from "../transaction/TransactionType";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 // return a new Vertex
@@ -45,26 +48,35 @@ export function addNewVertex(
   setGraph("vertexes", actualVertexId, updateVertex(klona(vertex)));
   vertex.L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
-      Array.isArray(vertexIds) ? [...vertexIds, actualVertexId] : [actualVertexId],
+      Array.isArray(vertexIds)
+        ? [...vertexIds, actualVertexId]
+        : [actualVertexId],
     ),
   );
   const data = updateVertex(klona(vertex));
-  transactionDetailAdd(txnId, {
-    data,
-    insert: () => {
-      return updateVertex(data);
+  transactionDetailAdd(
+    txnId,
+    {
+      data,
+      insert: () => {
+        return updateVertex(data);
+      },
+      redo: () => {
+        return addNewVertex(0, updateVertex(data), graph, setGraph);
+      },
+      revert: () => {
+        const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+        return deleteVertex(0, actualVertexId2, graph, setGraph);
+      },
     },
-    redo: () => {
-      return addNewVertex(0, updateVertex(data), graph, setGraph);
-    },
-    revert: () => {
-      const actualVertexId2 = vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-      return deleteVertex(0, actualVertexId2, graph, setGraph);
-    },
-  }, graph);
+    graph,
+  );
   return {
     error: false,
-    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId
+      ? graph.transactions.get(txnId)?.steps.length - 1
+      : -1,
   };
 }
 
@@ -83,16 +95,29 @@ export function replaceVertexProperties(
   const originalProperties = klona(graph.vertexes[actualVertexId].P);
   setGraph("vertexes", actualVertexId, "P", reconcile(klona(properties)));
   const data = updateVertex(klona(graph.vertexes[actualVertexId]));
-  transactionDetailAdd(txnId, {
-    data,
-    redo: () => replaceVertexProperties(0, actualVertexId, graph, setGraph, data.P),
-    replace: () => updateVertex(klona(graph.vertexes[actualVertexId])),
-    revert: () =>
-      replaceVertexProperties(0, actualVertexId, graph, setGraph, originalProperties),
-  }, graph);
+  transactionDetailAdd(
+    txnId,
+    {
+      data,
+      redo: () =>
+        replaceVertexProperties(0, actualVertexId, graph, setGraph, data.P),
+      replace: () => updateVertex(klona(graph.vertexes[actualVertexId])),
+      revert: () =>
+        replaceVertexProperties(
+          0,
+          actualVertexId,
+          graph,
+          setGraph,
+          originalProperties,
+        ),
+    },
+    graph,
+  );
   return {
     error: false,
-    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId
+      ? graph.transactions.get(txnId)?.steps.length - 1
+      : -1,
   };
 }
 
@@ -117,24 +142,49 @@ export function mergeVertexProperties(
   // It will only merge top level properties.
   setGraph("vertexes", actualVertexId, "P", klona(properties));
 
-  transactionDetailAdd(txnId, {
-    data: properties,
-    merge: () => {
-      const actualVertexId2 = vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-      return updateVertex(Object.assign({}, graph.vertexes[actualVertexId2], { properties: klona(properties) }));
+  transactionDetailAdd(
+    txnId,
+    {
+      data: properties,
+      merge: () => {
+        const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+        return updateVertex(
+          Object.assign({}, graph.vertexes[actualVertexId2], {
+            properties: klona(properties),
+          }),
+        );
+      },
+      redo: () => {
+        const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+        return mergeVertexProperties(
+          0,
+          actualVertexId2,
+          graph,
+          setGraph,
+          klona(properties),
+        );
+      },
+      revert: () => {
+        const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+        return mergeVertexProperties(
+          0,
+          actualVertexId2,
+          graph,
+          setGraph,
+          klona(originalProperties),
+        );
+      },
     },
-    redo: () => {
-      const actualVertexId2 = vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-      return mergeVertexProperties(0, actualVertexId2, graph, setGraph, klona(properties));
-    },
-    revert: () => {
-      const actualVertexId2 = vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-      return mergeVertexProperties(0, actualVertexId2, graph, setGraph, klona(originalProperties));
-    },
-  }, graph);
+    graph,
+  );
   return {
     error: false,
-    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId
+      ? graph.transactions.get(txnId)?.steps.length - 1
+      : -1,
   };
 }
 
@@ -213,31 +263,42 @@ export function deleteVertex(
     setGraph("vertexes", actualVertexId, undefined);
   });
   const data = klona(vertex);
-  transactionDetailAdd(txnId, {
-    data,
-    deleteVertex: () => updateVertex(data),
-    redo: () => {
-      const actualVertexId2 = vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-      return deleteVertex(0, actualVertexId2, graph, setGraph);
+  transactionDetailAdd(
+    txnId,
+    {
+      data,
+      deleteVertex: () => updateVertex(data),
+      redo: () => {
+        const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+        return deleteVertex(0, actualVertexId2, graph, setGraph);
+      },
+      revert: () => {
+        return addNewVertex(0, updateVertex(vertex), graph, setGraph);
+      },
     },
-    revert: () => {
-      return addNewVertex(0, updateVertex(vertex), graph, setGraph);
-    },
-  }, graph);
+    graph,
+  );
   return {
     error: false,
-    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId
+      ? graph.transactions.get(txnId)?.steps.length - 1
+      : -1,
   };
 }
 
 function updateVertex(vertex: Vertex) {
   vertex.id = vertexOldIdToNewIdMap.get(vertex.id) || vertex.id;
   Object.entries(vertex.IN).forEach(([edgeType, edgeIds]) => {
-    vertex.IN[edgeType] = edgeIds.map((id) => edgeOldIdToNewIdMap.get(id) || id);
+    vertex.IN[edgeType] = edgeIds.map(
+      (id) => edgeOldIdToNewIdMap.get(id) || id,
+    );
   });
 
   Object.entries(vertex.OUT).forEach(([edgeType, edgeIds]) => {
-    vertex.OUT[edgeType] = edgeIds.map((id) => edgeOldIdToNewIdMap.get(id) || id);
+    vertex.OUT[edgeType] = edgeIds.map(
+      (id) => edgeOldIdToNewIdMap.get(id) || id,
+    );
   });
   return vertex;
 }

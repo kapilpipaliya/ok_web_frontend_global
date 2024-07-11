@@ -1,5 +1,3 @@
-
-
 import type { TextFieldOptionsField } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
@@ -59,5 +57,5 @@ export const SizeSection: SizeSectionType = {
       options: sizeTypes,
       type: "number",
     } as TextFieldOptionsField,
-  ])
+  ]),
 };

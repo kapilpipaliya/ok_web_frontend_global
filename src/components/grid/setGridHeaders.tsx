@@ -2,10 +2,7 @@ import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { Icon } from "@iconify-icon/solid";
-import {
-  Match,
-  Switch
-} from "solid-js";
+import { Match, Switch } from "solid-js";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
@@ -15,7 +12,14 @@ import { getSelectNameValue } from "~/components/grid/getSelectNameValue";
 import { getTagValue } from "~/components/grid/getTagValue";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
-export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, setDeleteRowId: (id: Id) => void, navigate: (path: string) => void, tableId: string) {
+export function setGridHeaders(
+  formNew: IFormMetaData,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  setDeleteRowId: (id: Id) => void,
+  navigate: (path: string) => void,
+  tableId: string,
+) {
   const tableColumns = [] as ColumnDef<any>[];
 
   for (const attribute of formNew.attributes) {
@@ -28,7 +32,9 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
       return (
         <Switch>
           <Match
-            when={attribute.component === "SelectBox" && !attribute.props?.items}
+            when={
+              attribute.component === "SelectBox" && !attribute.props?.items
+            }
           >
             {getSelectNameValue({
               attribute: attribute,
@@ -63,12 +69,14 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
         </Switch>
       );
     };
-    column.header = (info) => capitalizeFirstLetter(
-      attribute.title || attribute.displayName || attribute.name
-    );
-    column.footer = (info) => capitalizeFirstLetter(
-      attribute.title || attribute.displayName || attribute.name
-    );
+    column.header = (info) =>
+      capitalizeFirstLetter(
+        attribute.title || attribute.displayName || attribute.name,
+      );
+    column.footer = (info) =>
+      capitalizeFirstLetter(
+        attribute.title || attribute.displayName || attribute.name,
+      );
     tableColumns.push(column);
   }
   tableColumns.push({
@@ -82,7 +90,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
                 graph={graph}
                 info={info}
                 setGraph={setGraph}
-                tableId={tableId} />
+                tableId={tableId}
+              />
               <Icon
                 class="color:rgb(255,0,0)"
                 height={22}
@@ -90,7 +99,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
                 onclick={() => {
                   setDeleteRowId(info.row.original.id);
                 }}
-                width={22} />
+                width={22}
+              />
             </div>
           </Match>
 
@@ -102,7 +112,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
                   height={21}
                   icon="fluent:edit-12-regular"
                   onClick={() => navigate(`./${info.row.original.id}`)}
-                  width={21} />
+                  width={21}
+                />
                 <Icon
                   class="color:rgb(255,0,0)"
                   height={22}
@@ -110,7 +121,8 @@ export function setGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterfa
                   onclick={() => {
                     setDeleteRowId(info.row.original.id);
                   }}
-                  width={22} />
+                  width={22}
+                />
               </div>
             </div>
           </Match>

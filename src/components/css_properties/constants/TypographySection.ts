@@ -1,6 +1,8 @@
-
-
-import type { ColorPickerField, SelectField, TextFieldOptionsField } from "./FieldType";
+import type {
+  ColorPickerField,
+  SelectField,
+  TextFieldOptionsField,
+} from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
@@ -30,7 +32,7 @@ export const TypographySection = {
       "Trebuchet MS",
       "Verdana",
     ],
-    true
+    true,
   ),
   typography: createGridOptions("size Grid", "Typography", [
     {
@@ -46,17 +48,7 @@ export const TypographySection = {
       isLabelOnTop: true,
       label: "Weight",
       name: "font-weight",
-      options: [
-        "100",
-        "200",
-        "300",
-        "400",
-        "500",
-        "600",
-        "700",
-        "800",
-        "900",
-      ],
+      options: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
     } as SelectField,
     {
       component: "textFieldOptions",
@@ -117,6 +109,6 @@ export const TypographySection = {
       { label: "Pre Line", value: "pre-line" },
       { label: "Break Spaces", value: "break-spaces" },
     ],
-    true
+    true,
   ),
 };

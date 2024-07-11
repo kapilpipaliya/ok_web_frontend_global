@@ -6,7 +6,7 @@ import {
   Show,
   Switch,
   createMemo,
-  createSignal, 
+  createSignal,
 } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
@@ -16,13 +16,20 @@ import type { DataEditorField } from "../constants/FieldType";
 import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { ContainerLabel } from "./ContainerLabel";
 
-export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component'>) => {
+export const DataEditWithCustomDialog = (
+  props: Omit<DataEditorField, "component">,
+) => {
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
-  const [changedData, setChangedData] = createSignal<Record<string, string>>({});
+  const [changedData, setChangedData] = createSignal<Record<string, string>>(
+    {},
+  );
 
-  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
+  const selected = () =>
+    cssState[state() || ""]?.[props.name] ||
+    cssDefault[state() ?? ""]?.[props.name] ||
+    "";
 
   interface CssProperties {
     blur: string;
@@ -56,48 +63,37 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
       "x-offset": xOffset = "0",
       "y-offset": yOffset = "0",
     } = css;
-    setCssState(state(),
-      {[props.name]:
-      `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,}
-    );
+    setCssState(state(), {
+      [props.name]: `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,
+    });
   }
 
   const addOption = () => {
     if (props.label.includes("Text Shadow")) {
-      const currentOptions = selected()
-        ? selected().split(",")
-        : [];
+      const currentOptions = selected() ? selected().split(",") : [];
       currentOptions.push("0|0|5|0|#000|inset");
       const newValue = currentOptions.join(",");
-      setCssState(state(),{[props.name]: newValue});
+      setCssState(state(), { [props.name]: newValue });
     } else if (props.label.includes("Filter")) {
-      const currentOptions = selected()
-        ? selected().split("|")
-        : [];
+      const currentOptions = selected() ? selected().split("|") : [];
       currentOptions.push("blur(3px)");
       const newValue = currentOptions.join("|");
-      setCssState(state(),{[props.name]: newValue});
+      setCssState(state(), { [props.name]: newValue });
     } else if (props.label.includes("Box Shadow")) {
-      const currentOptions = selected()
-        ? selected().split(",")
-        : [];
+      const currentOptions = selected() ? selected().split(",") : [];
       currentOptions.push("0|0|5|0|#000|inset");
       const newValue = currentOptions.join(",");
-      setCssState(state(),{[props.name]: newValue});
+      setCssState(state(), { [props.name]: newValue });
     } else if (props.label.includes("Transition")) {
-      const currentOptions = selected()
-        ? selected().split(",")
-        : [];
+      const currentOptions = selected() ? selected().split(",") : [];
       currentOptions.push("opacity|1s|ease|0s");
       const newValue = currentOptions.join(",");
-      setCssState(state(),{[props.name]: newValue});
+      setCssState(state(), { [props.name]: newValue });
     } else if (props.label.includes("Transform")) {
-      const currentOptions = selected()
-        ? selected().split("|")
-        : [];
+      const currentOptions = selected() ? selected().split("|") : [];
       currentOptions.push("rotate(10deg)");
       const newValue = currentOptions.join("|");
-      setCssState(state(),{[props.name]: newValue});
+      setCssState(state(), { [props.name]: newValue });
     }
   };
 
@@ -113,7 +109,11 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
     }
     return [];
   };
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
+  const isDefaultValue = createMemo(
+    () =>
+      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
+      selected() !== "",
+  );
 
   const getValueOfInput = (name: string) => changedData()[name];
   const deleteOption = (index: number) => {
@@ -121,17 +121,17 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
       const data = selected()
         .split(",")
         .filter((_, i) => i !== index);
-      setCssState(state(),{[ props.name]: data.join(",")});
+      setCssState(state(), { [props.name]: data.join(",") });
     } else if (props.label.includes("Filter")) {
       const data = selected()
         .split("|")
         .filter((_, i) => i !== index);
-      setCssState(state(),{[ props.name]: data.join("|")});
+      setCssState(state(), { [props.name]: data.join("|") });
     } else if (props.label.includes("Transform")) {
       const data = selected()
         .split("|")
         .filter((_, i) => i !== index);
-      setCssState(state(),{[ props.name]: data.join("|")});
+      setCssState(state(), { [props.name]: data.join("|") });
     }
   };
 
@@ -150,15 +150,13 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
       const data = getCssParts(option);
 
       if (property.name === "grid" && property.children) {
-        property.children.forEach((child) =>
-          setCssStateFromProperties(child),
-        );
+        property.children.forEach((child) => setCssStateFromProperties(child));
         return;
       }
 
       // @ts-expect-error ignore
       if (data.hasOwnProperty(property.name)) {
-        setCssState(state(), {[property.name]: data[property.name]});
+        setCssState(state(), { [property.name]: data[property.name] });
       }
     };
 
@@ -182,24 +180,22 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
         onChangeInput: (value: string) => {
           setChangedData({ ...changedData(), [properties.name]: value });
           createCssOption(changedData());
-          setCssState(state(), {[properties.name]: value});
+          setCssState(state(), { [properties.name]: value });
         },
         value: () => getValueOfInput(properties.name),
       };
     };
 
     return (
-      <Show when={props.openMenu() === index} >
+      <Show when={props.openMenu() === index}>
         <div
-          class={"popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"}
+          class={
+            "popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"
+          }
         >
           <div class={"flex ai:center jc:space-between mb:5"}>
             <div class={"f:15 font-weight:bold"}>{props.dialogLabel}</div>
-            <Icon
-              class={"fg:grey"}
-              icon={"mdi:close"}
-              onClick={closePopup}
-            />
+            <Icon class={"fg:grey"} icon={"mdi:close"} onClick={closePopup} />
           </div>
           <For each={Object.entries(props.children)}>
             {([sectionName, properties], index) => {
@@ -219,7 +215,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
     );
   };
   const resetValues = () => {
-    setCssState(state(), {[props.name]: cssDefault[state() ?? '']?.[props.name]});
+    setCssState(state(), {
+      [props.name]: cssDefault[state() ?? ""]?.[props.name],
+    });
     setChangedData({});
   };
   const Component = (p: { i: Accessor<number>; option: string }) => {
@@ -280,14 +278,21 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
 
   return (
     <div
-      class={"b:1px|solid|lightgray color:#333 m:10px p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"}
+      class={
+        "b:1px|solid|lightgray color:#333 m:10px p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
+      }
     >
       <div
         class={`${
           getOptions().length > 0 ? "bb:1|solid|lightgrey m:1 pb:5" : ""
         } flex ai:center jc:space-between mb:6px`}
       >
-        <ContainerLabel info={props.name} onIconClick={resetValues} showIcon={isDefaultValue()} title={props.label} />
+        <ContainerLabel
+          info={props.name}
+          onIconClick={resetValues}
+          showIcon={isDefaultValue()}
+          title={props.label}
+        />
         <Icon
           class={"cursor:pointer"}
           icon={"lets-icons:add-round"}
@@ -297,7 +302,9 @@ export const DataEditWithCustomDialog = (props: Omit<DataEditorField, 'component
       <For each={getOptions()}>
         {(option, i) => (
           <div
-            class={"flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:5px r:4px"}
+            class={
+              "flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:5px r:4px"
+            }
           >
             <Icon
               class={"cursor:pointer mr:8"}

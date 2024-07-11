@@ -1,4 +1,3 @@
-
 export function calculateFilter(input: string) {
   let type = ""; // baseString
   let filter = "";

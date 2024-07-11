@@ -1,6 +1,6 @@
 // @ts-nocheck
- 
-import { mount, shallow } from "enzyme";
+
+import {mount, shallow} from "enzyme";
 import React from "react";
 import TestUtils from "react-dom/test-utils"; // eslint-disable-line import/no-extraneous-dependencies
 import JsxParser from "./JsxParser";

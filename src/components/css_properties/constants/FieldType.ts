@@ -10,8 +10,8 @@ interface Field {
 }
 
 export interface FieldWithCustomProperty extends Field {
-  align?: string
-  component: "fieldWithCustomProperty",
+  align?: string;
+  component: "fieldWithCustomProperty";
   customProperty: CustomProperty[];
   "grid-template-columns"?: string;
   gridType: string;
@@ -23,7 +23,7 @@ export interface FieldWithCustomProperty extends Field {
   options?: { label: string; value: string }[] | string[];
   padding?: string;
   type?: string;
-};
+}
 
 export interface ColorPickerField extends Field {
   component: "colorPicker";
@@ -36,12 +36,12 @@ export interface ColorPickerField extends Field {
 }
 
 export interface GridField extends Field {
-  children: GenericField[]
+  children: GenericField[];
   component: "grid";
   gap: string;
   "grid-template-columns": string;
   name: string;
-  "padding": string;
+  padding: string;
 }
 
 export interface TextFieldOptionsField extends Field {
@@ -62,24 +62,24 @@ export interface TextFieldOptionsField extends Field {
 }
 
 export interface ToggleField extends Field {
-  component: "toggleButton",
+  component: "toggleButton";
   infoLink?: string;
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
   name: string;
   onChangeInput?: (value: string) => void;
-  options: { icon?: boolean, key: string, value: string }[],
+  options: { icon?: boolean; key: string; value: string }[];
 }
 
 export interface DataEditorField extends Field {
   children: {
-    data?: ColorPickerField,
-    easing?: SelectField,
-    shadow: GridField,
-    style?: ToggleField,
-    type?: SelectField
-  }
+    data?: ColorPickerField;
+    easing?: SelectField;
+    shadow: GridField;
+    style?: ToggleField;
+    type?: SelectField;
+  };
   component: "dataEditor";
   dialogLabel: string;
   fallback: string;
@@ -97,7 +97,7 @@ export interface SelectField extends Field {
   name: string;
   onChangeInput?: (label: any, value: any) => void;
   onRemoveIconClick?: () => void;
-  options: { label: string, value: string }[] | string[];
+  options: { label: string; value: string }[] | string[];
   value?: any;
 }
 
@@ -110,19 +110,19 @@ export interface ButtonGroupField extends Field {
   name: string;
   onChangeInput?: (value: string) => void;
   options: {
-    icon: true,
-    key: string,
-    tooltip?: string,
-    value: string,
-  }[],
+    icon: true;
+    key: string;
+    tooltip?: string;
+    value: string;
+  }[];
 }
 
 export interface StringField extends Field {
   component: "select";
-  isLabelOnTop: boolean,
-  label: string,
-  name: string,
-  options: string[],
+  isLabelOnTop: boolean;
+  label: string;
+  name: string;
+  options: string[];
 }
 
 export interface DividerField extends Field {
@@ -131,7 +131,7 @@ export interface DividerField extends Field {
   title?: string;
 }
 
-export type GenericField = 
+export type GenericField =
   | ButtonGroupField
   | ColorPickerField
   | DataEditorField
@@ -143,15 +143,24 @@ export type GenericField =
   | TextFieldOptionsField
   | ToggleField;
 
-export type CSSJSONSchemaType = { [section: string]: { [key: string]: GenericField } };
-export type CSSJSONSectionFilterDetail = { isOpen: boolean; propertyFieldMap: { [key: string]: GenericField } }
-export type CSSJSONSchemaSearchType = { [section: string]: CSSJSONSectionFilterDetail };
+export type CSSJSONSchemaType = {
+  [section: string]: { [key: string]: GenericField };
+};
+export type CSSJSONSectionFilterDetail = {
+  isOpen: boolean;
+  propertyFieldMap: { [key: string]: GenericField };
+};
+export type CSSJSONSchemaSearchType = {
+  [section: string]: CSSJSONSectionFilterDetail;
+};
 
-export function createButtonGroupOptions(name: string,
+export function createButtonGroupOptions(
+  name: string,
   label: string,
-  iconOptions: { key: string; tooltip?: string; value: string; }[],
-  isLabelOnTop = true): ButtonGroupField {
-  return ({
+  iconOptions: { key: string; tooltip?: string; value: string }[],
+  isLabelOnTop = true,
+): ButtonGroupField {
+  return {
     component: "buttonGroups",
     isLabelOnTop,
     label,
@@ -162,10 +171,14 @@ export function createButtonGroupOptions(name: string,
       tooltip,
       value,
     })),
-  });
+  };
 }
 
-export const createGridOptions = (name: string, label: string, children: GenericField[]): GridField => ({
+export const createGridOptions = (
+  name: string,
+  label: string,
+  children: GenericField[],
+): GridField => ({
   children,
   component: "grid",
   gap: "5px 10px",
@@ -174,15 +187,17 @@ export const createGridOptions = (name: string, label: string, children: Generic
   padding: "5px",
 });
 
-export function createSelectOptions(name: string,
+export function createSelectOptions(
+  name: string,
   label: string,
-  options: { label: string; value: string; }[] | string[],
-  isLabelOnTop = false): SelectField {
-  return ({
+  options: { label: string; value: string }[] | string[],
+  isLabelOnTop = false,
+): SelectField {
+  return {
     component: "select",
     isLabelOnTop,
     label,
     name,
     options,
-  });
+  };
 }

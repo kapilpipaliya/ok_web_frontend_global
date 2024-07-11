@@ -3,7 +3,6 @@ import type { TextFieldOptionsField } from "./FieldType";
 import { createGridOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 
-
 type SpaceSectionType = {
   margin: ReturnType<typeof createGridOptions>;
   padding: ReturnType<typeof createGridOptions>;
@@ -28,7 +27,7 @@ export const SpaceSection: SpaceSectionType = {
       name: "margin-left",
       options: sizeTypes,
       type: "number",
-    } as TextFieldOptionsField  ,
+    } as TextFieldOptionsField,
     {
       component: "textFieldOptions",
       isAddToClass: true,

@@ -23,31 +23,35 @@ export function PreviewButton() {
   const Content = () => {
     return (
       <PreviewPage>
-      <PageView
-        // data={dataVertex()}
-        isPreview={true}
-        metaVertex={layoutStore.formData.formData}
-      />
-    </PreviewPage>
+        <PageView
+          // data={dataVertex()}
+          isPreview={true}
+          metaVertex={layoutStore.formData.formData}
+        />
+      </PreviewPage>
     );
-  }
+  };
 
   const Modal = () => {
     const zIndex = useZIndex();
-    return  <Portal>
-    <div class={`flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full z-index:${zIndex}`}>
-      <div class="bg:white h:full p:4 position:relative w:full">
-        <button
-          class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
-          onClick={handleCloseClick}
+    return (
+      <Portal>
+        <div
+          class={`flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full z-index:${zIndex}`}
         >
-          <Icon height={22} icon={"ph:x"} width={22} />
-        </button>
-        <Content />
-      </div>
-    </div>
-  </Portal>
-  }
+          <div class="bg:white h:full p:4 position:relative w:full">
+            <button
+              class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
+              onClick={handleCloseClick}
+            >
+              <Icon height={22} icon={"ph:x"} width={22} />
+            </button>
+            <Content />
+          </div>
+        </div>
+      </Portal>
+    );
+  };
 
   return (
     <>

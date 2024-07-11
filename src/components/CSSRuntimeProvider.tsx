@@ -8,7 +8,6 @@ import {
   createSignal,
   onCleanup,
   useContext,
-  
 } from "solid-js";
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
@@ -18,11 +17,13 @@ export function useRuntimeCSS() {
 }
 
 // https://github.com/master-co/css/blob/beta/packages/react/src/CSSProvider.tsx
-export function CSSRuntimeProvider(props: Readonly<{
-  children: JSX.Element;
-  config?: Config | Promise<any>;
-  root?: Document | ShadowRoot;
-}>) {
+export function CSSRuntimeProvider(
+  props: Readonly<{
+    children: JSX.Element;
+    config?: Config | Promise<any>;
+    root?: Document | ShadowRoot;
+  }>,
+) {
   const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(
     undefined,
   );

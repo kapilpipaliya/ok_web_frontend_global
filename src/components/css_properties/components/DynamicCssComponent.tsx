@@ -101,7 +101,6 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
         <FieldWithCustomBox
-        
           component={props.value.component}
           customProperty={props.value.customProperty}
           gridType={props.value.gridType}

@@ -20,10 +20,10 @@ export function ShareSection() {
     if (layoutStore) {
       const hostname = window.location.hostname;
       const protocol = window.location.protocol;
-      const port = window.location.port ? `:${window.location.port}` : '';
+      const port = window.location.port ? `:${window.location.port}` : "";
       return `${protocol}//${hostname}${port}/view/${layoutStore.formData.formData.L[0]}/${layoutStore.formData.formData.P.name}/new`;
     }
-    return ""
+    return "";
   };
 
   const copyToClipboard = () => {
@@ -51,15 +51,22 @@ export function ShareSection() {
         />
         <Tooltip content={"Preview link"}>
           <button
-            class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
+            class={
+              "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
+            }
             onClick={previewLink}
           >
             🚀
           </button>
         </Tooltip>
-        <Tooltip content={showCopiedTooltip() ? "Copied" : "Click to copy"} nowrap>
+        <Tooltip
+          content={showCopiedTooltip() ? "Copied" : "Click to copy"}
+          nowrap
+        >
           <button
-            class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
+            class={
+              "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
+            }
             onClick={copyToClipboard}
           >
             📋
@@ -92,7 +99,7 @@ export function ShareSection() {
       </div>
       <div class="flex mb:20px">
         <button class={"bg:#F5F5F5 p:10 r:5|0|0|5"} onClick={copyToClipboard}>
-          <Icon height={25} icon={"system-uicons:mail"} width={25}/>
+          <Icon height={25} icon={"system-uicons:mail"} width={25} />
         </button>
 
         <input
@@ -113,4 +120,4 @@ export function ShareSection() {
       </div>
     </div>
   );
-};
+}

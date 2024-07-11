@@ -9,7 +9,10 @@ import { validateInput } from "~/components/page_designer/settings/properties/va
 import { evaluate } from "~/lib/expression_eval";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
-import type { FieldAttribute, IFormMetaData } from "../../../lib/FormMetadataType";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "../../../lib/FormMetadataType";
 
 import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
 
@@ -27,17 +30,34 @@ export function getChildrenAttrs(
 }
 
 // todo: write test for this function
-export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, rootVertex: Vertex): IFormMetaData {
+export function getFormMetaData(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  rootVertex: Vertex,
+): IFormMetaData {
   const result: FieldAttribute[] = [];
-  function getAllInputFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex, parent: Vertex, parentComponent: string): FieldAttribute[] {
+  function getAllInputFields(
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+    vertex: Vertex,
+    parent: Vertex,
+    parentComponent: string,
+  ): FieldAttribute[] {
     const children = getChildrenAttrs(graph, setGraph, vertex);
     const component = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P.name;
 
-    if (vertex !== rootVertex && (genericInputComponents.includes(component) || component === "DynamicTable")) {
+    if (
+      vertex !== rootVertex &&
+      (genericInputComponents.includes(component) ||
+        component === "DynamicTable")
+    ) {
       result.push({
         id: vertex.id,
         ...vertex.P,
-        attributes: component === "DynamicTable" ? getFormMetaData(graph, setGraph, vertex).attributes : undefined,
+        attributes:
+          component === "DynamicTable"
+            ? getFormMetaData(graph, setGraph, vertex).attributes
+            : undefined,
         component: component,
         name: vertex.P.name,
         title: parentComponent === "Label" ? parent.P.label : vertex.P.title,
@@ -47,14 +67,21 @@ export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStore
       return [];
     }
     return children.map((child) => {
-      const childComponent = getChildVertex(graph, ["$0Comp"], child).vertex?.P.name;
-      return ({
-        attributes: getAllInputFields(graph, setGraph, child, vertex, component),
+      const childComponent = getChildVertex(graph, ["$0Comp"], child).vertex?.P
+        .name;
+      return {
+        attributes: getAllInputFields(
+          graph,
+          setGraph,
+          child,
+          vertex,
+          component,
+        ),
         //title: component === "Label" ? vertex.P.label : child.P.title,
         component: childComponent,
         id: child.id,
         name: child.P.name,
-      });
+      };
     });
   }
   getAllInputFields(graph, setGraph, rootVertex, rootVertex, "");
@@ -67,10 +94,24 @@ export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStore
   };
 }
 // use it when new field is drag and drop.
-export function getUniqueName(txnId: number, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, layoutVertex: Vertex) {
+export function getUniqueName(
+  txnId: number,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+  layoutVertex: Vertex,
+) {
   let uniqueId = (formVertex.P.lastUniqueId || 0) + 1;
 
-  while (isUniqueIdUsed(graph, setGraph, formVertex, layoutVertex, `unique_${uniqueId}`)) {
+  while (
+    isUniqueIdUsed(
+      graph,
+      setGraph,
+      formVertex,
+      layoutVertex,
+      `unique_${uniqueId}`,
+    )
+  ) {
     uniqueId++;
   }
 
@@ -81,51 +122,44 @@ export function getUniqueName(txnId: number, graph: Store<GraphInterface>, setGr
   return `unique_${uniqueId}`;
 }
 
-export function isUniqueIdUsed(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, layoutVertex: Vertex, name: string) {
+export function isUniqueIdUsed(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+  layoutVertex: Vertex,
+  name: string,
+) {
   function checkVertex(attrVertex: Vertex) {
     if (attrVertex.P.name === name && attrVertex.id !== layoutVertex.id) {
       return true;
     }
 
-    return getChildrenAttrs(
-      graph,
-      setGraph,
-      attrVertex,
-    ).some(checkVertex);
+    return getChildrenAttrs(graph, setGraph, attrVertex).some(checkVertex);
   }
 
-  return getChildrenAttrs(
-    graph,
-    setGraph,
-    formVertex,
-  ).some(checkVertex);
+  return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
 }
 
-export function isAnyFieldInvalid(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, data: Vertex) {
+export function isAnyFieldInvalid(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+  data: Vertex,
+) {
   function checkVertex(attrVertex: Vertex) {
-
     if (attrVertex.P.validation) {
       const value = data.P[attrVertex.P.name];
       const error = validateInput(attrVertex.P.validation, value);
       mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
-        error: error || ""
+        error: error || "",
       });
       if (error) {
         return true;
       }
     }
 
-
-    return getChildrenAttrs(
-      graph,
-      setGraph,
-      attrVertex,
-    ).some(checkVertex);
+    return getChildrenAttrs(graph, setGraph, attrVertex).some(checkVertex);
   }
 
-  return getChildrenAttrs(
-    graph,
-    setGraph,
-    formVertex,
-  ).some(checkVertex);
+  return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
 }

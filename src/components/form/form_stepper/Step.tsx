@@ -9,23 +9,54 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 
-export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[]; }>) {
+export function Step(
+  props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[] }>,
+) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const steps = createMemo<Vertex[]>(() => getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData));
+  const steps = createMemo<Vertex[]>(() =>
+    getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData),
+  );
 
   const handleDelete = (e: MouseEvent) => {
-    deleteStep(graph, setGraph, layoutStore, setLayoutStore, props.steps, props.step, showErrorToast, showSuccessToast);
+    deleteStep(
+      graph,
+      setGraph,
+      layoutStore,
+      setLayoutStore,
+      props.steps,
+      props.step,
+      showErrorToast,
+      showSuccessToast,
+    );
   };
 
   const handleMoveUp = (e: MouseEvent) => {
-    if (props.index() > 0) moveStep(graph, setGraph, layoutStore, setLayoutStore, props.steps, props.index(), props.index() - 1);
+    if (props.index() > 0)
+      moveStep(
+        graph,
+        setGraph,
+        layoutStore,
+        setLayoutStore,
+        props.steps,
+        props.index(),
+        props.index() - 1,
+      );
   };
 
   const handleMoveDown = (e: MouseEvent) => {
-    if (props.index() < steps().length - 1) moveStep(graph, setGraph, layoutStore, setLayoutStore, props.steps, props.index(), props.index() + 1);
+    if (props.index() < steps().length - 1)
+      moveStep(
+        graph,
+        setGraph,
+        layoutStore,
+        setLayoutStore,
+        props.steps,
+        props.index(),
+        props.index() + 1,
+      );
   };
 
   // const isActiveStep = () => layoutStore.activeStepId === props.step.id;
@@ -36,7 +67,11 @@ export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; st
     <div
       style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${isActiveStep() ? "color:rgb(37,99,235);" : ""} position:relative;`}
     >
-      <button class="flex align-items:center; gap:0.5rem; width:100%" onClick={() => setLayoutStore('activeStepId', props.step.id)} type="button">
+      <button
+        class="flex align-items:center; gap:0.5rem; width:100%"
+        onClick={() => setLayoutStore("activeStepId", props.step.id)}
+        type="button"
+      >
         <span style="display:flex; align-items:center;">
           <Tooltip content={props.step.P.name}>
             <span
@@ -46,7 +81,9 @@ export function Step(props: Readonly<{ index: Accessor<number>; step: Vertex; st
             </span>
           </Tooltip>
         </span>
-        <span style="margin-right: 0.5rem; white-space: nowrap;">{props.step.P.name}</span>
+        <span style="margin-right: 0.5rem; white-space: nowrap;">
+          {props.step.P.name}
+        </span>
         <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);"></div>
       </button>
 
