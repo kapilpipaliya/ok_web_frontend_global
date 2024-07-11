@@ -1,11 +1,10 @@
 import { type Placement, autoUpdate } from '@floating-ui/dom';
-import { makeEventListener } from "@solid-primitives/event-listener";
 import { useFloating } from 'solid-floating-ui';
 import { type JSX, createSignal, onMount, splitProps, } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useGraph } from '~/lib/graph/graph';
+import { useClickOutside } from '~/lib/useClickOutside';
 
 import { useZIndex } from './ZIndex';
 
@@ -14,7 +13,6 @@ export function DropdownMenu(props: { onClickOutside?: () => void, parentRef: HT
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [graph, setGraph] = useGraph();
   const zIndex = useZIndex();
-  const activeClickOutside = useActiveClickOutside(graph, setGraph);
 
   const position = useFloating(reference, floating, {
     placement: props.plaement ?? 'bottom-start',
@@ -26,14 +24,13 @@ export function DropdownMenu(props: { onClickOutside?: () => void, parentRef: HT
     setReference(props.parentRef);
   });
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (activeClickOutside < graph.activeClickOutside) return;
+  useClickOutside(graph, setGraph, (event) => {
     const path = event.composedPath();
     if (!path.includes(floating()!) && !path.includes(props.parentRef)) {
       props.onClickOutside?.();
     }
-  };
-  makeEventListener(window, "mousedown", handleClickOutside);
+  });
+
   const [local, rest] = splitProps(props, ["ref", "parentRef", "class"]);
   return (
     <Portal mount={document.body}>

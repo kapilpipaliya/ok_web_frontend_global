@@ -9,10 +9,8 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { ImportModal } from "./import/ImportModal";
-import { RulesModal } from "./rules/RulesModal";
 
 export function PropertiesBody() {
-  const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
   const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
@@ -37,13 +35,11 @@ export function PropertiesBody() {
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
 
-  const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);
   const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
 
   return (
     <Show when={layoutStore.selectedId !== -1}>
       <div class="flex gap:2 jc:start">
-        <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
         {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       </div>
       <CollAndData />
@@ -54,9 +50,6 @@ export function PropertiesBody() {
         txnId={layoutStore.formData.txnId}
       />
       <ZIndex>
-        <Show when={isRulesModalOpen()}>
-          <RulesModal toggleModal={toggleRulesModal} />
-        </Show>
         <Show when={isImportModalOpen()}>
           <ImportModal toggleModal={toggleImportsModal} />
         </Show>

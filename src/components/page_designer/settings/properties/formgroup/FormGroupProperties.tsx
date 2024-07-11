@@ -12,6 +12,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
+import { HiddenField } from "./HiddenField";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { UniqueNameField } from "./UniqueNameField";
@@ -30,20 +31,23 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const nameVertexId = `nameVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
+  const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
 
   addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { class: PROPERTIES.Css.TextBox, component: "TextBox", displayName: 'Unique Name', name: 'name' }), graph, setGraph);
   addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { displayName: 'Class', name: 'class' }), graph, setGraph);
   addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { displayName: 'Default Value', name: 'defaultValue' }), graph, setGraph);
+  addNewVertex(0, newVertex(hiddenVertexId, ["MetaTemp"], { class:'flex:1', collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`, component: "TagBox", displayName: 'Hidden', name: 'hidden', saveEdge: true, useLocalStorage: true }), graph, setGraph);
 
   function moveClassToLast(vertices: Vertex[]) {
-    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue');
-    return [graph.vertexes[nameVertexId], graph.vertexes[defaultValueVertexId], ...otherVertices, graph.vertexes[classVertexId]];
+    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue' && vertex.P.name !== 'hidden');
+    return [graph.vertexes[nameVertexId], graph.vertexes[defaultValueVertexId], graph.vertexes[hiddenVertexId], ...otherVertices, graph.vertexes[classVertexId]];
   }
 
   onCleanup(() => {
     deleteVertex(0, nameVertexId, graph, setGraph);
     deleteVertex(0, classVertexId, graph, setGraph);
     deleteVertex(0, defaultValueVertexId, graph, setGraph);
+    deleteVertex(0, hiddenVertexId, graph, setGraph);
   });
 
   return (
@@ -64,8 +68,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
           const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
           const [meta, setMeta] = createWritableMemo(() => {
+            if (metaVertex.P.name === 'hidden' || metaVertex.P.name === 'name' || metaVertex.P.name === 'class' || metaVertex.P.name === 'defaultValue') {
+              return {...metaVertex }
+            }
             const P = {
               ...metaVertex.P,
+              // Adding component and meta from the FormMetaData
               component: valueAttribute.component,
               meta: valueAttribute.meta
             }
@@ -93,6 +101,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
                   <UniqueNameField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
+                </Match>
+                <Match when={metaVertex.P.name === "hidden"}>
+                  <HiddenField id={id} meta={meta} metaVertex={metaVertex} selectedLayout={props.selectedLayout} setValue={props.setValue} txnId={props.txnId} />
                 </Match>
                 <Match when={metaVertex.P.name === "class"}>
                   <CSSPropertiesEditor

@@ -2,9 +2,9 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
+import { useClickOutside } from "~/lib/useClickOutside";
 
 import { useZIndex } from "./ZIndex";
-import { useActiveClickOutside } from "./useActiveClickOutside";
 
 interface DrawerProps {
   children: JSX.Element;
@@ -20,55 +20,64 @@ interface DrawerProps {
 
 export function Drawer(props: Readonly<DrawerProps>) {
   const [graph, setGraph] = useGraph();
-  const activeClickOutside = useActiveClickOutside(graph, setGraph);
   const zIndex = useZIndex();
   const [isOpen, setIsOpen] = props.open && props.setIsOpen
     ? [props.open, props.setIsOpen]
     : createSignal(false);
+    
   const [drawerWidth, setDrawerWidth] = createSignal(props.width || "450px");
   const [mainDivHover, setMainDivHover] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
-  const toggleDrawer = () => {
-    setIsOpen(!isOpen());
-  };
-
-  let initialX: number;
-  let initialWidth: number;
-
-  const handleMouseDown = (event: MouseEvent) => {
-    initialX = event.clientX;
-    initialWidth = Number.parseInt(drawerWidth(), 10);
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
-
-  const handleMouseMove = (event: MouseEvent) => {
-    const newWidth = initialWidth - (event.clientX - initialX);
-    setDrawerWidth(`${newWidth}px`);
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener("mousemove", handleMouseMove);
-    document.removeEventListener("mouseup", handleMouseUp);
-  };
-
-  const handleEscClose = (event: KeyboardEvent) => {
-    if (event.key === "Escape" && isOpen()) {
-      toggleDrawer();
-    }
-  };
-
   const handleClickOutside = (event: MouseEvent) => {
-    if (activeClickOutside !== graph.activeClickOutside) return;
     const path = event.composedPath();
     if (!path.includes(floating()!)) {
       setIsOpen(false);
     }
   };
 
+  const activeClickOutside = useClickOutside(graph, setGraph, handleClickOutside);
+
+  const toggleDrawer = () => {
+    setIsOpen(!isOpen());
+  };
+
+  const handleEscClose = (event: KeyboardEvent) => {
+    if (activeClickOutside < graph.activeClickOutside) return;
+    if (event.key === "Escape" && isOpen()) {
+      toggleDrawer();
+    }
+  };
+
   makeEventListener(document, "keydown", handleEscClose);
-  makeEventListener(window, "mousedown", handleClickOutside);
+
+  const Resizer = () => {
+    let initialX: number;
+    let initialWidth: number;
+    const handleMouseDown = (event: MouseEvent) => {
+      initialX = event.clientX;
+      initialWidth = Number.parseInt(drawerWidth(), 10);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const newWidth = initialWidth - (event.clientX - initialX);
+      setDrawerWidth(`${newWidth}px`);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    return <div
+      class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
+      onMouseDown={handleMouseDown}
+      onMouseEnter={() => setMainDivHover(true)}
+      onMouseLeave={() => setMainDivHover(false)}
+    />
+  }
 
   return (
     <>
@@ -82,12 +91,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
         ref={setFloating}
       >
         <div class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto p:20px`}>{props.children}</div>
-        <div
-          class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
-          onMouseDown={handleMouseDown}
-          onMouseEnter={() => setMainDivHover(true)}
-          onMouseLeave={() => setMainDivHover(false)}
-        />
+        <Resizer />
       </div>
       {/* <div
         class={`${isOpen() ? "block" : "none"} h:100% left:0 position:fixed top:0 w:100%`}

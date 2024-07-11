@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, createSignal, onCleanup } from "solid-js";
+import { Show, createSignal, onCleanup, onMount } from "solid-js";
 
 import { ZIndex } from "~/components/ZIndex";
 import { insertNewRow } from "~/components/fields/table_input/insertNewRow";
@@ -12,7 +12,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
 
-export function AddNewState(props: Readonly<{ onClose: () => void }>) {
+export function AddNewState(props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>) {
   const [stateName, setStateName] = createSignal("");
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
@@ -20,6 +20,7 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
   const prevTxnIndex = graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ?? 0;
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
   const metaTxnId = graph.newTxnId;
+
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
   });
@@ -42,6 +43,13 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
     const rule = graph.vertexes[rowResult!.vertexId!];
     setSelectedRule(rule);
   };
+  onMount(() => inputRef?.focus());
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Enter") {
+      addNewState();
+    }
+  };
 
   return (
     <div class="radius-b:5 flex flex:column px:2 py:5">
@@ -53,6 +61,7 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
             <input
               class={`${PROPERTIES.Css.TextBox} h:100%`}
               onInput={(e) => setStateName(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Enter Rule Name"
               ref={inputRef!}
               value={stateName()}
@@ -64,12 +73,12 @@ export function AddNewState(props: Readonly<{ onClose: () => void }>) {
         </button>
         <Show when={selectedRule()}>
           <ZIndex>
-            <RulesModal prevTxnIndex={prevTxnIndex} selectedRule={selectedRule()} toggleModal={props.onClose} />
+            <RulesModal closeModal={props.onClose} onSubmit={() => {
+              props.onClose(selectedRule());
+            }} prevTxnIndex={prevTxnIndex} selectedRule={selectedRule()} />
           </ZIndex>
         </Show>
       </div>
     </div>
   );
 }
-
-

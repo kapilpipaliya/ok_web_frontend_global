@@ -16,7 +16,7 @@ import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransaction
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 
-export function RulesModal(props: Readonly<{ prevTxnIndex?: number; selectedRule?: Vertex | null, toggleModal: () => void }>) {
+export function RulesModal(props: Readonly<{ closeModal: () => void; onSubmit: () => void, prevTxnIndex?: number, selectedRule?: Vertex | null }>) {
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
@@ -72,13 +72,13 @@ export function RulesModal(props: Readonly<{ prevTxnIndex?: number; selectedRule
     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
     //     v ? [...v] : v,
     // );
-    props.toggleModal();
+    props.onSubmit();
   };
   const onRulesCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpTo(layoutStore.formData.txnId, prevTxnIndex, graph);
     }
-    props.toggleModal();
+    props.closeModal();
   };
   return (
     <Portal>

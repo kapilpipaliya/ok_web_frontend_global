@@ -369,6 +369,9 @@ addBinaryOp(
   false,
   (vertexes, edgeType, context) => {
     if (!vertexes) return;
+    if (!Array.isArray(vertexes)) {
+      vertexes = [vertexes];
+    }
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {
@@ -436,6 +439,9 @@ addBinaryOp(
   false,
   (vertexes, edgeType, context) => {
     if (!vertexes) return;
+    if (!Array.isArray(vertexes)) {
+      vertexes = [vertexes];
+    }
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {

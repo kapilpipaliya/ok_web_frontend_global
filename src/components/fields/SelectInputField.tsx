@@ -85,10 +85,15 @@ export function SelectInputField(
       parsedOptions = getSelectedOptions();
     } else if (getCollection()) {
       setLoading(true);
-      const mutationData = props.txnId ? commitTxn(props.txnId, graph) : undefined;
-      const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection(), mutationData, 10);
-      if (isValidResponse(res)) {
-        parsedOptions = res.result || [];
+      if (props.meta.P.useLocalStorage) {
+        const res = getSelectionOptions(graph, setGraph, getCollection(), [props.data as Vertex]);
+        parsedOptions = res.vertexes || [];
+      } else {
+        const mutationData = props.txnId ? commitTxn(props.txnId, graph) : undefined;
+        const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection(), mutationData, 10);
+        if (isValidResponse(res)) {
+          parsedOptions = res.result || [];
+        }
       }
       setLoading(false);
     }
@@ -153,57 +158,54 @@ export function SelectInputField(
   };
 
   return (
-    <div>
-      <Show
-        fallback={
-          <For each={selectedValue(props.meta, props.data as Vertex, graph)}>
-            {(vertexId) => (
-              <>
-                {
-                  getSelectionOptions(
-                    graph,
-                    setGraph,
-                    props.meta.P.displayExpr || `::'P.${IdAttr}'`,
-                    [graph.vertexes[vertexId]],
-                  ).vertexes
-                }
-              </>
-            )}
-          </For>
-        }
-        when={!props.disabled}
-      >
-        <MultiSelectField
-          childrenKey={props.meta.P.childrenKey}
-          disable={props.disabled}
-          displayValueKey={props.meta.P.labelKey ? props.meta.P.labelKey : "::'P.displayName'||::'P.name'||::'P.id'"}
-          isLoadingOptions={loading()}
-          loadOptions={loadOptions}
-          onRemove={(e) => onChangeSelect(e, true)}
-          onSelect={(e) => onChangeSelect(e, false)}
-          optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
-          options={options()}
-          placeholder={`${props.title}`}
-          selectedValues={() => {
-            if (props.meta.P.saveEdge && !props.meta.P.saveValue) {
-              return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
-                return graph.vertexes[id];
-              });
-            } else {
-              const value = props.data?.P[props.meta.P[IdAttr]];
-              if(!value) return [];
-              if (!Array.isArray(value) && props.meta.P.valueKey && getComponent() === "SelectBox") {
-                const option = options().find((option) => (value?.[props.meta.P.valueKey] || value) === (option?.[props.meta.P.valueKey] || option));
-                return option ? [option] : [{label: value, value}];
+    <Show
+      fallback={
+        <For each={selectedValue(props.meta, props.data as Vertex, graph)}>
+          {(vertexId) => (
+            <>
+              {
+                getSelectionOptions(
+                  graph,
+                  setGraph,
+                  props.meta.P.displayExpr || `::'P.${IdAttr}'`,
+                  [graph.vertexes[vertexId]],
+                ).vertexes
               }
-              return ensureArray(value);
+            </>
+          )}
+        </For>
+      }
+      when={!props.disabled}
+    >
+      <MultiSelectField
+        childrenKey={props.meta.P.childrenKey}
+        disable={props.disabled}
+        displayValueKey={props.meta.P.labelKey ? props.meta.P.labelKey : "::'P.displayName'||::'P.name'||::'P.id'"}
+        isLoadingOptions={loading()}
+        loadOptions={loadOptions}
+        onRemove={(e) => onChangeSelect(e, true)}
+        onSelect={(e) => onChangeSelect(e, false)}
+        optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
+        options={options()}
+        placeholder={`${props.title}`}
+        selectedValues={() => {
+          if (props.meta.P.saveEdge && !props.meta.P.saveValue) {
+            return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
+              return graph.vertexes[id];
+            });
+          } else {
+            const value = props.data?.P[props.meta.P[IdAttr]];
+            if (!value) return [];
+            if (!Array.isArray(value) && props.meta.P.valueKey && getComponent() === "SelectBox") {
+              const option = options().find((option) => (value?.[props.meta.P.valueKey] || value) === (option?.[props.meta.P.valueKey] || option));
+              return option ? [option] : [{ label: value, value }];
             }
+            return ensureArray(value);
           }
-          }
-          selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
-        />
-      </Show>
-      {/* Todo: think about validations */}
-    </div>
+        }
+        }
+        selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
+      />
+    </Show>
   );
 }

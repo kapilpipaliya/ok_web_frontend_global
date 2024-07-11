@@ -13,6 +13,7 @@ export const genericInputComponents = [
   "Radio",
   "RadioGroup",
   "SelectBox",
+  "TagBox",
   // "Switch",
   "TextArea",
   "TextBox",

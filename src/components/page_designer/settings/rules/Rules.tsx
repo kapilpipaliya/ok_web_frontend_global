@@ -12,46 +12,56 @@ import { RulesModal } from "../properties/rules/RulesModal";
 import { AddNewState } from "./AddNewState";
 
 export function Rules() {
-return (
+  return (
     <div class="w-full">
       <Header />
       <RulesList />
     </div>
   );
 }
-
-function Header() {
+function AddNewRule() {
   let buttonRef: HTMLButtonElement;
   const [showDropdown, setShowDropdown] = createSignal(false);
-  const [showRuleSettings, setShowRuleSettings] = createSignal(false);
-  const onDisplayAllRules = () => {
-    setShowRuleSettings(true);
-  };
 
   const addNewRule = () => {
     setShowDropdown(true);
   };
   return <>
+    <button class="bg:blue-50 color:white mb:2 p:2 r:5" onClick={addNewRule} ref={buttonRef!}>
+      Add New Rule
+    </button>
+    <Show when={showDropdown()}>
+      <ZIndex>
+        <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
+          <AddNewState onClose={() => setShowDropdown(false)} />
+        </DropdownMenu>
+      </ZIndex>
+    </Show>
+  </>;
+}
+function DisplayAllRules() {
+  const [showRuleSettings, setShowRuleSettings] = createSignal(false);
+  const onDisplayAllRules = () => {
+    setShowRuleSettings(true);
+  };
+  return <>
+    <button class="bg:blue-50 color:white mb:2 p:2 r:5" onClick={onDisplayAllRules}>
+      All Rules
+    </button>
+    <Show when={showRuleSettings()}>
+      <ZIndex>
+        <RulesModal closeModal={() => setShowRuleSettings(false)} onSubmit={() => setShowRuleSettings(false)} />
+      </ZIndex>
+    </Show>
+  </>;
+}
+
+function Header() {
+  return <>
     <h2>Rules:</h2>
     <div class="flex ai:center jc:space-between">
-      <button class="bg:blue-50 color:white mb:2 p:2 r:5" onClick={addNewRule} ref={buttonRef!}>
-        Add New Rule
-      </button>
-      <Show when={showDropdown()}>
-        <ZIndex>
-          <DropdownMenu class="r:5" onClickOutside={() => setShowDropdown(false)} parentRef={buttonRef!}>
-            <AddNewState onClose={() => setShowDropdown(false)} />
-          </DropdownMenu>
-        </ZIndex>
-      </Show>
-      <button class="bg:blue-50 color:white mb:2 p:2 r:5" onClick={onDisplayAllRules}>
-        All Rules
-      </button>
-      <Show when={showRuleSettings()}>
-        <ZIndex>
-          <RulesModal toggleModal={() => setShowRuleSettings(false)} />
-        </ZIndex>
-      </Show>
+      <AddNewRule />
+      <DisplayAllRules />
     </div>
   </>;
 }
@@ -94,7 +104,7 @@ function RulesList() {
     </For>
     <Show when={selectedRule()}>
       <ZIndex>
-        <RulesModal selectedRule={selectedRule()} toggleModal={closeRuleSettings} />
+        <RulesModal closeModal={closeRuleSettings} onSubmit={() => closeRuleSettings()} selectedRule={selectedRule()} />
       </ZIndex>
     </Show>
   </>;
