@@ -4,7 +4,6 @@ import { Match, Show, Switch, createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import { validatePassword } from "~/lib/validations";
 import {sendEmail} from "~/server/sendEmail";
 export function ForgotPassword() {

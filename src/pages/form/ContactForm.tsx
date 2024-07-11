@@ -3,7 +3,6 @@ import { createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import { contactUsCall } from "~/lib/api/api_functions";
 import { validateEmail } from "~/lib/validations";
 export function ContactForm() {

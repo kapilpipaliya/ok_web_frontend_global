@@ -4,7 +4,6 @@ import { Show, createSignal, onMount } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import { signInCall } from "~/lib/api/api_functions";
 import {postAPI} from "~/lib/api/postApi";
 import { APP_BASE_URL } from "~/lib/constants";

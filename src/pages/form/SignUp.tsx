@@ -4,7 +4,6 @@ import { createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import { registerUserCall } from "~/lib/api/api_functions";
 import { APP_BASE_URL } from "~/lib/constants";
 import { useLoading } from "~/lib/contexts";

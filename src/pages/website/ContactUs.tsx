@@ -2,7 +2,6 @@ import { useNavigate } from "@solidjs/router";
 import { createSignal } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import { contactUsCall } from "~/lib/api/api_functions";
 import { useLoading } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";

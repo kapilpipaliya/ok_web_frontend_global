@@ -1,4 +1,4 @@
-import "~/css/base.css";
+
 
 export function NotFound404() {
   return (

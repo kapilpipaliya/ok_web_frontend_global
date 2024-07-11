@@ -11,7 +11,6 @@ import {
 } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import "~/css/base.css";
 import "~/css/modal.css";
 import { signOutCall } from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";

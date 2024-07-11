@@ -6,6 +6,7 @@ import { Show, Suspense, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Toaster } from "solid-toast";
 
+import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
 import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 
