@@ -5,9 +5,12 @@ import { CloseIconTopRight } from "./CloseIconTopRight";
 import { FormElementTabs } from "./FormElementTabs";
 
 export function FormElementsWrapper() {
-  const [, setLayoutStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <aside class={"rel"}>
+    <aside class={"rel"} classList={{
+        "hidden": !layoutStore.isRightOpen
+      }}
+    >
       <ZIndex>
         <CloseIconTopRight
           onClick={() => setLayoutStore("isLeftOpen", false)}
@@ -15,7 +18,7 @@ export function FormElementsWrapper() {
       </ZIndex>
       <div
         class={
-          "flex-col scrollbar-color:lightgrey scrollbar-width:thin border:1|solid|lightgrey h:100vh m:5 max-h:calc(100vh-70px) overflow:auto r:5|5|5|5"
+          "scrollbar-color:lightgrey scrollbar-width:thin flex border:1|solid|lightgrey flex:column m:5 max-h:calc(100vh-70px) overflow:auto p:5 r:5|5|5|5"
         }
       >
         <FormElementTabs />

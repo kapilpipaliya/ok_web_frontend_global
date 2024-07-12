@@ -25,8 +25,8 @@ export const LeftIcons = () => {
           width={30}
         />
       </button>
-      <a href="/">
-        <img alt="logo" class="h:35px" src={logo} />
+      <a href="/admin">
+        <img alt="logo" class="h:30px" src={logo} />
       </a>
       <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
         <LeftToggleButton />

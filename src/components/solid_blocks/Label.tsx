@@ -97,6 +97,8 @@ export function Label(
     "label",
     "position",
     "children",
+    "meta",
+    "data"
   ]);
   return (
     <div style={containerStyle()}>

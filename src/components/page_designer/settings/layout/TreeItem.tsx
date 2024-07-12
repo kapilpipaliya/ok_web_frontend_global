@@ -139,7 +139,7 @@ export function TreeItem(
   };
 
   return (
-    <div>
+    <>
       <button
         classList={{
           "align-items:center": true,
@@ -211,6 +211,6 @@ export function TreeItem(
           </For>
         </ul>
       </Show>
-    </div>
+    </>
   );
 }

@@ -26,7 +26,7 @@ export function SettingTabs() {
 
   const Tabs = () => (
     <div class="bg:white position:sticky top:0">
-      <div class="flex ai:center jc:space-between position:relative">
+
         <Icon
           class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
           height={30}
@@ -34,7 +34,7 @@ export function SettingTabs() {
           onClick={() => setLayoutStore("isRightOpen", false)}
           width={30}
         />
-      </div>
+  
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128)  f:0.875rem  font-weight:500  mb:10  text-align:center ">
         <ul class="flex  flex-wrap:wrap jc:space-around  margin-bottom:-1px ">
           <For each={tabs()}>
@@ -62,7 +62,7 @@ export function SettingTabs() {
   );
 
   return (
-    <div class={"p:5"}>
+    <>
       <Tabs />
 
       <div classList={{ "display:none": selectedTab() !== "layout" }}>
@@ -85,6 +85,6 @@ export function SettingTabs() {
       <div classList={{ "display:none": selectedTab() !== "Rules" }}>
         <Rules />
       </div>
-    </div>
+    </>
   );
 }

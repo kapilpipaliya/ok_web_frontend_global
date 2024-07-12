@@ -5,7 +5,7 @@ import { useZIndex } from "~/components/ZIndex";
 export function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
   const zIndex = useZIndex();
   return (
-    <div class="">
+
       <Icon
         class={`cursor:pointer fg:#c1c1c1 position:absolute right:1rem z:${zIndex}`}
         height={30}
@@ -13,6 +13,6 @@ export function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
         onClick={props.onClick}
         width={30}
       />
-    </div>
+
   );
 }

@@ -27,11 +27,12 @@ export function UndoRedoIcons() {
   ];
 
   return (
-    <For each={icons}>
-      {(item) => (
-        <Tooltip content={item.tooltip} position={"n"}>
+    <div class="flex ai:center gap:2">
+      <For each={icons}>
+        {(item) => (
+          <Tooltip content={item.tooltip} position={"n"}>
           <button
-            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover h:30px jc:center r:7 w:30px"
+            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
             disabled={item.disabled?.()}
             onClick={item.onClick}
             type="button"
@@ -39,7 +40,8 @@ export function UndoRedoIcons() {
             <Icon height={22} icon={item.icon} width={22} />
           </button>
         </Tooltip>
-      )}
-    </For>
+        )}
+      </For>
+    </div>
   );
 }

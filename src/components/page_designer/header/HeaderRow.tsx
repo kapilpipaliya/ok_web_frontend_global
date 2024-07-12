@@ -19,15 +19,15 @@ export function HeaderRow() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
 
   return (
-    <header class="flex bg:#f3f3f4 grid-area:header jc:space-between r:7">
+    <header class="flex bg:#f3f3f4 jc:space-between r:7">
       <LeftIcons />
 
       <Show when={layoutStore.selectedSection === "build"}>
-        <div class="flex ai:center gap:5">
+        <div class="flex ai:center gap:6">
           <UndoRedoIcons />
           <ResizeViewButtons />
           <Icon
-            class="ml:10"
+            class=""
             height={22}
             icon="solar:settings-linear"
             onClick={() => setLayoutStore("selectedSection", "setting")}

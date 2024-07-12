@@ -44,7 +44,7 @@ export function FormElementTabs() {
   );
 
   return (
-    <div class={"h:full p:5"}>
+    <>
       <Tabs />
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
@@ -64,6 +64,6 @@ export function FormElementTabs() {
           <PagesList coll={selectedTab().collection} />
         </Match>
       </Switch>
-    </div>
+    </>
   );
 }

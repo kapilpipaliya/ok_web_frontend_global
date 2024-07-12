@@ -13,13 +13,12 @@ export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <div
-      class={`${
-        !layoutStore.isLeftOpen && !layoutStore.isRightOpen
-          ? "grid-template-columns:repeat(1,1fr)"
-          : layoutStore.isLeftOpen && layoutStore.isRightOpen
-            ? "grid-template-columns:repeat(3,22%|53%|25%)"
-            : `grid-template-columns:repeat(2,${!layoutStore.isLeftOpen ? "70%|30%" : "30%|70%"}`
-      } grid gap:4px`}
+      class={`${!layoutStore.isLeftOpen && !layoutStore.isRightOpen
+        ? "grid-template-columns:repeat(1,1fr)"
+        : layoutStore.isLeftOpen && layoutStore.isRightOpen
+          ? "grid-template-columns:repeat(3,22%|53%|25%)"
+          : `grid-template-columns:repeat(2,${!layoutStore.isLeftOpen ? "70%|30%" : "30%|70%"}`
+        } grid gap:4px`}
     >
       <Show
         fallback={
@@ -40,11 +39,9 @@ export function RenderMainContent() {
         }
         when={!layoutStore.isSmallScreen}
       >
-        <div class={`${!layoutStore.isLeftOpen ? "d:none" : ""}`}>
-          <Show when={layoutStore.isLeftOpen}>
-            <FormElementsWrapper />
-          </Show>
-        </div>
+        <Show when={layoutStore.isLeftOpen}>
+          <FormElementsWrapper  />
+        </Show>
       </Show>
       <Show when={layoutStore.formData}>
         <ResizableContainer view={layoutStore.view}>
@@ -73,9 +70,7 @@ export function RenderMainContent() {
         }
         when={!layoutStore.isSmallScreen}
       >
-        <div class={`${!layoutStore.isRightOpen ? "hidden" : ""}`}>
-          <SettingsWrapper />
-        </div>
+        <SettingsWrapper/>
       </Show>
     </div>
   );
