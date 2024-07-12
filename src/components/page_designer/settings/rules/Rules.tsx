@@ -6,10 +6,12 @@ import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
 import { AddNewRule } from "./AddNewRule";
+import { SimpleWithDismissButton } from "./SimpleModal";
 
 export function Rules() {
   return (
@@ -90,6 +92,7 @@ function RulesList() {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [selectedRule, setSelectedRule] = createSignal<Vertex | null>(null);
+  const [selectedRuleToDelete, setSelectedRuleToDelete] = createSignal<Vertex | null>(null);
   const rules = createMemo(() => {
     if (layoutStore.formData?.formData) {
       return (
@@ -120,23 +123,61 @@ function RulesList() {
     }
     setLayoutStore("multiHighlight", incomingIds);
   }
+
+  const ruleUsageCount = (rule: Vertex) => {
+    let count = 0;
+    for (const key in rule.IN) {
+      for (const edge of rule.IN[key]) {
+        if (graph.edges[edge].id !== rule.id) {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  }
+
   const unhighlightRule = () => {
     setLayoutStore("multiHighlight", []);
+  }
+  const removeAllConditions = (rule: Vertex) => {
+    const conditions = evaluate(jsep("->$0Cond"), {
+      graph,
+      setGraph,
+      vertexes: [rule],
+    }) || [];
+    for (const condition of conditions) {
+      deleteRow(condition, false, graph, setGraph, layoutStore.formData.txnId);
+    }
+  }
+  const deleteRule = (rule: Vertex) => {
+    removeAllConditions(rule);
+    deleteRow(rule, false, graph, setGraph, layoutStore.formData.txnId);
+    setSelectedRuleToDelete(null);
   }
   return (
     <>
       <For each={rules()}>
         {(rule) => (
-          <div class="flex ai:center bg:gray-20:hover jc:space-between p:2" onMouseEnter={() => highlightRule(rule)} onMouseLeave={() => unhighlightRule()}>
-            <span>{rule.P.name}</span>
-            <button class="" onClick={() => openRuleSettings(rule)}>
-              <Icon
-                class={"cursor:pointer opacity:.5 opacity:1:hover"}
-                height={22}
-                icon={"mingcute:settings-5-line"}
-                width={22}
-              />
-            </button>
+          <div class="flex bg:gray-20:hover jc:space-between p:2" onMouseEnter={() => highlightRule(rule)} onMouseLeave={() => unhighlightRule()}>
+            <span class="flex:1">{rule.P.name}</span>
+            <div class="flex gap:2">
+              <button class="flex ai:center" onClick={() => openRuleSettings(rule)}>
+                <Icon
+                  class={"cursor:pointer opacity:.5 opacity:1:hover"}
+                  height={22}
+                  icon={"mingcute:settings-5-line"}
+                  width={22}
+                />
+              </button>
+              <button class="flex ai:center color:red" onClick={() => setSelectedRuleToDelete(rule)}>
+                <Icon
+                  class={"cursor:pointer opacity:.5 opacity:1:hover"}
+                  height={22}
+                  icon={"mage:trash"}
+                  width={22}
+                />
+              </button>
+            </div>
           </div>
         )}
       </For>
@@ -147,6 +188,21 @@ function RulesList() {
             onSubmit={() => closeRuleSettings()}
             selectedRule={selectedRule()}
           />
+        </ZIndex>
+      </Show>
+      <Show when={selectedRuleToDelete()}>
+        <ZIndex>
+          <SimpleWithDismissButton
+            confirmButtonText="Delete"
+            description={`Are you sure you want to delete this rule?`}
+            onClose={() => setSelectedRuleToDelete(null)}
+            onConfirm={() => deleteRule(selectedRuleToDelete()!)}
+            title="Delete Rule"
+          >
+            <div class="mt:1rem">
+              <p>The rule is used at {ruleUsageCount(selectedRuleToDelete()!)} places. It will be removed from all places where it is used.</p>
+            </div>
+          </SimpleWithDismissButton>
         </ZIndex>
       </Show>
     </>
