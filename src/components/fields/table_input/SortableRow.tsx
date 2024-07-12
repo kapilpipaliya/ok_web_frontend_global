@@ -120,15 +120,20 @@ export const SortableRow = (
                   ),
                 async (v) => {
                   if (metaVertex().P.meta) {
-                    const mutationData = formTxnId
-                      ? commitTxn(formTxnId, graph)
-                      : undefined;
-                    const metaData = await getPropsFromMetaExpressionMGCall(
-                      metaVertex(),
-                      [p.joinVertex],
-                      mutationData,
-                      10,
-                    );
+                    let metaData;
+                    if (formTxnId) {
+                      const mutationData = formTxnId
+                        ? commitTxn(formTxnId, graph)
+                        : undefined;
+                      metaData = await getPropsFromMetaExpressionMGCall(
+                        metaVertex(),
+                        [p.joinVertex],
+                        mutationData,
+                        10,
+                      );
+                    } else {
+                      metaData = v;
+                    }
                     const metaDataVal = removeUndefinedProperties(
                       metaData,
                       false,
@@ -156,52 +161,54 @@ export const SortableRow = (
               ),
             );
           }
-
-          const getComponent = (columnId: Id) => {
-            const metaVertex = getMetaVertex(columnId);
-            if (metaVertex.P.component.includes("-")) {
-              createComputed(
-                on(
-                  () =>
-                    getSelectionOptions(
-                      graph,
-                      setGraph,
-                      metaVertex.P.component,
-                      [p.joinVertex],
-                    ).vertexes,
-                  async (vertexes) => {
-                    const mutationData = formTxnId
-                      ? commitTxn(formTxnId, graph)
-                      : undefined;
-                    const res = await getSelectionOptionsMGCall(
-                      [p.joinVertex],
-                      metaVertex.P.component,
-                      mutationData,
-                      10,
-                    );
-                    console.log("res", res);
-
-                    runWithOwner(outerOwner, () => {
-                      if (
-                        isValidResponse(res) &&
-                        typeof res.result === "string"
-                      ) {
-                        setComponent(res.result);
-                      } else {
-                        setComponent(getStringComponent(graph)?.P.name);
-                      }
-                    });
-                  },
-                ),
-              );
-            } else {
-              return metaVertex.P.component;
-            }
-          };
-
           const [component, setComponent] = createWritableMemo(() =>
             getComponent(column.id),
           );
+          function getComponent(columnId: Id) {
+            const columnMetaVertex = getMetaVertex(columnId);
+            if (columnMetaVertex.P.component.includes("-")) {
+              createComputed(
+                on(
+                  () => getSelectionOptions(
+                    graph,
+                    setGraph,
+                    columnMetaVertex.P.component,
+                    [p.joinVertex]
+                  ).vertexes,
+                  async (vertexes) => {
+                    let component = "";
+                    if (formTxnId) {
+                      const mutationData = formTxnId
+                        ? commitTxn(formTxnId, graph)
+                        : undefined;
+                      const res = await getSelectionOptionsMGCall(
+                        [p.joinVertex],
+                        columnMetaVertex.P.component,
+                        mutationData,
+                        10
+                      );
+                      if (isValidResponse(res) &&
+                        typeof res.result === "string") {
+                        component = res.result;
+                      }
+                    } else {
+                      component = vertexes;
+                    }
+                    if (!component) {
+                      component = getStringComponent(graph)?.P.name;
+                    }
+                    setTimeout(() => {
+                      runWithOwner(outerOwner, () => {
+                        setComponent(component);
+                      });
+                    })
+                  }
+                )
+              );
+            } else {
+              return columnMetaVertex.P.component;
+            }
+          }
 
           const DefaultValue = () => (
             <Show when={metaVertex().P.defaultValue}>
