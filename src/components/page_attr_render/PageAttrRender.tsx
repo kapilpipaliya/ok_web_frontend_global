@@ -27,6 +27,7 @@ export function PageAttrRender(
   const [graph, setGraph] = useGraph();
   const { formData, txnId } = useFormContext();
   const [isPreview] = useIsPreview();
+
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
       {(item, index) => {
@@ -47,7 +48,7 @@ export function PageAttrRender(
         };
 
         const Content = () => (
-          <Show when={!isHidden(item, formData, graph, setGraph)}>
+          <Show when={!isPreview() || !isHidden(item, formData, graph, setGraph)}>
             <DynamicComponent
               applyDefaults={true}
               // NOTE: For repeater we cant use parentData
@@ -61,7 +62,7 @@ export function PageAttrRender(
                 getDataVertex(graph, item)
               }
               // setValue={props.setValue}
-              disabled={isDisabled(item, formData, graph, setGraph)}
+              disabled={isPreview() && isDisabled(item, formData, graph, setGraph)}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
               txnId={txnId}

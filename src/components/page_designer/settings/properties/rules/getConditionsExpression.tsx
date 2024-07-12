@@ -24,7 +24,7 @@ export function getConditionsExpression(
   rule: Vertex,
   formVertex: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,isTest?: boolean
 ) {
   const conditionRows = evaluate(jsep("->RulesCond"), {
     graph,
@@ -39,7 +39,7 @@ export function getConditionsExpression(
       vertexes: [condition],
     })?.[0]?.P.name;
     if (evaluatedFieldName) {
-      return getTextValue(formVertex.P[evaluatedFieldName]) ?? `"${evaluatedFieldName}"`;
+      return getTextValue(formVertex.P[evaluatedFieldName]) ?? (isTest ? `"${evaluatedFieldName}"` : 0);
     }
     return "";
   };
