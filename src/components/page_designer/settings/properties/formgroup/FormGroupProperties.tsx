@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
+import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -23,9 +24,9 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
-import { SelectRuleField } from "./SelectRuleField";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
+import { SelectRuleField } from "./SelectRuleField";
 import { UniqueNameField } from "./UniqueNameField";
 
 interface FormGroupPropertiesProps {
@@ -65,6 +66,8 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     graph,
     setGraph,
   );
+
+
   addNewVertex(
     0,
     newVertex(defaultValueVertexId, ["MetaTemp"], {
@@ -74,6 +77,8 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     graph,
     setGraph,
   );
+
+  
   addNewVertex(
     0,
     newVertex(hiddenVertexId, ["MetaTemp"], {
@@ -102,9 +107,11 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         vertex.P.name !== "hidden" &&
         vertex.P.name !== "disabled",
     );
+    const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+    const isAddDefaultValue = componentName !== "Form" && genericInputComponents.includes(componentName);
     return [
       graph.vertexes[nameVertexId],
-      graph.vertexes[defaultValueVertexId],
+      ...(isAddDefaultValue ? [graph.vertexes[defaultValueVertexId]] : []),
       graph.vertexes[hiddenVertexId],
       graph.vertexes[disabledVertexId],
       ...otherVertices,

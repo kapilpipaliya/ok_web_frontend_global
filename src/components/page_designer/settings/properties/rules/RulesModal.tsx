@@ -162,7 +162,6 @@ export function RulesModal(
   function modifyFieldMeta(attribute: FieldAttribute) {
     attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
     attribute.valueKey = "id";
-    attribute.saveEdge = true;
     attribute.childrenKey = "attributes";
     attribute.options = () =>
       getFormMetaData(graph, setGraph, layoutStore.formData.formData)

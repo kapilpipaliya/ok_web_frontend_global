@@ -68,7 +68,6 @@ export function SelectRuleField(
       displayName: props.metaVertex.P.displayName,
       name: props.metaVertex.P.name,
       renderLabel: RenderLabel,
-      saveEdge: true,
       useLocalStorage: true,
     },
   } as unknown as Vertex;

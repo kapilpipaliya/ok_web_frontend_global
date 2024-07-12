@@ -151,12 +151,12 @@ ${Object.keys(binopsInitial).join("\n")}`,
               name: "rightField",
               // collection: "g:'DataType'",
             },
-            {
+            /*{
               component: "TextBox",
               displayName: "Value",
               name: "rightValue",
             },
-            /* {
+            {
               collection: "g:'DataType'",
               component: "SelectBox",
               displayName: "DataType",
@@ -171,13 +171,13 @@ ${Object.keys(binopsInitial).join("\n")}`,
               
                 name: "comp",
               
-            },
+            },*/
             {
-              component: `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
+              component: `->$0RightField->$0Comp<-CompChild::'P.name'||->$0RightField->$0Comp::'P.name'||->$0RightField->$0DataType->$0Default::'P.name'`,
               displayName: "Value",
               meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
-              name: "value",
-            },*/
+              name: "rightValue",
+            },
             {
               component: "SelectBox",
               displayName: "Paren",
