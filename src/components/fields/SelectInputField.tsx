@@ -131,18 +131,7 @@ export function SelectInputField(
         if (props.isRealTime) {
           props.txnId = graph.newTxnId;
         }
-        if (props.meta.P.saveEdge) {
-          setSelectValueHelper(
-            props.txnId ?? 0,
-            props.meta,
-            props.data as Vertex,
-            getComponent(),
-            value,
-            isRemove,
-            graph,
-            setGraph,
-          );
-        } else if (memoizedOptions() || props.meta.P.saveValue) {
+        if (typeof props.meta.P.options === "string" || props.meta.P.saveValue) {
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
@@ -227,13 +216,7 @@ export function SelectInputField(
         placeholder={`${props.title}`}
         renderLabel={props.meta.P.renderLabel}
         selectedValues={() => {
-          if (props.meta.P.saveEdge && !props.meta.P.saveValue) {
-            return selectedValue(props.meta, props.data as Vertex, graph).map(
-              (id) => {
-                return graph.vertexes[id];
-              },
-            );
-          } else {
+          if (props.meta.P.saveValue) {
             const value = props.data?.P[props.meta.P[IdAttr]];
             if (!value) return [];
             if (
@@ -246,9 +229,15 @@ export function SelectInputField(
                   (value?.[props.meta.P.valueKey] || value) ===
                   (option?.[props.meta.P.valueKey] || option),
               );
-              return option ? [option] : [{ label: value, value }];
+              return option ? [option] : [{label: value, value}];
             }
             return ensureArray(value);
+          } else {
+            return selectedValue(props.meta, props.data as Vertex, graph).map(
+              (id) => {
+                return graph.vertexes[id];
+              },
+            );
           }
         }}
         selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
