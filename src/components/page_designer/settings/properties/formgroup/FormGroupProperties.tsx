@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -18,12 +17,13 @@ import {
   deleteVertex,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
-import { HiddenField } from "./HiddenField";
+import { SelectRuleField } from "./SelectRuleField";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { UniqueNameField } from "./UniqueNameField";
@@ -43,6 +43,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const classVertexId = `classVertex${createUniqueId()}`;
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
   const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
+  const disabledVertexId = `disabledVertex${createUniqueId()}`;
 
   addNewVertex(
     0,
@@ -82,6 +83,15 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     graph,
     setGraph,
   );
+  addNewVertex(
+    0,
+    newVertex(disabledVertexId, ["MetaTemp"], {
+      displayName: "Disabled",
+      name: "disabled",
+    }),
+    graph,
+    setGraph,
+  );
 
   function moveClassToLast(vertices: Vertex[]) {
     const otherVertices = vertices.filter(
@@ -89,12 +99,14 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         vertex.P.name !== "name" &&
         vertex.P.name !== "class" &&
         vertex.P.name !== "defaultValue" &&
-        vertex.P.name !== "hidden",
+        vertex.P.name !== "hidden" &&
+        vertex.P.name !== "disabled",
     );
     return [
       graph.vertexes[nameVertexId],
       graph.vertexes[defaultValueVertexId],
       graph.vertexes[hiddenVertexId],
+      graph.vertexes[disabledVertexId],
       ...otherVertices,
       graph.vertexes[classVertexId],
     ];
@@ -105,6 +117,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     deleteVertex(0, classVertexId, graph, setGraph);
     deleteVertex(0, defaultValueVertexId, graph, setGraph);
     deleteVertex(0, hiddenVertexId, graph, setGraph);
+    deleteVertex(0, disabledVertexId, graph, setGraph);
   });
 
   return (
@@ -131,6 +144,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           const [meta, setMeta] = createWritableMemo(() => {
             if (
               metaVertex.P.name === "hidden" ||
+              metaVertex.P.name === "disabled" ||
               metaVertex.P.name === "name" ||
               metaVertex.P.name === "class" ||
               metaVertex.P.name === "defaultValue"
@@ -175,8 +189,8 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     txnId={props.txnId}
                   />
                 </Match>
-                <Match when={metaVertex.P.name === "hidden"}>
-                  <HiddenField
+                <Match when={metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled"}>
+                  <SelectRuleField
                     id={id}
                     meta={meta}
                     metaVertex={metaVertex}

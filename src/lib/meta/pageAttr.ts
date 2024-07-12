@@ -22,9 +22,14 @@ export const pageAttr = [
     displayName: "ID",
     name: "name",
   },
+  // to load initial data
   {
     component: "TagBox",
     name: "hidden",
+  },
+  {
+    component: "TagBox",
+    name: "disabled",
   },
   // {
   //   name: "definition",

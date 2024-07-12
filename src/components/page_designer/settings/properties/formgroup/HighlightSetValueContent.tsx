@@ -53,7 +53,7 @@ export function HighlightSetValueContent(
                         P: {
                           [IdAttr]: "import",
                           displayExpr: "$P.name",
-                          collection: `ids:'${props.selectedLayout.id}'->Rules`
+                          collection: `ids:'${props.selectedLayout.id}'->Rule`
                         },
                       } as unknown as Vertex}
                       setValue={(attr, vertex, data) => 0}

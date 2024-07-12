@@ -1,7 +1,6 @@
 import jsep from "jsep";
 import { klona } from "klona";
-import { onCleanup } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
+import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
@@ -11,23 +10,15 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
-import { evaluate } from "~/lib/expression_eval";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
-export const getConditionsExpression = (rule: Vertex, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) => {
-  const conditionRows =   evaluate(jsep('->RulesCond'), {graph, setGraph, vertexes: [rule]});
-  let expression = "";
-  for (const condition of conditionRows) {
-    expression += `${condition.leftField} ${condition.operator} ${condition.rightField} ${condition.operator} `;
-  }
-  return expression;
+import { getConditionsExpression } from "./getConditionsExpression";
 
-}
 
 export function RulesModal(
   props: Readonly<{
@@ -49,7 +40,7 @@ export function RulesModal(
   const metaVertexId = graph.newVertexId;
   const metaTxnId = graph.newTxnId;
   let metaAttribute = klona(
-    FormMetaData.Form.attributes.find((x) => x.name === "Rules")!,
+    FormMetaData.Form.attributes.find((x) => x.name === "Rule")!,
   );
   for (const attribute of metaAttribute.attributes!) {
     if (attribute.name === "cond") {
@@ -84,20 +75,35 @@ export function RulesModal(
     revertTransaction(metaTxnId, graph);
   });
 
+  const [error, setError] = createSignal<null | string>(null);
+
+  const expression = createMemo(() => {
+    try {
+      const expr = getConditionsExpression(props.selectedRule!, {P: {}} as unknown as Vertex, graph, setGraph);
+      jsep(expr);
+      setError(null);
+      return expr;
+    } catch (e: any) {
+      setError('Please write a valid expression');
+      return '';
+    }
+  });
+
   const onRulesSubmit = () => {
-    // hack to refresh the select fields. no option is refereshing the label.
-    //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
-    //     v ? [...v] : v,
-    // );
-    console.log(getConditionsExpression(props.selectedRule!, graph, setGraph));
-    props.onSubmit();
+    if (!error()) {
+      props.onSubmit();
+    } else {
+      alert(error());
+    }
   };
+
   const onRulesCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpTo(layoutStore.formData.txnId, prevTxnIndex, graph);
     }
     props.closeModal();
   };
+
   return (
     <Portal>
       <div
@@ -135,7 +141,9 @@ export function RulesModal(
                   </div>
                 </div>
               </div>
+              Expression: {expression()}
               <div class="display:grid@sm gap:0.75rem@sm grid-auto-flow:row|dense@sm grid-cols:2@sm mt:1.25rem mt:1.5rem@sm">
+                {error() && <div class="color:#FF0000">{error()}</div>}
                 <button onClick={onRulesSubmit}>Submit</button>
                 <button
                   class="border-color:#FF0000 color:#FF0000"

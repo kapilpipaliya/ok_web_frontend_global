@@ -13,7 +13,7 @@ import { AddNewRule } from "../../rules/AddNewRule";
 import { RulesModal } from "../rules/RulesModal";
 import { Label } from "./Label";
 
-export function HiddenField(
+export function SelectRuleField(
   props: Readonly<{
     id: string;
     meta: Accessor<Vertex>;
@@ -65,8 +65,8 @@ export function HiddenField(
       class: "flex:1",
       collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
       component: "TagBox",
-      displayName: "Hidden",
-      name: "hidden",
+      displayName: props.metaVertex.P.displayName,
+      name: props.metaVertex.P.name,
       renderLabel: RenderLabel,
       saveEdge: true,
       useLocalStorage: true,

@@ -24,7 +24,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 };
 
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.name === "Rules",
+  (x) => x.name === "Rule",
 );
 
 FormMetaData.Form = {

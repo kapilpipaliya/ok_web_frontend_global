@@ -129,7 +129,8 @@ export function PageAttrDnDWrapper(
         <Popover
           open={
             isSelectedLayoutId(props.item.id) ||
-            isSelectedHoverId(props.item.id)
+            isSelectedHoverId(props.item.id) ||
+            layoutStore.multiHighlight.includes(props.item.id)
           }
           placement={`${isSelectedLayoutId(props.item.id) ? "top-start" : "top-end"}`}
         >

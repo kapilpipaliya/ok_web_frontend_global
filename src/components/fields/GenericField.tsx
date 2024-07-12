@@ -103,14 +103,15 @@ export function GenericField(
   return (
     <Show
       fallback={getViewValue(props.data?.P[props.meta.P[IdAttr]])}
-      when={!props.disabled}
+      // when={!props.disabled}
+      when={true}
     >
       <Switch>
         <Match when={component() === "Repeater"}>
-          <Repeater data={props.data} meta={props.meta} />
+          <Repeater data={props.data} disabled={props.disabled} meta={props.meta} />
         </Match>
         <Match when={component() === "Text" && props.meta.P.as}>
-          <Dynamic class={props.meta.P.class} component={props.meta.P.as}>
+          <Dynamic class={props.meta.P.class} component={props.meta.P.as} disabled={props.disabled}>
             {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
             {props.children}
             <PageAttrRender data={props.data} metaVertex={props.meta} />
@@ -127,6 +128,7 @@ export function GenericField(
                   {...defaultValues()}
                   {...deNullify(props.meta.P)}
                   class={mergeCSS(defaultValues().class, props.meta.P.class)}
+                  disabled={props.disabled}
                   draggable
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                 >
@@ -150,6 +152,7 @@ export function GenericField(
                 {...defaultValues()}
                 {...deNullify(props.meta.P)}
                 class={mergeCSS(defaultValues().class, props.meta.P.class)}
+                disabled={props.disabled}
                 draggable
                 href={
                   getUrl(graph, setGraph, props.meta.P.href, repeaterContext) ||
@@ -171,7 +174,7 @@ export function GenericField(
               </A>
             </Match>
             <Match when={true}>
-              <a draggable>
+              <a disabled={props.disabled} draggable>
                 {props.children}
                 <PageAttrRender data={props.data} metaVertex={props.meta} />
               </a>
@@ -183,13 +186,11 @@ export function GenericField(
             component(),
           )}
         >
-          {/* g:'Page':-'*[P.name="book"]' */}
-          {/* <Show when={props.meta.P.data} keyed> */}
           <PageViewWrapper
+            disabled={props.disabled}
             expression={props.meta.P.data}
             pageVertexLabel={component()}
           />
-          {/* </Show> */}
         </Match>
         <Match when={component() === "Image"}>
           <img
@@ -198,6 +199,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             alt={"img"}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             draggable={true}
             src={getText(graph, setGraph, props.meta.P.src, repeaterContext)}
           />
@@ -207,15 +209,16 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageAttrRender data={props.data} metaVertex={props.meta} />
+          <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageAttrRender data={props.data} metaVertex={props.meta} />
+          <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
@@ -225,6 +228,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.text}>
@@ -234,6 +238,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
             {...getAttrs(props.meta)}
+            disabled={props.disabled}
           >
             {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
           </Dynamic>
@@ -243,6 +248,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <Switch>
               <Match
@@ -271,6 +277,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Table>
@@ -282,12 +289,12 @@ export function GenericField(
               .vertexes?.length
           }
         >
-          <TableHeadCell class={"h:5 p:10 text:center"}>
+          <TableHeadCell class={"h:5 p:10 text:center"} disabled={props.disabled}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
-          <TableBodyCell class={"b:1px|solid|#000 bg:#ffffff h:50 text:center"}>
+          <TableBodyCell class={"b:1px|solid|#000 bg:#ffffff h:50 text:center"} disabled={props.disabled}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
@@ -297,6 +304,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Collapsible>
@@ -306,6 +314,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
@@ -315,6 +324,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Select>
@@ -324,23 +334,25 @@ export function GenericField(
             {...defaultValues()}
             {...props.meta?.P}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             {props.meta.P.children}
           </Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
-          <TreeView meta={props.meta} title={props.meta.P?.title ?? "MenuItem"}>
+          <TreeView disabled={props.disabled} meta={props.meta} title={props.meta.P?.title ?? "MenuItem"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <PageAttrRender data={props.data} metaVertex={props.meta} />
+          <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
@@ -353,6 +365,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Breadcrumbs>
@@ -362,16 +375,18 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           />
         </Match>
         <Match when={component() === "Form" || component() === "Step"}>
-          <FormWrapper meta={props.meta} />
+          <FormWrapper disabled={props.disabled} meta={props.meta} />
         </Match>
         <Match when={component() === "Divider"}>
           <hr
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={` ${mergeCSS(defaultValues().class, props.meta.P.class)} color:${props.meta.P.color ?? "lightgrey"} h:${props.meta.P.height ?? "2"} w:full`}
+            disabled={props.disabled}
           />
         </Match>
         <Match when={component() === "Heading"}>
@@ -379,6 +394,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             divider={props.meta.P.divider ?? true}
             etc={props.meta.P.class}
             heading={props.meta.P.heading}
@@ -390,6 +406,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             etc={props.meta.P.class}
             heading={props.meta.P.heading ?? "Rating"}
           />
@@ -400,6 +417,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Label>
@@ -411,6 +429,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             {...getAttrs(props.meta)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           >
             {props.children}
             <PageAttrRender data={props.data} metaVertex={props.meta} />

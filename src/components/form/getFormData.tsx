@@ -2,9 +2,9 @@ import type { ServerResult } from "~/cypher/get/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/FormMetaDataAuth.1";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 export const getFormData = async (
   formId: string,

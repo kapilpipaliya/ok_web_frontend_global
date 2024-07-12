@@ -5,7 +5,7 @@ import { For, Show, createMemo, createSignal } from "solid-js";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../properties/rules/RulesModal";
@@ -88,7 +88,7 @@ function Header() {
 
 function RulesList() {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [selectedRule, setSelectedRule] = createSignal<Vertex | null>(null);
   const rules = createMemo(() => {
     if (layoutStore.formData?.formData) {
@@ -111,11 +111,23 @@ function RulesList() {
     setSelectedRule(null);
   };
 
+  const highlightRule = (rule: Vertex) => {
+    const incomingIds: Id[] = [];
+    for (const key in rule.IN) {
+      for (const edge of rule.IN[key]) {
+        incomingIds.push(graph.edges[edge].S);
+      }
+    }
+    setLayoutStore("multiHighlight", incomingIds);
+  }
+  const unhighlightRule = () => {
+    setLayoutStore("multiHighlight", []);
+  }
   return (
     <>
       <For each={rules()}>
         {(rule) => (
-          <div class="flex ai:center bg:gray-20:hover jc:space-between p:2">
+          <div class="flex ai:center bg:gray-20:hover jc:space-between p:2" onMouseEnter={() => highlightRule(rule)} onMouseLeave={() => unhighlightRule()}>
             <span>{rule.P.name}</span>
             <button class="" onClick={() => openRuleSettings(rule)}>
               <Icon

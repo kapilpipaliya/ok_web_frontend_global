@@ -8,8 +8,8 @@ import {
   convertNodeToJson,
   convertRelationshipToJson,
 } from "~/lib/convertNodeToJson";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getSubDomain } from "~/server/getSubDomain";
 
 type JsonData = Record<string, any>;

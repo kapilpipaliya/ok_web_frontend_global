@@ -18,6 +18,7 @@ export function getInitialDesignerLayoutStore() {
     isRightOpen: true,
     isSmallScreen: false,
     labelColor: "black", // Default label color
+    multiHighlight: [] as Array<Id | number>,
     // this propes may required on preview too
     position: null as "after" | "before" | "center" | "left" | "right" | null,
     prevTxnIds: [] as Array<Id | number>,

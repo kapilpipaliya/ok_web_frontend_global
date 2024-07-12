@@ -17,6 +17,7 @@ import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToS
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
+import { isDisabled, isHidden } from "../page_designer/settings/properties/rules/isHidden";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
@@ -24,7 +25,7 @@ export function PageAttrRender(
 ) {
   const parentItems = usePageRenderVertexContext();
   const [graph, setGraph] = useGraph();
-  const { txnId } = useFormContext();
+  const { formData, txnId } = useFormContext();
   const [isPreview] = useIsPreview();
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
@@ -45,26 +46,27 @@ export function PageAttrRender(
           return getDataVertex(graph, getLastItem(parentItems, 1));
         };
 
-        // TODO: Find hidden rule and apply here.
         const Content = () => (
-          <DynamicComponent
-            applyDefaults={true}
-            // NOTE: For repeater we cant use parentData
-            component={component()}
-            // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
-            data={
-              props.data ||
-              getSelectionOptions(graph, setGraph, item.P.data, [
-                ...useRepeaterVertexContext(),
-              ]).vertexes ||
-              getDataVertex(graph, item)
-            }
-            // setValue={props.setValue}
-            disabled={false}
-            meta={item}
-            title={toTitle(getId(graph, item) ?? "")}
-            txnId={txnId}
-          />
+          <Show when={!isHidden(item, formData, graph, setGraph)}>
+            <DynamicComponent
+              applyDefaults={true}
+              // NOTE: For repeater we cant use parentData
+              component={component()}
+              // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
+              data={
+                props.data ||
+                getSelectionOptions(graph, setGraph, item.P.data, [
+                  ...useRepeaterVertexContext(),
+                ]).vertexes ||
+                getDataVertex(graph, item)
+              }
+              // setValue={props.setValue}
+              disabled={isDisabled(item, formData, graph, setGraph)}
+              meta={item}
+              title={toTitle(getId(graph, item) ?? "")}
+              txnId={txnId}
+            />
+          </Show>
         );
 
         const PageComponentWithPreview = () => (

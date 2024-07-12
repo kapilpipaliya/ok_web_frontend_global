@@ -5,10 +5,10 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/FormMetaDataAuth.1";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 async function getFormAttr(
   tableId: string,

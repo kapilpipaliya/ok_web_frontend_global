@@ -4,10 +4,10 @@ import type { IFormContext } from "~/lib/contexts";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { binopsInitial, unaryOperatorsInitial } from "../expression_eval";
-import { FormMetaData } from "./formMetaData";
-import { FormMetaDataAuth } from "./formMetaDataAuth";
 import { useGraph } from "../graph/graph";
 import { collectionAttr } from "./collectionAttr";
+import { FormMetaData } from "./formMetaData";
+import { FormMetaDataAuth } from "./formMetaDataAuth";
 
 export const Coll: IFormMetaData = {
   attributes: [
@@ -121,7 +121,7 @@ export const Coll: IFormMetaData = {
             {
               component: "SelectBox",
               displayName: "Paren",
-              name: "left",
+              name: "leftParen",
 
               options: `(
 ((
@@ -181,7 +181,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
             {
               component: "SelectBox",
               displayName: "Paren",
-              name: "right",
+              name: "rightParen",
 
               options: `)
 ))
@@ -204,7 +204,7 @@ OR`,
       component: "DynamicTable",
       label: "Rules",
 
-      name: "Rules",
+      name: "Rule",
       tab: "Rules",
 
       type: "Rule",

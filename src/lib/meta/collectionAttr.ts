@@ -50,6 +50,10 @@ export const collectionAttr = [
     name: "hidden",
   },
   {
+    component: "TagBox",
+    name: "disabled",
+  },
+  {
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",

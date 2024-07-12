@@ -1,9 +1,9 @@
 import type { Session } from "neo4j-driver";
 
 import { processNodeSync } from "~/cypher/mutate/sync/processNodeSync";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/FormMetaDataAuth.1";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 export async function transferNodeTypes(
   sessionSource: Session,

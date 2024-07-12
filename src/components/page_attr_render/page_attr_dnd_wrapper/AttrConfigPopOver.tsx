@@ -6,7 +6,7 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 
-export function AttrConfigPopOver(props: { item: Vertex }) {
+export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const [layoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
@@ -15,7 +15,7 @@ export function AttrConfigPopOver(props: { item: Vertex }) {
       <Match when={isSelectedLayoutId(props.item.id)}>
         <SelectedAttrConfigPopOver item={props.item} />
       </Match>
-      <Match when={isSelectedHoverId(props.item.id)}>
+      <Match when={isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
         <HoverAttrConfigPopOver item={props.item} />
       </Match>
     </Switch>

@@ -52,7 +52,7 @@ export function ImportModal(props: { toggleModal: () => void }) {
     //     //   // reset layout
     //     //   // layoutTreeViewInstance.option("items", getLayoutTreeData());
     //     //   // hack to refresh the select fields. no option is refereshing the label.
-    //     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
+    //     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rule", (v) =>
     //     //     v ? [...v] : v,
     //     //   );
     props.toggleModal();

@@ -21,6 +21,7 @@ export function GenericInputField(
     applyDefaults?: boolean;
     component?: string; // depricated
     componentName?: string;
+    disabled?: boolean;
     title: string;
     txnId: number;
   } & ComponentProps,
@@ -35,7 +36,7 @@ export function GenericInputField(
       ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]])
       : {},
   );
-  const Error = () => (
+  const DisplayError = () => (
     <Show when={props.meta.P.error}>
       <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
     </Show>
@@ -46,7 +47,8 @@ export function GenericInputField(
   return (
     <Show
       fallback={getViewValue(props.data?.P[props.meta.P[IdAttr]])}
-      when={!props.disabled}
+      // when={!props.disabled}
+      when={true}
     >
       <Switch>
         <Match when={component() === "CheckBox"}>
@@ -58,6 +60,7 @@ export function GenericInputField(
               props.data?.P[props.meta.P[IdAttr]] ?? props.meta?.P.checked
             }
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.checked)
@@ -73,7 +76,7 @@ export function GenericInputField(
                   );
             }}
           />
-          <Error />
+          <DisplayError />
           <PageAttrRender data={props.data} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "ColorBox"}>
@@ -82,6 +85,7 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             onInput={(e) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -98,7 +102,7 @@ export function GenericInputField(
             }}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "DropDownBox"}>Dropdown</Match>
         <Match when={component() === "FileUploader"}>
@@ -106,13 +110,14 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             image={props.meta?.P.image}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "HtmlEditor"}>
           {props.data?.P[props.meta.P[IdAttr]]}
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "NumberBox"}>
           <input
@@ -134,10 +139,11 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             type="number"
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "Radio"}>
           <Radio
@@ -146,6 +152,7 @@ export function GenericInputField(
             // name={props.meta?.P.label ?? "radio"}
             align="left"
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
             // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
             onchange={(e: any) => {
               props.setValue
@@ -164,7 +171,7 @@ export function GenericInputField(
           >
             {props.meta?.P.label ?? "radio"}
           </Radio>
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "ProgressBar"}>
           <input
@@ -172,8 +179,9 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            disabled={props.disabled}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "SelectBox"}>
           <MultiSelectField
@@ -214,13 +222,13 @@ export function GenericInputField(
             selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
             selectionLimit={1}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "RadioGroup"}>
-          <RadioGroup>
+          <RadioGroup disabled={props.disabled}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </RadioGroup>
-          <Error />
+          <DisplayError />
         </Match>
 
         <Match when={component() === "TextArea"}>
@@ -228,6 +236,7 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -246,7 +255,7 @@ export function GenericInputField(
             rows={props.meta?.P.rows ?? 4}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
-          <Error />
+          <DisplayError />
         </Match>
         {/* Expression Builder */}
         <Match
@@ -266,6 +275,7 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -283,11 +293,12 @@ export function GenericInputField(
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
-          <Error />
+          <DisplayError />
           <ExpressionBuilder
             component={component()}
             content={props.data?.P[props.meta.P[IdAttr]]}
             data={props.data}
+            disabled={props.disabled}
             meta={props.meta}
             setValue={
               props.setValue
@@ -314,6 +325,7 @@ export function GenericInputField(
             {...defaultValues()}
             {...deNullify(customMetaProps)}
             class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
                 ? props.setValue(e.target.value)
@@ -331,11 +343,11 @@ export function GenericInputField(
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
-          <Error />
+          <DisplayError />
         </Match>
         <Match when={component() === "SignatureBox"}>
-          <Signature />
-          <Error />
+          <Signature disabled={props.disabled} />
+          <DisplayError />
         </Match>
       </Switch>
     </Show>
