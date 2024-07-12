@@ -9,12 +9,14 @@ import { pageAttr } from "./pageAttr";
 export const Page: IFormMetaData = {
   attributes: [
     {
+      class: 'p:8 w:100%',
       component: "TextBox",
-      name: "title",
 
-      onchange: '{"new": ["name","id"]}',
+      name: "title",
+      onchange: '{"new": ["name","id"]}'
     },
     {
+      class: 'p:8 w:100%',
       component: "TextBox",
       name: "name",
 
@@ -43,7 +45,7 @@ export const Page: IFormMetaData = {
         },
       ],
     },
-    { component: "TextArea", name: "description" },
+    { class: 'p:8 w:100%',component: "TextArea", name: "description" },
     {
       collection: "g:'Dashboard'",
       component: "TagBox",
