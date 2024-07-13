@@ -121,8 +121,7 @@ export function DynamicCSSComponent(props: { value: any }) {
           infoLink={props.value.infoLink}
           label={props.value.label}
           name={props.value.name}
-          openMenu={props.value.openMenu[0]}
-          setOpenMenu={props.value.openMenu[1]}
+          openMenu={props.value.openMenu}
         />
       </Match>
       <Match when={props.value.component === "divider"}>

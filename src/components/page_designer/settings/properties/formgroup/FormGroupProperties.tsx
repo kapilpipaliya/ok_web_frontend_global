@@ -109,13 +109,17 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
     const isAddDefaultValue = componentName !== "Form" && genericInputComponents.includes(componentName);
+    const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("css"));
+    const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("css"));
+
     return [
       graph.vertexes[nameVertexId],
       ...(isAddDefaultValue ? [graph.vertexes[defaultValueVertexId]] : []),
       graph.vertexes[hiddenVertexId],
       graph.vertexes[disabledVertexId],
-      ...otherVertices,
+      ...nonCssVertices,
       graph.vertexes[classVertexId],
+      ...cssVertices,
     ];
   }
 

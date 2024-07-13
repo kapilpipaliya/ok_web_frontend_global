@@ -1,4 +1,4 @@
-import type { Accessor, JSXElement, Setter } from "solid-js";
+import type { JSXElement, Signal } from "solid-js";
 
 export type CustomProperty = {
   label: string;
@@ -58,7 +58,7 @@ export interface TextFieldOptionsField extends Field {
   placeholder?: string;
   showInside?: boolean;
   type: string;
-  value?: any;
+  value?: string;
 }
 
 export interface ToggleField extends Field {
@@ -85,8 +85,7 @@ export interface DataEditorField extends Field {
   fallback: string;
   label: string;
   name: string;
-  openMenu: Accessor<boolean | null>;
-  setOpenMenu?: Setter<boolean | null>;
+  openMenu: Signal<null | number>;
 }
 export interface SelectField extends Field {
   component: "select";
@@ -95,10 +94,10 @@ export interface SelectField extends Field {
   isLabelOnTop: boolean;
   label: string;
   name: string;
-  onChangeInput?: (label: any, value: any) => void;
+  onChangeInput?: (label: string, value: string) => void;
   onRemoveIconClick?: () => void;
   options: { label: string; value: string }[] | string[];
-  value?: any;
+  value?: string;
 }
 
 export interface ButtonGroupField extends Field {

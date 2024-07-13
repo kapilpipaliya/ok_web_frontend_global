@@ -1,44 +1,28 @@
+/* eslint-disable perfectionist/sort-objects */
 import type {
   DividerField,
   FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "./FieldType";
 
-import { createButtonGroupOptions } from "./FieldType";
-import { createSelectOptions } from "./FieldType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
+import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
 import { Icons } from "./Icons";
 import { sizeTypes } from "./constants";
 
 export const LayoutSection = {
-  alignFlex: createButtonGroupOptions("align-items", "Align", [
-    { key: "material-symbols:align-start-rounded", value: "flex-start" },
-    { key: "material-symbols:align-center-rounded", value: "center" },
-    { key: "material-symbols:align-end-rounded", value: "flex-end" },
-    { key: "material-symbols:align-items-stretch-rounded", value: "stretch" },
-  ]),
-  alignSelf: createButtonGroupOptions("align-self", "Align", [
-    { key: Icons.flex.auto, value: "auto" },
-    { key: Icons.align.start, value: "flex-start" },
-    { key: Icons.align.center, value: "center" },
-    { key: Icons.align.end, value: "flex-end" },
-    { key: Icons.align.stretch, value: "stretch" },
-  ]),
-  direction: createButtonGroupOptions("flex-direction", "Direction", [
+  display: createSelectOptions("display", "Display", ['block', 'contents', 'flex', 'flow', 'flow-root', 'grid', 'inline', 'inline-block', 'inline-flex', 'inline-grid', 'inline-table', 'list-item', 'math', 'none', 'ruby', 'ruby-text', 'table', 'table-caption', 'table-cell', 'table-column', 'table-column-group', 'table-footer-group', 'table-header-group', 'table-row', 'table-row-group', ...CSSWideKeywords]),
+  alignFlex: createSelectOptions("align-items", "Align Items", extraPropertyValues["align-items"].values),
+  alignSelf: createSelectOptions("align-self", "Align Self", extraPropertyValues["align-self"].values),
+  direction: createButtonGroupOptions("flex-direction", "Flex Direction", [
     { key: Icons.direction.horizontal, value: "row" },
     { key: Icons.direction.horizontalReverse, value: "row-reverse" },
     { key: Icons.direction.vertical, value: "column" },
     { key: Icons.direction.verticalReverse, value: "column-reverse" },
   ]),
-  display: createSelectOptions("display", "Display", [
-    "block",
-    "inline",
-    "inline block",
-    "flex",
-    "none",
-  ]),
   divider4: { component: "divider", title: "Flex Child" } as DividerField,
   flex: createButtonGroupOptions("flex", "Flex", [
-    { key: "mdi:close", tooltip: "auto", value: "0 0 auto" },
+    { key: Icons.flex.auto, tooltip: "auto", value: "0 0 auto" },
     { key: Icons.flex.expand, tooltip: "expand", value: "1 1 0%" },
     { key: Icons.flex.collapse, tooltip: "collapse", value: "0 1 auto" },
     { key: "customIcon", tooltip: "Custom", value: "custom" },

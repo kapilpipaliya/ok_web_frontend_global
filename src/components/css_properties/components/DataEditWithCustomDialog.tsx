@@ -136,11 +136,11 @@ export const DataEditWithCustomDialog = (
   };
 
   const openPopup = (index: number) => {
-    props.setOpenMenu(index);
+    props.openMenu[1](index);
   };
 
   const closePopup = () => {
-    props.setOpenMenu(null);
+    props.openMenu[1](null);
   };
   const renderPopup = (option: string, index: number) => {
     const setCssStateFromProperties = (property: {
@@ -187,7 +187,7 @@ export const DataEditWithCustomDialog = (
     };
 
     return (
-      <Show when={props.openMenu() === index}>
+      <Show when={props.openMenu[0]() === index}>
         <div
           class={
             "popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"
@@ -208,7 +208,7 @@ export const DataEditWithCustomDialog = (
         </div>
         {/* TODO Remove this div */}
         <div
-          class={`${props.openMenu() ? "display:block" : "display:none"} h:100% left:0 position:fixed top:0 w:100% z:3`}
+          class={`${props.openMenu[0]() ? "display:block" : "display:none"} h:100% left:0 position:fixed top:0 w:100% z:3`}
           onClick={closePopup}
         />
       </Show>
