@@ -9,6 +9,7 @@ import { NameKey } from "./keys/NameKey";
 import { PrimaryKey } from "./keys/PrimaryKey";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
+import { SeoConfig } from "./seo/SeoConfig";
 import { UniqueConstrains } from "./unique_constrains/UniqueConstrains";
 
 export function SettingTabs() {
@@ -20,7 +21,9 @@ export function SettingTabs() {
     if (layoutStore.formData?.formData?.L[0] === "Form") {
       baseTabs.push("Keys", "Unique constrains");
     }
-    baseTabs.push("Rules");
+    if (layoutStore.formData?.formData?.L[0] === "Form" || layoutStore.formData?.formData?.L[0] === "Page") {
+      baseTabs.push("Rules", "SEO");
+    }
     return baseTabs;
   });
 
@@ -84,6 +87,9 @@ export function SettingTabs() {
       </Show>
       <div classList={{ "display:none": selectedTab() !== "Rules" }}>
         <Rules />
+      </div>
+      <div classList={{ "display:none": selectedTab() !== "SEO" }}>
+        <SeoConfig />
       </div>
     </>
   );
