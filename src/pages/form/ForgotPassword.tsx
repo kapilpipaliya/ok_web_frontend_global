@@ -82,7 +82,7 @@ export function ForgotPassword() {
       <Switch>
         <Match when={isLoading()}>
           <div class="bg:white p:5rem r:10">
-            <div class="loader" />
+            <div >Loading</div>
           </div>
         </Match>
         <Match when={true}>

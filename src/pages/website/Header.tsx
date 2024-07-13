@@ -2,8 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
 
 import logos from "~/assets/graphics/logo.png";
-import "~/pages/website/krd.css";
-import "~/pages/website/style.css";
 
 export function Header() {
   const navigate = useNavigate();

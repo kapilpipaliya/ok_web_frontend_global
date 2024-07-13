@@ -33,6 +33,8 @@ export function CustomModal(props: CustomModalProps) {
     if (e.target !== e.currentTarget) return;
     setOpen(false);
   };
+  const modalContainerClass = "position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:20  background-color:rgba(0,0,0,0.5)";
+  const modalClass = "position:relative  width:80vw  max-width:800px  padding:15px  background-color:white";
 
   return (
     <>
@@ -67,13 +69,13 @@ export function CustomModal(props: CustomModalProps) {
         setOpen={setOpen}
       >
         <div
-          class="modal-container"
+          class={modalContainerClass}
           onClick={onClickOverlay}
           role="presentation"
         >
           <div
             aria-modal="true"
-            class={`modal ${props.dialogClass} r:10`}
+            class={`${modalClass} ${props.dialogClass} r:10`}
             role="dialog"
           >
             <div class={"font-weight:bold mb:4"}>

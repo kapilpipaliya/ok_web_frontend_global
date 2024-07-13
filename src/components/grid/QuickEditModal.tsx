@@ -21,6 +21,8 @@ export const QuickEditModal = (p: {
   const closePopUp = () => {
     setOpen(false);
   };
+  const modalContainerClass = "position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:20  background-color:rgba(0,0,0,0.5)";
+  const modalClass = "position:relative  width:80vw  max-width:800px  padding:15px  background-color:white";
 
   return (
     <Show when={p.tableId}>
@@ -46,10 +48,10 @@ export const QuickEditModal = (p: {
         open={open}
         setOpen={setOpen}
       >
-        <div class="modal-container" role="presentation">
+        <div class={modalContainerClass} role="presentation">
           <div
             aria-modal="true"
-            class="modal min-w:30% p:0 r:10px"
+            class={`${modalClass} min-w:30% p:0 r:10px`}
             role="dialog"
           >
             <div class="font-weight:bold mb:4">

@@ -1,9 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For } from "solid-js";
 
-import "~/pages/website/krd.css";
-import "~/pages/website/style.css";
-
 interface FooterLinkProps {
   children: string;
   href: string;

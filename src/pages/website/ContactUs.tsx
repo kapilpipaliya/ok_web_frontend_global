@@ -6,8 +6,8 @@ import { contactUsCall } from "~/lib/api/api_functions";
 import { useLoading } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
 import { Footer } from "~/pages/website/Footer";
-import "~/pages/website/krd.css";
-import "~/pages/website/style.css";
+
+
 
 import { Header } from "./Header";
 import { SiteTitle } from "./SiteTitle";
