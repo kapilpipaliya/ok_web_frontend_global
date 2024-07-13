@@ -41,6 +41,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [layoutStore] = useDesignerLayoutStore();
 
   const nameVertexId = `nameVertex${createUniqueId()}`;
+  const labelVertexId = `labelVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
   const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
@@ -58,6 +59,19 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     graph,
     setGraph,
   );
+
+  addNewVertex(
+    0,
+    newVertex(labelVertexId, ["MetaTemp"], {
+      class: PROPERTIES.Css.TextBox,
+      component: "TextBox",
+      displayName: "Label",
+      name: "label",
+    }),
+    graph,
+    setGraph,
+  );
+
   addNewVertex(
     0,
     newVertex(classVertexId, ["MetaTemp"], {
@@ -112,6 +126,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     const otherVertices = vertices.filter(
       (vertex) =>
         vertex.P.name !== "name" &&
+        vertex.P.name !== "label" &&
         vertex.P.name !== "class" &&
         vertex.P.name !== "defaultValue" &&
         vertex.P.name !== "hidden" &&
@@ -125,6 +140,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
     return [
       graph.vertexes[nameVertexId],
+      graph.vertexes[labelVertexId],
       ...(isAddDefaultValue ? [graph.vertexes[defaultValueVertexId]] : []),
       graph.vertexes[requiredVertexId],
       graph.vertexes[hiddenVertexId],
@@ -137,6 +153,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
   onCleanup(() => {
     deleteVertex(0, nameVertexId, graph, setGraph);
+    deleteVertex(0, labelVertexId, graph, setGraph);
     deleteVertex(0, classVertexId, graph, setGraph);
     deleteVertex(0, defaultValueVertexId, graph, setGraph);
     deleteVertex(0, requiredVertexId, graph, setGraph);
@@ -170,6 +187,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
               metaVertex.P.name === "hidden" ||
               metaVertex.P.name === "disabled" ||
               metaVertex.P.name === "name" ||
+              metaVertex.P.name === "label" ||
               metaVertex.P.name === "class" ||
               metaVertex.P.name === "defaultValue" ||
               metaVertex.P.name === "required"
