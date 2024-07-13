@@ -16,7 +16,7 @@ export function RenderMainContent() {
       class={`${!layoutStore.isLeftOpen && !layoutStore.isRightOpen
         ? "grid-template-columns:repeat(1,1fr)"
         : layoutStore.isLeftOpen && layoutStore.isRightOpen
-          ? "grid-template-columns:repeat(3,22%|53%|25%)"
+          ? "grid-template-columns:repeat(3,22%|calc(53%-8px)|25%)"
           : `grid-template-columns:repeat(2,${!layoutStore.isLeftOpen ? "70%|30%" : "30%|70%"}`
         } grid gap:4px`}
     >

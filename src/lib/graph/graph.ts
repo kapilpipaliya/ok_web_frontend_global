@@ -46,6 +46,7 @@ export interface GraphInterface {
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
   member?: { [key: string]: any } | null;
+  navBarHeight: number;
   navigationData?: { [key: string]: any }[];
   newTxnId: number;
   newVertexId: Id;

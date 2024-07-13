@@ -1,4 +1,4 @@
-import { JSX, createContext, useContext } from "solid-js";
+import { type JSX, createContext, useContext } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
 
@@ -39,7 +39,7 @@ function Backdrop() {
 function ModalContent() {
   const zIndex = useZIndex();
   return (
-    <div class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex.modal}`}>
+    <div class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}>
       <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
         <ModalPanel />
       </div>
@@ -110,7 +110,7 @@ function ModalFooter() {
         onClick={props.onConfirm}
         type="button"
       >
-        {props.confirmButtonText || "Confirm"}
+        {props.confirmButtonText ?? "Confirm"}
       </button>
       <button
         class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"

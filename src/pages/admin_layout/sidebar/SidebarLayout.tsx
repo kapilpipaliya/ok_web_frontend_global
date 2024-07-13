@@ -103,13 +103,13 @@ export function Sidebar() {
 
   const handleUrlChange = () => {
     const path = location.pathname;
-    const mainDiv = document.getElementById("mainDiv");
 
     if (!path.includes("/admin")) {
       setGraph("isSideBarOpen", false);
       setGraph("isSubSideBarOpen", false);
     } else {
-      mainDiv?.classList.add("flex");
+      setGraph("isSideBarOpen", true);
+      setGraph("isSubSideBarOpen", true);
     }
   };
 
@@ -160,7 +160,7 @@ export function Sidebar() {
     }) as JSX.CSSProperties;
 
   return (
-    <aside class="flex rel r:0|10|10|0" style={sidebarStyle()}>
+    <aside class="flex r:0|10|10|0" style={sidebarStyle()}>
       <Show
         fallback={
           <div class="flex ai:center jc:center">

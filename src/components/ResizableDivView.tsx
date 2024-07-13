@@ -1,5 +1,7 @@
 import { type JSX, createEffect, createSignal } from "solid-js";
 
+import { useGraph } from "~/lib/graph/graph";
+
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
@@ -7,7 +9,8 @@ export function ResizableContainer(
   }>,
 ) {
   const [width, setWidth] = createSignal("");
-  const [height, setHeight] = createSignal("calc(100vh - 70px)");
+  const [graph] = useGraph();
+  const [height, setHeight] = createSignal(`calc(100vh - ${graph.navBarHeight + 10}px)`);
   const DIMENSIONS = {
     desktop: { height: "1200px", width: "100%" },
     mobile: { height: "570px", width: "360px" },
@@ -58,14 +61,14 @@ export function ResizableContainer(
     <div
       class="grid mt:5 overflow:auto"
       classList={{
-        "min-h:80%": props.view === "Mobile",
-        "min-h:100%": props.view === "Tablet",
+
       }}
     >
       <div
-        class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center max-h:80vh min-h:80% min-w:30% overflow:auto position:relative r:10|10|10|10"
+        class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
-          [`height:${height()}`]: !!height(),
+          [`height:calc(100vh-${graph.navBarHeight + 10}px)`]: true,
+          // [`height:${height()}`]: !!height(),
           [`width:${width()}`]: !!width(),
         }}
       >

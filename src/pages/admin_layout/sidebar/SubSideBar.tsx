@@ -27,7 +27,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
   return (
     <Show when={!props.isCollapsed()}>
       <nav
-        class={"@fade|.3s bg:ghostwhite p:10|20 r:0|0|15|0 w:max-content"}
+        class={"@fade|.3s bg:ghostwhite min-h:100vh p:10|20 r:0|0|15|0 w:max-content"}
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
         <SearchBar

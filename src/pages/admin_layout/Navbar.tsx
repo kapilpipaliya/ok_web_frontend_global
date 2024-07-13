@@ -7,13 +7,15 @@ import type { DisplayComponentProps } from "~/components/fields/ComponentType";
 import { useGraph } from "~/lib/graph/graph";
 
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   return (
     <button
-      class="transition:transform|0.3s|ease"
+      class="flex ai:center"
       onClick={props.toggleSidebar}
+      type="button"
     >
       <Icon
+        class={`${graph.isSideBarOpen ? "rotate(180deg)" : "rotate(0deg)"} transition:transform|.3s|ease-in-out`}
         height="24"
         icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"}
         width="24"
@@ -42,7 +44,7 @@ export function Navbar(
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
   return (
-    <div class="flex ai:center bb:1|solid|rgb(212,219,231) bg:white box-shadow:3px|-1px|4px|3px|lightgrey jc:justify-between p:5|10 r:0|0|10|10">
+    <div class="flex bb:1|solid|rgb(212,219,231) jc:space-between p:5|10">
       <Show
         when={
           field.meta?.P.menuPosition === "left" || !field.meta?.P.menuPosition

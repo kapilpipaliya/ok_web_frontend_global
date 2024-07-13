@@ -64,7 +64,7 @@ export function CommonTable(props: Readonly<TableProps>) {
   };
 
   return (
-    <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) width:100%">
+    <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) p:4|10 width:100%">
       <Table headers={props.headers.length}>
         <For each={props.headers}>
           {(header) => <TableHeadCell>{header.header}</TableHeadCell>}

@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { Show } from "solid-js";
+import { Show, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
@@ -11,8 +11,8 @@ import {
   isAnyFieldInvalid,
 } from "~/components/page_designer/functions/getChildrenAttrs";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { FormContext } from "~/lib/contexts";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { FormContext, type IFormContext } from "~/lib/contexts";
+import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -37,21 +37,10 @@ export function FormWrapper(
   const [formData, setFormData] = createStore({
     cleanUpConfig: () => cleanUpConfig,
     txnId,
-  } as {
-    cleanUpConfig: () => { [key: string]: any };
-    formData: Vertex;
-    formMeta: Vertex;
-    groupByTabsAndGroup: {
-      [tab: string]: {
-        [group: string]: Vertex[];
-      };
-    };
-    tabs: string[];
-    txnId: number;
-  });
+  } as unknown as IFormContext);
 
   // if (!props.data?.id) {
-  const form = getFormMetaData(graph, () => {}, props.meta);
+  const form = getFormMetaData(graph, () => { }, props.meta);
   const defaultValues = form.attributes.reduce(
     (acc, attr) => {
       acc[attr.name] = attr.defaultValue;
@@ -82,7 +71,10 @@ export function FormWrapper(
   // }
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
-
+  onCleanup(() => {
+    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+      revertTransaction(rowMetaTxnId, graph);
+  });
   const SubmitCancelButtons = () => {
     const onSubmit = async () => {
       if (isAnyFieldInvalid(graph, setGraph, props.meta, formData.formData)) {
@@ -122,18 +114,12 @@ export function FormWrapper(
   };
 
   return (
-    <div
-      ref={(el) => {
-        // setDivRef(el);
-      }}
-    >
-      <FormContext.Provider value={formData}>
-        <div class="">
-          <PageAttrRender data={formData.formData} metaVertex={props.meta} />
-        </div>
-        <div />
-        <SubmitCancelButtons />
-      </FormContext.Provider>
-    </div>
+    <FormContext.Provider value={formData}>
+      <div class="">
+        <PageAttrRender data={formData.formData} metaVertex={props.meta} />
+      </div>
+      <div />
+      <SubmitCancelButtons />
+    </FormContext.Provider>
   );
 }

@@ -8,7 +8,7 @@ import { Toaster } from "solid-toast";
 
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
-import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
+import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
@@ -40,6 +40,7 @@ export default function App() {
     isSideBarOpen: false,
     isSubSideBarOpen: false,
     member: {},
+    navBarHeight: 45,
     navigationData: [],
     get newTxnId() {
       txnId = txnId + 1;
@@ -66,8 +67,11 @@ export default function App() {
             <GraphContext.Provider value={graph}>
               <LoadingContext.Provider value={loadingSite}>
                 <MetaProvider>
-                  <div id="popup-root" />
-                  <div id="mainDiv">
+                  <div
+                    classList={{
+                      flex: graph[0].isSideBarOpen || graph[0].isSubSideBarOpen,
+                    }}
+                  >
                     <Show when={graph[0].isSideBarOpen}>
                       <Sidebar />
                     </Show>

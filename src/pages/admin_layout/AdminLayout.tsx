@@ -17,16 +17,16 @@ import {
   newVertex,
 } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/utils";
-import { Navbar } from "~/pages/dashboard/Navbar";
+import { Navbar } from "~/pages/admin_layout/Navbar";
 
-export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
+export function AdminLayout(props: Readonly<{ children?: JSX.Element }>) {
   const border = "|solid|rgb(212,219,231)";
 
   const [graph, setGraph] = useGraph();
-  const vertexId = graph.newVertexId;
+  const navBarVertexId = graph.newVertexId;
   addNewVertex(
     0,
-    newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }),
+    newVertex(navBarVertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }),
     graph,
     setGraph,
   );
@@ -43,12 +43,17 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
   });
 
   return (
-    <div class="scrollbar-width:thin flex flex-grow:1 flex:column overflow:auto">
+    <div
+      class="scrollbar-width:thin flex flex:column overflow:auto"
+      classList={{
+        "flex-grow:1": graph.isSideBarOpen || graph.isSubSideBarOpen,
+      }}
+    >
       <PageContext.Provider
         value={{
           events: {
             setTitle: (title: string) =>
-              mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
+              mergeVertexProperties(0, navBarVertexId, graph, setGraph, { title }),
           },
         }}
       >
@@ -59,7 +64,7 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
           }
         >
           <Navbar
-            meta={graph.vertexes[vertexId]}
+            meta={graph.vertexes[navBarVertexId]}
             right={<DropdownMenu />}
             showCloseDrawerBtn={location.pathname.includes("/admin/")}
             toggleSidebar={() => {
@@ -67,12 +72,7 @@ export function MainDashboard(props: Readonly<{ children?: JSX.Element }>) {
             }}
           />
         </Show>
-        <div
-          class={" scrollbar-width:thin overflow-y:auto  p:4|10"}
-          classList={{ "height:93vh": graph.isSideBarOpen }}
-        >
-          {props.children}
-        </div>
+        {props.children}
       </PageContext.Provider>
     </div>
   );
@@ -131,10 +131,9 @@ const DropdownMenu = () => {
         id="dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl}
-        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${
-          graph.member?.properties?.profileImage ||
+        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${graph.member?.properties?.profileImage ||
           "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-        })`}
+          })`}
       />
       <Dismiss
         cursorKeys
@@ -165,10 +164,9 @@ const DropdownMenu = () => {
             <li class={"flex mb:5px p:10px"}>
               <div
                 class="h:45 r:50% w:45"
-                style={`background-size:cover;background-image: url(${
-                  graph.member?.properties?.profileImage ||
+                style={`background-size:cover;background-image: url(${graph.member?.properties?.profileImage ||
                   "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-                })`}
+                  })`}
               />
               <div class={"ml:10 mr:1rem"}>
                 <div class={"f:15 font-weight:bold text-align:start"}>

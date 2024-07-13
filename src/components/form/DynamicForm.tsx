@@ -148,7 +148,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           value={[formData.formData, ...useRepeaterVertexContext()]}
         >
           <FormContext.Provider value={formData}>
-            <div ref={setDivRef}>
+            <div class="p:4|10" ref={setDivRef}>
               <Show when={props.showSubmitButtonOnTop ?? false}>
                 <SaveCancelButton
                   buttonAlign={props.buttonAlign}

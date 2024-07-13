@@ -14,7 +14,7 @@ type MainSideBarProps = {
 
 export const MainSideBar = (props: MainSideBarProps) => {
   return (
-    <nav class="flex rel align-items:center bg:#E5EAFE flex-direction:column flex:1 mt:1rem pt:0.5rem r:0|15|15|0 w:4rem">
+    <nav class="flex rel align-items:center bg:#E5EAFE flex-direction:column flex:1 min-h:100vh pt:0.5rem r:0|15|15|0 w:4rem">
       <a href="/">
         <img alt="logo" src={logo} style="height: 35px; " />
       </a>
@@ -49,7 +49,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
           )}
         </For>
         <Icon
-          class="abs b:1px|solid|lightgrey bg:#f3f3f4 cursor:pointer p:3 r:50% right:-13px text:center top:2px"
+          class="abs b:1px|solid|lightgrey bg:#f3f3f4 cursor:pointer p:3 r:50% right:-13px text:center top:10px"
           height={19}
           icon={
             !props.isCollapsed()

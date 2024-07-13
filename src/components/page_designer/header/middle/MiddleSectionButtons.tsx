@@ -13,12 +13,13 @@ export const MiddleSectionButtons = () => {
         <Tooltip content={section} position={"s"}>
           <button
             classList={{
+              "ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
               "bg-color:#E0E7F3": section !== "Build",
+              "bl:none": section !== "Build",
               "color:#5252F1": section !== "Build",
               "color:grey": section === "Build",
               "r:0|5|5|0": section !== "Build",
               "r:5|0|0|5": section === "Build",
-              "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
             }}
             onclick={() =>
               setLayoutStore("selectedSection", section.toLowerCase())

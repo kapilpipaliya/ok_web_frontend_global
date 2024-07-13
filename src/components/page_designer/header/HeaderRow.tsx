@@ -26,13 +26,13 @@ export function HeaderRow() {
         <div class="flex ai:center gap:6">
           <UndoRedoIcons />
           <ResizeViewButtons />
-          <Icon
-            class=""
-            height={22}
-            icon="solar:settings-linear"
+          <button
+            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
             onClick={() => setLayoutStore("selectedSection", "setting")}
-            width={22}
-          />
+            type="button"
+          >
+            <Icon height={22} icon="solar:settings-linear" width={22} />
+          </button>
         </div>
       </Show>
       {/* <Show when={layoutStore.formData.txnId}>
@@ -45,7 +45,9 @@ export function HeaderRow() {
               </div>
             </Show> */}
       <Show when={layoutStore.selectedSection === "setting"}>
-        <MiddleSectionButtons />
+        <div class="flex ai:center">
+          <MiddleSectionButtons />
+        </div>
       </Show>
 
       <div class="flex ai:center gap:5">
