@@ -1,20 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  type Accessor,
   For,
-  Match,
-  Show,
-  Switch,
   createMemo,
   createSignal,
 } from "solid-js";
-
-import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
 import type { DataEditorField } from "../constants/FieldType";
 
 import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { ContainerLabel } from "./ContainerLabel";
+import { PickedOption } from "./shadow_editor/PickedOption";
 
 export const DataEditWithCustomDialog = (
   props: Omit<DataEditorField, "component">,
@@ -22,54 +17,13 @@ export const DataEditWithCustomDialog = (
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
-  const [changedData, setChangedData] = createSignal<Record<string, string>>(
-    {},
-  );
 
   const selected = () =>
     cssState[state() || ""]?.[props.name] ||
     cssDefault[state() ?? ""]?.[props.name] ||
     "";
 
-  interface CssProperties {
-    blur: string;
-    color: string;
-    spread: string;
-    type: string;
-    "x-offset": string;
-    "y-offset": string;
-  }
-
-  // Function to parse CSS parts
-  function getCssParts(option: string): CssProperties {
-    const parts = option.split("|");
-    return {
-      blur: parts[2] || "",
-      color: parts[4] || "",
-      spread: parts[3] || "",
-      type: parts[5] || "",
-      "x-offset": parts[0] || "",
-      "y-offset": parts[1] || "",
-    };
-  }
-
-  function createCssOption(css: CssProperties) {
-    // Deconstruct the cssProperties object to extract each property
-    const {
-      blur = "0",
-      color = "#000",
-      spread = "0",
-      type = "",
-      "x-offset": xOffset = "0",
-      "y-offset": yOffset = "0",
-    } = css;
-    setCssState(state(), {
-      [props.name]: `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,
-    });
-  }
-
   const addOption = () => {
-
     if (props.label.includes("Text Shadow") || props.label.includes("Box Shadow")) {
       const currentOptions = selected() ? selected().split(",") : [];
       currentOptions.push("0|0|5|0|#000|inset");
@@ -109,7 +63,7 @@ export const DataEditWithCustomDialog = (
       selected() !== "",
   );
 
-  const getValueOfInput = (name: string) => changedData()[name];
+
 
   const deleteOption = (index: number) => {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
@@ -138,129 +92,6 @@ export const DataEditWithCustomDialog = (
     props.openMenu[1](null);
   };
 
-  const Popup = (p: { index: number, option: string}) => {
-
-    const setCssStateFromProperties = (property: {
-      children?: any[];
-      name: keyof CssProperties;
-    }) => {
-      const data = getCssParts(p.option);
-
-      if (property.name === "grid" && property.children) {
-        property.children.forEach((child) => setCssStateFromProperties(child));
-        return;
-      }
-
-      // @ts-expect-error ignore
-      if (data.hasOwnProperty(property.name)) {
-        setCssState(state(), { [property.name]: data[property.name] });
-      }
-    };
-
-    const addOnChangeToProperties = (properties: any) => {
-      // Ensure properties is an object and not null
-      if (!properties || typeof properties !== "object") {
-        return properties;
-      }
-
-      // If properties.children is an array, iterate over it and enhance each child
-      if (Array.isArray(properties.children)) {
-        properties.children = properties.children.map((child) =>
-          addOnChangeToProperties(child),
-        );
-      }
-
-      // Add onChangeInput handler to the properties object
-      return {
-        ...properties,
-        isAddToClass: false,
-        onChangeInput: (value: string) => {
-          setChangedData({ ...changedData(), [properties.name]: value });
-          createCssOption(changedData());
-          setCssState(state(), { [properties.name]: value });
-        },
-        value: () => getValueOfInput(properties.name),
-      };
-    };
-
-    return (
-      <Show when={props.openMenu[0]() === p.index}>
-        <div
-          class={
-            "popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"
-          }
-        >
-          <div class={"flex ai:center jc:space-between mb:5"}>
-            <div class={"f:15 font-weight:bold"}>{props.dialogLabel}</div>
-            <Icon class={"fg:grey"} icon={"mdi:close"} onClick={closePopup} />
-          </div>
-          <For each={Object.entries(props.children)}>
-            {([sectionName, properties], index) => {
-              setCssStateFromProperties(properties);
-              const enhancedProperties = addOnChangeToProperties(properties);
-
-              return <DynamicCSSComponent value={enhancedProperties} />;
-            }}
-          </For>
-        </div>
-        {/* TODO Remove this div */}
-        <div
-          class={`${props.openMenu[0]() ? "display:block" : "display:none"} h:100% left:0 position:fixed top:0 w:100% z:3`}
-          onClick={closePopup}
-        />
-      </Show>
-    );
-  };
-
-  const resetValues = () => {
-    setCssState(state(), {
-      [props.name]: cssDefault[state() ?? ""]?.[props.name],
-    });
-    setChangedData({});
-  };
-
-  const Component = (p: { i: Accessor<number>; option: string }) => {
-    return (
-      <Switch>
-        <Match when={props.label.includes("Shadow")}>
-          <button class={"f:14 flex:1 mr:8px"}
-            onClick={() => openPopup(p.i())}
-            type="button"
-          >
-            {p.option.replaceAll("|", " ")}
-          </button>
-          <div class={`bg:#fff box-shadow:${p.option} h:20px mr:10 r:5 w:20px`} />
-        </Match>
-        {props.label}
-        <Match when={props.label.includes("Filter")}>
-          <button class={"f:14 flex:1 mr:8px"}
-            onClick={() => openPopup(p.i())}
-            type="button"
-          >
-            {p.option.replaceAll(")", "").replaceAll("(", " ")}
-          </button>
-        </Match>
-        <Match when={props.label.includes("Transition")}>
-          <button class={"f:14 flex:1 mr:8px"}
-            onClick={() => openPopup(p.i())}
-            type="button"
-          >
-            {p.option.replaceAll("|", " ")}
-          </button>
-        </Match>
-        <Match when={props.label.includes("Transform")}>
-          <button class={"f:14 flex:1 mr:8px"}
-            onClick={() => openPopup(p.i())}
-            type="button"
-          >
-            {p.option.replaceAll(")", "").replaceAll("(", " ")}
-          </button>
-        </Match>
-        <Match when={true}>{props.centerComponent}</Match>
-      </Switch>
-    );
-  };
-
   return (
     <div
       class={
@@ -286,24 +117,13 @@ export const DataEditWithCustomDialog = (
       </div>
       <For each={getOptions()}>
         {(option, i) => (
-          <div
-            class={
-              "flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:5px r:4px"
-            }
-          >
-            <Icon
-              class={"cursor:pointer mr:8"}
-              icon={"icon-park-outline:more-one"}
-              onClick={() => openPopup(i())}
-            />
-            <Component i={i} option={option} />
-            <Icon
-              class={"cursor:pointer fg:red mr:8"}
-              icon={"mdi:close"}
-              onClick={() => deleteOption(i())}
-            />
-            <Popup index={i()} option={option} />
-          </div>
+          <PickedOption
+            deleteOption={deleteOption}
+            index={i}
+            label={props.label}
+            openPopup={openPopup}
+            option={option}
+          />
         )}
       </For>
     </div>

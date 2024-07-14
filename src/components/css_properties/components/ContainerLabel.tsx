@@ -16,7 +16,7 @@ export const ContainerLabel = (props: {
   title: JSXElement;
 }) => (
   <span
-    class={`${props.class} flex ai:center font-weight:400 font:14 m:0 pt:5`}
+    class={`${props.class ?? ""} flex ai:center font-weight:400 font:14 m:0 pt:5`}
   >
     {props.title}
     <Show when={props.showResetIcon ?? false}>
