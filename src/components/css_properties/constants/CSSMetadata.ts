@@ -890,8 +890,8 @@ const Weight = new Map([
 const CommonKeywords = ['auto', 'none'];
 
 export interface CSSPropertyDefinition {
-  name: string;
-  longhands: string[]|null;
   inherited: boolean|null;
+  longhands: null|string[];
+  name: string;
   svg: boolean|null;
 }

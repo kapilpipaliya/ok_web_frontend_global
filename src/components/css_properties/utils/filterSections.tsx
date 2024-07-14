@@ -14,7 +14,7 @@ export function filterSections(query: string) {
       );
       if (Object.keys(filteredProperties).length > 0) {
         acc[sectionName] = {
-          isOpen: !!query,
+          isOpen: true, //!!query,
           propertyFieldMap: filteredProperties,
         };
       }

@@ -1,7 +1,7 @@
-/* eslint-disable perfectionist/sort-objects */
-import { extraPropertyValues } from "./CSSMetadata";
+ 
 import type { FieldWithCustomProperty } from "./FieldType";
 
+import { extraPropertyValues } from "./CSSMetadata";
 import { sizeTypes } from "./constants";
 
 export const BorderSection: { [key: string]: FieldWithCustomProperty } = {

@@ -1,14 +1,10 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
-  DividerField,
-  FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
-import { Icons } from "./Icons";
-import { sizeTypes } from "./constants";
+import { createSelectOptions } from "./FieldType";
 
 export const GridChild = {
   gridArea: {component: "textFieldOptions", label: "Grid Area", name: "grid-area", type: "text"} as TextFieldOptionsField,

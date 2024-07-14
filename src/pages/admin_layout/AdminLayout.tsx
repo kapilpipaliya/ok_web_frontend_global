@@ -4,7 +4,6 @@ import Dismiss from "solid-dismiss";
 import { type JSX, Show, createEffect, createSignal, onMount } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-
 import { signOutCall } from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";

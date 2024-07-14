@@ -1,18 +1,14 @@
-/* eslint-disable perfectionist/sort-objects */
+ 
 import { createSignal } from "solid-js";
 
 import type {
-  ColorPickerField,
   DataEditorField,
   FieldWithCustomProperty,
   TextFieldOptionsField,
-  ToggleField,
 } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
-import { createSelectOptions } from "./FieldType";
-import { sizeTypes, timesTypes } from "./constants";
-import { CSSWideKeywords } from "./CSSMetadata";
+import { sizeTypes, } from "./constants";
 
 export const Transform = {
   transform: {

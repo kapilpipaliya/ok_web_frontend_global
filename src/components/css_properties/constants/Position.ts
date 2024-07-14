@@ -1,6 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import { CSSWideKeywords } from "./CSSMetadata";
-import { createSelectOptions, type TextFieldOptionsField } from "./FieldType";
+import { type TextFieldOptionsField, createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 
 export const PositionSection = {

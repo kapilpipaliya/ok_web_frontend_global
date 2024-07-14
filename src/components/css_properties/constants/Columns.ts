@@ -1,13 +1,10 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
-  DividerField,
-  FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "./FieldType";
 
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
-import { Icons } from "./Icons";
+import { CSSWideKeywords, } from "./CSSMetadata";
+import { createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 
 export const ColumnsSection = {

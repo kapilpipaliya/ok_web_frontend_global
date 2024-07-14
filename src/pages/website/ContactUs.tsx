@@ -7,8 +7,6 @@ import { useLoading } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
 import { Footer } from "~/pages/website/Footer";
 
-
-
 import { Header } from "./Header";
 import { SiteTitle } from "./SiteTitle";
 

@@ -17,7 +17,7 @@ export const CollapsibleSection = (
     title: string;
   }>,
 ) => {
-  const [isOpen, setIsOpen] = createSignal(props.isOpen ?? false);
+  const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true);
 
   return (
     <div
@@ -33,13 +33,14 @@ export const CollapsibleSection = (
         onClick={() => setIsOpen(!isOpen())}
         type="button"
       >
-        <span class="f:15 font-weight:600">{props.title}</span>
-        <Icon
-          class={`transform ${isOpen() ? "rotate:0deg" : "rotate:180deg"} cursor:pointer transition:transform|0.2s|linear`}
+                <Icon
+          class={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
           height={25}
           icon="uil:angle-up"
           width={25}
         />
+        <span class="f:15 font-weight:600">{props.title}</span>
+
       </button>
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
@@ -65,7 +66,7 @@ export const SectionList = (props: {
           <Show when={Object.keys(propertyFieldMap).length > 0}>
             <CollapsibleSection
               index={index()}
-              isOpen={isOpen}
+              isOpen={isOpen ?? true}
               propertyFieldMap={propertyFieldMap}
               sectionCount={sectionCount}
               title={sectionName}

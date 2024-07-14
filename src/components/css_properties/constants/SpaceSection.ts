@@ -1,5 +1,6 @@
-/* eslint-disable perfectionist/sort-objects */
-import type { FieldWithCustomProperty, TextFieldOptionsField } from "./FieldType";
+ 
+import type { FieldWithCustomProperty, } from "./FieldType";
+
 import { sizeTypes } from "./constants";
 
 export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty } = {

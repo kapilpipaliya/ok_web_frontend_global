@@ -3,17 +3,14 @@ import { createSignal } from "solid-js";
 
 import type {
   DataEditorField,
-  DividerField,
-  FieldWithCustomProperty,
   SelectField,
   TextFieldOptionsField,
   ToggleField,
 } from "./FieldType";
 
-import { createGridOptions, createSelectOptions } from "./FieldType";
-import { timesTypes } from "./constants";
-import { sizeTypes } from "./constants";
 import { extraPropertyValues } from "./CSSMetadata";
+import { createGridOptions, } from "./FieldType";
+import { sizeTypes } from "./constants";
 
 export const EffectsSection = {
   filter: {

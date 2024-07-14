@@ -1,6 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { FieldWithCustomProperty, TextFieldOptionsField, ToggleField, createSelectOptions } from "./FieldType";
+import { type FieldWithCustomProperty, type TextFieldOptionsField, type ToggleField, createSelectOptions } from "./FieldType";
 import { Icons } from "./Icons";
 import { sizeTypes } from "./constants";
 

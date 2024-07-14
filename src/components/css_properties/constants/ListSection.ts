@@ -1,14 +1,8 @@
 /* eslint-disable perfectionist/sort-objects */
-import type {
-  DividerField,
-  FieldWithCustomProperty,
-  TextFieldOptionsField,
-} from "./FieldType";
+
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
-import { Icons } from "./Icons";
-import { sizeTypes } from "./constants";
+import { createSelectOptions } from "./FieldType";
 
 export const ListSection = {
   listStyleType: createSelectOptions("list-style-type", "List Style Type", [...extraPropertyValues["list-style"].values, ...CSSWideKeywords]),

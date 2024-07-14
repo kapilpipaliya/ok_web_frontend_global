@@ -1,12 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import type {
   ColorPickerField,
   SelectField,
   TextFieldOptionsField,
 } from "./FieldType";
 
-import { createGridOptions } from "./FieldType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 

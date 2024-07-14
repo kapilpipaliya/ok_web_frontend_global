@@ -1,15 +1,10 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
   ColorPickerField,
-  DataEditorField,
-  TextFieldOptionsField,
-  ToggleField,
 } from "./FieldType";
 
-import { createGridOptions } from "./FieldType";
-import { createSelectOptions } from "./FieldType";
-import { sizeTypes } from "./constants";
 import { CSSWideKeywords } from "./CSSMetadata";
+import { createSelectOptions } from "./FieldType";
 
 export const BackgroundSection = {
   backgroundColor: {

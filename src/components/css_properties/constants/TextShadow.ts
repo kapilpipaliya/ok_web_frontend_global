@@ -1,4 +1,4 @@
-/* eslint-disable perfectionist/sort-objects */
+ 
 import { createSignal } from "solid-js";
 
 import type {
@@ -9,9 +9,7 @@ import type {
 } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
-import { createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
-import { CSSWideKeywords } from "./CSSMetadata";
 
 export const TextShadow = {
   textShadow: {

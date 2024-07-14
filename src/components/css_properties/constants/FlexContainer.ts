@@ -1,8 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
-  DividerField,
   FieldWithCustomProperty,
-  TextFieldOptionsField,
 } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
