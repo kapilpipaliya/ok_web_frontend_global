@@ -96,7 +96,7 @@ export interface SelectField extends Field {
   name: string;
   onChangeInput?: (label: string, value: string) => void;
   onRemoveIconClick?: () => void;
-  options: { label: string; value: string }[] | string[];
+  options: ({ label: string; value: string } | string)[] | string[];
   value?: string;
 }
 
@@ -189,7 +189,7 @@ export const createGridOptions = (
 export function createSelectOptions(
   name: string,
   label: string,
-  options: { label: string; value: string }[] | string[],
+  options: ({ label: string; value: string }|string)[] | string[],
   isLabelOnTop = false,
 ): SelectField {
   return {

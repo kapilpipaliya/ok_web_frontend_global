@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-objects */
+import { extraPropertyValues } from "./CSSMetadata";
 import type { FieldWithCustomProperty } from "./FieldType";
 
 import { sizeTypes } from "./constants";
@@ -47,17 +49,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     label: "Border Style",
     mainFieldType: "select",
     name: "border-style",
-    options: [
-      "none",
-      "solid",
-      "dotted",
-      "dashed",
-      "double",
-      "groove",
-      "Ridge",
-      "inset",
-      "outset",
-    ],
+    options: extraPropertyValues["border-style"].values,
     type: "number",
   },
   borderWidth: {
@@ -75,5 +67,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     name: "border-width",
     options: sizeTypes,
     type: "number",
+    // TODO: Add support for options
+    // options: extraPropertyValues["border-width"].values,
   },
 };

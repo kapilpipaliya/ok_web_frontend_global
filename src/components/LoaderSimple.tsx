@@ -1,5 +1,3 @@
-import "~/css/modal.css";
-
 export function LoaderNew(
   props: Readonly<{ class?: string; loaderHeight?: string }>,
 ) {

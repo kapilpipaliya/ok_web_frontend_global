@@ -231,7 +231,8 @@ export const extraPropertyValues = {
   'border-width': {values: ['medium', 'thick', 'thin']},
   'border-style': {values: ['hidden', 'inset', 'groove', 'ridge', 'outset', 'dotted', 'dashed', 'solid', 'double']},
   'size': {values: ['a3', 'a4', 'a5', 'b4', 'b5', 'landscape', 'ledger', 'legal', 'letter', 'portrait']},
-  'overflow': {values: ['hidden', 'visible', 'overlay', 'scroll']},
+  // modified
+  'overflow': {values: ['hidden', 'visible', 'clip', 'scroll', 'auto']},
   'overscroll-behavior': {values: ['contain']},
   'text-rendering': {values: ['optimizeSpeed', 'optimizeLegibility', 'geometricPrecision']},
   'clip-path': {values: ['circle', 'ellipse', 'inset', 'polygon', 'url']},
@@ -334,7 +335,10 @@ export const extraPropertyValues = {
       'ruby',
     ],
   },
-  'vertical-align': {values: ['top', 'bottom']},
+  // added options: middle, baseline, sub, super, text-top, text-bottom
+  'vertical-align': {values: ['top', 'bottom', 'middle', 'baseline', 'sub', 'super', 'text-top', 'text-bottom']},
+  // added:
+  'resize': {values: ['none', 'both', 'horizontal', 'vertical', 'inline', 'block']},
   'page-break-after': {values: ['left', 'right', 'always', 'avoid']},
   'transform': {
     values: [
@@ -474,7 +478,14 @@ export const extraPropertyValues = {
   },
   'grid-template-columns': {values: ['min-content', 'max-content']},
   'grid-template-rows': {values: ['min-content', 'max-content']},
-  'grid-auto-flow': {values: ['dense']},
+  // modified
+  'grid-auto-flow': {values: [
+    'row',
+    'column',
+    'dense',
+    'row dense',
+    'column dense',
+    ]},
   'background': {
     values: [
       'repeat',

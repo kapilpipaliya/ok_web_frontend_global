@@ -5,21 +5,37 @@ import type { CSSJSONSchemaType } from "./FieldType";
 import { BackgroundSection } from "./BackgroundSection";
 import { BorderSection } from "./BorderSection";
 import { EffectsSection } from "./EffectsSection";
-import { GeneralSection } from "./GeneralSection";
-import { LayoutSection } from "./LayoutSection";
-import { PositionSection } from "./PositionSection";
-import { SizeSection } from "./SizeSection";
-import { SpaceSection } from "./SpaceSection";
+import { FlexContainer } from "./FlexContainer";
+import { DisplaySection } from "./DisplaySection";
+import { DimentionSection } from "./DimentionSection";
+import { MarginAndPaddingSection } from "./SpaceSection";
 import { TypographySection } from "./TypographySection";
+import { FlexChild } from "./FlexChild";
+import { BoxShadow } from "./BoxShadow";
+import { TextShadow } from "./TextShadow";
+import { PositionSection } from "./Position";
+import { ColumnsSection } from "./Columns";
+import { GridContainer } from "./GridContainer";
+import { GridChild } from "./GridChild";
+import { ListSection } from "./ListSection";
+import { Transition } from "./Transition";
 
 export const JSONSchema: CSSJSONSchemaType = {
-  Layout: LayoutSection,
-  Background: BackgroundSection,
-  Border: BorderSection,
-  Effects: EffectsSection,
-  General: GeneralSection,
-  Position: PositionSection,
-  Size: SizeSection,
-  Space: SpaceSection,
-  Typography: TypographySection,
+  DisplaySection,
+  PositionSection,
+  FlexContainer,
+  FlexChild,
+  BackgroundSection,
+  BoxShadow,
+  TextShadow,
+  BorderSection,
+  // EffectsSection,
+  DimentionSection,
+  MarginAndPaddingSection,
+  TypographySection,
+  GridContainer,
+  GridChild,
+  ColumnsSection,
+  ListSection,
+  Transition,
 };

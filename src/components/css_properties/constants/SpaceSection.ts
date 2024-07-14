@@ -1,88 +1,39 @@
-import type { TextFieldOptionsField } from "./FieldType";
-
-import { createGridOptions } from "./FieldType";
+/* eslint-disable perfectionist/sort-objects */
+import type { FieldWithCustomProperty, TextFieldOptionsField } from "./FieldType";
 import { sizeTypes } from "./constants";
 
-type SpaceSectionType = {
-  margin: ReturnType<typeof createGridOptions>;
-  padding: ReturnType<typeof createGridOptions>;
-};
-
-export const SpaceSection: SpaceSectionType = {
-  margin: createGridOptions("margin", "Margin", [
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Margin Top",
-      name: "margin-top",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Margin Left",
-      name: "margin-left",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Margin Right",
-      name: "margin-right",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Margin Bottom",
-      name: "margin-bottom",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-  ]),
-  padding: createGridOptions("padding", "Padding", [
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Padding Top",
-      name: "padding-top",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Padding Left",
-      name: "padding-left",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Padding Right",
-      name: "padding-right",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "textFieldOptions",
-      isAddToClass: true,
-      isLabelOnTop: true,
-      label: "Padding Bottom",
-      name: "padding-bottom",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-  ]),
+export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty } = {
+  margin: {
+    component: "fieldWithCustomProperty",
+    customProperty: [
+      { label: "Left", name: "margin-left" },
+      { label: "Right", name: "margin-right" },
+      { label: "Top", name: "margin-top" },
+      { label: "Bottom", name: "margin-bottom" },
+    ],
+    gridType: "repeat(2,auto)",
+    isLabelOnTop: true,
+    label: "Margin",
+    mainFieldType: "textFieldOptions",
+    name: "margin",
+    options: sizeTypes,
+    type: "number",
+  },
+ 
+  padding: {
+    component: "fieldWithCustomProperty",
+    customProperty: [
+      { label: "Left", name: "padding-left" },
+      { label: "Right", name: "padding-right" },
+      { label: "Top", name: "padding-top" },
+      { label: "Bottom", name: "padding-bottom" },
+    ],
+    gridType: "repeat(2,auto)",
+    isLabelOnTop: true,
+    label: "Padding",
+    mainFieldType: "textFieldOptions",
+    name: "padding",
+    options: sizeTypes,
+    type: "number",
+  },
 };

@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-objects */
 import { createSignal } from "solid-js";
 
 import type {
@@ -12,128 +13,9 @@ import type {
 import { createGridOptions, createSelectOptions } from "./FieldType";
 import { timesTypes } from "./constants";
 import { sizeTypes } from "./constants";
+import { extraPropertyValues } from "./CSSMetadata";
 
 export const EffectsSection = {
-  backdropFilter: {
-    children: {
-      shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
-        {
-          component: "select",
-          isLabelOnTop: true,
-          label: "Type",
-          name: "type",
-          options: [
-            "blur",
-            "brightness",
-            "contrast",
-            "grayscale",
-            "hue rotate",
-            "invert",
-            "saturate",
-            "sepia",
-          ],
-        } as SelectField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Value",
-          name: "value",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-      ]),
-    },
-    component: "dataEditor",
-    dialogLabel: "Backdrop Filter",
-    label: "Backdrop Filter",
-    name: "backdrop-filter",
-    openMenu: createSignal(null),
-  } as DataEditorField,
-  backface: {
-    component: "toggleButton",
-    isLabelOnTop: true,
-    label: "Backface",
-    name: "backface-visibility",
-    options: [
-      { key: "Visible", value: "visible" },
-      { key: "Hidden", value: "hidden" },
-    ],
-  } as ToggleField,
-  boxShadow: {
-    children: {
-      shadow: createGridOptions("Shadow Grid", "Box Shadow", [
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "X Offset",
-          name: "X Offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Y Offset",
-          name: "Y Offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Blur",
-          name: "Blur",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Spread",
-          name: "Spread",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-      ]),
-      style: {
-        component: "toggleButton",
-        label: "",
-        name: "Style",
-        options: [
-          { key: "Outside", value: "" },
-          { key: "Inside", value: "inset" },
-        ],
-      } as ToggleField,
-    },
-    component: "dataEditor",
-    dialogLabel: "Adjust Shadow",
-    fallback: "No Shadow Effects",
-    label: "Box Shadow",
-    name: "box-shadow",
-    openMenu: createSignal(null),
-  } as DataEditorField,
-  cursors: createSelectOptions(
-    "cursor",
-    "Cursor",
-    [
-      "auto",
-      "pointer",
-      "copy",
-      "crosshair",
-      "grab",
-      "grabbing",
-      "help",
-      "move",
-      "text",
-    ],
-    true,
-  ),
-  divider: { component: "divider", label: "" } as DividerField,
-  divider2: { component: "divider", label: "" } as DividerField,
-  divider4: {
-    component: "divider",
-    title: "Children transform",
-  } as DividerField,
   filter: {
     children: {
       shadow: createGridOptions("Shadow Grid", "Filter", [
@@ -147,7 +29,7 @@ export const EffectsSection = {
             "brightness",
             "contrast",
             "grayscale",
-            "hue rotate",
+            "hue-rotate",
             "invert",
             "saturate",
             "sepia",
@@ -170,144 +52,17 @@ export const EffectsSection = {
     name: "filter",
     openMenu: createSignal(null),
   } as DataEditorField,
-  opacity: createGridOptions("size Grid", "Opacity", [
-    {
-      component: "textFieldOptions",
-      isLabelOnTop: true,
-      label: "Opacity",
-      name: "opacity",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "select",
-      isLabelOnTop: true,
-      label: "Blend Mode",
-      name: "blend-mode",
-      options: [
-        "normal",
-        "multiply",
-        "screen",
-        "overlay",
-        "darken",
-        "lighten",
-        "color dodge",
-        "color burn",
-        "hard light",
-        "soft light",
-        "difference",
-        "exclusion",
-        "hue",
-        "saturation",
-        "color",
-        "luminosity",
-      ],
-    },
-  ]),
-  overflow: {
-    align: "end",
-    component: "fieldWithCustomProperty",
-    customProperty: [
-      { label: "X", name: "overflow-x" },
-      { label: "Y", name: "overflow-y" },
-    ],
-    gap: "5px 10px",
-    "grid-template-columns": "1fr 25%",
-    gridType: "repeat(2,auto)",
-    isLabelOnTop: true,
-    label: "Overflow",
-    mainFieldType: "select",
-    name: "overflow",
-    options: ["visible", "hidden", "scroll", "auto"],
-    padding: "5px",
-  } as FieldWithCustomProperty,
-  perspective: createGridOptions("size Grid", "Perspective", [
-    {
-      component: "textFieldOptions",
-      isLabelOnTop: true,
-      label: "Perspective",
-      name: "perspective",
-      options: sizeTypes,
-      type: "number",
-    } as TextFieldOptionsField,
-    {
-      component: "buttonGroups",
-      isLabelOnTop: true,
-      label: "Type",
-      name: "transform-style",
-      options: [
-        { key: "2D", tooltip: "2D", value: "flat" },
-        { key: "3D", tooltip: "3D", value: "preserve-3d" },
-      ],
-    },
-  ]),
-  textShadow: {
+
+  backdropFilter: {
     children: {
-      shadow: createGridOptions("Shadow Grid", "Text Shadow", [
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "X Offset",
-          name: "X Offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Y Offset",
-          name: "Y Offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Blur",
-          name: "Blur",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Spread",
-          name: "Spread",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-      ]),
-    },
-    component: "dataEditor",
-    dialogLabel: "Adjust Shadow",
-    fallback: "No Shadow Effects",
-    label: "Text Shadow",
-    name: "text-shadow",
-    openMenu: createSignal(null),
-  } as DataEditorField,
-  transform: {
-    children: {
-      shadow: createGridOptions("Grid", "Transform", [
+      shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
         {
           component: "select",
           isLabelOnTop: true,
           label: "Type",
           name: "type",
-          options: [
-            "move x",
-            "move y",
-            "move z",
-            "rotate x",
-            "rotate y",
-            "rotate z",
-            "scale",
-            "scale x",
-            "scale y",
-            "scale z",
-            "skew x",
-            "skew y",
-          ],
-        },
+          options: extraPropertyValues["backdrop-filter"].values,
+        } as SelectField,
         {
           component: "textFieldOptions",
           isLabelOnTop: true,
@@ -319,91 +74,33 @@ export const EffectsSection = {
       ]),
     },
     component: "dataEditor",
-    dialogLabel: "Adjust Transform",
-    label: "Transform",
-    name: "transform",
+    dialogLabel: "Backdrop Filter",
+    label: "Backdrop Filter",
+    name: "backdrop-filter",
     openMenu: createSignal(null),
   } as DataEditorField,
-  transformOrigin: {
-    align: "end",
-    component: "fieldWithCustomProperty",
-    customProperty: [
-      { label: "Left", name: "transform-origin" },
-      { label: "Top", name: "transform-origin" },
-    ],
-    gap: "5px 10px",
-    "grid-template-columns": "1fr 25%",
-    gridType: "repeat(2,auto)",
+
+  
+
+  backfaceVisibility: {
+    component: "toggleButton",
     isLabelOnTop: true,
-    label: "Transform Origin",
-    mainFieldType: "textFieldOptions",
-    name: "transform-origin",
+    label: "Backface",
+    name: "backface-visibility",
+    options: [
+      { key: "Visible", value: "visible" },
+      { key: "Hidden", value: "hidden" },
+    ],
+  } as ToggleField,
+
+
+  perspective: {
+    component: "textFieldOptions",
+    isLabelOnTop: true,
+    label: "Perspective",
+    name: "perspective",
     options: sizeTypes,
-    padding: "5px",
     type: "number",
-  } as FieldWithCustomProperty,
-  transition: {
-    children: {
-      easing: createSelectOptions(
-        "easing",
-        "Easing",
-        ["ease", "ease-in", "ease-in-out", "ease-out", "linear"],
-        true,
-      ),
-      shadow: createGridOptions("size Grid", "Transition", [
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Duration",
-          name: "duration",
-          options: timesTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Delay",
-          name: "delay",
-          options: timesTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-      ]),
-      type: createSelectOptions(
-        "type",
-        "Type",
-        [
-          "height",
-          "width",
-          "min height",
-          "min width",
-          "max height",
-          "max width",
-          "padding",
-          "margin",
-          "color",
-          "font",
-          "font size",
-          "line height",
-          "letter height",
-          "border",
-          "border radius",
-          "background",
-          "opacity",
-          "box shadow",
-          "text shadow",
-          "filter",
-          "backdrop filter",
-          "transform",
-          "all",
-        ],
-        true,
-      ),
-    },
-    component: "dataEditor",
-    dialogLabel: "Adjust Transition",
-    fallback: "No transition",
-    label: "Transition",
-    name: "transition",
-    openMenu: createSignal(null),
-  } as DataEditorField,
+  } as TextFieldOptionsField,
+
 };

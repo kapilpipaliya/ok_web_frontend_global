@@ -3,9 +3,6 @@
 // import { parseHTML } from '@master/css-server'
 import { StartServer, createHandler } from "@solidjs/start/server";
 // import { JSX } from 'solid-js';
-import "tippy.js/dist/tippy.css";
-
-import "~/css/modal.css";
 
 // import masterConfig from "./master.css";
 
