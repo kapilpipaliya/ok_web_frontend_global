@@ -238,8 +238,8 @@ export const TextFieldWithSelect = (
             <CenterDiv>
               <ContainerLabel
                 info={props.name}
-                onIconClick={resetValue}
-                showIcon={isDefaultValue()}
+                onResetIconClick={resetValue}
+                showResetIcon={isDefaultValue()}
                 title={props.label}
               />
               <Content />
@@ -251,8 +251,8 @@ export const TextFieldWithSelect = (
         <div class={"w:full"}>
           <ContainerLabel
             info={props.name}
-            onIconClick={resetValue}
-            showIcon={isDefaultValue()}
+            onResetIconClick={resetValue}
+            showResetIcon={isDefaultValue()}
             title={props.label}
           />
           <Content />

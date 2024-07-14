@@ -73,10 +73,10 @@ export const ToggleButton = (props: ToggleField) => {
         <div class={"w:full"}>
           <ContainerLabel
             info={props.name}
-            onIconClick={() =>
+            onResetIconClick={() =>
               setCssState(state(), { [props.name]: cssDefault[props.name] })
             }
-            showIcon={isDefaultValue()}
+            showResetIcon={isDefaultValue()}
             title={props.label}
           />
           <Content />
@@ -86,10 +86,10 @@ export const ToggleButton = (props: ToggleField) => {
         <CenterDiv>
           <ContainerLabel
             info={props.name}
-            onIconClick={() =>
+            onResetIconClick={() =>
               setCssState(state(), { [props.name]: cssDefault[props.name] })
             }
-            showIcon={isDefaultValue()}
+            showResetIcon={isDefaultValue()}
             title={props.label}
           />
           <Content />

@@ -32,13 +32,13 @@ export const ColorPickerInput = (
   const isDefaultValue = createMemo(
     () =>
       selected() !== cssDefault[state() ?? ""]?.[props.name] &&
-      selected() !== "#000000",
+      selected() !== "",
   );
 
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
       <input
-        class="color-picker__input-color b:none bg:#ffffff cursor:pointer; h:25px mr:10 p:0 r:5 w:30px"
+        class="b:none bg:#ffffff cursor:pointer; h:25px mr:10 p:0 r:5 w:30px"
         onInput={handleChange}
         type="color"
         value={selected()}
@@ -56,12 +56,12 @@ export const ColorPickerInput = (
   const Label = () => (
     <ContainerLabel
       info={props.name}
-      onIconClick={() =>
+      onResetIconClick={() =>
         setCssState(state(), {
           [props.name]: cssDefault[state() ?? ""]?.[props.name],
         })
       }
-      showIcon={isDefaultValue()}
+      showResetIcon={isDefaultValue()}
       title={props.label}
     />
   );

@@ -24,7 +24,7 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, "component">) => {
     if (props.onChangeInput) {
       props.onChangeInput(option.value);
     }
-    if (!props.isAddToClass == false) {
+    if (!props.isAddToClass === false) {
       setCssState(state(), { [props.name]: option.value });
     }
   };
@@ -47,7 +47,7 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, "component">) => {
                   class={`${selected() === option.value ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
                 >
                   {option.icon ? (
-                    <IconifyIcon icon={option.key as string} />
+                    <IconifyIcon icon={option.key} />
                   ) : (
                     option.key
                   )}
@@ -65,35 +65,28 @@ export const ButtonGroups = (props: Omit<ButtonGroupField, "component">) => {
       selected() !== cssDefault[state() ?? ""]?.[props.name] &&
       selected() !== "",
   );
+  const Label = () => <ContainerLabel
+    info={props.name}
+    onResetIconClick={() =>
+      setCssState(state(), {
+        [props.name]: cssDefault[state() ?? ""]?.[props.name],
+      })
+    }
+    showResetIcon={isDefaultValue()}
+    title={props.label}
+  />
+
   return (
     <Switch>
       <Match when={props.isLabelOnTop}>
         <div class={"w:full"}>
-          <ContainerLabel
-            info={props.name}
-            onIconClick={() =>
-              setCssState(state(), {
-                [props.name]: cssDefault[state() ?? ""]?.[props.name],
-              })
-            }
-            showIcon={isDefaultValue()}
-            title={props.label}
-          />
+          <Label />
           <Content />
         </div>
       </Match>
       <Match when={props.label}>
         <CenterDiv>
-          <ContainerLabel
-            info={props.name}
-            onIconClick={() =>
-              setCssState(state(), {
-                [props.name]: cssDefault[state() ?? ""]?.[props.name],
-              })
-            }
-            showIcon={isDefaultValue()}
-            title={props.label}
-          />
+          <Label />
           <Content />
         </CenterDiv>
       </Match>

@@ -53,7 +53,7 @@ export const Select = (props: SelectField) => {
           <div class={"w:full"}>
             <ContainerLabel
               info={props.infoLink || props.name}
-              onIconClick={() => {
+              onResetIconClick={() => {
                 if (props.value) {
                   props.onRemoveIconClick?.();
                 }
@@ -61,7 +61,7 @@ export const Select = (props: SelectField) => {
                   [props.name]: cssDefault[state() ?? ""]?.[props.name],
                 });
               }}
-              showIcon={isDefaultValue()}
+              showResetIcon={isDefaultValue()}
               title={props.label}
             />
             <Content />
@@ -71,7 +71,7 @@ export const Select = (props: SelectField) => {
           <div class={"flex ai:center jc:space-between w:100%"}>
             <ContainerLabel
               info={props.infoLink || props.name}
-              onIconClick={() => {
+              onResetIconClick={() => {
                 setCssState(state(), {
                   [props.name]: cssDefault[state() ?? ""]?.[props.name],
                 });
@@ -79,7 +79,7 @@ export const Select = (props: SelectField) => {
                   props.onRemoveIconClick?.();
                 }
               }}
-              showIcon={isDefaultValue()}
+              showResetIcon={isDefaultValue()}
               title={props.label}
             />
             <Content />

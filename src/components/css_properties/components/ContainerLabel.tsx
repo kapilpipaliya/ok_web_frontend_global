@@ -3,23 +3,28 @@ import { type JSXElement, Show } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
+/*
+┌───────────┐
+│Title x ?  │
+└───────────┘
+ */
 export const ContainerLabel = (props: {
-  class?: any;
-  info?: any;
-  onIconClick?: any;
-  showIcon?: boolean;
+  class?: string;
+  info?: string;
+  onResetIconClick?: () => void;
+  showResetIcon?: boolean;
   title: JSXElement;
 }) => (
   <span
     class={`${props.class} flex ai:center font-weight:400 font:14 m:0 pt:5`}
   >
     {props.title}
-    <Show when={props.showIcon ?? false}>
+    <Show when={props.showResetIcon ?? false}>
       &nbsp;
       <Icon
         class={"cursor:pointer fg:purple"}
         icon={"mdi:close"}
-        onClick={props.onIconClick}
+        onClick={props.onResetIconClick}
       />
     </Show>
     <Show when={props.info}>

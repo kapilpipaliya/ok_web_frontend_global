@@ -69,7 +69,8 @@ export const DataEditWithCustomDialog = (
   }
 
   const addOption = () => {
-    if (props.label.includes("Text Shadow")) {
+
+    if (props.label.includes("Text Shadow") || props.label.includes("Box Shadow")) {
       const currentOptions = selected() ? selected().split(",") : [];
       currentOptions.push("0|0|5|0|#000|inset");
       const newValue = currentOptions.join(",");
@@ -78,11 +79,6 @@ export const DataEditWithCustomDialog = (
       const currentOptions = selected() ? selected().split("|") : [];
       currentOptions.push("blur(3px)");
       const newValue = currentOptions.join("|");
-      setCssState(state(), { [props.name]: newValue });
-    } else if (props.label.includes("Box Shadow")) {
-      const currentOptions = selected() ? selected().split(",") : [];
-      currentOptions.push("0|0|5|0|#000|inset");
-      const newValue = currentOptions.join(",");
       setCssState(state(), { [props.name]: newValue });
     } else if (props.label.includes("Transition")) {
       const currentOptions = selected() ? selected().split(",") : [];
@@ -101,14 +97,12 @@ export const DataEditWithCustomDialog = (
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
       return (selected() && selected().split(",")) || [];
     }
-    if (props.label.includes("Filter")) {
-      return (selected() && selected().split("|")) || [];
-    }
-    if (props.label.includes("Transform")) {
+    if (props.label.includes("Filter") || props.label.includes("Transform")) {
       return (selected() && selected().split("|")) || [];
     }
     return [];
   };
+
   const isDefaultValue = createMemo(
     () =>
       selected() !== cssDefault[state() ?? ""]?.[props.name] &&
@@ -116,6 +110,7 @@ export const DataEditWithCustomDialog = (
   );
 
   const getValueOfInput = (name: string) => changedData()[name];
+
   const deleteOption = (index: number) => {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
       const data = selected()
@@ -142,12 +137,14 @@ export const DataEditWithCustomDialog = (
   const closePopup = () => {
     props.openMenu[1](null);
   };
-  const renderPopup = (option: string, index: number) => {
+
+  const Popup = (p: { index: number, option: string}) => {
+
     const setCssStateFromProperties = (property: {
       children?: any[];
       name: keyof CssProperties;
     }) => {
-      const data = getCssParts(option);
+      const data = getCssParts(p.option);
 
       if (property.name === "grid" && property.children) {
         property.children.forEach((child) => setCssStateFromProperties(child));
@@ -187,7 +184,7 @@ export const DataEditWithCustomDialog = (
     };
 
     return (
-      <Show when={props.openMenu[0]() === index}>
+      <Show when={props.openMenu[0]() === p.index}>
         <div
           class={
             "popup b:1px|solid|#ccc bg:#fff mr:100px p:10px position:absolute r:10px w:280px z:4"
@@ -214,62 +211,50 @@ export const DataEditWithCustomDialog = (
       </Show>
     );
   };
+
   const resetValues = () => {
     setCssState(state(), {
       [props.name]: cssDefault[state() ?? ""]?.[props.name],
     });
     setChangedData({});
   };
+
   const Component = (p: { i: Accessor<number>; option: string }) => {
     return (
       <Switch>
         <Match when={props.label.includes("Shadow")}>
-          <span
-            class={"f:14"}
-            class={"flex:1 mr:8px"}
-            onClick={() => {
-              openPopup(p.i());
-            }}
+          <button class={"f:14 flex:1 mr:8px"}
+            onClick={() => openPopup(p.i())}
+            type="button"
           >
             {p.option.replaceAll("|", " ")}
-          </span>
-          <div
-            class={`bg:#fff box-shadow:${p.option} h:20px mr:10 r:5 w:20px`}
-          />
+          </button>
+          <div class={`bg:#fff box-shadow:${p.option} h:20px mr:10 r:5 w:20px`} />
         </Match>
         {props.label}
         <Match when={props.label.includes("Filter")}>
-          <span
-            class={"f:14"}
-            class={"flex:1 mr:8px"}
-            onClick={() => {
-              openPopup(p.i());
-            }}
+          <button class={"f:14 flex:1 mr:8px"}
+            onClick={() => openPopup(p.i())}
+            type="button"
           >
             {p.option.replaceAll(")", "").replaceAll("(", " ")}
-          </span>
+          </button>
         </Match>
         <Match when={props.label.includes("Transition")}>
-          <span
-            class={"f:14"}
-            class={"flex:1 mr:8px"}
-            onClick={() => {
-              openPopup(p.i());
-            }}
+          <button class={"f:14 flex:1 mr:8px"}
+            onClick={() => openPopup(p.i())}
+            type="button"
           >
             {p.option.replaceAll("|", " ")}
-          </span>
+          </button>
         </Match>
         <Match when={props.label.includes("Transform")}>
-          <span
-            class={"f:14"}
-            class={"flex:1 mr:8px"}
-            onClick={() => {
-              openPopup(p.i());
-            }}
+          <button class={"f:14 flex:1 mr:8px"}
+            onClick={() => openPopup(p.i())}
+            type="button"
           >
             {p.option.replaceAll(")", "").replaceAll("(", " ")}
-          </span>
+          </button>
         </Match>
         <Match when={true}>{props.centerComponent}</Match>
       </Switch>
@@ -289,8 +274,8 @@ export const DataEditWithCustomDialog = (
       >
         <ContainerLabel
           info={props.name}
-          onIconClick={resetValues}
-          showIcon={isDefaultValue()}
+          onResetIconClick={resetValues}
+          showResetIcon={isDefaultValue()}
           title={props.label}
         />
         <Icon
@@ -317,7 +302,7 @@ export const DataEditWithCustomDialog = (
               icon={"mdi:close"}
               onClick={() => deleteOption(i())}
             />
-            {renderPopup(option, i())}
+            <Popup index={i()} option={option} />
           </div>
         )}
       </For>
