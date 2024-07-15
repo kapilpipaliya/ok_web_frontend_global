@@ -7,8 +7,8 @@ export function FormElementTabs() {
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
     { collection: "TemplatePage", title: "Templates" },
-    { collection: "Page", title: "Pages" },
     { collection: "Form", title: "Forms" },
+    { collection: "Page", title: "Pages" },
     { collection: "ThankYouPage", title: "Thank You" },
     { collection: "ErrorPages", title: "Error Pages" },
     { collection: "EmailTemplate", title: "Email Template" },

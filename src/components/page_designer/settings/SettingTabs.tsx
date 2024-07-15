@@ -9,7 +9,7 @@ import { NameKey } from "./keys/NameKey";
 import { PrimaryKey } from "./keys/PrimaryKey";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
-import { SeoConfig } from "./seo/SeoConfig";
+import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { UniqueConstrains } from "./unique_constrains/UniqueConstrains";
 
 export function SettingTabs() {
@@ -89,7 +89,7 @@ export function SettingTabs() {
         <Rules />
       </div>
       <div classList={{ "display:none": selectedTab() !== "SEO" }}>
-        <SeoConfig />
+        <SEOFormGroupProperties  />
       </div>
     </>
   );
