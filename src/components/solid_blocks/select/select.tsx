@@ -1,7 +1,6 @@
 import { type JSX, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
-import "./select.css";
 
 export type SelectProps = {
   label: JSX.Element;
@@ -21,7 +20,7 @@ export function Select(props: SelectProps) {
       aria-orientation={local["aria-orientation"]}
       classList={{ disabled: props.disabled, "sb-select": true }}
     >
-      {/* <span class="sb-select-label">{local.label}</span> */}
+      <span class="sb-select-label">{local.label}</span>
       <select
         {...fieldProps}
         onChange={(ev): void => {

@@ -3,7 +3,7 @@ export const APP_BASE_URL_NAME = "Admin";
 export const breadcrumbData = [
   { href: `${APP_BASE_URL}`, icon: "ic:baseline-home", name: "Home" },
 ];
-export const iconMap: any = {
+export const iconMap = {
   A: "ph:link-bold",
   Autocomplete: "fluent-mdl2:completed",
   Box: "mage:box-3d-scan",
@@ -23,7 +23,7 @@ export const iconMap: any = {
   Icon: "mynaui:letter-i-hexagon",
   Image: "mage:image",
   Label: "mdi:label-outline",
-  LoadIndicator: "ep:loading",
+  // LoadIndicator: "ep:loading",
   NumberBox: "fluent-emoji-high-contrast:input-numbers",
   Page: "fluent:form-20-regular",
   ProgressBar: "carbon:progress-bar",

@@ -25,7 +25,6 @@ import { TreeView } from "~/components/solid_blocks/TreeView";
 import { Accordion } from "~/components/solid_blocks/accordion/accordion";
 import { Progress } from "~/components/solid_blocks/progress/progress";
 import { Select } from "~/components/solid_blocks/select/select";
-import { Spinner } from "~/components/solid_blocks/spinner/spinner";
 import { Tabs } from "~/components/solid_blocks/tabs/tabs";
 import { APP_BASE_URL } from "~/lib/constants";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
@@ -328,16 +327,6 @@ export function GenericField(
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Select>
-        </Match>
-        <Match when={component() === "LoadIndicator"}>
-          <Spinner
-            {...defaultValues()}
-            {...props.meta?.P}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
-            disabled={props.disabled}
-          >
-            {props.meta.P.children}
-          </Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
           <TreeView disabled={props.disabled} meta={props.meta} title={props.meta.P?.title ?? "MenuItem"}>

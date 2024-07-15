@@ -43,6 +43,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const nameVertexId = `nameVertex${createUniqueId()}`;
   const labelVertexId = `labelVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;
+  const labelClassVertexId = `labelClassVertex${createUniqueId()}`;
   const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
   const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
   const disabledVertexId = `disabledVertex${createUniqueId()}`;
@@ -77,6 +78,16 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     newVertex(classVertexId, ["MetaTemp"], {
       displayName: "Class",
       name: "class",
+    }),
+    graph,
+    setGraph,
+  );
+
+  addNewVertex(
+    0,
+    newVertex(labelClassVertexId, ["MetaTemp"], {
+      displayName: "Label Class",
+      name: "labelClass",
     }),
     graph,
     setGraph,
@@ -128,25 +139,27 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         vertex.P.name !== "name" &&
         vertex.P.name !== "label" &&
         vertex.P.name !== "class" &&
+        vertex.P.name !== "labelClass" &&
         vertex.P.name !== "defaultValue" &&
         vertex.P.name !== "hidden" &&
         vertex.P.name !== "disabled" &&
         vertex.P.name !== "required",
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-    const isAddDefaultValue = componentName !== "Form" && genericInputComponents.includes(componentName);
-    const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("css"));
-    const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("css"));
+    const isFormField = componentName === "Form" && genericInputComponents.includes(componentName);
+    const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("Class"));
+    const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
 
     return [
       graph.vertexes[nameVertexId],
       graph.vertexes[labelVertexId],
-      ...(isAddDefaultValue ? [graph.vertexes[defaultValueVertexId]] : []),
+      ...(isFormField ? [graph.vertexes[defaultValueVertexId]] : []),
       graph.vertexes[requiredVertexId],
       graph.vertexes[hiddenVertexId],
       graph.vertexes[disabledVertexId],
       ...nonCssVertices,
       graph.vertexes[classVertexId],
+      ...(isFormField ? [graph.vertexes[labelClassVertexId]] : []),
       ...cssVertices,
     ];
   }
@@ -155,6 +168,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     deleteVertex(0, nameVertexId, graph, setGraph);
     deleteVertex(0, labelVertexId, graph, setGraph);
     deleteVertex(0, classVertexId, graph, setGraph);
+    deleteVertex(0, labelClassVertexId, graph, setGraph);
     deleteVertex(0, defaultValueVertexId, graph, setGraph);
     deleteVertex(0, requiredVertexId, graph, setGraph);
     deleteVertex(0, hiddenVertexId, graph, setGraph);
@@ -189,6 +203,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
               metaVertex.P.name === "name" ||
               metaVertex.P.name === "label" ||
               metaVertex.P.name === "class" ||
+              metaVertex.P.name === "labelClass" ||
               metaVertex.P.name === "defaultValue" ||
               metaVertex.P.name === "required"
             ) {
@@ -242,7 +257,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     txnId={props.txnId}
                   />
                 </Match>
-                <Match when={metaVertex.P.name === "class"}>
+                <Match when={metaVertex.P.name === "class" || metaVertex.P.name.endsWith("Class")}>
                   <CSSPropertiesEditor
                     data={props.selectedLayout}
                     meta={metaVertex}

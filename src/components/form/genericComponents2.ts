@@ -11,7 +11,6 @@ export const genericComponents2 = [
   "TreeViewItem",
   "TreeViewChild",
   "Collapsible",
-  "LoadIndicator",
   "Divider",
   "Heading",
   "Rating",
