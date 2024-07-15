@@ -2,7 +2,6 @@ import { type Accessor, createMemo } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
@@ -73,13 +72,14 @@ export function Step(
         type="button"
       >
         <span style="display:flex; align-items:center;">
-          <Tooltip content={props.step.P.name}>
+
             <span
               style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${isActiveStep ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+              title={props.step.P.name}
             >
               {props.index() + 1}
             </span>
-          </Tooltip>
+
         </span>
         <span style="margin-right: 0.5rem; white-space: nowrap;">
           {props.step.P.name}

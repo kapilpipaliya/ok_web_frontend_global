@@ -5,7 +5,6 @@ import { Portal } from "solid-js/web";
 import PreviewPage from "~/components/PreviewPage";
 import { ZIndex, useZIndex } from "~/components/ZIndex";
 import PageView from "~/components/page_attr_render/PageView";
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
@@ -55,15 +54,16 @@ export function PreviewButton() {
 
   return (
     <>
-      <Tooltip content={"Preview"} position={"s"}>
+
         <button
           class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
           onClick={handleButtonClick}
+          title="Preview"
           type="button"
         >
           <Icon height={22} icon={"ph:eye"} width={22} />
         </button>
-      </Tooltip>
+
       <Show when={isModalOpen()}>
         <ZIndex>
           <Modal />

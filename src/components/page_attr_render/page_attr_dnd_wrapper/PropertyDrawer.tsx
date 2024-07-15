@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, createSelector } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
 export const PropertyDrawer = (
@@ -12,20 +10,19 @@ export const PropertyDrawer = (
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   return (
     <Show when={isSelectedLayoutId(props.itemId)}>
-      <Tooltip content={"Properties"} nowrap>
-        <Icon
-          class="flex ai:center cursor:pointer"
-          height={22}
-          icon={"mingcute:settings-5-line"}
-          onclick={() =>
-            setLayoutStore(
-              "showPropertiesDrawer",
-              !layoutStore.showPropertiesDrawer,
-            )
-          }
-          width={22}
-        />
-      </Tooltip>
+      <Icon
+        class="flex ai:center cursor:pointer"
+        height={22}
+        icon={"mingcute:settings-5-line"}
+        onclick={() =>
+          setLayoutStore(
+            "showPropertiesDrawer",
+            !layoutStore.showPropertiesDrawer,
+          )
+        }
+        title="Properties"
+        width={22}
+      />
     </Show>
   );
 };

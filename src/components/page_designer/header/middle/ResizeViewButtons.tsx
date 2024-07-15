@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export const ResizeViewButtons = () => {
@@ -16,7 +14,7 @@ export const ResizeViewButtons = () => {
     <div>
       <For each={views}>
         {(view, index) => (
-          <Tooltip content={view.value} position={"s"}>
+
             <button
               class="ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
               classList={{
@@ -28,11 +26,12 @@ export const ResizeViewButtons = () => {
                 "r:5|0|0|5": index() === 0,
               }}
               onclick={() => setLayoutStore("view", view.value)}
+              title={view.value}
               type="button"
             >
               <Icon height={22} icon={view.key} width={22} />
             </button>
-          </Tooltip>
+       
         )}
       </For>
     </div>

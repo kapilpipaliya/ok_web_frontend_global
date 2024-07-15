@@ -11,8 +11,6 @@ import {
   createSignal,
 } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-
 type TableProps = {
   data: any[];
   defaultRowsPerPage?: number;
@@ -136,21 +134,39 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 }
 
-const TableActions = (
-  props: Readonly<{
-    currentPage: Accessor<number>;
-    data: any;
-    displayedRows: Accessor<any[]>;
-    handleFirstPage: () => void;
-    handleLastPage: () => void;
-    handleNextPage: () => void;
-    handlePreviousPage: () => void;
-    handleRowsPerPageChange: (e: Event) => void;
-    rowsPerPage: Accessor<number>;
-    rowsPerPageOptions?: number[];
-    totalPages: Accessor<number>;
-  }>,
-) => {
+function IconButton(props: {
+  classList: Record<string, boolean>;
+  disabled: boolean;
+  icon: string;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+      <button
+        class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
+        classList={props.classList}
+        disabled={props.disabled}
+        onClick={props.onClick}
+        title={props.title}
+      >
+        <Icon height={22} icon={props.icon} width={22} />
+      </button>
+  );
+}
+
+const TableActions = (props: Readonly<{
+  currentPage: Accessor<number>;
+  data: any;
+  displayedRows: Accessor<any[]>;
+  handleFirstPage: () => void;
+  handleLastPage: () => void;
+  handleNextPage: () => void;
+  handlePreviousPage: () => void;
+  handleRowsPerPageChange: (e: Event) => void;
+  rowsPerPage: Accessor<number>;
+  rowsPerPageOptions?: number[];
+  totalPages: Accessor<number>;
+}>) => {
   return (
     <Show when={props.displayedRows().length > 0}>
       <div class="align-items:center display:flex justify-content:space-between padding:.5rem|1rem">
@@ -174,69 +190,54 @@ const TableActions = (
           )} of ${props.data.length}`}</span>
         </div>
         <div class="flex gap:10px">
-          <Tooltip content="Move first">
-            <button
-              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
-              classList={{
-                "color:black": props.currentPage() !== 0,
-                "color:lightgrey": props.currentPage() === 0,
-              }}
-              disabled={props.currentPage() === 0}
-              onClick={props.handleFirstPage}
-            >
-              <Icon
-                height={22}
-                icon={"icon-park-outline:go-start"}
-                width={22}
-              />
-            </button>
-          </Tooltip>
-          <Tooltip content="Previous">
-            <button
-              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
-              classList={{
-                "color:black": props.currentPage() !== 0,
-                "color:lightgrey": props.currentPage() === 0,
-              }}
-              disabled={props.currentPage() === 0}
-              onClick={props.handlePreviousPage}
-            >
-              <Icon height={22} icon={"icon-park-outline:left"} width={22} />
-            </button>
-          </Tooltip>
-          <Tooltip content="Next">
-            <button
-              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
-              classList={{
-                "color:black": props.currentPage() !== props.totalPages() - 1,
-                "color:lightgrey":
-                  props.currentPage() === props.totalPages() - 1,
-              }}
-              disabled={props.currentPage() === props.totalPages() - 1}
-              onClick={props.handleNextPage}
-            >
-              <Icon height={22} icon={"icon-park-outline:right"} width={22} />
-            </button>
-          </Tooltip>
-          <Tooltip content="Move last">
-            <button
-              class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
-              classList={{
-                "color:black": props.currentPage() !== props.totalPages() - 1,
-                "color:lightgrey":
-                  props.currentPage() === props.totalPages() - 1,
-              }}
-              disabled={props.currentPage() === props.totalPages() - 1}
-              onClick={props.handleLastPage}
-            >
-              <Icon height={22} icon={"icon-park-outline:go-end"} width={22} />
-            </button>
-          </Tooltip>
+          <IconButton
+            classList={{
+              "color:black": props.currentPage() !== 0,
+              "color:lightgrey": props.currentPage() === 0,
+            }}
+            disabled={props.currentPage() === 0}
+            icon="icon-park-outline:go-start"
+            onClick={props.handleFirstPage}
+            title="Move first"
+          />
+          <IconButton
+            classList={{
+              "color:black": props.currentPage() !== 0,
+              "color:lightgrey": props.currentPage() === 0,
+            }}
+            disabled={props.currentPage() === 0}
+            icon="icon-park-outline:left"
+            onClick={props.handlePreviousPage}
+            title="Previous"
+          />
+          <IconButton
+            classList={{
+              "color:black": props.currentPage() !== props.totalPages() - 1,
+              "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+            }}
+            disabled={props.currentPage() === props.totalPages() - 1}
+            icon="icon-park-outline:right"
+            onClick={props.handleNextPage}
+            title="Next"
+          />
+          <IconButton
+            classList={{
+              "color:black": props.currentPage() !== props.totalPages() - 1,
+              "color:lightgrey": props.currentPage() === props.totalPages() - 1,
+            }}
+            disabled={props.currentPage() === props.totalPages() - 1}
+            icon="icon-park-outline:go-end"
+            onClick={props.handleLastPage}
+            title="Move last"
+          />
         </div>
       </div>
     </Show>
   );
 };
+
+export default TableActions;
+
 
 export function Table(
   props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,

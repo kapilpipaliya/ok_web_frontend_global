@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createEffect, createSignal } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function ShareSection() {
@@ -49,29 +47,28 @@ export function ShareSection() {
           type="text"
           value={getLink()}
         />
-        <Tooltip content={"Preview link"}>
+     
           <button
             class={
               "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
             }
             onClick={previewLink}
+            title="Preview link"
           >
             🚀
           </button>
-        </Tooltip>
-        <Tooltip
-          content={showCopiedTooltip() ? "Copied" : "Click to copy"}
-          nowrap
-        >
+        
+
           <button
             class={
               "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
             }
             onClick={copyToClipboard}
+            title={showCopiedTooltip() ? "Copied" : "Click to copy"}
           >
             📋
           </button>
-        </Tooltip>
+
       </div>
       <div class="mb:20px">
         <button

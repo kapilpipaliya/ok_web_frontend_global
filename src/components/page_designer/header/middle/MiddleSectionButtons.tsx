@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For } from "solid-js";
 
-import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
-
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export const MiddleSectionButtons = () => {
@@ -10,7 +8,7 @@ export const MiddleSectionButtons = () => {
   return (
     <For each={["Build", "Setting"]}>
       {(section) => (
-        <Tooltip content={section} position={"s"}>
+
           <button
             classList={{
               "ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
@@ -24,6 +22,7 @@ export const MiddleSectionButtons = () => {
             onclick={() =>
               setLayoutStore("selectedSection", section.toLowerCase())
             }
+            title={section}
             type="button"
           >
             <Icon
@@ -36,7 +35,7 @@ export const MiddleSectionButtons = () => {
               width={22}
             />
           </button>
-        </Tooltip>
+     
       )}
     </For>
   );

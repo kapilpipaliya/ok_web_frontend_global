@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, createSignal } from "solid-js";
 
-import { Tooltip } from "./solid_blocks/tooltip/tooltip";
-
 const PreviewPage = (props: any) => {
   const [view, setView] = createSignal("Desktop");
 
@@ -19,7 +17,7 @@ const PreviewPage = (props: any) => {
       <div class="flex mb:16">
         <For each={views}>
           {(viewData, index) => (
-            <Tooltip content={viewData.value} position={"s"}>
+   
               <button
                 classList={{
                   "bg:#E0E7F3 color:#5252F1": viewData.value === view(),
@@ -29,11 +27,12 @@ const PreviewPage = (props: any) => {
                   "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
                 }}
                 onclick={() => setView(viewData.value)}
+                title={viewData.value}
                 type="button"
               >
                 <Icon height={22} icon={viewData.key} width={22} />
               </button>
-            </Tooltip>
+    
           )}
         </For>
       </div>

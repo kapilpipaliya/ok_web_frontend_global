@@ -50,10 +50,10 @@ export interface DynamicFormProps {
   graph: Store<GraphInterface>;
   id?: Id;
   importExportButtons?: boolean;
-  showSaveCancelButton?: boolean;
   meta?: Vertex;
   setGraph: SetStoreFunction<GraphInterface>;
   showMainFieldsOnly?: boolean;
+  showSaveCancelButton?: boolean;
   showSubmitButtonOnTop?: boolean;
   submitButton?: JSXElement;
 }

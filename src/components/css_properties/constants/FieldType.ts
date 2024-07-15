@@ -44,6 +44,7 @@ export interface GridField extends Field {
 
 export interface TextFieldOptionsField extends Field {
   component: "textFieldOptions";
+  inputProps: any
   isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -55,7 +56,6 @@ export interface TextFieldOptionsField extends Field {
   showInside?: boolean;
   type: string;
   value?: string;
-  inputProps: any
 }
 
 export interface ToggleField extends Field {

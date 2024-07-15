@@ -2,12 +2,12 @@ import { Icon } from "@iconify-icon/solid";
 import { path } from "rambda";
 import {
   For,
+  Match,
   Show,
+  Switch,
   createEffect,
   createSignal,
   onCleanup,
-  Switch,
-  Match,
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../constants/FieldType";

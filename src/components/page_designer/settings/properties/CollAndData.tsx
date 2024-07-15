@@ -129,9 +129,9 @@ export function CollAndData() {
             title={""}
             txnId={layoutStore.formData.txnId}
           />
-          {/* <Tooltip content="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used." trigger="hover">
-          <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" />
-        </Tooltip> */}
+          {/* 
+            <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
+          */}
         </div>
       </div>
 
