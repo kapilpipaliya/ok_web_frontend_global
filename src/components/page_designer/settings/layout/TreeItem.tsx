@@ -162,7 +162,6 @@ export function TreeItem(
           "font-size:14px": true,
           "font-weight:bold": !!children().length,
           "font-weight:normal": !children().length,
-          "height:25px": true,
           "justify-content:space-between": true,
           "r:0|5|5|0": !children().length,
           "r:5|5|5|5": !!children().length,
