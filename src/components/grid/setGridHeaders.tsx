@@ -71,7 +71,7 @@ export function setGridHeaders(
     };
     column.header = (info) =>
       capitalizeFirstLetter(
-        attribute.title || attribute.displayName || attribute.name,
+        attribute.label || attribute.title || attribute.displayName || attribute.name,
       );
     column.footer = (info) =>
       capitalizeFirstLetter(

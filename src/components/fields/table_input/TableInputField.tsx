@@ -137,7 +137,7 @@ export function TableInputField(
                         >
                           <th class="font-weight:medium jc:center p:0px|10px">
                             {toTitle(
-                              attribute.P.displayName ||
+                              attribute.P.label || attribute.P.displayName ||
                                 attribute.P[IdAttr] ||
                                 "",
                             )}
