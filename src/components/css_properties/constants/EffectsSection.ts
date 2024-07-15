@@ -1,5 +1,4 @@
 /* eslint-disable perfectionist/sort-objects */
-import { createSignal } from "solid-js";
 
 import type {
   DataEditorField,
@@ -47,7 +46,6 @@ export const EffectsSection = {
     fallback: "No Filter Effects",
     label: "Filter",
     name: "filter",
-    openMenu: createSignal(null),
   } as DataEditorField,
 
   backdropFilter: {
@@ -74,7 +72,6 @@ export const EffectsSection = {
     dialogLabel: "Backdrop Filter",
     label: "Backdrop Filter",
     name: "backdrop-filter",
-    openMenu: createSignal(null),
   } as DataEditorField,
 
   

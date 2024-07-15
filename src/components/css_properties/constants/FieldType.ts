@@ -1,4 +1,4 @@
-import type { JSXElement, Signal } from "solid-js";
+import type { JSXElement, } from "solid-js";
 
 export type CustomProperty = {
   label: string;
@@ -15,10 +15,9 @@ export interface FieldWithCustomProperty extends Field {
   customProperty: CustomProperty[];
   "grid-template-columns"?: string;
   gridType: string;
-  inputType?: string;
   isLabelOnTop: boolean;
   label: string;
-  mainFieldType: string;
+  mainFieldType: ComponentKeyType;
   name: string;
   options?: { label: string; value: string }[] | string[];
   padding?: string;
@@ -27,7 +26,6 @@ export interface FieldWithCustomProperty extends Field {
 
 export interface ColorPickerField extends Field {
   component: "colorPicker";
-  infoLink?: string;
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -46,8 +44,6 @@ export interface GridField extends Field {
 
 export interface TextFieldOptionsField extends Field {
   component: "textFieldOptions";
-  infoLink?: string;
-  inputType?: string;
   isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -59,11 +55,11 @@ export interface TextFieldOptionsField extends Field {
   showInside?: boolean;
   type: string;
   value?: string;
+  inputProps: any
 }
 
 export interface ToggleField extends Field {
   component: "toggleButton";
-  infoLink?: string;
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
@@ -74,35 +70,27 @@ export interface ToggleField extends Field {
 
 export interface DataEditorField extends Field {
   children: {
-    data?: ColorPickerField;
-    easing?: SelectField;
-    shadow: GridField;
-    style?: ToggleField;
-    type?: SelectField;
+    [key: string]: GenericField;
   };
   component: "dataEditor";
   dialogLabel: string;
   fallback: string;
   label: string;
   name: string;
-  openMenu: Signal<null | number>;
 }
 export interface SelectField extends Field {
   component: "select";
-  infoLink?: string;
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
   name: string;
   onChangeInput?: (label: string, value: string) => void;
-  onRemoveIconClick?: () => void;
   options: ({ label: string; value: string } | string)[] | string[];
   value?: string;
 }
 
 export interface ButtonGroupField extends Field {
   component: "buttonGroups";
-  infoLink?: string;
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -141,6 +129,8 @@ export type GenericField =
   | StringField
   | TextFieldOptionsField
   | ToggleField;
+
+export type ComponentKeyType = GenericField["component"];
 
 export type CSSJSONSchemaType = {
   [section: string]: { [key: string]: GenericField };

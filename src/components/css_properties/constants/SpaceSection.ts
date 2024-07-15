@@ -1,5 +1,5 @@
  
-import type { FieldWithCustomProperty, } from "./FieldType";
+import type { FieldWithCustomProperty } from "./FieldType";
 
 import { sizeTypes } from "./constants";
 

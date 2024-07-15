@@ -1,35 +1,34 @@
-import { For, Match, Switch, createMemo } from "solid-js";
+import { path } from "rambda";
+import { For, Match, Switch, } from "solid-js";
 
 import type { ToggleField } from "../constants/FieldType";
 
-import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
-import { ContainerLabel } from "./ContainerLabel";
 import { IconifyIcon } from "./IconifyIcon";
+import { LabelWrapper } from "./LabelWrapper";
 
-export const ToggleButton = (props: ToggleField) => {
+export const ToggleButton = () => {
+  const meta = useComponentMeta() as ToggleField;
   const [cssState, setCssState] = useCssEditor();
-  const [state, setState] = useCssState();
-  const [cssDefault, setCssDefault] = useCssDefaultEditor();
-  const selected = () =>
-    cssState[state() || ""]?.[props.name] ||
-    cssDefault[state() ?? ""]?.[props.name] ||
-    "";
-  const isSelected = (option: any) => selected() === option.value;
-
-  const isDefaultValue = createMemo(
-    () =>
-      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
-      selected() !== "",
-  );
+  const [state] = useCssState();
+  const [cssDefault] = useCssDefaultEditor();
+  const selectedValue = () =>
+    {
+      const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+      return path(projections, cssState) ||
+        path(projections, cssDefault) ||
+        "";
+    };
+  const isSelected = (option: any) => selectedValue() === option.value;
 
   const Content = () => (
     <div
       class={`${
-        !props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
+        !meta.isLabelOnTop && meta.label ? "w:50%" : "w:100%"
       } inline-flex b:1px|solid|#ccc overflow:hidden r:5`}
     >
-      <For each={props.options}>
+      <For each={meta.options}>
         {(option) => {
           return (
             <div
@@ -38,25 +37,25 @@ export const ToggleButton = (props: ToggleField) => {
               } color:${isSelected(option) ? "#5252f1" : "black"} cursor:pointer f:14 jc:center
                                      p:2|5
                  r:${
-                   props.options.indexOf(option) === 0
+                   meta.options.indexOf(option) === 0
                      ? "5|0|0|5"
-                     : props.options.indexOf(option) ===
-                         props.options.length - 1
+                     : meta.options.indexOf(option) ===
+                         meta.options.length - 1
                        ? "0|5|5|0"
                        : "0"
                  }
                  w:-webkit-fill-available`}
               onClick={() => {
-                if (props.onChangeInput) {
-                  props.onChangeInput(option.value);
+                if (meta.onChangeInput) {
+                  meta.onChangeInput(option.value);
                 }
-                if (props.isAddToClass) {
-                  setCssState(state(), { [props.name]: option.value });
+                if (meta.isAddToClass ?? true) {
+                  setCssState(state(), ...(meta.projections ?? []), { [meta.name]: option.value });
                 }
               }}
             >
               {option.icon ? (
-                <IconifyIcon icon={option.key as string} />
+                <IconifyIcon icon={option.key} />
               ) : (
                 option.key
               )}
@@ -69,29 +68,15 @@ export const ToggleButton = (props: ToggleField) => {
 
   return (
     <Switch>
-      <Match when={props.isLabelOnTop}>
+      <Match when={meta.isLabelOnTop}>
         <div class={"w:full"}>
-          <ContainerLabel
-            info={props.name}
-            onResetIconClick={() =>
-              setCssState(state(), { [props.name]: cssDefault[props.name] })
-            }
-            showResetIcon={isDefaultValue()}
-            title={props.label}
-          />
+          <LabelWrapper/>
           <Content />
         </div>
       </Match>
-      <Match when={props.label}>
+      <Match when={meta.label}>
         <CenterDiv>
-          <ContainerLabel
-            info={props.name}
-            onResetIconClick={() =>
-              setCssState(state(), { [props.name]: cssDefault[props.name] })
-            }
-            showResetIcon={isDefaultValue()}
-            title={props.label}
-          />
+        <LabelWrapper/>
           <Content />
         </CenterDiv>
       </Match>

@@ -8,77 +8,40 @@ import { Select } from "~/components/css_properties/components/Select";
 import { TextFieldWithSelect } from "~/components/css_properties/components/TextFieldWithSelect";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
 
-export function DynamicCSSComponent(props: { value: any }) {
+import type { GenericField, TextFieldOptionsField, } from "../constants/FieldType";
+
+import { ComponentMetaContext } from "../context";
+
+export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
   return (
     <Switch>
       <Match when={props.value.component === "colorPicker"}>
-        <ColorPickerInput
-          infoLink={props.value.infoLink}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <ColorPickerInput />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "select"}>
-        <Select
-          infoLink={props.value.infoLink}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-          onRemoveIconClick={props.value.onRemoveIconClick}
-          options={props.value.options}
-          value={props.value.value}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <Select />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "toggleButton"}>
-        <ToggleButton
-          infoLink={props.value.infoLink}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-          options={props.value.options}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <ToggleButton />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "textField"}>
-        <TextFieldWithSelect
-          infoLink={props.value.infoLink}
-          inputType={props.value.type}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          leftIcon={props.value.leftIcon}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-          options={props.value.options}
-          placeholder={props.value.placeholder}
-          showInside={props.value.showInside}
-          value={props.value.value}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <TextFieldWithSelect />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "textFieldOptions"}>
-        <TextFieldWithSelect
-          infoLink={props.value.infoLink}
-          inputType={props.value.type}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          leftIcon={props.value.leftIcon}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-          options={props.value.options}
-          placeholder={props.value.placeholder}
-          showInside={true}
-          value={props.value.value}
-        />
+        <ComponentMetaContext.Provider value={{ ...(props.value as TextFieldOptionsField), showInside: true }}>
+          <TextFieldWithSelect />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "grid"}>
-        <div
+        <div  
           class={`grid ai:${props.value.align || "center"} gap:${props.value.gap || 10} grid-template-cols:${props.value["grid-template-columns"]} p:${props.value.padding || 0}`}
         >
           <For each={props.value.children}>
@@ -89,40 +52,19 @@ export function DynamicCSSComponent(props: { value: any }) {
         </div>
       </Match>
       <Match when={props.value.component === "buttonGroups"}>
-        <ButtonGroups
-          infoLink={props.value.infoLink}
-          isAddToClass={props.value.isAddToClass ?? true}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          name={props.value.name}
-          onChangeInput={props.value.onChangeInput}
-          options={props.value.options}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <ButtonGroups />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
-        <FieldWithCustomBox
-          component={props.value.component}
-          customProperty={props.value.customProperty}
-          gridType={props.value.gridType}
-          inputType={props.value.inputType}
-          isLabelOnTop={props.value.isLabelOnTop}
-          label={props.value.label}
-          mainFieldType={props.value.mainFieldType}
-          name={props.value.name}
-          options={props.value.options}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <FieldWithCustomBox />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "dataEditor"}>
-        <DataEditWithCustomDialog
-          centerComponent={props.value.centerComponent}
-          children={props.value.children}
-          dialogLabel={props.value.dialogLabel}
-          fallback={props.value.fallback}
-          infoLink={props.value.infoLink}
-          label={props.value.label}
-          name={props.value.name}
-          openMenu={props.value.openMenu}
-        />
+        <ComponentMetaContext.Provider value={props.value}>
+          <DataEditWithCustomDialog />
+        </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.component === "divider"}>
         <hr class={"color:lightgrey m:5|0 w:full"} />

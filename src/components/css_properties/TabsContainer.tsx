@@ -76,7 +76,7 @@ export function TabsContainer(
   };
   const removeState = () => {
     batch(() => {
-      setCssState(state(), reconcile({}));
+      setCssState(state(), ...(props.meta.projections ?? []), reconcile({}));
       setState("");
     });
   };

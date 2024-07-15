@@ -1,263 +1,243 @@
 import { Icon } from "@iconify-icon/solid";
+import { path } from "rambda";
 import {
   For,
   Show,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
+  Switch,
+  Match,
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../constants/FieldType";
 
 import { sizeTypes } from "../constants/constants";
-import { useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
 import { Container } from "./Container";
-import { ContainerLabel } from "./ContainerLabel";
+import { LabelWrapper } from "./LabelWrapper";
 
-export const TextFieldWithSelect = (
-  props: Omit<TextFieldOptionsField, "component">,
-) => {
+export const TextFieldWithSelect = () => {
+  const meta = useComponentMeta() as TextFieldOptionsField;
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
-  const selected = () =>
-    cssState[state() || ""]?.[props.name] ||
-    cssDefault[state() ?? ""]?.[props.name] ||
-    "";
+  const selectedValue = () => {
+    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    return path(projections, cssState) ||
+      path(projections, cssDefault) ||
+      "";
+  };
 
-  const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
-  const [isMoving, setIsMoving] = createSignal(false);
-  const [startY, setStartY] = createSignal(0);
-  const [startValue, setStartValue] = createSignal(selected());
+  const [startValue, setStartValue] = createSignal(selectedValue());
   const determineSelectedOption = () => {
-    return sizeTypes.find((unit) => selected().includes(unit)) || "px";
+    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.options?.[0] ?? "px";
   };
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
 
-  createEffect(() => {
-    setOption(determineSelectedOption());
-  });
+  const Content = () => {
+    const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
+    const [isMoving, setIsMoving] = createSignal(false);
+    const [startY, setStartY] = createSignal(0);
+    createEffect(() => {
+      setOption(determineSelectedOption());
+    });
 
-  const handleChange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    const value = target.value;
-    if (value === "") {
-      setCssState(state(), { [props.name]: "" });
-      return;
-    }
-    const numericValue = Number.parseFloat(value);
-    if (props.isAddToClass) {
-      if (props.options) {
-        setCssState(state(), { [props.name]: `${value}${selectedOption()}` });
-      } else {
-        setCssState(state(), { [props.name]: `${numericValue}` });
+    const handleChange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      const value = target.value;
+      if (value === "") {
+        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: "" });
+        return;
       }
-    }
-    if (props.onChangeInput) {
-      props.onChangeInput(`${numericValue}${selectedOption()}`);
-    }
-  };
+      const numericValue = Number.parseFloat(value);
+      if (meta.inputProps.min !== undefined && numericValue < meta.inputProps.min) {
+        return;
+      }
+      if (meta.inputProps.max !== undefined && numericValue > meta.inputProps.max) {
+        return;
+      }
+      if (meta.isAddToClass ?? true) {
+        if (meta.options) {
+          setCssState(state(), ...(meta.projections ?? []), { [meta.name]: `${value}${selectedOption()}` });
+        } else {
+          setCssState(state(), ...(meta.projections ?? []), { [meta.name]: `${numericValue}` });
+        }
+      }
+      if (meta.onChangeInput) {
+        meta.onChangeInput(`${numericValue}${selectedOption()}`);
+      }
+    };
 
-  const toggleDropdown = (event: MouseEvent) => {
-    event.stopPropagation(); // Prevent click from immediately closing the dropdown
-    setIsDropdownOpen(!isDropdownOpen());
-  };
+    const toggleDropdown = (event: MouseEvent) => {
+      event.stopPropagation(); // Prevent click from immediately closing the dropdown
+      setIsDropdownOpen(!isDropdownOpen());
+    };
 
-  const selectOption = (option: string) => {
-    if (option === "") {
+    const selectOption = (option: string) => {
+      if (option === "") {
+        setIsDropdownOpen(false);
+        setOption(option);
+        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: "" });
+        return;
+      }
       setIsDropdownOpen(false);
       setOption(option);
-      setCssState(state(), { [props.name]: "" });
-      return;
-    }
-    setIsDropdownOpen(false);
-    setOption(option);
-    const value = getValueWithoutUnits(selected());
-    setCssState(state(), { [props.name]: `${value}${option}` });
-  };
+      const value = getValueWithoutUnits(selectedValue());
+      setCssState(state(), ...(meta.projections ?? []), { [meta.name]: `${value}${option}` });
+    };
 
-  const getValueWithoutUnits = (valueWithUnits: string) => {
-    if (!valueWithUnits) return "";
-    const unitsToRemove = ["px", "%", "em", "rem", "vh", "vw"];
-    const regexPattern = new RegExp(unitsToRemove.join("|"), "g");
-    return Number.parseFloat(valueWithUnits.replace(regexPattern, ""));
-  };
+    const getValueWithoutUnits = (valueWithUnits: string) => {
+      if (!valueWithUnits) return "";
+      const unitsToRemove = ["px", "%", "em", "rem", "vh", "vw"];
+      const regexPattern = new RegExp(unitsToRemove.join("|"), "g");
+      return Number.parseFloat(valueWithUnits.replace(regexPattern, ""));
+    };
 
-  // Function to normalize and set the new value based on mouse movement
-  const moveIncrement = (event: MouseEvent) => {
-    if (isMoving()) {
-      const diff = startY() - event.pageY;
-      setCssState(state(), {
-        [props.name]: `${startValue() + diff}${selectedOption()}`,
-      });
-    }
-  };
+    // Function to normalize and set the new value based on mouse movement
+    const moveIncrement = (event: MouseEvent) => {
+      if (isMoving()) {
+        const diff = startY() - event.pageY;
+        let newValue = startValue() + diff;
+        if (meta.inputProps.min !== undefined) {
+          newValue = Math.max(newValue, meta.inputProps.min);
+        }
+        if (meta.inputProps.max !== undefined) {
+          newValue = Math.min(newValue, meta.inputProps.max);
+        }
+        setCssState(state(), ...(meta.projections ?? []), {
+          [meta.name]: `${newValue}${selectedOption()}`,
+        });
+      }
+    };
 
-  // Function to start the increment process
-  const downIncrement = (event: MouseEvent) => {
-    event.preventDefault();
-    setIsMoving(true);
-    setStartY(event.pageY);
-    setStartValue(
-      getValueWithoutUnits(props.value ? props.value() : selected()),
-    );
+    // Function to start the increment process
+    const downIncrement = (event: MouseEvent) => {
+      event.preventDefault();
+      setIsMoving(true);
+      setStartY(event.pageY);
+      setStartValue(
+        getValueWithoutUnits(meta.value ? meta.value() : selectedValue()),
+      );
 
-    document.addEventListener("mousemove", moveIncrement);
-    document.addEventListener("mouseup", upIncrement);
-  };
+      document.addEventListener("mousemove", moveIncrement);
+      document.addEventListener("mouseup", upIncrement);
+    };
 
-  // Function to stop the increment process
-  const upIncrement = () => {
-    setIsMoving(false);
-    document.removeEventListener("mousemove", moveIncrement);
-    document.removeEventListener("mouseup", upIncrement);
-  };
+    // Function to stop the increment process
+    const upIncrement = () => {
+      setIsMoving(false);
+      document.removeEventListener("mousemove", moveIncrement);
+      document.removeEventListener("mouseup", upIncrement);
+    };
 
-  // Clean up event listeners when the component unmounts
-  onCleanup(() => {
-    document.removeEventListener("mousemove", moveIncrement);
-    document.removeEventListener("mouseup", upIncrement);
-  });
-
-  const Content = () => (
-    <div
-      class={`${
-        props.showInside ? "b:1px|solid|#ccc" : ""
-      } ${props.showInside ? "p:0|5|0|5" : ""} ${
-        !props.isLabelOnTop ? "max-w:50%" : ""
-      } flex rel ai:center jc:space-between r:5`}
-    >
-      <div class={"flex ai:center flex:1"}>
-        <Show when={props.leftIcon || props.inputType === "number"}>
-          <Show
-            fallback={
-              <button
+    // Clean up event listeners when the component unmounts
+    onCleanup(() => {
+      document.removeEventListener("mousemove", moveIncrement);
+      document.removeEventListener("mouseup", upIncrement);
+    });
+    return (
+      <div
+        class={`${meta.showInside ? "b:1px|solid|#ccc" : ""} ${meta.showInside ? "p:0|5|0|5" : ""} ${!meta.isLabelOnTop ? "max-w:50%" : ""} flex rel ai:center jc:space-between r:5`}
+      >
+        <div class={"flex ai:center flex:1"}>
+          <Show when={meta.leftIcon || meta.type === "number"}>
+            <Show
+              fallback={<button
                 class="bg:transparent border:none cursor:ns-resize"
                 onMouseDown={downIncrement}
               >
                 <Icon class="color:grey" icon="gg:scroll-v" />
-              </button>
-            }
-            when={props.inputType !== "number"}
+              </button>}
+              when={meta.type !== "number"}
+            >
+              {meta.leftIcon}
+            </Show>
+          </Show>
+          <Show
+            fallback={<label>
+              {meta.label}
+              <input
+                class={"f:14 w:100%"}
+                onInput={handleChange}
+                placeholder={`${meta.type === "number" ? "0" : meta.placeholder ?? ""}`}
+                step="any"
+                type={meta.type || "text"}
+                value={getValueWithoutUnits(selectedValue())}
+                {...meta.inputProps} />
+            </label>}
+            when={meta.showInside}
           >
-            {props.leftIcon}
+            <input
+              class="f:14 outline:none p:5 w:100%"
+              onInput={handleChange}
+              placeholder={`${meta.type === "number" ? "0" : meta.placeholder ?? ""}`}
+              step="any"
+              type={meta.type || "text"}
+              value={getValueWithoutUnits(
+                meta.value ? meta.value() : selectedValue()
+              )}
+              {...meta.inputProps} />
+          </Show>
+        </div>
+        <Show when={meta.options}>
+          <span
+            class={"color:lightgrey cursor:pointer f:14 ml:5 pr:5 user-select:none"}
+            onClick={toggleDropdown}
+          >
+            {selectedOption?.()}
+          </span>
+          <Show when={isDropdownOpen()}>
+            <div
+              class={"abs bg:white box-shadow:0px|2px|5px|rgba(0,0,0,0.2) left:0 p:5 r:5 top:100% w:full z-index:1000"}
+            >
+              <For each={meta.options}>
+                {(option) => (
+                  <div
+                    class={`${selectedOption?.() === option
+                      ? "bg:rgb(229,234,253) font-weight:medium"
+                      : "bg:transparent"} flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
+                    onClick={() => selectOption(option)}
+                  >
+                    {option}
+                    <Show when={selectedOption?.() === option}>
+                      <Icon icon={"mdi:check"} />
+                    </Show>
+                  </div>
+                )}
+              </For>
+            </div>
           </Show>
         </Show>
-        <Show
-          fallback={
-            <label>
-              {props.label}
-              <input
-                class={"f:14"}
-                class="w:100%" // Set width to 100%
-                onInput={handleChange}
-                placeholder={`${
-                  props.inputType === "number" ? "0" : props.placeholder
-                }`}
-                step="any"
-                type={props.inputType || "text"}
-                value={getValueWithoutUnits(selected())}
-              />
-            </label>
-          }
-          when={props.showInside}
-        >
-          <input
-            class="f:14 outline:none p:5 w:100%"
-            onInput={handleChange}
-            placeholder={`${
-              props.inputType === "number" ? "0" : props.placeholder
-            }`}
-            step="any"
-            type={props.inputType || "text"}
-            value={getValueWithoutUnits(
-              props.value ? props.value() : selected(),
-            )}
-          />
-        </Show>
       </div>
-      <Show when={props.options}>
-        <span
-          class={
-            "color:lightgrey cursor:pointer f:14 ml:5 pr:5 user-select:none"
-          }
-          onClick={toggleDropdown}
-        >
-          {selectedOption?.()}
-        </span>
-        <Show when={isDropdownOpen()}>
-          <div
-            class={
-              "abs bg:white box-shadow:0px|2px|5px|rgba(0,0,0,0.2) left:0 p:5 r:5 top:100% w:full z-index:1000"
-            }
-          >
-            <For each={props.options}>
-              {(option) => (
-                <div
-                  class={`${
-                    selectedOption?.() === option
-                      ? "bg:rgb(229,234,253) font-weight:medium"
-                      : "bg:transparent"
-                  } flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
-                  onClick={() => selectOption(option)}
-                >
-                  {option}
-                  <Show when={selectedOption?.() === option}>
-                    <Icon icon={"mdi:check"} />
-                  </Show>
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </Show>
-    </div>
-  );
-
-  const isDefaultValue = createMemo(
-    () =>
-      selected() !== cssDefault[state() ?? ""]?.[props.name] &&
-      selected() !== "",
-  );
+    );
+  };
 
   const resetValue = () => {
-    setCssState(state(), {
-      [props.name]: cssDefault[state() ?? ""]?.[props.name],
-    });
-    setStartValue(cssDefault[state() ?? ""]?.[props.name]);
+    setStartValue(cssDefault[state() ?? ""]?.[meta.name]);
     setOption(determineSelectedOption());
   };
 
   return (
     <Container>
-      <Show
-        fallback={
-          <Show fallback={<Content />} when={props.label}>
-            <CenterDiv>
-              <ContainerLabel
-                info={props.name}
-                onResetIconClick={resetValue}
-                showResetIcon={isDefaultValue()}
-                title={props.label}
-              />
-              <Content />
-            </CenterDiv>
-          </Show>
-        }
-        when={props.isLabelOnTop}
-      >
-        <div class={"w:full"}>
-          <ContainerLabel
-            info={props.name}
-            onResetIconClick={resetValue}
-            showResetIcon={isDefaultValue()}
-            title={props.label}
-          />
+      <Switch>
+        <Match when={meta.isLabelOnTop}>
+          <div class={"w:full"}>
+            <LabelWrapper onResetIconClick={resetValue} />
+            <Content />
+          </div>
+        </Match>
+        <Match when={meta.label}>
+          <CenterDiv>
+            <LabelWrapper onResetIconClick={resetValue} />
+            <Content />
+          </CenterDiv>
+        </Match>
+        <Match when={true}>
           <Content />
-        </div>
-      </Show>
+        </Match>
+      </Switch>
     </Container>
   );
 };

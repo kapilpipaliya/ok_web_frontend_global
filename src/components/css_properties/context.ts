@@ -1,13 +1,16 @@
 import { createContext, createSignal, useContext } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
+import type { GenericField } from "./constants/FieldType";
+
 export interface CSSStore {
-  [state: string]: { [key: string]: string };
+  [state: string]: { [key: string]: { [key: string]: any } | string };
 }
 
 export const CssEditorContext = createContext<
   [CSSStore, SetStoreFunction<CSSStore>]
 >(createStore({}));
+
 export const CssDefaultEditorContext = createContext<
   [CSSStore, SetStoreFunction<CSSStore>]
 >(createStore({}));
@@ -25,3 +28,7 @@ export function useCssState() {
 }
 
 export const CssStateContext = createContext(createSignal(""));
+
+export const ComponentMetaContext = createContext<GenericField>();
+
+export const useComponentMeta = () => useContext(ComponentMetaContext)!;

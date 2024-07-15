@@ -235,7 +235,7 @@ export type MenuOptionProps = {
 export function MenuOption(props: MenuOptionProps) {
   const [local, divProps] = splitProps(props, ["value", "onchange"]);
   const [value, change, type] = useContext(MenuOptionsContext);
-  const selected = createMemo(() => value().includes(props.value));
+  const selectedValue = createMemo(() => value().includes(props.value));
   const clickHandler = createMemo(
     () => () => props["aria-disabled"] !== "true" && change(props.value),
   );
@@ -247,14 +247,14 @@ export function MenuOption(props: MenuOptionProps) {
   });
 
   createEffect(() => {
-    props.onchange?.(selected());
+    props.onchange?.(selectedValue());
   });
 
   return (
     <div
-      aria-selected={selected()}
+      aria-selected={selectedValue()}
       tabIndex={
-        (type === "checkbox" || !selected()) &&
+        (type === "checkbox" || !selectedValue()) &&
         props["aria-disabled"] !== "true"
           ? "0"
           : "-1"

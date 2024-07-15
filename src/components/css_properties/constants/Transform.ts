@@ -1,5 +1,4 @@
- 
-import { createSignal } from "solid-js";
+/* eslint-disable perfectionist/sort-objects */
 
 import type {
   DataEditorField,
@@ -76,6 +75,5 @@ export const Transform = {
     dialogLabel: "Adjust Transform",
     label: "Transform",
     name: "transform",
-    openMenu: createSignal(null),
   } as DataEditorField,
 };

@@ -1,5 +1,4 @@
- 
-import { createSignal } from "solid-js";
+
 
 import type {
   ColorPickerField,
@@ -8,7 +7,6 @@ import type {
   ToggleField,
 } from "./FieldType";
 
-import { createGridOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 
 export const BoxShadow = {
@@ -20,48 +18,46 @@ export const BoxShadow = {
         label: "Shadow Color",
         name: "color",
       } as ColorPickerField,
-      shadow: createGridOptions("grid", "Shadow", [
-        {
-          component: "textFieldOptions",
-          isAddToClass: false,
-          isLabelOnTop: true,
-          label: "X Offset",
-          name: "x-offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isAddToClass: false,
-          isLabelOnTop: true,
-          label: "Y Offset",
-          name: "y-offset",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isAddToClass: false,
-          isLabelOnTop: true,
-          label: "Blur",
-          name: "blur",
-          options: sizeTypes,
-          type: "number",
-        } as TextFieldOptionsField,
-        {
-          component: "textFieldOptions",
-          isAddToClass: false,
-          isLabelOnTop: true,
-          label: "Spread",
-          name: "spread",
-          options: sizeTypes,
-          type: "number",
-        },
-      ]),
-      style: {
+      xOffset: {
+        component: "textFieldOptions",
+        isAddToClass: false,
+        isLabelOnTop: true,
+        label: "X Offset",
+        name: "x-offset",
+        options: sizeTypes,
+        type: "number",
+      } as TextFieldOptionsField,
+      yOffset: {
+        component: "textFieldOptions",
+        isAddToClass: false,
+        isLabelOnTop: true,
+        label: "Y Offset",
+        name: "y-offset",
+        options: sizeTypes,
+        type: "number",
+      } as TextFieldOptionsField,
+      blur: {
+        component: "textFieldOptions",
+        isAddToClass: false,
+        isLabelOnTop: true,
+        label: "Blur",
+        name: "blur",
+        options: sizeTypes,
+        type: "number",
+      } as TextFieldOptionsField,
+      spread: {
+        component: "textFieldOptions",
+        isAddToClass: false,
+        isLabelOnTop: true,
+        label: "Spread",
+        name: "spread",
+        options: sizeTypes,
+        type: "number",
+      } as TextFieldOptionsField,
+      inset: {
         component: "toggleButton",
         label: "",
-        name: "type",
+        name: "inset",
         options: [
           { key: "Outside", value: "" },
           { key: "Inside", value: "inset" },
@@ -73,6 +69,5 @@ export const BoxShadow = {
     fallback: "No Shadow Effects",
     label: "Box Shadow",
     name: "box-shadow",
-    openMenu: createSignal(null),
   } as DataEditorField,
 };

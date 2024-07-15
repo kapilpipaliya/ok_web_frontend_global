@@ -35,3 +35,6 @@ in master css have to write position:absolute full.
 
 Note:
 when lastpass auto fill the fields, it is giving errors in development on cleanup of component.
+
+Grid:
+<div class="display:grid grid-template-cols:repeat(2,1fr) gap:16">

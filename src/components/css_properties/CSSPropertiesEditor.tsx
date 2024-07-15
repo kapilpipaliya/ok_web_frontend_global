@@ -64,7 +64,7 @@ export function CSSPropertiesEditor(
     >
       <CssDefaultEditorContext.Provider
         value={[cssDefaultState, setCssDefaultCssState]}
-      >
+      >{JSON.stringify(cssState)}
         <CssStateContext.Provider value={[state, setState]}>
           <ResetButton />
           <span class={"m:10|0"}>

@@ -2,7 +2,6 @@
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { type FieldWithCustomProperty, type TextFieldOptionsField, type ToggleField, createSelectOptions } from "./FieldType";
 import { Icons } from "./Icons";
-import { sizeTypes } from "./constants";
 
 export const DisplaySection = {
   display: createSelectOptions("display", "Display", ['block', 'contents', 'flex', 'flow', 'flow-root', 'grid', 'inline', 'inline-block', 'inline-flex', 'inline-grid', 'inline-table', 'list-item', 'math', 'none', 'ruby', 'ruby-text', 'table', 'table-caption', 'table-cell', 'table-column', 'table-column-group', 'table-footer-group', 'table-header-group', 'table-row', 'table-row-group', ...CSSWideKeywords]),
@@ -42,8 +41,12 @@ export const DisplaySection = {
     isLabelOnTop: true,
     label: "Opacity",
     name: "opacity",
-    options: sizeTypes,
+    options: ['%'],
     type: "number",
+    inputProps: {
+      min: 0,
+      max: 100,
+    },
   } as TextFieldOptionsField,
   cursor: createSelectOptions("cursor", "Cursor", ["auto", "default", "pointer", "wait", "text", "move", "not-allowed", ...CSSWideKeywords]), //Add more if required
   objectFit: createSelectOptions("object-fit", "Object Fit", ["fill", "contain", "cover", "none", "scale-down", ...CSSWideKeywords]), 

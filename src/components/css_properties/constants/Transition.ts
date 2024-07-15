@@ -1,5 +1,4 @@
- 
-import { createSignal } from "solid-js";
+/* eslint-disable perfectionist/sort-objects */
 
 import type {
   DataEditorField,
@@ -73,6 +72,5 @@ export const Transition = {
     fallback: "No transition",
     label: "Transition",
     name: "transition",
-    openMenu: createSignal(null),
   } as DataEditorField,
 };

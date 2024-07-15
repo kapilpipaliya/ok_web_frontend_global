@@ -1,5 +1,4 @@
- 
-import { createSignal } from "solid-js";
+/* eslint-disable perfectionist/sort-objects */
 
 import type {
   ColorPickerField,
@@ -73,6 +72,5 @@ export const TextShadow = {
     fallback: "No Shadow Effects",
     label: "Text Shadow",
     name: "text-shadow",
-    openMenu: createSignal(null),
   } as DataEditorField,
 };

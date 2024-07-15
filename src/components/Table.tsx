@@ -280,7 +280,7 @@ export function TableBodyCell(
 ) {
   return (
     <div
-      class={`${props.class} @fade|.4s`}
+      class={`${props.class ?? ""} @fade|.4s`}
       classList={{
         "align-content:center": true,
         "bg:#3478cc0d": props.index ? props.index % 2 !== 0 : false,

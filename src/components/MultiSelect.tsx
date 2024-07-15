@@ -46,7 +46,7 @@ export function MultiSelectField(
   const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
 
   // Define signals for managing state
-  const selected = createMemo(
+  const selectedValue = createMemo(
     () =>
       (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
   );
@@ -77,7 +77,7 @@ export function MultiSelectField(
 
   // Remove tag from selected values
   const handleRemoveTag = (option: Option) => {
-    const newSelected = selected().filter(
+    const newSelected = selectedValue().filter(
       (item) => getOptionValue(item) !== option,
     );
 
@@ -146,8 +146,8 @@ export function MultiSelectField(
     const handleSelectChange = (option: Option) => {
       const value = getOptionValue(option);
       let newSelected: Option[];
-      if (selected().some((item) => getOptionValue(item) === value)) {
-        newSelected = selected().filter(
+      if (selectedValue().some((item) => getOptionValue(item) === value)) {
+        newSelected = selectedValue().filter(
           (item) => getOptionValue(item) !== value,
         );
 
@@ -156,7 +156,7 @@ export function MultiSelectField(
         if (
           props.selectionLimit &&
           props.selectionLimit > 1 &&
-          selected().length >= props.selectionLimit
+          selectedValue().length >= props.selectionLimit
         ) {
           showErrorToast("Selection limit reached");
           setDropdownVisible(false);
@@ -165,7 +165,7 @@ export function MultiSelectField(
         if (props.selectionLimit === 1) {
           newSelected = [option];
         } else {
-          newSelected = [...selected(), option];
+          newSelected = [...selectedValue(), option];
         }
 
         props.onSelect?.(newSelected, value);
@@ -211,7 +211,7 @@ export function MultiSelectField(
             <button
               class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
               classList={{
-                "bg:#ddd opacity:0.5": selected().some(
+                "bg:#ddd opacity:0.5": selectedValue().some(
                   (item) => getOptionValue(item) === getOptionValue(p.option),
                 ),
               }}
@@ -235,7 +235,7 @@ export function MultiSelectField(
             <button
               class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
               classList={{
-                "bg:#ddd opacity:0.5": selected().some(
+                "bg:#ddd opacity:0.5": selectedValue().some(
                   (item) => getOptionValue(item) === getOptionValue(p.option),
                 ),
               }}
@@ -297,7 +297,7 @@ export function MultiSelectField(
       <div
         class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|0px w:100%`}
       >
-        <For each={selected()}>
+        <For each={selectedValue()}>
           {(tag) => (
             <div class="c:#fff ai:center bg:#3377cc cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
               {props.renderLabel
@@ -322,7 +322,7 @@ export function MultiSelectField(
           // @ts-expect-error disable lastpass
           AutoComplete="off"
           auto-complete="off"
-          class={`${props.selectionLimit === 1 && selected().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
+          class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
           // onBlur={() => {
           //   if (dropdownVisible()) {
