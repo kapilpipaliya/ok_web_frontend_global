@@ -216,7 +216,7 @@ export function SelectInputField(
         placeholder={`${props.title}`}
         renderLabel={props.meta.P.renderLabel}
         selectedValues={() => {
-          if (props.meta.P.saveValue) {
+          if (typeof props.meta.P.options === "string" || props.meta.P.saveValue) {
             const value = props.data?.P[props.meta.P[IdAttr]];
             if (!value) return [];
             if (
