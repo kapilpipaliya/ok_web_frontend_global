@@ -31,7 +31,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
   };
 
   const baseStyle =
-    "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:5px justify-content:space-between margin-left:3px margin-right:3px padding:10px|0px place-content:center position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
+    "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
 
   const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
 
@@ -52,22 +52,22 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
         setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
         setSelectedComponents(new Set<Vertex>());
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      ondblclick={(e) => {
-        setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
-        onClickAddComponent(
-          graph,
-          setGraph,
-          layoutStore.formData.txnId,
-          layoutStore.draggedVertices[0],
-          layoutStore.formData.formData || {},
-          layoutStore.selectedId !== -1
-            ? layoutStore.selectedId
-            : layoutStore.formData.formData.id,
-        );
-        setLayoutStore("draggedVertices", []);
-      }}
+      // onMouseEnter={() => setIsHovered(true)}
+      // onMouseLeave={() => setIsHovered(false)}
+      // ondblclick={() => {
+      //   setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
+      //   onClickAddComponent(
+      //     graph,
+      //     setGraph,
+      //     layoutStore.formData.txnId,
+      //     layoutStore.draggedVertices[0],
+      //     layoutStore.formData.formData || {},
+      //     layoutStore.selectedId !== -1
+      //       ? layoutStore.selectedId
+      //       : layoutStore.formData.formData.id,
+      //   );
+      //   setLayoutStore("draggedVertices", []);
+      // }}
       type="button"
     >
       <Show when={isHovered()}>
@@ -85,12 +85,12 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
       >
         <Checkbox
           checked={selectedComponents().has(graph.vertexes[props.child.id])}
-          class="left:7px position:absolute top:-2px"
+          class="left:7px position:absolute top:2px"
           onChange={(e) => handleCheckboxChange(e, props.child.id)}
           wrapperClass="height:19px width:19px"
         />
       </Show>
-      <div class="flex-flow:column flex ai:center gap:5px pt:5px">
+      <div class="{flex-flow:column} flex ai:center gap:5px pt:5px">
         <Icon
           height={24}
           icon={

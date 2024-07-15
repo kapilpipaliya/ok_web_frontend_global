@@ -31,6 +31,14 @@ export const pageAttr = [
     component: "TagBox",
     name: "disabled",
   },
+  {
+    component: "TagBox",
+    name: "required",
+  },
+  {
+    component: "SelectBox",
+    name: "thankYouPage",
+  },
   // {
   //   name: "definition",
   //   component: "TextArea",

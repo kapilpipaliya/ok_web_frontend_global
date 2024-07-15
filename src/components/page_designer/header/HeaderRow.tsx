@@ -13,10 +13,20 @@ import { PreviewButton } from "./right/PreviewButton";
 import { RightToggleButton } from "./right/RightToggleButton";
 import { SaveIconButton } from "./right/SaveIconButton";
 
+const SettingPageIcon = () => {
+  const [, setLayoutStore] = useDesignerLayoutStore();
+  return <button
+    class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
+    onClick={() => setLayoutStore("selectedSection", "setting")}
+    type="button"
+  >
+    <Icon height={22} icon="solar:settings-linear" width={22} />
+  </button>
+}
 export function HeaderRow() {
   // const [graph] = useGraph();
   const [openDialog, setOpenDialog] = createSignal(false);
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [layoutStore] = useDesignerLayoutStore();
 
   return (
     <header class="flex bg:#f3f3f4 jc:space-between r:7">
@@ -26,13 +36,7 @@ export function HeaderRow() {
         <div class="flex ai:center gap:6">
           <UndoRedoIcons />
           <ResizeViewButtons />
-          <button
-            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
-            onClick={() => setLayoutStore("selectedSection", "setting")}
-            type="button"
-          >
-            <Icon height={22} icon="solar:settings-linear" width={22} />
-          </button>
+          {/* <SettingPageIcon /> */}
         </div>
       </Show>
       {/* <Show when={layoutStore.formData.txnId}>

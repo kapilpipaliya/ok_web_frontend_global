@@ -27,6 +27,7 @@ import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
+import { SelectPageField } from "./SelectPageField";
 import { SelectRuleField } from "./SelectRuleField";
 import { UniqueNameField } from "./UniqueNameField";
 
@@ -60,12 +61,14 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         ].includes(vertex.P.name)
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-    const isFormField = layoutStore.formData?.formData.L[0] === "Form" && genericInputComponents.includes(componentName);
+    const isForm = layoutStore.formData?.formData.L[0] === "Form";
+    const isFormField = isForm && genericInputComponents.includes(componentName);
     const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("Class"));
     const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
 
     return [
       graph.vertexes[vertexIds.name],
+      ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
       graph.vertexes[vertexIds.label],
       ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
       graph.vertexes[vertexIds.required],
@@ -114,6 +117,15 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
                   <UniqueNameField
+                    meta={meta}
+                    metaVertex={metaVertex}
+                    selectedLayout={props.selectedLayout}
+                    setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
+                </Match>
+                <Match when={metaVertex.P.name === "thankYouPage"}>
+                  <SelectPageField
                     meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
@@ -179,18 +191,20 @@ function createVertexIds() {
     labelClass: `labelClassVertex${createUniqueId()}`,
     name: `nameVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
+    thankYouPage: `thankYouPageVertex${createUniqueId()}`
   };
 }
 
-function createVertices(vertexIds: ReturnType<typeof createVertexIds>,   graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
-  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", {class: PROPERTIES.Css.TextBox, component: "TextBox"})), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", {class: PROPERTIES.Css.TextBox, component: "TextBox"})), graph, setGraph);
+function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
+  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.defaultValue, ["MetaTemp"], createVertexMeta("Default Value", "defaultValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.required, ["MetaTemp"], createVertexMeta("Required Rule", "required")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.hidden, ["MetaTemp"], createVertexMeta("Hidden Rule", "hidden")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.disabled, ["MetaTemp"], createVertexMeta("Disabled Rule", "disabled")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.thankYouPage, ["MetaTemp"], createVertexMeta("Thank You Page", "thankYouPage")), graph, setGraph);
 }
 
 function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
@@ -211,7 +225,8 @@ function useMetaMemo(metaVertex: Vertex) {
       "label",
       "labelClass",
       "name",
-      "required"
+      "required",
+      "thankYouPage"
     ].includes(metaVertex.P.name)) {
       return { ...metaVertex };
     }

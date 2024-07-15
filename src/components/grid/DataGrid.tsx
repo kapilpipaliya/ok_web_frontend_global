@@ -125,7 +125,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <LoaderNew loaderHeight="55vh" />
       </Match>
       <Match when={error()}>Error {error()}</Match>
-      <Match when={tableStore.data?.length > 0}>
+      <Match when={true}>
         <div class="flex ai:center jc:space-between p:4|10">
           <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">

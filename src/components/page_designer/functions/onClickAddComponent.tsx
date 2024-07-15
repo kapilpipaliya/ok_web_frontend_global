@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { handleComponentDrag } from "~/components/page_designer/functions/handleComponentDrag";
-import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,
@@ -13,8 +13,12 @@ export function onClickAddComponent(
   formData: any,
   toVertexId: Id | number,
 ) {
-  const toVertex = graph.vertexes[toVertexId];
-  const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
+  let toVertex = graph.vertexes[toVertexId];
+  const component = getChildVertex(graph, ["$0Comp"], toVertex).vertex
+  if (!component?.P.child) {
+    toVertex = getParentVertex(["Attr"], toVertex, graph).vertex!;
+  }
+  const toParentVertex =  getParentVertex(["Attr"], toVertex, graph).vertex;
 
   handleComponentDrag(
     graph,
