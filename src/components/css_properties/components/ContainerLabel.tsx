@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSXElement, Show } from "solid-js";
+import { Show } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
@@ -13,10 +13,10 @@ export const ContainerLabel = (props: {
   info?: string;
   onResetIconClick?: () => void;
   showResetIcon?: boolean;
-  title: JSXElement;
+  title: string;
 }) => (
   <span
-    class={`${props.class ?? ""} flex ai:center font-weight:400 font:14 m:0 pt:5`}
+    class={`${props.class ?? ""} flex ai:center font-weight:400 font:14 gap:2`}
   >
     {props.title}
     <Show when={props.showResetIcon ?? false}>
@@ -39,10 +39,9 @@ export const ContainerLabel = (props: {
           }}
         >
           <Icon
-            class="bg:lightgrey ml:2px"
-            height={21}
+            height={14}
             icon={"mdi:information-outline"}
-            width={21}
+            width={14}
           />
         </div>
       </CustomTooltip>

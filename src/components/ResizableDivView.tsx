@@ -10,7 +10,7 @@ export function ResizableContainer(
 ) {
   const [width, setWidth] = createSignal("");
   const [graph] = useGraph();
-  const [height, setHeight] = createSignal(`calc(100vh - ${graph.navBarHeight + 10}px)`);
+  const [height, setHeight] = createSignal(`calc(100vh - ${graph.navBarHeight + 2}px)`);
   const DIMENSIONS = {
     desktop: { height: "1200px", width: "100%" },
     mobile: { height: "570px", width: "360px" },
@@ -59,7 +59,7 @@ export function ResizableContainer(
 
   return (
     <div
-      class="grid mt:5 overflow:auto"
+      class="grid overflow:auto"
       classList={{
 
       }}
@@ -67,7 +67,7 @@ export function ResizableContainer(
       <div
         class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
-          [`height:calc(100vh-${graph.navBarHeight + 10}px)`]: true,
+          [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
           // [`height:${height()}`]: !!height(),
           [`width:${width()}`]: !!width(),
         }}
