@@ -1,3 +1,4 @@
+import { Meta, Title } from "@solidjs/meta";
 import { clientOnly } from "@solidjs/start";
 import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
@@ -57,11 +58,6 @@ export function PageViewWrapper(
     }
     setIsPreview(props.pageId === "preview");
 
-    // @ts-ignore
-    if (data.error) {
-      // @ts-ignore
-      return { error: data.error };
-    }
     if (props.formId) {
       delete data.graph.vertexes[props.formId];
     }
@@ -109,6 +105,12 @@ export function PageViewWrapper(
     <Show keyed when={count()}>
       <Show when={error()}>
         <SimpleWarningAlert message={error()} />
+      </Show>
+      <Show when={metaVertex()?.P.seoTitle}>
+        <Title>{metaVertex()?.P.seoTitle}</Title>
+      </Show>
+      <Show when={metaVertex()?.P.seoDescription}>
+        <Meta content={metaVertex()?.P.seoDescription} name="description" />
       </Show>
       <Show when={mounted() && metaVertex()}>
         <Show

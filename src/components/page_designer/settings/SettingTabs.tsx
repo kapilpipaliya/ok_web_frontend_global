@@ -1,16 +1,17 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
+import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { PrimaryKey } from "./keys/PrimaryKey";
+import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
-import { UniqueConstrains } from "./unique_constrains/UniqueConstrains";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -19,7 +20,7 @@ export function SettingTabs() {
   const tabs = createMemo(() => {
     const baseTabs = ["layout", "form"];
     if (layoutStore.formData?.formData?.L[0] === "Form") {
-      baseTabs.push("Keys", "Unique constrains");
+      baseTabs.push("Keys");
     }
     if (layoutStore.formData?.formData?.L[0] === "Form" || layoutStore.formData?.formData?.L[0] === "Page") {
       baseTabs.push("Rules", "SEO");
@@ -78,11 +79,11 @@ export function SettingTabs() {
         <div classList={{ "display:none": selectedTab() !== "Keys" }}>
           <PrimaryKey />
           <NameKey />
-        </div>
-        <div
-          classList={{ "display:none": selectedTab() !== "Unique constrains" }}
-        >
-          <UniqueConstrains />
+          <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
+            <Divider class="mt:10" />
+            <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
+            <UniqueConstrains />
+          </Show>
         </div>
       </Show>
       <div classList={{ "display:none": selectedTab() !== "Rules" }}>
@@ -92,5 +93,26 @@ export function SettingTabs() {
         <SEOFormGroupProperties  />
       </div>
     </>
+  );
+}
+
+
+interface DividerProps {
+  borderColor?: string;
+  borderTopWidth?: string;
+  class?: string;
+  width?: string;
+}
+
+export function Divider(props: DividerProps): JSX.Element {
+  return (
+    <div
+      class={props.class || ""}
+      classList={{
+        [`border-color:${props.borderColor || "rgb(209,213,219)"}`]: true,
+        [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
+        [`width:${props.width || "100%"}`]: true,
+      }}
+    ></div>
   );
 }
