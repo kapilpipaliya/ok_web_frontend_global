@@ -3,6 +3,7 @@ import jsep from "jsep";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -79,8 +80,10 @@ function DisplayAllRules() {
 function Header() {
   return (
     <>
-      <h2>Rules:</h2>
-      <div class="flex ai:center jc:space-between">
+      <HeaderWithDescription description="All the rules that are used in the form." title="" />
+
+
+      <div class="flex ai:center jc:space-between mt:10">
         <AddNewRuleButton />
         <DisplayAllRules />
       </div>
@@ -156,12 +159,17 @@ function RulesList() {
   }
   return (
     <>
+
       <For each={rules()}>
-        {(rule) => (
-          <div class="flex bg:gray-20:hover jc:space-between p:2" onMouseEnter={() => highlightRule(rule)} onMouseLeave={() => unhighlightRule()}>
+        {(rule, index) => (
+          <div class="lh:1.25rem flex align-items:center b:1px|solid|lightgrey bg:gray-10:hover color:rgb(55,65,81) f:0.875rem jc:space-between px:1rem py:0.5rem" classList={{
+            "bt:none": index() != 0
+          }} onMouseEnter={() => highlightRule(rule)}
+          onMouseLeave={() => unhighlightRule()}
+          >
             <span class="flex:1">{rule.P.name}</span>
             <div class="flex gap:2">
-              <button class="flex ai:center" onClick={() => openRuleSettings(rule)}>
+              <button class="flex ai:center" onClick={() => openRuleSettings(rule)} title="Edit Rule" type="button">
                 <Icon
                   class={"cursor:pointer opacity:.5 opacity:1:hover"}
                   height={22}
@@ -169,7 +177,7 @@ function RulesList() {
                   width={22}
                 />
               </button>
-              <button class="flex ai:center color:red" onClick={() => setSelectedRuleToDelete(rule)}>
+              <button class="flex ai:center color:red" onClick={() => setSelectedRuleToDelete(rule)} title="Delete Rule" type="button">
                 <Icon
                   class={"cursor:pointer opacity:.5 opacity:1:hover"}
                   height={22}

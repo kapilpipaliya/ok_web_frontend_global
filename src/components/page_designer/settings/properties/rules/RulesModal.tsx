@@ -3,12 +3,10 @@ import { klona } from "klona";
 import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
@@ -18,6 +16,7 @@ import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransaction
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getConditionsExpression } from "./getConditionsExpression";
+import { modifyFieldMetaAllFields } from "./modifyFieldMetaAllFields";
 
 
 export function RulesModal(
@@ -49,7 +48,7 @@ export function RulesModal(
           condAttribute.name === "leftField" ||
           condAttribute.name === "rightField"
         ) {
-          modifyFieldMeta(condAttribute);
+          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStore);
         }
       }
     }
@@ -87,9 +86,9 @@ export function RulesModal(
     } catch (e: any) {
       setError('Please write a valid expression');
     }
-    
+
     return expr;
-    
+
   });
 
   const onRulesSubmit = () => {
@@ -162,17 +161,11 @@ export function RulesModal(
     </Portal>
   );
 
-  function modifyFieldMeta(attribute: FieldAttribute) {
-    attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
-    attribute.valueKey = "id";
-    attribute.childrenKey = "attributes";
-    attribute.options = () =>
-      getFormMetaData(graph, setGraph, layoutStore.formData.formData)
-        .attributes;
-  }
+
 }
 const Overlay = () => {
   return (
     <div class="--bg-opacity:0.75 ~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:opacity bg:rgb(107,114,128) inset:0px position:fixed"></div>
   );
 };
+
