@@ -41,7 +41,7 @@ function getOptions(cssState: CSSStore) {
       value in cssState
         ? `${value === "" ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
         : value;
-    return { label, value };
+    return { id: value, label };
   });
 }
 

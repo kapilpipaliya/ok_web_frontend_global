@@ -15,8 +15,8 @@ import { ZIndex } from "./ZIndex";
 export type Option =
   | {
       children?: Option[];
+      id: string;
       label: string;
-      value: string;
     }
   | Vertex
   | string;
@@ -60,7 +60,7 @@ export function MultiSelectField(
       return option[props.optionValueKey as keyof Option];
     }
     // @ts-expect-error ignore
-    return option.value;
+    return option.id;
   };
 
   const getOptionLabel = (option: Option) => {

@@ -58,9 +58,9 @@ export function SelectInputField(
         if (val === undefined) {
           return !props.meta.P.valueKey
             ? label.trim()
-            : { label: label.trim(), value: label.trim() };
+            : { id: label.trim(), label: label.trim() };
         }
-        return { label: label.trim(), value: val.trim() };
+        return { id: val.trim(), label: label.trim() };
       });
     }
     if (Array.isArray(options)) return options;
@@ -205,7 +205,7 @@ export function SelectInputField(
         displayValueKey={
           props.meta.P.labelKey
             ? props.meta.P.labelKey
-            : "::'P.displayName'||::'P.name'||::'P.id'"
+            : "::'P.displayName'||::'P.name'||::'P.id'||::'label'"
         }
         isLoadingOptions={loading()}
         loadOptions={loadOptions}
