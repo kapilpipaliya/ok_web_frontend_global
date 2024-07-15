@@ -50,7 +50,7 @@ export interface DynamicFormProps {
   graph: Store<GraphInterface>;
   id?: Id;
   importExportButtons?: boolean;
-  isLoginRegister?: string;
+  showSaveCancelButton?: boolean;
   meta?: Vertex;
   setGraph: SetStoreFunction<GraphInterface>;
   showMainFieldsOnly?: boolean;
@@ -221,7 +221,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
               <Show
                 when={
                   !(props.showSubmitButtonOnTop ?? false) &&
-                  !props.isLoginRegister
+                  (props.showSaveCancelButton ?? true)
                 }
               >
                 <SaveCancelButton

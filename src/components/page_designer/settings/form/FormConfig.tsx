@@ -15,6 +15,7 @@ export function FormConfig() {
       importExportButtons={false}
       setGraph={setGraph}
       showMainFieldsOnly={true}
+      showSaveCancelButton={false}
     />
   );
 }
