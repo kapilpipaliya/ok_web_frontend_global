@@ -1,4 +1,5 @@
 import { onCleanup } from "solid-js";
+import { SetStoreFunction } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
@@ -6,20 +7,17 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { useGraph } from "~/lib/graph/graph";
+import { GraphInterface, Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
 
-export function CollAndData() {
-  const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
-
+function initializeMetaVertex(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   const metaVertexId = graph.newVertexId;
   const metaTxnId = graph.newTxnId;
 
@@ -31,10 +29,14 @@ export function CollAndData() {
       type: "Attr",
     }),
     graph,
-    setGraph,
+    setGraph
   );
 
-  const attributes: FieldAttribute[] = [
+  return { metaTxnId, metaVertexId };
+}
+
+function createFieldAttributes(graph: GraphInterface, layoutStore: PageLayoutObject): FieldAttribute[] {
+  return [
     {
       collection: "g:'ALL_LABELS'",
       component: "SelectBox",
@@ -58,44 +60,46 @@ export function CollAndData() {
       name: "data",
     },
   ];
+}
 
-  addMetaVertexes(
-    graph,
-    setGraph,
-    metaTxnId,
-    graph.vertexes[metaVertexId],
-    attributes,
-  );
+function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStore: PageLayoutObject, collMetaVertex: Vertex[]) {
+  return (value: string) => {
+    setValueGlobal(
+      graph,
+      setGraph,
+      layoutStore.formData.txnId,
+      collMetaVertex[0],
+      graph.vertexes[layoutStore.selectedId],
+      value,
+      false
+    );
+    setSelectionValue(
+      layoutStore.formData.txnId,
+      graph.vertexes[layoutStore.selectedId],
+      graph,
+      setGraph,
+      collMetaVertex[1],
+      undefined
+    );
+  };
+}
+
+export function CollAndData() {
+  const [graph, setGraph] = useGraph();
+  const [layoutStore] = useDesignerLayoutStore();
+
+  const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
+  const attributes = createFieldAttributes(graph, layoutStore);
+
+  addMetaVertexes(graph, setGraph, metaTxnId, graph.vertexes[metaVertexId], attributes);
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = getSelectionOptions(graph, setGraph, "->MetaAttr", [
-    metaVertex,
-  ]);
-
-  const handleCollectionChange = (value: string) => {
-    setValueGlobal(
-      graph,
-      setGraph,
-      layoutStore.formData.txnId,
-      collMetaVertex.vertexes![0],
-      graph.vertexes[layoutStore.selectedId],
-      value,
-      false,
-    );
-    setSelectionValue(
-      layoutStore.formData.txnId,
-      graph.vertexes[layoutStore.selectedId],
-
-      graph,
-      setGraph,
-      collMetaVertex.vertexes![1],
-      undefined,
-    );
-  };
+  const collMetaVertex = getSelectionOptions(graph, setGraph, "->MetaAttr", [metaVertex]);
+  const onCollectionChange = handleCollectionChange(graph, setGraph, layoutStore, collMetaVertex.vertexes);
 
   return (
     <>
@@ -123,7 +127,7 @@ export function CollAndData() {
                 collMetaVertex.vertexes![2],
                 graph.vertexes[layoutStore.selectedId],
                 value,
-                false,
+                false
               )
             }
             title={""}
@@ -143,7 +147,7 @@ export function CollAndData() {
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![0]}
-        setValue={handleCollectionChange}
+        setValue={onCollectionChange}
         title={"Select Collection"}
         txnId={layoutStore.formData.txnId}
       />
