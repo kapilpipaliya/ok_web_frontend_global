@@ -2,7 +2,9 @@ import { clientOnly } from "@solidjs/start";
 import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
+import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -28,6 +30,7 @@ export function PageViewWrapper(
   const [metaVertex, setMetaVertex] = createSignal<Vertex>();
   const [mounted, setMounted] = createSignal(false);
   const [isPreview, setIsPreview] = createSignal(false);
+  const [error, setError] = createSignal<string>();
 
   // load form meta data
   async function loadFormDesignerMetaData() {
@@ -44,7 +47,14 @@ export function PageViewWrapper(
       incoming,
       outgoing,
     });
-    if (!data) return;
+    if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
+      setError(`No ${props.pageVertexLabel} found`);
+      return;
+    }
+    if (!data.result[0].P.public) {
+      setError(`${props.pageVertexLabel} is not authorized`);
+      return;
+    }
     setIsPreview(props.pageId === "preview");
 
     // @ts-ignore
@@ -97,6 +107,9 @@ export function PageViewWrapper(
 
   return (
     <Show keyed when={count()}>
+      <Show when={error()}>
+        <SimpleWarningAlert message={error()} />
+      </Show>
       <Show when={mounted() && metaVertex()}>
         <Show
           fallback={
