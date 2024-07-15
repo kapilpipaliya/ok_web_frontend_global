@@ -15,7 +15,6 @@ import { Label } from "./Label";
 
 export function SelectRuleField(
   props: Readonly<{
-    id: string;
     meta: Accessor<Vertex>;
     metaVertex: Vertex;
     selectedLayout: Vertex;
@@ -154,7 +153,7 @@ export function SelectRuleField(
     <div
       class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
     >
-      <span class="f:15 flex:.5" id={props.id}>
+      <span class="f:15 flex:.5">
         <Label metaVertex={props.metaVertex} />
       </span>
       <div class="flex f:15 flex:1" ref={buttonRef!}>

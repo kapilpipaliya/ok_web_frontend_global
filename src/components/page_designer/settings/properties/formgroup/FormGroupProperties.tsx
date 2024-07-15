@@ -7,12 +7,13 @@ import {
   createUniqueId,
   onCleanup,
 } from "solid-js";
+import { SetStoreFunction } from "solid-js/store";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,
@@ -40,139 +41,45 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
-  const nameVertexId = `nameVertex${createUniqueId()}`;
-  const labelVertexId = `labelVertex${createUniqueId()}`;
-  const classVertexId = `classVertex${createUniqueId()}`;
-  const labelClassVertexId = `labelClassVertex${createUniqueId()}`;
-  const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
-  const hiddenVertexId = `hiddenVertex${createUniqueId()}`;
-  const disabledVertexId = `disabledVertex${createUniqueId()}`;
-  const requiredVertexId = `requiredVertex${createUniqueId()}`;
+  const vertexIds = createVertexIds();
 
-  addNewVertex(
-    0,
-    newVertex(nameVertexId, ["MetaTemp"], {
-      class: PROPERTIES.Css.TextBox,
-      component: "TextBox",
-      displayName: "Unique Name",
-      name: "name",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(labelVertexId, ["MetaTemp"], {
-      class: PROPERTIES.Css.TextBox,
-      component: "TextBox",
-      displayName: "Label",
-      name: "label",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(classVertexId, ["MetaTemp"], {
-      displayName: "Class",
-      name: "class",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(labelClassVertexId, ["MetaTemp"], {
-      displayName: "Label Class",
-      name: "labelClass",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(defaultValueVertexId, ["MetaTemp"], {
-      displayName: "Default Value",
-      name: "defaultValue",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(requiredVertexId, ["MetaTemp"], {
-      displayName: "Required",
-      name: "required",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(hiddenVertexId, ["MetaTemp"], {
-      displayName: "Hidden",
-      name: "hidden",
-    }),
-    graph,
-    setGraph,
-  );
-
-  addNewVertex(
-    0,
-    newVertex(disabledVertexId, ["MetaTemp"], {
-      displayName: "Disabled",
-      name: "disabled",
-    }),
-    graph,
-    setGraph,
-  );
+  createVertices(vertexIds, graph, setGraph);
 
   function moveClassToLast(vertices: Vertex[]) {
     const otherVertices = vertices.filter(
       (vertex) =>
-        vertex.P.name !== "name" &&
-        vertex.P.name !== "label" &&
-        vertex.P.name !== "class" &&
-        vertex.P.name !== "labelClass" &&
-        vertex.P.name !== "defaultValue" &&
-        vertex.P.name !== "hidden" &&
-        vertex.P.name !== "disabled" &&
-        vertex.P.name !== "required",
+        ![
+          "class",
+          "defaultValue",
+          "disabled",
+          "hidden",
+          "label",
+          "labelClass",
+          "name",
+          "required",
+        ].includes(vertex.P.name)
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-    const isFormField = componentName === "Form" && genericInputComponents.includes(componentName);
+    const isFormField = layoutStore.formData?.formData.L[0] === "Form" && genericInputComponents.includes(componentName);
     const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("Class"));
     const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
 
     return [
-      graph.vertexes[nameVertexId],
-      graph.vertexes[labelVertexId],
-      ...(isFormField ? [graph.vertexes[defaultValueVertexId]] : []),
-      graph.vertexes[requiredVertexId],
-      graph.vertexes[hiddenVertexId],
-      graph.vertexes[disabledVertexId],
+      graph.vertexes[vertexIds.name],
+      graph.vertexes[vertexIds.label],
+      ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
+      graph.vertexes[vertexIds.required],
+      graph.vertexes[vertexIds.hidden],
+      graph.vertexes[vertexIds.disabled],
       ...nonCssVertices,
-      graph.vertexes[classVertexId],
-      ...(isFormField ? [graph.vertexes[labelClassVertexId]] : []),
+      graph.vertexes[vertexIds.class],
+      ...(isFormField ? [graph.vertexes[vertexIds.labelClass]] : []),
       ...cssVertices,
     ];
   }
 
   onCleanup(() => {
-    deleteVertex(0, nameVertexId, graph, setGraph);
-    deleteVertex(0, labelVertexId, graph, setGraph);
-    deleteVertex(0, classVertexId, graph, setGraph);
-    deleteVertex(0, labelClassVertexId, graph, setGraph);
-    deleteVertex(0, defaultValueVertexId, graph, setGraph);
-    deleteVertex(0, requiredVertexId, graph, setGraph);
-    deleteVertex(0, hiddenVertexId, graph, setGraph);
-    deleteVertex(0, disabledVertexId, graph, setGraph);
+    cleanupVertices(vertexIds, graph, setGraph);
   });
 
   return (
@@ -188,49 +95,17 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
       <For each={moveClassToLast(props.metaAttributes)}>
         {(metaVertex) => {
-          const id = `${props.selectedLayout.id + metaVertex.P[IdAttr]}Label`;
-          const form = FormMetaData.Comp;
-          const propAttribute = form.attributes.find(
-            (attr) => attr.name === "Prop",
-          )!;
-          const valueAttribute = propAttribute.attributes!.find(
-            (attr) => attr.name === "value",
-          )!;
-          const [meta, setMeta] = createWritableMemo(() => {
-            if (
-              metaVertex.P.name === "hidden" ||
-              metaVertex.P.name === "disabled" ||
-              metaVertex.P.name === "name" ||
-              metaVertex.P.name === "label" ||
-              metaVertex.P.name === "class" ||
-              metaVertex.P.name === "labelClass" ||
-              metaVertex.P.name === "defaultValue" ||
-              metaVertex.P.name === "required"
-            ) {
-              return { ...metaVertex };
-            }
-            const P = {
-              ...metaVertex.P,
-              // Adding component and meta from the FormMetaData
-              component: valueAttribute.component,
-              meta: valueAttribute.meta,
-            };
-            return { ...metaVertex, P };
-          });
-
+          const [meta, setMeta] = useMetaMemo(metaVertex);
           const component = createMemo(() =>
-            getComponentForCollRow(meta(), meta(), graph, setGraph),
+            getComponentForCollRow(meta(), meta(), graph, setGraph)
           );
           const metaProps = getPropsFromMetaExpression(
             graph,
             setGraph,
             meta(),
-            meta(),
+            meta()
           );
-          const P = {
-            ...meta().P,
-            ...metaProps,
-          };
+          const P = { ...meta().P, ...metaProps };
           const v = { ...metaVertex, P };
           setMeta(v);
 
@@ -239,7 +114,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
                   <UniqueNameField
-                    id={id}
                     meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
@@ -249,7 +123,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 </Match>
                 <Match when={metaVertex.P.name === "required" || metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled"}>
                   <SelectRuleField
-                    id={id}
                     meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
@@ -280,7 +153,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 <Match when={props.selectedLayout}>
                   <HighlightSetValueContent
                     component={component}
-                    id={id}
                     meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
@@ -295,4 +167,67 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       </For>
     </>
   );
+}
+
+function createVertexIds() {
+  return {
+    class: `classVertex${createUniqueId()}`,
+    defaultValue: `defaultValueVertex${createUniqueId()}`,
+    disabled: `disabledVertex${createUniqueId()}`,
+    hidden: `hiddenVertex${createUniqueId()}`,
+    label: `labelVertex${createUniqueId()}`,
+    labelClass: `labelClassVertex${createUniqueId()}`,
+    name: `nameVertex${createUniqueId()}`,
+    required: `requiredVertex${createUniqueId()}`,
+  };
+}
+
+function createVertices(vertexIds: ReturnType<typeof createVertexIds>,   graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
+  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", {class: PROPERTIES.Css.TextBox, component: "TextBox"})), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", {class: PROPERTIES.Css.TextBox, component: "TextBox"})), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.defaultValue, ["MetaTemp"], createVertexMeta("Default Value", "defaultValue")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.required, ["MetaTemp"], createVertexMeta("Required Rule", "required")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.hidden, ["MetaTemp"], createVertexMeta("Hidden Rule", "hidden")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.disabled, ["MetaTemp"], createVertexMeta("Disabled Rule", "disabled")), graph, setGraph);
+}
+
+function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
+  return { displayName, name, ...other };
+}
+
+function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+  Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
+}
+
+function useMetaMemo(metaVertex: Vertex) {
+  return createWritableMemo(() => {
+    if ([
+      "class",
+      "defaultValue",
+      "disabled",
+      "hidden",
+      "label",
+      "labelClass",
+      "name",
+      "required"
+    ].includes(metaVertex.P.name)) {
+      return { ...metaVertex };
+    }
+    const form = FormMetaData.Comp;
+    const propAttribute = form.attributes.find(
+      (attr) => attr.name === "Prop",
+    )!;
+    const valueAttribute = propAttribute.attributes!.find(
+      (attr) => attr.name === "value",
+    )!;
+    const P = {
+      ...metaVertex.P,
+      // Adding component and meta from the FormMetaData
+      component: valueAttribute.component,
+      meta: valueAttribute.meta,
+    };
+    return { ...metaVertex, P };
+  });
 }
