@@ -170,8 +170,8 @@ export const createGridOptions = (
 ): GridField => ({
   children,
   component: "grid",
-  gap: "5px 10px",
-  "grid-template-columns": "repeat(2, auto)",
+  gap: "5px|10px",
+  "grid-template-columns": "repeat(2,auto)",
   name,
   padding: "5px",
 });

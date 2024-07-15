@@ -10,7 +10,6 @@ import { sizeTypes } from "./constants";
 export const ColumnsSection = {
   columnCount: {
     component: "textFieldOptions",
-    isAddToClass: false,
     isLabelOnTop: true,
     label: "Column Count",
     name: "column-count",
@@ -19,7 +18,6 @@ export const ColumnsSection = {
   } as TextFieldOptionsField,
   columnGap: {
     component: "textFieldOptions",
-    isAddToClass: false,
     isLabelOnTop: true,
     label: "Column Gap",
     name: "column-gap",

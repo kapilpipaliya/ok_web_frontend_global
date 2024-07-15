@@ -43,30 +43,33 @@ export const TextFieldWithSelect = () => {
     createEffect(() => {
       setOption(determineSelectedOption());
     });
+    const changeValue = (value: string) => {
+      if (meta.isAddToClass ?? true) {
+        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: value });
+      }
+      if (meta.onChangeInput) {
+        meta.onChangeInput(value);
+      }
+    };
 
     const handleChange = (event: Event) => {
       const target = event.target as HTMLInputElement;
       const value = target.value;
       if (value === "") {
-        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: "" });
+        changeValue("");
         return;
       }
       const numericValue = Number.parseFloat(value);
-      if (meta.inputProps.min !== undefined && numericValue < meta.inputProps.min) {
+      if (meta.inputProps?.min !== undefined && numericValue < meta.inputProps.min) {
         return;
       }
-      if (meta.inputProps.max !== undefined && numericValue > meta.inputProps.max) {
+      if (meta.inputProps?.max !== undefined && numericValue > meta.inputProps.max) {
         return;
       }
-      if (meta.isAddToClass ?? true) {
-        if (meta.options) {
-          setCssState(state(), ...(meta.projections ?? []), { [meta.name]: `${value}${selectedOption()}` });
-        } else {
-          setCssState(state(), ...(meta.projections ?? []), { [meta.name]: `${numericValue}` });
-        }
-      }
-      if (meta.onChangeInput) {
-        meta.onChangeInput(`${numericValue}${selectedOption()}`);
+      if (meta.options) {
+        changeValue(`${value}${selectedOption()}`);
+      } else {
+        changeValue(`${numericValue}`);
       }
     };
 
@@ -100,15 +103,13 @@ export const TextFieldWithSelect = () => {
       if (isMoving()) {
         const diff = startY() - event.pageY;
         let newValue = startValue() + diff;
-        if (meta.inputProps.min !== undefined) {
+        if (meta.inputProps?.min !== undefined) {
           newValue = Math.max(newValue, meta.inputProps.min);
         }
-        if (meta.inputProps.max !== undefined) {
+        if (meta.inputProps?.max !== undefined) {
           newValue = Math.min(newValue, meta.inputProps.max);
         }
-        setCssState(state(), ...(meta.projections ?? []), {
-          [meta.name]: `${newValue}${selectedOption()}`,
-        });
+        changeValue(`${newValue}${selectedOption()}`);
       }
     };
 

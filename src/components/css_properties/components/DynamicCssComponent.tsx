@@ -46,7 +46,7 @@ export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
         >
           <For each={props.value.children}>
             {(item) => {
-              return <DynamicCSSComponent value={item} />;
+              return <DynamicCSSComponent value={{ ...(item), projections: [...(props.value.projections || []), ...(item.projections || [])] }} />;
             }}
           </For>
         </div>
