@@ -22,7 +22,7 @@ import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaE
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useFormContext } from "~/lib/contexts";
-import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
+import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";

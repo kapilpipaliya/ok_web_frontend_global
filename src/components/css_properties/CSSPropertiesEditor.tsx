@@ -33,7 +33,7 @@ export function CSSPropertiesEditor(
   } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const defaultValues = props.meta.P.value || "";
+  const defaultValues = "";
   const cssValue = (props.data?.P[props.meta.P.name] as string) || "";
 
   const initializeState = (

@@ -50,7 +50,6 @@ export function PageAttrRender(
         const Content = () => (
           <Show when={!isPreview() || !isHidden(item, formData, graph, setGraph)}>
             <DynamicComponent
-              applyDefaults={true}
               // NOTE: For repeater we cant use parentData
               component={component()}
               // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}

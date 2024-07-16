@@ -7,7 +7,6 @@ import { MultiSelectField } from "~/components/MultiSelect";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { Radio, RadioGroup } from "~/components/solid_blocks/radio/radio";
-import { getCompProps } from "~/lib/graph/get/sync/getProps";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -18,7 +17,6 @@ import { mergeCSS } from "../css_properties/utils/mergeCSS";
 
 export function GenericInputField(
   props: {
-    applyDefaults?: boolean;
     component?: string; // depricated
     componentName?: string;
     disabled?: boolean;
@@ -31,11 +29,7 @@ export function GenericInputField(
     props.component ?? props.componentName ?? props.meta.P.component;
 
   // todo: make a common onChange if possible.
-  const defaultValues = createMemo(() =>
-    props.applyDefaults && graph.componentIdMap[component()]
-      ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]])
-      : {},
-  );
+
   const DisplayError = () => (
     <Show when={props.meta.P.error}>
       <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
@@ -54,12 +48,12 @@ export function GenericInputField(
         <Match when={component() === "CheckBox"}>
           <input
             type="checkbox"
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
             checked={
               props.data?.P[props.meta.P[IdAttr]] ?? props.meta?.P.checked
             }
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
@@ -82,9 +76,9 @@ export function GenericInputField(
         <Match when={component() === "ColorBox"}>
           <input
             type="color"
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             onInput={(e) => {
               props.setValue
@@ -107,9 +101,9 @@ export function GenericInputField(
         <Match when={component() === "DropDownBox"}>Dropdown</Match>
         <Match when={component() === "FileUploader"}>
           <FileUploader
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             image={props.meta?.P.image}
           />
@@ -136,9 +130,9 @@ export function GenericInputField(
                   );
             }}
             placeholder={props.meta?.P.label ?? ""}
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             type="number"
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
@@ -147,11 +141,11 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "Radio"}>
           <Radio
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
             // name={props.meta?.P.label ?? "radio"}
             align="left"
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
             onchange={(e: any) => {
@@ -176,16 +170,16 @@ export function GenericInputField(
         <Match when={component() === "ProgressBar"}>
           <input
             type="progress"
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
           />
           <DisplayError />
         </Match>
         <Match when={component() === "SelectBox"}>
           <MultiSelectField
-            {...defaultValues()}
+      
             disable={props.disabled}
             displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
             onRemove={(e: any) => {
@@ -233,9 +227,9 @@ export function GenericInputField(
 
         <Match when={component() === "TextArea"}>
           <textarea
-            {...defaultValues()}
+            
             {...deNullify(customMetaProps)}
-            class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
@@ -251,7 +245,7 @@ export function GenericInputField(
                     false,
                   );
             }}
-            placeholder={props.meta?.P.label ?? props.title}
+            // placeholder={props.meta?.P.label ?? props.title}
             rows={props.meta?.P.rows ?? 4}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
@@ -272,9 +266,9 @@ export function GenericInputField(
         >
           <input
             type="text"
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue
@@ -322,9 +316,9 @@ export function GenericInputField(
         <Match when={component() === "TextBox"}>
           <input
             type="text"
-            {...defaultValues()}
+      
             {...deNullify(customMetaProps)}
-            class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+            class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
             onchange={(e: any) => {
               props.setValue

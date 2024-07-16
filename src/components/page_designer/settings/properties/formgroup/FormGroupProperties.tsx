@@ -12,7 +12,7 @@ import { SetStoreFunction } from "solid-js/store";
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
-import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getProps";
+import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
