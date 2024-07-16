@@ -26,12 +26,12 @@ export function getConditionsExpression(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,isTest?: boolean
 ) {
-  const conditionRows = evaluate(jsep("->RulesCond"), {
+  const conditionRows = evaluate(jsep("->RuleCond"), {
     graph,
     setGraph,
     vertexes: [rule],
   });
-
+  if (!conditionRows) {return ""}
   const getFieldValue = (fieldName: string, condition: Vertex) => {
     const evaluatedFieldName = evaluate(jsep(fieldName), {
       graph,
@@ -46,9 +46,9 @@ export function getConditionsExpression(
 
   return conditionRows.reduce((expression: string, condition: Vertex) => {
     expression += condition.P.leftParen || "";
-    expression += getTextValue(condition.P.leftValue) || getFieldValue("->RulesCondLeftField", condition);
+    expression += getTextValue(condition.P.leftValue) || getFieldValue("->$0LeftField", condition);
     expression += condition.P.operator || "";
-    expression += getTextValue(condition.P.rightValue) || getFieldValue("->RulesCondRightField", condition);
+    expression += getTextValue(condition.P.rightValue) || getFieldValue("->$0RightField", condition);
     expression += condition.P.rightParen || "";
     if (condition.P.andOr) {
       if (condition.P.andOr === "AND") {

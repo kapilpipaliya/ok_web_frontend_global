@@ -77,17 +77,15 @@ export function RulesModal(
 
   const expression = createMemo(() => {
     let expr = '';
+    expr = getConditionsExpression(props.selectedRule!, { P: {} } as unknown as Vertex, graph, setGraph, true);
 
     try {
-      expr = getConditionsExpression(props.selectedRule!, { P: {} } as unknown as Vertex, graph, setGraph, true);
       jsep(expr);
       setError(null);
     } catch (e: any) {
       setError('Please write a valid expression');
     }
-
     return expr;
-
   });
 
   const onRulesSubmit = () => {

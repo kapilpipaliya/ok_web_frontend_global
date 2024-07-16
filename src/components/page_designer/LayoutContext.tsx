@@ -5,6 +5,8 @@ import { createContext, useContext } from "solid-js";
 import type { IFormContext } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
+import { IDToRuleMap } from "./functions/getChildrenAttrs";
+
 export function getInitialDesignerLayoutStore() {
   return {
     activeItem: null as Id | null | number,
@@ -25,7 +27,8 @@ export function getInitialDesignerLayoutStore() {
     selectedComponent: -1 as Id | number,
     selectedId: -1 as Id | number,
     selectedSection: "build",
-    showPropertiesDrawer: false, // properties drawer
+    showPropertiesDrawer: false,
+    usedAttrs: {} as IDToRuleMap,
     view: "Tablet",
   };
 }

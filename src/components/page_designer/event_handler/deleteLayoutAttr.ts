@@ -6,6 +6,7 @@ import type { PageLayoutObject } from "~/components/page_designer/LayoutContext"
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
+import { getAllFieldsUsedInRules, isAttrUsedInRules } from "../functions/getChildrenAttrs";
 
 export function deleteLayoutAttr(
   layoutStore: Store<PageLayoutObject>,
@@ -17,6 +18,13 @@ export function deleteLayoutAttr(
   name: string,
   showSuccessToast: (message: string) => void,
 ) {
+  const usedAttrs = getAllFieldsUsedInRules(graph, setGraph, layoutStore.formData.formData);
+  const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
+
+  if (Object.keys(usedAttrsInRules).length > 0) {
+    setLayoutStore("usedAttrs", usedAttrsInRules);
+    return;
+  }
   batch(() => {
     if (layoutStore.selectedId === layoutVertex.id) {
       setLayoutStore("selectedId", -1);

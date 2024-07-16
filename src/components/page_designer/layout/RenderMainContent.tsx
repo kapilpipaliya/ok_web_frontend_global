@@ -8,6 +8,7 @@ import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
+import { DeleteRuleDialog } from "./DeleteRuleDialog";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -73,6 +74,11 @@ export function RenderMainContent() {
         when={!layoutStore.isSmallScreen}
       >
         <SettingsWrapper/>
+      </Show>
+      <Show when={Object.keys(layoutStore.usedAttrs).length > 0}>
+        <ZIndex>
+          <DeleteRuleDialog/>
+        </ZIndex>
       </Show>
     </div>
   );

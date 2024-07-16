@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import jsep from "jsep";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { genericInputComponents } from "~/components/form/genericInputComponents";
 import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
@@ -163,3 +163,60 @@ export function isAnyFieldInvalid(
 
   return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
 }
+
+type RuleToIDMap = { [RuleId: string]: Id[] };
+export type IDToRuleMap = { [id: string]: string[] };
+
+export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
+  const idToRuleMap: IDToRuleMap = {};
+
+  for (const ruleId in ruleToIDMap) {
+    const idArrays = ruleToIDMap[ruleId];
+
+    idArrays.forEach(id => {
+      if (!idToRuleMap[id]) {
+        idToRuleMap[id] = [];
+      }
+      idToRuleMap[id].push(ruleId);
+    });
+  }
+
+  return idToRuleMap;
+}
+
+export function getAllFieldsUsedInRules(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+): IDToRuleMap {
+  if (!formVertex) {
+    return {};
+  }
+  const rules = evaluate(jsep("->Rule"), { graph, setGraph, vertexes: [formVertex] }) || [];
+  const ruleToIDMap: RuleToIDMap = {};
+  rules.forEach((rule: Vertex) => {
+    ruleToIDMap[rule.id] = (
+      evaluate(jsep("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)"), { graph, setGraph, vertexes: [rule] }) || []
+    ).map((vertex: Vertex) => vertex.id);
+  });
+  return convertToIdToRuleMap(ruleToIDMap);
+}
+
+export function isAttrUsedInRules(attrVertex: Vertex, usedAttrs: IDToRuleMap, graph: GraphInterface): IDToRuleMap {
+  const result: IDToRuleMap = {};
+
+  function collectUsedAttrs(vertex: Vertex, usedAttrs: IDToRuleMap, graph: GraphInterface, result: IDToRuleMap) {
+    if (usedAttrs[vertex.id]) {
+      result[vertex.id] = usedAttrs[vertex.id];
+    }
+
+    const children = getChildrenAttrs(graph, {}, vertex);
+    children.forEach(child => {
+      collectUsedAttrs(child, usedAttrs, graph, result);
+    });
+  }
+
+  collectUsedAttrs(attrVertex, usedAttrs, graph, result);
+  return result;
+}
+

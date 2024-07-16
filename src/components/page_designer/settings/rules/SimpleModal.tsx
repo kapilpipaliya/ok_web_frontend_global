@@ -1,15 +1,16 @@
-import { type JSX, createContext, useContext } from "solid-js";
+import { type JSX, Show, createContext, useContext } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
 
 
 interface SimpleWithDismissButtonProps {
   children?: JSX.Element;
+  closeButtonText?: string;
   confirmButtonText?: string;
   description: string;
   isOpen?: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
 }
 const ModalContext = createContext<SimpleWithDismissButtonProps>();
@@ -20,7 +21,7 @@ export function SimpleWithDismissButton(props: SimpleWithDismissButtonProps) {
       <div
         aria-labelledby="modal-title"
         aria-modal="true"
-        class={`position:relative z:${zIndex.modal}`}
+        class={`position:relative z:${zIndex}`}
         role="dialog"
       >
         <Backdrop />
@@ -105,20 +106,24 @@ function ModalFooter() {
   const props = useContext(ModalContext)!;
   return (
     <div class="flex@sm flex-direction:row-reverse@sm mt:1.25rem mt:1rem@sm">
-      <button
-        class="lh:1.25rem bg:rgb(220,38,38) bg:rgb(239,68,68):hover border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:rgb(255,255,255) display:inline-flex f:0.875rem font-weight:600 justify-content:center ml:0.75rem@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
-        onClick={props.onConfirm}
-        type="button"
-      >
-        {props.confirmButtonText ?? "Confirm"}
-      </button>
-      <button
-        class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
-        onClick={props.onClose}
-        type="button"
-      >
-        Cancel
-      </button>
+      <Show when={props.confirmButtonText}>
+        <button
+          class="lh:1.25rem bg:rgb(220,38,38) bg:rgb(239,68,68):hover border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:rgb(255,255,255) display:inline-flex f:0.875rem font-weight:600 justify-content:center ml:0.75rem@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
+          onClick={props.onConfirm}
+          type="button"
+        >
+          {props.confirmButtonText ?? "Confirm"}
+        </button>
+      </Show>
+      <Show when={props.closeButtonText}>
+        <button
+          class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
+          onClick={props.onClose}
+          type="button"
+        >
+          {props.closeButtonText ?? "Close"}
+        </button>
+      </Show>
     </div>
   );
 }

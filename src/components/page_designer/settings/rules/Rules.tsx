@@ -201,6 +201,7 @@ function RulesList() {
       <Show when={selectedRuleToDelete()}>
         <ZIndex>
           <SimpleWithDismissButton
+            closeButtonText="Cancel"
             confirmButtonText="Delete"
             description={`Are you sure you want to delete this rule?`}
             onClose={() => setSelectedRuleToDelete(null)}

@@ -202,7 +202,7 @@ OR`,
         },
       ],
       component: "DynamicTable",
-      label: "Rules",
+      label: "Rule",
 
       name: "Rule",
       tab: "Rules",
