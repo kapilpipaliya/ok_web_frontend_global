@@ -128,11 +128,11 @@ function RulesList() {
   }
 
   const ruleUsageCount = (rule: Vertex) => {
-    let count = 0;
+    const count: Id[] = [];
     for (const key in rule.IN) {
       for (const edge of rule.IN[key]) {
-        if (graph.edges[edge].id !== rule.id) {
-          count += 1;
+        if (graph.edges[edge].S !== layoutStore.formData.formData.id) {
+          count.push(graph.edges[edge].S);
         }
       }
     }
@@ -157,6 +157,26 @@ function RulesList() {
     deleteRow(rule, false, graph, setGraph, layoutStore.formData.txnId);
     setSelectedRuleToDelete(null);
   }
+  const DeleteConfirmDialog = () => {
+    const ruleUsage = createMemo(() => ruleUsageCount(selectedRuleToDelete()!))
+    return <ZIndex>
+      <SimpleWithDismissButton
+        closeButtonText="Cancel"
+        confirmButtonText="Delete"
+        description={`Are you sure you want to delete this rule?`}
+        onClose={() => setSelectedRuleToDelete(null)}
+        onConfirm={() => deleteRule(selectedRuleToDelete()!)}
+        title="Delete Rule"
+      >
+        <div class="mt:1rem">
+          <p>The rule is used at {ruleUsage().length} attributes. It will be removed from all places where it is used.</p>
+          <For each={ruleUsage()}>
+            {(id) => <div>{graph.vertexes[id].P.name}</div>}
+          </For>
+        </div>
+      </SimpleWithDismissButton>
+    </ZIndex>
+  }
   return (
     <>
 
@@ -165,9 +185,9 @@ function RulesList() {
           <div class="lh:1.25rem flex align-items:center b:1px|solid|lightgrey bg:gray-10:hover color:rgb(55,65,81) f:0.875rem jc:space-between px:1rem py:0.5rem" classList={{
             "bt:none": index() != 0
           }} onMouseEnter={() => highlightRule(rule)}
-          onMouseLeave={() => unhighlightRule()}
+            onMouseLeave={() => unhighlightRule()}
           >
-            <span class="flex:1">{rule.P.name}</span>
+            <span class="flex:1">{rule.P.name} ({ruleUsageCount(rule).length} usage{ruleUsageCount(rule).length > 1 ? "s" : ""})</span>
             <div class="flex gap:2">
               <button class="flex ai:center" onClick={() => openRuleSettings(rule)} title="Edit Rule" type="button">
                 <Icon
@@ -199,20 +219,7 @@ function RulesList() {
         </ZIndex>
       </Show>
       <Show when={selectedRuleToDelete()}>
-        <ZIndex>
-          <SimpleWithDismissButton
-            closeButtonText="Cancel"
-            confirmButtonText="Delete"
-            description={`Are you sure you want to delete this rule?`}
-            onClose={() => setSelectedRuleToDelete(null)}
-            onConfirm={() => deleteRule(selectedRuleToDelete()!)}
-            title="Delete Rule"
-          >
-            <div class="mt:1rem">
-              <p>The rule is used at {ruleUsageCount(selectedRuleToDelete()!)} places. It will be removed from all places where it is used.</p>
-            </div>
-          </SimpleWithDismissButton>
-        </ZIndex>
+        <DeleteConfirmDialog />
       </Show>
     </>
   );
