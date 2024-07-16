@@ -38,11 +38,14 @@ export function DropdownMenu(
   });
 
   const [local, rest] = splitProps(props, ["ref", "parentRef", "class"]);
+  const borderClass = "border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) outline-offset:2px:focus outline:2px|solid|transparent transform-origin:top|right"
   return (
     <Portal mount={document.body}>
       <div
-        class={`${local.class ?? ""} align-items:flex-start bg:white border:1px|solid|#D1D5DB box-shadow:0|10px|15px|-3px|rgba(0,0,0,0.1),0|4px|6px|-2px|rgba(0,0,0,0.05) display:flex flex-direction:column gap:0.25rem max-height:13rem min-width:12rem overflow-y:auto padding:0.25rem z-index:${zIndex}`}
+        aria-orientation="vertical"
+        class={`${local.class ?? ""} ${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem max-height:13rem min-width:12rem mt:2 overflow-y:auto padding:0.25rem z-index:${zIndex}`}
         ref={setFloating}
+        role="menu"
         style={{
           left: `${position.x ?? 0}px`,
           position: position.strategy,
