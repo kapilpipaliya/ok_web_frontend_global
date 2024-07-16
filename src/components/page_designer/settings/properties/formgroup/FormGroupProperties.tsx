@@ -11,6 +11,12 @@ import { SetStoreFunction } from "solid-js/store";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
+import {
+  Tab,
+  TabContainer,
+  TabList,
+  Tabs,
+} from "~/components/solid_blocks/tabs/tabs";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -63,7 +69,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
     const isForm = layoutStore.formData?.formData.L[0] === "Form";
     const isFormField = isForm && genericInputComponents.includes(componentName);
-    const cssVertices = otherVertices.filter(vertex => vertex.P.name.endsWith("Class"));
+
     const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
 
     return [
@@ -75,15 +81,48 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       graph.vertexes[vertexIds.hidden],
       graph.vertexes[vertexIds.disabled],
       ...nonCssVertices,
-      graph.vertexes[vertexIds.class],
-      ...(isFormField ? [graph.vertexes[vertexIds.labelClass]] : []),
-      ...cssVertices,
+
     ];
   }
 
   onCleanup(() => {
     cleanupVertices(vertexIds, graph, setGraph);
   });
+
+  const Classes = () => {
+    const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+    const isForm = layoutStore.formData?.formData.L[0] === "Form";
+    const isFormField = isForm && genericInputComponents.includes(componentName);
+    const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
+    const metaAttributes = [
+      graph.vertexes[vertexIds.class],
+      ...(isFormField ? [graph.vertexes[vertexIds.labelClass]] : []),
+      ...classVertices,
+    ];
+
+    return <Tabs class="p:10px">
+      <TabList>
+        <For each={metaAttributes}>
+          {(tab) => {
+            return <Tab >{tab.P.displayName}</Tab>
+          }}
+        </For>
+      </TabList>
+
+      <For each={metaAttributes}>
+        {(metaVertex) => {
+          return <TabContainer>
+            <CSSPropertiesEditor
+              data={props.selectedLayout}
+              meta={metaVertex}
+              setValue={(data) => props.setValue(metaVertex, data)}
+              txnId={props.txnId}
+            />
+          </TabContainer>
+        }}
+      </For>
+    </Tabs>
+  }
 
   return (
     <>
@@ -142,14 +181,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     txnId={props.txnId}
                   />
                 </Match>
-                <Match when={metaVertex.P.name === "class" || metaVertex.P.name.endsWith("Class")}>
-                  <CSSPropertiesEditor
-                    data={props.selectedLayout}
-                    meta={metaVertex}
-                    setValue={(data) => props.setValue(metaVertex, data)}
-                    txnId={props.txnId}
-                  />
-                </Match>
                 <Match when={component() === "Table"}>
                   <h3>
                     <Label metaVertex={metaVertex} />
@@ -177,6 +208,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           );
         }}
       </For>
+      <Classes />
+
+
     </>
   );
 }

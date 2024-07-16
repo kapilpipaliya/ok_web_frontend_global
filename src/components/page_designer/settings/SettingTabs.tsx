@@ -12,13 +12,14 @@ import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
+import { FormStatus } from "./status/FormStatus";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [selectedTab, setSelectedTab] = createSignal("layout");
 
   const tabs = createMemo(() => {
-    const baseTabs = ["layout", "form"];
+    const baseTabs = ["layout", "settings"];
     if (layoutStore.formData?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
@@ -72,8 +73,9 @@ export function SettingTabs() {
       <div classList={{ "display:none": selectedTab() !== "layout" }}>
         <LayoutTree />
       </div>
-      <div class="p:5" classList={{ "display:none": selectedTab() !== "form" }}>
+      <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
         <FormConfig />
+        <FormStatus/>
       </div>
       <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
         <div classList={{ "display:none": selectedTab() !== "Keys" }}>
