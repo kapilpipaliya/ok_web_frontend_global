@@ -1,6 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
-import { type JSX, onMount } from "solid-js";
+import { Title } from "@solidjs/meta";
+import { type JSX, Show, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
@@ -42,6 +43,7 @@ export function PageDesignerWrapper(): JSX.Element {
       <DesignerLayoutStoreContext.Provider
         value={[layoutStore, setLayoutStore]}
       >
+        <Title>{layoutStore.formData?.formData?.P.name ?? `New ${layoutStore.formData?.formData?.L[0] ?? "Form"} Builder`} - Easy Form Forge</Title>
         <HeaderRow />
         <div
           classList={{
