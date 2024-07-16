@@ -12,7 +12,7 @@ export function DropdownMenu(
   props: {
     onClickOutside?: () => void;
     parentRef: HTMLElement;
-    plaement?: Placement;
+    placement?: Placement;
   } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -21,7 +21,7 @@ export function DropdownMenu(
   const zIndex = useZIndex();
 
   const position = useFloating(reference, floating, {
-    placement: props.plaement ?? "bottom-start",
+    placement: props.placement ?? "bottom-start",
     strategy: "fixed",
     whileElementsMounted: autoUpdate,
   });

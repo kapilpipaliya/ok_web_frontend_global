@@ -12,7 +12,6 @@ import { createStore } from "solid-js/store";
 import { Breadcrumb } from "~/components/Breadcrumb";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
-import "~/css/tab.css";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
