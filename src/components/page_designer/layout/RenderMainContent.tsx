@@ -8,6 +8,7 @@ import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
+import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { DeleteRuleDialog } from "./DeleteRuleDialog";
 
 export function RenderMainContent() {
@@ -74,6 +75,21 @@ export function RenderMainContent() {
         when={!layoutStore.isSmallScreen}
       >
         <SettingsWrapper/>
+      </Show>
+      <Show when={layoutStore.showPropertiesDrawer}>
+        <ZIndex>
+          <Drawer
+            customButton={() => false}
+            drawerClass={"padding:10px"}
+            open={() => layoutStore.showPropertiesDrawer}
+            setIsOpen={
+              ((v: boolean) =>
+                setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>
+            }
+          >
+            <PropertiesWrapper />
+          </Drawer>
+        </ZIndex>
       </Show>
       <Show when={Object.keys(layoutStore.usedAttrs).length > 0}>
         <ZIndex>

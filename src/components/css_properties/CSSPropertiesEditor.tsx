@@ -3,6 +3,7 @@ import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { isDevelopment } from "~/lib/isDevelopment";
 import { isObject } from "~/lib/utils";
 
 import type { CSSStore } from "./context";
@@ -15,7 +16,6 @@ import {
   CssStateContext,
 } from "./context";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
-
 export function CSSPropertiesEditor(
   props: Readonly<{
     data?: Vertex; // temp vertex
@@ -64,7 +64,8 @@ export function CSSPropertiesEditor(
     >
       <CssDefaultEditorContext.Provider
         value={[cssDefaultState, setCssDefaultCssState]}
-      >{JSON.stringify(cssState)}
+      >
+        {isDevelopment ? JSON.stringify(cssState) : null}
         <CssStateContext.Provider value={[state, setState]}>
           <ResetButton />
           <span class={"m:10|0"}>

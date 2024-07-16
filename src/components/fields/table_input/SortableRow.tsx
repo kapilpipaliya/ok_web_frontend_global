@@ -5,6 +5,7 @@ import {
   type Accessor,
   For,
   Match,
+  Setter,
   Show,
   Switch,
   createComputed,
@@ -17,6 +18,9 @@ import {
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 
+import { Drawer } from "~/components/Drawer";
+import { ZIndex } from "~/components/ZIndex";
+import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
@@ -33,6 +37,7 @@ import {
   getColumnProps,
   rowMetaInitialize,
 } from "~/lib/graph/mutate/form/rowFunction";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
@@ -244,6 +249,42 @@ export const SortableRow = (
               />
             </>
           );
+          const CssEditor = () => {
+            const [showCssEditor, setShowCssEditor] = createSignal(false);
+            return <>
+              <button onClick={() => setShowCssEditor(true)} type="button">Edit CSS</button>
+              <Show when={showCssEditor()}>
+                <ZIndex>
+                  <Drawer
+                    customButton={() => false}
+                    drawerClass={"padding:10px"}
+                    open={showCssEditor}
+                    setIsOpen={
+                      ((v: boolean) =>
+                        setShowCssEditor(v)) as Setter<boolean>
+                    }
+                  >
+                    <CSSPropertiesEditor
+                      data={p.joinVertex}
+                      meta={metaVertex()}
+                      setValue={data => {
+                        setValueGlobal(
+                          graph,
+                          setGraph,
+                          p.txnId,
+                          metaVertex(),
+                          p.joinVertex,
+                          data,
+                          false,
+                        );
+                      }}
+                      txnId={p.txnId}
+                    />
+                  </Drawer>
+                </ZIndex >
+              </Show>
+            </>
+          }
 
           return (
             <Switch>
@@ -253,6 +294,15 @@ export const SortableRow = (
                     class={`${getComponentClass(component())} flex ai:center jc:center`}
                   >
                     <DefaultValue />
+                  </div>
+                </td>
+              </Match>
+              <Match when={metaVertex()?.P.name === 'value' && ((p.joinVertex?.P.name ?? '').endsWith('Class') || (p.joinVertex?.P.name ?? '') === 'class')}>
+                <td class="align-content:center">
+                  <div
+                    class={`flex ai:center jc:center`}
+                  >
+                    <CssEditor />
                   </div>
                 </td>
               </Match>
