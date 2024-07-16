@@ -126,11 +126,17 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (isDisabledTxn(txnId, graph)) {
+      // allow navigation
+      return;
+    }
+    // preventDefault to block immediately and prompt user async
     e.preventDefault();
     setTimeout(() => {
       setDiscardPopup(true);
     }, 100);
     onConfirmExit = () => {
+      // user wants to proceed anyway so retry with force=true
       e.retry(true);
     };
   });
@@ -236,6 +242,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
               <Show when={discardPopup()}>
                 <DeleteDialog
                   message="Discard unsaved changes - are you sure?"
+                  onCancel={() => setDiscardPopup(false)}
                   onConfirm={() => {
                     revertTransaction(formData.txnId, graph);
                     setDiscardPopup(false);

@@ -86,9 +86,9 @@ export function SettingTabs() {
           </Show>
         </div>
       </Show>
-      <div classList={{ "display:none": selectedTab() !== "Rules" }}>
+      <Show when={selectedTab() === "Rules"}>
         <Rules />
-      </div>
+      </Show>
       <div classList={{ "display:none": selectedTab() !== "SEO" }}>
         <SEOFormGroupProperties  />
       </div>

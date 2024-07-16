@@ -149,6 +149,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <Show when={deleteRowId()}>
           <DeleteDialog
             message="Are you sure you want to delete this item?"
+            onCancel={() => setDeleteRowId(null)}
             onConfirm={onDelete}
             open={true}
             title="Delete Item"

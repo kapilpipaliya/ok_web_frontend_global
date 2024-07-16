@@ -282,6 +282,9 @@ export const SupportTicketSection = (
                           />
                         }
                         message={"Are you sure you want to delete this ticket?"}
+                        onCancel={() => {
+                          setDeleteRowId(null);
+                        }}
                         onConfirm={() => {
                           deleteContact(row.id);
                         }}
