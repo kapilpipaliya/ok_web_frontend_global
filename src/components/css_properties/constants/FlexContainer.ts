@@ -1,13 +1,31 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
-  FieldWithCustomProperty,
+  TextFieldOptionsField,
 } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
-import { Icons } from "./Icons";
-import { sizeTypes } from "./constants";
+import { createSelectOptions } from "./FieldType";
 
+export const gapFields = {
+  gap: {
+    component: "textFieldOptions",
+    label: "Gap",
+    name: "gap",
+    type: "number",
+  } as TextFieldOptionsField,
+  rowGap: {
+    component: "textFieldOptions",
+    label: "Row Gap",
+    name: "row-gap",
+    type: "number",
+  } as TextFieldOptionsField,
+  columnGap: {
+    component: "textFieldOptions",
+    label: "Column Gap",
+    name: "column-gap",
+    type: "number",
+  } as TextFieldOptionsField,
+}
 export const FlexContainer = {
   flexDirection: createSelectOptions("flex-direction", "Flex Direction", [
     "row","row-reverse","column","column-reverse",...CSSWideKeywords
@@ -24,25 +42,5 @@ export const FlexContainer = {
     ...CSSWideKeywords
   ]),
   alignContent: createSelectOptions("align-content", "Align Content", [...extraPropertyValues["align-content"].values, ...CSSWideKeywords]),
-  gap: {
-    component: "fieldWithCustomProperty",
-    customProperty: [
-      { label: "Column", name: "gap-x" },
-      { label: "Row", name: "gap-y" },
-    ],
-    gridType: "repeat(2,auto)",
-    isLabelOnTop: true,
-    label: "Gap",
-    mainFieldType: "textFieldOptions",
-    name: "gap",
-    options: sizeTypes,
-    type: "number",
-  } as FieldWithCustomProperty,
-
-  flex: createButtonGroupOptions("flex", "Flex", [
-    { key: Icons.flex.auto, tooltip: "auto", value: "0 0 auto" },
-    { key: Icons.flex.expand, tooltip: "expand", value: "1 1 0%" },
-    { key: Icons.flex.collapse, tooltip: "collapse", value: "0 1 auto" },
-    { key: "customIcon", tooltip: "Custom", value: "custom" },
-  ]),
+ ...gapFields
 };

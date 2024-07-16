@@ -82,7 +82,7 @@ export const TextFieldWithSelect = () => {
       if (option === "") {
         setIsDropdownOpen(false);
         setOption(option);
-        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: "" });
+        setCssState(state(), ...(meta.projections ?? []), { [meta.name]: undefined });
         return;
       }
       setIsDropdownOpen(false);

@@ -24,7 +24,8 @@ export function LabelWrapper(props: Readonly<{ onResetIconClick?: () => void }>)
   );
   return (
     <ContainerLabel
-      info={meta.name}
+      info={meta.info}
+      name={meta.hashName ?? meta.name}
       onResetIconClick={() => {
         const projections = [state() || "", ...(meta.projections ?? []), meta.name];
         const value = path(projections, cssDefault);

@@ -1,10 +1,11 @@
-/* eslint-disable perfectionist/sort-objects */
+ 
 import { CSSWideKeywords } from "./CSSMetadata";
-import { type TextFieldOptionsField, createSelectOptions } from "./FieldType";
+import { type TextFieldOptionsField, createGridOptions, createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
 
 export const PositionSection = {
-  top: {
+  dimentions: createGridOptions("grid", "Dimention", [
+ {
     component: "textFieldOptions",
     isLabelOnTop: true,
     label: "Top",
@@ -12,15 +13,7 @@ export const PositionSection = {
     options: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
-  left: {
-    component: "textFieldOptions",
-    isLabelOnTop: true,
-    label: "Left",
-    name: "left",
-    options: sizeTypes,
-    type: "number",
-  } as TextFieldOptionsField,
-  right: {
+  {
     component: "textFieldOptions",
     isLabelOnTop: true,
     label: "Right",
@@ -28,7 +21,7 @@ export const PositionSection = {
     options: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
-  bottom: {
+  {
     component: "textFieldOptions",
     isLabelOnTop: true,
     label: "Bottom",
@@ -36,10 +29,18 @@ export const PositionSection = {
     options: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
+  {
+    component: "textFieldOptions",
+    isLabelOnTop: true,
+    label: "Left",
+    name: "left",
+    options: sizeTypes,
+    type: "number",
+  } as TextFieldOptionsField,
+]),
   position: createSelectOptions("position", "Position", ["static", "relative", "absolute", "fixed", "sticky", ...CSSWideKeywords]),
   zIndex: {
     component: "textFieldOptions",
-    isLabelOnTop: true,
     label: "Z-Index",
     name: "z-index",
     options: sizeTypes,

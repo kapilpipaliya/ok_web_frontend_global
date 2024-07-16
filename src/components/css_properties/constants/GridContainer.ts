@@ -7,6 +7,7 @@ import type {
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./constants";
+import { gapFields } from "./FlexContainer";
 
 export const GridContainer = {
   grid: {
@@ -39,33 +40,7 @@ export const GridContainer = {
     name: "grid-template-rows",
     type: "text",
   } as TextFieldOptionsField,
-  // TOdo either simplify gap as number, or replace gap-x with row-gap and gap-y with column-gap
-  gap: {
-    component: "fieldWithCustomProperty",
-    customProperty: [
-      { label: "Column", name: "gap-x" },
-      { label: "Row", name: "gap-y" },
-    ],
-    gridType: "repeat(2,auto)",
-    isLabelOnTop: true,
-    label: "Gap",
-    mainFieldType: "textFieldOptions",
-    name: "gap",
-    options: sizeTypes,
-    type: "number",
-  } as FieldWithCustomProperty,
-  rowGap: {
-    component: "textFieldOptions",
-    label: "Row Gap",
-    name: "row-gap",
-    type: "number",
-  } as TextFieldOptionsField,
-  columnGap: {
-    component: "textFieldOptions",
-    label: "Column Gap",
-    name: "column-gap",
-    type: "number",
-  } as TextFieldOptionsField,
+  ...gapFields,
   gridAutoRows: {
     component: "textFieldOptions",
     label: "Grid Auto Rows",

@@ -8,8 +8,14 @@ export type CustomProperty = {
 interface Field {
   component: string;
 }
+interface CSSField extends Field {
+  hashName?: string;
+  info?: string;
+  name: string;
+  projections?: []
+}
 
-export interface FieldWithCustomProperty extends Field {
+export interface FieldWithCustomProperty extends CSSField {
   align?: string;
   component: "fieldWithCustomProperty";
   customProperty: CustomProperty[];
@@ -18,38 +24,34 @@ export interface FieldWithCustomProperty extends Field {
   isLabelOnTop: boolean;
   label: string;
   mainFieldType: ComponentKeyType;
-  name: string;
   options?: { label: string; value: string }[] | string[];
   padding?: string;
   type?: string;
 }
 
-export interface ColorPickerField extends Field {
+export interface ColorPickerField extends CSSField {
   component: "colorPicker";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  name: string;
   onChangeInput?: (value: string) => void;
 }
 
-export interface GridField extends Field {
+export interface GridField extends CSSField {
   children: GenericField[];
   component: "grid";
   gap: string;
   "grid-template-columns": string;
-  name: string;
   padding: string;
 }
 
-export interface TextFieldOptionsField extends Field {
+export interface TextFieldOptionsField extends CSSField {
   component: "textFieldOptions";
   inputProps: any
   isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
   leftIcon?: JSXElement;
-  name: string;
   onChangeInput?: (value: string) => void;
   options: string[]; // { label: string; value: string }[];
   placeholder?: string;
@@ -58,17 +60,16 @@ export interface TextFieldOptionsField extends Field {
   value?: string;
 }
 
-export interface ToggleField extends Field {
+export interface ToggleField extends CSSField {
   component: "toggleButton";
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
-  name: string;
   onChangeInput?: (value: string) => void;
   options: { icon?: boolean; key: string; value: string }[];
 }
 
-export interface DataEditorField extends Field {
+export interface DataEditorField extends CSSField {
   children: {
     [key: string]: GenericField;
   };
@@ -76,25 +77,22 @@ export interface DataEditorField extends Field {
   dialogLabel: string;
   fallback: string;
   label: string;
-  name: string;
 }
-export interface SelectField extends Field {
+export interface SelectField extends CSSField {
   component: "select";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  name: string;
   onChangeInput?: (label: string, value: string) => void;
   options: ({ label: string; value: string } | string)[] | string[];
   value?: string;
 }
 
-export interface ButtonGroupField extends Field {
+export interface ButtonGroupField extends CSSField {
   component: "buttonGroups";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  name: string;
   onChangeInput?: (value: string) => void;
   options: {
     icon: true;
@@ -104,11 +102,10 @@ export interface ButtonGroupField extends Field {
   }[];
 }
 
-export interface StringField extends Field {
+export interface StringField extends CSSField {
   component: "select";
   isLabelOnTop: boolean;
   label: string;
-  name: string;
   options: string[];
 }
 

@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, createEffect, createSignal } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
@@ -10,18 +10,22 @@ import { ButtonGroups } from "./ButtonGroups";
 export const FieldWithCustomBox = () => {
   const meta = useComponentMeta() as FieldWithCustomProperty;
   const [optionType, setOptionType] = createSignal("all");
-  const [cssState, setCssState] = useCssEditor();
-  const [state, setState] = useCssState();
+  const [cssState] = useCssEditor();
+  const [state] = useCssState();
 
-  const onChangeAllField = () => {
-    const currentState = state() ?? "";
-    const newState: { [key: string]: string } = { ...cssState[currentState] };
-    meta.customProperty.forEach((property) => {
-      newState[property.name] = cssState[currentState]?.[property.name] || "";
-    });
-    setCssState(currentState, newState);
-  };
-
+  createEffect(() => {
+    if (meta.customProperty && meta.customProperty.length > 0) {
+      let isValueSet = false;
+      meta.customProperty.forEach((property) => {
+        if (cssState[state()]?.[property.name] !== undefined) {
+          isValueSet = true;
+        }
+      });
+      if (isValueSet) {
+        setOptionType("custom");
+      }
+    }
+  });
   return (
     <div>
       <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
@@ -29,9 +33,6 @@ export const FieldWithCustomBox = () => {
           value={{
             ...meta,
             component: meta.mainFieldType ?? "textFieldOptions",
-            onChangeInput: () => {
-              onChangeAllField();
-            },
             type: meta.type ?? "number"
           } as GenericField}
         />

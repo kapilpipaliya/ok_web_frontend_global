@@ -15,6 +15,7 @@ export const BoxShadow = {
     children: {
       data: {
         component: "colorPicker",
+        info: "box-shadow",
         isLabelOnTop: true,
         label: "Shadow Color",
         name: "color",
@@ -22,6 +23,8 @@ export const BoxShadow = {
       shadow: createGridOptions("grid", "Shadow", [
         {
           component: "textFieldOptions",
+          hashName: "length",
+          info: "box-shadow",
           isLabelOnTop: true,
           label: "X Offset",
           name: "x-offset",
@@ -30,6 +33,8 @@ export const BoxShadow = {
         } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
+          hashName: "length",
+          info: "box-shadow",
           isLabelOnTop: true,
           label: "Y Offset",
           name: "y-offset",
@@ -38,6 +43,8 @@ export const BoxShadow = {
         } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
+          hashName: "length",
+          info: "box-shadow",
           isLabelOnTop: true,
           label: "Blur",
           name: "blur",
@@ -46,6 +53,8 @@ export const BoxShadow = {
         } as TextFieldOptionsField,
         {
           component: "textFieldOptions",
+          hashName: "length",
+          info: "box-shadow",
           isLabelOnTop: true,
           label: "Spread",
           name: "spread",
@@ -55,6 +64,7 @@ export const BoxShadow = {
       ]),
       inset: {
         component: "toggleButton",
+        info: "box-shadow",
         label: "",
         name: "inset",
         options: [

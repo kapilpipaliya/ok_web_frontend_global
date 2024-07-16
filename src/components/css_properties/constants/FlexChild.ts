@@ -8,6 +8,8 @@ import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
 import { Icons } from "./Icons";
 
 export const FlexChild = {
+  // Do we need to imporove this?
+  // do we give three separate input like Basis, Grow and Shrink?
   flex: createButtonGroupOptions("flex", "Flex", [
     { key: Icons.flex.auto, tooltip: "auto", value: "0 0 auto" },
     { key: Icons.flex.expand, tooltip: "expand", value: "1 1 0%" },
