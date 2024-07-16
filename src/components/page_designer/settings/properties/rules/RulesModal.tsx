@@ -3,7 +3,6 @@ import { klona } from "klona";
 import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-
 import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
@@ -112,10 +111,11 @@ export function RulesModal(
         aria-labelledby="Rules Modal"
         aria-modal="true"
         class={`position:relative z:${zIndex}`}
+        onClick={e=>e.stopPropagation()}
         role="dialog"
       >
         <Overlay />
-        <div class="inset:0px overflow-y:auto position:fixed width:100vw z:10">
+        <div class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}>
           <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
             <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:90vw@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
               <div>

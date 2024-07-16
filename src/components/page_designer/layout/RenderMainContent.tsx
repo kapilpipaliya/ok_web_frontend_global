@@ -11,15 +11,17 @@ import { SettingsWrapper } from "../settings/SettingsWrapper";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const getGridTemplateColumns = () => {
+    if (!layoutStore.isLeftOpen && !layoutStore.isRightOpen) {
+      return "1,1fr";
+    }
+    if (layoutStore.isLeftOpen && layoutStore.isRightOpen) {
+      return "3,22%|calc(53%-8px)|25%";
+    }
+    return `2,${layoutStore.isLeftOpen ? "30%|70%" : "70%|30%"}`;
+  };
   return (
-    <div
-      class={`${!layoutStore.isLeftOpen && !layoutStore.isRightOpen
-        ? "grid-template-columns:repeat(1,1fr)"
-        : layoutStore.isLeftOpen && layoutStore.isRightOpen
-          ? "grid-template-columns:repeat(3,22%|calc(53%-8px)|25%)"
-          : `grid-template-columns:repeat(2,${!layoutStore.isLeftOpen ? "70%|30%" : "30%|70%"}`
-        } grid gap:4px`}
-    >
+    <div class={`grid gap:4px grid-template-columns:repeat(${getGridTemplateColumns()})`}>
       <Show
         fallback={
           <ZIndex>

@@ -10,7 +10,7 @@ export function FormElementsWrapper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
     <aside class={"rel"} classList={{
-        "hidden": !layoutStore.isRightOpen
+        "hidden": !layoutStore.isLeftOpen
       }}
     >
       <ZIndex>
