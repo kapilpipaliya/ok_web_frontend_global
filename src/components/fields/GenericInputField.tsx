@@ -17,7 +17,7 @@ import { mergeCSS } from "../css_properties/utils/mergeCSS";
 
 export function GenericInputField(
   props: {
-    component?: string; // depricated
+    component?: string; // deprecated
     componentName?: string;
     disabled?: boolean;
     title: string;
@@ -28,7 +28,13 @@ export function GenericInputField(
   const component = () =>
     props.component ?? props.componentName ?? props.meta.P.component;
 
-  // todo: make a common onChange if possible.
+  const handleChange = (value: any) => {
+    if (props.setValue) {
+      props.setValue(value);
+    } else {
+      setValueGlobal(graph, setGraph, props.txnId, props.meta, props.data!, value, false);
+    }
+  };
 
   const DisplayError = () => (
     <Show when={props.meta.P.error}>
@@ -48,27 +54,11 @@ export function GenericInputField(
         <Match when={component() === "CheckBox"}>
           <input
             type="checkbox"
-      
             {...deNullify(customMetaProps)}
-            checked={
-              props.data?.P[props.meta.P[IdAttr]] ?? props.meta?.P.checked
-            }
+            checked={props.data?.P[props.meta.P[IdAttr]] ?? props.meta?.P.checked}
             class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.checked)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.checked,
-
-                    false,
-                  );
-            }}
+            onchange={(e: any) => handleChange(e.target.checked)}
           />
           <DisplayError />
           <PageAttrRender data={props.data} metaVertex={props.meta} />
@@ -76,24 +66,10 @@ export function GenericInputField(
         <Match when={component() === "ColorBox"}>
           <input
             type="color"
-      
             {...deNullify(customMetaProps)}
             class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
-            onInput={(e) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
+            onInput={(e) => handleChange(e.target.value)}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
           <DisplayError />
@@ -101,7 +77,6 @@ export function GenericInputField(
         <Match when={component() === "DropDownBox"}>Dropdown</Match>
         <Match when={component() === "FileUploader"}>
           <FileUploader
-      
             {...deNullify(customMetaProps)}
             class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
@@ -115,22 +90,8 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "NumberBox"}>
           <input
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
+            onchange={(e: any) => handleChange(e.target.value)}
             placeholder={props.meta?.P.label ?? ""}
-      
             {...deNullify(customMetaProps)}
             class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
@@ -141,27 +102,13 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "Radio"}>
           <Radio
-      
             {...deNullify(customMetaProps)}
             // name={props.meta?.P.label ?? "radio"}
             align="left"
             class={mergeCSS("", props.meta.P.class)}
             disabled={props.disabled}
             // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.checked)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.checked,
-
-                    false,
-                  );
-            }}
+            onchange={(e: any) => handleChange(e.target.checked)}
           >
             {props.meta?.P.label ?? "radio"}
           </Radio>
@@ -169,37 +116,10 @@ export function GenericInputField(
         </Match>
         <Match when={component() === "SelectBox"}>
           <MultiSelectField
-      
             disable={props.disabled}
             displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
-            onRemove={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
-            onSelect={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
+            onRemove={(value: any) => handleChange(value)}
+            onSelect={(value: any) => handleChange(value)}
             optionValueKey="id"
             options={props.meta?.P.options ?? []}
             placeholder={props.meta?.P.placeholder ?? "Select Item"}
@@ -214,28 +134,12 @@ export function GenericInputField(
           </RadioGroup>
           <DisplayError />
         </Match>
-
         <Match when={component() === "TextArea"}>
           <textarea
-            
             {...deNullify(customMetaProps)}
             class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
-            // placeholder={props.meta?.P.label ?? props.title}
+            onchange={(e: any) => handleChange(e.target.value)}
             rows={props.meta?.P.rows ?? 4}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
@@ -256,24 +160,10 @@ export function GenericInputField(
         >
           <input
             type="text"
-      
             {...deNullify(customMetaProps)}
             class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
+            onchange={(e: any) => handleChange(e.target.value)}
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
@@ -284,21 +174,7 @@ export function GenericInputField(
             data={props.data}
             disabled={props.disabled}
             meta={props.meta}
-            setValue={
-              props.setValue
-                ? props.setValue
-                : (value) =>
-                    setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId,
-                      props.meta,
-                      props.data!,
-                      value,
-
-                      false,
-                    )
-            }
+            setValue={(value) => handleChange(value)}
             title={props.title}
             txnId={props.txnId}
           />
@@ -306,24 +182,10 @@ export function GenericInputField(
         <Match when={component() === "TextBox"}>
           <input
             type="text"
-      
             {...deNullify(customMetaProps)}
             class={`${mergeCSS("", props.meta.P.class)}`}
             disabled={props.disabled}
-            onchange={(e: any) => {
-              props.setValue
-                ? props.setValue(e.target.value)
-                : setValueGlobal(
-                    graph,
-                    setGraph,
-                    props.txnId,
-                    props.meta,
-                    props.data!,
-                    e.target.value,
-
-                    false,
-                  );
-            }}
+            onchange={(e: any) => handleChange(e.target.value)}
             placeholder={props.meta?.P.label ?? props.title}
             value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           />
