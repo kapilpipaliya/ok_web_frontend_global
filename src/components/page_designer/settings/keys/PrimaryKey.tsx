@@ -15,8 +15,7 @@ export function PrimaryKey() {
           component={"TagBox"}
           data={layoutStore.formData?.formData}
           isRealTime={false}
-          meta={{ P: modifyFieldMetaAllFields({ name: "primaryKey" } , graph, setGraph, layoutStore)} as unknown as Vertex}
-          //  Todo Add tree options, only includes the top level fields.
+          meta={{ P: modifyFieldMetaAllFields({ name: "primaryKey" } , graph, setGraph, layoutStore, true)} as unknown as Vertex}
           txnId={layoutStore.formData.txnId}
         />
       </span>

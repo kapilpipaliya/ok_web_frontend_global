@@ -32,14 +32,14 @@ export function SettingTabs() {
   const Tabs = () => (
     <div class="bg:white position:sticky top:0">
 
-        <Icon
-          class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
-          height={30}
-          icon={"iconamoon:close-duotone"}
-          onClick={() => setLayoutStore("isRightOpen", false)}
-          width={30}
-        />
-  
+      <Icon
+        class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
+        height={30}
+        icon={"iconamoon:close-duotone"}
+        onClick={() => setLayoutStore("isRightOpen", false)}
+        width={30}
+      />
+
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128)  f:0.875rem  font-weight:500  mb:10  text-align:center ">
         <ul class="overflow-x-auto scrollbar-width:thin flex jc:space-around  margin-bottom:-1px ">
           <For each={tabs()}>
@@ -75,10 +75,10 @@ export function SettingTabs() {
       </div>
       <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
         <FormConfig />
-        <FormStatus/>
+        <FormStatus />
       </div>
       <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
-        <div classList={{ "display:none": selectedTab() !== "Keys" }}>
+        <Show when={selectedTab() === "Keys"}>
           <PrimaryKey />
           <NameKey />
           <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
@@ -86,14 +86,14 @@ export function SettingTabs() {
             <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
             <UniqueConstrains />
           </Show>
-        </div>
+        </Show>
       </Show>
       <Show when={selectedTab() === "Rules"}>
         <Rules />
       </Show>
-      <div classList={{ "display:none": selectedTab() !== "SEO" }}>
-        <SEOFormGroupProperties  />
-      </div>
+      <Show when={selectedTab() === "SEO"}>
+        <SEOFormGroupProperties />
+      </Show>
     </>
   );
 }

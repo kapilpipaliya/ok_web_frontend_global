@@ -38,6 +38,16 @@ FormMetaData.Form = {
       name: "form",
       parentLabel: "FormCategory",
     },
+    {
+      attributes: [
+        {
+          component: "TagBox",
+          name: "keys",
+        },
+      ],
+      component: "DynamicTable",
+      name: "Unique",
+    },
     rulesMetaAttribute!,
   ],
   name: "Form",

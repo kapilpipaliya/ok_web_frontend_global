@@ -34,6 +34,7 @@ export function getFormMetaData(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   rootVertex: Vertex,
+  ignoreTable?: boolean,
 ): IFormMetaData {
   const result: FieldAttribute[] = [];
   function getAllInputFields(
@@ -55,8 +56,8 @@ export function getFormMetaData(
         id: vertex.id,
         ...vertex.P,
         attributes:
-          component === "DynamicTable"
-            ? getFormMetaData(graph, setGraph, vertex).attributes
+          component === "DynamicTable" && !ignoreTable
+            ? getFormMetaData(graph, setGraph, vertex, ignoreTable).attributes
             : undefined,
         component: component,
         name: vertex.P.name,

@@ -1,6 +1,6 @@
 import jsep from "jsep";
 import { klona } from "klona";
-import { createMemo, createSignal, onCleanup } from "solid-js";
+import { createMemo, createSignal, } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useZIndex } from "~/components/ZIndex";
@@ -8,15 +8,37 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { generateTableInputMeta } from "./generateTableInputMeta";
 import { getConditionsExpression } from "./getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./modifyFieldMetaAllFields";
 
+
+const getMetaAttributes = (selectedRule?: Vertex | null) => {
+  const [graph, setGraph] = useGraph();
+  const [layoutStore] = useDesignerLayoutStore();
+  let metaAttribute = klona(
+    FormMetaData.Form.attributes.find((x) => x.name === "Rule")!,
+  );
+  for (const attribute of metaAttribute.attributes!) {
+    if (attribute.name === "cond") {
+      for (const condAttribute of attribute.attributes!) {
+        if (
+          condAttribute.name === "leftField" ||
+          condAttribute.name === "rightField"
+        ) {
+          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStore);
+        }
+      }
+    }
+  }
+  if (selectedRule) {
+    metaAttribute = metaAttribute.attributes!.find((x) => x.name === "cond")!;
+  }
+  return metaAttribute;
+}
 
 export function RulesModal(
   props: Readonly<{
@@ -35,43 +57,8 @@ export function RulesModal(
     graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ??
     0;
 
-  const metaVertexId = graph.newVertexId;
-  const metaTxnId = graph.newTxnId;
-  let metaAttribute = klona(
-    FormMetaData.Form.attributes.find((x) => x.name === "Rule")!,
-  );
-  for (const attribute of metaAttribute.attributes!) {
-    if (attribute.name === "cond") {
-      for (const condAttribute of attribute.attributes!) {
-        if (
-          condAttribute.name === "leftField" ||
-          condAttribute.name === "rightField"
-        ) {
-          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStore);
-        }
-      }
-    }
-  }
-  if (props.selectedRule) {
-    metaAttribute = metaAttribute.attributes!.find((x) => x.name === "cond")!;
-  }
-
-  addNewVertex(
-    metaTxnId,
-    newVertex(metaVertexId, ["MetaAttr"], metaAttribute),
-    graph,
-    setGraph,
-  );
-  addMetaVertexes(
-    graph,
-    setGraph,
-    metaTxnId,
-    graph.vertexes[metaVertexId],
-    metaAttribute.attributes!,
-  );
-  onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
-  });
+    
+  const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedRule));
 
   const [error, setError] = createSignal<null | string>(null);
 
@@ -158,12 +145,10 @@ export function RulesModal(
       </div>
     </Portal>
   );
-
-
 }
+
 const Overlay = () => {
   return (
     <div class="--bg-opacity:0.75 ~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:opacity bg:rgb(107,114,128) inset:0px position:fixed"></div>
   );
 };
-
