@@ -1,3 +1,5 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { createWritableMemo } from "@solid-primitives/memo";
 import {
   For,
@@ -7,7 +9,6 @@ import {
   createUniqueId,
   onCleanup,
 } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
 
 import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
@@ -19,7 +20,7 @@ import {
 } from "~/components/solid_blocks/tabs/tabs";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
-import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,

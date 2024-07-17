@@ -1,12 +1,10 @@
 /* eslint-disable perfectionist/sort-objects */
 import type {
-  FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
-import { sizeTypes } from "./constants";
 import { gapFields } from "./FlexContainer";
 
 export const GridContainer = {

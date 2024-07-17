@@ -1,6 +1,6 @@
 import { For, Show, createSignal } from "solid-js";
 
-import { type Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { TreeItem } from "./TreeItem";

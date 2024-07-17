@@ -1,6 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { type FieldWithCustomProperty, type TextFieldOptionsField, type ToggleField, createSelectOptions } from "./FieldType";
+import { type TextFieldOptionsField, type ToggleField, createSelectOptions } from "./FieldType";
 import { Icons } from "./Icons";
 
 export const DisplaySection = {

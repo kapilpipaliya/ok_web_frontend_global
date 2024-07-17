@@ -1,5 +1,6 @@
+import type { Accessor } from "solid-js";
+
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";

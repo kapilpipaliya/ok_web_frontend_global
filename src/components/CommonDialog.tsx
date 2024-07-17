@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
-import Dismiss from "solid-dismiss";
 import { type JSX, type Setter, Show, createSignal } from "solid-js";
+import { Portal } from "solid-js/web";
 
 interface CustomModalProps {
   body: JSX.Element;
@@ -59,45 +59,41 @@ export function CustomModal(props: CustomModalProps) {
           width={props.iconSize ?? 25}
         />
       </Show>
-      <Dismiss
-        menuButton={btnEl!}
-        modal
-        open={open}
-        overlay={false}
-        setOpen={setOpen}
-      >
-        <div
-          class={modalContainerClass}
-          onClick={onClickOverlay}
-          role="presentation"
-        >
+      <Show when={open()}>
+        <Portal>
           <div
-            aria-modal="true"
-            class={`${modalClass} ${props.dialogClass} r:10`}
-            role="dialog"
+            class={modalContainerClass}
+            onClick={onClickOverlay}
+            role="presentation"
           >
-            <div class={"font-weight:bold mb:4"}>
-              <Show fallback={props.customTitle} when={!props.customTitle}>
-                {props.title}
-              </Show>
-              {props.closeButton !== false && (
-                <button
-                  class={"bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5"}
-                  onClick={onClickOverlay}
-                  title={"Close"}
-                >
-                  ✕
-                </button>
-              )}
+            <div
+              aria-modal="true"
+              class={`${modalClass} ${props.dialogClass} r:10`}
+              role="dialog"
+            >
+              <div class={"font-weight:bold mb:4"}>
+                <Show fallback={props.customTitle} when={!props.customTitle}>
+                  {props.title}
+                </Show>
+                {props.closeButton !== false && (
+                  <button
+                    class={"bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5"}
+                    onClick={onClickOverlay}
+                    title={"Close"}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <hr class={"fg:lightgrey"} />
+              <div class={`${props.bodyClass} overflow:auto p:3`}>
+                {props.body}
+              </div>
+              <div class={"pt:5"}>{props.footer(setOpen)}</div>
             </div>
-            <hr class={"fg:lightgrey"} />
-            <div class={`${props.bodyClass} overflow:auto p:3`}>
-              {props.body}
-            </div>
-            <div class={"pt:5"}>{props.footer(setOpen)}</div>
           </div>
-        </div>
-      </Dismiss>
+        </Portal>
+      </Show>
     </>
   );
 }

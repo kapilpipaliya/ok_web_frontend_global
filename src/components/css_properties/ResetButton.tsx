@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { CSSStore, useCssEditor } from "./context";
+import { type CSSStore, useCssEditor } from "./context";
 
 
 function isNonEmptyObject(obj: any): boolean {

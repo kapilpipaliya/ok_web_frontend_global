@@ -1,4 +1,4 @@
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
 interface WithAccentBorderProps {
   backgroundColor?: string;
@@ -41,7 +41,10 @@ export function SimpleWarningAlert(props: WithAccentBorderProps): JSX.Element {
           <p class="lh:1.25rem f:0.875rem" style={{ color: "rgb(180,83,9)" }}>
             {props.message || "Warning"}
             <a
-              class={`font-weight:500 text-decoration:underline color:rgb(180,83,9) color:${props.linkHoverColor || "rgb(217,119,6)"}:hover`}
+              class={`color:rgb(180,83,9) font-weight:500 text-decoration:underline`}
+              classList={{
+                [`color:${props.linkHoverColor ?? 'rgb(217,119,6)'}:hover`]: !props.linkHoverColor,
+              }}
               href={props.linkHref || "#"}
             >
               {props.linkText || ""}

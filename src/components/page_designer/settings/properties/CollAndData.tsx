@@ -1,5 +1,6 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { onCleanup } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
@@ -7,14 +8,14 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { GraphInterface, Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "../../LayoutContext";
+import { type PageLayoutObject, useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
 
 function initializeMetaVertex(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {

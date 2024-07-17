@@ -7,7 +7,6 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
-import { onClickAddComponent } from "../../functions/onClickAddComponent";
 
 export function ComonentItem(props: Readonly<{ child: Vertex }>) {
   const [graph, setGraph] = useGraph();
@@ -90,7 +89,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           wrapperClass="height:19px width:19px"
         />
       </Show>
-      <div class="{flex-flow:column} flex ai:center gap:5px pt:5px">
+      <div class="flex {flex-flow:column} ai:center gap:5px pt:5px">
         <Icon
           height={24}
           icon={

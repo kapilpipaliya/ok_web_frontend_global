@@ -1,7 +1,7 @@
 import { Match, Switch, createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { type Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { getDynamicComponent } from "./getDynamicComponent";
 

@@ -1,3 +1,5 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { createWritableMemo } from "@solid-primitives/memo";
 import {
   For,
@@ -6,10 +8,9 @@ import {
   createUniqueId,
   onCleanup,
 } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,

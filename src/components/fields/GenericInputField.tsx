@@ -1,4 +1,4 @@
-import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
+import { Match, Show, Switch, splitProps } from "solid-js";
 
 import type { ComponentProps } from "~/components/fields/ComponentType";
 

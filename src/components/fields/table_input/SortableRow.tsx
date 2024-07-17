@@ -5,7 +5,7 @@ import {
   type Accessor,
   For,
   Match,
-  Setter,
+  type Setter,
   Show,
   Switch,
   createComputed,
