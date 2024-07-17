@@ -7,7 +7,6 @@ import { capitalizeFirstLetter } from "~/lib/utils";
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
-import { PrimaryKey } from "./keys/PrimaryKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
@@ -79,7 +78,7 @@ export function SettingTabs() {
       </div>
       <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
         <Show when={selectedTab() === "Keys"}>
-          <PrimaryKey />
+          {/* <PrimaryKey /> */}
           <NameKey />
           <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
             <Divider class="mt:10" />
