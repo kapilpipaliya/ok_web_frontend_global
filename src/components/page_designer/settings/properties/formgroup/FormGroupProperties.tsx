@@ -57,6 +57,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     const otherVertices = vertices.filter(
       (vertex) =>
         ![
+          "calculatedValue",
           "class",
           "defaultValue",
           "disabled",
@@ -78,6 +79,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
       graph.vertexes[vertexIds.label],
       ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
+      graph.vertexes[vertexIds.calculatedValue],
       graph.vertexes[vertexIds.required],
       graph.vertexes[vertexIds.hidden],
       graph.vertexes[vertexIds.disabled],
@@ -173,7 +175,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     txnId={props.txnId}
                   />
                 </Match>
-                <Match when={metaVertex.P.name === "required" || metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled"}>
+                <Match when={metaVertex.P.name === "required" || metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled" || metaVertex.P.name === "calculatedValue"}>
                   <SelectRuleField
                     meta={meta}
                     metaVertex={metaVertex}
@@ -218,6 +220,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
 function createVertexIds() {
   return {
+    calculatedValue: `calculatedValueVertex${createUniqueId()}`,
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
@@ -233,6 +236,7 @@ function createVertexIds() {
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
   addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Rule", "calculatedValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.defaultValue, ["MetaTemp"], createVertexMeta("Default Value", "defaultValue")), graph, setGraph);
@@ -253,6 +257,7 @@ function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: G
 function useMetaMemo(metaVertex: Vertex) {
   return createWritableMemo(() => {
     if ([
+      "calculatedValue",
       "class",
       "defaultValue",
       "disabled",
