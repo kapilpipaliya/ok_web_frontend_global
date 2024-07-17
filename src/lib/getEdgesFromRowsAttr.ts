@@ -13,8 +13,8 @@ export function getEdgesFromRowsAttr(attrs: any): {
 
   for (const attribute of attrs) {
     if (
-      attribute.component === "SelectBox" ||
-      attribute.component === "TagBox"
+      attribute.componentName === "SelectBox" ||
+      attribute.componentName === "TagBox"
     ) {
       if (attribute.props?.inward) {
         incoming.push({
@@ -32,8 +32,8 @@ export function getEdgesFromRowsAttr(attrs: any): {
         }); // `->$0${capitalizedName}`
       }
     } else if (
-      attribute.component === "Table" ||
-      attribute.component === "DynamicTable"
+      attribute.componentName === "Table" ||
+      attribute.componentName === "DynamicTable"
     ) {
       const expression: NestedExpression = {
         expression: `->${getToEdge(

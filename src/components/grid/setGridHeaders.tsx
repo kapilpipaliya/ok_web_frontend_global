@@ -24,7 +24,7 @@ export function setGridHeaders(
 
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.component === "Table") continue;
+    if (attribute.componentName === "Table") continue;
     // @ts-ignore
     column.accessorKey = `P.${attribute.name}`;
     column.id = attribute.name;
@@ -33,7 +33,7 @@ export function setGridHeaders(
         <Switch>
           <Match
             when={
-              attribute.component === "SelectBox" && !attribute.props?.items
+              attribute.componentName === "SelectBox" && !attribute.props?.items
             }
           >
             {getSelectNameValue({
@@ -45,7 +45,7 @@ export function setGridHeaders(
           </Match>
 
           <Match
-            when={attribute.component === "TagBox" && !attribute.props?.items}
+            when={attribute.componentName === "TagBox" && !attribute.props?.items}
           >
             {getTagValue({
               attribute: attribute,
@@ -55,7 +55,7 @@ export function setGridHeaders(
             })}
           </Match>
 
-          <Match when={attribute.component === "CheckBox"}>
+          <Match when={attribute.componentName === "CheckBox"}>
             <span>
               {info.getValue() === true
                 ? "Yes"

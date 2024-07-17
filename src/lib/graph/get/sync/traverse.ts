@@ -40,7 +40,7 @@ export function getChildVertex(
 
   if (filter) {
     // TODO:
-    // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'component')
+    // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'componentName')
   }
   if (vertexes.length !== 1) {
     return {

@@ -90,7 +90,7 @@ export const SortableRow = (
     if (rowId !== undefined && graph.vertexes[rowId]) {
       return graph.vertexes[rowId];
     } else {
-      return { P: { component: "Error" } } as unknown as Vertex;
+      return { P: { componentName: "Error" } } as unknown as Vertex;
     }
   };
 
@@ -146,7 +146,7 @@ export const SortableRow = (
                     );
 
                     const newMetaData = Object.assign(
-                      // when component is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
+                      // when componentName is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
                       getColumnProps(
                         graph.vertexes[metaVertex().P.templateId] ?? { P: {} },
                         graph,
@@ -166,52 +166,52 @@ export const SortableRow = (
               ),
             );
           }
-          const [component, setComponent] = createWritableMemo(() =>
+          const [componentName, setComponentName] = createWritableMemo(() =>
             getComponent(column.id),
           );
           function getComponent(columnId: Id) {
             const columnMetaVertex = getMetaVertex(columnId);
-            if (columnMetaVertex.P.component.includes("-")) {
+            if (columnMetaVertex.P.componentName.includes("-")) {
               createComputed(
                 on(
                   () => getSelectionOptions(
                     graph,
                     setGraph,
-                    columnMetaVertex.P.component,
+                    columnMetaVertex.P.componentName,
                     [p.joinVertex]
                   ).vertexes,
                   async (vertexes) => {
-                    let component = "";
+                    let componentName = "";
                     if (formTxnId) {
                       const mutationData = formTxnId
                         ? commitTxn(formTxnId, graph)
                         : undefined;
                       const res = await getSelectionOptionsMGCall(
                         [p.joinVertex],
-                        columnMetaVertex.P.component,
+                        columnMetaVertex.P.componentName,
                         mutationData,
                         10
                       );
                       if (isValidResponse(res) &&
                         typeof res.result === "string") {
-                        component = res.result;
+                        componentName = res.result;
                       }
                     } else {
-                      component = vertexes;
+                      componentName = vertexes;
                     }
-                    if (!component) {
-                      component = getStringComponent(graph)?.P.name;
+                    if (!componentName) {
+                      componentName = getStringComponent(graph)?.P.name;
                     }
                     setTimeout(() => {
                       runWithOwner(outerOwner, () => {
-                        setComponent(component);
+                        setComponentName(componentName);
                       });
                     })
                   }
                 )
               );
             } else {
-              return columnMetaVertex.P.component;
+              return columnMetaVertex.P.componentName;
             }
           }
 
@@ -230,16 +230,16 @@ export const SortableRow = (
 
           const Content = () => (
             <>
-              <Show when={component() === "Error"}>Error</Show>
+              <Show when={componentName() === "Error"}>Error</Show>
               <DynamicComponent
-                component={component()}
+                componentName={componentName()}
                 data={p.joinVertex}
                 disabled={disabled()}
                 isRealTime={p.isRealTime}
                 isTableInside={false}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={
-                  component() === "DynamicTable"
+                  componentName() === "DynamicTable"
                     ? graph.vertexes[metaVertex().P.templateId]
                     : metaVertex()
                 }
@@ -291,7 +291,7 @@ export const SortableRow = (
               <Match when={metaVertex().P.hidden}>
                 <td class="align-content:center">
                   <div
-                    class={`${getComponentClass(component())} flex ai:center jc:center`}
+                    class={`${getComponentClass(componentName())} flex ai:center jc:center`}
                   >
                     <DefaultValue />
                   </div>
@@ -306,11 +306,11 @@ export const SortableRow = (
                   </div>
                 </td>
               </Match>
-              <Match when={component() === "DynamicTable"}>
+              <Match when={componentName() === "DynamicTable"}>
                 <td class="align-content:center">
                   <Show when={!disabled()}>
                     <div
-                      class={`${getComponentClass(component())} flex ai:center jc:center`}
+                      class={`${getComponentClass(componentName())} flex ai:center jc:center`}
                     >
                       <DefaultValue />
                       <Content />
@@ -320,7 +320,7 @@ export const SortableRow = (
               </Match>
               <Match when={true}>
                 <td
-                  class={`${getComponentClass(component())} align-content:center padding:1px`}
+                  class={`${getComponentClass(componentName())} align-content:center padding:1px`}
                 >
                   <div class="align-items:center">
                     <DefaultValue />
@@ -421,7 +421,7 @@ export const SortableRow = (
         <tr class="border-bottom:1px|solid|#dddddd border-radius:10px">
           <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
             <DynamicComponent
-              component={"DynamicTable"}
+              componentName={"DynamicTable"}
               data={p.joinVertex}
               disabled={disabled()}
               isRealTime={p.isRealTime}
@@ -438,8 +438,8 @@ export const SortableRow = (
   );
 };
 
-const getComponentClass = (component: string) => {
-  switch (component) {
+const getComponentClass = (componentName: string) => {
+  switch (componentName) {
     case "TextBox":
       return "min-w:150px";
     case "TextArea":

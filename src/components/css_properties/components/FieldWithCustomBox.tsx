@@ -32,12 +32,12 @@ export const FieldWithCustomBox = () => {
         <DynamicCSSComponent
           value={{
             ...meta,
-            component: meta.mainFieldType ?? "textFieldOptions",
+            componentName: meta.mainFieldType ?? "textFieldOptions",
             type: meta.type ?? "number"
           } as GenericField}
         />
         <ComponentMetaContext.Provider value={{
-            component: "buttonGroups",
+            componentName: "buttonGroups",
             isAddToClass: false,
             isLabelOnTop: false,
             label: "",
@@ -76,7 +76,7 @@ export const FieldWithCustomBox = () => {
               return (
                 <DynamicCSSComponent
                   value={{
-                    component: meta.mainFieldType ?? "textFieldOptions",
+                    componentName: meta.mainFieldType ?? "textFieldOptions",
                     isLabelOnTop: meta.isLabelOnTop,
                     label: item.label,
                     name: item.name,

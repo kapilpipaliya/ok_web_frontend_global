@@ -14,14 +14,14 @@ export const TextShadow = {
   textShadow: {
     children: {
       data: {
-        component: "colorPicker",
+        componentName: "colorPicker",
         isLabelOnTop: true,
         label: "Shadow Color",
         name: "color",
       } as ColorPickerField,
       shadow: createGridOptions("grid", "Shadow", [
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isAddToClass: false,
           isLabelOnTop: true,
           label: "X Offset",
@@ -30,7 +30,7 @@ export const TextShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isAddToClass: false,
           isLabelOnTop: true,
           label: "Y Offset",
@@ -39,7 +39,7 @@ export const TextShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isAddToClass: false,
           isLabelOnTop: true,
           label: "Blur",
@@ -48,7 +48,7 @@ export const TextShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isAddToClass: false,
           isLabelOnTop: true,
           label: "Spread",
@@ -58,7 +58,7 @@ export const TextShadow = {
         },
       ]),
       style: {
-        component: "toggleButton",
+        componentName: "toggleButton",
         label: "",
         name: "type",
         options: [
@@ -67,7 +67,7 @@ export const TextShadow = {
         ],
       } as ToggleField,
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
     label: "Text Shadow",

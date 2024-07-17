@@ -11,7 +11,7 @@ export function setSelectValueHelper(
   txnId: number,
   meta: Vertex,
   dataVertex: Vertex,
-  component: string,
+  componentName: string,
   value: Option[],
   isRemove: boolean,
   graph: GraphInterface,
@@ -19,10 +19,10 @@ export function setSelectValueHelper(
 ) {
   let data: Id | Id[];
   let vertexes: Vertex[];
-  if (isRemove && component === "SelectBox") {
+  if (isRemove && componentName === "SelectBox") {
     data = [];
     vertexes = [];
-  } else if (component === "SelectBox") {
+  } else if (componentName === "SelectBox") {
     // @ts-expect-error ignore
     data = value[0].id;
     vertexes = [value[0]] as Vertex[];

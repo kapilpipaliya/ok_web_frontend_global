@@ -14,7 +14,7 @@ export const Transform = {
     children: {
       shadow: createGridOptions("Grid", "Transform", [
         {
-          component: "select",
+          componentName: "select",
           isLabelOnTop: true,
           label: "Type",
           name: "type",
@@ -34,7 +34,7 @@ export const Transform = {
           ],
         },
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -43,7 +43,7 @@ export const Transform = {
         } as TextFieldOptionsField,
         {
           align: "end",
-          component: "fieldWithCustomProperty",
+          componentName: "fieldWithCustomProperty",
           customProperty: [
             { label: "Left", name: "transform-origin" },
             { label: "Top", name: "transform-origin" },
@@ -60,7 +60,7 @@ export const Transform = {
           type: "number",
         } as FieldWithCustomProperty,
         {
-          component: "buttonGroups",
+          componentName: "buttonGroups",
           isLabelOnTop: true,
           label: "Type",
           name: "transform-style",
@@ -71,7 +71,7 @@ export const Transform = {
         },
       ]),
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Adjust Transform",
     label: "Transform",
     name: "transform",

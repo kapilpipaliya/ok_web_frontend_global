@@ -74,7 +74,7 @@ export function ImportModal(props: { toggleModal: () => void }) {
           </div>
           <div class={"mt:1rem"}>
             <GenericInputField
-              component="TextArea"
+              componentName="TextArea"
               data={graph.vertexes[dataVertexId]}
               disabled={false}
               meta={graph.vertexes[metaVertexId]}

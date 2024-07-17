@@ -12,7 +12,7 @@ export function PrimaryKey() {
       <span class="f:15 flex:.5">Primary Key</span>
       <span class="f:15 flex:1">
         <DynamicComponent
-          component={"TagBox"}
+          componentName={"TagBox"}
           data={layoutStore.formData?.formData}
           isRealTime={false}
           meta={{ P: modifyFieldMetaAllFields({ name: "primaryKey" } , graph, setGraph, layoutStore, true)} as unknown as Vertex}

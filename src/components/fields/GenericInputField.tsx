@@ -17,7 +17,6 @@ import { mergeCSS } from "../css_properties/utils/mergeCSS";
 
 export function GenericInputField(
   props: {
-    component?: string; // deprecated
     componentName?: string;
     disabled?: boolean;
     title: string;
@@ -25,8 +24,8 @@ export function GenericInputField(
   } & ComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
-  const component = () =>
-    props.component ?? props.componentName ?? props.meta.P.component;
+  const componentName = () =>
+    props.componentName ?? props.meta.P.componentName;
 
   const handleChange = (value: any) => {
     if (props.setValue) {
@@ -51,7 +50,7 @@ export function GenericInputField(
       when={true}
     >
       <Switch>
-        <Match when={component() === "CheckBox"}>
+        <Match when={componentName() === "CheckBox"}>
           <input
             type="checkbox"
             {...deNullify(customMetaProps)}
@@ -63,7 +62,7 @@ export function GenericInputField(
           <DisplayError />
           <PageAttrRender data={props.data} metaVertex={props.meta} />
         </Match>
-        <Match when={component() === "ColorBox"}>
+        <Match when={componentName() === "ColorBox"}>
           <input
             type="color"
             {...deNullify(customMetaProps)}
@@ -74,8 +73,8 @@ export function GenericInputField(
           />
           <DisplayError />
         </Match>
-        <Match when={component() === "DropDownBox"}>Dropdown</Match>
-        <Match when={component() === "FileUploader"}>
+        <Match when={componentName() === "DropDownBox"}>Dropdown</Match>
+        <Match when={componentName() === "FileUploader"}>
           <FileUploader
             {...deNullify(customMetaProps)}
             class={mergeCSS("", props.meta.P.class)}
@@ -84,11 +83,11 @@ export function GenericInputField(
           />
           <DisplayError />
         </Match>
-        <Match when={component() === "HtmlEditor"}>
+        <Match when={componentName() === "HtmlEditor"}>
           {props.data?.P[props.meta.P[IdAttr]]}
           <DisplayError />
         </Match>
-        <Match when={component() === "NumberBox"}>
+        <Match when={componentName() === "NumberBox"}>
           <input
             onchange={(e: any) => handleChange(e.target.value)}
             placeholder={props.meta?.P.label ?? ""}
@@ -100,7 +99,7 @@ export function GenericInputField(
           />
           <DisplayError />
         </Match>
-        <Match when={component() === "Radio"}>
+        <Match when={componentName() === "Radio"}>
           <Radio
             {...deNullify(customMetaProps)}
             // name={props.meta?.P.label ?? "radio"}
@@ -114,7 +113,7 @@ export function GenericInputField(
           </Radio>
           <DisplayError />
         </Match>
-        <Match when={component() === "SelectBox"}>
+        <Match when={componentName() === "SelectBox"}>
           <MultiSelectField
             disable={props.disabled}
             displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
@@ -128,13 +127,13 @@ export function GenericInputField(
           />
           <DisplayError />
         </Match>
-        <Match when={component() === "RadioGroup"}>
+        <Match when={componentName() === "RadioGroup"}>
           <RadioGroup disabled={props.disabled}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </RadioGroup>
           <DisplayError />
         </Match>
-        <Match when={component() === "TextArea"}>
+        <Match when={componentName() === "TextArea"}>
           <textarea
             {...deNullify(customMetaProps)}
             class={`${mergeCSS("", props.meta.P.class)}`}
@@ -148,7 +147,7 @@ export function GenericInputField(
         {/* Expression Builder */}
         <Match
           when={
-            component() === "TextBox" &&
+            componentName() === "TextBox" &&
             props.data &&
             props.meta &&
             props.meta.P &&
@@ -169,7 +168,7 @@ export function GenericInputField(
           />
           <DisplayError />
           <ExpressionBuilder
-            component={component()}
+            componentName={componentName()}
             content={props.data?.P[props.meta.P[IdAttr]]}
             data={props.data}
             disabled={props.disabled}
@@ -179,7 +178,7 @@ export function GenericInputField(
             txnId={props.txnId}
           />
         </Match>
-        <Match when={component() === "TextBox"}>
+        <Match when={componentName() === "TextBox"}>
           <input
             type="text"
             {...deNullify(customMetaProps)}
@@ -191,7 +190,7 @@ export function GenericInputField(
           />
           <DisplayError />
         </Match>
-        <Match when={component() === "SignatureBox"}>
+        <Match when={componentName() === "SignatureBox"}>
           <Signature disabled={props.disabled} />
           <DisplayError />
         </Match>

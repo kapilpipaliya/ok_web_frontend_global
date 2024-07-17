@@ -18,7 +18,7 @@ export function DefaultValueContent(
 
   return (
     <DynamicComponent
-      component={graph.vertexes[layoutStore.selectedComponent].P.name}
+      componentName={graph.vertexes[layoutStore.selectedComponent].P.name}
       data={props.selectedLayout}
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}

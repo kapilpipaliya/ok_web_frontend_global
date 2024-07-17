@@ -10,14 +10,14 @@ export const Page: IFormMetaData = {
   attributes: [
     {
       class: 'p:8 w:100%',
-      component: "TextBox",
+      componentName: "TextBox",
 
       name: "title",
       onchange: '{"new": ["name","id"]}'
     },
     {
       class: 'p:8 w:100%',
-      component: "TextBox",
+      componentName: "TextBox",
       name: "name",
 
       validationRules: [
@@ -45,20 +45,20 @@ export const Page: IFormMetaData = {
         },
       ],
     },
-    { class: 'p:8 w:100%',component: "TextArea", name: "description" },
+    { class: 'p:8 w:100%',componentName: "TextArea", name: "description" },
     {
       collection: "g:'Dashboard'",
-      component: "TagBox",
+      componentName: "TagBox",
 
       inward: true,
       name: "dashboard",
       parentLabel: "Dashboard",
     },
-    { component: "CheckBox", name: "public" },
-    /*{ component: "CheckBox", name: "isRealTime" },
+    { componentName: "CheckBox", name: "public" },
+    /*{ componentName: "CheckBox", name: "isRealTime" },
     {
       collection: "g:'Form'",
-      component: "SelectBox",
+      componentName: "SelectBox",
       displayName: "Collection",
       
         name: "coll",
@@ -68,12 +68,12 @@ export const Page: IFormMetaData = {
     },
     {
       collection: `g:'{{->$0Coll::'P.name'}}'`,
-      component: "SelectBox",
+      componentName: "SelectBox",
         name: "data",
     },*/
     {
       attributes: pageAttr,
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       label: "Attr",
 
       name: "Attr",
@@ -85,7 +85,7 @@ export const Page: IFormMetaData = {
       attributes: [
         {
           collection: "g:'Role'",
-          component: "SelectBox",
+          componentName: "SelectBox",
 
           name: "role",
         },
@@ -93,16 +93,16 @@ export const Page: IFormMetaData = {
           attributes: [
             {
               collection: "g:'Perm'",
-              component: "SelectBox",
+              componentName: "SelectBox",
 
               name: "perm",
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           name: "Perm",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Role",
       tab: "Permission",
     },

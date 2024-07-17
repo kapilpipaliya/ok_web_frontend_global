@@ -9,44 +9,44 @@ import { gapFields } from "./FlexContainer";
 
 export const GridContainer = {
   grid: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid",
     name: "grid",
     type: "text",
   } as TextFieldOptionsField,
   gridTemplate: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Template",
     name: "grid-template",
     type: "text",
   } as TextFieldOptionsField,
   gridTemplateAreas: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Template Areas",
     name: "grid-template-areas",
     type: "text",
   } as TextFieldOptionsField,
   gridTemplateColumns: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Template Columns",
     name: "grid-template-columns",
     type: "text",
   } as TextFieldOptionsField,
   gridTemplateRows: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Template Rows",
     name: "grid-template-rows",
     type: "text",
   } as TextFieldOptionsField,
   ...gapFields,
   gridAutoRows: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Auto Rows",
     name: "grid-auto-rows",
     type: "text",
   } as TextFieldOptionsField,
   gridAutoColumns: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Grid Auto Columns",
     name: "grid-auto-columns",
     type: "text",

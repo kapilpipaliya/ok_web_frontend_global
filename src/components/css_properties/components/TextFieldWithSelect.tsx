@@ -133,7 +133,7 @@ export const TextFieldWithSelect = () => {
       document.removeEventListener("mouseup", upIncrement);
     };
 
-    // Clean up event listeners when the component unmounts
+    // Clean up event listeners when the componentName unmounts
     onCleanup(() => {
       document.removeEventListener("mousemove", moveIncrement);
       document.removeEventListener("mouseup", upIncrement);

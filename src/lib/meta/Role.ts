@@ -1,5 +1,5 @@
 export const Role = {
-  attributes: [{ component: "TextBox", name: "name" }],
+  attributes: [{ componentName: "TextBox", name: "name" }],
   isInlineEditable: true,
   name: "Role",
   title: "Role",

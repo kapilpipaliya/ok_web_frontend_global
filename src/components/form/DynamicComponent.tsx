@@ -7,7 +7,7 @@ import { getDynamicComponent } from "./getDynamicComponent";
 
 export function DynamicComponent(
   props: Readonly<{
-    component: string; // component is required, cant refactor it to remove it, because parent component needs it too.
+    componentName: string;
     data?: Vertex;
     disabled?: boolean;
     isRealTime?: boolean;
@@ -18,14 +18,14 @@ export function DynamicComponent(
     txnId?: number;
   }>,
 ) {
-  const component = createMemo(() => getDynamicComponent(props.component));
+  const componentName = createMemo(() => getDynamicComponent(props.componentName));
   return (
     <Switch>
-      <Match when={!component()}>NO INPUT</Match>
-      <Match keyed when={component()}>
+      <Match when={!componentName()}>NO INPUT</Match>
+      <Match keyed when={componentName()}>
         <Dynamic
-          component={component()!}
-          componentName={props.component}
+          component={componentName()!}
+          componentName={props.componentName}
           data={props.data}
           disabled={props.disabled}
           isRealTime={props.isRealTime}

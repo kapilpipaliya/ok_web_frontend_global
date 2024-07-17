@@ -15,32 +15,32 @@ import { ComponentMetaContext } from "../context";
 export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
   return (
     <Switch>
-      <Match when={props.value.component === "colorPicker"}>
+      <Match when={props.value.componentName === "colorPicker"}>
         <ComponentMetaContext.Provider value={props.value}>
           <ColorPickerInput />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "select"}>
+      <Match when={props.value.componentName === "select"}>
         <ComponentMetaContext.Provider value={props.value}>
           <Select />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "toggleButton"}>
+      <Match when={props.value.componentName === "toggleButton"}>
         <ComponentMetaContext.Provider value={props.value}>
           <ToggleButton />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "textField"}>
+      <Match when={props.value.componentName === "textField"}>
         <ComponentMetaContext.Provider value={props.value}>
           <TextFieldWithSelect />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "textFieldOptions"}>
+      <Match when={props.value.componentName === "textFieldOptions"}>
         <ComponentMetaContext.Provider value={{ ...(props.value as TextFieldOptionsField), showInside: true }}>
           <TextFieldWithSelect />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "grid"}>
+      <Match when={props.value.componentName === "grid"}>
         <div  
           class={`grid ai:${props.value.align || "center"} gap:${props.value.gap || 10} grid-template-cols:${props.value["grid-template-columns"]} p:${props.value.padding || 0}`}
         >
@@ -51,22 +51,22 @@ export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
           </For>
         </div>
       </Match>
-      <Match when={props.value.component === "buttonGroups"}>
+      <Match when={props.value.componentName === "buttonGroups"}>
         <ComponentMetaContext.Provider value={props.value}>
           <ButtonGroups />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "fieldWithCustomProperty"}>
+      <Match when={props.value.componentName === "fieldWithCustomProperty"}>
         <ComponentMetaContext.Provider value={props.value}>
           <FieldWithCustomBox />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "dataEditor"}>
+      <Match when={props.value.componentName === "dataEditor"}>
         <ComponentMetaContext.Provider value={props.value}>
           <DataEditWithCustomDialog />
         </ComponentMetaContext.Provider>
       </Match>
-      <Match when={props.value.component === "divider"}>
+      <Match when={props.value.componentName === "divider"}>
         <hr class={"color:lightgrey m:5|0 w:full"} />
         <Show when={props.value.title}>
           <div class={"f:15"}>{props.value.title}</div>

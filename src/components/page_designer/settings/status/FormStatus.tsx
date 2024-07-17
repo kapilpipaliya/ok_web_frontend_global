@@ -148,11 +148,11 @@ function createVertexIds() {
 }
 
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  addNewVertex(0, newVertex(vertexIds.formStatus, ["MetaTemp"], createVertexMeta("Form Status", "formStatus", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.expirationDate, ["MetaTemp"], createVertexMeta("Expiration Date", "expirationDate", { class: PROPERTIES.Css.TextBox, component: "DatePicker" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.expirationTime, ["MetaTemp"], createVertexMeta("Expiration Time", "expirationTime", { class: PROPERTIES.Css.TextBox, component: "TimePicker" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.submissionLimit, ["MetaTemp"], createVertexMeta("Submission Limit", "submissionLimit", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.warningMessage, ["MetaTemp"], createVertexMeta("Warning Message", "warningMessage", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.formStatus, ["MetaTemp"], createVertexMeta("Form Status", "formStatus", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.expirationDate, ["MetaTemp"], createVertexMeta("Expiration Date", "expirationDate", { class: PROPERTIES.Css.TextBox, componentName: "DatePicker" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.expirationTime, ["MetaTemp"], createVertexMeta("Expiration Time", "expirationTime", { class: PROPERTIES.Css.TextBox, componentName: "TimePicker" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.submissionLimit, ["MetaTemp"], createVertexMeta("Submission Limit", "submissionLimit", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.warningMessage, ["MetaTemp"], createVertexMeta("Warning Message", "warningMessage", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
 }
 
 function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
@@ -184,7 +184,7 @@ function useMetaMemo(metaVertex: Vertex) {
     )!;
     const P = {
       ...metaVertex.P,
-      component: valueAttribute.component,
+      componentName: valueAttribute.componentName,
       meta: valueAttribute.meta,
     };
     return { ...metaVertex, P };

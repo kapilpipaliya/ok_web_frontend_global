@@ -6,7 +6,7 @@ export type CustomProperty = {
 };
 
 interface Field {
-  component: string;
+  componentName: string;
 }
 interface CSSField extends Field {
   hashName?: string;
@@ -17,7 +17,7 @@ interface CSSField extends Field {
 
 export interface FieldWithCustomProperty extends CSSField {
   align?: string;
-  component: "fieldWithCustomProperty";
+  componentName: "fieldWithCustomProperty";
   customProperty: CustomProperty[];
   "grid-template-columns"?: string;
   gridType: string;
@@ -30,7 +30,7 @@ export interface FieldWithCustomProperty extends CSSField {
 }
 
 export interface ColorPickerField extends CSSField {
-  component: "colorPicker";
+  componentName: "colorPicker";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -39,14 +39,14 @@ export interface ColorPickerField extends CSSField {
 
 export interface GridField extends CSSField {
   children: GenericField[];
-  component: "grid";
+  componentName: "grid";
   gap: string;
   "grid-template-columns": string;
   padding: string;
 }
 
 export interface TextFieldOptionsField extends CSSField {
-  component: "textFieldOptions";
+  componentName: "textFieldOptions";
   inputProps: any
   isAddToClass: boolean;
   isLabelOnTop: boolean;
@@ -61,7 +61,7 @@ export interface TextFieldOptionsField extends CSSField {
 }
 
 export interface ToggleField extends CSSField {
-  component: "toggleButton";
+  componentName: "toggleButton";
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
@@ -73,13 +73,13 @@ export interface DataEditorField extends CSSField {
   children: {
     [key: string]: GenericField;
   };
-  component: "dataEditor";
+  componentName: "dataEditor";
   dialogLabel: string;
   fallback: string;
   label: string;
 }
 export interface SelectField extends CSSField {
-  component: "select";
+  componentName: "select";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -89,7 +89,7 @@ export interface SelectField extends CSSField {
 }
 
 export interface ButtonGroupField extends CSSField {
-  component: "buttonGroups";
+  componentName: "buttonGroups";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -103,14 +103,14 @@ export interface ButtonGroupField extends CSSField {
 }
 
 export interface StringField extends CSSField {
-  component: "select";
+  componentName: "select";
   isLabelOnTop: boolean;
   label: string;
   options: string[];
 }
 
 export interface DividerField extends Field {
-  component: "divider";
+  componentName: "divider";
   label: string;
   title?: string;
 }
@@ -127,7 +127,7 @@ export type GenericField =
   | TextFieldOptionsField
   | ToggleField;
 
-export type ComponentKeyType = GenericField["component"];
+export type ComponentKeyType = GenericField["componentName"];
 
 export type CSSJSONSchemaType = {
   [section: string]: { [key: string]: GenericField };
@@ -147,7 +147,7 @@ export function createButtonGroupOptions(
   isLabelOnTop = true,
 ): ButtonGroupField {
   return {
-    component: "buttonGroups",
+    componentName: "buttonGroups",
     isLabelOnTop,
     label,
     name,
@@ -166,7 +166,7 @@ export const createGridOptions = (
   children: GenericField[],
 ): GridField => ({
   children,
-  component: "grid",
+  componentName: "grid",
   gap: "5px|10px",
   "grid-template-columns": "repeat(2,auto)",
   name,
@@ -180,7 +180,7 @@ export function createSelectOptions(
   isLabelOnTop = false,
 ): SelectField {
   return {
-    component: "select",
+    componentName: "select",
     isLabelOnTop,
     label,
     name,

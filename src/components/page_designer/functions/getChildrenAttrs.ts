@@ -45,26 +45,26 @@ export function getFormMetaData(
     parentComponent: string,
   ): FieldAttribute[] {
     const children = getChildrenAttrs(graph, setGraph, vertex);
-    const component = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P.name;
+    const componentName = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P.name;
 
     if (
       vertex !== rootVertex &&
-      (genericInputComponents.includes(component) ||
-        component === "DynamicTable")
+      (genericInputComponents.includes(componentName) ||
+        componentName === "DynamicTable")
     ) {
       result.push({
         id: vertex.id,
         ...vertex.P,
         attributes:
-          component === "DynamicTable" && !ignoreTable
+          componentName === "DynamicTable" && !ignoreTable
             ? getFormMetaData(graph, setGraph, vertex, ignoreTable).attributes
             : undefined,
-        component: component,
+        componentName: componentName,
         name: vertex.P.name,
         title: parentComponent === "Label" ? parent.P.label : vertex.P.title,
       });
     }
-    if (vertex !== rootVertex && component === "DynamicTable") {
+    if (vertex !== rootVertex && componentName === "DynamicTable") {
       return [];
     }
     return children.map((child) => {
@@ -76,10 +76,10 @@ export function getFormMetaData(
           setGraph,
           child,
           vertex,
-          component,
+          componentName,
         ),
-        //title: component === "Label" ? vertex.P.label : child.P.title,
-        component: childComponent,
+        //title: componentName === "Label" ? vertex.P.label : child.P.title,
+        componentName: childComponent,
         id: child.id,
         name: child.P.name,
       };

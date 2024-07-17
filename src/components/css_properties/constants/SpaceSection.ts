@@ -5,7 +5,7 @@ import { sizeTypes } from "./constants";
 
 export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty } = {
   margin: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Left", name: "margin-left" },
       { label: "Right", name: "margin-right" },
@@ -22,7 +22,7 @@ export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty }
   },
  
   padding: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Left", name: "padding-left" },
       { label: "Right", name: "padding-right" },

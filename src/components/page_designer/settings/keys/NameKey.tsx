@@ -12,7 +12,7 @@ export function NameKey() {
       <span class="f:15 flex:.5">Name Key</span>
       <span class="f:15 flex:1">
         <DynamicComponent
-          component={"TagBox"}
+          componentName={"TagBox"}
           data={layoutStore.formData?.formData}
           isRealTime={false}
           meta={{ P: modifyFieldMetaAllFields({ name: "nameKey" } , graph, setGraph, layoutStore, true)} as unknown as Vertex}

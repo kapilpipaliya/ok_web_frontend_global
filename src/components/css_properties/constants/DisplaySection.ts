@@ -6,7 +6,7 @@ import { Icons } from "./Icons";
 export const DisplaySection = {
   display: createSelectOptions("display", "Display", ['block', 'contents', 'flex', 'flow', 'flow-root', 'grid', 'inline', 'inline-block', 'inline-flex', 'inline-grid', 'inline-table', 'list-item', 'math', 'none', 'ruby', 'ruby-text', 'table', 'table-caption', 'table-cell', 'table-column', 'table-column-group', 'table-footer-group', 'table-header-group', 'table-row', 'table-row-group', ...CSSWideKeywords]),
   visibility: {
-    component: "toggleButton",
+    componentName: "toggleButton",
     label: "Visibility",
     name: "visibility",
     options: [
@@ -18,7 +18,7 @@ export const DisplaySection = {
   resize: createSelectOptions("resize", "Resize", [...extraPropertyValues["resize"].values, ...CSSWideKeywords]),
   /*overflow: {
     align: "end",
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "X", name: "overflow-x" },
       { label: "Y", name: "overflow-y" },
@@ -40,7 +40,7 @@ export const DisplaySection = {
   clear: createSelectOptions("clear", "Clear", ["none", "left", "right", "both", ...CSSWideKeywords]),
   boxSizing: createSelectOptions("box-sizing", "Box Sizing", ["content-box", "border-box", ...CSSWideKeywords]),
   opacity: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Opacity",
     name: "opacity",
     options: ['%'],

@@ -141,7 +141,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       <For each={moveClassToLast(props.metaAttributes)}>
         {(metaVertex) => {
           const [meta, setMeta] = useMetaMemo(metaVertex);
-          const component = createMemo(() =>
+          const componentName = createMemo(() =>
             getComponentForCollRow(meta(), meta(), graph, setGraph)
           );
           const metaProps = getPropsFromMetaExpression(
@@ -184,12 +184,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     txnId={props.txnId}
                   />
                 </Match>
-                <Match when={component() === "Table"}>
+                <Match when={componentName() === "Table"}>
                   <h3>
                     <Label metaVertex={metaVertex} />
                   </h3>
                   <Content
-                    component={component}
+                    componentName={componentName}
                     meta={meta}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
@@ -198,7 +198,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 </Match>
                 <Match when={props.selectedLayout}>
                   <HighlightSetValueContent
-                    component={component}
+                    componentName={componentName}
                     meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
@@ -234,8 +234,8 @@ function createVertexIds() {
 }
 
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
-  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Rule", "calculatedValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
@@ -279,8 +279,8 @@ function useMetaMemo(metaVertex: Vertex) {
     )!;
     const P = {
       ...metaVertex.P,
-      // Adding component and meta from the FormMetaData
-      component: valueAttribute.component,
+      // Adding componentName and meta from the FormMetaData
+      componentName: valueAttribute.componentName,
       meta: valueAttribute.meta,
     };
     return { ...metaVertex, P };

@@ -31,7 +31,7 @@ export const TypographySection = {
     true,
   ),
   fontSize: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Size",
     name: "font-size",
@@ -40,7 +40,7 @@ export const TypographySection = {
   } as TextFieldOptionsField,
 
   lineHeight: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Line height",
     name: "line-height",
@@ -48,20 +48,20 @@ export const TypographySection = {
     type: "number",
   } as TextFieldOptionsField,
   colorPicker: {
-    component: "colorPicker",
+    componentName: "colorPicker",
     isLabelOnTop: true,
     label: "Color",
     name: "color",
   } as ColorPickerField,
   fontWeight: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Weight",
     name: "font-weight",
     options: extraPropertyValues["font-weight"].values,
   } as SelectField,
   letterSpacing:{
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Spacing",
     name: "letter-spacing",
@@ -69,7 +69,7 @@ export const TypographySection = {
     type: "number",
   } as TextFieldOptionsField,
   textIndent: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Indent",
     name: "text-indent",
@@ -77,7 +77,7 @@ export const TypographySection = {
     type: "number",
   } as TextFieldOptionsField,
   fontStyle: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Style",
     name: "font-style",
@@ -89,28 +89,28 @@ export const TypographySection = {
     ],
   } as SelectField,
   fontVariant: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Variant",
     name: "font-variant",
     options: extraPropertyValues["font-variant"].values,
   } as SelectField,
   textDecoration: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Decoration",
     name: "text-decoration",
     options: extraPropertyValues["text-decoration"].values,
   } as SelectField,
   textTransform: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Transform",
     name: "text-transform",
     options: ["none", "capitalize", "uppercase", "lowercase"],
   } as SelectField,
   textAlign: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Align",
     name: "text-align",
@@ -130,7 +130,7 @@ export const TypographySection = {
     true,
   ),
   direction: {
-    component: "select",
+    componentName: "select",
     isLabelOnTop: true,
     label: "Direction",
     name: "direction",

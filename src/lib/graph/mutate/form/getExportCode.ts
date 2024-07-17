@@ -30,10 +30,10 @@ export function getExportCode(
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P;
     const selectMetaVertexes = metaVertexes.filter((meta) =>
-      ["SelectBox", "TagBox"].includes(meta.P.component),
+      ["SelectBox", "TagBox"].includes(meta.P.componentName),
     );
     const tableMetaVertexes = metaVertexes.filter((meta) =>
-      ["Table"].includes(meta.P.component),
+      ["Table"].includes(meta.P.componentName),
     );
 
     for (const metaVertex of selectMetaVertexes) {

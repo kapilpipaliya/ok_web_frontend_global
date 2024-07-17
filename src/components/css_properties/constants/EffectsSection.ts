@@ -16,7 +16,7 @@ export const EffectsSection = {
     children: {
       shadow: createGridOptions("Shadow Grid", "Filter", [
         {
-          component: "select",
+          componentName: "select",
           isLabelOnTop: true,
           label: "Type",
           name: "type",
@@ -32,7 +32,7 @@ export const EffectsSection = {
           ],
         },
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -41,7 +41,7 @@ export const EffectsSection = {
         } as TextFieldOptionsField,
       ]),
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Adjust Filter",
     fallback: "No Filter Effects",
     label: "Filter",
@@ -52,14 +52,14 @@ export const EffectsSection = {
     children: {
       shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
         {
-          component: "select",
+          componentName: "select",
           isLabelOnTop: true,
           label: "Type",
           name: "type",
           options: extraPropertyValues["backdrop-filter"].values,
         } as SelectField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -68,7 +68,7 @@ export const EffectsSection = {
         } as TextFieldOptionsField,
       ]),
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Backdrop Filter",
     label: "Backdrop Filter",
     name: "backdrop-filter",
@@ -77,7 +77,7 @@ export const EffectsSection = {
   
 
   backfaceVisibility: {
-    component: "toggleButton",
+    componentName: "toggleButton",
     isLabelOnTop: true,
     label: "Backface",
     name: "backface-visibility",
@@ -89,7 +89,7 @@ export const EffectsSection = {
 
 
   perspective: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Perspective",
     name: "perspective",

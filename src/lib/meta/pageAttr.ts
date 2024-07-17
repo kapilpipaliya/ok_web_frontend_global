@@ -4,48 +4,48 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 export const pageAttr = [
   {
     collection: "g:'ALL_LABELS'",
-    component: "SelectBox",
+    componentName: "SelectBox",
     displayName: "Collection",
     name: "collection",
     saveValue: true,
   },
   {
     // collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
-    component: "SelectBox",
+    componentName: "SelectBox",
     // displayExpr: "P.displayName||P.name",
     displayExpr: "$P.displayName ($P.name)",
     displayName: "Data",
     name: "data",
   },
   {
-    component: "TextBox",
+    componentName: "TextBox",
     displayName: "ID",
     name: "name",
   },
   // to load initial data
   {
-    component: "TagBox",
+    componentName: "TagBox",
     name: "hidden",
   },
   {
-    component: "TagBox",
+    componentName: "TagBox",
     name: "disabled",
   },
   {
-    component: "TagBox",
+    componentName: "TagBox",
     name: "required",
   },
   {
-    component: "SelectBox",
+    componentName: "SelectBox",
     name: "thankYouPage",
   },
   // {
   //   name: "definition",
-  //   component: "TextArea",
+  //   componentName: "TextArea",
   // },
   // {
   //   name: "parent",
-  //   component: "SelectBox",
+  //   componentName: "SelectBox",
   //
   //
   //     collection: "<-$0->Attr",
@@ -53,13 +53,13 @@ export const pageAttr = [
   // },
   {
     collection: `g:'{{->$0Coll::'P.name'}}'`,
-    component: "SelectBox",
+    componentName: "SelectBox",
 
     name: "data",
   },
   {
     collection: "g:'Comp'",
-    component: "SelectBox",
+    componentName: "SelectBox",
 
     name: "Comp",
     // smaller version:
@@ -69,18 +69,18 @@ export const pageAttr = [
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
-        component: "SelectBox",
+        componentName: "SelectBox",
 
         displayExpr: "::'P.name'",
         name: "name",
       },
       {
-        component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+        componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         name: "value",
       },
     ],
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     displayName: "Property",
     name: "Prop",
   },
@@ -88,7 +88,7 @@ export const pageAttr = [
     attributes: [
       {
         collection: "g:'Role'",
-        component: "SelectBox",
+        componentName: "SelectBox",
 
         name: "role",
       },
@@ -96,20 +96,20 @@ export const pageAttr = [
         attributes: [
           {
             collection: "g:'Perm'",
-            component: "SelectBox",
+            componentName: "SelectBox",
 
             name: "perm",
           },
         ],
-        component: "DynamicTable",
+        componentName: "DynamicTable",
         name: "Perm",
       },
     ],
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     name: "Role",
   },
   {
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     label: "Attr",
     name: "Attr",
 

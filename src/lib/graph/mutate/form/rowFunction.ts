@@ -126,9 +126,9 @@ export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
   const P = klona(attrColumn.P);
   P.templateId = attrColumn.id;
 
-  if (!P.component) {
-    const component = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-    if (component) P.component = component;
+  if (!P.componentName) {
+    const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
+    if (componentName) P.componentName = componentName;
   }
   return P;
 }
@@ -220,9 +220,9 @@ export function rowMetaInitialize(
       const P = klona(attrColumn.P);
       P.templateId = attrColumn.id;
 
-      if (!P.component) {
-        const component = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-        if (component) P.component = component;
+      if (!P.componentName) {
+        const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
+        if (componentName) P.componentName = componentName;
       }
       mergeVertexProperties(
         metaTxnId,

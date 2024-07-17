@@ -7,7 +7,7 @@ import { sizeTypes } from "./constants";
 
 export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
   borderColor: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Border Top", name: "border-top" },
       { label: "Border Left", name: "border-left" },
@@ -22,7 +22,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     type: "number",
   },
   borderRadius: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Top Left", name: "rtl" },
       { label: "Top Right", name: "rtr" },
@@ -38,7 +38,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     type: "number",
   },
   borderStyle: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Border Top", name: "border-top" },
       { label: "Border Left", name: "border-left" },
@@ -54,7 +54,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     type: "number",
   },
   borderWidth: {
-    component: "fieldWithCustomProperty",
+    componentName: "fieldWithCustomProperty",
     customProperty: [
       { label: "Border Top", name: "border-top" },
       { label: "Border Left", name: "border-left" },

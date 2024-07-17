@@ -10,7 +10,7 @@ export interface FieldAttribute {
   [key: string]: any;
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
-  component: string;
+  componentName: string;
   // group?: string;
   dataType?: string;
   displayName?: string;

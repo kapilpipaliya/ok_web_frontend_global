@@ -8,7 +8,7 @@ import { createSelectOptions } from "./FieldType";
 
 export const BackgroundSection = {
   backgroundColor: {
-    component: "colorPicker",
+    componentName: "colorPicker",
     isLabelOnTop: true,
     label: "Background Color",
     name: "background-color",

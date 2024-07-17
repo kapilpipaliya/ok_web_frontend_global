@@ -62,7 +62,7 @@ export function SEOFormGroupProperties() {
                   <Switch>
                     <Match when={true}>
                       <DynamicComponent
-                        component={metaVertex.P.component}
+                        componentName={metaVertex.P.componentName}
                         data={layoutStore.formData.formData}
                         isRealTime={false}
                         meta={metaVertex}
@@ -89,8 +89,8 @@ function createVertexIds() {
 }
 
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
-  addNewVertex(0, newVertex(vertexIds.seoTitle, ["MetaTemp"], createVertexMeta("SEO Title", "seoTitle", { class: PROPERTIES.Css.TextBox, component: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.seoDescription, ["MetaTemp"], createVertexMeta("SEO Description", "seoDescription", { class: PROPERTIES.Css.TextBox, component: "TextArea" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.seoTitle, ["MetaTemp"], createVertexMeta("SEO Title", "seoTitle", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.seoDescription, ["MetaTemp"], createVertexMeta("SEO Description", "seoDescription", { class: PROPERTIES.Css.TextBox, componentName: "TextArea" })), graph, setGraph);
 }
 
 function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
@@ -115,7 +115,7 @@ function useMetaMemo(metaVertex: Vertex) {
     )!;
     const P = {
       ...metaVertex.P,
-      component: valueAttribute.component,
+      componentName: valueAttribute.componentName,
       meta: valueAttribute.meta,
     };
     return { ...metaVertex, P };

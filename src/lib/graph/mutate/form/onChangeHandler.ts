@@ -49,7 +49,7 @@ export function onChangeHandler(
     if (value === "id")
       value = getId(vertex.P[changedFieldAttribute.P[IdAttr]]);
     if (value === "clear") value = null;
-    if (attribute.P.component === "Select" || attribute.P.component === "Tag") {
+    if (attribute.P.componentName === "Select" || attribute.P.componentName === "Tag") {
       setSelectionValue(txnId, vertex, graph, setGraph, attribute, value);
     } else {
       mergeVertexProperties(txnId, vertex.id, graph, setGraph, {

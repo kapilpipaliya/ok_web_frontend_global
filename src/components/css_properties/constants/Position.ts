@@ -6,7 +6,7 @@ import { sizeTypes } from "./constants";
 export const PositionSection = {
   dimentions: createGridOptions("grid", "Dimention", [
  {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Top",
     name: "top",
@@ -14,7 +14,7 @@ export const PositionSection = {
     type: "number",
   } as TextFieldOptionsField,
   {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Right",
     name: "right",
@@ -22,7 +22,7 @@ export const PositionSection = {
     type: "number",
   } as TextFieldOptionsField,
   {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Bottom",
     name: "bottom",
@@ -30,7 +30,7 @@ export const PositionSection = {
     type: "number",
   } as TextFieldOptionsField,
   {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Left",
     name: "left",
@@ -40,7 +40,7 @@ export const PositionSection = {
 ]),
   position: createSelectOptions("position", "Position", ["static", "relative", "absolute", "fixed", "sticky", ...CSSWideKeywords]),
   zIndex: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Z-Index",
     name: "z-index",
     options: sizeTypes,

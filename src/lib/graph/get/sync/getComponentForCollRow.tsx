@@ -16,28 +16,28 @@ export function getComponentForCollRow(
     return getChildVertex(graph, ["$0Comp"], metaVertex).vertex?.P[IdAttr];
   };
 
-  if (!metaVertex.P.component) {
+  if (!metaVertex.P.componentName) {
     return (
       getComponentName() ||
       getCompFallbackToString(metaVertex, graph)?.P[IdAttr]
     );
   }
 
-  if (metaVertex.P.component.includes("-")) {
-    const component = getSelectionOptions(
+  if (metaVertex.P.componentName.includes("-")) {
+    const componentName = getSelectionOptions(
       graph,
       setGraph,
-      metaVertex.P.component,
+      metaVertex.P.componentName,
       [data],
     ).vertexes;
-    if (!component) {
+    if (!componentName) {
       return getCompFallbackToString(metaVertex, graph)?.P[IdAttr];
     }
-    if (typeof component === "string") {
-      return component;
+    if (typeof componentName === "string") {
+      return componentName;
     }
-    return component.P[IdAttr];
+    return componentName.P[IdAttr];
   }
 
-  return getComponentName() || metaVertex.P.component;
+  return getComponentName() || metaVertex.P.componentName;
 }

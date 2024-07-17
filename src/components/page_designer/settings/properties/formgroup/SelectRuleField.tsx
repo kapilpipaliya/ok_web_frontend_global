@@ -63,7 +63,7 @@ export function SelectRuleField(
     P: {
       class: "flex:1",
       collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
-      component: "TagBox",
+      componentName: "TagBox",
       displayName: props.metaVertex.P.displayName,
       name: props.metaVertex.P.name,
       renderLabel: RenderLabel,
@@ -74,7 +74,7 @@ export function SelectRuleField(
   const SelectRules = () => {
     return (
       <DynamicComponent
-        component={"TagBox"}
+        componentName={"TagBox"}
         data={props.selectedLayout}
         isRealTime={false}
         meta={meta}

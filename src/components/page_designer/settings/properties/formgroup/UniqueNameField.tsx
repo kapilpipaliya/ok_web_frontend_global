@@ -59,7 +59,7 @@ export function UniqueNameField(
       </span>
       <span class="f:15 flex:1">
         <DynamicComponent
-          component={"TextBox"}
+          componentName={"TextBox"}
           data={props.selectedLayout}
           isRealTime={false}
           meta={props.meta()}

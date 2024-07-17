@@ -4,18 +4,18 @@ export const Comp: IFormMetaData = {
   attributes: [
     {
       collection: "g:'CompCategory'",
-      component: "SelectBox",
+      componentName: "SelectBox",
 
       inward: true,
       name: "category",
       parentLabel: "CompCategory",
     },
-    { component: "TextBox", name: "name" },
-    { component: "TextBox", name: "label" },
+    { componentName: "TextBox", name: "name" },
+    { componentName: "TextBox", name: "label" },
     {
       childLabel: "Child",
       collection: "g:'Comp'",
-      component: "SelectBox",
+      componentName: "SelectBox",
 
       displayName: "Parent Component",
       inward: true,
@@ -24,7 +24,7 @@ export const Comp: IFormMetaData = {
     },
     {
       collection: "g:'DataType'",
-      component: "TagBox",
+      componentName: "TagBox",
       displayName: "DataType",
 
       inward: true,
@@ -32,41 +32,41 @@ export const Comp: IFormMetaData = {
       parentLabel: "DataType",
     },
     {
-      component: "CheckBox",
+      componentName: "CheckBox",
       displayName: "Children",
       name: "child",
     },
     {
-      component: "CheckBox",
+      componentName: "CheckBox",
       displayName: "Required",
       name: "required",
     },
-    { component: "TextArea", name: "description" },
+    { componentName: "TextArea", name: "description" },
     // TODO: add validation, duplicate row with same name is not allowed.
     {
       attributes: [
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "name",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "label",
         },
         {
-          component: "CheckBox",
+          componentName: "CheckBox",
           name: "required",
         },
         {
           collection: "g:'DataType'",
-          component: "SelectBox",
+          componentName: "SelectBox",
 
           name: "dataType",
           onchange: '["Comp",null]',
         },
         {
           collection: "->$0DataType->$0Comp",
-          component: "SelectBox",
+          componentName: "SelectBox",
           displayName: "Component",
 
           name: "Comp",
@@ -75,30 +75,30 @@ export const Comp: IFormMetaData = {
           attributes: [
             {
               collection: "<-$0->$0Comp->$0Prop",
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayExpr: "::'P.name'",
               name: "name",
             },
             {
-              component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+              componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
               meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
               name: "value",
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           displayName: "Value Property",
           // TODO: Be sure the name is ok, it will not change in production.
           name: "valueProp",
           tab: "Properties",
         },
         {
-          component: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
+          componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
           meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
           name: "value",
-          // component: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
+          // componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
         },
         {
-          component: "TextArea",
+          componentName: "TextArea",
           name: "description",
 
           // autoResizeEnabled: true,
@@ -108,7 +108,7 @@ export const Comp: IFormMetaData = {
           children: "Reset",
           class: "border-color:#FF0000 color:#FF0000",
 
-          component: "Button",
+          componentName: "Button",
           name: "reset",
           variant: "outlined",
           // TODO:
@@ -116,29 +116,29 @@ export const Comp: IFormMetaData = {
           // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Prop",
       tab: "Properties",
     },
     {
       attributes: [
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "name",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "label",
         },
         {
-          component: "TextArea",
+          componentName: "TextArea",
           name: "description",
 
           // autoResizeEnabled: true,
           width: "550px",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Event",
       tab: "Events",
     },

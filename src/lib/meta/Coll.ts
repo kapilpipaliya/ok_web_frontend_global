@@ -12,13 +12,13 @@ import { FormMetaDataAuth } from "./formMetaDataAuth";
 export const Coll: IFormMetaData = {
   attributes: [
     {
-      component: "TextBox",
+      componentName: "TextBox",
       name: "title",
 
       onchange: '{"new": ["name","id"]}',
     },
     {
-      component: "TextBox",
+      componentName: "TextBox",
       name: "name",
 
       validationRules: [
@@ -56,7 +56,7 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "g:'CollCategory'",
-      component: "SelectBox",
+      componentName: "SelectBox",
 
       inward: true,
       name: "category",
@@ -64,21 +64,21 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "g:'Dashboard'",
-      component: "TagBox",
+      componentName: "TagBox",
 
       inward: true,
       name: "dashboard",
       parentLabel: "Dashboard",
     },
-    { component: "TextArea", name: "description" },
-    { component: "CheckBox", name: "public" },
-    { component: "CheckBox", name: "isInlineEditable" },
-    // { name: "supportCustomFields", component: "CheckBox" },
-    // { name: "searchOnly", component: "CheckBox" },
-    // { name: "supportDeletedRecordSearch", component: "CheckBox" },
+    { componentName: "TextArea", name: "description" },
+    { componentName: "CheckBox", name: "public" },
+    { componentName: "CheckBox", name: "isInlineEditable" },
+    // { name: "supportCustomFields", componentName: "CheckBox" },
+    // { name: "searchOnly", componentName: "CheckBox" },
+    // { name: "supportDeletedRecordSearch", componentName: "CheckBox" },
     {
       collection: "->Attr",
-      component: "TagBox",
+      componentName: "TagBox",
       displayName: "Primary Key",
 
       name: "pk",
@@ -88,7 +88,7 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "->Attr",
-      component: "TagBox",
+      componentName: "TagBox",
 
       name: "nameKey",
       // TODO: add validation
@@ -98,7 +98,7 @@ export const Coll: IFormMetaData = {
 
     {
       attributes: collectionAttr,
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       label: "Attr",
 
       name: "Attr",
@@ -109,17 +109,17 @@ export const Coll: IFormMetaData = {
     {
       attributes: [
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "name",
         },
         // {
-        //   component: "TextBox",
+        //   componentName: "TextBox",
         //   name: "label",
         // },
         {
           attributes: [
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Paren",
               name: "leftParen",
 
@@ -128,37 +128,37 @@ export const Coll: IFormMetaData = {
 (((`,
             },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Field",
               name: "leftField",
               // collection: "g:'DataType'",
             },
             // {
-            //   component: "TextBox",
+            //   componentName: "TextBox",
             //   displayName: "Value",
             //   name: "leftValue",
             // },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Operator",
               name: "operator",
               options: `${Object.keys(unaryOperatorsInitial).join("\n")}
 ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Field",
               name: "rightField",
               // collection: "g:'DataType'",
             },
             /*{
-              component: "TextBox",
+              componentName: "TextBox",
               displayName: "Value",
               name: "rightValue",
             },
             {
               collection: "g:'DataType'",
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "DataType",
               
                 name: "dataType",
@@ -166,20 +166,20 @@ ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
               collection: "->$0DataType->$0Comp||Comp",
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Component",
               
                 name: "comp",
               
             },*/
             {
-              component: `->$0RightField->$0Comp<-CompChild::'P.name'||->$0RightField->$0Comp::'P.name'||->$0RightField->$0DataType->$0Default::'P.name'`,
+              componentName: `->$0RightField->$0Comp<-CompChild::'P.name'||->$0RightField->$0Comp::'P.name'||->$0RightField->$0DataType->$0Default::'P.name'`,
               displayName: "Value",
               meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
               name: "rightValue",
             },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "Paren",
               name: "rightParen",
 
@@ -188,7 +188,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
 )))`,
             },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               displayName: "AndOr",
               name: "andOr",
 
@@ -196,12 +196,12 @@ ${Object.keys(binopsInitial).join("\n")}`,
 OR`,
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           displayName: "Conditions",
           name: "cond",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       label: "Rule",
 
       name: "Rule",
@@ -212,12 +212,12 @@ OR`,
 
     /*      {
                   name: "Child",
-                  component: "DynamicTable",
+                  componentName: "DynamicTable",
                   tab: "Child",
                   attributes: [
                     {
                       name: "coll",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
                       
  
                         collection: "g:'Coll'",
@@ -225,18 +225,18 @@ OR`,
                     },
                     {
                       name: "displayName",
-                      component: "TextBox",
+                      componentName: "TextBox",
                       
                         onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
                       
                     },
                     {
                       name: "name",
-                      component: "TextBox",
+                      componentName: "TextBox",
                     },
                     {
                       name: "tab",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
                       
  
                         collection: "-CollChild->$0Tab",
@@ -244,7 +244,7 @@ OR`,
                     },
                     {
                       name: "group",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
                       
                         collection: "-CollChild->$0Group",
  
@@ -253,11 +253,11 @@ OR`,
                     {
                       name: "Prop",
                       displayName: "Property",
-                      component: "DynamicTable",
+                      componentName: "DynamicTable",
                       attributes: [
                         {
                           name: "name",
-                          component: "SelectBox",
+                          componentName: "SelectBox",
                           
                             displayExpr: "::'P.name'",
                             collection: "g:'Comp[Table]'->$0Prop",
@@ -266,7 +266,7 @@ OR`,
                         {
                           name: "value",
                           meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                          component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                          componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
                         },
                       ],
                     },
@@ -276,39 +276,39 @@ OR`,
       attributes: [
         {
           collection: "g:'Coll'",
-          component: "SelectBox",
+          componentName: "SelectBox",
 
           name: "coll",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "displayName",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "fieldDefaults",
         },
         {
           attributes: [
             {
               collection: "g:'Comp[Table]'->$0Prop",
-              component: "SelectBox",
+              componentName: "SelectBox",
 
               displayExpr: "::'P.name'",
               name: "name",
             },
             {
-              component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+              componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
               meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
               name: "value",
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           displayName: "Property",
           name: "Prop",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Transform",
       tab: "Transform",
     },
@@ -316,22 +316,22 @@ OR`,
       attributes: [
         {
           collection: "g:'Role'",
-          component: "SelectBox",
+          componentName: "SelectBox",
 
           name: "role",
         },
         {
           collection: "g:'Perm'",
-          component: "TagBox",
+          componentName: "TagBox",
 
           name: "perm",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "scope",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Role",
       tab: "Permission",
     },
@@ -339,13 +339,13 @@ OR`,
       attributes: [
         {
           collection: "<-$0->Attr",
-          component: "TagBox",
+          componentName: "TagBox",
           displayName: "Unique Constrain Keys",
 
           name: "pk",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "uniqueConstrain",
       tab: "Unique Constrain",
     },

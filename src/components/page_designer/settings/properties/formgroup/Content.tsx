@@ -6,7 +6,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 export function Content(
   props: Readonly<{
-    component: Accessor<string>;
+    componentName: Accessor<string>;
     meta: Accessor<Vertex>;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
@@ -15,7 +15,7 @@ export function Content(
 ) {
   return (
     <DynamicComponent
-      component={props.component()}
+      componentName={props.componentName()}
       data={props.selectedLayout}
       isRealTime={false}
       meta={props.meta()}

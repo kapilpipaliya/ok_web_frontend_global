@@ -9,7 +9,7 @@ import { Label } from "./Label";
 
 export function HighlightSetValueContent(
   props: Readonly<{
-    component: Accessor<string>;
+    componentName: Accessor<string>;
     meta: Accessor<Vertex>;
     metaVertex: Vertex;
     selectedLayout: Vertex;
@@ -36,7 +36,7 @@ export function HighlightSetValueContent(
           </Match>
           <Match when={true}>
             <Content
-              component={props.component}
+              componentName={props.componentName}
               meta={props.meta}
               selectedLayout={props.selectedLayout}
               setValue={props.setValue}
@@ -46,7 +46,7 @@ export function HighlightSetValueContent(
         </Switch>
         {/* Select Rules: */}
         {/* <SelectInputField
-                      component={"SelectBox"}
+                      componentName={"SelectBox"}
                       data={{ P: {} } as Vertex}
                       meta={{
                         P: {

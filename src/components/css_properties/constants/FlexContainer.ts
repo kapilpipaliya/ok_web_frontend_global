@@ -8,19 +8,19 @@ import { createSelectOptions } from "./FieldType";
 
 export const gapFields = {
   gap: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Gap",
     name: "gap",
     type: "number",
   } as TextFieldOptionsField,
   rowGap: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Row Gap",
     name: "row-gap",
     type: "number",
   } as TextFieldOptionsField,
   columnGap: {
-    component: "textFieldOptions",
+    componentName: "textFieldOptions",
     label: "Column Gap",
     name: "column-gap",
     type: "number",

@@ -31,9 +31,9 @@ export function PageAttrRender(
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
       {(item, index) => {
-        const component = createMemo(
+        const componentName = createMemo(
           () =>
-            item.P.component || getCompFallbackToString(item, graph)?.P[IdAttr],
+            item.P.componentName || getCompFallbackToString(item, graph)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
           return getCompFallbackToString(getLastItem(parentItems, 1), graph)?.P[
@@ -51,7 +51,7 @@ export function PageAttrRender(
           <Show when={!isPreview() || !isHidden(item, formData, graph, setGraph)}>
             <DynamicComponent
               // NOTE: For repeater we cant use parentData
-              component={component()}
+              componentName={componentName()}
               // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
               data={
                 props.data ||

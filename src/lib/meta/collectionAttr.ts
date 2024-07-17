@@ -3,29 +3,29 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 export const collectionAttr = [
   {
-    component: "TextBox",
+    componentName: "TextBox",
     name: "displayName",
 
     onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
   },
   {
-    component: "TextBox",
+    componentName: "TextBox",
     displayName: "ID",
     name: "name",
   },
   {
-    component: "TextArea",
+    componentName: "TextArea",
     name: "definition",
   },
   {
     collection: "g:'DataType'",
-    component: "SelectBox",
+    componentName: "SelectBox",
 
     name: "dataType",
   },
   {
     collection: "->$0DataType->$0Comp",
-    component: "SelectBox",
+    componentName: "SelectBox",
 
     name: "Comp",
     // smaller version:
@@ -33,42 +33,42 @@ export const collectionAttr = [
   },
   {
     collection: "g:'Coll'",
-    component: "SelectBox",
+    componentName: "SelectBox",
 
     name: "coll",
   },
   {
-    component: "CheckBox",
+    componentName: "CheckBox",
     name: "required",
   },
   {
-    component: "CheckBox",
+    componentName: "CheckBox",
     name: "disabled",
   },
   {
-    component: "TagBox",
+    componentName: "TagBox",
     name: "hidden",
   },
   {
-    component: "TagBox",
+    componentName: "TagBox",
     name: "disabled",
   },
   {
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
-        component: "SelectBox",
+        componentName: "SelectBox",
 
         displayExpr: "::'P.name'",
         name: "name",
       },
       {
-        component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+        componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         name: "value",
       },
     ],
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     displayName: "Properties",
     name: "Prop",
   },
@@ -76,7 +76,7 @@ export const collectionAttr = [
     attributes: [
       {
         collection: "g:'Role'",
-        component: "SelectBox",
+        componentName: "SelectBox",
 
         name: "role",
       },
@@ -84,25 +84,25 @@ export const collectionAttr = [
         attributes: [
           {
             collection: "g:'Perm'",
-            component: "TagBox",
+            componentName: "TagBox",
 
             name: "perm",
           },
           {
-            component: "TextBox",
+            componentName: "TextBox",
             name: "scope",
           },
         ],
-        component: "DynamicTable",
+        componentName: "DynamicTable",
         name: "Perm",
       },
     ],
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     displayName: "Permissions",
     name: "Role",
   },
   {
-    component: "DynamicTable",
+    componentName: "DynamicTable",
     label: "Attr",
     name: "Attr",
 

@@ -14,7 +14,7 @@ export const BoxShadow = {
   boxShadow: {
     children: {
       data: {
-        component: "colorPicker",
+        componentName: "colorPicker",
         info: "box-shadow",
         isLabelOnTop: true,
         label: "Shadow Color",
@@ -22,7 +22,7 @@ export const BoxShadow = {
       } as ColorPickerField,
       shadow: createGridOptions("grid", "Shadow", [
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -32,7 +32,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -42,7 +42,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -52,7 +52,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -63,7 +63,7 @@ export const BoxShadow = {
         } as TextFieldOptionsField,
       ]),
       inset: {
-        component: "toggleButton",
+        componentName: "toggleButton",
         info: "box-shadow",
         label: "",
         name: "inset",
@@ -73,7 +73,7 @@ export const BoxShadow = {
         ],
       } as ToggleField,
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
     label: "Box Shadow",

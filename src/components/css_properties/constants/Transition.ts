@@ -20,7 +20,7 @@ export const Transition = {
       ),
       shadow: createGridOptions("size Grid", "Transition", [
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Duration",
           name: "duration",
@@ -28,7 +28,7 @@ export const Transition = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          component: "textFieldOptions",
+          componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Delay",
           name: "delay",
@@ -67,7 +67,7 @@ export const Transition = {
         true,
       ),
     },
-    component: "dataEditor",
+    componentName: "dataEditor",
     dialogLabel: "Adjust Transition",
     fallback: "No transition",
     label: "Transition",

@@ -1,7 +1,7 @@
 export const Dashboard = {
   attributes: [
-    { component: "TextBox", name: "name" },
-    { component: "TextArea", name: "description" },
+    { componentName: "TextBox", name: "name" },
+    { componentName: "TextArea", name: "description" },
   ],
   isInlineEditable: true,
   name: "Dashboard",

@@ -32,7 +32,7 @@ FormMetaData.Form = {
     ...FormMetaData.Page.attributes,
     {
       collection: "g:'FormCategory'",
-      component: "SelectBox",
+      componentName: "SelectBox",
       displayName: "Form Category",
       inward: true,
       name: "form",
@@ -41,11 +41,11 @@ FormMetaData.Form = {
     {
       attributes: [
         {
-          component: "TagBox",
+          componentName: "TagBox",
           name: "keys",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Unique",
     },
     rulesMetaAttribute!,

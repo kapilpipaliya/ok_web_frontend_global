@@ -23,7 +23,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
     <For each={props.metaAttributes}>
       {(metaVertex) => {
         const id = `${props.vertex.id}${metaVertex.P[IdAttr]}Label`;
-        const component = createMemo(() =>
+        const componentName = createMemo(() =>
           getComponentForCollRow(
             metaVertex,
             props.vertex,
@@ -43,7 +43,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
         );
         const Content = () => (
           <DynamicComponent
-            component={component()}
+            componentName={componentName()}
             data={props.vertex}
             isRealTime={false}
             isTableInside={true}
@@ -66,7 +66,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
 
         return (
           <Switch>
-            <Match when={component() === "DynamicTable"}>
+            <Match when={componentName() === "DynamicTable"}>
               {/* <h3><Label/></h3> */}
               <Content />
             </Match>

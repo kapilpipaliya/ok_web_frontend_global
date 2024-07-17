@@ -7,13 +7,13 @@ import { useGraph } from "../graph/graph";
 export const Nav = {
   attributes: [
     {
-      component: "TextBox",
+      componentName: "TextBox",
       name: "title",
 
       onchange: '{"new": ["name","id"]}',
     },
     {
-      component: "TextBox",
+      componentName: "TextBox",
       name: "name",
 
       validationRules: [
@@ -42,24 +42,24 @@ export const Nav = {
         },
       ],
     },
-    { component: "TextArea", name: "description" },
+    { componentName: "TextArea", name: "description" },
     {
       attributes: [
         {
-          component: "TextBox",
+          componentName: "TextBox",
           displayName: "ID",
           name: "name",
         },
         {
-          component: "TextArea",
+          componentName: "TextArea",
           name: "definition",
         },
         {
-          component: "CheckBox",
+          componentName: "CheckBox",
           name: "expanded",
         },
         {
-          component: "SelectBox",
+          componentName: "SelectBox",
           items: `Table
 Form
 Url`,
@@ -68,19 +68,19 @@ Url`,
         },
         {
           collection: "g:'Form'",
-          component: "SelectBox",
+          componentName: "SelectBox",
 
           name: "Form",
         },
         {
-          component: "TextBox",
+          componentName: "TextBox",
           name: "url",
         },
         {
           attributes: [
             {
               collection: "g:'Role'",
-              component: "SelectBox",
+              componentName: "SelectBox",
 
               name: "role",
             },
@@ -88,36 +88,36 @@ Url`,
               attributes: [
                 {
                   collection: "g:'Perm'",
-                  component: "SelectBox",
+                  componentName: "SelectBox",
 
                   name: "perm",
                 },
               ],
-              component: "DynamicTable",
+              componentName: "DynamicTable",
               name: "Perm",
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           name: "Role",
           tab: "Permission",
         },
         {
           attributes: [
             {
-              component: "TextBox",
+              componentName: "TextBox",
               displayName: "ID",
               name: "name",
             },
             {
-              component: "TextArea",
+              componentName: "TextArea",
               name: "definition",
             },
             {
-              component: "CheckBox",
+              componentName: "CheckBox",
               name: "expanded",
             },
             {
-              component: "SelectBox",
+              componentName: "SelectBox",
               items: `Table
 Form
 Url`,
@@ -126,19 +126,19 @@ Url`,
             },
             {
               collection: "g:'Form'",
-              component: "SelectBox",
+              componentName: "SelectBox",
 
               name: "Form",
             },
             {
-              component: "TextBox",
+              componentName: "TextBox",
               name: "url",
             },
             {
               attributes: [
                 {
                   collection: "g:'Role'",
-                  component: "SelectBox",
+                  componentName: "SelectBox",
 
                   name: "role",
                 },
@@ -146,36 +146,36 @@ Url`,
                   attributes: [
                     {
                       collection: "g:'Perm'",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
 
                       name: "perm",
                     },
                   ],
-                  component: "DynamicTable",
+                  componentName: "DynamicTable",
                   name: "Perm",
                 },
               ],
-              component: "DynamicTable",
+              componentName: "DynamicTable",
               name: "Role",
               tab: "Permission",
             },
             {
               attributes: [
                 {
-                  component: "TextBox",
+                  componentName: "TextBox",
                   displayName: "ID",
                   name: "name",
                 },
                 {
-                  component: "TextArea",
+                  componentName: "TextArea",
                   name: "definition",
                 },
                 {
-                  component: "CheckBox",
+                  componentName: "CheckBox",
                   name: "expanded",
                 },
                 {
-                  component: "SelectBox",
+                  componentName: "SelectBox",
                   items: `Table
 Form
 Url`,
@@ -184,19 +184,19 @@ Url`,
                 },
                 {
                   collection: "g:'Form'",
-                  component: "SelectBox",
+                  componentName: "SelectBox",
 
                   name: "Form",
                 },
                 {
-                  component: "TextBox",
+                  componentName: "TextBox",
                   name: "url",
                 },
                 {
                   attributes: [
                     {
                       collection: "g:'Role'",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
 
                       name: "role",
                     },
@@ -204,36 +204,36 @@ Url`,
                       attributes: [
                         {
                           collection: "g:'Perm'",
-                          component: "SelectBox",
+                          componentName: "SelectBox",
 
                           name: "perm",
                         },
                       ],
-                      component: "DynamicTable",
+                      componentName: "DynamicTable",
                       name: "Perm",
                     },
                   ],
-                  component: "DynamicTable",
+                  componentName: "DynamicTable",
                   name: "Role",
                   tab: "Permission",
                 },
                 {
                   attributes: [
                     {
-                      component: "TextBox",
+                      componentName: "TextBox",
                       displayName: "ID",
                       name: "name",
                     },
                     {
-                      component: "TextArea",
+                      componentName: "TextArea",
                       name: "definition",
                     },
                     {
-                      component: "CheckBox",
+                      componentName: "CheckBox",
                       name: "expanded",
                     },
                     {
-                      component: "SelectBox",
+                      componentName: "SelectBox",
                       items: `Table
 Form
 Url`,
@@ -242,19 +242,19 @@ Url`,
                     },
                     {
                       collection: "g:'Form'",
-                      component: "SelectBox",
+                      componentName: "SelectBox",
 
                       name: "Form",
                     },
                     {
-                      component: "TextBox",
+                      componentName: "TextBox",
                       name: "url",
                     },
                     {
                       attributes: [
                         {
                           collection: "g:'Role'",
-                          component: "SelectBox",
+                          componentName: "SelectBox",
 
                           name: "role",
                         },
@@ -262,21 +262,21 @@ Url`,
                           attributes: [
                             {
                               collection: "g:'Perm'",
-                              component: "SelectBox",
+                              componentName: "SelectBox",
 
                               name: "perm",
                             },
                           ],
-                          component: "DynamicTable",
+                          componentName: "DynamicTable",
                           name: "Perm",
                         },
                       ],
-                      component: "DynamicTable",
+                      componentName: "DynamicTable",
                       name: "Role",
                       tab: "Permission",
                     },
                   ],
-                  component: "DynamicTable",
+                  componentName: "DynamicTable",
                   name: "Attr",
 
                   tab: "expand",
@@ -284,7 +284,7 @@ Url`,
                   type: "NavAttr",
                 },
               ],
-              component: "DynamicTable",
+              componentName: "DynamicTable",
               name: "Attr",
 
               tab: "expand",
@@ -292,7 +292,7 @@ Url`,
               type: "NavAttr",
             },
           ],
-          component: "DynamicTable",
+          componentName: "DynamicTable",
           name: "Attr",
 
           tab: "expand",
@@ -300,7 +300,7 @@ Url`,
           type: "NavAttr",
         },
       ],
-      component: "DynamicTable",
+      componentName: "DynamicTable",
       name: "Attr",
 
       tab: "Attributes",

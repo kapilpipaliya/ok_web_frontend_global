@@ -40,7 +40,6 @@ function createFieldAttributes(graph: GraphInterface, layoutStore: PageLayoutObj
   return [
     {
       collection: "g:'ALL_LABELS'",
-      component: "SelectBox",
       componentName: "SelectBox",
       displayName: "Collection",
       name: "collection",
@@ -52,12 +51,12 @@ function createFieldAttributes(graph: GraphInterface, layoutStore: PageLayoutObj
         graph.vertexes[layoutStore.selectedId]?.P?.collection
           ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'`
           : "",
-      component: "SelectBox",
+      componentName: "SelectBox",
       name: "data",
     },
     {
       class: PROPERTIES.Css.TextBox,
-      component: "TextBox",
+      componentName: "TextBox",
       name: "data",
     },
   ];
@@ -108,7 +107,7 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
           <GenericInputField
-            component={"TextBox"}
+            componentName={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
             meta={collMetaVertex.vertexes![2]}
@@ -116,7 +115,7 @@ export function CollAndData() {
             txnId={layoutStore.formData.txnId}
           />
           <ExpressionBuilder
-            component={"TextBox"}
+            componentName={"TextBox"}
             content={graph.vertexes[layoutStore.selectedId]?.P.data || ""}
             data={graph.vertexes[layoutStore.selectedId]}
             meta={collMetaVertex.vertexes![2]}

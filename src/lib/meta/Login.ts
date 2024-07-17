@@ -2,9 +2,9 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 
 export const Login: IFormMetaData = {
   attributes: [
-    { component: "TextBox", name: "email" },
+    { componentName: "TextBox", name: "email" },
     {
-      component: "TextBox",
+      componentName: "TextBox",
       mode: "password",
       name: "pass",
     },

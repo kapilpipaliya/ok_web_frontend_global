@@ -42,7 +42,7 @@ import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { Label } from "../solid_blocks/Label";
 import { Avatar } from "../solid_blocks/avatar/avatar";
 
-// This component support rendering Child Themselves by calling PageRender.
+// This componentName support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
   return meta.P.attr ? JSON.parse(meta.P.attr) : {};
 }
@@ -74,7 +74,6 @@ export function GenericField(
   props: {
     [key: string]: any;
     children?: JSXElement;
-    component?: string; // depricated
     componentName?: string;
     disabled?: boolean;
     txnId?: number;
@@ -82,8 +81,8 @@ export function GenericField(
 ) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderVertexContext();
-  const component = createMemo(
-    () => props.component ?? props.componentName ?? props.meta.P.component,
+  const componentName = createMemo(
+    () => props.componentName ?? props.componentName ?? props.meta.P.componentName,
   );
   const parentComponent = createMemo(
     () =>
@@ -98,20 +97,20 @@ export function GenericField(
       when={true}
     >
       <Switch>
-        <Match when={component() === "Repeater"}>
+        <Match when={componentName() === "Repeater"}>
           <Repeater data={props.data} disabled={props.disabled} meta={props.meta} />
         </Match>
-        <Match when={component() === "Text" && props.meta.P.as}>
+        <Match when={componentName() === "Text" && props.meta.P.as}>
           <Dynamic class={props.meta.P.class} component={props.meta.P.as} disabled={props.disabled}>
             {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
             {props.children}
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Dynamic>
         </Match>
-        <Match when={component() === "Text" && !props.meta.P.as}>
+        <Match when={componentName() === "Text" && !props.meta.P.as}>
           {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
         </Match>
-        <Match when={component() === "A"}>
+        <Match when={componentName() === "A"}>
           <Switch>
             <Match when={getDataVertex(graph, props.meta)}>
               {(vertex) => (
@@ -172,16 +171,16 @@ export function GenericField(
         </Match>
         <Match
           when={PageDesignerLabels.filter((label) => label !== "Form").includes(
-            component(),
+            componentName(),
           )}
         >
           <PageViewWrapper
             disabled={props.disabled}
             expression={props.meta.P.data}
-            pageVertexLabel={component()}
+            pageVertexLabel={componentName()}
           />
         </Match>
-        <Match when={component() === "Image"}>
+        <Match when={componentName() === "Image"}>
           <img
             loading="lazy"
             {...deNullify(props.meta.P)}
@@ -192,7 +191,7 @@ export function GenericField(
             src={getText(graph, setGraph, props.meta.P.src, repeaterContext)}
           />
         </Match>
-        <Match when={component() === "Tabs"}>
+        <Match when={componentName() === "Tabs"}>
           <Tabs
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -201,13 +200,13 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Tabs>
         </Match>
-        <Match when={component() === "TabContainer"}>
+        <Match when={componentName() === "TabContainer"}>
           <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
-        <Match when={component() === "TabList"}>
+        <Match when={componentName() === "TabList"}>
           <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
-        <Match when={component() === "Icon"}>
+        <Match when={componentName() === "Icon"}>
           <Icon
             height={props.meta.P.height || "24"}
             icon={props.meta.P.icon}
@@ -217,7 +216,7 @@ export function GenericField(
             disabled={props.disabled}
           />
         </Match>
-        <Match when={component() === "Box" && props.meta.P.text}>
+        <Match when={componentName() === "Box" && props.meta.P.text}>
           <Dynamic
             component={props.meta.P.as || "div"}
             {...deNullify(props.meta.P)}
@@ -228,7 +227,7 @@ export function GenericField(
             {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
           </Dynamic>
         </Match>
-        <Match when={component() === "Button"}>
+        <Match when={componentName() === "Button"}>
           <button
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -252,7 +251,7 @@ export function GenericField(
             </Switch>
           </button>
         </Match>
-        <Match when={component() === "Table"}>
+        <Match when={componentName() === "Table"}>
           <Table
             headers={
               getSelectionOptions(graph, setGraph, "->Attr", [props.meta])
@@ -267,7 +266,7 @@ export function GenericField(
         </Match>
         <Match
           when={
-            component() === "TableHeader" &&
+            componentName() === "TableHeader" &&
             getSelectionOptions(graph, setGraph, "->Attr", [props.meta])
               .vertexes?.length
           }
@@ -276,12 +275,12 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
-        <Match when={component() === "TableRow"}>
+        <Match when={componentName() === "TableRow"}>
           <TableBodyCell class={"b:1px|solid|#000 bg:#ffffff h:50 text:center"} disabled={props.disabled}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
-        <Match when={component() === "Collapsible"}>
+        <Match when={componentName() === "Collapsible"}>
           <Collapsible
             isOpen={props.meta.P.isOpen ?? true}
             {...deNullify(props.meta.P)}
@@ -291,7 +290,7 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Collapsible>
         </Match>
-        <Match when={component() === "Avtar"}>
+        <Match when={componentName() === "Avtar"}>
           <Avatar
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -300,7 +299,7 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
         </Match>
-        <Match when={component() === "Select"}>
+        <Match when={componentName() === "Select"}>
           <Select
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -309,15 +308,15 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Select>
         </Match>
-        <Match when={component() === "TreeViewItem"}>
+        <Match when={componentName() === "TreeViewItem"}>
           <TreeView disabled={props.disabled} meta={props.meta} title={props.meta.P?.title ?? "MenuItem"}>
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </TreeView>
         </Match>
-        <Match when={component() === "TreeViewChild"}>
+        <Match when={componentName() === "TreeViewChild"}>
           <PageAttrRender data={props.data} disabled={props.disabled} metaVertex={props.meta} />
         </Match>
-        <Match when={component() === "Accordion"}>
+        <Match when={componentName() === "Accordion"}>
           <Accordion
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -326,7 +325,7 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
         </Match>
-        <Match when={component() === "Breadcrumb"}>
+        <Match when={componentName() === "Breadcrumb"}>
           <Breadcrumbs
             aria-label="breadcrumb"
             // @ts-ignore
@@ -338,17 +337,17 @@ export function GenericField(
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
-        <Match when={component() === "Form" || component() === "Step"}>
+        <Match when={componentName() === "Form" || componentName() === "Step"}>
           <FormWrapper disabled={props.disabled} meta={props.meta} />
         </Match>
-        <Match when={component() === "Divider"}>
+        <Match when={componentName() === "Divider"}>
           <hr
             {...deNullify(props.meta.P)}
             class={` ${mergeCSS("", props.meta.P.class)} color:${props.meta.P.color ?? "lightgrey"} h:${props.meta.P.height ?? "2"} w:full`}
             disabled={props.disabled}
           />
         </Match>
-        <Match when={component() === "Heading"}>
+        <Match when={componentName() === "Heading"}>
           <Heading
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -359,7 +358,7 @@ export function GenericField(
             subheading={props.meta.P.subheading}
           />
         </Match>
-        <Match when={component() === "Rating"}>
+        <Match when={componentName() === "Rating"}>
           <StarRating
             {...deNullify(props.meta.P)}
             class={mergeCSS("", props.meta.P.class)}
@@ -368,7 +367,7 @@ export function GenericField(
             heading={props.meta.P.heading ?? "Rating"}
           />
         </Match>
-        <Match when={component() === "Label"}>
+        <Match when={componentName() === "Label"}>
           <Label
             meta={props.meta}
             {...deNullify(props.meta.P)}
