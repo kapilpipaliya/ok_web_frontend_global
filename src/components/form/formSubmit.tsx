@@ -50,9 +50,7 @@ export function formSubmit(closePopUp?: () => void) {
       const name = formData?.formData?.P.name;
 
       const res = await checkIfNameExistsMGCall(
-        formData.formMeta.L[0],
-        name,
-        formData.formData.id,
+        formData.formData,
       );
 
       if (res.error) {

@@ -26,7 +26,7 @@ export const iconMap = {
   // LoadIndicator: "ep:loading",
   NumberBox: "fluent-emoji-high-contrast:input-numbers",
   Page: "fluent:form-20-regular",
-  ProgressBar: "carbon:progress-bar",
+  // ProgressBar: "carbon:progress-bar",
   Radio: "fluent:radio-button-16-filled",
   RadioGroup: "ri:list-radio",
   Rating: "mage:star",

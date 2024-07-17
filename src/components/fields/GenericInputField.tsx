@@ -167,16 +167,6 @@ export function GenericInputField(
           </Radio>
           <DisplayError />
         </Match>
-        <Match when={component() === "ProgressBar"}>
-          <input
-            type="progress"
-      
-            {...deNullify(customMetaProps)}
-            class={mergeCSS("", props.meta.P.class)}
-            disabled={props.disabled}
-          />
-          <DisplayError />
-        </Match>
         <Match when={component() === "SelectBox"}>
           <MultiSelectField
       

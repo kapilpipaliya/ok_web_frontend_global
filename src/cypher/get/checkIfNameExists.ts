@@ -3,12 +3,11 @@ import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 import { getSubDomain } from "~/server/getSubDomain";
 
 export const checkIfNameExistsMGCall = async (
   vertex: Vertex,
-  id?: string,
 ) => {
   "use server";
   const host = getRequestURL().hostname;
@@ -17,6 +16,7 @@ export const checkIfNameExistsMGCall = async (
 
   const label = vertex.L[0];
   const name = vertex.P.name;
+  const id = vertex.id;
 
   const buildUniqueCheckQuery = (label: string, name: string, id?: string) => {
     let baseQuery = `MATCH (v:${label}) WHERE v.name = $name`;
@@ -31,6 +31,9 @@ export const checkIfNameExistsMGCall = async (
   const buildUniqueConstrainCheckQuery = (keys: Vertex[]) => {
     let baseQuery = `MATCH (v:${label}) WHERE `;
     const params: Record<string, string> = {};
+    if (id) {
+      baseQuery += `v.elementId != $id AND `;
+    }
     for(const key of keys) {
       baseQuery += `v.${key.P.name} = $${key.P.name} AND `;
       params[key.P.name] = vertex.P[key.P.name];

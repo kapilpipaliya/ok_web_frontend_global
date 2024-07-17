@@ -62,7 +62,7 @@ export function SaveAsTemplateMenu(
   };
 
   const saveAsTemplate = async (name: string) => {
-    const res = await checkIfNameExistsMGCall("TemplatePage", name);
+    const res = await checkIfNameExistsMGCall({L: ["TemplatePage"], P: {name}} as unknown as Vertex);
     if (res.error) {
       setError(res.message);
       return;

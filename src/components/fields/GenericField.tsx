@@ -23,7 +23,6 @@ import { Heading } from "~/components/solid_blocks/Heading";
 import { StarRating } from "~/components/solid_blocks/Rating";
 import { TreeView } from "~/components/solid_blocks/TreeView";
 import { Accordion } from "~/components/solid_blocks/accordion/accordion";
-import { Progress } from "~/components/solid_blocks/progress/progress";
 import { Select } from "~/components/solid_blocks/select/select";
 import { Tabs } from "~/components/solid_blocks/tabs/tabs";
 import { APP_BASE_URL } from "~/lib/constants";
@@ -338,13 +337,6 @@ export function GenericField(
           >
             <PageAttrRender data={props.data} metaVertex={props.meta} />
           </Breadcrumbs>
-        </Match>
-        <Match when={component() === "ProgressBar"}>
-          <Progress
-            {...deNullify(props.meta.P)}
-            class={mergeCSS("", props.meta.P.class)}
-            disabled={props.disabled}
-          />
         </Match>
         <Match when={component() === "Form" || component() === "Step"}>
           <FormWrapper disabled={props.disabled} meta={props.meta} />
