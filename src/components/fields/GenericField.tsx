@@ -1,22 +1,19 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+
 
 import { A } from "@solidjs/router";
-import { type JSXElement, Match, Show, Switch, createMemo, splitProps } from "solid-js";
+import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import {
   usePageRenderVertexContext,
-  useRepeaterVertexContext,
 } from "~/components/page_attr_render/Context";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import {
-  type GraphInterface,
   IdAttr,
   type Vertex,
   useGraph,

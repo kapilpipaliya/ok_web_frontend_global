@@ -25,45 +25,8 @@ export const pageAttr = [
   // to load initial data
   {
     componentName: "TagBox",
-    name: "hidden",
-  },
-  {
-    componentName: "TagBox",
-    name: "disabled",
-  },
-  {
-    componentName: "TagBox",
-    name: "required",
-  },
-  {
-    componentName: "SelectBox",
-    name: "thankYouPage",
-  },
-  // {
-  //   name: "definition",
-  //   componentName: "TextArea",
-  // },
-  // {
-  //   name: "parent",
-  //   componentName: "SelectBox",
-  //
-  //
-  //     collection: "<-$0->Attr",
-  //     focusRefresh: true
-  // },
-  {
-    collection: `g:'{{->$0Coll::'P.name'}}'`,
-    componentName: "SelectBox",
-
-    name: "data",
-  },
-  {
-    collection: "g:'Comp'",
-    componentName: "SelectBox",
-
-    name: "Comp",
-    // smaller version:
-    // collection: "g:'Comp'",
+    name: "All",
+    type: "'*'"
   },
   {
     attributes: [

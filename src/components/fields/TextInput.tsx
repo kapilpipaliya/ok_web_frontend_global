@@ -59,13 +59,13 @@ export const TextInput: Component<GenericComponentProps> = (props) => {
     <>
       <Switch>
         <Match when={/area|html/i.test(local.componentName ?? '')}>
-          <textarea {...others} onInput={handleChange} rows={props.meta?.P.rows ?? 4} value={local.value}/>
+          <textarea {...others} onChange={handleChange} rows={props.meta?.P.rows ?? 4} value={local.value}/>
         </Match>
         <Match when={determineInputType() === 'checkbox'}>
-          <input type="checkbox" {...others} checked={local.value} onInput={handleChange} />
+          <input type="checkbox" {...others} checked={local.value} onChange={handleChange} />
         </Match>
         <Match when={true}>
-          <input type={determineInputType()} {...others} onInput={handleChange} value={local.value} />
+          <input type={determineInputType()} {...others} onChange={handleChange} value={local.value} />
         </Match>
       </Switch>
       <DisplayError />

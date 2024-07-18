@@ -29,7 +29,14 @@ export async function evalGetChildren(
 
   let query;
   let params;
-  if (type.includes("|")) {
+  if (type === "*") {
+    query = `
+  MATCH (parent)-[r]->(child)
+  WHERE id(parent) IN $parentIds
+  RETURN r, child
+`;
+    params = { parentIds: vertexes.map((v) => int(v.id)) };
+  } else if (type.includes("|")) {
     query = `
   MATCH (parent)-[r]->(child)
   WHERE id(parent) IN $parentIds AND type(r) IN $types

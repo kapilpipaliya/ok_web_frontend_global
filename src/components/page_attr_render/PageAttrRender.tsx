@@ -17,7 +17,7 @@ import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToS
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { isDisabled, isHidden } from "../page_designer/settings/properties/rules/isHidden";
+import { evaluateAttributeRules } from "../page_designer/settings/properties/rules/evaluateAttributeRules";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
@@ -48,7 +48,7 @@ export function PageAttrRender(
         };
 
         const Content = () => (
-          <Show when={!isPreview() || !isHidden(item, formData, graph, setGraph)}>
+          <Show when={!isPreview() || !evaluateAttributeRules(item, formData, graph, setGraph, "Hidden")}>
             <DynamicComponent
               // NOTE: For repeater we cant use parentData
               componentName={componentName()}
@@ -61,7 +61,7 @@ export function PageAttrRender(
                 getDataVertex(graph, item)
               }
               // setValue={props.setValue}
-              disabled={isPreview() && isDisabled(item, formData, graph, setGraph)}
+              disabled={isPreview() && evaluateAttributeRules(item, formData, graph, setGraph, "Disabled")}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
               txnId={txnId}

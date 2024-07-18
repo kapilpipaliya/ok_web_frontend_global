@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, Show, createSignal } from "solid-js";
+import { Show, createSignal } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
@@ -15,10 +15,8 @@ import { Label } from "./Label";
 
 export function SelectRuleField(
   props: Readonly<{
-    meta: Accessor<Vertex>;
     metaVertex: Vertex;
     selectedLayout: Vertex;
-    setValue: (meta: Vertex, data: any) => void;
     txnId: number;
   }>,
 ) {
@@ -63,7 +61,7 @@ export function SelectRuleField(
     P: {
       class: "flex:1",
       collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
-      componentName: "TagBox",
+      componentName: props.metaVertex.P.name.endsWith("Expr") ? "SelectBox" : "TagBox",
       displayName: props.metaVertex.P.displayName,
       name: props.metaVertex.P.name,
       renderLabel: RenderLabel,
@@ -74,7 +72,6 @@ export function SelectRuleField(
   const SelectRules = () => {
     return (
       <DynamicComponent
-        componentName={"TagBox"}
         data={props.selectedLayout}
         isRealTime={false}
         meta={meta}

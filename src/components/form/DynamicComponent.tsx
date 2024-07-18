@@ -1,16 +1,19 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { Match, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { IdAttr, type Vertex, useGraph, GraphInterface } from "~/lib/graph/graph";
+import { useFormContext } from "~/lib/contexts";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { deNullify, ifNotNull } from "~/lib/utils";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
-import { PageAttrRender } from "../page_attr_render/PageAttrRender";
-import { getDynamicComponent } from "./getDynamicComponent";
 import { useRepeaterVertexContext } from "../page_attr_render/Context";
-import { SetStoreFunction } from "solid-js/store";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+import { PageAttrRender } from "../page_attr_render/PageAttrRender";
+import { evaluateRule } from "../page_designer/settings/properties/rules/evaluateRule";
+import { getDynamicComponent } from "./getDynamicComponent";
 
 export function getText(
   graph: GraphInterface,
@@ -37,7 +40,7 @@ export function getUrl(
 
 export function DynamicComponent(
   props: Readonly<{
-    componentName: string;
+    componentName?: string;
     data?: Vertex;
     disabled?: boolean;
     isRealTime?: boolean;
@@ -49,10 +52,12 @@ export function DynamicComponent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const component = createMemo(() => getDynamicComponent(props.componentName));
+  const { formData, } = useFormContext() ?? {};
+
   const componentName = () =>
     props.componentName ?? props.meta.P.componentName;
-  const setValue = (value: any) => {
+  const component = createMemo(() => getDynamicComponent(componentName()));
+  const setValue = (value: unknown) => {
     if (props.setValue) {
       props.setValue(value);
     } else {
@@ -64,16 +69,62 @@ export function DynamicComponent(
 
   const repeaterContext = useRepeaterVertexContext();
 
-  // Proxy handler for P property
-  const handlerP: ProxyHandler<any> = {
-    get(target, property, receiver) {
-      if (property === "text") {
-        return getText(graph, setGraph, target.text, repeaterContext);
+  // Extra properties to be added
+  const extraProperties = createMemo(() => {
+    const propertyRuleMap = new Map<string, Vertex>(); // Change Set to Map
+    for (const edgeType in props.meta.OUT) {
+      for (const edge of props.meta.OUT[edgeType]) {
+        const endVertex = graph.vertexes[graph.edges[edge].E];
+        if (endVertex.L[0] === "Rule") {
+          let propertyName = edgeType.replace(/^Attr/g, '');
+          // Lowercase the first letter
+          propertyName = propertyName.charAt(0).toLowerCase() + propertyName.slice(1);
+          propertyRuleMap.set(propertyName, endVertex); // Save endVertex in the value
+        }
       }
-      if (property === "href") {
-        return getUrl(graph, setGraph, target.href, repeaterContext) || '#';
+    }
+    return propertyRuleMap;
+  });
+
+  // Proxy handler for P property
+  const handlerP: ProxyHandler<{ [key: string]: unknown }> = {
+    get(target, property, receiver) {
+      console.log(property)
+      if (formData && extraProperties().has(property as string)) {
+        const rule = extraProperties().get(property as string);
+        let value;
+        if (rule) {
+          try {
+            value = evaluateRule(rule, formData, graph, setGraph);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (e) { /* empty */ }
+        }
+        return value;
       }
       return Reflect.get(target, property, receiver);
+    },
+    getOwnPropertyDescriptor(target, property) { // called for every property
+      if (formData && extraProperties().has(property as string)) {
+        const rule = extraProperties().get(property as string);
+        let value;
+        if (rule) {
+          try {
+            value = evaluateRule(rule, formData, graph, setGraph);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (e) { /* empty */ }
+        }
+        return {
+          configurable: true,
+          enumerable: true,
+          value,
+          writable: true,
+        };
+      }
+      return Reflect.getOwnPropertyDescriptor(target, property);
+    },
+    ownKeys(target) { // called once to get a list of properties
+      console.log(Reflect.ownKeys(target).concat([...extraProperties().keys()]))
+      return Reflect.ownKeys(target).concat([...extraProperties().keys()]);
     },
   };
 
@@ -87,15 +138,12 @@ export function DynamicComponent(
     },
   };
 
-
-  const proxyMetaVertex = new Proxy(props.meta, handler);
-
-
+  const proxyMetaVertex = createMemo(() => new Proxy(props.meta, handler));
 
   return (
     <Switch>
       <Match when={!component()}>NO INPUT</Match>
-      <Match keyed when={component()}>
+      <Match keyed when={component()}>{JSON.stringify(Object.keys(proxyMetaVertex().P))}
         <Dynamic
           {...deNullify(customMetaProps)}
           class={mergeCSS("", props.meta.P.class)}
@@ -105,7 +153,7 @@ export function DynamicComponent(
           disabled={props.disabled}
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
-          meta={proxyMetaVertex}
+          meta={proxyMetaVertex()}
           // passed setValue when we have a string value in select field
           setValue={setValue}
           title={props.title ?? ""}

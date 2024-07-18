@@ -35,9 +35,9 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
 
   const HideShowIcon = () => {
-    const isHidden = () => layoutStore.hiddenNodes.includes(props.metaVertex.id);
-    const icon = () => (isHidden() ? "mdi:eye-off-outline" : "mdi:eye-outline");
-    const tooltipContent = () => (isHidden() ? "Show" : "Hide");
+    const isHiddenAttr = () => layoutStore.hiddenNodes.includes(props.metaVertex.id);
+    const icon = () => (isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline");
+    const tooltipContent = () => (isHiddenAttr() ? "Show" : "Hide");
 
     return (
       <RenderButton

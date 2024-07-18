@@ -177,10 +177,8 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 </Match>
                 <Match when={metaVertex.P.name === "required" || metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled" || metaVertex.P.name === "calculatedValue"}>
                   <SelectRuleField
-                    meta={meta}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
-                    setValue={props.setValue}
                     txnId={props.txnId}
                   />
                 </Match>
@@ -203,6 +201,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
+                    txnId={props.txnId}
+                  />
+
+                  <SelectRuleField
+                    metaVertex={metaVertex}
+                    selectedLayout={props.selectedLayout}
                     txnId={props.txnId}
                   />
                 </Match>
