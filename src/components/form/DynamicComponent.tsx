@@ -1,13 +1,39 @@
 import { Match, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, type Vertex, useGraph, GraphInterface } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { deNullify, ifNotNull } from "~/lib/utils";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import { getDynamicComponent } from "./getDynamicComponent";
+import { useRepeaterVertexContext } from "../page_attr_render/Context";
+import { SetStoreFunction } from "solid-js/store";
+import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
+export function getText(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  repeaterContext: Vertex[],
+) {
+  return (
+    (getSelectionOptions(graph, setGraph, projection, repeaterContext)
+      .vertexes as string) || projection
+  );
+}
+
+export function getUrl(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  repeaterContext: Vertex[],
+) {
+  const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
+    .vertexes as string | undefined;
+  return typeof url === "string" && url.startsWith("/") ? url : undefined;
+}
 
 export function DynamicComponent(
   props: Readonly<{
@@ -36,25 +62,33 @@ export function DynamicComponent(
 
   const [, customMetaProps] = splitProps(props.meta.P, ["validation"]);
 
-// // Proxy handler for P property
-// const handlerP: ProxyHandler<any> = {
-//   get(target, property, receiver) {
-//     return Reflect.get(target, property, receiver);
-//   },
-// };
+  const repeaterContext = useRepeaterVertexContext();
 
-// // Proxy handler for Vertex
-// const handler: ProxyHandler<Vertex> = {
-//   get(target, property, receiver) {
-//     if (property === "P") {
-//       return new Proxy(target.P, handlerP);
-//     }
-//     return Reflect.get(target, property, receiver);
-//   },
-// };
+  // Proxy handler for P property
+  const handlerP: ProxyHandler<any> = {
+    get(target, property, receiver) {
+      if (property === "text") {
+        return getText(graph, setGraph, target.text, repeaterContext);
+      }
+      if (property === "href") {
+        return getUrl(graph, setGraph, target.href, repeaterContext) || '#';
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  };
+
+  // Proxy handler for Vertex
+  const handler: ProxyHandler<Vertex> = {
+    get(target, property, receiver) {
+      if (property === "P") {
+        return new Proxy(target.P, handlerP);
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  };
 
 
-// const proxyMetaVertex = new Proxy(props.meta, handler);
+  const proxyMetaVertex = new Proxy(props.meta, handler);
 
 
 
@@ -71,7 +105,7 @@ export function DynamicComponent(
           disabled={props.disabled}
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
-          meta={props.meta}
+          meta={proxyMetaVertex}
           // passed setValue when we have a string value in select field
           setValue={setValue}
           title={props.title ?? ""}

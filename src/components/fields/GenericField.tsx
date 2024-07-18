@@ -28,31 +28,10 @@ function getAttrs(meta: Vertex) {
   return meta.P.attr ? JSON.parse(meta.P.attr) : {};
 }
 
-export function getText(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  repeaterContext: Vertex[],
-) {
-  return (
-    (getSelectionOptions(graph, setGraph, projection, repeaterContext)
-      .vertexes as string) || projection
-  );
-}
 
-export function getUrl(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  repeaterContext: Vertex[],
-) {
-  const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
-    .vertexes as string | undefined;
-  return typeof url === "string" && url.startsWith("/") ? url : undefined;
-}
 
 export function GenericField(props: Readonly<GenericComponentProps>) {
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   const parentItems = usePageRenderVertexContext();
   const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'children']);
 
@@ -64,8 +43,6 @@ export function GenericField(props: Readonly<GenericComponentProps>) {
     () =>
       getCompFallbackToString(getLastItem(parentItems, 2), graph)?.P[IdAttr],
   );
-  
-  const repeaterContext = useRepeaterVertexContext();
 
   return (
     <Show
@@ -77,7 +54,7 @@ export function GenericField(props: Readonly<GenericComponentProps>) {
 
         <Match when={componentName() === "Text"}>
           <Dynamic component={local.meta.P.as ?? "span"} {...others}>
-            {getText(graph, setGraph, local.meta.P.text, repeaterContext)}
+            {local.meta.P.text}
             {local.children}
           </Dynamic>
         </Match>
@@ -85,17 +62,9 @@ export function GenericField(props: Readonly<GenericComponentProps>) {
         <Match when={componentName() === "A"}>
           <A
             {...others}
-            href={
-              getUrl(graph, setGraph, local.meta.P.href, repeaterContext) ||
-              "#"
-            }
+            href={local.meta.P.href}
           >
-            {getText(
-              graph,
-              setGraph,
-              local.meta.P.text,
-              repeaterContext,
-            )}
+            {local.meta.P.text}
             {local.children}
           </A>
         </Match>
@@ -124,7 +93,7 @@ export function GenericField(props: Readonly<GenericComponentProps>) {
             {...others}
             {...getAttrs(local.meta)}
           >
-            {getText(graph, setGraph, local.meta.P.text, repeaterContext)}
+            {local.meta.P.text}
             {local.children}
           </Dynamic>
         </Match>
