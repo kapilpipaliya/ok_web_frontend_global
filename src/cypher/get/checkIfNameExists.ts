@@ -1,9 +1,10 @@
 import jsep from "jsep";
 import { getRequestURL } from "vinxi/http";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
-import type { Vertex } from "~/lib/graph/graph";
 import { getSubDomain } from "~/server/getSubDomain";
 
 export const checkIfNameExistsMGCall = async (

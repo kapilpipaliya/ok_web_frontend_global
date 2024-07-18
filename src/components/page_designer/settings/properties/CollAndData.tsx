@@ -5,8 +5,8 @@ import { onCleanup } from "solid-js";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
-import { GenericInputField } from "~/components/fields/GenericInputField";
 import { SelectInputField } from "~/components/fields/SelectInputField";
+import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
@@ -106,7 +106,7 @@ export function CollAndData() {
       <div class="flex">
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
-          <GenericInputField
+          <DynamicComponent
             componentName={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}

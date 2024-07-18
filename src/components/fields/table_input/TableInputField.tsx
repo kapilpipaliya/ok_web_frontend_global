@@ -9,7 +9,7 @@ import {
   createSignal,
 } from "solid-js";
 
-import type { ComponentProps } from "~/components/fields/ComponentType";
+import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { AddNewButton } from "~/components/grid/AddNew";
 import {
@@ -32,7 +32,7 @@ export function TableInputField(
     isRealTime?: boolean;
     isTableInside?: boolean;
     txnId?: number;
-  } & ComponentProps,
+  } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);

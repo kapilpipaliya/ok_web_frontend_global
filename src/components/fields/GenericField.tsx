@@ -5,7 +5,7 @@ import { A } from "@solidjs/router";
 import { type JSXElement, Match, Show, Switch, createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import type { ComponentProps } from "~/components/fields/ComponentType";
+import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { FormWrapper } from "~/components/fields/FormWrapper";
@@ -77,7 +77,7 @@ export function GenericField(
     componentName?: string;
     disabled?: boolean;
     txnId?: number;
-  } & ComponentProps,
+  } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderVertexContext();

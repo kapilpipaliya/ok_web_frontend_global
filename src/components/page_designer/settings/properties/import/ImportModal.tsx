@@ -1,7 +1,7 @@
 import { onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { GenericInputField } from "~/components/fields/GenericInputField";
+import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { useGraph } from "~/lib/graph/graph";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
@@ -73,7 +73,7 @@ export function ImportModal(props: { toggleModal: () => void }) {
             </button>
           </div>
           <div class={"mt:1rem"}>
-            <GenericInputField
+            <DynamicComponent
               componentName="TextArea"
               data={graph.vertexes[dataVertexId]}
               disabled={false}

@@ -1,10 +1,16 @@
 import type { Vertex } from "~/lib/graph/graph";
 
-export interface ComponentProps {
+export interface GenericComponentProps {
+  componentName?: string;
   data?: Vertex;
   disabled?: boolean;
+  isRealTime?: boolean;
+  isTableInside?: boolean;
   meta: Vertex;
   setValue?(data: any): void;
+  title: string;
+  txnId: number;
+  value: any;
 }
 
 export interface DisplayComponentProps {

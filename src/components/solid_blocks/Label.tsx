@@ -11,7 +11,7 @@ import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import type { ComponentProps } from "../fields/ComponentType";
+import type { GenericComponentProps } from "../fields/ComponentType";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
@@ -22,7 +22,7 @@ interface LabeledFieldProps {
 }
 
 export function Label(
-  props: ComponentProps &
+  props: GenericComponentProps &
     JSX.IntrinsicAttributes &
     JSX.LabelHTMLAttributes<HTMLLabelElement> &
     LabeledFieldProps,

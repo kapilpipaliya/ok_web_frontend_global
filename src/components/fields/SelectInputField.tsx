@@ -8,7 +8,7 @@ import {
   runWithOwner,
 } from "solid-js";
 
-import type { ComponentProps } from "~/components/fields/ComponentType";
+import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
@@ -31,7 +31,7 @@ export function SelectInputField(
     isRealTime?: boolean;
     title: string;
     txnId?: number;
-  } & ComponentProps,
+  } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
   const formData = useFormContext();

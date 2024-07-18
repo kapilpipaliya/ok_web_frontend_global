@@ -16,7 +16,7 @@ import {
   runWithOwner,
 } from "solid-js";
 
-import type { ComponentProps } from "~/components/fields/ComponentType";
+import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
@@ -55,7 +55,7 @@ export const SortableRow = (
     setDragToIndex: (index: number) => void;
     tableColumnsTemplate: Accessor<Vertex[]>;
     txnId: number;
-  } & ComponentProps,
+  } & GenericComponentProps,
 ) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.

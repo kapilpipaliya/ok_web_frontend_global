@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { Show, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { ComponentProps } from "~/components/fields/ComponentType";
+import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { useToast } from "~/components/Toast";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
@@ -22,7 +22,7 @@ export function FormWrapper(
     // For Root Level Forms we use Parent vertex label as form name
     label?: string;
     submitButton?: any;
-  } & ComponentProps,
+  } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
