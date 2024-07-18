@@ -1,11 +1,9 @@
 import { type Component, Match, Show, Switch, createMemo, splitProps } from 'solid-js';
 
-import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-
 import type { GenericComponentProps } from './ComponentType';
 
 export const TextInput: Component<GenericComponentProps> = (props) => {
-  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId'
+  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'onchange'
   ]);
 
   const inputTypes = {
@@ -71,7 +69,6 @@ export const TextInput: Component<GenericComponentProps> = (props) => {
         </Match>
       </Switch>
       <DisplayError />
-      <PageAttrRender data={local.data} metaVertex={local.meta} />
     </>
   );
 };
