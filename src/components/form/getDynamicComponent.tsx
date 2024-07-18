@@ -4,6 +4,7 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { Repeater } from "~/components/page_attr_render/Repeater";
 
 import { Signature } from "../SignatureBox";
+import { FormWrapper } from "../fields/FormWrapper";
 import { TextInput } from "../fields/TextInput";
 import { FileUploader } from "../solid_blocks/FileUploader";
 import { Radio, RadioGroup } from "../solid_blocks/radio/radio";
@@ -40,6 +41,9 @@ export function getDynamicComponent(component: string) {
 
     case "Repeater":
       return Repeater;
+
+      case "Form":
+        return FormWrapper
 
     // case "Text":
     //   return Dynamic;

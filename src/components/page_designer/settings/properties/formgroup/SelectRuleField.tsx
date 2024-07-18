@@ -61,7 +61,7 @@ export function SelectRuleField(
     P: {
       class: "flex:1",
       collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
-      componentName: props.metaVertex.P.name.endsWith("Expr") ? "SelectBox" : "TagBox",
+      componentName: "SelectBox",
       displayName: props.metaVertex.P.displayName,
       name: props.metaVertex.P.name,
       renderLabel: RenderLabel,

@@ -48,7 +48,6 @@ export function PageAttrRender(
         };
 
         const Content = () => (
-          <Show when={!isPreview() || !evaluateAttributeRules(item, formData, graph, setGraph, "Hidden")}>
             <DynamicComponent
               // NOTE: For repeater we cant use parentData
               componentName={componentName()}
@@ -61,12 +60,10 @@ export function PageAttrRender(
                 getDataVertex(graph, item)
               }
               // setValue={props.setValue}
-              disabled={isPreview() && evaluateAttributeRules(item, formData, graph, setGraph, "Disabled")}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
               txnId={txnId}
             />
-          </Show>
         );
 
         const PageComponentWithPreview = () => (

@@ -38,6 +38,17 @@ import { SelectPageField } from "./SelectPageField";
 import { SelectRuleField } from "./SelectRuleField";
 import { UniqueNameField } from "./UniqueNameField";
 
+function modifyMetaVertexExpr(metaVertex: Vertex) {
+  return {
+    ...metaVertex,
+    P: {
+      ...metaVertex.P,
+      displayName: `${metaVertex.P.displayName ?? metaVertex.P.name} Expr`,
+      name: `${metaVertex.P.name}`,
+    },
+  };
+}
+
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   selectedLayout: Vertex;
@@ -205,7 +216,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                   />
 
                   <SelectRuleField
-                    metaVertex={metaVertex}
+                    metaVertex={modifyMetaVertexExpr(metaVertex)}
                     selectedLayout={props.selectedLayout}
                     txnId={props.txnId}
                   />
@@ -240,13 +251,13 @@ function createVertexIds() {
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
   addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Rule", "calculatedValue")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Expr", "calculatedValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.defaultValue, ["MetaTemp"], createVertexMeta("Default Value", "defaultValue")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.required, ["MetaTemp"], createVertexMeta("Required Rule", "required")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.hidden, ["MetaTemp"], createVertexMeta("Hidden Rule", "hidden")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.disabled, ["MetaTemp"], createVertexMeta("Disabled Rule", "disabled")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.required, ["MetaTemp"], createVertexMeta("Required Expr", "required")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.hidden, ["MetaTemp"], createVertexMeta("Hidden Expr", "hidden")), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.disabled, ["MetaTemp"], createVertexMeta("Disabled Expr", "disabled")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.thankYouPage, ["MetaTemp"], createVertexMeta("Thank You Page", "thankYouPage")), graph, setGraph);
 }
 

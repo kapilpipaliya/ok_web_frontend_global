@@ -192,8 +192,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
               displayName: "AndOr",
               name: "andOr",
 
-              options: `AND
-OR`,
+              options: `${Object.keys(binopsInitial).join("\n")}`,
             },
           ],
           componentName: "DynamicTable",
