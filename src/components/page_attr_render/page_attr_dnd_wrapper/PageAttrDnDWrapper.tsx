@@ -39,32 +39,47 @@ export function PageAttrDnDWrapper(
   );
 
   const getBorder = () => {
+    const createBoxShadow = (offsetX: number|string, offsetY: number|string, blur: number|string, spread: number|string, color: string) =>
+      {
+        // we need inset shadow for the border
+        const shadowPart = `${offsetX}|${offsetY}|${blur}|${spread}|${color}`
+        return `box-shadow:inset|${shadowPart}>*`;
+      };
+  
+    let boxShadow = "";
+  
     if (!isPreview()) {
       if (isActiveTargetItem()) {
         switch (layoutStore.position) {
           case "center":
-            return "box-shadow:inset|0|0|0|2px|rgb(0,125,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+            boxShadow = createBoxShadow(0, 0, 0, "2px", "rgb(0,125,0)");
+            break;
           case "before":
-            return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+            boxShadow = createBoxShadow(0, "8px", 0, "-6px", "rgb(0,0,255)");
+            break;
           case "after":
-            return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+            boxShadow = createBoxShadow(0, "-8px", 0, "-6px", "rgb(0,0,255)");
+            break;
           case "left":
-            return "box-shadow:inset|8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+            boxShadow = createBoxShadow("8px", 0, 0, "-6px", "rgb(0,0,255)");
+            break;
           case "right":
-            return "box-shadow:inset|-8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+            boxShadow = createBoxShadow("-8px", 0, 0, "-6px", "rgb(0,0,255)");
+            break;
         }
-      }
-      if (
+      } else if (
         isSelectedLayoutId(props.item.id) ||
         isSelectedDragOverTargetId(props.item.id)
       ) {
-        return "box-shadow:inset|0|0|0|2px|rgb(57,150,225)>*";
-      }
-      if (isSelectedHoverId(props.item.id)) {
-        return "box-shadow:inset|0|0|0|2px|rgb(210,219,252)>*";
+        boxShadow = createBoxShadow(0, 0, 0, "2px", "rgb(57,150,225)");
+      } else if (isSelectedHoverId(props.item.id)) {
+        boxShadow = createBoxShadow(0, 0, 0, "2px", "rgb(210,219,252)");
       }
     }
+  
+    return boxShadow;
   };
+  
 
   return (
     <PageRenderVertexContext.Provider
