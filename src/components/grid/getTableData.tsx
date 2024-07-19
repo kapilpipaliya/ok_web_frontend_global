@@ -49,6 +49,7 @@ export async function getTableData(
 
     const { incoming, outgoing } = getEdgesFromRowsAttr(
       formAttrResult.form!.attributes,
+      true,
     );
     const expression = paginationExpression({
       coll: tableId,

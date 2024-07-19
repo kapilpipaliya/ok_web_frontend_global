@@ -6,7 +6,7 @@ interface AbstractGridProps {
   tableId: string;
 }
 
-export function AbstractGrid(props: AbstractGridProps) {
+export function AbstractGrid(props: Readonly<AbstractGridProps>) {
   const [tableId, setTableId] = createSignal(props.tableId);
   createEffect(() => {
     setTableId("");

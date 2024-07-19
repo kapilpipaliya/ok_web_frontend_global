@@ -26,10 +26,10 @@ export function getSelectNameValue(props: {
     return getSelectionOptions(
       props.graph,
       props.setGraph,
-      props.attribute.props?.displayExpr ||
+      props.attribute.displayExpr ||
         formNameDisplayExprFromVertex(
           props.graph,
-          props.attribute.props?.collection,
+          props.attribute.collection,
         ) ||
         `::'P.${IdAttr}'`,
       [props.graph.vertexes[vertex[0]]],

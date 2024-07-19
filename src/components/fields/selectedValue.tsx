@@ -18,7 +18,7 @@ export function selectedValue(
   data: Vertex,
   graph: Store<GraphInterface>,
 ): Id[] {
-  if (meta.P.stringValue || meta.P.items) {
+  if (meta.P.saveValue || meta.P.options) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => ensureArray(data.P[meta.P[IdAttr]]));
   }

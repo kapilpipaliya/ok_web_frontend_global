@@ -28,7 +28,7 @@ export const getTagValue = (props: {
       const text = getSelectionOptions(
         props.graph,
         props.setGraph,
-        props.attribute.props?.displayExpr || `::'P.${IdAttr}'`,
+        props.attribute.displayExpr || `::'P.${IdAttr}'`,
         [props.graph.vertexes[v]],
       ).vertexes;
       textArray.push(text);

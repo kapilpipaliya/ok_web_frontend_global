@@ -50,7 +50,7 @@ export const Import = {
 
           displayName: "Function",
           name: "func",
-          stringValue: true,
+          saveValue: true,
         },
         { componentName: "CheckBox", name: "skip" },
         { componentName: "TextArea", name: "skipRow" },
