@@ -1,13 +1,12 @@
 import {
   type JSX,
-  Show,
+  Match,
+  Switch,
   createMemo,
   splitProps,
 } from "solid-js";
 
 import { useFormContext } from "~/lib/contexts";
-
-import type { GenericComponentProps } from "../fields/ComponentType";
 
 interface LabeledFieldProps {
   children: JSX.Element;
@@ -16,12 +15,10 @@ interface LabeledFieldProps {
 }
 
 export function Label(
-  props: GenericComponentProps &
+  props: JSX.HTMLAttributes<HTMLSpanElement> &
     JSX.IntrinsicAttributes &
-    JSX.LabelHTMLAttributes<HTMLLabelElement> &
     LabeledFieldProps,
 ) {
-
   const formData = useFormContext();
 
   const position = createMemo(() =>
@@ -29,57 +26,41 @@ export function Label(
       ? formData.formMeta?.P.position || "top"
       : props.position,
   );
-
-  const getFlexDirection = () => {
-    switch (position()) {
-      case "top":
-        return "column";
-      case "bottom":
-        return "column-reverse";
-      case "left":
-        return "row";
-      case "right":
-        return "row-reverse";
-      default:
-        return "column";
-    }
+  
+  const generateLabelClass = () => {
+    const styles: { [key: string]: string } = {};
+    if (position() === "top") styles["mb"] = "5px";
+    if (position() === "right") styles["ml"] = "5px";
+    if (position() === "left") styles["mr"] = "5px";
+    if (position() === "bottom") styles["mt"] = "5px";
+    return Object.entries(styles)
+      .map(([key, value]) => `${key}:${value}`)
+      .join(" ");
   };
-
-  const containerStyle = () =>
-    ({
-      "align-items":
-        position() === "left" || position() === "right"
-          ? "center"
-          : "flex-start",
-      display: "flex",
-      "flex-direction": getFlexDirection(),
-      margin: "10px 0",
-      padding: "0px 10px",
-      width: "100%",
-    }) as JSX.CSSProperties;
-
-  const labelStyle = () => ({
-    "margin-bottom": position() === "top" ? "5px" : "0",
-    "margin-left": position() === "right" ? "5px" : "0",
-    "margin-right": position() === "left" ? "5px" : "0",
-    "margin-top": position() === "bottom" ? "5px" : "0",
-  });
-
   const [local, restProps] = splitProps(props, [
     "label",
     "position",
     "children",
-    "meta",
-    "data"
   ]);
+
   return (
-    <div style={containerStyle()}>
-      <Show when={local.label}>
-        <label style={labelStyle()} {...restProps}>
-          {local.label}
-        </label>
-      </Show>
-      {local.children}
-    </div>
+    <label class={`flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}>
+      <Switch fallback={<>{local.children}</>}>
+        <Match when={local.label && (position() === "top" || position() === "left")}>
+          <span class={generateLabelClass()} {...restProps}>
+            {local.label}
+          </span>
+          {local.children}
+        </Match>
+        <Match when={local.label && (position() === "bottom" || position() === "right")}>
+          {local.children}
+          <span class={generateLabelClass()} {...restProps}>
+            {local.label}
+          </span>
+        </Match>
+      </Switch>
+    </label>
   );
 }
+
+// Other label component: https://github.com/radix-ui/primitives/blob/main/packages/react/label/src/Label.tsx

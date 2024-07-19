@@ -3,6 +3,8 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { path } from "rambda";
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 
+import { useZIndex } from "~/components/ZIndex";
+
 import type { SelectField } from "../constants/FieldType";
 
 import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
@@ -21,6 +23,7 @@ export const Select = () => {
   const [cssDefault, setCssDefault] = useCssDefaultEditor();
   const [isActive, setIsActive] = createSignal(false);
   const toggleDropdown = () => setIsActive(!isActive());
+  const zIndex = useZIndex();
   const selectedValue = () =>
     {
       const projections = [state() || "", ...(meta.projections ?? []), meta.name];
@@ -102,7 +105,7 @@ export const Select = () => {
         </div>
 
         <ul
-          class="scrollbar-width:thin border-radius:.28571429rem border:1px|solid|rgba(34,36,38,.15) box-shadow:-1px|0px|14px|3px|rgba(17,36,38,.15) cursor:auto max-h:15rem outline:0 overflow:auto position:absolute text-align:left text-shadow:none top:100% transition:opacity|.1s|ease will-change:transform,opacity z-index:11"
+          class={`scrollbar-width:thin border-radius:.28571429rem border:1px|solid|rgba(34,36,38,.15) box-shadow:-1px|0px|14px|3px|rgba(17,36,38,.15) cursor:auto max-h:15rem outline:0 overflow:auto position:absolute text-align:left text-shadow:none top:100% transition:opacity|.1s|ease will-change:transform,opacity z-index:${zIndex}`}
           classList={{
             "b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:full": true,
             hidden: !isActive(),

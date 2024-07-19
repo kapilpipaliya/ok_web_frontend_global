@@ -1,5 +1,6 @@
 import { For, Match, Show, Switch } from "solid-js";
 
+import { ZIndex } from "~/components/ZIndex";
 import { ButtonGroups } from "~/components/css_properties/components/ButtonGroups";
 import { ColorPickerInput } from "~/components/css_properties/components/ColorPickerInput";
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
@@ -22,7 +23,9 @@ export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
       </Match>
       <Match when={props.value.componentName === "select"}>
         <ComponentMetaContext.Provider value={props.value}>
-          <Select />
+          <ZIndex>
+            <Select />
+          </ZIndex>
         </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.componentName === "toggleButton"}>

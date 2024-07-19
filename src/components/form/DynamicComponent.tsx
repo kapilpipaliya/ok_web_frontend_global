@@ -12,6 +12,7 @@ import { deNullify, ifNotNull } from "~/lib/utils";
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import { evaluateRule } from "../page_designer/settings/properties/rules/evaluateRule";
+import { Label } from "../solid_blocks/Label";
 import { getDynamicComponent } from "./getDynamicComponent";
 
 export function getText(
@@ -90,10 +91,10 @@ export function DynamicComponent(
   const expressionProperties = createMemo(() => {
     const values = {} as Record<string, any>;
     for (const [property, rule] of extraProperties().entries()) {
-      if(property === "disabled" && !isPreview()) {
+      if (property === "disabled" && !isPreview()) {
         continue;
       }
-      if(property === "hidden" && !isPreview()) {
+      if (property === "hidden" && !isPreview()) {
         continue;
       }
       if (formData && rule) {
@@ -108,32 +109,42 @@ export function DynamicComponent(
     return values;
   })
 
+  const Content = () => <Dynamic
+    {...deNullify(customMetaProps)}
+    class={mergeCSS("", props.meta.P.class)}
+    component={component()!}
+    componentName={componentName()}
+    data={props.data}
+    disabled={props.disabled}
+    isRealTime={props.isRealTime}
+    isTableInside={props.isTableInside}
+    meta={props.meta}
+    // passed setValue when we have a string value in select field
+    setValue={setValue}
+    title={props.title ?? ""}
+    txnId={props.txnId}
+    value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
+    {...expressionProperties()}
+  >
+    <Show when={props.meta.id}>
+      <PageAttrRender data={props.data} metaVertex={props.meta} />
+    </Show>
+  </Dynamic>
 
   return (
     <Switch>
       <Match when={!component()}>NO INPUT</Match>
       <Match keyed when={!expressionProperties().hidden && component()}>
-        <Dynamic
-          {...deNullify(customMetaProps)}
-          class={mergeCSS("", props.meta.P.class)}
-          component={component()!}
-          componentName={componentName()}
-          data={props.data}
-          disabled={props.disabled}
-          isRealTime={props.isRealTime}
-          isTableInside={props.isTableInside}
-          meta={props.meta}
-          // passed setValue when we have a string value in select field
-          setValue={setValue}
-          title={props.title ?? ""}
-          txnId={props.txnId}
-          value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
-          {...expressionProperties()}
-        >
-          <Show when={props.meta.id}>
-            <PageAttrRender data={props.data} metaVertex={props.meta} />
-          </Show>
-        </Dynamic>
+        <Switch>
+          <Match when={expressionProperties().label || props.meta.P.label}>
+            <Label label={expressionProperties().label || props.meta.P.label}>
+              <Content />
+            </Label>
+          </Match>
+          <Match when={true}>
+            <Content />
+          </Match>
+        </Switch>
       </Match>
     </Switch>
   );

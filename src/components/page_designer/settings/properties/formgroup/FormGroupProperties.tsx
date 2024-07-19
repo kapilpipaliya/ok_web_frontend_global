@@ -4,20 +4,17 @@ import { createWritableMemo } from "@solid-primitives/memo";
 import {
   For,
   Match,
+  Show,
   Switch,
   createMemo,
+  createSignal,
   createUniqueId,
   onCleanup,
 } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
+import { TabsWithUnderline } from "~/components/css_properties/SimpleTabs";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
-import {
-  Tab,
-  TabContainer,
-  TabList,
-  Tabs,
-} from "~/components/solid_blocks/tabs/tabs";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -114,28 +111,21 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       ...classVertices,
     ];
 
-    return <Tabs class="p:10px">
-      <TabList>
-        <For each={metaAttributes}>
-          {(tab) => {
-            return <Tab >{tab.P.displayName}</Tab>
-          }}
-        </For>
-      </TabList>
+    const [selectedIndex, setSelectedIndex] = createSignal(0);
+    const handleTabClick = (index: number) => {
+      setSelectedIndex(index);
+    };
 
-      <For each={metaAttributes}>
-        {(metaVertex) => {
-          return <TabContainer>
-            <CSSPropertiesEditorWrapper
-              data={props.selectedLayout}
-              meta={metaVertex}
-              setValue={(data) => props.setValue(metaVertex, data)}
-              txnId={props.txnId}
-            />
-          </TabContainer>
-        }}
-      </For>
-    </Tabs>
+    return <>
+      <TabsWithUnderline displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'" onTabClick={handleTabClick} selectedIndex={selectedIndex()} tabs={metaAttributes as unknown as { name: string }[]} />
+      <Show keyed when={selectedIndex() + 1}>
+        <CSSPropertiesEditorWrapper
+          data={props.selectedLayout}
+          meta={metaAttributes[selectedIndex()]}
+          setValue={(data) => props.setValue(metaAttributes[selectedIndex()], data)}
+          txnId={props.txnId}
+        />
+      </Show></>
   }
 
   return (

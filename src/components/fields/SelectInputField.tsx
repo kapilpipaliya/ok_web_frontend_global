@@ -19,6 +19,7 @@ import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { isObject } from "~/lib/utils";
 
 import { ensureArray } from "./ensureArray";
 import { selectedValue } from "./selectedValue";
@@ -136,9 +137,9 @@ export function SelectInputField(
           if (isRemove) {
             parsedValue = null;
           } else if (getComponent() === "SelectBox") {
-            // @ts-expect-error ignore
-            parsedValue = props.meta.P.valueKey
-              ? value[0][props.meta.P.valueKey]
+            parsedValue = isObject(value[0])
+              // @ts-expect-error ignore
+              ? value[0][props.meta.P.valueKey || "id"]
               : value[0];
           } else {
             parsedValue = value;
