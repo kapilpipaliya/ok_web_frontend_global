@@ -2,18 +2,12 @@ import {
   type JSX,
   Show,
   createMemo,
-  createSignal,
-  onMount,
   splitProps,
 } from "solid-js";
 
 import { useFormContext } from "~/lib/contexts";
-import { useGraph } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { GenericComponentProps } from "../fields/ComponentType";
-
-import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 interface LabeledFieldProps {
   children: JSX.Element;
@@ -27,11 +21,8 @@ export function Label(
     JSX.LabelHTMLAttributes<HTMLLabelElement> &
     LabeledFieldProps,
 ) {
-  const [layoutStore] = useDesignerLayoutStore() || [];
+
   const formData = useFormContext();
-  const [graph, setGraph] = useGraph();
-  const [isEditing, setIsEditing] = createSignal(false);
-  const [inputValue, setInputValue] = createSignal(props.label ?? "");
 
   const position = createMemo(() =>
     !props.position || props.position === "system"
@@ -74,25 +65,6 @@ export function Label(
     "margin-top": position() === "bottom" ? "5px" : "0",
   });
 
-  const handleBlur = (e: FocusEvent) => {
-    setIsEditing(false);
-    if (layoutStore.formData?.txnId) {
-      mergeVertexProperties(
-        layoutStore.formData.txnId,
-        props.meta.id,
-        graph,
-        setGraph,
-        { label: (e.currentTarget as HTMLInputElement).value },
-      );
-    }
-  };
-
-  const handleLabelClick = (e: MouseEvent) => {
-    if (!layoutStore.formData?.txnId) return;
-    setInputValue(props.label ?? "");
-    setIsEditing(true);
-  };
-
   const [local, restProps] = splitProps(props, [
     "label",
     "position",
@@ -102,35 +74,12 @@ export function Label(
   ]);
   return (
     <div style={containerStyle()}>
-      <Show when={props.label}>
-        <Show
-          fallback={
-            <input
-              onBlur={handleBlur}
-              onInput={(e) => setInputValue(e.currentTarget.value)}
-              ref={(el) => {
-                onMount(() => {
-                  el.focus();
-                });
-              }}
-              style={{
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                width: "100%",
-              }}
-              type="text"
-              value={inputValue()}
-            />
-          }
-          when={!isEditing()}
-        >
-          <label style={labelStyle()} {...restProps} onClick={handleLabelClick}>
-            {props.label}
-          </label>
-        </Show>
+      <Show when={local.label}>
+        <label style={labelStyle()} {...restProps}>
+          {local.label}
+        </label>
       </Show>
-      {props.children}
+      {local.children}
     </div>
   );
 }

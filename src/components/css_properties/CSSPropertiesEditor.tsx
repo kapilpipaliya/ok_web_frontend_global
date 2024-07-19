@@ -2,10 +2,11 @@ import { Icon } from "@iconify-icon/solid";
 import { Show, batch, createSignal } from "solid-js";
 import { reconcile } from "solid-js/store";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
 import { useFormContext } from "~/lib/contexts";
-import { Vertex } from "~/lib/graph/graph";
 import { isDevelopment } from "~/lib/isDevelopment";
 
 import type { CSSStore } from "./context";

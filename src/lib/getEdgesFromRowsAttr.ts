@@ -1,13 +1,14 @@
 import type { NestedExpression } from "~/cypher/get/NestedExpression";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { FieldAttribute } from "./FormMetadataType";
+import type { FieldAttribute } from "./FormMetadataType";
+
 import { getInEdge } from "./graph/get/sync/getInEdge";
 import { getToEdge } from "./graph/get/sync/getToEdge";
 
 export function getEdgesFromRowsAttr(
   metaAttrs: FieldAttribute[],
-  ignoreTables: boolean = false,
+  ignoreTables = false,
 ): {
   incoming: NestedExpression[];
   outgoing: NestedExpression[];
