@@ -64,7 +64,11 @@ export function CSSPropertiesEditorWrapper(
         value={[cssDefaultState, setCssDefaultCssState]}
       >
         <CssStateContext.Provider value={[state, setState]}>
-          <CSSPropertiesEditor setValue={props.setValue} />
+          <CSSPropertiesEditor
+            data={props.data!}
+            meta={props.meta}
+            setValue={props.setValue}
+          />
         </CssStateContext.Provider>
       </CssDefaultEditorContext.Provider>
     </CssEditorContext.Provider>

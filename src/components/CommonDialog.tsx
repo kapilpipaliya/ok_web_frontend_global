@@ -2,10 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, type Setter, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useGraph } from "~/lib/graph/graph";
-
-import { useActiveClickOutside } from "./useActiveClickOutside";
-
 interface CustomModalProps {
   body: JSX.Element;
   bodyClass?: JSX.CSSProperties;
@@ -24,8 +20,7 @@ interface CustomModalProps {
 }
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
-  const [graph, setGraph] = useGraph();
-  useActiveClickOutside(graph, setGraph);
+
   const [open, setOpen] = createSignal(props.open ?? false);
   let btnEl: any;
 

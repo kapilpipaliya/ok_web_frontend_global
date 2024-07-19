@@ -6,6 +6,7 @@ import {
   Show,
   createSignal,
 } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
 import { useClickOutside } from "~/lib/useClickOutside";
@@ -94,28 +95,30 @@ export function Drawer(props: Readonly<DrawerProps>) {
     );
   };
 
+  const ResizerBorder = (p: { children: JSX.Element }) => {
+    return <div
+      class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
+      ref={setFloating}
+    >{p.children}</div>
+  };
   return (
-    <>
+    <Portal>
       <Show when={props.customButton}>
         {/* @ts-expect-error ignore */}
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
-      <div
-        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
-        id="drawer"
-        ref={setFloating}
-      >
+      <ResizerBorder>
         <div
-          class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto p:20px`}
+          class={`scrollbar-width:thin ${props.drawerClass} h:100% overflow:auto`}
         >
           {props.children}
         </div>
         <Resizer />
-      </div>
+      </ResizerBorder>
       {/* <div
         class={`${isOpen() ? "block" : "none"} h:100% left:0 position:fixed top:0 w:100%`}
         onClick={toggleDrawer}
       /> */}
-    </>
+    </Portal>
   );
 }

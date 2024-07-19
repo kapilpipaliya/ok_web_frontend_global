@@ -4,6 +4,8 @@ import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
+import { useFormContext } from "~/lib/contexts";
+import { Vertex } from "~/lib/graph/graph";
 import { isDevelopment } from "~/lib/isDevelopment";
 
 import type { CSSStore } from "./context";
@@ -11,6 +13,7 @@ import type { CSSStore } from "./context";
 import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
 import { ZIndex } from "../ZIndex";
+import { DynamicComponent } from "../form/DynamicComponent";
 import { AddNewState } from "./AddNewState";
 import { ResetButton } from "./ResetButton";
 import { useCssEditor, useCssState } from "./context";
@@ -41,11 +44,12 @@ function getOptions(cssState: CSSStore) {
 }
 
 export function CSSPropertiesEditor(
-  props: Readonly<{ setValue?: (data: CSSStore) => void }>,
+  props: Readonly<{ data: Vertex, meta: Vertex, setValue?: (data: CSSStore) => void }>,
 ) {
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
+  const {formData} = useFormContext();
   let buttonRef: HTMLInputElement;
 
   function getSelectedValues() {
@@ -71,7 +75,15 @@ export function CSSPropertiesEditor(
     });
   };
 
-  return <div class="my:10">
+  return <>
+    <Show when={formData?.L[0] === "Comp"}>
+      <span>Preview:</span><br/>
+      <DynamicComponent
+        componentName={formData.P.name}
+        data={formData}
+        meta={{P: {class: props.data.P.value}} as unknown as Vertex}
+      /><br/>
+    </Show>
     {isDevelopment ? JSON.stringify(cssState) : null}
     <ResetButton />
     <TextEditor
@@ -111,6 +123,6 @@ export function CSSPropertiesEditor(
       </Show>
     </div>
     <StyleEditor />
-  </div>
+  </>
 
 }

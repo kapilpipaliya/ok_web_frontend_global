@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { Match, Switch, createMemo, splitProps } from "solid-js";
+import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import { useFormContext, useIsPreview } from "~/lib/contexts";
@@ -130,7 +130,9 @@ export function DynamicComponent(
           value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           {...expressionProperties()}
         >
-          <PageAttrRender data={props.data} metaVertex={props.meta} />
+          <Show when={props.meta.id}>
+            <PageAttrRender data={props.data} metaVertex={props.meta} />
+          </Show>
         </Dynamic>
       </Match>
     </Switch>
