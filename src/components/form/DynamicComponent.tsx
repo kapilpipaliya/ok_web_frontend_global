@@ -52,7 +52,7 @@ export function DynamicComponent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const { formData, } = useFormContext() ?? {};
+  const { formData } = useFormContext() ?? {};
   const [isPreview] = useIsPreview();
 
   const componentName = () =>
@@ -66,14 +66,14 @@ export function DynamicComponent(
     }
   };
 
-  const [, customMetaProps] = splitProps(props.meta.P, ["validation"]);
+  const [selectedProps, customMetaProps] = splitProps(props.meta.P, ["validation", "labelClass"]);
 
   // Should also use repeaterContext
   // const repeaterContext = useRepeaterVertexContext();
 
   // Extra properties to be added
   const extraProperties = createMemo(() => {
-    const propertyRuleMap = new Map<string, Vertex>(); // Change Set to Map
+    const propertyRuleMap = new Map<string, Vertex>();
     for (const edgeType in props.meta.OUT) {
       for (const edge of props.meta.OUT[edgeType]) {
         const endVertex = graph.vertexes[graph.edges[edge].E];
@@ -101,35 +101,68 @@ export function DynamicComponent(
         if (rule) {
           try {
             values[property] = evaluateRule(rule, formData, graph, setGraph);
+            if (property.toLowerCase().endsWith("class")) {
+              values[property] = mergeCSS("", values[property]);
+            }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (e) { /* empty */ }
         }
       }
     }
     return values;
-  })
+  });
+  const deNullifyAndMergeCSS = createMemo(() => {
+    const result: Record<string, any> = {};
 
-  const Content = () => <Dynamic
-    {...deNullify(customMetaProps)}
-    class={mergeCSS("", props.meta.P.class)}
-    component={component()!}
-    componentName={componentName()}
-    data={props.data}
-    disabled={props.disabled}
-    isRealTime={props.isRealTime}
-    isTableInside={props.isTableInside}
-    meta={props.meta}
-    // passed setValue when we have a string value in select field
-    setValue={setValue}
-    title={props.title ?? ""}
-    txnId={props.txnId}
-    value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
-    {...expressionProperties()}
-  >
-    <Show when={props.meta.id}>
-      <PageAttrRender data={props.data} metaVertex={props.meta} />
-    </Show>
-  </Dynamic>
+    for (const key in customMetaProps) {
+      const descriptor = Object.getOwnPropertyDescriptor(customMetaProps, key);
+
+      if (descriptor) {
+        // Handle properties with getters
+        if (descriptor.get) {
+          if (key.toLowerCase().endsWith('class')) {
+            const value = customMetaProps[key];
+            if (value !== null) {
+              result[key] = mergeCSS("", value);
+            }
+          } else {
+            Object.defineProperty(result, key, descriptor);
+          }
+        } else {
+          // Handle properties without getters
+          const value = descriptor.value;
+          if (value !== null) {
+            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value) : value;
+          }
+        }
+      }
+    }
+
+    return result;
+  });
+
+  const Content = () => (
+    <Dynamic
+      {...deNullifyAndMergeCSS()}
+      component={component()!}
+      componentName={componentName()}
+      data={props.data}
+      disabled={props.disabled}
+      isRealTime={props.isRealTime}
+      isTableInside={props.isTableInside}
+      meta={props.meta}
+      // passed setValue when we have a string value in select field
+      setValue={setValue}
+      title={props.title ?? ""}
+      txnId={props.txnId}
+      value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
+      {...expressionProperties()}
+    >
+      <Show when={props.meta.id}>
+        <PageAttrRender data={props.data} metaVertex={props.meta} />
+      </Show>
+    </Dynamic>
+  );
 
   return (
     <Switch>
@@ -137,7 +170,7 @@ export function DynamicComponent(
       <Match keyed when={!expressionProperties().hidden && component()}>
         <Switch>
           <Match when={expressionProperties().label || props.meta.P.label}>
-            <Label label={expressionProperties().label || props.meta.P.label}>
+            <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label}>
               <Content />
             </Label>
           </Match>
