@@ -20,7 +20,7 @@ import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
-import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
+import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
@@ -264,7 +264,7 @@ export const SortableRow = (
                         setShowCssEditor(v)) as Setter<boolean>
                     }
                   >
-                    <CSSPropertiesEditor
+                    <CSSPropertiesEditorWrapper
                       data={p.joinVertex}
                       meta={metaVertex()}
                       setValue={data => {

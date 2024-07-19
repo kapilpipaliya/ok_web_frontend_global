@@ -23,6 +23,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/rowFunction";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { sortVertexesByPosition } from "~/lib/sortVertexesByPosition";
 
 import { SortableRow } from "./SortableRow";
 import { insertNewRow } from "./insertNewRow";
@@ -39,8 +40,8 @@ export function TableInputField(
 
   const tableColumnsTemplate = createMemo(
     () =>
-      getSelectionOptions(graph, setGraph, `->MetaAttr++->Attr`, [props.meta])
-        .vertexes || [],
+      sortVertexesByPosition(getSelectionOptions(graph, setGraph, `->MetaAttr++->Attr`, [props.meta])
+        .vertexes || []),
   );
 
   const parentItems = usePageRenderVertexContext();

@@ -97,7 +97,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       txnId,
       props.formId,
     );
-    if (initFormStateResult.error) {
+    if (initFormStateResult.error) {  
       setError(initFormStateResult.error);
       return;
     }

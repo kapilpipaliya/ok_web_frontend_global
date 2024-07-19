@@ -64,14 +64,13 @@ export function HighlightSetValueContent(
           props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null
         }
       >
-        <span>
+        <button onClick={() => props.setValue(props.metaVertex, null)} type="button">
           <Icon
             class="color:#ff0000 cursor:pointer"
             data-testid="clearIcon"
             icon="mdi:close"
-            onClick={() => props.setValue(props.metaVertex, null)}
           />
-        </span>
+        </button>
       </Show>
     </div>
   );

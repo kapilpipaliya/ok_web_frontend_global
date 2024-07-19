@@ -15,6 +15,7 @@ import type {
 } from "../../../lib/FormMetadataType";
 
 import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
+import { sortVertexesByPosition } from "../../../lib/sortVertexesByPosition";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,
@@ -24,10 +25,9 @@ export function getChildrenAttrs(
   if (!child) {
     return [];
   }
-  return (
-    evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [child] }) || []
-  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
+  return sortVertexesByPosition(evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [child] }) || []);
 }
+
 
 // todo: write test for this function
 export function getFormMetaData(

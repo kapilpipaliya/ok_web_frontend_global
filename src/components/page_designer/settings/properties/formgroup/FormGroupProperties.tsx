@@ -10,7 +10,7 @@ import {
   onCleanup,
 } from "solid-js";
 
-import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
+import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
 import {
   Tab,
@@ -126,7 +126,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       <For each={metaAttributes}>
         {(metaVertex) => {
           return <TabContainer>
-            <CSSPropertiesEditor
+            <CSSPropertiesEditorWrapper
               data={props.selectedLayout}
               meta={metaVertex}
               setValue={(data) => props.setValue(metaVertex, data)}

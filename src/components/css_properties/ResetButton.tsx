@@ -47,9 +47,13 @@ export function ResetButton() {
 
   return (
     <Show when={Object.entries(filterTruthyCSSStore(cssState)).length}>
-      <div class="flex jc:end p:10|0">
-        <button class="display:flex" onClick={() => setCssState(reconcile({"": {}}))}>
-          <Icon icon="mdi:close" /> Reset
+      <div class="d:flex jc:end">
+        <button
+          class="ai:center bg:red-50 bg:red-70:hover color:white d:flex gap:10px px:16px py:8px r:6 transition:background-color|200ms"
+          onClick={() => setCssState(reconcile({ "" : {} }))}
+        >
+          <Icon icon="mdi:close" />
+          <span>Reset</span>
         </button>
       </div>
     </Show>
