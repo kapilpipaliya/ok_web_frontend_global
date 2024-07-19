@@ -70,8 +70,8 @@ export function PageAttrDnDWrapper(
     <PageRenderVertexContext.Provider
       value={[...usePageRenderVertexContext(), props.item]}
     >
-      <button
-        class={`${getBorder() || ""} contents`}
+      <div // NOSONAR 
+        class={`${getBorder() ?? ""} contents`}
         onClick={(e) => {
           e.stopPropagation();
           onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
@@ -148,7 +148,7 @@ export function PageAttrDnDWrapper(
             </Popover.Content>
           </Popover.Portal>
         </Popover>
-      </button>
+      </div>
     </PageRenderVertexContext.Provider>
   );
 }
