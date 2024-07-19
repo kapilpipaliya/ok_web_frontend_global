@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addStepComponentAttr } from "~/components/page_designer/functions/drop/addStepComponentAttr";
+import { addComponentAttrInPage } from "~/components/page_designer/functions/drop/addComponentAttrInForm";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
 import type { PageLayoutObject } from "../../page_designer/LayoutContext";
@@ -14,11 +14,12 @@ export function addStepBefore(
   setLayoutStore: SetStoreFunction<PageLayoutObject>,
   toVertex: Vertex,
 ) {
-  const layoutRowId = addStepComponentAttr(
+  const layoutRowId = addComponentAttrInPage(
     layoutStore.formData.formData,
     layoutStore.formData.txnId,
     graph,
     setGraph,
+    "Step"
   );
 
   if (layoutRowId === -1) return;

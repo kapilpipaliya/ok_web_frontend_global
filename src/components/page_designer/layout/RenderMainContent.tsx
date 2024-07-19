@@ -9,7 +9,7 @@ import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
-import { DeleteRuleDialog } from "./DeleteRuleDialog";
+import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -91,9 +91,9 @@ export function RenderMainContent() {
           </Drawer>
         </ZIndex>
       </Show>
-      <Show when={Object.keys(layoutStore.usedAttrsInRules).length > 0 || layoutStore.usedAttrsInUniqueConstraints.length > 0 || layoutStore.usedAttrsInNameKeys.length > 0}>
+      <Show when={Object.keys(layoutStore.usedAttrsInRules).length > 0 || layoutStore.usedAttrsInUniqueConstraints.length > 0 || layoutStore.usedAttrsInNameKeys.length > 0 || layoutStore.shouldContainAtLeastOneForm}>
         <ZIndex>
-          <DeleteRuleDialog/>
+          <DeleteAttributeDialog/>
         </ZIndex>
       </Show>
     </div>

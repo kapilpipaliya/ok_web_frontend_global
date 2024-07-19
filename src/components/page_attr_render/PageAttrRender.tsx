@@ -17,7 +17,6 @@ import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToS
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
-import { evaluateAttributeRules } from "../page_designer/settings/properties/rules/evaluateAttributeRules";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(

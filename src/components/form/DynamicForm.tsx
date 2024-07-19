@@ -36,6 +36,7 @@ import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
+import { addComponentAttrInPage } from "../page_designer/functions/drop/addComponentAttrInForm";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SaveCancelButton } from "./SaveCancelButton";
@@ -109,6 +110,19 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       tabs: initFormStateResult.tabs,
       txnId,
     });
+    if (initFormStateResult.dataVertex?.L[0] === "Form") {
+      const layoutRowId = addComponentAttrInPage(initFormStateResult.dataVertex, txnId, graph, setGraph, "Box", {class: {"":{"padding":"10px"}}});
+      if (layoutRowId === -1) {
+        setError("Adding component to layout failed");
+        return;
+      }
+      console.log(graph.vertexes[layoutRowId])
+      const formCompVertex = addComponentAttrInPage(graph.vertexes[layoutRowId], txnId, graph, setGraph, "Form");
+      if (formCompVertex === -1) {
+        setError("Adding component to layout failed");
+        return;
+      }
+    }
 
     setLayoutStore?.("formData", formData);
     setIsLoading(false);

@@ -1,12 +1,11 @@
 import { For, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { GraphInterface, Id, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { SimpleWithDismissButton } from "../settings/rules/SimpleModal";
 
-// Helper function to get attribute names from IDs
 const getAttributeNames = (graph: GraphInterface, ids: Array<Id | number>): string[] => {
   return ids.map(id => graph.vertexes[id]?.P.name).filter(name => name !== undefined);
 };
@@ -23,22 +22,33 @@ const AttributeList = (props: { attributes: string[], title: string }) => (
   </Show>
 );
 
-export function DeleteRuleDialog() {
+export function DeleteAttributeDialog() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
 
   const nameKeyAttributes = () => getAttributeNames(graph, layoutStore.usedAttrsInNameKeys);
   const uniqueConstraintAttributes = () => getAttributeNames(graph, layoutStore.usedAttrsInUniqueConstraints);
 
+  const handleClose = () => {
+    setLayoutStore("usedAttrsInRules", reconcile({}));
+    setLayoutStore("usedAttrsInNameKeys", reconcile([]));
+    setLayoutStore("usedAttrsInUniqueConstraints", reconcile([]));
+    setLayoutStore("shouldContainAtLeastOneForm", false);
+  };
+
+  const descriptionParts = [
+    "The attribute or its children are used in the following rules or constraints.",
+    layoutStore.usedAttrsInRules && Object.keys(layoutStore.usedAttrsInRules).length > 0 ? "Please delete them from the rules before deleting the attribute." : "",
+    layoutStore.usedAttrsInNameKeys && layoutStore.usedAttrsInNameKeys.length > 0 ? "Please delete them from the name keys before deleting the attribute." : "",
+    layoutStore.usedAttrsInUniqueConstraints && layoutStore.usedAttrsInUniqueConstraints.length > 0 ? "Please delete them from the unique constraints before deleting the attribute." : "",
+    layoutStore.shouldContainAtLeastOneForm ? "Additionally, ensure that at least one form attribute is present." : ""
+  ].filter(part => part !== "").join(" ");
+
   return (
     <SimpleWithDismissButton
       closeButtonText="Close"
-      description="The Attribute or its children are used in the following rules or constraints. Please delete them before deleting the attribute."
-      onClose={() => {
-        setLayoutStore("usedAttrsInRules", reconcile({}));
-        setLayoutStore("usedAttrsInNameKeys", reconcile([]));
-        setLayoutStore("usedAttrsInUniqueConstraints", reconcile([]));
-      }}
+      description={descriptionParts}
+      onClose={handleClose}
       title="Delete Attribute"
     >
       <div class="mt:1rem">
@@ -55,6 +65,11 @@ export function DeleteRuleDialog() {
         </For>
         <AttributeList attributes={nameKeyAttributes()} title="The following attributes are used in name keys:" />
         <AttributeList attributes={uniqueConstraintAttributes()} title="The following attributes are used in unique constraints:" />
+        <Show when={layoutStore.shouldContainAtLeastOneForm}>
+          <div class="lh:1.25rem color:red f:0.875rem mt:0.5rem">
+            Error: At least one form attribute should be present.
+          </div>
+        </Show>
       </div>
     </SimpleWithDismissButton>
   );

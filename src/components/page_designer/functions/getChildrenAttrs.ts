@@ -243,3 +243,33 @@ export function getAllFieldsUsedInRootLevelSetting(
 
   return fieldsUsedInUniqueConstraints
 }
+
+
+export function allFormAttrsInPageFromLevel(
+  graph: Store<GraphInterface>,
+  parent: Vertex,
+  componentLabel: string,
+  excludeVertices: Id[] = []
+): Id[] { 
+  const verticesWithFormAttr: Id[] = [];
+
+  function collectFormProperties(vertex: Vertex): void {
+    if (excludeVertices.includes(vertex.id)) {
+      return;
+    }
+    const compLabel = evaluate(jsep("->$0Comp"), { graph, vertexes: [vertex] })?.[0]?.P.name;
+
+    if (compLabel === componentLabel) {
+      verticesWithFormAttr.push(vertex.id);
+    }
+
+    const children = evaluate(jsep("->Attr"), { graph, vertexes: [vertex] }) || [];
+    for (const child of children) {
+      collectFormProperties(child);
+    }
+  }
+
+  collectFormProperties(parent);
+
+  return verticesWithFormAttr;
+}

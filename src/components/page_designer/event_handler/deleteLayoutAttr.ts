@@ -6,7 +6,7 @@ import type { PageLayoutObject } from "~/components/page_designer/LayoutContext"
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
-import { getAllFieldsUsedInAllRules, getAllFieldsUsedInRootLevelSetting, isAttrUsedInRules } from "../functions/getChildrenAttrs";
+import { allFormAttrsInPageFromLevel, getAllFieldsUsedInAllRules, getAllFieldsUsedInRootLevelSetting, isAttrUsedInRules } from "../functions/getChildrenAttrs";
 
 export function deleteLayoutAttr(
   layoutStore: Store<PageLayoutObject>,
@@ -41,6 +41,21 @@ export function deleteLayoutAttr(
     setLayoutStore("usedAttrsInNameKeys", usedAttrsInNameKeys);
     shouldReturn = true;
   }
+
+
+  if (layoutStore.formData.formData.L[0] === "Form") {
+    const childContainsFormAttr = allFormAttrsInPageFromLevel(graph, layoutVertex, "Form");
+
+    if (childContainsFormAttr.length > 0) {
+      const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(graph, layoutStore.formData.formData, "Form", childContainsFormAttr);
+  
+      if (rootContainsFormAttrExcludingChild.length === 0) {
+        setLayoutStore("shouldContainAtLeastOneForm", true);
+        shouldReturn = true;
+      }
+    }
+  }
+
 
   if (shouldReturn) {
     return;

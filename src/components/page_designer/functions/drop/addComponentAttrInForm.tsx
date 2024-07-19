@@ -6,25 +6,31 @@ import { componentDrop } from "~/components/page_designer/functions/drop/compone
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { IdAttr } from "~/lib/graph/graph";
 
-export function addStepComponentAttr(
+export function addComponentAttrInPage(
   dataVertex: Vertex,
   txnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  componentName: string,
+  properties: Record<string, any> = {}
 ) {
-  // add Step component
   const formCompVertex = findVertexByLabelAndUniqueId(
     graph,
     "Comp",
     IdAttr,
-    "Step",
+    componentName,
   );
+  if (!formCompVertex) {
+    return -1;
+  }
   return componentDrop(
     dataVertex,
     txnId,
-    formCompVertex!,
+    formCompVertex,
     dataVertex,
     graph,
     setGraph,
+    undefined,
+    properties
   );
 }
