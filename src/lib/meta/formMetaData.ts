@@ -42,7 +42,7 @@ FormMetaData.Form = {
       attributes: [
         {
           componentName: "TagBox",
-          name: "keys",
+          name: "key",
         },
       ],
       componentName: "DynamicTable",

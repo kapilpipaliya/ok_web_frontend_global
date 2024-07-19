@@ -6,7 +6,7 @@ import type { PageLayoutObject } from "~/components/page_designer/LayoutContext"
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
-import { getAllFieldsUsedInRules, isAttrUsedInRules } from "../functions/getChildrenAttrs";
+import { getAllFieldsUsedInAllRules, getAllFieldsUsedInRootLevelSetting, isAttrUsedInRules } from "../functions/getChildrenAttrs";
 
 export function deleteLayoutAttr(
   layoutStore: Store<PageLayoutObject>,
@@ -18,13 +18,34 @@ export function deleteLayoutAttr(
   name: string,
   showSuccessToast: (message: string) => void,
 ) {
-  const usedAttrs = getAllFieldsUsedInRules(graph, setGraph, layoutStore.formData.formData);
+  const usedAttrs = getAllFieldsUsedInAllRules(graph, setGraph, layoutStore.formData.formData);
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
+  let shouldReturn = false;
+
   if (Object.keys(usedAttrsInRules).length > 0) {
-    setLayoutStore("usedAttrs", usedAttrsInRules);
+    setLayoutStore("usedAttrsInRules", usedAttrsInRules);
+    shouldReturn = true;
+  }
+
+  const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formData.formData, layoutVertex, "->$0Unique->$0Key");
+
+  if (usedAttrsInUniqueConstraints.length > 0) {
+    setLayoutStore("usedAttrsInUniqueConstraints", usedAttrsInUniqueConstraints);
+    shouldReturn = true;
+  }
+
+  const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formData.formData, layoutVertex, "->$0NameKey");
+
+  if (usedAttrsInNameKeys.length > 0) {
+    setLayoutStore("usedAttrsInNameKeys", usedAttrsInNameKeys);
+    shouldReturn = true;
+  }
+
+  if (shouldReturn) {
     return;
   }
+
   batch(() => {
     if (layoutStore.selectedId === layoutVertex.id) {
       setLayoutStore("selectedId", -1);

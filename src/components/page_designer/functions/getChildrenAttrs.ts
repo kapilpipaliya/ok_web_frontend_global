@@ -185,7 +185,7 @@ export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
   return idToRuleMap;
 }
 
-export function getAllFieldsUsedInRules(
+export function getAllFieldsUsedInAllRules(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formVertex: Vertex,
@@ -203,21 +203,43 @@ export function getAllFieldsUsedInRules(
   return convertToIdToRuleMap(ruleToIDMap);
 }
 
-export function isAttrUsedInRules(attrVertex: Vertex, usedAttrs: IDToRuleMap, graph: GraphInterface): IDToRuleMap {
+export function isAttrUsedInRules(attrVertex: Vertex, usedAttrsInRules: IDToRuleMap, graph: GraphInterface): IDToRuleMap {
   const result: IDToRuleMap = {};
 
-  function collectUsedAttrs(vertex: Vertex, usedAttrs: IDToRuleMap, graph: GraphInterface, result: IDToRuleMap) {
-    if (usedAttrs[vertex.id]) {
-      result[vertex.id] = usedAttrs[vertex.id];
+  function collectUsedAttrs(vertex: Vertex, usedAttrsInRules: IDToRuleMap, graph: GraphInterface, result: IDToRuleMap) {
+    if (usedAttrsInRules[vertex.id]) {
+      result[vertex.id] = usedAttrsInRules[vertex.id];
     }
 
     const children = getChildrenAttrs(graph, {}, vertex);
     children.forEach(child => {
-      collectUsedAttrs(child, usedAttrs, graph, result);
+      collectUsedAttrs(child, usedAttrsInRules, graph, result);
     });
   }
 
-  collectUsedAttrs(attrVertex, usedAttrs, graph, result);
+  collectUsedAttrs(attrVertex, usedAttrsInRules, graph, result);
   return result;
 }
 
+export function getAllFieldsUsedInRootLevelSetting(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+  layoutVertex: Vertex,
+  projection: string
+): Id[] {
+  const allUniqueKeys = evaluate(jsep(projection), { graph, setGraph, vertexes: [formVertex] }) || [];
+  const allUniqueKeyIds = allUniqueKeys.map((key: Vertex) => key.id);
+
+  const fieldsUsedInUniqueConstraints = [] as Id[];
+
+  function collectUniqueConstraints(vertex: Vertex) {
+    if (allUniqueKeyIds.includes(vertex.id)) {
+      fieldsUsedInUniqueConstraints.push(vertex.id);
+    }
+    getChildrenAttrs(graph, setGraph, vertex).forEach(collectUniqueConstraints);
+  }
+  collectUniqueConstraints(layoutVertex);
+
+  return fieldsUsedInUniqueConstraints
+}

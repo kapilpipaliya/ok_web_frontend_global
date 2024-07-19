@@ -11,9 +11,9 @@ export interface GenericComponentProps {
   isTableInside?: boolean;
   meta: Vertex;
   setValue?(data: any): void;
-  title: string;
+  title?: string;
   txnId: number;
-  value: any;
+  value?: any;
 }
 
 export interface DisplayComponentProps {

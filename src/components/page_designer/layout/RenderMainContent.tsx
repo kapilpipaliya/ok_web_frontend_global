@@ -91,7 +91,7 @@ export function RenderMainContent() {
           </Drawer>
         </ZIndex>
       </Show>
-      <Show when={Object.keys(layoutStore.usedAttrs).length > 0}>
+      <Show when={Object.keys(layoutStore.usedAttrsInRules).length > 0 || layoutStore.usedAttrsInUniqueConstraints.length > 0 || layoutStore.usedAttrsInNameKeys.length > 0}>
         <ZIndex>
           <DeleteRuleDialog/>
         </ZIndex>

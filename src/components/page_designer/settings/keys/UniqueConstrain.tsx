@@ -12,7 +12,7 @@ export function UniqueConstrains() {
   const [layoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const uniqueConstrainsMetaAttribute = klona(FormMetaData.Form.attributes).find((meta) => meta.name === "Unique")!;
-  modifyFieldMetaAllFields(uniqueConstrainsMetaAttribute.attributes!.find((attribute) => attribute.name === "keys")!, graph, setGraph, layoutStore, true);
+  modifyFieldMetaAllFields(uniqueConstrainsMetaAttribute.attributes!.find((attribute) => attribute.name === "key")!, graph, setGraph, layoutStore, true);
   const { metaVertexId } = generateTableInputMeta(uniqueConstrainsMetaAttribute);
 
   return (
