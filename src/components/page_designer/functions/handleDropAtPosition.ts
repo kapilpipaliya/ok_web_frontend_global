@@ -39,7 +39,7 @@ export async function handleDropAtPosition(
       : getParentVertex(["Attr"], toVertex, graph).vertex;
 
   if (fromVertex.L[0] === "Comp") {
-    await handleComponentDrag(
+    return await handleComponentDrag(
       graph,
       setGraph,
       txnId,
@@ -50,7 +50,7 @@ export async function handleDropAtPosition(
       position,
     );
   } else if (PageDesignerLabels.includes(fromVertex.L[0])) {
-    await handlePageDrag(
+    return await handlePageDrag(
       graph,
       setGraph,
       txnId,
@@ -74,7 +74,7 @@ export async function handleDropAtPosition(
       position,
     );
   } else {
-    await handleParentChange(
+    return await handleParentChange(
       graph,
       setGraph,
       txnId,

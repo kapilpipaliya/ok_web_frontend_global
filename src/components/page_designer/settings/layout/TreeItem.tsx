@@ -119,17 +119,16 @@ export function TreeItem(
     await handleDrop(
       e,
       layoutStore,
+      setLayoutStore,
       graph,
-      showErrorToast,
       setGraph,
-      layoutStore.formData.txnId,
-      layoutStore.formData.formData
+      showErrorToast,
     );
     resetDragDropState(setLayoutStore);
   };
 
   const handleClick = () => {
-    onLayoutItemClick(setLayoutStore, props.metaVertex, graph, setGraph);
+    onLayoutItemClick(setLayoutStore, props.metaVertex.id, graph, setGraph);
   };
 
   const handleMouseOver = (e: MouseEvent) => {

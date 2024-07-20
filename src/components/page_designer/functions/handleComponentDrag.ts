@@ -17,7 +17,7 @@ export function handleComponentDrag(
   formData: Vertex,
   position: string,
 ) {
-  handleComponentDropAndSort(
+  const layoutId = handleComponentDropAndSort(
     graph,
     setGraph,
     txnId,
@@ -29,6 +29,8 @@ export function handleComponentDrag(
   );
 
   saveUndoPoint(txnId, graph);
+
+  return layoutId;
 }
 
 function handleComponentDropAndSort(

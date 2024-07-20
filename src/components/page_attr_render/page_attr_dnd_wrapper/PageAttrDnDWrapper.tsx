@@ -58,8 +58,6 @@ export function PageAttrDnDWrapper(
     return boxShadow;
   };
 
-
-
   return (
     <PageRenderVertexContext.Provider
       value={[...usePageRenderVertexContext(), props.item]}
@@ -68,7 +66,7 @@ export function PageAttrDnDWrapper(
         class={`${getBorder() ?? ""} contents`}
         onClick={(e) => {
           e.stopPropagation();
-          onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
+          onLayoutItemClick(setLayoutStore, props.item.id, graph, setGraph);
         }}
         onDragEnter={(e) =>
           handleDragOverAndSetDropPosition(
@@ -103,11 +101,10 @@ export function PageAttrDnDWrapper(
           await handleDrop(
             e,
             layoutStore,
+            setLayoutStore,
             graph,
-            showErrorToast,
             setGraph,
-            layoutStore.formData.txnId,
-            layoutStore.formData.formData,
+            showErrorToast,
           );
           resetDragDropState(setLayoutStore);
         }}

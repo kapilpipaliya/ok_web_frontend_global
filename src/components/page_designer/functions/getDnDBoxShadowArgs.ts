@@ -11,6 +11,9 @@ export function getDnDBoxShadowArgs(position: null | string, color: string, inse
   };
 
   switch (position) {
+    case "center":
+      boxShadowProps.spread = "2px";
+      break;
     case "before":
       boxShadowProps['y-offset'] = "8px";
       boxShadowProps.spread = "-6px";

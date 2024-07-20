@@ -7,15 +7,15 @@ import { handleDropAtPosition } from "~/components/page_designer/functions/handl
 import { loadPageData } from "~/components/page_designer/functions/loadPageData";
 
 import { PageDesignerLabels } from "../functions/constant";
+import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(
   e: DragEvent,
   layoutStore: Store<PageLayoutObject>,
+  setLayoutStore: SetStoreFunction<PageLayoutObject>,
   graph: GraphInterface,
-  showErrorToast: (message: string) => void,
   setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number,
-  formData: Vertex,
+  showErrorToast: (message: string) => void,
 ) {
   e.stopPropagation();
   for (const vertex of layoutStore.draggedVertices) {
@@ -36,14 +36,18 @@ export async function handleDrop(
       return;
     }
     // NOTE: Multiple selected dragged vertexes may not drop before or after as expected. test it.
-    await handleDropAtPosition(
+    const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      txnId,
-      formData,
+      layoutStore.formData.txnId,
+      layoutStore.formData.formData,
       fromVertex,
       toVertex,
       layoutStore.position,
     );
+    if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
+      onLayoutItemClick(setLayoutStore, layoutId as string, graph, setGraph);
+      setLayoutStore("showPropertiesDrawer", true);
+    }
   }
 }

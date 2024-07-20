@@ -60,7 +60,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           onClick={() => {
             const parentResult = getParentVertex(["Attr"], props.item, graph);
             if (parentResult.error) return;
-            onLayoutItemClick(setLayoutStore, parentResult.vertex!, graph, setGraph);
+            onLayoutItemClick(setLayoutStore, parentResult.vertex!.id, graph, setGraph);
           }}
           title="Parent"
         />
