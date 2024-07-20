@@ -1,7 +1,9 @@
- 
-import { Popover } from "@kobalte/core/popover";
-import { type JSX, Show, createMemo, createSelector } from "solid-js";
+import { autoUpdate } from "@floating-ui/dom";
+import { useFloating } from "solid-floating-ui";
+import { type JSX, Show, createMemo, createSelector, createSignal } from "solid-js";
+import { Portal } from "solid-js/web";
 
+import { ZIndex } from "~/components/ZIndex";
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
 import {
   PageRenderVertexContext,
@@ -23,21 +25,18 @@ import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShad
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
 
 export function PageAttrDnDWrapper(
-  props: Readonly<{ children: JSX.Element; item: Vertex }>,
+  props: Readonly<{ children: JSX.Element; item: Vertex }>
 ) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const [isPreview] = useIsPreview();
-
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
 
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
-  const children = createMemo(() =>
-    getChildrenAttrs(graph, setGraph, props.item),
-  );
+  const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
 
   const getBorder = () => {
     let boxShadow = "";
@@ -47,21 +46,27 @@ export function PageAttrDnDWrapper(
         const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}>*`;
       }
-  
+
       if (isSelectedLayoutId(props.item.id)) {
         boxShadow += " b:1|solid|blue-60>*";
       } else if (isSelectedHoverId(props.item.id)) {
         boxShadow += " b:1|solid|blue-80>*";
       }
     }
-  
+
     return boxShadow;
   };
 
+  const [reference, setReference] = createSignal<HTMLElement | null>(null);
+  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+  const position = useFloating(reference, floating, {
+    // placement: isSelectedLayoutId(props.item.id) ? "top-start" : "top-start",
+    strategy: "fixed",
+    whileElementsMounted: autoUpdate
+  });
+
   return (
-    <PageRenderVertexContext.Provider
-      value={[...usePageRenderVertexContext(), props.item]}
-    >
+    <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
       <div // NOSONAR 
         class={`${getBorder() ?? ""} contents`}
         onClick={(e) => {
@@ -79,7 +84,7 @@ export function PageAttrDnDWrapper(
             children,
             graph,
             setGraph,
-            layoutStore.formData.formData,
+            layoutStore.formData.formData
           )
         }
         onDragLeave={() => handleDragLeave(setLayoutStore)}
@@ -94,7 +99,7 @@ export function PageAttrDnDWrapper(
             children,
             graph,
             setGraph,
-            layoutStore.formData.formData,
+            layoutStore.formData.formData
           )
         }
         onDrop={async (e) => {
@@ -104,7 +109,7 @@ export function PageAttrDnDWrapper(
             setLayoutStore,
             graph,
             setGraph,
-            showErrorToast,
+            showErrorToast
           );
           resetDragDropState(setLayoutStore);
         }}
@@ -116,29 +121,28 @@ export function PageAttrDnDWrapper(
           e.stopPropagation();
           setLayoutStore("hoverId", -1);
         }}
+        ref={el => setTimeout(() => setReference(el.firstElementChild!), 100)}
       >
-        <Popover
-          open={
-            isSelectedLayoutId(props.item.id) ||
-            isSelectedHoverId(props.item.id) ||
-            layoutStore.multiHighlight.includes(props.item.id)
-          }
-          placement={`${isSelectedLayoutId(props.item.id) ? "top-start" : "top-end"}`}
-        >
-          <Popover.Anchor>
-            <Show
-              keyed
-              when={!layoutStore?.hiddenNodes.includes(props.item.id)}
-            >
-              {props.children}
-            </Show>
-          </Popover.Anchor>
-          <Popover.Portal>
-            <Popover.Content class="popover__content">
-              <AttrConfigPopOver item={props.item} />
-            </Popover.Content>
-          </Popover.Portal>
-        </Popover>
+        <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
+          {props.children}
+        </Show>
+        <Show when={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
+          <ZIndex>
+            <Portal mount={document.body}>
+              <div
+                class=""
+                ref={setFloating}
+                style={{
+                  left: `${position.x ?? 0}px`,
+                  position: position.strategy,
+                  top: `${position.y ?? 0}px`
+                }}
+              >
+                <AttrConfigPopOver item={props.item} />
+              </div>
+            </Portal>
+          </ZIndex>
+        </Show>
       </div>
     </PageRenderVertexContext.Provider>
   );

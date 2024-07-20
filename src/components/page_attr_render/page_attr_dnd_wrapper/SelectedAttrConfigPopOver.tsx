@@ -19,10 +19,11 @@ function IconButton(props: {
   icon: string;
   onClick: () => void;
   onDragStart?: (e: DragEvent) => void;
-  title: string;
+  ref?: (element: HTMLButtonElement) => void;
+  title: string; 
 }) {
   return (
-    <button draggable={props.draggable} onClick={props.onClick} onDragStart={props.onDragStart} title={props.title}>
+    <button  draggable={props.draggable} onClick={props.onClick} onDragStart={props.onDragStart} ref={props.ref} title={props.title}>
       <Icon class="flex cursor:pointer" height={20} icon={props.icon} width={20} />
     </button>
   );
