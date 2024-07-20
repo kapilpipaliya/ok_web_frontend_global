@@ -7,7 +7,7 @@ export const genericComponents2 = [
   "TableRow",
   "Tabs",
   "TabContainer",
-  "TabList",
+  // "TabList",
   "TreeViewItem",
   "TreeViewChild",
   "Collapsible",
