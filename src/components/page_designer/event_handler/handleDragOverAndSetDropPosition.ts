@@ -19,6 +19,7 @@ export function handleDragOverAndSetDropPosition(
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
 ) {
+  setLayoutStore({ activeItem: layoutVertex.id, position: null });
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
@@ -28,7 +29,6 @@ export function handleDragOverAndSetDropPosition(
     | null;
   if (!position) {
     setLayoutStore({ activeItem: null, position: null });
-    setLayoutStore("dragOverTargetId", -1);
     return;
   }
 
@@ -68,5 +68,4 @@ export function handleDragOverAndSetDropPosition(
     return;
   }
   setLayoutStore({ activeItem, position });
-  setLayoutStore("dragOverTargetId", layoutVertex.id);
 }

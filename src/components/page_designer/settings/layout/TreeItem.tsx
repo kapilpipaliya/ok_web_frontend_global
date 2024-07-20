@@ -1,12 +1,15 @@
+ 
 import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
+import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
 import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { useIsPreview } from "~/lib/contexts";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -15,12 +18,13 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContent } from "./TreeItemContent";
 
+
 export function TreeItem(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
-  }>,
+  }>
 ) {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -32,7 +36,7 @@ export function TreeItem(
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
   const children = createMemo(() =>
-    getChildrenAttrs(graph, setGraph, props.metaVertex),
+    getChildrenAttrs(graph, setGraph, props.metaVertex)
   );
 
   let startTime = 0;
@@ -49,7 +53,7 @@ export function TreeItem(
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData,
+      layoutStore.formData.formData
     );
   };
 
@@ -65,7 +69,7 @@ export function TreeItem(
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData,
+      layoutStore.formData.formData
     );
 
     const position = layoutStore.position;
@@ -95,7 +99,7 @@ export function TreeItem(
           fromVertex,
           toVertexId,
           layoutStore.formData.formData,
-          position,
+          position
         )
       ) {
         // Don't allow drag and drop
@@ -119,7 +123,7 @@ export function TreeItem(
       showErrorToast,
       setGraph,
       layoutStore.formData.txnId,
-      layoutStore.formData.formData,
+      layoutStore.formData.formData
     );
     resetDragDropState(setLayoutStore);
   };
@@ -138,30 +142,43 @@ export function TreeItem(
     setLayoutStore("hoverId", -1);
   };
 
+  const getBorder = () => {
+    let boxShadow = "";
+
+    if (!isPreview()) {
+      if (isActiveTargetItem()) {
+        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
+      }
+  
+      if (isSelectedLayoutId(props.metaVertex.id)) {
+        boxShadow += " bg:rgb(197,221,255)";
+      } else if (isSelectedHoverId(props.metaVertex.id)) {
+        boxShadow += " bg:#F2EDED";
+      }
+    }
+  
+    return boxShadow;
+  };
+  
+
+
   return (
     <>
-      <button
+      <div
         classList={{
           "align-items:center": true,
           "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
           "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
-          "box-shadow:1px|1px|1px|1px#F2EDED":
-            !!children().length &&
-            !isActiveTargetItem() &&
-            !!layoutStore.position,
-          "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
-            isActiveTargetItem() && layoutStore.position === "after",
-          "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
-            isActiveTargetItem() && layoutStore.position === "center",
-          "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
-            isActiveTargetItem() && layoutStore.position === "before",
+          // little dark shadow on top,little lite shadow on bottom
           "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px":
-            !(isActiveTargetItem() && layoutStore.position === "center") &&
-            children().length,
+            !(isActiveTargetItem()) &&
+            children().length > 0,
           "display:flex": true,
           "font-size:14px": true,
           "font-weight:bold": !!children().length,
           "font-weight:normal": !children().length,
+          [getBorder()]: true,
           "justify-content:space-between": true,
           "r:0|5|5|0": !children().length,
           "r:5|5|5|5": !!children().length,
@@ -172,13 +189,10 @@ export function TreeItem(
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
-        onDragStart={(e) =>
-          handleDragStart(e, setLayoutStore, props.metaVertex)
-        }
+        onDragStart={(e) => handleDragStart(e, setLayoutStore, props.metaVertex)}
         onDrop={handleDropEvent}
         onMouseOver={handleMouseOver}
         onmouseleave={handleMouseLeave}
-        type="button"
       >
         <TreeItemContent
           collapsedKeys={props.collapsedKeys}
@@ -188,7 +202,7 @@ export function TreeItem(
         <Show when={layoutStore.formData.formData.id !== props.metaVertex.id}>
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
-      </button>
+      </div>
 
       <Show
         when={

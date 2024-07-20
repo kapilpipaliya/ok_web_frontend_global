@@ -7,7 +7,7 @@ import { useFormContext, useIsPreview } from "~/lib/contexts";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { deNullify, ifNotNull } from "~/lib/utils";
+import { ifNotNull } from "~/lib/utils";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";

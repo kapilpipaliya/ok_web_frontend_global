@@ -10,7 +10,6 @@ import type { IDToRuleMap } from "./functions/getChildrenAttrs";
 export function getInitialDesignerLayoutStore() {
   return {
     activeItem: null as Id | null | number,
-    dragOverTargetId: -1 as Id | number,
     draggedVertices: [] as Array<Vertex>,
     formData: {} as IFormContext,
     hiddenNodes: [] as Array<Id | number>,

@@ -10,7 +10,6 @@ export function resetDragDropState(
   batch(() => {
     setLayoutStore({
       activeItem: null,
-      dragOverTargetId: -1,
       draggedVertices: [],
       position: null,
     });
