@@ -43,7 +43,6 @@ export const PositionSection = {
     componentName: "textFieldOptions",
     label: "Z-Index",
     name: "z-index",
-    options: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
 };

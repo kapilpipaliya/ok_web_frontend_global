@@ -10,8 +10,8 @@ import { CustomTooltip } from "~/components/Tooltip";
  */
 interface ContainerLabelProps {
   class?: string;
+  hashName?: string;
   info?: string;
-  name?: string;
   onResetIconClick?: () => void;
   showResetIcon?: boolean;
   title: string;
@@ -19,7 +19,7 @@ interface ContainerLabelProps {
 
 export const ContainerLabel = (props: ContainerLabelProps) => {
   const handleInfoClick = () => {
-    const url = `https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}${props.name ? `#${props.name}` : ""}`;
+    const url = `https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}${props.hashName ? `#${props.hashName}` : ""}`;
     window.open(url, "_blank");
   };
 

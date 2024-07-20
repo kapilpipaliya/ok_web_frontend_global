@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Show, createMemo, createSignal } from "solid-js";
+import { type Accessor, For, Show, createMemo, createSignal, createEffect } from "solid-js";
 
 import type {
   CSSJSONSchemaSearchType,
@@ -14,10 +14,18 @@ export const CollapsibleSection = (
     isOpen: boolean;
     propertyFieldMap: { [key: string]: GenericField };
     sectionCount: Accessor<number>;
+    setAllOpen: Accessor<boolean | null>;
     title: string;
   }>,
 ) => {
   const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true);
+
+  // Sync with setAllOpen signal
+  createEffect(() => {
+    if (props.setAllOpen() !== null) {
+      setIsOpen(props.setAllOpen()!);
+    }
+  });
 
   return (
     <div
@@ -33,14 +41,13 @@ export const CollapsibleSection = (
         onClick={() => setIsOpen(!isOpen())}
         type="button"
       >
-                <Icon
+        <Icon
           class={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
           height={25}
           icon="uil:angle-up"
           width={25}
         />
         <span class="f:15 font-weight:600">{props.title}</span>
-
       </button>
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
@@ -58,22 +65,48 @@ export const SectionList = (props: {
   const sectionCount = createMemo(
     () => Object.keys(props.filteredSections()).length,
   );
+  const [setAllOpen, setSetAllOpen] = createSignal<boolean | null>(null);
+
+  const collapseAll = () => setSetAllOpen(false);
+  const expandAll = () => setSetAllOpen(true);
+
   return (
-    <For each={Object.entries(props.filteredSections())} fallback={""}>
-      {(section, index) => {
-        const [sectionName, { isOpen, propertyFieldMap }] = section;
-        return (
-          <Show when={Object.keys(propertyFieldMap).length > 0}>
-            <CollapsibleSection
-              index={index()}
-              isOpen={isOpen ?? true}
-              propertyFieldMap={propertyFieldMap}
-              sectionCount={sectionCount}
-              title={sectionName}
-            />
-          </Show>
-        );
-      }}
-    </For>
+    <>
+      <div class="flex jc:end mb:2 w:100%">
+        <button class="btn" onClick={collapseAll} title="Collapse all">
+          <Icon
+            class={` transition:transform|0.2s|linear`}
+            height={25}
+            icon="mdi:collapse-all-outline"
+            width={25}
+          />
+        </button>
+        <button class="btn ml:2" onClick={expandAll} title="Expand all">
+          <Icon
+            class={` transition:transform|0.2s|linear`}
+            height={25}
+            icon="mdi:expand-all-outline"
+            width={25}
+          />
+        </button>
+      </div>
+      <For each={Object.entries(props.filteredSections())} fallback={""}>
+        {(section, index) => {
+          const [sectionName, { isOpen, propertyFieldMap }] = section;
+          return (
+            <Show when={Object.keys(propertyFieldMap).length > 0}>
+              <CollapsibleSection
+                index={index()}
+                isOpen={isOpen ?? true}
+                propertyFieldMap={propertyFieldMap}
+                sectionCount={sectionCount}
+                setAllOpen={setAllOpen}
+                title={sectionName}
+              />
+            </Show>
+          );
+        }}
+      </For>
+    </>
   );
 };

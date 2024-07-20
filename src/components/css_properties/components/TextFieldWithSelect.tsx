@@ -32,7 +32,7 @@ export const TextFieldWithSelect = () => {
 
   const [startValue, setStartValue] = createSignal(selectedValue());
   const determineSelectedOption = () => {
-    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.options?.[0] ?? "px";
+    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.options?.[0] ?? "";
   };
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
 
