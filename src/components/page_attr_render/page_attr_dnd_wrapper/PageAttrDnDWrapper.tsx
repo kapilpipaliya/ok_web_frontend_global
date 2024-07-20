@@ -48,9 +48,9 @@ export function PageAttrDnDWrapper(
       }
 
       if (isSelectedLayoutId(props.item.id)) {
-        boxShadow += " b:1|solid|blue-60>*";
+        boxShadow += " b:1px|solid|blue-60>*";
       } else if (isSelectedHoverId(props.item.id)) {
-        boxShadow += " b:1|solid|blue-80>*";
+        boxShadow += " b:1px|solid|blue-80>*";
       }
     }
 
@@ -60,7 +60,7 @@ export function PageAttrDnDWrapper(
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const position = useFloating(reference, floating, {
-    // placement: isSelectedLayoutId(props.item.id) ? "top-start" : "top-start",
+    placement: isSelectedLayoutId(props.item.id) ? "top-start" : "top-start",
     strategy: "fixed",
     whileElementsMounted: autoUpdate
   });

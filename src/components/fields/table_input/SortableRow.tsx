@@ -252,7 +252,7 @@ export const SortableRow = (
           const CssEditor = () => {
             const [showCssEditor, setShowCssEditor] = createSignal(false);
             return <>
-              <button class="b:1|solid|lightgrey p:6 r:6" onClick={() => setShowCssEditor(true)} type="button">
+              <button class="b:1px|solid|lightgrey p:6 r:6" onClick={() => setShowCssEditor(true)} type="button">
                 <Icon height={20} icon="fluent:text-edit-style-20-filled" width={20}/>
               </button>
               <Show when={showCssEditor()}>

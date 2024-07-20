@@ -20,7 +20,7 @@ export function FormElementsWrapper() {
       </ZIndex>
       <div
         class={
-          `scrollbar-color:lightgrey scrollbar-width:thin flex border:1|solid|lightgrey flex:column h:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`
+          `scrollbar-color:lightgrey scrollbar-width:thin flex border:1px|solid|lightgrey flex:column h:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`
         }
       >
         <FormElementTabs />

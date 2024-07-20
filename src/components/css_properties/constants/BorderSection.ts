@@ -66,7 +66,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     label: "Border Width",
     mainFieldType: "textFieldOptions",
     name: "border-width",
-    options: sizeTypes,
+    options: ["px"].concat(sizeTypes.filter(size => size !== "px")),
     type: "number",
     // TODO: Add support for options
     // options: extraPropertyValues["border-width"].values,

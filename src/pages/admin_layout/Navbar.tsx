@@ -44,7 +44,7 @@ export function Navbar(
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
   return (
-    <div class="flex bb:1|solid|rgb(212,219,231) jc:space-between p:5|10">
+    <div class="flex bb:1px|solid|rgb(212,219,231) jc:space-between p:5|10">
       <Show
         when={
           field.meta?.P.menuPosition === "left" || !field.meta?.P.menuPosition

@@ -13,7 +13,7 @@ export default {
       control:
         "fg:current font-family:inherit appearance:none outline:0 opacity:1 full pr:2em",
       outlined:
-        "b:1|line-light b:text-lightest:has(:hover:not(:disabled),:focus:not(:disabled))",
+        "b:1px|line-light b:text-lightest:has(:hover:not(:disabled),:focus:not(:disabled))",
       indicator: "abs middle untouchable",
       ...selectSizes,
     },

@@ -43,7 +43,7 @@ export const DataEditWithCustomDialog = () => {
     >
       <div
         class={`${
-          selectedValue().length > 0 ? "bb:1|solid|lightgrey m:1 pb:5" : ""
+          selectedValue().length > 0 ? "bb:1px|solid|lightgrey m:1 pb:5" : ""
         } flex ai:center jc:space-between mb:6px`}
       >
         <LabelWrapper />
