@@ -1,20 +1,16 @@
 import { autoUpdate } from "@floating-ui/dom";
-import { klona } from "klona";
 import { useFloating } from "solid-floating-ui";
 import {
   type JSX,
   Show,
   children,
-  createEffect,
   createMemo,
   createSelector,
   createSignal,
 } from "solid-js";
-import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { ZIndex } from "~/components/ZIndex";
-import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
 import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
@@ -32,11 +28,15 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
+import { BorderOverlay } from "./BorderOverlay";
 
+interface PageAttrDnDWrapperProps {
+  children: JSX.Element;
+  item: Vertex;
+}
 export function PageAttrDnDWrapper(
-  props: Readonly<{ children: JSX.Element; item: Vertex }>
+  props: Readonly<PageAttrDnDWrapperProps>
 ) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
@@ -45,80 +45,17 @@ export function PageAttrDnDWrapper(
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
 
-  const activeItemChanged = createSelector(() => layoutStore.activeItem);
-  const isActiveTargetItem = () => activeItemChanged(props.item.id);
   const childrenAttrs = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
   const resolvedChildren = children(() => props.children);
-
-  const getBorder = () => {
-    let boxShadow = "";
-
-    if (!isPreview()) {
-      if (isActiveTargetItem()) {
-        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
-      }
-
-      if (isSelectedLayoutId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-60";
-      } else if (isSelectedHoverId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-80";
-      }
-    }
-
-    return boxShadow;
-  };
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
-  createEffect(() => {
-    const ref = reference();
-    if (!ref) return;
-    ref.getBoundingClientRect = () => getBoundingRect(ref);
-  });
   const position = useFloating(reference, floating, {
     placement: isSelectedLayoutId(props.item.id) ? "top-start" : "top-start",
     strategy: "fixed",
     whileElementsMounted: autoUpdate
   });
-
-  const ShowBorder = () => {
-    const [store, setStore] = createStore({
-      maxHeight: 0,
-      maxWidth: 0,
-      x: 0,
-      y: 0
-    });
-    const [floating, setFloating] = createSignal<HTMLElement | null>(null);
-  
-    const ref = reference();
-    if (!ref) return;
-    ref.getBoundingClientRect = () => getBoundingRect(ref);
-
-    const position = useFloating(reference, floating, {
-      placement: "bottom-start",
-      strategy: "fixed",
-      whileElementsMounted: autoUpdate
-    });
-    createEffect(() => {
-      const pos = klona(position);
-      if(pos.strategy) {
-        const rect = getBoundingRect(reference()!);
-        setStore({
-          maxHeight: rect.height + 2,
-          maxWidth: rect.width + 2,
-          x: (pos.x ?? 0) - 1,
-          y: (pos.y ?? 0) - rect.height - 1
-        })
-      }
-    });
-    return (
-      <Portal><div class={`${getBorder()} height:${store.maxHeight}px left:${store.x}px pointer-events:none position:fixed top:${store.y}px width:${store.maxWidth}px`}
-        ref={setFloating}
-      ></div></Portal>
-    );
-  };
 
   return (
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
@@ -176,7 +113,7 @@ export function PageAttrDnDWrapper(
           e.stopPropagation();
           setLayoutStore("hoverId", -1);
         }}
-        ref={setReference}
+        ref={el => {setReference(el); el.getBoundingClientRect = () => getBoundingRect(el)}}
         style="display:contents;"
       >
         <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
@@ -199,9 +136,7 @@ export function PageAttrDnDWrapper(
             </Portal>
           </ZIndex>
         </Show>
-        <Show when={getBorder()}>
-          <ShowBorder />
-        </Show>
+         <BorderOverlay item={props.item} reference={reference} />
       </div>
     </PageRenderVertexContext.Provider>
   );
