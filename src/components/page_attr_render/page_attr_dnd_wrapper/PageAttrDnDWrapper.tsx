@@ -1,10 +1,11 @@
 import { autoUpdate } from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
-import { type JSX, Show, createMemo, createSelector, createSignal } from "solid-js";
+import { type JSX, Show, children, createMemo, createSelector, createSignal, onMount, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { ZIndex } from "~/components/ZIndex";
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
+import { ensureArray } from "~/components/fields/ensureArray";
 import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
@@ -36,7 +37,8 @@ export function PageAttrDnDWrapper(
 
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
-  const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
+  const childrenAttrs = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
+  const resolvedChildren = children(() => props.children)
 
   const getBorder = () => {
     let boxShadow = "";
@@ -44,13 +46,13 @@ export function PageAttrDnDWrapper(
     if (!isPreview()) {
       if (isActiveTargetItem()) {
         const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}>*`;
+        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
       }
 
       if (isSelectedLayoutId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-60>*";
+        boxShadow += " b:1px|solid|blue-60";
       } else if (isSelectedHoverId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-80>*";
+        boxShadow += " b:1px|solid|blue-80";
       }
     }
 
@@ -65,10 +67,53 @@ export function PageAttrDnDWrapper(
     whileElementsMounted: autoUpdate
   });
 
+
+  const ShowBorder = () => {
+    const [maxWidth, setMaxWidth] = createSignal(0);
+    const [maxHeight, setMaxHeight] = createSignal(0);
+    const [minTop, setMinTop] = createSignal(0);
+    const [minLeft, setMinLeft] = createSignal(0);
+  
+    const measureElements = () => {
+      const rectangles = ensureArray(resolvedChildren())
+        .filter(element => element)
+        .map(element => element.getBoundingClientRect());
+  
+      if (rectangles.length === 0) {
+        return;
+      }
+  
+      const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property]));
+      const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property]));
+  
+      setMaxWidth(getMaxProperty('width'));
+      setMaxHeight(getMaxProperty('height'));
+      // setMaxWidth(getMaxProperty('right') - getMinProperty('left'));
+      // setMaxHeight(getMaxProperty('bottom') - getMinProperty('top'));
+      setMinTop(getMinProperty('top'));
+      setMinLeft(getMinProperty('left'));
+    };
+  
+
+    onMount(() => {
+      requestAnimationFrame(measureElements);
+
+    });
+  
+    return (
+      <Portal>
+        <div
+          class={`${getBorder()} fixed`}
+          style={{ height: `${maxHeight() + 1}px`, left: `${minLeft() - 1}px`, 'pointer-events': 'none', top: `${minTop() - 1}px`, width: `${maxWidth() + 1}px` }}
+        ></div>
+      </Portal>
+    );
+  };
+
   return (
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
-      <div // NOSONAR 
-        class={`${getBorder() ?? ""} contents`}
+      <span // NOSONAR 
+        class={`${"drop-targe"} ${(layoutStore.draggedVertices.length > 0 || isSelectedLayoutId(props.item.id)) ? "m:3px" : ""}`}
         onClick={(e) => {
           e.stopPropagation();
           onLayoutItemClick(setLayoutStore, props.item.id, graph, setGraph);
@@ -81,7 +126,7 @@ export function PageAttrDnDWrapper(
             props.item,
             isPreview(),
             () => [],
-            children,
+            childrenAttrs,
             graph,
             setGraph,
             layoutStore.formData.formData
@@ -96,7 +141,7 @@ export function PageAttrDnDWrapper(
             props.item,
             isPreview(),
             () => [],
-            children,
+            childrenAttrs,
             graph,
             setGraph,
             layoutStore.formData.formData
@@ -121,10 +166,10 @@ export function PageAttrDnDWrapper(
           e.stopPropagation();
           setLayoutStore("hoverId", -1);
         }}
-        ref={el => setTimeout(() => setReference(el.firstElementChild!), 100)}
+        ref={el => setTimeout(() => setReference(el.firstElementChild!), 150)}
       >
         <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
-          {props.children}
+          {resolvedChildren()}
         </Show>
         <Show when={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
           <ZIndex>
@@ -143,7 +188,10 @@ export function PageAttrDnDWrapper(
             </Portal>
           </ZIndex>
         </Show>
-      </div>
+      </span>
+      <Show when={getBorder()}>
+        <ShowBorder />
+      </Show>
     </PageRenderVertexContext.Provider>
   );
 }

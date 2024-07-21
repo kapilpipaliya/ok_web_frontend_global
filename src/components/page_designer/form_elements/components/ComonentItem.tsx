@@ -41,6 +41,9 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
     <button
       class={itemStyle()}
       draggable={true}
+      onDragEnd={() => {
+        setLayoutStore("draggedVertices", []);
+      }}
       onDragStart={(e) => {
         e.stopPropagation();
         setLayoutStore("draggedVertices", []);
