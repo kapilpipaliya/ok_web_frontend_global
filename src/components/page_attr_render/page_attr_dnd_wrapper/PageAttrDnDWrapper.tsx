@@ -1,11 +1,20 @@
 import { autoUpdate } from "@floating-ui/dom";
+import { klona } from "klona";
 import { useFloating } from "solid-floating-ui";
-import { type JSX, Show, children, createMemo, createSelector, createSignal, onMount, onCleanup } from "solid-js";
+import {
+  type JSX,
+  Show,
+  children,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+} from "solid-js";
+import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { ZIndex } from "~/components/ZIndex";
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
-import { ensureArray } from "~/components/fields/ensureArray";
 import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
@@ -17,6 +26,7 @@ import { handleDrop } from "~/components/page_designer/event_handler/handleDrop"
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getBoundingRect } from "~/components/page_designer/functions/getIndicatorPosition";
 import { useIsPreview } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
@@ -38,7 +48,7 @@ export function PageAttrDnDWrapper(
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
   const childrenAttrs = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
-  const resolvedChildren = children(() => props.children)
+  const resolvedChildren = children(() => props.children);
 
   const getBorder = () => {
     let boxShadow = "";
@@ -61,58 +71,58 @@ export function PageAttrDnDWrapper(
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+
+  createEffect(() => {
+    const ref = reference();
+    if (!ref) return;
+    ref.getBoundingClientRect = () => getBoundingRect(ref);
+  });
   const position = useFloating(reference, floating, {
     placement: isSelectedLayoutId(props.item.id) ? "top-start" : "top-start",
     strategy: "fixed",
     whileElementsMounted: autoUpdate
   });
 
-
   const ShowBorder = () => {
-    const [maxWidth, setMaxWidth] = createSignal(0);
-    const [maxHeight, setMaxHeight] = createSignal(0);
-    const [minTop, setMinTop] = createSignal(0);
-    const [minLeft, setMinLeft] = createSignal(0);
-  
-    const measureElements = () => {
-      const rectangles = ensureArray(resolvedChildren())
-        .filter(element => element)
-        .map(element => element.getBoundingClientRect());
-  
-      if (rectangles.length === 0) {
-        return;
-      }
-  
-      const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property]));
-      const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property]));
-  
-      setMaxWidth(getMaxProperty('width'));
-      setMaxHeight(getMaxProperty('height'));
-      // setMaxWidth(getMaxProperty('right') - getMinProperty('left'));
-      // setMaxHeight(getMaxProperty('bottom') - getMinProperty('top'));
-      setMinTop(getMinProperty('top'));
-      setMinLeft(getMinProperty('left'));
-    };
-  
-
-    onMount(() => {
-      requestAnimationFrame(measureElements);
-
+    const [store, setStore] = createStore({
+      maxHeight: 0,
+      maxWidth: 0,
+      x: 0,
+      y: 0
     });
+    const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   
+    const ref = reference();
+    if (!ref) return;
+    ref.getBoundingClientRect = () => getBoundingRect(ref);
+
+    const position = useFloating(reference, floating, {
+      placement: "bottom-start",
+      strategy: "fixed",
+      whileElementsMounted: autoUpdate
+    });
+    createEffect(() => {
+      const pos = klona(position);
+      if(pos.strategy) {
+        const rect = getBoundingRect(reference()!);
+        setStore({
+          maxHeight: rect.height + 2,
+          maxWidth: rect.width + 2,
+          x: pos.x ?? 0,
+          y: (pos.y ?? 0) - rect.height
+        })
+      }
+    });
     return (
-      <Portal>
-        <div
-          class={`${getBorder()} fixed`}
-          style={{ height: `${maxHeight() + 1}px`, left: `${minLeft() - 1}px`, 'pointer-events': 'none', top: `${minTop() - 1}px`, width: `${maxWidth() + 1}px` }}
-        ></div>
-      </Portal>
+      <Portal><div class={`${getBorder()} height:${store.maxHeight}px left:${store.x}px pointer-events:none position:fixed top:${store.y}px width:${store.maxWidth}px`}
+        ref={setFloating}
+      ></div></Portal>
     );
   };
 
   return (
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
-      <span // NOSONAR 
+      <div // NOSONAR 
         class={`${"drop-targe"} ${(layoutStore.draggedVertices.length > 0 || isSelectedLayoutId(props.item.id)) ? "m:3px" : ""}`}
         onClick={(e) => {
           e.stopPropagation();
@@ -166,7 +176,8 @@ export function PageAttrDnDWrapper(
           e.stopPropagation();
           setLayoutStore("hoverId", -1);
         }}
-        ref={el => setTimeout(() => setReference(el.firstElementChild!), 150)}
+        ref={setReference}
+        style="display:contents;"
       >
         <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
           {resolvedChildren()}
@@ -188,10 +199,10 @@ export function PageAttrDnDWrapper(
             </Portal>
           </ZIndex>
         </Show>
-      </span>
-      <Show when={getBorder()}>
-        <ShowBorder />
-      </Show>
+        <Show when={getBorder()}>
+          <ShowBorder />
+        </Show>
+      </div>
     </PageRenderVertexContext.Provider>
   );
 }

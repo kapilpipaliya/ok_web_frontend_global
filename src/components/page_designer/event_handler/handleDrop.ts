@@ -1,7 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, } from "~/lib/graph/graph";
 
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { loadPageData } from "~/components/page_designer/functions/loadPageData";

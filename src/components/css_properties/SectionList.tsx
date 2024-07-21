@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Show, createMemo, createSignal, createEffect } from "solid-js";
+import { type Accessor, For, Show, createEffect, createMemo, createSignal } from "solid-js";
 
 import type {
   CSSJSONSchemaSearchType,

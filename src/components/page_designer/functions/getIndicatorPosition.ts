@@ -1,5 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
-export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
+
+export function getBoundingRect(node: HTMLElement): DOMRect {
   // Get bounding rectangles of the direct children elements
   const elementDirectChildrens = Array.from(node.children);
   const rectangles = elementDirectChildrens
@@ -7,14 +8,13 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
     .map(element => element.getBoundingClientRect());
 
   // If there are no child rectangles, use the node's bounding rectangle
-  let bounds: DOMRect;
   if (rectangles.length === 0) {
-    bounds = node.getBoundingClientRect();
+    return node.getBoundingClientRect();
   } else {
     const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property]));
     const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property]));
 
-    bounds = {
+    return {
       top: getMinProperty('top'),
       right: getMaxProperty('right'),
       bottom: getMaxProperty('bottom'),
@@ -26,6 +26,10 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
       toJSON: () => ({})
     } as DOMRect;
   }
+}
+
+export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
+  const bounds = getBoundingRect(node);
 
   // Calculate the offset and dimensions
   const offsetY = e.clientY - bounds.top;

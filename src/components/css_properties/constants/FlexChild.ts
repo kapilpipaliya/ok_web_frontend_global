@@ -4,8 +4,7 @@ import type {
 } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createButtonGroupOptions, createSelectOptions } from "./FieldType";
-import { Icons } from "./Icons";
+import { createSelectOptions } from "./FieldType";
 
 export const FlexChild = {
   // Do we need to imporove this?
