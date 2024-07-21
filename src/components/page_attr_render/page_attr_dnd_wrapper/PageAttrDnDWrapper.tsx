@@ -108,8 +108,8 @@ export function PageAttrDnDWrapper(
         setStore({
           maxHeight: rect.height + 2,
           maxWidth: rect.width + 2,
-          x: pos.x ?? 0,
-          y: (pos.y ?? 0) - rect.height
+          x: (pos.x ?? 0) - 1,
+          y: (pos.y ?? 0) - rect.height - 1
         })
       }
     });
@@ -123,7 +123,7 @@ export function PageAttrDnDWrapper(
   return (
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
       <div // NOSONAR 
-        class={`${"drop-targe"} ${(layoutStore.draggedVertices.length > 0 || isSelectedLayoutId(props.item.id)) ? "m:3px" : ""}`}
+        class={`${"drop-targe"}`}
         onClick={(e) => {
           e.stopPropagation();
           onLayoutItemClick(setLayoutStore, props.item.id, graph, setGraph);
