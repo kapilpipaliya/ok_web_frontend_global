@@ -84,9 +84,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
       });
     }
 
-    const updatePosition = debounce(updatePos, 30);
-
-    createEffect(on([() => position.x, () => position.y], updatePosition));
+    createEffect(on([() => position.x, () => position.y], updatePos));
 
     return (
       <Portal>
