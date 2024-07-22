@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSX, type Setter, Show, createSignal } from "solid-js";
+import { type JSX, type Setter, Show, createSignal, Accessor } from "solid-js";
 import { Portal } from "solid-js/web";
 
 interface CustomModalProps {
@@ -13,20 +13,14 @@ interface CustomModalProps {
   footer: (setOpen: Setter<boolean>) => JSX.Element;
   iconClass?: string;
   iconSize?: number;
-  open?: boolean;
+  open?: Accessor<boolean>;
   openButton?: boolean;
   setOpen?: (open: boolean) => void;
   title?: JSX.Element | string;
 }
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
-
-  const [open, setOpen] = createSignal(props.open ?? false);
-  let btnEl: any;
-
-  const onClickClose = () => {
-    setOpen(false);
-  };
+  const [open, setOpen] = (props.open && props.setOpen) ? [props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>] : createSignal(false);
 
   const onClickOverlay = (e: MouseEvent) => {
     if (e.target !== e.currentTarget) return;
@@ -42,7 +36,6 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
           <div
             aria-disabled={open()}
             class={`${props.iconClass} bg:#dfe9f3d1:hover cursor:pointer p:5|5|5|5 r:5|5|5|5`}
-            ref={btnEl!}
           >
             {props.buttonLabel}
           </div>
@@ -56,7 +49,6 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
           height={props.iconSize ?? 25}
           icon={props.buttonIcon ?? "material-symbols:error"}
           onClick={() => setOpen(true)}
-          ref={btnEl!}
           width={props.iconSize ?? 25}
         />
       </Show>

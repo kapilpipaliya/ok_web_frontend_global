@@ -28,7 +28,7 @@ export function ExportSection(
           <button onClick={() => toggle(false)}>Close</button>
         </div>
       )}
-      open={props.openDialog()}
+      open={props.openDialog}
       openButton={false}
       setOpen={props.setOpenDialog}
       title={"Code"}

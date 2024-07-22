@@ -285,7 +285,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                     setDiscardPopup(false);
                     onConfirmExit();
                   }}
-                  open={discardPopup()}
+                  open={discardPopup}
+                  setOpen={setDiscardPopup}
                   title="Discard changes"
                 />
               </Show>

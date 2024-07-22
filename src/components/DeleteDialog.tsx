@@ -1,4 +1,9 @@
-import type { JSX } from "solid-js";
+import type { Accessor, JSX } from "solid-js";
+
+import { autofocus } from "@solid-primitives/autofocus";
+// prevents from being tree-shaken by TS
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+autofocus
 
 import { CustomModal } from "./CommonDialog";
 
@@ -8,7 +13,7 @@ export function DeleteDialog(
     message?: string;
     onCancel?: () => void;
     onConfirm: () => void;
-    open?: boolean;
+    open?: Accessor<boolean>;
     setOpen?: (open: boolean) => void;
     title?: string;
   }>,
@@ -33,11 +38,12 @@ export function DeleteDialog(
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <button
+            autofocus
             class="danger mr:7px"
             onClick={() => {
               handleCancel();
-              toggle((v) => !v);
             }}
+            use:autofocus
           >
             Cancel
           </button>
@@ -45,7 +51,6 @@ export function DeleteDialog(
             class="mr:10px"
             onClick={() => {
               handleConfirm();
-              toggle((v) => !v);
             }}
           >
             Confirm

@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import { Match, Show, Switch, createSignal, onMount } from "solid-js";
+import { Accessor, Match, Show, Switch, createSignal, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
@@ -151,7 +151,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             message="Are you sure you want to delete this item?"
             onCancel={() => setDeleteRowId(null)}
             onConfirm={onDelete}
-            open={true}
+            open={deleteRowId as unknown as Accessor<boolean>}
+            setOpen={setDeleteRowId}
             title="Delete Item"
           />
         </Show>

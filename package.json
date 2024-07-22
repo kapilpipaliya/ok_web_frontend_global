@@ -17,8 +17,8 @@
     "@kobalte/utils": "^0.9.0",
     "@master/css": "^2.0.0-rc.44",
     "@master/css-runtime": "^2.0.0-rc.44",
-    "@master/css-server": "^2.0.0-beta.189",
-    "@master/eslint-plugin-css": "^2.0.0-beta.175",
+    "@master/css-server": "^2.0.0-rc.44",
+    "@master/eslint-plugin-css": "^2.0.0-rc.44",
     "@memgraph/orb": "^0.4.3",
     "@mobily/ts-belt": "^4.0.0-rc.5",
     "@orbit/data": "^0.17.0",
@@ -27,6 +27,7 @@
     "@orbit/records": "^0.17.0",
     "@solid-aria/primitives": "^0.4.0",
     "@solid-bricks/barcode": "^1.0.1",
+    "@solid-primitives/autofocus": "^0.0.111",
     "@solid-primitives/intersection-observer": "^2.1.6",
     "@solid-primitives/memo": "^1.3.9",
     "@solid-primitives/scheduled": "^1.4.3",
@@ -119,6 +120,6 @@
     "eslint": "^9.7.0",
     "globals": "^15.8.0",
     "typescript": "^5.5.3",
-    "typescript-eslint": "^8.0.0-alpha.39"
+    "typescript-eslint": "^8.0.0-alpha.51"
   }
 }
