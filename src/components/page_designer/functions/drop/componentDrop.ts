@@ -22,7 +22,7 @@ import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
 // 1. Create a Row to proper parent.
 // 2. Sort properly
 export function componentDrop(
-  pageDesignerVertex: Vertex,
+  formVertex: Vertex,
   txnId: number,
   fromVertex: Vertex,
   toParentVertex: Vertex,
@@ -41,7 +41,7 @@ export function componentDrop(
   if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
       processChildrenAttrs(
-        pageDesignerVertex,
+        formVertex,
         fromVertex,
         toParentVertex,
         txnId,
@@ -57,7 +57,7 @@ export function componentDrop(
     txnId,
     graph,
     setGraph,
-    pageDesignerVertex,
+    formVertex,
     attrMetaVertex,
   );
 
@@ -73,8 +73,9 @@ export function componentDrop(
     props = { ...props, name: uniqueName };
   }
   if (fromVertex.L[0] === "Comp") {
-    props = { ...props, ...getCompPropsObj(graph, fromVertex) };
-    if (fromVertex.P.name === "Text") {
+    const compProps = getCompPropsObj(graph, fromVertex);
+    props = { ...compProps, ...props };
+    if (fromVertex.P.name === "Text" && !props.text) {
       props = { ...props, text: "Sample Text" };
     }
   } else if (fromVertex.L[0] === "Attr") {
@@ -121,7 +122,7 @@ export function componentDrop(
         compVertex.id,
       );
       processChildrenAttrs(
-        pageDesignerVertex,
+        formVertex,
         fromVertex,
         rowVertex,
         txnId,

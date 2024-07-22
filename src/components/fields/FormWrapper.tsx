@@ -119,7 +119,7 @@ export function FormWrapper(
         <PageAttrRender data={formData.formData} metaVertex={props.meta} />
       </div>
       <div />
-      <SubmitCancelButtons />
+      {/* <SubmitCancelButtons /> */}
     </FormContext.Provider>
   );
 }

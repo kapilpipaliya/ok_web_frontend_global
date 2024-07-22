@@ -151,8 +151,7 @@ export function DynamicComponent(
       isRealTime={props.isRealTime}
       isTableInside={props.isTableInside}
       meta={props.meta}
-      // passed setValue when we have a string value in select field
-      setValue={setValue}
+      setValue={componentName() !== "DynamicTable" ? setValue : undefined}
       title={props.title ?? ""}
       txnId={props.txnId}
       value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}

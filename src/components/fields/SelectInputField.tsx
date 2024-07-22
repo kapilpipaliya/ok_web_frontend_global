@@ -222,13 +222,12 @@ export function SelectInputField(
             if (!value) return [];
             if (
               !Array.isArray(value) &&
-              props.meta.P.valueKey &&
               getComponent() === "SelectBox"
             ) {
               const option = options().find(
                 (option) =>
-                  (value?.[props.meta.P.valueKey] || value) ===
-                  (option?.[props.meta.P.valueKey] || option),
+                  (value?.[props.meta.P.valueKey ?? 'id'] || value) ===
+                  (option?.[props.meta.P.valueKey ?? 'id'] || option),
               );
               return option ? [option] : [{label: value, value}];
             }

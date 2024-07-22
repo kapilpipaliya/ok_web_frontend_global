@@ -7,6 +7,7 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { IdAttr } from "~/lib/graph/graph";
 
 export function addComponentAttrInPage(
+  formVertex: Vertex,
   dataVertex: Vertex,
   txnId: number,
   graph: Store<GraphInterface>,
@@ -24,7 +25,7 @@ export function addComponentAttrInPage(
     return -1;
   }
   return componentDrop(
-    dataVertex,
+    formVertex,
     txnId,
     formCompVertex,
     dataVertex,

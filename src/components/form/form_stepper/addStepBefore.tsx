@@ -12,9 +12,11 @@ export function addStepBefore(
   setGraph: SetStoreFunction<GraphInterface>,
   layoutStore: Store<PageLayoutObject>,
   setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  formVertex: Vertex,
   toVertex: Vertex,
 ) {
   const layoutRowId = addComponentAttrInPage(
+    formVertex,
     layoutStore.formData.formData,
     layoutStore.formData.txnId,
     graph,

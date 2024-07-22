@@ -99,7 +99,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       txnId,
       props.formId,
     );
-    if (initFormStateResult.error) {  
+    if (initFormStateResult.error) {
       setError(initFormStateResult.error);
       return;
     }
@@ -112,17 +112,37 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       tabs: initFormStateResult.tabs,
       txnId,
     });
+
+    function addComponent(graph: GraphInterface, parentId: Id, txnId: number, setGraph: SetStoreFunction<GraphInterface>, type: string, attributes: any = {}) {
+      const componentIndex = addComponentAttrInPage(formData.formData, graph.vertexes[parentId], txnId, graph, setGraph, type, attributes);
+      if (componentIndex === -1) {
+        return setError("Adding component to layout failed");
+      }
+      return componentIndex;
+    }
+
     if (initFormStateResult.dataVertex?.L[0] === "Form") {
-      const layoutRowId = addComponentAttrInPage(initFormStateResult.dataVertex, txnId, graph, setGraph, "Box", {class: {"":{"padding":"10px"}}});
-      if (layoutRowId === -1) {
-        setError("Adding component to layout failed");
-        return;
-      }
-      const formCompVertex = addComponentAttrInPage(graph.vertexes[layoutRowId], txnId, graph, setGraph, "Form");
-      if (formCompVertex === -1) {
-        setError("Adding component to layout failed");
-        return;
-      }
+      const layoutRowId = addComponent(graph, initFormStateResult.dataVertex.id, txnId, setGraph, "Box", { class: { "": { "padding": "10px" } } });
+      if (!layoutRowId) return;
+
+      const formCompVertex = addComponent(graph, layoutRowId, txnId, setGraph, "Form");
+      if (!formCompVertex) return;
+
+      const boxCompIndex = addComponent(graph, formCompVertex, txnId, setGraph, "Box", { class: { "": { "display": "flex", gap: '0.5rem', "padding": "10px" } } });
+      if (!boxCompIndex) return;
+
+      const textBoxCompIndex = addComponent(graph, boxCompIndex, txnId, setGraph, "TextBox", { class: { "": { "border-radius": "6px", "border-style": "solid", "border-width": "1px", "padding": "0.5rem" } }, label: 'First Name' });
+      if (!textBoxCompIndex) return;
+
+      const buttonsWrapperCompIndex = addComponent(graph, formCompVertex, txnId, setGraph, "Box", { class: { "": { "display": "flex", gap: '0.5rem', "padding": "10px" } } });
+      if (!buttonsWrapperCompIndex) return;
+
+      const submitButtonCompIndex = addComponent(graph, buttonsWrapperCompIndex, txnId, setGraph, "Button", { text: "Submit", type: "submit" });
+      if (!submitButtonCompIndex) return;
+
+      const cancelButtonCompIndex = addComponent(graph, buttonsWrapperCompIndex, txnId, setGraph, "Button", { text: "Cancel", type: "cancel" });
+      if (!cancelButtonCompIndex) return;
+
       saveUndoPoint(txnId, graph);
       setPreventUndoBeforeIndex(txnId, graph);
     }
