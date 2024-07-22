@@ -1,5 +1,3 @@
-import type { Accessor } from "solid-js";
-
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
@@ -7,7 +5,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 
 export function DefaultValueContent(
   props: Readonly<{
-    meta: Accessor<Vertex>;
+    meta: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
     txnId: number;
@@ -22,7 +20,7 @@ export function DefaultValueContent(
       data={props.selectedLayout}
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}
-      setValue={(data) => props.setValue(props.meta(), data)}
+      setValue={(data) => props.setValue(props.meta, data)}
       txnId={props.txnId}
     />
   );

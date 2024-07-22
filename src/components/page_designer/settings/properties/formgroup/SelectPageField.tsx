@@ -1,5 +1,3 @@
-import type { Accessor } from "solid-js";
-
 import { Icon } from "@iconify-icon/solid";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -10,7 +8,7 @@ import { Label } from "./Label";
 
 export function SelectPageField(
   props: Readonly<{
-    meta: Accessor<Vertex>;
+    meta: Vertex;
     metaVertex: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;

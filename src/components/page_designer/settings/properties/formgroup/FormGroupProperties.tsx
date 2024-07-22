@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { createWritableMemo } from "@solid-primitives/memo";
 import {
   For,
   Match,
@@ -10,6 +9,7 @@ import {
   createSignal,
   createUniqueId,
   onCleanup,
+  untrack,
 } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
@@ -21,8 +21,10 @@ import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,
+  mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
@@ -60,6 +62,32 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const vertexIds = createVertexIds();
 
   createVertices(vertexIds, graph, setGraph);
+
+  const metaTxnId = graph.newTxnId;
+  const propAttributes = createMemo(() => {
+    const form = FormMetaData.Comp;
+    const propAttribute = form.attributes.find(
+      (attr) => attr.name === "Prop",
+    )!;
+    const valueAttribute = propAttribute.attributes!.find(
+      (attr) => attr.name === "value",
+    )!;
+    return props.metaAttributes.map(vertex => {
+      const vertexId = graph.newVertexId;
+      untrack(() => {
+        addNewVertex(metaTxnId, newVertex(vertexId, ["MetaTemp"], {
+          ...vertex.P,
+          // Adding componentName and meta from the FormMetaData
+          componentName: valueAttribute.componentName,
+          meta: valueAttribute.meta,
+        }), graph, setGraph);
+      })
+      return graph.vertexes[vertexId];
+    });
+  });
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph);
+  });
 
   function moveClassToLast(vertices: Vertex[]) {
     const otherVertices = vertices.filter(
@@ -139,28 +167,25 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
 
-      <For each={moveClassToLast(props.metaAttributes)}>
+      <For each={moveClassToLast(propAttributes())}>
         {(metaVertex) => {
-          const [meta, setMeta] = useMetaMemo(metaVertex);
-          const componentName = createMemo(() =>
-            getComponentForCollRow(meta(), meta(), graph, setGraph)
-          );
           const metaProps = getPropsFromMetaExpression(
             graph,
             setGraph,
-            meta(),
-            meta()
+            metaVertex,
+            metaVertex
           );
-          const P = { ...meta().P, ...metaProps };
-          const v = { ...metaVertex, P };
-          setMeta(v);
+          mergeVertexProperties(metaTxnId, metaVertex.id, graph, setGraph, metaProps);
+          const componentName = createMemo(() =>
+            getComponentForCollRow(metaVertex, metaVertex, graph, setGraph)
+          );
 
           return (
             <div>
               <Switch>
                 <Match when={metaVertex.P.name === "name"}>
                   <UniqueNameField
-                    meta={meta}
+                    meta={metaVertex}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
@@ -169,7 +194,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 </Match>
                 <Match when={metaVertex.P.name === "thankYouPage"}>
                   <SelectPageField
-                    meta={meta}
+                    meta={metaVertex}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
@@ -189,7 +214,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                   </h3>
                   <Content
                     componentName={componentName}
-                    meta={meta}
+                    meta={metaVertex}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
                     txnId={props.txnId}
@@ -198,7 +223,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
                 <Match when={props.selectedLayout}>
                   <HighlightSetValueContent
                     componentName={componentName}
-                    meta={meta}
+                    meta={metaVertex}
                     metaVertex={metaVertex}
                     selectedLayout={props.selectedLayout}
                     setValue={props.setValue}
@@ -259,35 +284,3 @@ function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: G
   Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
 }
 
-function useMetaMemo(metaVertex: Vertex) {
-  return createWritableMemo(() => {
-    if ([
-      "calculatedValue",
-      "class",
-      "defaultValue",
-      "disabled",
-      "hidden",
-      "label",
-      "labelClass",
-      "name",
-      "required",
-      "thankYouPage"
-    ].includes(metaVertex.P.name)) {
-      return { ...metaVertex };
-    }
-    const form = FormMetaData.Comp;
-    const propAttribute = form.attributes.find(
-      (attr) => attr.name === "Prop",
-    )!;
-    const valueAttribute = propAttribute.attributes!.find(
-      (attr) => attr.name === "value",
-    )!;
-    const P = {
-      ...metaVertex.P,
-      // Adding componentName and meta from the FormMetaData
-      componentName: valueAttribute.componentName,
-      meta: valueAttribute.meta,
-    };
-    return { ...metaVertex, P };
-  });
-}

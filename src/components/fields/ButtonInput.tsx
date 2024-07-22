@@ -5,7 +5,7 @@ import { createMemo, splitProps } from "solid-js";
 
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useFormContext, useIsPreview } from "~/lib/contexts";
-import { Vertex, useGraph } from "~/lib/graph/graph";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 

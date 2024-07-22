@@ -1,4 +1,4 @@
-import type { Accessor } from "solid-js";
+
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
@@ -10,7 +10,7 @@ import { Label } from "./Label";
 
 export function UniqueNameField(
   props: Readonly<{
-    meta: Accessor<Vertex>;
+    meta: Vertex;
     metaVertex: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
@@ -62,7 +62,7 @@ export function UniqueNameField(
           componentName={"TextBox"}
           data={props.selectedLayout}
           isRealTime={false}
-          meta={props.meta()}
+          meta={props.meta}
           setValue={(data: string) =>
             setUniqueNameValue(props.metaVertex, data)
           }

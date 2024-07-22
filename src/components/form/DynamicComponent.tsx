@@ -168,7 +168,7 @@ export function DynamicComponent(
       <Match when={!component()}>NO INPUT</Match>
       <Match keyed when={!expressionProperties().hidden && component()}>
         <Switch>
-          <Match when={expressionProperties().label || props.meta.P.label}>
+          <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
             <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label}>
               <Content />
             </Label>

@@ -10,7 +10,7 @@ import { Label } from "./Label";
 export function HighlightSetValueContent(
   props: Readonly<{
     componentName: Accessor<string>;
-    meta: Accessor<Vertex>;
+    meta: Vertex;
     metaVertex: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
