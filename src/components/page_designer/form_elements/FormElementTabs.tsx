@@ -18,7 +18,7 @@ export function FormElementTabs() {
   const Tabs = () => (
     <div class={`bg:white p:4 position:sticky top:0`}>
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128) f:0.875rem font-weight:500 mb:10 text-align:center">
-        <ul class="{scrollbar-width:thin} flex jc:space-around margin-bottom:-1px overflow-x:auto">
+        <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
           <For each={leftMenuTabs}>
             {(data) => (
               <li class="me-2 cursor:pointer">

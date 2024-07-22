@@ -8,7 +8,8 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
-import { revertTransactionUpTo } from "~/lib/graph/transaction/revertTransactionUpTo";
+import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { generateTableInputMeta } from "./generateTableInputMeta";
@@ -52,12 +53,10 @@ export function RulesModal(
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
-  const prevTxnIndex =
-    props.prevTxnIndex ??
-    graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ??
-    0;
 
-    
+  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formData.txnId, graph);
+
+
   const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedRule));
 
   const [error, setError] = createSignal<null | string>(null);
@@ -89,7 +88,7 @@ export function RulesModal(
 
   const onRulesCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpTo(layoutStore.formData.txnId, prevTxnIndex, graph);
+      revertTransactionUpToIndex(layoutStore.formData.txnId, prevTxnIndex, graph);
     }
     props.closeModal();
   };
@@ -100,7 +99,7 @@ export function RulesModal(
         aria-labelledby="Rules Modal"
         aria-modal="true"
         class={`position:relative z:${zIndex}`}
-        onClick={e=>e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         role="dialog"
       >
         <Overlay />

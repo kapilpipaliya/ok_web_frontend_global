@@ -1,5 +1,4 @@
 import { autoUpdate } from "@floating-ui/dom";
-import { debounce } from "@solid-primitives/scheduled";
 import { useFloating } from "solid-floating-ui";
 import {
   type Accessor,

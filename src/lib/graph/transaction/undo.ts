@@ -7,6 +7,7 @@ import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 export function undoAllowed(
   txnId: number,
   graph: Store<GraphInterface>,
+  revertTransactionUpToIndex?: number
 ): boolean {
   if (!txnId || !graph.transactions.has(txnId)) return false;
 
@@ -19,26 +20,32 @@ export function undoAllowed(
   
   if ((txnValue.steps.length - 1) <= preventUndoBeforeIndex) return false;
 
-  const newUndoIndex = getNewUndoIndex(txnValue, activeUndoIndex);
+  const newUndoIndex = revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
   if (newUndoIndex < preventUndoBeforeIndex) return false;
   
   return activeUndoIndex > 0;
 }
 
-export function undo(txnId: number, graph: Store<GraphInterface>) {
-  if (!undoAllowed(txnId, graph)) return;
+export function undo(txnId: number, graph: Store<GraphInterface>, revertTransactionUpToIndex?: number, hardUndo?: boolean) {
+  if (!undoAllowed(txnId, graph, revertTransactionUpToIndex)) return;
 
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
 
-  const newUndoIndex = getNewUndoIndex(txnValue, activeUndoIndex);
+  const newUndoIndex = revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
   txnValue.steps
     .slice(newUndoIndex + 1, activeUndoIndex + 1)
     .reverse()
     .forEach((txn) => txn.revert());
   txnValue.activeUndoIndex = newUndoIndex;
+  
+  if(hardUndo) {
+    txnValue.steps = txnValue.steps.slice(0, newUndoIndex + 1);
+    txnValue.activeUndoIndex = txnValue.steps.length - 1;
+    txnValue.undoStepIndexes = txnValue.undoStepIndexes.filter(index => index <= txnValue.activeUndoIndex);
+  }
 
   graph.transactions.set(txnId, txnValue);
 }

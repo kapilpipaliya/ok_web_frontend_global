@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type JSX, type Setter, Show, createSignal, Accessor } from "solid-js";
+import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
 interface CustomModalProps {

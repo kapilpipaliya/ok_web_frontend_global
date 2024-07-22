@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import { Accessor, Match, Show, Switch, createSignal, onMount } from "solid-js";
+import { type Accessor, Match, Show, Switch, createSignal, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";

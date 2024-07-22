@@ -98,7 +98,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
             placeholder={`Search ${props.coll}...`}
             value={searchQuery()}
           />
-          <div class="scrollbar-color:lightgrey {scrollbar-width:thin} grid overflow:auto">
+          <div class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto">
             <For
               each={filteredData()}
               fallback={

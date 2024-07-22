@@ -3,6 +3,7 @@ import { Portal } from "solid-js/web";
 
 import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { useGraph } from "~/lib/graph/graph";
+import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
@@ -10,9 +11,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 export function ImportModal(props: { toggleModal: () => void }) {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
-  let prevTxnIndex = -1;
-  prevTxnIndex =
-    graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
+  const prevTxnIndex = getLastTxnIndex(layoutStore.formData.txnId, graph);
 
   const metaVertexId = graph.newVertexId;
   const dataVertexId = graph.newVertexId;
@@ -23,9 +22,9 @@ export function ImportModal(props: { toggleModal: () => void }) {
   setGraph("vertexes", dataVertexId, { P: {}, id: dataVertexId });
 
   onCleanup(() => {
-    // @ts-expect-error
+    // @ts-expect-error ignore
     setGraph("vertexes", metaVertexId, undefined);
-    // @ts-expect-error
+    // @ts-expect-error ignore
     setGraph("vertexes", dataVertexId, undefined);
   });
 

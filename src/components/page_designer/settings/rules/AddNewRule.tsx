@@ -6,6 +6,7 @@ import { insertNewRow } from "~/components/fields/table_input/insertNewRow";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -19,8 +20,7 @@ export function AddNewRule(
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let inputRef: HTMLInputElement;
-  const prevTxnIndex =
-    graph.transactions.get(layoutStore.formData.txnId)?.steps?.length ?? 0;
+  const prevTxnIndex = getLastTxnIndex(layoutStore.formData.txnId, graph);
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
   const metaTxnId = graph.newTxnId;
 
