@@ -7,6 +7,7 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { resetDragDropState } from "../../event_handler/resetDragDropState";
 
 export function ComonentItem(props: Readonly<{ child: Vertex }>) {
   const [graph, setGraph] = useGraph();
@@ -42,7 +43,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
       class={itemStyle()}
       draggable={true}
       onDragEnd={() => {
-        setLayoutStore("draggedVertices", []);
+        resetDragDropState(setLayoutStore);
       }}
       onDragStart={(e) => {
         e.stopPropagation();

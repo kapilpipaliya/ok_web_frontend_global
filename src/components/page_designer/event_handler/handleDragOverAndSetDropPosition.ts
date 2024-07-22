@@ -13,7 +13,7 @@ export function handleDragOverAndSetDropPosition(
   setLayoutStore: SetStoreFunction<PageLayoutObject>,
   layoutVertex: Vertex,
   isPreview: boolean | undefined,
-  collapsedKeys: Accessor<Id[]>,
+  collapsedKeys: Accessor<Id[]> | boolean,
   children: () => Vertex[],
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -36,7 +36,7 @@ export function handleDragOverAndSetDropPosition(
   if (position === "before" || position === "left") {
     activeItem = layoutVertex.id;
   } else if (position === "after" || position === "right") {
-    if (isPreview || collapsedKeys().includes(layoutVertex.id)) {
+    if (isPreview || typeof collapsedKeys !== "function" || collapsedKeys().includes(layoutVertex.id)) {
       // collapsed state
       activeItem = layoutVertex.id;
     } else {

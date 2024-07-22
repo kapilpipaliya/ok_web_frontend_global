@@ -1,10 +1,8 @@
- 
-import { debounce } from "@solid-primitives/scheduled";
+
 import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
-import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
@@ -42,22 +40,7 @@ export function TreeItem(
 
   let startTime = 0;
 
-  const handleDragEnter = (e: DragEvent) => {
-    startTime = Date.now();
-    handleDragOverAndSetDropPosition(
-      e,
-      layoutStore,
-      setLayoutStore,
-      props.metaVertex,
-      isPreview(),
-      props.collapsedKeys,
-      children,
-      graph,
-      setGraph,
-      layoutStore.formData.formData
-    );
-  };
-
+  // debounce is giving error, node not found
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
@@ -109,26 +92,29 @@ export function TreeItem(
     e.stopPropagation();
     setLayoutStore("hoverId", -1);
   };
+  const isAfter = createMemo(() => !isPreview() && isActiveTargetItem() && layoutStore.position === "after");
 
-  const getBorder = () => {
+  const getBorder = createMemo(() => {
     let boxShadow = "";
 
     if (!isPreview()) {
       if (isActiveTargetItem()) {
-        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
+        if (layoutStore.position !== "after") {
+          const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+          boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
+        }
       }
-  
+
       if (isSelectedLayoutId(props.metaVertex.id)) {
         boxShadow += " bg:rgb(197,221,255)";
       } else if (isSelectedHoverId(props.metaVertex.id)) {
         boxShadow += " bg:#F2EDED";
       }
     }
-  
+
     return boxShadow;
-  };
-  
+  });
+
 
 
   return (
@@ -154,7 +140,10 @@ export function TreeItem(
         }}
         draggable={true}
         onClick={handleClick}
-        onDragEnter={handleDragEnter}
+        onDragEnter={e => {
+          startTime = Date.now();
+          handleDragOverEvent(e)
+        }}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
         onDragStart={(e) => handleDragStart(e, setLayoutStore, props.metaVertex)}
@@ -195,6 +184,9 @@ export function TreeItem(
             )}
           </For>
         </ul>
+      </Show>
+      <Show when={isAfter()}>
+        <div class="b:1px|solid|green-60" />
       </Show>
     </>
   );

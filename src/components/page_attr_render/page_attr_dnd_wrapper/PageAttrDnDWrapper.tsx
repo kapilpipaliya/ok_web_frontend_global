@@ -1,5 +1,4 @@
 import { autoUpdate } from "@floating-ui/dom";
-import { debounce } from "@solid-primitives/scheduled";
 import { useFloating } from "solid-floating-ui";
 import {
   type JSX,
@@ -18,7 +17,6 @@ import {
 } from "~/components/page_attr_render/Context";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
-import { handleDragOverAndSetDropPosition } from "~/components/page_designer/event_handler/handleDragOverAndSetDropPosition";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
@@ -72,21 +70,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     setLayoutStore("hoverId", -1);
   };
 
-  const handleDragEnter = (e: DragEvent) => {
-    handleDragOverAndSetDropPosition(
-      e,
-      layoutStore,
-      setLayoutStore,
-      props.item,
-      isPreview(),
-      () => [],
-      childrenAttrs,
-      graph,
-      setGraph,
-      layoutStore.formData.formData
-    );
-  };
-
+  // debounce is giving error, node not found when running element.currentTarget and we must need it
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
@@ -94,7 +78,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       setLayoutStore,
       props.item,
       isPreview(),
-      () => [],
+      false,
       childrenAttrs,
       graph,
       setGraph,
@@ -118,7 +102,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
       <div // NOSONAR
         onClick={handleClick}
-        onDragEnter={handleDragEnter}
+        onDragEnter={handleDragOverEvent}
         onDragLeave={() => handleDragLeave(setLayoutStore)}
         onDragOver={handleDragOverEvent}
         onDrop={handleDropEvent}

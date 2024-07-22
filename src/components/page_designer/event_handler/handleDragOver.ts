@@ -14,7 +14,7 @@ export function handleDragOver(
   setLayoutStore: SetStoreFunction<PageLayoutObject>,
   layoutVertex: Vertex,
   isPreview: boolean | undefined,
-  collapsedKeys: () => Id[],
+  collapsedKeys: Accessor<Id[]> | boolean,
   children: Accessor<Vertex[]>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
