@@ -20,8 +20,8 @@ import { handleDragOver } from "~/components/page_designer/event_handler/handleD
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
+import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { getBoundingRect } from "~/components/page_designer/functions/getIndicatorPosition";
 import { useIsPreview } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
@@ -106,15 +106,21 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         onDragLeave={() => handleDragLeave(setLayoutStore)}
         onDragOver={handleDragOverEvent}
         onDrop={handleDropEvent}
-        onMouseEnter={handleMouseEnter} 
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseOver={handleMouseEnter} // NOSONAR
-        ref={el => { 
+        ref={el => {
           setReference(el);
-           // @ts-expect-error ignore
-           el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
-           el.getBoundingClientRect = () => getBoundingRect(el);
-           }}
+          // @ts-expect-error ignore
+          el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
+          el.getBoundingClientRect = () => {
+            if (layoutStore?.hiddenNodes.includes(props.item.id)) {
+              // @ts-expect-error ignore
+              return el.getBoundingClientRectOriginal();
+            }
+            return getBoundingRectChildren(el);
+          };
+        }}
         style="display:contents;"
       >
         <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
@@ -137,7 +143,9 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
             </Portal>
           </ZIndex>
         </Show>
-        <BorderOverlay item={props.item} reference={reference} />
+        <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
+          <BorderOverlay item={props.item} reference={reference} />
+        </Show>
       </div>
     </PageRenderVertexContext.Provider>
   );

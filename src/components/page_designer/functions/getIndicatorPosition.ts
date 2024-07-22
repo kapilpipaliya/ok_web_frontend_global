@@ -1,36 +1,8 @@
-/* eslint-disable perfectionist/sort-objects */
-
-export function getBoundingRect(node: HTMLElement): DOMRect {
-  // Get bounding rectangles of the direct children elements
-  const elementDirectChildrens = Array.from(node.children);
-  const rectangles = elementDirectChildrens
-    .filter(element => element)
-    .map(element => element.getBoundingClientRect());
-
-  // If there are no child rectangles, use the node's bounding rectangle
-  if (rectangles.length === 0) {
-    return node.getBoundingClientRect();
-  } else {
-    const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property]));
-    const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property]));
-
-    return {
-      top: getMinProperty('top'),
-      right: getMaxProperty('right'),
-      bottom: getMaxProperty('bottom'),
-      left: getMinProperty('left'),
-      width: getMaxProperty('right') - getMinProperty('left'),
-      height: getMaxProperty('bottom') - getMinProperty('top'),
-      x: getMinProperty('left'),
-      y: getMinProperty('top'),
-      toJSON: () => ({})
-    } as DOMRect;
-  }
-}
+import { getBoundingRectChildren } from "./getBoundingRectChildren";
 
 export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   // @ts-expect-error ignore
-  const bounds = node.useCurrentPosition ? node.getBoundingClientRect() : getBoundingRect(node);
+  const bounds = node.useCurrentPosition ? node.getBoundingClientRect() : getBoundingRectChildren(node);
 
   // Calculate the offset and dimensions
   const offsetY = e.clientY - bounds.top;

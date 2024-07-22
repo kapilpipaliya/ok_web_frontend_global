@@ -2,6 +2,7 @@ import { autoUpdate } from "@floating-ui/dom";
 import { debounce } from "@solid-primitives/scheduled";
 import { useFloating } from "solid-floating-ui";
 import {
+  type Accessor,
   Show, createEffect, createMemo,
   createSelector, createSignal, on
 } from "solid-js";
@@ -11,7 +12,7 @@ import { Portal } from "solid-js/web";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
-import { getBoundingRect } from "~/components/page_designer/functions/getIndicatorPosition";
+import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { useIsPreview } from "~/lib/contexts";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
@@ -49,7 +50,6 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
 
     const ref = props.reference();
     if (!ref) return;
-    ref.getBoundingClientRect = () => getBoundingRect(ref);
 
     const [store, setStore] = createStore({
       maxHeight: 0,
@@ -58,7 +58,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
       y: 0
     });
     const updateInitial = () => {
-      const rect = getBoundingRect(props.reference());
+      const rect = getBoundingRectChildren(props.reference()!);
       setStore({
         maxHeight: rect.height + 2,
         maxWidth: rect.width + 2,
@@ -75,7 +75,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
     });
 
     const updatePos = () => {
-      const rect = getBoundingRect(props.reference());
+      const rect = getBoundingRectChildren(props.reference()!);
       setStore({
         maxHeight: rect.height + 2,
         maxWidth: rect.width + 2,
@@ -84,7 +84,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
       });
     }
 
-    const updatePosition = debounce(updatePos, 300);
+    const updatePosition = debounce(updatePos, 40);
 
     createEffect(on([() => position.x, () => position.y], updatePosition));
 
