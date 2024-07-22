@@ -1,4 +1,5 @@
 import { autoUpdate } from "@floating-ui/dom";
+import { debounce } from "@solid-primitives/scheduled";
 import { useFloating } from "solid-floating-ui";
 import {
   type JSX,
@@ -35,9 +36,7 @@ interface PageAttrDnDWrapperProps {
   children: JSX.Element;
   item: Vertex;
 }
-export function PageAttrDnDWrapper(
-  props: Readonly<PageAttrDnDWrapperProps>
-) {
+export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
@@ -57,63 +56,81 @@ export function PageAttrDnDWrapper(
     whileElementsMounted: autoUpdate
   });
 
+  const handleClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    onLayoutItemClick(setLayoutStore, props.item.id, graph, setGraph);
+  };
+
+  // no need debounde, it is called too less
+  const handleMouseEnter = (e: MouseEvent) => {
+    e.stopPropagation();
+    setLayoutStore("hoverId", props.item.id);
+  };
+
+  const handleMouseLeave = (e: MouseEvent) => {
+    e.stopPropagation();
+    setLayoutStore("hoverId", -1);
+  };
+
+  const handleDragEnter = (e: DragEvent) => {
+    handleDragOverAndSetDropPosition(
+      e,
+      layoutStore,
+      setLayoutStore,
+      props.item,
+      isPreview(),
+      () => [],
+      childrenAttrs,
+      graph,
+      setGraph,
+      layoutStore.formData.formData
+    );
+  };
+
+  const handleDragOverEvent = (e: DragEvent) => {
+    handleDragOver(
+      e,
+      layoutStore,
+      setLayoutStore,
+      props.item,
+      isPreview(),
+      () => [],
+      childrenAttrs,
+      graph,
+      setGraph,
+      layoutStore.formData.formData
+    );
+  };
+
+  const handleDropEvent = async (e: DragEvent) => {
+    await handleDrop(
+      e,
+      layoutStore,
+      setLayoutStore,
+      graph,
+      setGraph,
+      showErrorToast
+    );
+    resetDragDropState(setLayoutStore);
+  };
+
   return (
     <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
-      <div // NOSONAR 
-        class={`${"drop-targe"}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onLayoutItemClick(setLayoutStore, props.item.id, graph, setGraph);
-        }}
-        onDragEnter={(e) =>
-          handleDragOverAndSetDropPosition(
-            e,
-            layoutStore,
-            setLayoutStore,
-            props.item,
-            isPreview(),
-            () => [],
-            childrenAttrs,
-            graph,
-            setGraph,
-            layoutStore.formData.formData
-          )
-        }
+      <div // NOSONAR
+        onClick={handleClick}
+        onDragEnter={handleDragEnter}
         onDragLeave={() => handleDragLeave(setLayoutStore)}
-        onDragOver={(e) =>
-          handleDragOver(
-            e,
-            layoutStore,
-            setLayoutStore,
-            props.item,
-            isPreview(),
-            () => [],
-            childrenAttrs,
-            graph,
-            setGraph,
-            layoutStore.formData.formData
-          )
-        }
-        onDrop={async (e) => {
-          await handleDrop(
-            e,
-            layoutStore,
-            setLayoutStore,
-            graph,
-            setGraph,
-            showErrorToast
-          );
-          resetDragDropState(setLayoutStore);
-        }}
-        onMouseOver={(e) => {
-          e.stopPropagation();
-          setLayoutStore("hoverId", props.item.id);
-        }}
-        onmouseleave={(e) => {
-          e.stopPropagation();
-          setLayoutStore("hoverId", -1);
-        }}
-        ref={el => {setReference(el); el.getBoundingClientRect = () => getBoundingRect(el)}}
+        onDragOver={handleDragOverEvent}
+        onDrop={handleDropEvent}
+        onMouseEnter={handleMouseEnter} 
+        onMouseLeave={handleMouseLeave}
+        onMouseOver={handleMouseEnter} // NOSONAR
+        ref={el => { 
+          setReference(el);
+           // @ts-expect-error ignore
+           el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
+           el.getBoundingClientRect = () => getBoundingRect(el);
+           }}
         style="display:contents;"
       >
         <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
@@ -136,7 +153,7 @@ export function PageAttrDnDWrapper(
             </Portal>
           </ZIndex>
         </Show>
-         <BorderOverlay item={props.item} reference={reference} />
+        <BorderOverlay item={props.item} reference={reference} />
       </div>
     </PageRenderVertexContext.Provider>
   );

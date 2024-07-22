@@ -19,6 +19,7 @@ export function handleDragOver(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
+  expandChildren?: (position: string) => void,
 ) {
   e.stopPropagation();
   handleDragOverAndSetDropPosition(
@@ -38,6 +39,7 @@ export function handleDragOver(
     // Don't allow drag and drop
     return;
   }
+  expandChildren?.(layoutStore.position);
 
   for (const vertex of layoutStore.draggedVertices) {
     const fromVertex = vertex;

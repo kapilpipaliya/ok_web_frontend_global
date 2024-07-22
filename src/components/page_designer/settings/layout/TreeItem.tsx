@@ -1,4 +1,5 @@
  
+import { debounce } from "@solid-primitives/scheduled";
 import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
@@ -10,11 +11,11 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
-import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { useIsPreview } from "~/lib/contexts";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
+import { handleDragOver } from "../../event_handler/handleDragOver";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContent } from "./TreeItemContent";
 
@@ -57,9 +58,8 @@ export function TreeItem(
     );
   };
 
-  const handleDragOver = (e: DragEvent) => {
-    e.stopPropagation();
-    handleDragOverAndSetDropPosition(
+  const handleDragOverEvent = (e: DragEvent) => {
+    handleDragOver(
       e,
       layoutStore,
       setLayoutStore,
@@ -69,46 +69,15 @@ export function TreeItem(
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData
+      layoutStore.formData.formData,
+      (position) => {
+        if (position === "center" && Date.now() - startTime > 1000) {
+          if (props.collapsedKeys().includes(props.metaVertex.id)) {
+            props.toggleExpand(props.metaVertex.id);
+          }
+        }
+      }
     );
-
-    const position = layoutStore.position;
-    if (!position) {
-      // Don't allow drag and drop
-      return;
-    }
-
-    if (position === "center" && Date.now() - startTime > 1000) {
-      if (props.collapsedKeys().includes(props.metaVertex.id)) {
-        props.toggleExpand(props.metaVertex.id);
-      }
-    }
-
-    for (const vertex of layoutStore.draggedVertices) {
-      const fromVertex = vertex;
-      const toVertexId = layoutStore.activeItem!;
-      if (!fromVertex) {
-        // Don't allow drag and drop
-        return;
-      }
-
-      if (
-        !validateDragOver(
-          graph,
-          setGraph,
-          fromVertex,
-          toVertexId,
-          layoutStore.formData.formData,
-          position
-        )
-      ) {
-        // Don't allow drag and drop
-        return;
-      }
-    }
-
-    // This is necessary to allow the drop action to proceed
-    e.preventDefault();
   };
 
   const handleDragLeave = () => {
@@ -164,7 +133,7 @@ export function TreeItem(
 
   return (
     <>
-      <div
+      <div // NOSONAR
         classList={{
           "align-items:center": true,
           "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
@@ -187,11 +156,15 @@ export function TreeItem(
         onClick={handleClick}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
+        onDragOver={handleDragOverEvent}
         onDragStart={(e) => handleDragStart(e, setLayoutStore, props.metaVertex)}
         onDrop={handleDropEvent}
-        onMouseOver={handleMouseOver}
+        onMouseEnter={handleMouseOver}
         onmouseleave={handleMouseLeave}
+        ref={el => {
+          // @ts-expect-error ignore
+          el.useCurrentPosition = true;
+        }}
       >
         <TreeItemContent
           collapsedKeys={props.collapsedKeys}
