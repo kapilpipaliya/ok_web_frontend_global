@@ -40,7 +40,7 @@ export function SettingTabs() {
       />
 
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128)  f:0.875rem  font-weight:500  mb:10  text-align:center ">
-        <ul class="overflow-x-auto scrollbar-width:thin flex jc:space-around  margin-bottom:-1px ">
+        <ul class="overflow-x-auto {scrollbar-width:thin} flex jc:space-around  margin-bottom:-1px ">
           <For each={tabs()}>
             {(data) => (
               <li class="me-2 cursor:pointer">

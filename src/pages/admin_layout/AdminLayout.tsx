@@ -43,7 +43,7 @@ export function AdminLayout(props: Readonly<{ children?: JSX.Element }>) {
 
   return (
     <div
-      class="scrollbar-width:thin flex flex:column overflow:auto"
+      class="{scrollbar-width:thin} flex flex:column overflow:auto"
       classList={{
         "flex-grow:1": graph.isSideBarOpen || graph.isSubSideBarOpen,
       }}

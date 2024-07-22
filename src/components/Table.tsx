@@ -243,7 +243,7 @@ export function Table(
   props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,
 ) {
   return (
-    <div class="scrollbar-width:thin rel overflow:visible r:10">
+    <div class="{scrollbar-width:thin} rel overflow:visible r:10">
       <div
         class={`${props.class || ""} grid bb:2px|solid|#37c`}
         classList={{
@@ -251,7 +251,7 @@ export function Table(
           "border-radius:10px": true,
           "font-size:0.9em": true,
           "overflow:auto": true,
-          "scrollbar-width:thin": true,
+          "{scrollbar-width:thin}": true,
           "width:100%": true,
         }}
       >

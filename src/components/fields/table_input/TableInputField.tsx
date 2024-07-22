@@ -113,7 +113,7 @@ export function TableInputField(
           class="m:2 overflow:auto r:10"
           classList={{
             "border:1px|solid|#37c": sortedVertexes().length,
-            "scrollbar-width:thin": true,
+            "{scrollbar-width:thin}": true,
           }}
         >
           <table

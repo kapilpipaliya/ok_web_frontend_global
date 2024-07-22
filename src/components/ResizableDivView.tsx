@@ -65,7 +65,7 @@ export function ResizableContainer(
       }}
     >
       <div
-        class="scrollbar-width:thin scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
+        class="{scrollbar-width:thin} scrollbar-color:lightgrey border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
           [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
           // [`height:${height()}`]: !!height(),

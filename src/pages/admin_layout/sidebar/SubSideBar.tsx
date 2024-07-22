@@ -36,7 +36,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
           value={props.searchTerm()}
         />
         <nav
-          class="scrollbar-width:thin ml:-12 mr:-12 mt:10 overflow:auto"
+          class="{scrollbar-width:thin} ml:-12 mr:-12 mt:10 overflow:auto"
           style={{
             "max-height": "calc(100vh - 5rem)",
             "overflow-y": "auto",

@@ -110,7 +110,7 @@ export function ComponentList() {
         placeholder="Search Component..."
         value={searchQuery()}
       />
-      <div class="scrollbar-color:lightgrey scrollbar-width:thin h:full overflow:auto">
+      <div class="scrollbar-color:lightgrey {scrollbar-width:thin} h:full overflow:auto">
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}
           when={!isFetchingData()}
