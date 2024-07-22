@@ -95,17 +95,6 @@ export function GenericField(props: Readonly<GenericComponentProps>) {
           </Dynamic>
         </Match>
 
-        <Match when={componentName() === "Button"}>
-          <button
-            {...others}
-          >
-            {local.data?.P?.[local.meta.P.name] ??
-              local.meta.P.text ??
-              local.meta.P.children}
-            {local.children}
-          </button>
-        </Match>
-
         <Match when={true}>
           <Dynamic
             component={local.meta.P.as || "div"}

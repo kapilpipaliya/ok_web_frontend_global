@@ -25,9 +25,6 @@ export function FormWrapper(
   } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
-  const { showLoadingToast } = useToast();
-  const navigate = useNavigate();
-
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -75,43 +72,6 @@ export function FormWrapper(
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
       revertTransaction(rowMetaTxnId, graph);
   });
-  const SubmitCancelButtons = () => {
-    const onSubmit = async () => {
-      if (isAnyFieldInvalid(graph, setGraph, props.meta, formData.formData)) {
-        return;
-      }
-      const data = commitTxn(txnId, graph);
-      await showLoadingToast({
-        loadMessage: "Submitting Data...",
-        onSuccess: (value) => {
-          setTimeout(() => navigate(-1), 0);
-        },
-        promise: submitDataCall(data, graph, setGraph, txnId),
-        successMessage: "Data submitted successfully",
-      });
-    };
-
-    const onCancel = () => {
-      revertTransaction(txnId, graph);
-      setTimeout(() => navigate(-1));
-    };
-    return (
-      <div class="flex gap:1">
-        <Show
-          fallback={<button onClick={onSubmit}>Submit</button>}
-          when={props.submitButton}
-        >
-          {props.submitButton}
-        </Show>
-        <button
-          class="danger border-color:#FF0000 color:#FF0000 margin-left:7px"
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
-      </div>
-    );
-  };
 
   return (
     <FormContext.Provider value={formData}>
@@ -119,7 +79,6 @@ export function FormWrapper(
         <PageAttrRender data={formData.formData} metaVertex={props.meta} />
       </div>
       <div />
-      {/* <SubmitCancelButtons /> */}
     </FormContext.Provider>
   );
 }

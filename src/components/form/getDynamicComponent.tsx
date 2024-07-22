@@ -4,6 +4,7 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { Repeater } from "~/components/page_attr_render/Repeater";
 
 import { Signature } from "../SignatureBox";
+import { ButtonInput } from "../fields/ButtonInput";
 import { FormWrapper } from "../fields/FormWrapper";
 import { TextInput } from "../fields/TextInput";
 import { FileUploader } from "../solid_blocks/FileUploader";
@@ -102,8 +103,8 @@ export function getDynamicComponent(component: string) {
     // case "Box":
     //   return Dynamic;
 
-    // case "Button":
-    //  return "button";
+    case "Button":
+      return ButtonInput;
 
     default:
       if (genericComponents2.includes(component)) {
