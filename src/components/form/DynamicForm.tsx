@@ -32,11 +32,13 @@ import {
 } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { setPreventUndoBeforeIndex } from "~/lib/graph/transaction/setPreventUndoBeforeIndex";
 import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { addComponentAttrInPage } from "../page_designer/functions/drop/addComponentAttrInForm";
+import { saveUndoPoint } from "../page_designer/functions/saveUndoPoint";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SaveCancelButton } from "./SaveCancelButton";
@@ -116,12 +118,13 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         setError("Adding component to layout failed");
         return;
       }
-      console.log(graph.vertexes[layoutRowId])
       const formCompVertex = addComponentAttrInPage(graph.vertexes[layoutRowId], txnId, graph, setGraph, "Form");
       if (formCompVertex === -1) {
         setError("Adding component to layout failed");
         return;
       }
+      saveUndoPoint(txnId, graph);
+      setPreventUndoBeforeIndex(txnId, graph);
     }
 
     setLayoutStore?.("formData", formData);

@@ -29,17 +29,17 @@ export function UndoRedoIcons() {
     <div class="flex ai:center gap:2">
       <For each={icons}>
         {(item) => (
-
           <button
-            class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
-            disabled={item.disabled?.()}
+            class={`${
+              item.disabled() ? 'cursor:not-allowed opacity:50' : 'hover:color:#000'
+            } flex ai:center b:1px|solid|lightgrey bg:white color:grey jc:center p:6 r:7`}
+            disabled={item.disabled()}
             onClick={item.onClick}
             title={item.tooltip}
             type="button"
           >
             <Icon height={22} icon={item.icon} width={22} />
           </button>
-
         )}
       </For>
     </div>

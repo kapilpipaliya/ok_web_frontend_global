@@ -39,31 +39,35 @@ export type EdgeMap = { [key: string]: Edge };
 
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
+
+type AnyObject = { [key: string]: any };
+
+export interface TransactionDetail {
+  activeUndoIndex: number;
+  preventUndoBeforeIndex: number;
+  revertSteps: TransactionValue[];
+  status: ProcessStatus;
+  steps: TransactionValue[];
+  submittedIndex: number;
+  undoStepIndexes: number[];
+}
+
 export interface GraphInterface {
   activeClickOutside: number;
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  member?: { [key: string]: any } | null;
+  member?: AnyObject | null;
   navBarHeight: number;
-  navigationData?: { [key: string]: any }[];
+  navigationData?: AnyObject[];
   newTxnId: number;
   newVertexId: Id;
-  transactions: Map<
-    number,
-    {
-      activeUndoIndex: number;
-      revertSteps: TransactionValue[];
-      status: ProcessStatus;
-      steps: TransactionValue[];
-      submittedIndex: number;
-      undoStepIndexes: number[];
-    }
-  >;
+  transactions: Map<number, TransactionDetail>;
   vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
 }
+
 
 export const GraphContext = createContext<
   ReturnType<typeof createStore<GraphInterface>>
