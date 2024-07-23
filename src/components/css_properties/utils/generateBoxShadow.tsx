@@ -2,9 +2,9 @@ export interface ShadowAttributes {
   blur: string;
   color?: string;
   inset?: string;
-  spread: string;
   'offset-x': string;
   'offset-y': string;
+  spread: string;
 }
 export function generateBoxShadow(
   shadows: Array<ShadowAttributes>,
@@ -19,9 +19,9 @@ export function generateBoxShadow(
         blur = '0px',
         color = '',
         inset = '',
-        spread = '0px',
         'offset-x': xOffset = '0px',
-        'offset-y': yOffset = '0px'
+        'offset-y': yOffset = '0px',
+        spread = '0px'
       } = shadow;
 
       const colorPart = color ? `${separator}${color}` : '';

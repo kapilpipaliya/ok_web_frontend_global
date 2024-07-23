@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
   For,
@@ -12,67 +11,51 @@ import {
 import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { IconButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/IconButton";
 import { useFormContext } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
-import {
-  addNewRow,
-  rowMetaInitialize,
-} from "~/lib/graph/mutate/form/rowFunction";
+import { addNewRow, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 
 import { DisplayProperty } from "./DisplayProperty";
 
-// Utility function to get the component class based on the component name
-export const getComponentClass = (componentName: string) => {
-  switch (componentName) {
-    case "TextBox":
-      return "min-w:150px";
-    case "TextArea":
-      return "min-w:200px";
-    case "CheckBox":
-      return "min-w:50px";
-    case "SelectBox":
-      return "min-w:200px";
-    default:
-      return "";
-  }
-};
-
-export const SortableRow = (
-  p: {
-    dragFromIndex: Accessor<null | number>;
-    dragToIndex: Accessor<null | number>;
-    handleDrop: (event: DragEvent) => void;
-    isRealTime: boolean;
-    joinVertex: Vertex;
-    rowIndex: number;
-    setDragFromIndex: (index: number) => void;
-    setDragToIndex: (index: number) => void;
-    tableColumnsTemplate: Accessor<Vertex[]>;
-    txnId: number;
-  } & GenericComponentProps,
-) => {
+export const SortableRow = (props: {
+  dragFromIndex: Accessor<null | number>;
+  dragToIndex: Accessor<null | number>;
+  handleDrop: (event: DragEvent) => void;
+  isRealTime: boolean;
+  joinVertex: Vertex;
+  rowIndex: number;
+  setDragFromIndex: (index: number) => void;
+  setDragToIndex: (index: number) => void;
+  tableColumnsTemplate: Accessor<Vertex[]>;
+  txnId: number;
+} & GenericComponentProps) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
   const { cleanUpConfig } = useFormContext();
+  const [expanded, setExpanded] = createSignal(true);
+  const [disabled] = createSignal(false);
 
   createComputed(
-    on(p.tableColumnsTemplate, (columns) => {
-      const metaTxnId = rowMetaInitialize(graph, setGraph, p.joinVertex, p.meta, columns);
+    on(props.tableColumnsTemplate, (columns) => {
+      const metaTxnId = rowMetaInitialize(graph, setGraph, props.joinVertex, props.meta, columns);
       if (metaTxnId && cleanUpConfig) {
-        if (!cleanUpConfig().rowMetaTxnIds) {
-          cleanUpConfig().rowMetaTxnIds = [];
+        const config = cleanUpConfig();
+        if (!config.rowMetaTxnIds) {
+          config.rowMetaTxnIds = [];
         }
         // currently, when we delete row and unmount form, it is not giving error, but it should, because revertTransaction is not strict.
-        if (!cleanUpConfig().rowMetaTxnIds.includes(metaTxnId)) {
-          cleanUpConfig().rowMetaTxnIds.push(metaTxnId);
+
+        if (!config.rowMetaTxnIds.includes(metaTxnId)) {
+          config.rowMetaTxnIds.push(metaTxnId);
         }
       }
     }),
   );
 
-  const instResult = createMemo(() => getChildVertex(graph, ["AttrInst"], p.joinVertex).vertex);
+  const instResult = createMemo(() => getChildVertex(graph, ["AttrInst"], props.joinVertex).vertex);
 
   const getMetaVertex = (columnId: Id) => {
     const instRes = instResult();
@@ -84,45 +67,46 @@ export const SortableRow = (
 
   // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
   const rowColumnsMetaAttrs = createMemo(() =>
-    p.tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand"),
+    props.tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand"),
   );
   const expandVertex = createMemo(() =>
-    p.tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand"),
+    props.tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand"),
   );
-  const [expanded, setExpanded] = createSignal(true);
-  const [disabled] = createSignal(false);
+
+  const handleDragEnter = () => props.setDragToIndex(props.rowIndex);
+  const handleDragOver = (event: DragEvent) => event.preventDefault();
+  const handleDragStart = () => props.setDragFromIndex(props.rowIndex);
+  const handleDeleteRow = () => deleteRow(props.joinVertex, props.isRealTime, graph, setGraph, props.txnId);
+  const handleAddNewRow = () =>
+    addNewRow(props.txnId ?? 0, expandVertex()!, graph, setGraph, props.joinVertex, {}, props.isRealTime ?? false);
+  const toggleExpanded = () => setExpanded(!expanded());
 
   return (
     <>
       <tr
-        class="border-bottom:1px|solid|#dddddd border-radius:10px"
+        class="border-bottom:1px|solid|#dddddd border-radius:10px text-align:center transition:background-color|0.2s|ease width:50px"
         classList={{
-          "background-color:#e0e0e0": p.rowIndex === p.dragFromIndex(),
-          "background-color:#f0f0f0": p.rowIndex === p.dragToIndex(),
-          "background-color:white": p.rowIndex !== p.dragFromIndex() && p.rowIndex !== p.dragToIndex(),
-          "border:1px|solid|#ddd": p.rowIndex !== p.dragToIndex(),
-          "border:2px|solid|green": p.rowIndex === p.dragToIndex(),
-          "text-align:center": true,
-          "transition:background-color|0.2s|ease": true,
-          "width:50px": true,
+          "background-color:#e0e0e0": props.rowIndex === props.dragFromIndex(),
+          "background-color:#f0f0f0": props.rowIndex === props.dragToIndex(),
+          "background-color:white": props.rowIndex !== props.dragFromIndex() && props.rowIndex !== props.dragToIndex(),
+          "border:1px|solid|#ddd": props.rowIndex !== props.dragToIndex(),
+          "border:2px|solid|green": props.rowIndex === props.dragToIndex(),
         }}
         draggable={true}
-        onDragEnter={() => p.setDragToIndex(p.rowIndex)}
-        onDragOver={(event) => event.preventDefault()}
-        onDragStart={() => p.setDragFromIndex(p.rowIndex)}
-        onDrop={p.handleDrop}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragStart={handleDragStart}
+        onDrop={props.handleDrop}
       >
         <td>
-          <div class={"flex ai:center jc:center"}>
-            <button class="cursor:grab;">
-              <Icon class={"transition:transform|2s|ease-in-out"} icon="material-symbols:drag-indicator" />
-            </button>
-            <button class="cursor:pointer;" onClick={() => setExpanded(!expanded())}>
-              <Icon class={"transition:transform|2s|ease-in-out"} classList={{ "margin-top:7px": true }} icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`} />
-            </button>
-            <Icon class="color:red cursor:pointer m:5px" height={20} icon="mingcute:delete-line" onClick={() => deleteRow(p.joinVertex, p.isRealTime, graph, setGraph, p.txnId)} width={20} />
+          <div class="flex ai:center jc:center">
+            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconCss="transition:transform|2s|ease-in-out"/>
             <Show when={expandVertex()}>
-              <Icon class="color:green cursor:pointer" height={20} icon="icon-park-outline:plus" onClick={() => addNewRow(p.txnId ?? 0, expandVertex()!, graph, setGraph, p.joinVertex, {}, p.isRealTime ?? false)} width={20} />
+              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconCss="transition:transform|2s|ease-in-out" onClick={toggleExpanded}/>
+            </Show>
+            <IconButton class="color:red cursor:pointer m:5px" icon="mingcute:delete-line" onClick={handleDeleteRow} />
+            <Show when={expandVertex()}>
+              <IconButton class="color:green cursor:pointer" icon="icon-park-outline:plus" onClick={handleAddNewRow} />
             </Show>
           </div>
           {/*<Show when={!disabled}>*/}
@@ -130,20 +114,17 @@ export const SortableRow = (
           {/*</Show>*/}
         </td>
         <For each={rowColumnsMetaAttrs()}>
-          {(column) => {
-            return (
-              <DisplayProperty
-                column={column}
-                disabled={disabled}
-                getMetaVertex={getMetaVertex}
-                isRealTime={p.isRealTime}
-                joinVertex={p.joinVertex}
-
-                setValue={p.setValue}
-                txnId={p.txnId}
-              />
-            );
-          }}
+          {(column) => (
+            <DisplayProperty
+              column={column}
+              disabled={disabled}
+              getMetaVertex={getMetaVertex}
+              isRealTime={props.isRealTime}
+              joinVertex={props.joinVertex}
+              setValue={props.setValue}
+              txnId={props.txnId}
+            />
+          )}
         </For>
       </tr>
       {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
@@ -153,14 +134,14 @@ export const SortableRow = (
           <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
             <DynamicComponent
               componentName={"DynamicTable"}
-              data={p.joinVertex}
+              data={props.joinVertex}
               disabled={disabled()}
-              isRealTime={p.isRealTime}
+              isRealTime={props.isRealTime}
               isTableInside={false}
               // When we have a Table we pass original Table Meta Vertex
               meta={expandVertex()!}
-              setValue={p.setValue}
-              txnId={p.txnId}
+              setValue={props.setValue}
+              txnId={props.txnId}
             />
           </td>
         </tr>

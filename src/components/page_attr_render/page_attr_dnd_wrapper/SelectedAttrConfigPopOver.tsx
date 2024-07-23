@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
@@ -11,23 +10,9 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { IconButton } from "./IconButton";
 import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
-
-function IconButton(props: {
-  draggable?: boolean;
-  icon: string;
-  onClick: () => void;
-  onDragStart?: (e: DragEvent) => void;
-  ref?: (element: HTMLButtonElement) => void;
-  title: string; 
-}) {
-  return (
-    <button  draggable={props.draggable} onClick={props.onClick} onDragStart={props.onDragStart} ref={props.ref} title={props.title}>
-      <Icon class="flex cursor:pointer" height={20} icon={props.icon} width={20} />
-    </button>
-  );
-}
 
 export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
   const zIndex = useZIndex();
@@ -45,18 +30,20 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
       <div
         class={`flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
       >
+        <IconButton
+          class="cursor:grab"
+          draggable={true}
+          icon="material-symbols:drag-indicator"
+          onClick={() => { }}
+          onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
+          title="Move"
+        />
         <div class="display:flex font-size:0.875rem line-height:1.25rem margin-right:4px" title="Name">
           {getComponentName()}
         </div>
         <PropertyDrawer itemId={props.item.id} />
         <IconButton
-          draggable={true}
-          icon="material-symbols-light:drag-pan-rounded"
-          onClick={() => {}}
-          onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
-          title="Move"
-        />
-        <IconButton
+          class="cursor:pointer"
           icon="mdi:arrow-up"
           onClick={() => {
             const parentResult = getParentVertex(["Attr"], props.item, graph);
@@ -66,6 +53,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           title="Parent"
         />
         <IconButton
+          class="cursor:pointer"
           icon="mage:copy"
           onClick={() =>
             cloneLayoutAndChildren(
@@ -81,6 +69,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           title="Duplicate"
         />
         <IconButton
+          class="cursor:pointer"
           icon="fluent:save-as-24-regular"
           onClick={() => setShowModal(true)}
           ref={(el) => (saveAsTemplateRef = el)}
@@ -95,6 +84,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           />
         </Show>
         <IconButton
+          class="cursor:pointer"
           icon="fluent:delete-20-regular"
           onClick={() =>
             deleteLayoutAttr(

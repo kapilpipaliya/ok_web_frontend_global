@@ -9,6 +9,7 @@ import {
   on,
   runWithOwner
 } from "solid-js";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
@@ -22,9 +23,24 @@ import { getColumnProps } from "~/lib/graph/mutate/form/rowFunction";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+
 import { CssEditor } from "./CssEditor";
-import { getComponentClass } from "./SortableRow";
 import { DefaultValue } from "./DefaultValue";
+
+export const getComponentClass = (componentName: string) => {
+  switch (componentName) {
+    case "TextBox":
+      return "min-w:150px";
+    case "TextArea":
+      return "min-w:200px";
+    case "CheckBox":
+      return "min-w:50px";
+    case "SelectBox":
+      return "min-w:200px";
+    default:
+      return "";
+  }
+};
 
 // Component to display individual properties
 export function DisplayProperty(props: {

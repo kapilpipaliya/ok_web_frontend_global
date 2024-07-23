@@ -4,7 +4,6 @@ import type {
   ColorPickerField,
   DataEditorField,
   TextFieldOptionsField,
-  ToggleField,
 } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
