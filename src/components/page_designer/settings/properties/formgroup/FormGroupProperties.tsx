@@ -9,12 +9,12 @@ import {
   createSignal,
   createUniqueId,
   onCleanup,
-  untrack,
 } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { TabsWithUnderline } from "~/components/css_properties/SimpleTabs";
 import { genericInputComponents } from "~/components/form/genericInputComponents";
+import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -73,16 +73,11 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       (attr) => attr.name === "value",
     )!;
     return props.metaAttributes.map(vertex => {
-      const vertexId = graph.newVertexId;
-      untrack(() => {
-        addNewVertex(metaTxnId, newVertex(vertexId, ["MetaTemp"], {
-          ...vertex.P,
-          // Adding componentName and meta from the FormMetaData
-          componentName: valueAttribute.componentName,
-          meta: valueAttribute.meta,
-        }), graph, setGraph);
-      })
-      return graph.vertexes[vertexId];
+      return cloneVertexWithEdges(metaTxnId, vertex, {
+        // Adding componentName and meta from the FormMetaData
+        componentName: valueAttribute.componentName,
+        meta: valueAttribute.meta,
+      }, graph, setGraph);
     });
   });
   onCleanup(() => {
@@ -92,17 +87,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   function moveClassToLast(vertices: Vertex[]) {
     const otherVertices = vertices.filter(
       (vertex) =>
-        ![
-          "calculatedValue",
-          "class",
-          "defaultValue",
-          "disabled",
-          "hidden",
-          "label",
-          "labelClass",
-          "name",
-          "required",
-        ].includes(vertex.P.name)
+        !Object.keys(vertexIds).includes(vertex.P.name)
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
     const isForm = layoutStore.formData?.formData.L[0] === "Form";
