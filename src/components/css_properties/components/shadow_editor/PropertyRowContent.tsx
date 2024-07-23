@@ -2,9 +2,9 @@ import { type Accessor, type JSX, Match, type Setter, Switch } from "solid-js";
 
 import type { DataEditorField } from "../../constants/FieldType";
 
-import { generateBoxShadow } from "../../utils/generateBoxShadow";
+import { type ShadowAttributes, generateBoxShadow } from "../../utils/generateBoxShadow";
 import { generateFilter } from "../../utils/generateFilter";
-import { generateTextShadow } from "../../utils/generateTextShadow";
+import { type TextShadowAttributes, generateTextShadow } from "../../utils/generateTextShadow";
 import { generateTransform } from "../../utils/generateTransform";
 import { generateTransition } from "../../utils/generateTransition";
 
@@ -16,20 +16,20 @@ export interface ComponentProps {
   openPopup: Setter<boolean>;
   option: { [key: string]: any };
 }
-export function Component(props: Readonly<ComponentProps>) {
+export function PropertyRowContent(props: Readonly<ComponentProps>) {
   return (
     <Switch>
       <Match when={props.meta.name === "box-shadow"}>
         <button class="f:14 flex:1 mr:8px" onClick={() => props.openPopup(true)} type="button">
-          {generateBoxShadow([props.option], true)}
+          {generateBoxShadow([props.option as ShadowAttributes], true)}
         </button>
-        <div class={`bg:#fff box-shadow:${generateBoxShadow([props.option])} h:20px mr:10 r:5 w:20px`} />
+        <div class={`bg:#fff box-shadow:${generateBoxShadow([props.option as ShadowAttributes])} h:20px mr:10 r:5 w:20px`} />
       </Match>
       <Match when={props.meta.name === "text-shadow"}>
         <button class="f:14 flex:1 mr:8px" onClick={() => props.openPopup(true)} type="button">
-          {generateTextShadow([props.option], true)}
+          {generateTextShadow([props.option as TextShadowAttributes], true)}
         </button>
-        <div class={`bg:#fff h:20px mr:10 r:5 text-shadow:${generateTextShadow([props.option])} w:20px`} />
+        <div class={`bg:#fff h:20px mr:10 r:5 text-shadow:${generateTextShadow([props.option as TextShadowAttributes])} w:20px`} />
       </Match>
       <Match when={props.meta.name === "filter"}>
         <button class="f:14 flex:1 mr:8px" onClick={() => props.openPopup(true)} type="button">

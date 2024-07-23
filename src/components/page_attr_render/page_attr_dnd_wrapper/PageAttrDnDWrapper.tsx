@@ -14,7 +14,7 @@ import { ZIndex } from "~/components/ZIndex";
 import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";

@@ -7,7 +7,7 @@ import { useZIndex } from "~/components/ZIndex";
 
 import type { SelectField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 function formatString(str: string) {

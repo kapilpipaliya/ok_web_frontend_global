@@ -6,7 +6,7 @@ import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";

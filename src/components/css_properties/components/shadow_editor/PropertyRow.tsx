@@ -5,8 +5,8 @@ import { ZIndex } from "~/components/ZIndex";
 
 import type { DataEditorField } from "../../constants/FieldType";
 
-import { Component } from "./Component";
-import { Popup } from "./Popup";
+import { PropertyRowContent } from "./PropertyRowContent";
+import { PropertyRowPopup } from "./PropertyRowPopup";
 
 export interface PickedOptionProps {
   deleteOption: (index: number) => void;
@@ -24,7 +24,7 @@ export function PropertyRow(props: Readonly<PickedOptionProps>) {
         class="cursor:pointer mr:8"
         icon="icon-park-outline:more-one"
         onClick={() => openMenu[1](true)} />
-      <Component
+      <PropertyRowContent
         index={props.index}
         label={props.label}
         meta={props.meta}
@@ -35,7 +35,7 @@ export function PropertyRow(props: Readonly<PickedOptionProps>) {
         icon="mdi:close"
         onClick={() => props.deleteOption(props.index())} />
       <ZIndex>
-        <Popup
+        <PropertyRowPopup
           meta={props.meta}
           openMenu={openMenu}
           option={props.option}

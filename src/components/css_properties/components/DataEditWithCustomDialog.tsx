@@ -6,7 +6,7 @@ import {
 
 import type { DataEditorField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { LabelWrapper } from "./LabelWrapper";
 import { PropertyRow } from "./shadow_editor/PropertyRow";
 

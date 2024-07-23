@@ -22,7 +22,7 @@ import { TableTabs } from "~/components/TableTabs";
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { FormContext, type IFormContext } from "~/lib/contexts";
 import {
   type GraphInterface,
@@ -36,9 +36,9 @@ import { setPreventUndoBeforeIndex } from "~/lib/graph/transaction/setPreventUnd
 import { isPageDesignerPath } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
+import { saveUndoPoint } from "../../lib/graph/transaction/saveUndoPoint";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { addComponentAttrInPage } from "../page_designer/functions/drop/addComponentAttrInForm";
-import { saveUndoPoint } from "../page_designer/functions/saveUndoPoint";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SaveCancelButton } from "./SaveCancelButton";
@@ -70,10 +70,10 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const txnId = graph.newTxnId;
   const [, setLayoutStore] = useDesignerLayoutStore() || [];
 
-  const [formData, setFormData] = createStore<IFormContext>({
+  const [formData, setFormData] = createStore({
     cleanUpConfig: () => cleanUpConfig,
     txnId,
-  });
+  } as IFormContext);
   const [activeTab, setActiveTab] = createSignal("main");
   const [error, setError] = createSignal<null | string>(null);
   const [isLoading, setIsLoading] = createSignal(false);

@@ -3,7 +3,7 @@ import { createMemo } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(props: Readonly<{ onResetIconClick?: () => void }>) {

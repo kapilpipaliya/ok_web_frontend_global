@@ -5,14 +5,14 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/utils";
 
-import type { CSSStore } from "./context";
+import type { CSSStore } from "./CssEditorContext";
 
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import {
   CssDefaultEditorContext,
   CssEditorContext,
   CssStateContext,
-} from "./context";
+} from "./CssEditorContext";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 export function CSSPropertiesEditorWrapper(
   props: Readonly<{

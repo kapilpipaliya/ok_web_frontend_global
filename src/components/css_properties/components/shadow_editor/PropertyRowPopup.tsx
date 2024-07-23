@@ -14,7 +14,7 @@ export interface PopupProps {
   rowIndex: number;
 }
 
-export function Popup(props: Readonly<PopupProps>) {
+export function PropertyRowPopup(props: Readonly<PopupProps>) {
   const zIndex = useZIndex();
 
   const Header = () => {

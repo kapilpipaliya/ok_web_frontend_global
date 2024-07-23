@@ -21,7 +21,8 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isObject } from "~/lib/utils";
 
-import { ensureArray } from "./ensureArray";
+import { ensureArray } from "../../lib/ensureArray";
+import { isStaticOptions } from "./isStaticOptions";
 import { selectedValue } from "./selectedValue";
 import { setSelectValueHelper } from "./setSelectValueHelper";
 
@@ -132,7 +133,7 @@ export function SelectInputField(
         if (props.isRealTime) {
           props.txnId = graph.newTxnId;
         }
-        if (typeof props.meta.P.options === "string" || props.meta.P.saveValue) {
+        if (isStaticOptions(props.meta)) {
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
@@ -217,7 +218,7 @@ export function SelectInputField(
         placeholder={`${props.title}`}
         renderLabel={props.meta.P.renderLabel}
         selectedValues={() => {
-          if (typeof props.meta.P.options === "string" || props.meta.P.saveValue) {
+          if (isStaticOptions(props.meta)) {
             const value = props.data?.P[props.meta.P[IdAttr]];
             if (!value) return [];
             if (

@@ -12,8 +12,8 @@ import {
 
 import type { TextFieldOptionsField } from "../constants/FieldType";
 
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { sizeTypes } from "../constants/constants";
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
 import { CenterDiv } from "./CenterDiv";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";

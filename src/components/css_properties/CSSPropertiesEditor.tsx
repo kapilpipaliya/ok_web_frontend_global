@@ -9,15 +9,15 @@ import { TextEditor } from "~/components/css_properties/TextEditor";
 import { useFormContext } from "~/lib/contexts";
 import { isDevelopment } from "~/lib/isDevelopment";
 
-import type { CSSStore } from "./context";
+import type { CSSStore } from "./CssEditorContext";
 
 import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
 import { ZIndex } from "../ZIndex";
 import { DynamicComponent } from "../form/DynamicComponent";
-import { AddNewState } from "./AddNewState";
+import { AddNewCssState } from "./AddNewCssState";
+import { useCssEditor, useCssState } from "./CssEditorContext";
 import { ResetButton } from "./ResetButton";
-import { useCssEditor, useCssState } from "./context";
 import { cssStateToString } from "./utils/cssStateToString";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 const defaultStateLabel = "Default State";
@@ -118,7 +118,7 @@ export function CSSPropertiesEditor(
             onClickOutside={() => setShowDropdown(false)}
             parentRef={buttonRef!}
           >
-            <AddNewState onClose={() => setShowDropdown(false)} />
+            <AddNewCssState onClose={() => setShowDropdown(false)} />
           </DropdownMenu>
         </ZIndex>
       </Show>

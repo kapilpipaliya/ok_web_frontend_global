@@ -4,7 +4,7 @@ import { DynamicCSSComponent } from "~/components/css_properties/components/Dyna
 
 import type { ButtonGroupField, FieldWithCustomProperty, GenericField } from "../constants/FieldType";
 
-import { ComponentMetaContext, useComponentMeta, useCssEditor, useCssState } from "../context";
+import { ComponentMetaContext, useComponentMeta, useCssEditor, useCssState } from "../CssEditorContext";
 import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = () => {

@@ -1,6 +1,6 @@
 import { recursive } from "merge";
 
-import type { CSSStore } from "../context";
+import type { CSSStore } from "../CssEditorContext";
 
 import { cssStateToString } from "./cssStateToString";
 import { parseAndApplyCssRules } from "./parseAndApplyCssRules";

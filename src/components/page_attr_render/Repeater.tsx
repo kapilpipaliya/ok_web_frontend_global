@@ -5,7 +5,7 @@ import {
   RepeaterVertexContext,
   usePageRenderVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";

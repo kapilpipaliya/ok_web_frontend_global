@@ -3,7 +3,7 @@ import { For, Match, Switch, } from "solid-js";
 
 import type { ToggleField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { CenterDiv } from "./CenterDiv";
 import { IconifyIcon } from "./IconifyIcon";
 import { LabelWrapper } from "./LabelWrapper";

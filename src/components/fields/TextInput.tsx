@@ -3,7 +3,9 @@ import { type Component, Match, Show, Switch, createMemo, splitProps } from 'sol
 import type { GenericComponentProps } from './ComponentType';
 
 export const TextInput: Component<GenericComponentProps> = (props) => {
-  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'onchange'
+  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId',
+  // @ts-expect-error ignore
+  'onchange'
   ]);
 
   const inputTypes = {

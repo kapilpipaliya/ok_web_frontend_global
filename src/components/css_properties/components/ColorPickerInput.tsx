@@ -3,7 +3,7 @@ import { type JSX, Match, Switch } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 

@@ -1,6 +1,6 @@
 import { isObject } from "~/lib/utils";
 
-import type { CSSStore } from "../context";
+import type { CSSStore } from "../CssEditorContext";
 
 import { generateBoxShadow } from "./generateBoxShadow";
 

@@ -11,7 +11,7 @@ import { ToggleButton } from "~/components/css_properties/components/ToggleButto
 
 import type { GenericField, TextFieldOptionsField, } from "../constants/FieldType";
 
-import { ComponentMetaContext } from "../context";
+import { ComponentMetaContext } from "../CssEditorContext";
 
 export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
   return (

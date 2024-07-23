@@ -16,7 +16,7 @@ import {
   RepeaterVertexContext,
   usePageRenderVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -113,7 +113,7 @@ export function TableInputField(
           class="m:2 overflow:auto r:10"
           classList={{
             "{scrollbar-width:thin}": true,
-            "border:1px|solid|#37c": sortedVertexes().length,
+            "border:1px|solid|#37c": sortedVertexes().length > 0, // slate-70
           }}
         >
           <table

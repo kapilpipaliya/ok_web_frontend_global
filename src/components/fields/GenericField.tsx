@@ -8,7 +8,7 @@ import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import {
   usePageRenderVertexContext,
-} from "~/components/page_attr_render/Context";
+} from "~/components/page_attr_render/PageAttrContext";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";

@@ -5,7 +5,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { componentDrop } from "~/components/page_designer/functions/drop/componentDrop";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
-import { saveUndoPoint } from "./saveUndoPoint";
+import { saveUndoPoint } from "../../../lib/graph/transaction/saveUndoPoint";
 
 export function handleComponentDrag(
   graph: GraphInterface,

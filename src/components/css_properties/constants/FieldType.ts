@@ -75,7 +75,7 @@ export interface DataEditorField extends CSSField {
   };
   componentName: "dataEditor";
   dialogLabel: string;
-  fallback: string;
+  fallback?: string; // not used?
   label: string;
 }
 export interface SelectField extends CSSField {

@@ -1,12 +1,13 @@
+export interface ShadowAttributes {
+  blur: string;
+  color?: string;
+  inset?: string;
+  spread: string;
+  'x-offset': string;
+  'y-offset': string;
+}
 export function generateBoxShadow(
-  shadows: Array<{
-    blur: string;
-    color?: string;
-    inset?: string;
-    spread: string;
-    'x-offset': string;
-    'y-offset': string;
-  }>,
+  shadows: Array<ShadowAttributes>,
   isView?: boolean
 ): string {
   const separator = isView ? " " : "|";

@@ -1,6 +1,6 @@
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { getExistingOrDefaultTxnValue } from "../../../lib/graph/transaction/getExistingOrDefaultTxnValue";
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 
 export function saveUndoPoint(txnId: number, graph: GraphInterface) {
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);

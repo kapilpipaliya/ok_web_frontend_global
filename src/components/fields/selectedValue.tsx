@@ -11,14 +11,15 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 
-import { ensureArray } from "./ensureArray";
+import { ensureArray } from "../../lib/ensureArray";
+import { isStaticOptions } from "./isStaticOptions";
 
 export function selectedValue(
   meta: Vertex,
   data: Vertex,
   graph: Store<GraphInterface>,
 ): Id[] {
-  if (meta.P.saveValue || meta.P.options) {
+  if (isStaticOptions(meta)) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => ensureArray(data.P[meta.P[IdAttr]]));
   }

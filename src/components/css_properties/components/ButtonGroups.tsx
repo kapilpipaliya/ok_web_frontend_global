@@ -5,7 +5,7 @@ import { CustomTooltip } from "~/components/Tooltip";
 
 import type { ButtonGroupField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../context";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { CenterDiv } from "./CenterDiv";
 import { IconifyIcon } from "./IconifyIcon";
 import { LabelWrapper } from "./LabelWrapper";
