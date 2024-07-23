@@ -3,8 +3,8 @@ export interface ShadowAttributes {
   color?: string;
   inset?: string;
   spread: string;
-  'x-offset': string;
-  'y-offset': string;
+  'offset-x': string;
+  'offset-y': string;
 }
 export function generateBoxShadow(
   shadows: Array<ShadowAttributes>,
@@ -20,8 +20,8 @@ export function generateBoxShadow(
         color = '',
         inset = '',
         spread = '0px',
-        'x-offset': xOffset = '0px',
-        'y-offset': yOffset = '0px'
+        'offset-x': xOffset = '0px',
+        'offset-y': yOffset = '0px'
       } = shadow;
 
       const colorPart = color ? `${separator}${color}` : '';

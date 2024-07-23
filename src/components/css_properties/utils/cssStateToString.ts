@@ -2,21 +2,7 @@ import { isObject } from "~/lib/utils";
 
 import type { CSSStore } from "../CssEditorContext";
 
-import { generateBoxShadow } from "./generateBoxShadow";
-
-function arrayToString(name: string, arr: any[]): string {
-  return arr.map(item => {
-    if (isObject(item)) {
-      if (name === "box-shadow") {
-        return generateBoxShadow(arr)
-      }
-      return Object.entries(item)
-        .map(([key, value]) => `${key}:${value.toString().replaceAll(" ", "|")}`)
-        .join(" ");
-    }
-    return item.toString().replaceAll(" ", "|");
-  }).join(" ");
-}
+import { arrayToString } from "./arrayToString";
 
 export function cssStateToString(cssState: CSSStore) {
   if (!cssState) return "";

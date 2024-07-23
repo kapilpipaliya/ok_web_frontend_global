@@ -47,7 +47,7 @@ export interface GridField extends CSSField {
 
 export interface TextFieldOptionsField extends CSSField {
   componentName: "textFieldOptions";
-  inputProps: any
+  inputProps?: any
   isAddToClass: boolean;
   isLabelOnTop: boolean;
   label: string;
@@ -95,7 +95,7 @@ export interface ButtonGroupField extends CSSField {
   label: string;
   onChangeInput?: (value: string) => void;
   options: {
-    icon: true;
+    icon?: true;
     key: string;
     tooltip?: string;
     value: string;

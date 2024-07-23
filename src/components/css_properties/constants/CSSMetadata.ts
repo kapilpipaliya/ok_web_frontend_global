@@ -40,6 +40,8 @@
 // CSS-wide keywords.
 // Spec: https://drafts.csswg.org/css-cascade/#defaulting-keywords
 // https://drafts.csswg.org/css-cascade-5/#revert-layer
+
+import { BORDER_STYLE_VALUES } from '@master/css';
 export const CSSWideKeywords = ['inherit', 'initial', 'revert', 'revert-layer', 'unset'];
 
 /**
@@ -243,7 +245,8 @@ export const extraPropertyValues = {
   'writing-mode': {values: ['lr', 'rl', 'tb', 'lr-tb', 'rl-tb', 'tb-rl']},
   'page-break-inside': {values: ['avoid']},
   'border-width': {values: ['medium', 'thick', 'thin']},
-  'border-style': {values: ['hidden', 'inset', 'groove', 'ridge', 'outset', 'dotted', 'dashed', 'solid', 'double']},
+  //'border-style': {values: ['hidden', 'inset', 'groove', 'ridge', 'outset', 'dotted', 'dashed', 'solid', 'double']},
+  'border-style': {values: BORDER_STYLE_VALUES},
   'size': {values: ['a3', 'a4', 'a5', 'b4', 'b5', 'landscape', 'ledger', 'legal', 'letter', 'portrait']},
   // modified
   'overflow': {values: ['hidden', 'visible', 'clip', 'scroll', 'auto']},

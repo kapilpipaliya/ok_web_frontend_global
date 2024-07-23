@@ -1,10 +1,24 @@
 export interface TextShadowAttributes {
-  blurRadius: string;
+  'blur-radius': string;
   color: string;
-  offsetX: string;
-  offsetY: string;
+  'offset-x': string;
+  'offset-y': string;
 }
+
 export function generateTextShadow(shadows: Array<TextShadowAttributes>, isView?: boolean): string {
   const separator = isView ? " " : "|";
-  return shadows.map(shadow => `${shadow.offsetX}${separator}${shadow.offsetY}${separator}${shadow.blurRadius}${separator}${shadow.color}`).join(', ');
+  const separator2 = isView ? ", " : ",";
+
+  return shadows.map(shadow => {
+    const {
+      'blur-radius': blurRadius = '0px',
+      color = '',
+      'offset-x': offsetX = '0px',
+      'offset-y': offsetY = '0px'
+    } = shadow;
+
+    const colorPart = color ? `${separator}${color}` : '';
+
+    return `${offsetX}${separator}${offsetY}${separator}${blurRadius}${colorPart}`;
+  }).join(separator2);
 }
