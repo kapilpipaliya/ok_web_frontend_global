@@ -11,7 +11,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import { NavItem, getTreeData } from "~/lib/graph/get/sync/getTreeData";
+import { type NavItem, getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";

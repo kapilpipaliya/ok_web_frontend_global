@@ -4,6 +4,7 @@ import { TableInputField } from "~/components/fields/table_input/TableInputField
 import { Repeater } from "~/components/page_attr_render/Repeater";
 
 import { Signature } from "../SignatureBox";
+import { BoxField } from "../fields/BoxField";
 import { ButtonInput } from "../fields/ButtonInput";
 import { FormWrapper } from "../fields/FormWrapper";
 import { ImageField } from "../fields/ImageField";
@@ -13,7 +14,6 @@ import { TextInput } from "../fields/TextInput";
 import { UrlField } from "../fields/UrlField";
 import { FileUploader } from "../solid_blocks/FileUploader";
 import { Radio, RadioGroup } from "../solid_blocks/radio/radio";
-import { BoxField } from "../fields/BoxField";
 
 export function getDynamicComponent(component: string) {
   switch (component) {

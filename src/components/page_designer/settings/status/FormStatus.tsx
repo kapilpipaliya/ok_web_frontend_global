@@ -1,11 +1,9 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { createWritableMemo } from "@solid-primitives/memo";
 import { For, Show, createSignal, createUniqueId, onCleanup } from "solid-js";
 
-import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "../properties/constant";

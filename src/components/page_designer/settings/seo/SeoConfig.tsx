@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { createWritableMemo } from "@solid-primitives/memo";
 import {
   For,
   Match,
@@ -10,7 +9,7 @@ import {
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,

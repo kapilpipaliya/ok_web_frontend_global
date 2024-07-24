@@ -6,8 +6,9 @@ import { For, Show, createSignal } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { ChipDropDown } from "~/components/Chip";
-import { CustomModal } from "~/components/CommonDialog";
+import { CustomModal } from "~/components/CustomModal";
 import { DeleteDialog } from "~/components/DeleteDialog";
+import { IconButton } from "~/components/IconButton";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
 import {
@@ -28,6 +29,7 @@ export const SupportTicketSection = (
   const [messages, setMessages] = createSignal<any>([]);
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
+  const [deleteRowId, setDeleteRowId] = createSignal<null | string>(null);
 
   const sendMessage = async (parentVertexId: Id) => {
     if (inputMessage().trim() !== "") {
@@ -150,17 +152,10 @@ export const SupportTicketSection = (
     );
   };
 
-  const OpenDialog = (props: Readonly<{ id: number }>) => {
+  const OpenDialog = (props: Readonly<{ id: string }>) => {
+    const [openDialog, setOpenDialog] = createSignal(false);
     return (
-      <CustomModal
-        body={
-          <div>
-            <Chat id={props.id} />
-          </div>
-        }
-        buttonLabel={
-          <Icon class="color:#37c" height={22} icon="bi:chat-text" width={22} />
-        }
+      <><IconButton class="color:#37c" icon="bi:chat-text" onClick={() => setOpenDialog(true)} size={22} /><CustomModal
         dialogClass="min-w:30% r:10px p:0"
         footer={() => (
           <div class="flex ai:center jc:center">
@@ -186,9 +181,14 @@ export const SupportTicketSection = (
             </div>
           </div>
         )}
-        openButton={false}
+        open={openDialog}
+        setOpen={setOpenDialog}
         title="Chat With Support"
-      />
+      >
+        <div>
+          <Chat id={props.id} />
+        </div>
+      </CustomModal></>
     );
   };
 
@@ -272,15 +272,8 @@ export const SupportTicketSection = (
                   <TableBodyCell>
                     <div class="flex ai:center jc:center">
                       <OpenDialog id={row.id} />
+                      <IconButton icon="fluent:delete-48-regular" onClick={() => setDeleteRowId(row.id)} title="Delete" />
                       <DeleteDialog
-                        buttonLabel={
-                          <Icon
-                            class="color:rgb(255,0,0)"
-                            height={22}
-                            icon="fluent:delete-48-regular"
-                            width={22}
-                          />
-                        }
                         message={"Are you sure you want to delete this ticket?"}
                         onCancel={() => {
                           setDeleteRowId(null);
@@ -288,6 +281,8 @@ export const SupportTicketSection = (
                         onConfirm={() => {
                           deleteContact(row.id);
                         }}
+                        open={() => deleteRowId() === row.id}
+                        setOpen={setDeleteRowId}
                         title={"Delete Support Ticket"}
                       />
                     </div>

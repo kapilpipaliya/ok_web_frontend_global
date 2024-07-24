@@ -1,5 +1,6 @@
+import type { FieldAttribute } from "~/lib/FormMetadataType";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { FieldAttribute } from "~/lib/FormMetadataType";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

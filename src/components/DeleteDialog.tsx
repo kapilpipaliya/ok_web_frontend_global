@@ -1,15 +1,14 @@
-import type { Accessor, JSX } from "solid-js";
+import type { Accessor, } from "solid-js";
 
 import { autofocus } from "@solid-primitives/autofocus";
 // prevents from being tree-shaken by TS
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus
 
-import { CustomModal } from "./CommonDialog";
+import { CustomModal } from "./CustomModal";
 
 export function DeleteDialog(
   props: Readonly<{
-    buttonLabel?: JSX.Element;
     message?: string;
     onCancel?: () => void;
     onConfirm: () => void;
@@ -27,12 +26,6 @@ export function DeleteDialog(
   };
   return (
     <CustomModal
-      body={
-        <p class="p:10px|0px">
-          {props.message || "Are you sure you want to delete this item?"}
-        </p>
-      }
-      buttonLabel={props.buttonLabel}
       customTitle={<span>{props.title || "Delete Confirmation"}</span>}
       dialogClass="min-w:20% r:10px p:0"
       footer={(toggle) => (
@@ -58,8 +51,11 @@ export function DeleteDialog(
         </div>
       )}
       open={props.open}
-      openButton={false}
       setOpen={props.setOpen}
-    />
+    >
+            <p class="p:10px|0px">
+          {props.message || "Are you sure you want to delete this item?"}
+        </p>
+    </CustomModal>
   );
 }

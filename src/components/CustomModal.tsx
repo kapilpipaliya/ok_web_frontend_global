@@ -1,20 +1,15 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
 interface CustomModalProps {
-  body: JSX.Element;
   bodyClass?: JSX.CSSProperties;
-  buttonIcon?: string;
-  buttonLabel?: JSX.Element;
+  children: JSX.Element;
   closeButton?: boolean;
   customTitle?: JSX.Element;
   dialogClass: string;
   footer: (setOpen: Setter<boolean>) => JSX.Element;
-  iconClass?: string;
-  iconSize?: number;
   open?: Accessor<boolean>;
-  openButton?: boolean;
   setOpen?: (open: boolean) => void;
   title?: JSX.Element | string;
 }
@@ -22,6 +17,7 @@ interface CustomModalProps {
 export function CustomModal(props: Readonly<CustomModalProps>) {
   const [open, setOpen] = (props.open && props.setOpen) ? [props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>] : createSignal(false);
 
+  // remove the overlay click handler
   const onClickOverlay = (e: MouseEvent) => {
     if (e.target !== e.currentTarget) return;
     setOpen(false);
@@ -30,28 +26,6 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   const modalClass = "position:relative  width:80vw  max-width:800px  padding:15px  background-color:white";
 
   return (
-    <>
-      <Show
-        fallback={
-          <div
-            aria-disabled={open()}
-            class={`${props.iconClass} bg:#dfe9f3d1:hover cursor:pointer p:5|5|5|5 r:5|5|5|5`}
-          >
-            {props.buttonLabel}
-          </div>
-        }
-        when={props.openButton !== false}
-      >
-        <Icon
-          aria-disabled={open()}
-          class={`${props.iconClass} bg:lightgrey:hover cursor:pointer p:5|5|5|5 r:5|5|5|5`}
-          color={"grey"}
-          height={props.iconSize ?? 25}
-          icon={props.buttonIcon ?? "material-symbols:error"}
-          onClick={() => setOpen(true)}
-          width={props.iconSize ?? 25}
-        />
-      </Show>
       <Show when={open()}>
         <Portal>
           <div
@@ -80,13 +54,12 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
               </div>
               <hr class={"fg:lightgrey"} />
               <div class={`${props.bodyClass} overflow:auto p:3`}>
-                {props.body}
+                {props.children}
               </div>
               <div class={"pt:5"}>{props.footer(setOpen)}</div>
             </div>
           </div>
         </Portal>
       </Show>
-    </>
   );
 }

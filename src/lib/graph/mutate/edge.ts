@@ -9,8 +9,8 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
+import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 export function newEdge(
   edgeId: Id,
