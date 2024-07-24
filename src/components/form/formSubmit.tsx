@@ -4,7 +4,6 @@ import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
-import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
@@ -61,8 +60,6 @@ export function formSubmit(closePopUp?: () => void) {
       await showLoadingToast({
         loadMessage: `Saving ${label}...`,
         onSuccess: (value) => {
-          graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
-          updateSubmittedIndex(txnId, graph);
           // currently we are navigating back.
           if (closePopUp) {
             closePopUp();

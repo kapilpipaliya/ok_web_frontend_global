@@ -12,14 +12,14 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
-import { useIsPreview } from "~/lib/contexts";
+import { usePreviewContext } from "~/lib/contexts";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 
 export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null>; }>) {
   const [layoutStore] = useDesignerLayoutStore();
-  const [isPreview] = useIsPreview();
+  const {previewData, previewMeta} = usePreviewContext();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
@@ -28,7 +28,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
-    if (!isPreview()) {
+    if (!previewMeta) {
       if (isActiveTargetItem()) {
         const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;

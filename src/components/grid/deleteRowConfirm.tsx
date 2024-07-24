@@ -6,7 +6,6 @@ import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { ProcessStatus } from "~/lib/graph/transaction/TransactionType";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 export function deleteRowConfirm(id: Accessor<Id | null>) {
@@ -24,7 +23,6 @@ export function deleteRowConfirm(id: Accessor<Id | null>) {
       showErrorToast(deleteResult?.error.toString());
       return;
     }
-    graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
     const data = commitTxn(txnId, graph);
     if (!data) {
       return;

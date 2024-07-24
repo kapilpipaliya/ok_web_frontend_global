@@ -11,7 +11,7 @@ import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { useFormContext, useIsPreview } from "~/lib/contexts";
+import { useFormContext, usePreviewContext } from "~/lib/contexts";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -24,7 +24,7 @@ export function PageAttrRender(
   const parentItems = usePageRenderVertexContext();
   const [graph, setGraph] = useGraph();
   const { formData, txnId } = useFormContext();
-  const [isPreview] = useIsPreview();
+  const {previewData, previewMeta} = usePreviewContext();
 
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
@@ -78,7 +78,7 @@ export function PageAttrRender(
               <Tab>
                 <Show
                   fallback={<PageComponentWithPreview />}
-                  when={!isPreview()}
+                  when={!previewMeta}
                 >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -90,7 +90,7 @@ export function PageAttrRender(
               <TabContainer>
                 <Show
                   fallback={<PageComponentWithPreview />}
-                  when={!isPreview()}
+                  when={!previewMeta}
                 >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -102,7 +102,7 @@ export function PageAttrRender(
               <li>
                 <Show
                   fallback={<PageComponentWithPreview />}
-                  when={!isPreview()}
+                  when={!previewMeta}
                 >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -111,7 +111,7 @@ export function PageAttrRender(
               </li>
             </Match>
             <Match when={true}>
-              <Show fallback={<PageComponentWithPreview />} when={!isPreview()}>
+              <Show fallback={<PageComponentWithPreview />} when={!previewMeta}>
                 <PageAttrDnDWrapper item={item}>
                   <Content />
                 </PageAttrDnDWrapper>

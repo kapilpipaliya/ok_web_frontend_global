@@ -3,7 +3,6 @@ import type { createStore } from "solid-js/store";
 import { createContext, useContext } from "solid-js";
 
 import type {
-  ProcessStatus,
   TransactionValue,
 } from "~/lib/graph/transaction/TransactionType";
 
@@ -46,7 +45,6 @@ export interface TransactionDetail {
   activeUndoIndex: number;
   preventUndoBeforeIndex: number;
   revertSteps: TransactionValue[];
-  status: ProcessStatus;
   steps: TransactionValue[];
   submittedIndex: number;
   undoStepIndexes: number[];

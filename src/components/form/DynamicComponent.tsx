@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext, useIsPreview } from "~/lib/contexts";
+import { useFormContext, usePreviewContext } from "~/lib/contexts";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -53,7 +53,7 @@ export function DynamicComponent(
 ) {
   const [graph, setGraph] = useGraph();
   const { formData } = useFormContext() ?? {};
-  const [isPreview] = useIsPreview();
+  const {previewData, previewMeta} = usePreviewContext();
 
   const componentName = () =>
     props.componentName ?? props.meta.P.componentName;
@@ -94,10 +94,10 @@ export function DynamicComponent(
   const expressionProperties = createMemo(() => {
     const values = {} as Record<string, any>;
     for (const [property, rule] of extraProperties().entries()) {
-      if (property === "disabled" && !isPreview()) {
+      if (property === "disabled" && !previewMeta) {
         continue;
       }
-      if (property === "hidden" && !isPreview()) {
+      if (property === "hidden" && !previewMeta) {
         continue;
       }
       if (formData && rule) {

@@ -29,7 +29,7 @@ export async function getFormAttr(
       );
     }
     if (!form) {
-      return { error: "Form not found" };
+      return { error: `Form not found: ${tableId}` };
     }
   }
   return { error: "", form };

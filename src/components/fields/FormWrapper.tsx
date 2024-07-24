@@ -8,7 +8,7 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import {
   getFormMetaData,
 } from "~/components/page_designer/functions/getChildrenAttrs";
-import { FormContext, type IFormContext } from "~/lib/contexts";
+import { FormContext, usePreviewContext, type IFormContext } from "~/lib/contexts";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -21,6 +21,7 @@ export function FormWrapper(
   } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
+  const {previewData, previewMeta} = usePreviewContext();
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -45,7 +46,7 @@ export function FormWrapper(
     graph,
     setGraph,
     txnId,
-    props.label ?? props.meta.P[IdAttr],
+    props.label ?? previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
     defaultValues,
   );
   if (createResult.error) return createResult.error;

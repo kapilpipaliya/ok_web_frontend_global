@@ -22,7 +22,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { useIsPreview } from "~/lib/contexts";
+import { usePreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
@@ -38,7 +38,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const [isPreview] = useIsPreview();
+  const {previewData, previewMeta} = usePreviewContext();
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
 
@@ -77,7 +77,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       layoutStore,
       setLayoutStore,
       props.item,
-      isPreview(),
+      previewMeta,
       false,
       childrenAttrs,
       graph,

@@ -3,7 +3,7 @@ import { createContext, createSignal, useContext } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 export const LoadingContext = createContext(createSignal(false));
-export const IsPreviewContext = createContext(createSignal(false));
+export const PreviewContext = createContext<{previewData?: Vertex, previewMeta?: Vertex}>({});
 
 export interface IFormContext {
   cleanUpConfig: () => { [key: string]: any };
@@ -23,6 +23,6 @@ export const FormContext = createContext({} as IFormContext);
 export const PageContext = createContext({} as { [key: string]: any });
 
 export const useLoading = () => useContext(LoadingContext);
-export const useIsPreview = () => useContext(IsPreviewContext);
+export const usePreviewContext = () => useContext(PreviewContext);
 export const useFormContext = () => useContext(FormContext);
 export const usePageContext = () => useContext(PageContext);

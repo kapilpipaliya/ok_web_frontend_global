@@ -9,7 +9,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
-import { useIsPreview } from "~/lib/contexts";
+import { usePreviewContext } from "~/lib/contexts";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -30,7 +30,7 @@ export function TreeItem(
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
-  const [isPreview] = useIsPreview();
+  const {previewMeta} = usePreviewContext();
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
@@ -47,7 +47,7 @@ export function TreeItem(
       layoutStore,
       setLayoutStore,
       props.metaVertex,
-      isPreview(),
+      !!previewMeta,
       props.collapsedKeys,
       children,
       graph,
@@ -92,12 +92,12 @@ export function TreeItem(
     e.stopPropagation();
     setLayoutStore("hoverId", -1);
   };
-  const isAfter = createMemo(() => !isPreview() && isActiveTargetItem() && layoutStore.position === "after");
+  const isAfter = createMemo(() => !previewMeta && isActiveTargetItem() && layoutStore.position === "after");
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
-    if (!isPreview()) {
+    if (!previewMeta) {
       if (isActiveTargetItem()) {
         if (layoutStore.position !== "after") {
           const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");

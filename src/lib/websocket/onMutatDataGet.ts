@@ -9,7 +9,6 @@ import { updateEdgeId } from "~/lib/graph/mutate/edge";
 import { updateVertexId } from "~/lib/graph/mutate/vertex";
 
 import {
-  ProcessStatus,
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../graph/transaction/TransactionType";
@@ -35,8 +34,6 @@ export function onMutatDataGet(
 ) {
   const { showErrorToast } = useToast();
   batch(() => {
-    if (graph.transactions.has(d.txnId))
-      graph.transactions.get(d.txnId)!.status = ProcessStatus.Processed;
     for (const txnObject of d.data) {
       // Vertexes and edges are interlinked.
       // It's complicated to insert replace without error.
@@ -89,11 +86,11 @@ export function onMutatDataGet(
       }
     }
 
-    if (isAllTxnProcessed(graph)) {
+    /*if (isAllTxnProcessed(graph)) {
       vertexOldIdToNewIdMap.clear();
       edgeOldIdToNewIdMap.clear();
     } else {
       // commitTxn(txnId, graph);
-    }
+    }*/
   });
 }

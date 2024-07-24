@@ -4,7 +4,7 @@ import { useNavigate } from "@solidjs/router";
 import { createMemo, splitProps } from "solid-js";
 
 import { submitDataCall } from "~/lib/api/api_functions";
-import { useFormContext, useIsPreview } from "~/lib/contexts";
+import { useFormContext, usePreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -24,7 +24,7 @@ export function ButtonInput(props: ButtonProps) {
   const { showLoadingToast } = useToast();
   const { formData, txnId } = useFormContext();
   const navigate = useNavigate();
-  const [isPreview] = useIsPreview();
+  const {previewData, previewMeta} = usePreviewContext();
 
   const onSubmit = async () => {
     if (isAnyFieldInvalid(graph, setGraph, props.meta, formData)) {
@@ -48,7 +48,7 @@ export function ButtonInput(props: ButtonProps) {
   const extraProps = createMemo(() => {
     return {
       onClick: () => {
-        if (!isPreview()) {
+        if (!previewMeta) {
           return;
         }
         if (props.meta.P.type === "submit") {

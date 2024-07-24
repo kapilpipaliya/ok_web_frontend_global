@@ -14,13 +14,6 @@ export type InsertFn = {
     | "replaceEdgeStart"]?: () => void;
 };
 
-export enum ProcessStatus {
-  AckReceived = 3,
-  Processed = 4,
-  Ready = 1,
-  Sent = 2,
-  Unset = 0,
-}
 export type TransactionValue = { data: any } & InsertFn & Revert;
 
 export const vertexOldIdToNewIdMap = new Map<Id, Id>();

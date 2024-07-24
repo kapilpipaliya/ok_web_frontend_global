@@ -1,8 +1,8 @@
-import { Match, Show, Switch, createMemo, createSignal } from "solid-js";
+import { Match, Show, Switch, createMemo } from "solid-js";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { IsPreviewContext } from "~/lib/contexts";
+import { PreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
@@ -38,48 +38,36 @@ export function PageView(
   //   setActiveStepId(stepId);
   // };
 
+  const Content = () => {
+    return <Switch>
+    {/* <Match when={isFormRootVertetx()}> */}
+    {/* <Show when={props.isPreview && steps().length > 1}>
+        <div>
+          <button onClick={() => changeActiveStep(steps()[Math.max(steps().indexOf(selectedFormVertex()) - 1, 0)].id)}>Previous Step</button>
+          <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
+        </div>
+      </Show> */}
+    {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
+    {/* </Match> */}
+    <Match when={true}>
+      <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+    </Match>
+  </Switch>
+  }
   return (
-    <IsPreviewContext.Provider value={createSignal(props.isPreview ?? false)}>
-      {/* <PageContext.Provider value={{ events: {} }}> */}
       <Show keyed when={props.metaVertex}>
         <Switch>
-          {/* <Match when={collection() && !dataVertex()}> */}
-          {/* <For
-              each={
-                getSelectionOptions(
-                  graph,
-                  setGraph,
-                  `'g:${collection()!}'`,
-                  [props.vertex!],
-                ).vertexes
-              }
-            >
-              {(vertex) => (
-                <PageRenderContext.Provider value={[props.vertex!]}>
-                  <PageItemRender metaVertex={props.vertex!} data={vertex} />
-                </PageRenderContext.Provider>
-              )}
-            </For> */}
-          {/* </Match> */}
-          {/* <Match when={collection() && dataVertex()}>
-            <PageItemRender metaVertex={props.vertex!} />
-          </Match> */}
-          {/* <Match when={isFormRootVertetx()}> */}
-          {/* <Show when={props.isPreview && steps().length > 1}>
-              <div>
-                <button onClick={() => changeActiveStep(steps()[Math.max(steps().indexOf(selectedFormVertex()) - 1, 0)].id)}>Previous Step</button>
-                <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
-              </div>
-            </Show> */}
-          {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
-          {/* </Match> */}
+          <Match when={props.isPreview}>
+            <PreviewContext.Provider value={{previewData: props.data, previewMeta: props.metaVertex!}}>
+              <Content />
+            </PreviewContext.Provider>
+          </Match>
           <Match when={true}>
-            <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+            <Content />
           </Match>
         </Switch>
       </Show>
-      {/* </PageContext.Provider> */}
-    </IsPreviewContext.Provider>
+
   );
 }
 
