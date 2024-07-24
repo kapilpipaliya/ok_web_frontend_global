@@ -4,7 +4,7 @@ import { reconcile } from "solid-js/store";
 import { type GraphInterface, type Id, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
-import { SimpleWithDismissButton } from "../settings/rules/SimpleModal";
+import { SimpleWithDismissButton } from "../../SimpleModal";
 
 const getAttributeNames = (graph: GraphInterface, ids: Array<Id | number>): string[] => {
   return ids.map(id => graph.vertexes[id]?.P.name).filter(name => name !== undefined);

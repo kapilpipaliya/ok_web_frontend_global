@@ -1,6 +1,6 @@
 import { type SetStoreFunction } from "solid-js/store";
 import { Id, type GraphInterface, type Vertex } from "~/lib/graph/graph";
-import { setPreventUndoBeforeIndex } from "~/lib/graph/transaction/setPreventUndoBeforeIndex";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { saveUndoPoint } from "../../lib/graph/transaction/saveUndoPoint";
 import { addComponentAttrInPage } from "../page_designer/functions/drop/addComponentAttrInForm";
 
@@ -81,7 +81,4 @@ export function addFormInitialComponent(formVertex: Vertex, graph: GraphInterfac
   if (cancelButtonCompIndex === -1) {
     return -1;
   }
-
-  saveUndoPoint(txnId, graph);
-  setPreventUndoBeforeIndex(txnId, graph);
 }

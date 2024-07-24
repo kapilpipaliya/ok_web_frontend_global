@@ -11,7 +11,7 @@ import { ifNotNull } from "~/lib/utils";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
-import { evaluateRule } from "../page_designer/settings/properties/rules/evaluateRule";
+import { evaluateRule } from "../page_designer/rules/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { getDynamicComponent } from "./getDynamicComponent";
 

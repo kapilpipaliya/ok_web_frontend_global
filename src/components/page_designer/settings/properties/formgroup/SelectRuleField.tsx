@@ -10,7 +10,7 @@ import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
 
 import { AddNewRule } from "../../rules/AddNewRule";
-import { RulesModal } from "../rules/RulesModal";
+import { RulesModal } from "../../../rules/RulesModal";
 import { Label } from "./Label";
 
 export function SelectRuleField(

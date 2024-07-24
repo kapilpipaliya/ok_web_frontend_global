@@ -5,8 +5,8 @@ import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { generateTableInputMeta } from "../properties/rules/generateTableInputMeta";
-import { modifyFieldMetaAllFields } from "../properties/rules/modifyFieldMetaAllFields";
+import { generateTableInputMeta } from "../../rules/generateTableInputMeta";
+import { modifyFieldMetaAllFields } from "../../rules/modifyFieldMetaAllFields";
 
 export function UniqueConstrains() {
   const [layoutStore] = useDesignerLayoutStore();

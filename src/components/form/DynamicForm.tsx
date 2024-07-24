@@ -42,6 +42,9 @@ import { SaveCancelButton } from "./SaveCancelButton";
 import { addFormInitialComponent } from "./addFormInitialComponent";
 import { getFormData } from "./getFormData";
 import { getInitialFormState } from "./getInitialFormState";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
+
 
 export interface DynamicFormProps {
   buttonAlign?: string;
@@ -118,6 +121,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         return;
       }
     }
+    saveUndoPoint(txnId, graph);
+    setPreventUndoAtOrBeforeIndex(txnId, graph);
 
     setLayoutStore?.("formData", formData);
     setIsLoading(false);

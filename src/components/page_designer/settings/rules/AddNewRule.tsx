@@ -12,7 +12,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { RulesModal } from "../properties/rules/RulesModal";
+import { RulesModal } from "../../rules/RulesModal";
 
 export function AddNewRule(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
