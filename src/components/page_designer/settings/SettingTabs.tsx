@@ -11,7 +11,7 @@ import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
-import { FormStatus } from "./status/FormStatus";
+import { FormStatusWrapper } from "./status/FormStatusWrapper";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -74,7 +74,7 @@ export function SettingTabs() {
       </div>
       <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
         <FormConfig />
-        <FormStatus />
+        <FormStatusWrapper />
       </div>
       <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
         <Show when={selectedTab() === "Keys"}>
