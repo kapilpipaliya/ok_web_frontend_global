@@ -1,13 +1,14 @@
 import { Meta, Title } from "@solidjs/meta";
 import { clientOnly } from "@solidjs/start";
-import { Show, createEffect, createSignal, on, onMount } from "solid-js";
+import { Match, Show, Switch, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
+import { getFormAttr } from "~/components/grid/getFormAttr";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { isObject } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
@@ -17,6 +18,7 @@ const PageView = clientOnly(
 
 export function PageViewWrapper(
   props: Readonly<{
+    dataId?: Id
     expression?: string;
     formId?: string;
     pageId?: string;
@@ -73,9 +75,42 @@ export function PageViewWrapper(
       setMetaVertex(metaVertex_);
     }
   }
+  async function loadData() {
+    if (!props.dataId) {
+      return;
+    }
+    try {
+      const formAttrResult = await getFormAttr(props.pageVertexName ?? "");
+      if (formAttrResult.error) {
+        setError(formAttrResult.error);
+        return;
+      }
+
+      const { incoming, outgoing } = getEdgesFromRowsAttr(
+        formAttrResult.form!.attributes,
+        false,
+      );
+
+      const data = await getDataMGCall({
+        expression: `id:'${props.dataId}'`,
+        incoming,
+        outgoing,
+      });
+      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
+        setError(`No ${props.pageVertexLabel} found`);
+        return;
+      }
+      setGraphData(graph, setGraph, data.graph);
+      setDataVertex(data.result[0]);
+    } catch (e: any) {
+      console.error("error", e);
+      setError(`Error When Loading Form: ${e.message}`);
+    }
+  }
   onMount(() => {
     setMounted(true);
     loadFormDesignerMetaData();
+    loadData();
   });
   const [count, setCount] = createSignal(1);
 
@@ -112,7 +147,7 @@ export function PageViewWrapper(
       <Show when={metaVertex()?.P.seoDescription}>
         <Meta content={metaVertex()?.P.seoDescription} name="description" />
       </Show>
-      <Show when={mounted() && metaVertex()}>
+      <Show when={mounted() && metaVertex() && (props.dataId ? dataVertex() : true)}>
         <Show
           fallback={
             <PreviewPage>
@@ -125,18 +160,12 @@ export function PageViewWrapper(
           }
           when={!isPreview()}
         >
-          {/* <Show when={dataVertex()}> */}
           <PageView
             data={dataVertex()}
             isPreview={true}
             metaVertex={metaVertex()}
           />
         </Show>
-        {/* </Show> */}
-        {/* Pass Dummy Values */}
-        {/* <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}> */}
-
-        {/* </FormContext.Provider> */}
       </Show>
     </Show>
   );

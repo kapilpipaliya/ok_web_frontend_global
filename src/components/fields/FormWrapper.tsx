@@ -21,7 +21,7 @@ export function FormWrapper(
   } & GenericComponentProps,
 ) {
   const [graph, setGraph] = useGraph();
-  const {previewData, previewMeta} = usePreviewContext();
+  const { previewData, previewMeta } = usePreviewContext();
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -33,36 +33,40 @@ export function FormWrapper(
     txnId,
   } as unknown as IFormContext);
 
-  // if (!props.data?.id) {
-  const form = getFormMetaData(graph, () => { }, props.meta);
-  const defaultValues = form.attributes.reduce(
-    (acc, attr) => {
-      acc[attr.name] = attr.defaultValue;
-      return acc;
-    },
-    {} as { [key: string]: any },
-  );
-  const createResult = createForm(
-    graph,
-    setGraph,
-    txnId,
-    props.label ?? previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
-    defaultValues,
-  );
-  if (createResult.error) return createResult.error;
-  setFormData({
-    formData: createResult.vertex!,
-    formMeta: props.meta,
-    groupByTabsAndGroup: {},
-    tabs: [],
-    txnId,
-  });
+  if (!props.data?.id) {
+    const form = getFormMetaData(graph, () => { }, props.meta);
+    const defaultValues = form.attributes.reduce(
+      (acc, attr) => {
+        acc[attr.name] = attr.defaultValue;
+        return acc;
+      },
+      {} as { [key: string]: any },
+    );
+    const createResult = createForm(
+      graph,
+      setGraph,
+      txnId,
+      props.label ?? previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
+      defaultValues,
+    );
+    if (createResult.error) return createResult.error;
+    setFormData({
+      formData: createResult.vertex!,
+      formMeta: props.meta,
+      groupByTabsAndGroup: {},
+      tabs: [],
+      txnId,
+    });
 
-  // } else {
-  //   const loadResult = loadForm(graph, props.id);
-  //   if (loadResult.error) return loadResult.error;
-  //   dataVertex = loadResult.vertex!;
-  // }
+  } else {
+    setFormData({
+      formData: props.data,
+      formMeta: props.meta,
+      groupByTabsAndGroup: {},
+      tabs: [],
+      txnId,
+    });
+  }
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   onCleanup(() => {

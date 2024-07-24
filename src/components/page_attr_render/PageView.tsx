@@ -6,6 +6,7 @@ import { PreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
+import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrContext";
 
 export function PageView(
   props: Readonly<{
@@ -40,33 +41,37 @@ export function PageView(
 
   const Content = () => {
     return <Switch>
-    {/* <Match when={isFormRootVertetx()}> */}
-    {/* <Show when={props.isPreview && steps().length > 1}>
+      {/* <Match when={isFormRootVertetx()}> */}
+      {/* <Show when={props.isPreview && steps().length > 1}>
         <div>
           <button onClick={() => changeActiveStep(steps()[Math.max(steps().indexOf(selectedFormVertex()) - 1, 0)].id)}>Previous Step</button>
           <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
         </div>
       </Show> */}
-    {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
-    {/* </Match> */}
-    <Match when={true}>
-      <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
-    </Match>
-  </Switch>
+      {/* <FormWrapper data={props.data} label={props.metaVertex?.P.name} meta={selectedFormVertex()} /> */}
+      {/* </Match> */}
+      <Match when={true}>
+        <RepeaterVertexContext.Provider
+          value={props.data ? [props.data, ...useRepeaterVertexContext()] : useRepeaterVertexContext()}
+        >
+          <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+        </RepeaterVertexContext.Provider>
+      </Match>
+    </Switch>
   }
   return (
-      <Show keyed when={props.metaVertex}>
-        <Switch>
-          <Match when={props.isPreview}>
-            <PreviewContext.Provider value={{previewData: props.data, previewMeta: props.metaVertex!}}>
-              <Content />
-            </PreviewContext.Provider>
-          </Match>
-          <Match when={true}>
+    <Show keyed when={props.metaVertex}>
+      <Switch>
+        <Match when={props.isPreview}>
+          <PreviewContext.Provider value={{ previewData: props.data, previewMeta: props.metaVertex! }}>
             <Content />
-          </Match>
-        </Switch>
-      </Show>
+          </PreviewContext.Provider>
+        </Match>
+        <Match when={true}>
+          <Content />
+        </Match>
+      </Switch>
+    </Show>
 
   );
 }

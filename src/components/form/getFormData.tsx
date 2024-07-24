@@ -11,7 +11,7 @@ export const getFormData = async (
   id: Id,
 ): Promise<{ error: string; graph?: ServerResult["graph"] }> => {
   try {
-    const form = FormMetaData[formId] || FormMetaDataAuth[formId] || FormMetaData.Form;
+    const form = FormMetaData[formId] || FormMetaDataAuth[formId];
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
     const result = await getDataMGCall({
       expression: `id:'${id}'`,
