@@ -6,7 +6,9 @@ import {
   createSignal,
   onCleanup,
 } from "solid-js";
-import { type Renderable, toast } from "solid-toast";
+
+import toast, { type Renderable } from "./solid-toast/src";
+
 
 const DismissButton: Component<{
   onDismiss: () => void;

@@ -148,7 +148,7 @@ export function mergeVertexProperties(
           vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
         return updateVertex(
           Object.assign({}, graph.vertexes[actualVertexId2], {
-            properties: klona(properties),
+            P: klona(properties),
           }),
         );
       },

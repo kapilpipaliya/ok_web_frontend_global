@@ -4,7 +4,6 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Show, Suspense, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
-import { Toaster } from "solid-toast";
 
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
@@ -12,6 +11,7 @@ import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
+import { Toaster } from "./components/solid-toast/src";
 import {
   type EdgeMap,
   GraphContext,

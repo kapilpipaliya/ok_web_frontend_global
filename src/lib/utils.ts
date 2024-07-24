@@ -51,12 +51,7 @@ export function getId(input: string) {
   // TODO: letter make pascalCase letter
   return input;
 } // ts-belt
-export function isNumber(i: any) {
-  if ("number" === typeof i) {
-    return !Number.isNaN(i);
-  }
-  return !1;
-}
+
 export function deNullify<T extends Record<string, any>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
 
@@ -71,4 +66,16 @@ export function deNullify<T extends Record<string, any>>(obj: T): Partial<T> {
 
 export function ifNotNull<T>(value: T | null): T | undefined {
   return value !== null ? value : undefined;
+}
+
+// https://www.npmjs.com/package/@annexe/number.isnegative
+export function isNumber(value: number) {
+  return (value !== null &&
+      !isNaN(value) &&
+      Number.isFinite(value));
+}
+
+export function isNegative(value: number | string) {
+  const numericValue = Number(value);
+  return isNumber(numericValue) ? numericValue < 0 : false;
 }

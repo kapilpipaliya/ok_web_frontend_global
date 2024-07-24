@@ -7,9 +7,7 @@ import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
 import { getSubDomain } from "~/server/getSubDomain";
 
-export const checkIfNameExistsMGCall = async (
-  vertex: Vertex,
-) => {
+export async function checkIfNameExistsMGCall(vertex: Vertex) {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
@@ -18,6 +16,10 @@ export const checkIfNameExistsMGCall = async (
   const label = vertex.L[0];
   const name = vertex.P.name;
   const id = vertex.id;
+
+  if (!name) {
+    return { error: true, message: "Please configure the name first" };
+  }
 
   const buildUniqueCheckQuery = (label: string, name: string, id?: string) => {
     let baseQuery = `MATCH (v:${label}) WHERE v.name = $name`;
@@ -35,7 +37,7 @@ export const checkIfNameExistsMGCall = async (
     if (id) {
       baseQuery += `v.elementId != $id AND `;
     }
-    for(const key of keys) {
+    for (const key of keys) {
       baseQuery += `v.${key.P.name} = $${key.P.name} AND `;
       params[key.P.name] = vertex.P[key.P.name];
     }
@@ -57,9 +59,9 @@ export const checkIfNameExistsMGCall = async (
     const uniqueConstrains = await evalAsync(jsep(`g:'Form[${label}]->$0Unique'`), {});
     if (uniqueConstrains.length > 0) {
       for (const uniqueConstraintVertex of uniqueConstrains) {
-        const keys = await evalAsync(jsep('->$0Key'), {vertexes: [uniqueConstraintVertex]});
+        const keys = await evalAsync(jsep('->$0Key'), { vertexes: [uniqueConstraintVertex] });
         if (keys.length > 0) {
-          const {params, query} = buildUniqueConstrainCheckQuery(keys);
+          const { params, query } = buildUniqueConstrainCheckQuery(keys);
           const result = await session.run(query, params);
           const uniquConstrainExists = result.records.length > 0;
           if (uniquConstrainExists) {
@@ -74,4 +76,4 @@ export const checkIfNameExistsMGCall = async (
   } finally {
     await session.close();
   }
-};
+}
