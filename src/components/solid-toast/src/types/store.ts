@@ -1,40 +1,46 @@
-import type { Toast, ToastOptions } from './';
+import { Toast } from './';
+
+export enum ActionType {
+  ADD_TOAST,
+  UPDATE_TOAST,
+  UPSERT_TOAST,
+  DISMISS_TOAST,
+  REMOVE_TOAST,
+  START_PAUSE,
+  END_PAUSE,
+}
 
 export type Action =
   | {
-      time: number;
-      type: 'end_pause';
+      type: ActionType.ADD_TOAST;
+      toast: Toast;
     }
   | {
-      time: number;
-      type: 'start_pause';
+      type: ActionType.UPSERT_TOAST;
+      toast: Toast;
     }
   | {
+      type: ActionType.UPDATE_TOAST;
       toast: Partial<Toast>;
-      type: 'update';
     }
   | {
-      toast: Toast;
-      type: 'add';
-    }
-  | {
-      toast: Toast;
-      type: 'upsert';
-    }
-  | {
+      type: ActionType.DISMISS_TOAST;
       toastId?: string;
-      type: 'dismiss';
     }
   | {
+      type: ActionType.REMOVE_TOAST;
       toastId?: string;
-      type: 'remove';
+    }
+  | {
+      type: ActionType.START_PAUSE;
+      time: number;
+    }
+  | {
+      type: ActionType.END_PAUSE;
+      time: number;
     };
 
 export interface State {
-  pausedAt: number | undefined;
   toasts: Toast[];
-}
-
-export interface InitOptions {
-  options: ToastOptions[];
+  pausedAt: number | undefined;
 }

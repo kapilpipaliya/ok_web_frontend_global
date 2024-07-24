@@ -1,11 +1,10 @@
-import { createRoot, createSignal } from 'solid-js';
-
-import type { Message, Toast, ToastHandler, ToastOptions, ToastType, ToasterProps } from '../types';
-
-import { type DefaultToastOptions, type Renderable, type ValueOrFunction, resolveValue } from '../types';
+import { createRoot, createSignal, untrack } from 'solid-js';
+import { ToasterProps, Message, ToastType, ToastOptions, Toast, ToastHandler, ActionType } from '../types';
+import { defaultToasterOptions, defaultToastOptions, defaultTimeouts } from './defaults';
 import { generateID } from '../util';
-import { defaultTimeouts, defaultToastOptions, defaultToasterOptions } from './defaults';
 import { dispatch, store } from './store';
+
+import { resolveValue, Renderable, ValueOrFunction, DefaultToastOptions } from '../types';
 
 export const [defaultOpts, setDefaultOpts] = createSignal<ToasterProps>(defaultToasterOptions);
 
@@ -13,21 +12,21 @@ export const createToast = (message: Message, type: ToastType = 'blank', options
   ...defaultToastOptions,
   ...defaultOpts().toastOptions,
   ...options,
-  createdAt: Date.now(),
-  duration: options.duration || defaultOpts().toastOptions?.duration || defaultTimeouts[type],
-  id: options.id || generateID(),
+  type,
   message,
   pauseDuration: 0,
+  createdAt: Date.now(),
+  visible: true,
+  id: options.id || generateID(),
   paused: false,
-  position:
-    options.position || defaultOpts().toastOptions?.position || defaultOpts().position || defaultToastOptions.position,
   style: {
     ...defaultToastOptions.style,
     ...defaultOpts().toastOptions?.style,
     ...options.style,
   },
-  type,
-  visible: true,
+  duration: options.duration || defaultOpts().toastOptions?.duration || defaultTimeouts[type],
+  position:
+    options.position || defaultOpts().toastOptions?.position || defaultOpts().position || defaultToastOptions.position,
 });
 
 const createToastCreator =
@@ -36,12 +35,13 @@ const createToastCreator =
     return createRoot(() => {
       const existingToast = store.toasts.find((t) => t.id === options.id) as Toast;
       const toast = createToast(message, type, { ...existingToast, duration: undefined, ...options });
-      dispatch({ toast, type: 'upsert' });
+      dispatch({ type: ActionType.UPSERT_TOAST, toast });
       return toast.id;
     });
   };
 
 const toast = (message: Message, opts?: ToastOptions) => createToastCreator('blank')(message, opts);
+const test = untrack(() => toast);
 
 toast.error = createToastCreator('error');
 toast.success = createToastCreator('success');
@@ -50,17 +50,17 @@ toast.custom = createToastCreator('custom');
 
 toast.dismiss = (toastId?: string) => {
   dispatch({
+    type: ActionType.DISMISS_TOAST,
     toastId,
-    type: 'dismiss',
   });
 };
 
 toast.promise = <T>(
   promise: Promise<T>,
   msgs: {
-    error: ValueOrFunction<Renderable, any>;
     loading: Renderable;
     success: ValueOrFunction<Renderable, T>;
+    error: ValueOrFunction<Renderable, any>;
   },
   opts?: DefaultToastOptions
 ) => {
@@ -86,8 +86,8 @@ toast.promise = <T>(
 
 toast.remove = (toastId?: string) => {
   dispatch({
+    type: ActionType.REMOVE_TOAST,
     toastId,
-    type: 'remove',
   });
 };
 

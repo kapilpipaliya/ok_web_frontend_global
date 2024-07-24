@@ -1,6 +1,5 @@
-import { type Component, Match, Switch, createEffect } from 'solid-js';
-
-import { type ToastBarProps, resolveValue } from '../types';
+import { createEffect, Match, Switch, Component } from 'solid-js';
+import { resolveValue, ToastBarProps } from '../types';
 import { getToastYDirection as d, iconContainer, messageContainer, toastBarBase } from '../util';
 import { Error, Loader, Success } from './';
 
@@ -13,25 +12,25 @@ export const ToastBar: Component<ToastBarProps> = (props) => {
     if (props.toast.visible) {
       el.animate(
         [
-          { opacity: 0.5, transform: `translate3d(0,${direction * -200}%,0) scale(.6)` },
-          { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' },
+          { transform: `translate3d(0,${direction * -200}%,0) scale(.6)`, opacity: 0.5 },
+          { transform: 'translate3d(0,0,0) scale(1)', opacity: 1 },
         ],
         {
           duration: 350,
-          easing: 'cubic-bezier(.21,1.02,.73,1)',
           fill: 'forwards',
+          easing: 'cubic-bezier(.21,1.02,.73,1)'
         }
       );
     } else {
       el.animate(
         [
-          { opacity: 1, transform: 'translate3d(0,0,-1px) scale(1)' },
-          { opacity: 0, transform: `translate3d(0,${direction * -150}%,-1px) scale(.4)` },
+          { transform: 'translate3d(0,0,-1px) scale(1)', opacity: 1 },
+          { transform: `translate3d(0,${direction * -150}%,-1px) scale(.4)`, opacity: 0 },
         ],
         {
           duration: 400,
-          easing: 'cubic-bezier(.06,.71,.55,1)',
           fill: 'forwards',
+          easing: 'cubic-bezier(.06,.71,.55,1)'
         }
       );
     }
@@ -39,8 +38,8 @@ export const ToastBar: Component<ToastBarProps> = (props) => {
 
   return (
     <div
-      class={props.toast.className}
       ref={el}
+      class={props.toast.className}
       style={{
         ...toastBarBase,
         ...props.toast.style,

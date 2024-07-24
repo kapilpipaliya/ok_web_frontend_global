@@ -1,9 +1,9 @@
-import type { JSX } from 'solid-js';
+import { JSX } from 'solid-js';
 
-export type ToastType = 'blank' | 'custom' | 'error' | 'loading' | 'success';
-export type ToastPosition = 'bottom-center' | 'bottom-left' | 'bottom-right' | 'top-center' | 'top-left' | 'top-right';
+export type ToastType = 'success' | 'error' | 'loading' | 'blank' | 'custom';
+export type ToastPosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
-export type Renderable = JSX.Element | null | string;
+export type Renderable = JSX.Element | string | null;
 
 export type ValueFunction<TValue, TArg> = (arg: TArg) => TValue;
 export type ValueOrFunction<TValue, TArg> = TValue | ValueFunction<TValue, TArg>;
@@ -21,33 +21,36 @@ export interface IconTheme {
 }
 
 export interface Toast {
-  ariaProps: {
-    'aria-live': 'assertive' | 'off' | 'polite';
-    role: 'alert' | 'status';
-  };
-  className?: string;
-  createdAt: number;
-  duration?: number;
-  height?: number;
-  icon?: Renderable;
-  iconTheme?: IconTheme;
+  type: ToastType;
   id: string;
   message: ValueOrFunction<Renderable, Toast>;
+  icon?: Renderable;
+  duration?: number;
   pauseDuration: number;
-
   paused: boolean;
   position?: ToastPosition;
+
+  ariaProps: {
+    role: 'status' | 'alert';
+    'aria-live': 'assertive' | 'off' | 'polite';
+  };
+
   style?: JSX.CSSProperties;
-  type: ToastType;
-  unmountDelay: number;
+  className?: string;
+
+  iconTheme?: IconTheme;
+
+  createdAt: number;
   updatedAt?: number;
   visible: boolean;
+  height?: number;
+  unmountDelay: number;
 }
 
 export type ToastOptions = Partial<
   Pick<
     Toast,
-    'ariaProps' | 'className' | 'duration' | 'icon' | 'iconTheme' | 'id' | 'position' | 'style' | 'unmountDelay'
+    'id' | 'icon' | 'duration' | 'ariaProps' | 'className' | 'style' | 'position' | 'unmountDelay' | 'iconTheme'
   >
 >;
 
@@ -62,11 +65,11 @@ export type Message = ValueOrFunction<Renderable, Toast>;
 export type ToastHandler = (message: Message, options?: ToastOptions) => string;
 
 export interface ToasterProps {
-  containerClassName?: string;
-  containerStyle?: JSX.CSSProperties;
-  gutter?: number;
   position?: ToastPosition;
   toastOptions?: DefaultToastOptions;
+  gutter?: number;
+  containerStyle?: JSX.CSSProperties;
+  containerClassName?: string;
 }
 
 export interface ToastContainerProps {
@@ -74,8 +77,8 @@ export interface ToastContainerProps {
 }
 
 export interface ToastBarProps {
-  position: ToastPosition;
   toast: Toast;
+  position: ToastPosition;
 }
 
 export type IconProps = Partial<IconTheme>;
