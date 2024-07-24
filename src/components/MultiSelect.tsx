@@ -9,6 +9,7 @@ import { evaluate } from "~/lib/expression_eval";
 import { isObject } from "~/lib/utils";
 
 import { DropdownMenu } from "./DropdownMenu";
+import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
 import { ZIndex } from "./ZIndex";
 
@@ -208,7 +209,7 @@ export function MultiSelectField(
       return (
         <Show
           fallback={
-            <button
+            <div // NOSONAR
               class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selectedValue().some(
@@ -221,18 +222,15 @@ export function MultiSelectField(
                   p.option[childrenKey()].length === 0) &&
                 handleSelectChange(p.option)
               }
-              type="button"
-            >
-              {props.renderLabel
-                ? props.renderLabel(p.option, false)
-                : getOptionLabel(p.option)}
-            </button>
+            >              {props.renderLabel
+              ? props.renderLabel(p.option, false)
+              : getOptionLabel(p.option)}</div>
           }
           // @ts-expect-error ignore
           when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
         >
           <div>
-            <button
+            <div // NOSONAR
               class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
               classList={{
                 "bg:#ddd opacity:0.5": selectedValue().some(
@@ -240,8 +238,7 @@ export function MultiSelectField(
                 ),
               }}
               onClick={() => toggleExpandOption(p.option)}
-              type="button"
-            >
+                          >
               <Icon
                 icon={
                   isExpanded()
@@ -254,7 +251,7 @@ export function MultiSelectField(
                   ? props.renderLabel(p.option, false)
                   : getOptionLabel(p.option)}
               </span>
-            </button>
+            </div>
             <Show when={isExpanded()}>
               <div class="pl:20px">
                 {/* @ts-expect-error ignore */}
@@ -303,17 +300,15 @@ export function MultiSelectField(
               {props.renderLabel
                 ? props.renderLabel(tag, true)
                 : getOptionLabel(tag)}
-              <button
-                class="cursor:pointer d:flex"
+              <IconButton
+                icon="ic:round-close"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopImmediatePropagation();
                   return handleRemoveTag(getOptionValue(tag));
                 }}
-                type="button"
-              >
-                <Icon height={21} icon="ic:round-close" width={21} />
-              </button>
+                size={21}
+              />
             </div>
           )}
         </For>

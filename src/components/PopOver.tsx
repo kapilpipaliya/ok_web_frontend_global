@@ -2,6 +2,8 @@ import type { JSX } from "solid-js";
 
 import { Popover } from "@kobalte/core/popover";
 
+import { IconButton } from "./IconButton";
+
 export function CustomPopover(
   props: Readonly<{
     children: JSX.Element;
@@ -36,13 +38,11 @@ export function CustomPopover(
           )}
           {props.children}
         </div>
-        <button
+        <IconButton
           class="background:none border:none cursor:pointer font-size:1.5rem line-height:1 margin-right:0.25rem margin-top:0.25rem position:absolute right:1rem top:1rem"
+          icon="ic:round-close"
           onClick={() => props.setIsOpen(false)}
-        >
-          {" "}
-          &times;
-        </button>
+        />
       </Popover.Content>
     </Popover>
   );

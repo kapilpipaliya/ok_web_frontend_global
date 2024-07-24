@@ -1,5 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { For } from "solid-js";
+
+import { IconButton } from "~/components/IconButton";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
@@ -15,8 +17,8 @@ export const ResizeViewButtons = () => {
       <For each={views}>
         {(view, index) => (
 
-            <button
-              class="ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
+            <IconButton
+              class="b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
               classList={{
                 "bg:#E0E7F3": view.value === layoutStore.view,
                 "bl:none": index() !== 0,
@@ -25,12 +27,11 @@ export const ResizeViewButtons = () => {
                 "r:0|5|5|0": index() === 2,
                 "r:5|0|0|5": index() === 0,
               }}
+              icon={view.key}
               onclick={() => setLayoutStore("view", view.value)}
+              size={22}
               title={view.value}
-              type="button"
-            >
-              <Icon height={22} icon={view.key} width={22} />
-            </button>
+            />
        
         )}
       </For>

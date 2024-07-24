@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { CustomTooltip } from "~/components/Tooltip";
 
 /*
@@ -36,9 +37,12 @@ export const ContainerLabel = (props: ContainerLabelProps) => {
       </Show>
       <Show when={props.info}>
         <CustomTooltip message="Click for more Info" title={props.title}>
-          <button class="flex cursor:pointer" onClick={handleInfoClick} type="button">
-            <Icon height={14} icon="mdi:information-outline" width={14} />
-          </button>
+          <IconButton
+            icon="mdi:information-outline"
+            onClick={handleInfoClick}
+            size={14}
+            title="Click for more Info"
+          />
         </CustomTooltip>
       </Show>
     </span>

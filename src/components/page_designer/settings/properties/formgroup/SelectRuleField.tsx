@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
@@ -30,20 +30,16 @@ export function SelectRuleField(
     return (
       <div class="flex ai:center gap:4">
         <span>{option.P.name}</span>
-        <button
+        <IconButton
           class="center-content flex"
+          icon={"mingcute:settings-5-line"}
+          iconCss={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();
             setIsOpenRule(true);
           }}
-        >
-          <Icon
-            class={"cursor:pointer opacity:.5 opacity:1:hover"}
-            height={22}
-            icon={"mingcute:settings-5-line"}
-            width={22}
-          />
-        </button>
+          size={22}
+        />
         <Show when={isOpenRule()}>
           <ZIndex>
             <RulesModal
@@ -107,9 +103,7 @@ export function SelectRuleField(
     };
     return (
       <>
-        <button onClick={handleAddNewClick} title="Add New Rule">
-          <Icon height={21} icon="ic:round-add" width={21} />
-        </button>
+        <IconButton icon="ic:round-add" onClick={handleAddNewClick} size={21} title="Add New Rule" />
         <Show when={showDropdown()}>
           <ZIndex>
             <DropdownMenu
@@ -132,11 +126,11 @@ export function SelectRuleField(
     };
     return <>
       <button class="" onClick={onDisplayAllRules}>
-        <Icon
+        <IconButton
           class={"cursor:pointer opacity:.5 opacity:1:hover"}
-          height={22}
           icon={"mingcute:settings-5-line"}
-          width={22} />
+          size={22}
+        />
       </button>
       <Show when={showRuleSettings()}>
         <ZIndex>

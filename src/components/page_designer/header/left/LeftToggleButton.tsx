@@ -1,21 +1,18 @@
-import { Icon } from "@iconify-icon/solid";
 
+import { IconButton } from "~/components/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function LeftToggleButton() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <button
-      class="flex align-items:center border-radius:5px gap:10px outline:2px|solid|transparent outline:offset|2px:focus"
+    <IconButton
+      class="border-radius:5px gap:10px outline-offset:2px:focus outline:2px|solid|transparent"
+      icon="solar:widget-add-outline"
+      iconCss="color:#37c cursor:pointer"
       onClick={() => setLayoutStore("isLeftOpen", !layoutStore.isLeftOpen)}
+      size={22}
     >
-      <Icon
-        class="color:#37c cursor:pointer"
-        height={22}
-        icon={"solar:widget-add-outline"}
-        width={22}
-      />
-      <span class={`cursor:pointer d:none@<sm font:14`}>Add Form Element</span>
-    </button>
+      <span class="cursor:pointer d:none@<sm font:14">Add Form Element</span>
+    </IconButton>
   );
 }

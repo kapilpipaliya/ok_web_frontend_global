@@ -1,5 +1,6 @@
-import { Icon } from "@iconify-icon/solid";
 
+
+import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
@@ -23,20 +24,16 @@ export function SelectPageField(
     return (
       <div class="flex ai:center gap:4">
         <span>{option.P.name}</span>
-        <button
-          class="center-content flex"
+        <IconButton
+
+          icon={"mingcute:settings-5-line"}
+          iconCss={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();
             window.open(`/admin/ThankYouPage/${option.id}`, "_blank");
           }}
-        >
-          <Icon
-            class={"cursor:pointer opacity:.5 opacity:1:hover"}
-            height={22}
-            icon={"mingcute:settings-5-line"}
-            width={22}
-          />
-        </button>
+          size={22}
+        />
 
       </div>
     );
@@ -71,9 +68,12 @@ export function SelectPageField(
     };
     return (
       <>
-        <button onClick={handleAddNewClick} title="Add New Rule">
-          <Icon height={21} icon="ic:round-add" width={21} />
-        </button>
+        <IconButton
+          icon="ic:round-add"
+          onClick={handleAddNewClick}
+          size={21}
+          title="Add New Rule"
+        />
       </>
     );
   };

@@ -1,5 +1,6 @@
 import { Show, createSignal } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { useZIndex } from "~/components/ZIndex";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
@@ -10,7 +11,6 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { IconButton } from "./IconButton";
 import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
 
@@ -36,6 +36,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           icon="material-symbols:drag-indicator"
           onClick={() => { }}
           onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
+          size={20}
           title="Move"
         />
         <div class="display:flex font-size:0.875rem line-height:1.25rem margin-right:4px" title="Name">
@@ -50,6 +51,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
             if (parentResult.error) return;
             onLayoutItemClick(setLayoutStore, parentResult.vertex!.id, graph, setGraph);
           }}
+          size={20}
           title="Parent"
         />
         <IconButton
@@ -66,6 +68,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
               layoutStore.formData.formData,
             )
           }
+          size={20}
           title="Duplicate"
         />
         <IconButton
@@ -73,6 +76,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
           icon="fluent:save-as-24-regular"
           onClick={() => setShowModal(true)}
           ref={(el) => (saveAsTemplateRef = el)}
+          size={20}
           title="Save as Template"
         />
         <Show when={showModal()}>
@@ -98,6 +102,7 @@ export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
               showSuccessToast,
             )
           }
+          size={20}
           title="Delete"
         />
       </div>

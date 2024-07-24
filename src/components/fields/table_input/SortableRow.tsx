@@ -10,8 +10,8 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
+import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { IconButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/IconButton";
 import { useFormContext } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -100,13 +100,13 @@ export const SortableRow = (props: {
       >
         <td>
           <div class="flex ai:center jc:center">
-            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconCss="transition:transform|2s|ease-in-out"/>
+            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconCss="transition:transform|2s|ease-in-out" size={20}/>
             <Show when={expandVertex()}>
-              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconCss="transition:transform|2s|ease-in-out" onClick={toggleExpanded}/>
+              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconCss="transition:transform|2s|ease-in-out" onClick={toggleExpanded} size={20}/>
             </Show>
-            <IconButton class="color:red cursor:pointer m:5px" icon="mingcute:delete-line" onClick={handleDeleteRow} />
+            <IconButton class="color:red cursor:pointer m:5px" icon="mingcute:delete-line" onClick={handleDeleteRow} size={20}/>
             <Show when={expandVertex()}>
-              <IconButton class="color:green cursor:pointer" icon="icon-park-outline:plus" onClick={handleAddNewRow} />
+              <IconButton class="color:green cursor:pointer" icon="icon-park-outline:plus" onClick={handleAddNewRow} size={20}/>
             </Show>
           </div>
           {/*<Show when={!disabled}>*/}

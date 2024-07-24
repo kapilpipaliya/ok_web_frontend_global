@@ -39,7 +39,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
     isHovered() ? `${baseStyle} ${hoverStyle}` : baseStyle;
 
   return (
-    <button
+    <div // NOSONAR
       class={itemStyle()}
       draggable={true}
       onDragEnd={() => {
@@ -71,7 +71,6 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
       //   );
       //   setLayoutStore("draggedVertices", []);
       // }}
-      type="button"
     >
       <Show when={isHovered()}>
         <OpenComponentSettings
@@ -106,6 +105,6 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           {props.child?.P.label || props.child?.P.name}
         </span>
       </div>
-    </button>
+    </div>
   );
 }

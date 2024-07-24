@@ -1,6 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { Show, createSignal, onCleanup, onMount } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { insertNewRow } from "~/components/fields/table_input/insertNewRow";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
@@ -100,9 +101,12 @@ export function AddNewRule(
             />
           </div>
         </label>
-        <button onClick={addNewState}>
-          <Icon class="ml:2" height={21} icon="ic:round-check" width={21} />
-        </button>
+        <IconButton
+          icon="ic:round-check"
+          iconCss="ml:2"
+          onClick={addNewState}
+          size={21}
+        />
         <Show when={selectedRule()}>
           <ZIndex>
             <RulesModal

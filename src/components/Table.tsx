@@ -1,6 +1,5 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
-import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
   For,
@@ -10,6 +9,8 @@ import {
   Switch,
   createSignal,
 } from "solid-js";
+
+import { IconButton } from "./IconButton";
 
 type TableProps = {
   data: any[];
@@ -134,26 +135,6 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 }
 
-function IconButton(props: {
-  classList: Record<string, boolean>;
-  disabled: boolean;
-  icon: string;
-  onClick: () => void;
-  title: string;
-}) {
-  return (
-      <button
-        class="flex ai:center bg:#d3d3d345:hover jc:center p:4 r:50%"
-        classList={props.classList}
-        disabled={props.disabled}
-        onClick={props.onClick}
-        title={props.title}
-      >
-        <Icon height={22} icon={props.icon} width={22} />
-      </button>
-  );
-}
-
 const TableActions = (props: Readonly<{
   currentPage: Accessor<number>;
   data: any;
@@ -191,6 +172,7 @@ const TableActions = (props: Readonly<{
         </div>
         <div class="flex gap:10px">
           <IconButton
+          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
               "color:black": props.currentPage() !== 0,
               "color:lightgrey": props.currentPage() === 0,
@@ -198,9 +180,11 @@ const TableActions = (props: Readonly<{
             disabled={props.currentPage() === 0}
             icon="icon-park-outline:go-start"
             onClick={props.handleFirstPage}
+            size={22}
             title="Move first"
           />
           <IconButton
+            class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
               "color:black": props.currentPage() !== 0,
               "color:lightgrey": props.currentPage() === 0,
@@ -208,9 +192,11 @@ const TableActions = (props: Readonly<{
             disabled={props.currentPage() === 0}
             icon="icon-park-outline:left"
             onClick={props.handlePreviousPage}
+            size={22}
             title="Previous"
           />
           <IconButton
+          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
               "color:black": props.currentPage() !== props.totalPages() - 1,
               "color:lightgrey": props.currentPage() === props.totalPages() - 1,
@@ -218,9 +204,11 @@ const TableActions = (props: Readonly<{
             disabled={props.currentPage() === props.totalPages() - 1}
             icon="icon-park-outline:right"
             onClick={props.handleNextPage}
+            size={22}
             title="Next"
           />
           <IconButton
+          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
               "color:black": props.currentPage() !== props.totalPages() - 1,
               "color:lightgrey": props.currentPage() === props.totalPages() - 1,
@@ -228,6 +216,7 @@ const TableActions = (props: Readonly<{
             disabled={props.currentPage() === props.totalPages() - 1}
             icon="icon-park-outline:go-end"
             onClick={props.handleLastPage}
+            size={22}
             title="Move last"
           />
         </div>

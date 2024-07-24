@@ -1,6 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { For } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/undo";
@@ -29,18 +30,15 @@ export function UndoRedoIcons() {
     <div class="flex ai:center gap:2">
       <For each={icons}>
         {(item) => (
-          <button
+          <IconButton
             class={`${
-              item.disabled() ? 'cursor:not-allowed opacity:50' : 'hover:color:#000'
+              item.disabled() ? 'cursor:not-allowed opacity:.5' : 'hover:color:#000'
             } flex ai:center b:1px|solid|lightgrey bg:white color:grey jc:center p:6 r:7`}
-            disabled={item.disabled()}
+            icon={item.icon}
             onClick={item.onClick}
+            size={22}
             title={item.tooltip}
-            type="button"
-          >
-            <Icon height={22} icon={item.icon} width={22} />
-          </button>
-        )}
+          />)}
       </For>
     </div>
   );

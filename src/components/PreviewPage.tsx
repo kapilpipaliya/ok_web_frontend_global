@@ -1,5 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { For, createSignal } from "solid-js";
+
+import { IconButton } from "./IconButton";
 
 const PreviewPage = (props: any) => {
   const [view, setView] = createSignal("Desktop");
@@ -17,22 +19,20 @@ const PreviewPage = (props: any) => {
       <div class="flex mb:16">
         <For each={views}>
           {(viewData, index) => (
-   
-              <button
-                classList={{
-                  "bg:#E0E7F3 color:#5252F1": viewData.value === view(),
-                  "color:grey": viewData.value !== view(),
-                  "r:0|5|5|0": index() === 2,
-                  "r:5|0|0|5": index() === 0,
-                  "rel ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
-                }}
-                onclick={() => setView(viewData.value)}
-                title={viewData.value}
-                type="button"
-              >
-                <Icon height={22} icon={viewData.key} width={22} />
-              </button>
-    
+            <IconButton
+              classList={{
+                "bg:#E0E7F3 color:#5252F1": viewData.value === view(),
+                "color:grey": viewData.value !== view(),
+                "r:0|5|5|0": index() === 2,
+                "r:5|0|0|5": index() === 0,
+                "rel b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
+              }}
+              icon={viewData.key}
+              onclick={() => setView(viewData.value)}
+              size={22}
+              title={viewData.value}
+            />
+
           )}
         </For>
       </div>

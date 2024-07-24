@@ -1,9 +1,10 @@
-import { Icon } from "@iconify-icon/solid";
+
 import jsep from "jsep";
 import { For, Show, createMemo, createSignal } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -189,22 +190,8 @@ function RulesList() {
           >
             <span class="flex:1">{rule.P.name} ({ruleUsageCount(rule).length} usage{ruleUsageCount(rule).length > 1 ? "s" : ""})</span>
             <div class="flex gap:2">
-              <button class="flex ai:center" onClick={() => openRuleSettings(rule)} title="Edit Rule" type="button">
-                <Icon
-                  class={"cursor:pointer opacity:.5 opacity:1:hover"}
-                  height={22}
-                  icon={"mingcute:settings-5-line"}
-                  width={22}
-                />
-              </button>
-              <button class="flex ai:center color:red" onClick={() => setSelectedRuleToDelete(rule)} title="Delete Rule" type="button">
-                <Icon
-                  class={"cursor:pointer opacity:.5 opacity:1:hover"}
-                  height={22}
-                  icon={"mage:trash"}
-                  width={22}
-                />
-              </button>
+              <IconButton class="cursor:pointer opacity:.5 opacity:1:hover" icon="mingcute:settings-5-line" onClick={() => openRuleSettings(rule)} size={22} title="Edit Rule" type="button" />
+              <IconButton class="cursor:pointer opacity:.5 opacity:1:hover" icon="mage:trash" onClick={() => setSelectedRuleToDelete(rule)} size={22} title="Delete Rule" type="button" />
             </div>
           </div>
         )}

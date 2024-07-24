@@ -1,5 +1,6 @@
-import { Icon } from "@iconify-icon/solid";
 import { createEffect, createSignal } from "solid-js";
+
+import { IconButton } from "~/components/IconButton";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
@@ -48,27 +49,21 @@ export function ShareSection() {
           value={getLink()}
         />
      
-          <button
-            class={
-              "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
-            }
-            onClick={previewLink}
-            title="Preview link"
-          >
-            🚀
-          </button>
-        
+        <IconButton
+          class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
+          icon="mdi:external-link"
+          onClick={previewLink}
+          size={24}
+          title="Preview link"
+        />
 
-          <button
-            class={
-              "border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
-            }
-            onClick={copyToClipboard}
-            title={showCopiedTooltip() ? "Copied" : "Click to copy"}
-          >
-            📋
-          </button>
-
+        <IconButton
+          class={"border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"}
+          icon="mdi:clipboard-outline"
+          onClick={copyToClipboard}
+          size={24}
+          title={showCopiedTooltip() ? "Copied" : "Click to copy"}
+        />
       </div>
       <div class="mb:20px">
         <button
@@ -95,9 +90,13 @@ export function ShareSection() {
         </button>
       </div>
       <div class="flex mb:20px">
-        <button class={"bg:#F5F5F5 p:10 r:5|0|0|5"} onClick={copyToClipboard}>
-          <Icon height={25} icon={"system-uicons:mail"} width={25} />
-        </button>
+        <IconButton
+          class={"bg:#F5F5F5 p:10 r:5|0|0|5"}
+          icon="system-uicons:mail"
+          onClick={copyToClipboard}
+          size={24}
+          title="Copy link"
+        />
 
         <input
           class="p:10 r:0|5|5|0 w:full"

@@ -1,6 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { type Accessor, Match, Show, Switch } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { Content } from "./Content";
@@ -64,13 +65,13 @@ export function HighlightSetValueContent(
           props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null
         }
       >
-        <button onClick={() => props.setValue(props.metaVertex, null)} type="button">
-          <Icon
-            class="color:#ff0000 cursor:pointer"
-            data-testid="clearIcon"
-            icon="mdi:close"
-          />
-        </button>
+        <IconButton
+          data-testid="clearIcon"
+          icon="mdi:close"
+          iconCss="color:#ff0000 cursor:pointer"
+          onClick={() => props.setValue(props.metaVertex, null)}
+          size={24}
+        />
       </Show>
     </div>
   );

@@ -1,7 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import { IconButton } from "~/components/IconButton";
 import PreviewPage from "~/components/PreviewPage";
 import { ZIndex, useZIndex } from "~/components/ZIndex";
 import PageView from "~/components/page_attr_render/PageView";
@@ -55,14 +55,14 @@ export function PreviewButton() {
   return (
     <>
 
-        <button
+        <IconButton
           class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
+          icon="ph:eye"
           onClick={handleButtonClick}
+          size={22}
           title="Preview"
           type="button"
-        >
-          <Icon height={22} icon={"ph:eye"} width={22} />
-        </button>
+        />
 
       <Show when={isModalOpen()}>
         <ZIndex>

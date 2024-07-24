@@ -1,6 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { Show, createSignal } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { FormContext } from "~/lib/contexts";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -15,13 +16,12 @@ import { SaveIconButton } from "./right/SaveIconButton";
 
 const SettingPageIcon = () => {
   const [, setLayoutStore] = useDesignerLayoutStore();
-  return <button
-    class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover jc:center p:6 r:7"
+  return <IconButton
+    class="b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
+    icon="solar:settings-linear"
     onClick={() => setLayoutStore("selectedSection", "setting")}
-    type="button"
-  >
-    <Icon height={22} icon="solar:settings-linear" width={22} />
-  </button>
+    size={22}
+  />
 }
 export function HeaderRow() {
   // const [graph] = useGraph();

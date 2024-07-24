@@ -25,7 +25,7 @@ export function PageItem(
     new Set<Vertex>(),
   );
 
-  let menuRef: HTMLButtonElement;
+  let menuRef: HTMLDivElement;
 
   const baseStyle =
     "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
@@ -87,16 +87,14 @@ export function PageItem(
 
   return (
     <Show when={props.child.name}>
-      <button
-        class="relative"
-        class={itemStyle()}
+      <div // NOSONAR
+        class={`relative ${itemStyle()}`}
         draggable={true}
         onDragStart={handleDragStart}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         ondblclick={handleDoubleClick}
         ref={menuRef!}
-        type="button"
       >
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
         <div class="font-size:14px">{toTitle(props.child.name)}</div>
@@ -110,7 +108,7 @@ export function PageItem(
             <PageViewWrapper formId={props.child.id} />
           </DropdownMenu>
         </Show>
-      </button>
+      </div>
     </Show>
   );
 }

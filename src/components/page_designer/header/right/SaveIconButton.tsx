@@ -1,6 +1,7 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { createMemo } from "solid-js";
 
+import { IconButton } from "~/components/IconButton";
 import { formSubmit } from "~/components/form/formSubmit";
 import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
@@ -16,16 +17,12 @@ export function SaveIconButton() {
   );
 
   return (
-
-      <button
-        class={`${isDisabled() ? "cursor:not-allowed" : "color:#000:hover cursor:pointer"} flex ai:center b:1px|solid|lightgrey bg:white color:grey  jc:center p:6 r:7`}
-        disabled={isDisabled()}
-        onClick={onSubmit}
-        title="Save"
-        type="button"
-      >
-        <Icon height={22} icon={"bi:floppy"} width={22} />
-      </button>
-
+    <IconButton
+      class={`${isDisabled() ? "cursor:not-allowed" : "color:#000:hover"} b:1px|solid|lightgrey bg:white color:grey  jc:center p:6 r:7`}
+      icon="bi:floppy"
+      onClick={onSubmit}
+      size={22}
+      title="Save"
+    />
   );
 }
