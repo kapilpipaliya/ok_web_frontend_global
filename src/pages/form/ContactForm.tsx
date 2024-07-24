@@ -6,6 +6,7 @@ import { useToast } from "~/components/Toast";
 import { contactUsCall } from "~/lib/api/api_functions";
 import { validateEmail } from "~/lib/validations";
 
+// Deprecated: This component will be replaced in the next major version.
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();

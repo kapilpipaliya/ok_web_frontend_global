@@ -1,5 +1,5 @@
 import { SignUp } from "~/pages/form/SignUp";
-import { SiteTitle } from "~/pages/website/SiteTitle";
+import { SiteTitle } from "~/components/SiteTitle";
 
 export default function signUp() {
   return (

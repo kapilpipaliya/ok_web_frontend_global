@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show } from "solid-js";
 
-import { SiteTitle } from "~/pages/website/SiteTitle";
+import { SiteTitle } from "~/components/SiteTitle";
 
 export type PageHeaderProps = {
   breadcrumb: { href?: string; icon?: string; name: string }[];
