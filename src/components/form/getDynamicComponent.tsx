@@ -1,4 +1,4 @@
-import { GenericField } from "~/components/fields/GenericField";
+
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/table_input/TableInputField";
 import { Repeater } from "~/components/page_attr_render/Repeater";
@@ -6,10 +6,14 @@ import { Repeater } from "~/components/page_attr_render/Repeater";
 import { Signature } from "../SignatureBox";
 import { ButtonInput } from "../fields/ButtonInput";
 import { FormWrapper } from "../fields/FormWrapper";
+import { ImageField } from "../fields/ImageField";
+import { PageField } from "../fields/PageField";
+import { TextField } from "../fields/TextField";
 import { TextInput } from "../fields/TextInput";
+import { UrlField } from "../fields/UrlField";
 import { FileUploader } from "../solid_blocks/FileUploader";
 import { Radio, RadioGroup } from "../solid_blocks/radio/radio";
-import { genericComponents2 } from "./genericComponents2";
+import { BoxField } from "../fields/BoxField";
 
 export function getDynamicComponent(component: string) {
   switch (component) {
@@ -43,15 +47,17 @@ export function getDynamicComponent(component: string) {
     case "Repeater":
       return Repeater;
 
-      case "Form":
-        return FormWrapper
+    case "Form":
+      return FormWrapper
 
-    // case "Text":
-    //   return Dynamic;
+    case "Text":
+      return TextField;
 
-    // case "A":
-    //   return A;
+    case "A":
+      return UrlField;
 
+    case "Image":
+      return ImageField;
     // case "Tabs":
     //   return Tabs;
 
@@ -83,7 +89,7 @@ export function getDynamicComponent(component: string) {
     //   return Accordion;
 
     // case "Breadcrumb":
-      // return Breadcrumbs;
+    // return Breadcrumbs;
 
     // case "Divider":
     //   return "hr"; // Assuming you have a Divider component
@@ -100,16 +106,17 @@ export function getDynamicComponent(component: string) {
     // case "Icon":
     //   return Icon;
 
-    // case "Box":
-    //   return Dynamic;
-
     case "Button":
       return ButtonInput;
 
+    case "Page":
+    case "ThankYouPage":
+    case "ErrorPage":
+    case "TemplatePage":
+      return PageField;
+
+    case "Box":
     default:
-      if (genericComponents2.includes(component)) {
-        return GenericField;
-      }
-      return null;
+      return BoxField;
   }
 }

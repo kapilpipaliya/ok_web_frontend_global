@@ -56,16 +56,16 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
       x: 0,
       y: 0
     });
-    const updateInitial = () => {
-      const rect = getBoundingRectChildren(props.reference()!);
-      setStore({
-        maxHeight: rect.height + 2,
-        maxWidth: rect.width + 2,
-        x: rect.x - 1,
-        y: rect.y - 1
-      });
-    }
-    updateInitial();
+    // const updateInitial = () => {
+    //   const rect = getBoundingRectChildren(props.reference()!);
+    //   setStore({
+    //     maxHeight: rect.height + 2,
+    //     maxWidth: rect.width + 2,
+    //     x: rect.x - 1,
+    //     y: rect.y - 1
+    //   });
+    // }
+    // updateInitial();
 
     const position = useFloating(props.reference, floating, {
       placement: "bottom-start",

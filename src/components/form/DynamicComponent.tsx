@@ -57,6 +57,9 @@ export function DynamicComponent(
 
   const componentName = () =>
     props.componentName ?? props.meta.P.componentName;
+  // const parentItems = usePageRenderVertexContext();
+  // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems, 2), graph)?.P[IdAttr]);
+
   const component = createMemo(() => getDynamicComponent(componentName()));
   const setValue = (value: unknown) => {
     if (props.setValue) {
@@ -165,7 +168,7 @@ export function DynamicComponent(
 
   return (
     <Switch>
-      <Match when={!component()}>NO INPUT</Match>
+      <Match when={!component()}>NO INPUT {componentName()}</Match>
       <Match keyed when={!expressionProperties().hidden && component()}>
         <Switch>
           <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
@@ -181,3 +184,82 @@ export function DynamicComponent(
     </Switch>
   );
 }
+
+/*
+  <Match when={componentName() === "TabContainer"}>
+    <PageAttrRender data={local.data} disabled={local.disabled} metaVertex={local.meta} />
+  </Match>
+  <Match when={componentName() === "TabList"}>
+    <PageAttrRender data={local.data} disabled={local.disabled} metaVertex={local.meta} />
+  </Match>
+  <Match when={componentName() === "Icon"}>
+    <Icon
+      height={local.meta.P.height || "24"}
+      icon={local.meta.P.icon}
+      width={local.meta.P.width || "24"}
+      {...deNullify(local.meta.P)}
+      class={mergeCSS("", local.meta.P.class)}
+      disabled={local.disabled}
+    />
+  </Match>
+
+  <Match when={componentName() === "Table"}>
+    <Table
+      headers={
+        getSelectionOptions(graph, setGraph, "->Attr", [local.meta])
+          .vertexes?.length || 0
+      }
+      {...deNullify(local.meta.P)}
+      class={mergeCSS("", local.meta.P.class)}
+      disabled={local.disabled}
+    >
+      <PageAttrRender data={local.data} metaVertex={local.meta} />
+    </Table>
+  </Match>
+  <Match
+    when={
+      componentName() === "TableHeader" &&
+      getSelectionOptions(graph, setGraph, "->Attr", [local.meta])
+        .vertexes?.length
+    }
+  >
+    <TableHeadCell class={"h:5 p:10 text:center"} disabled={local.disabled}>
+      <PageAttrRender data={local.data} metaVertex={local.meta} />
+    </TableHeadCell>
+  </Match>
+  <Match when={componentName() === "TableRow"}>
+    <TableBodyCell class={"b:1px|solid|#000 bg:#ffffff h:50 text:center"} disabled={local.disabled}>
+      <PageAttrRender data={local.data} metaVertex={local.meta} />
+    </TableBodyCell>
+  </Match>
+
+  <Match when={componentName() === "TreeViewItem"}>
+    <TreeView disabled={local.disabled} meta={local.meta} title={local.meta.P?.title ?? "MenuItem"}>
+      <PageAttrRender data={local.data} metaVertex={local.meta} />
+    </TreeView>
+  </Match>
+  <Match when={componentName() === "TreeViewChild"}>
+    <PageAttrRender data={local.data} disabled={local.disabled} metaVertex={local.meta} />
+  </Match>
+
+
+  <Match when={componentName() === "Divider"}>
+    <hr
+      {...deNullify(local.meta.P)}
+      class={` ${mergeCSS("", local.meta.P.class)} color:${local.meta.P.color ?? "lightgrey"} h:${local.meta.P.height ?? "2"} w:full`}
+      disabled={local.disabled}
+    />
+  </Match>
+
+
+  <Match when={componentName() === "Label"}>
+    <Label
+      meta={local.meta}
+      {...deNullify(local.meta.P)}
+      class={mergeCSS("", local.meta.P.class)}
+      disabled={local.disabled}
+    >
+      <PageAttrRender data={local.data} metaVertex={local.meta} />
+    </Label>
+  </Match>
+*/
