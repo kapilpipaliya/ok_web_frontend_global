@@ -6,6 +6,8 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
 
+import { updateSubmittedIndex } from "../graph/transaction/updateSubmittedIndex";
+
 // General function to make API calls with a payload
 async function makeAPICall(url: string, payload: object) {
   return await postAPI(url, payload);
@@ -21,6 +23,7 @@ export async function submitDataCall(
   const result = await makeAPICall(API.submitDataUrl, data);
   // @ts-ignore
   onMutatDataGet(graph, setGraph, result);
+  updateSubmittedIndex(txnId, graph);
   return result;
 }
 

@@ -33,8 +33,8 @@ export function ButtonInput(props: ButtonProps) {
     const data = commitTxn(txnId, graph);
     await showLoadingToast({
       loadMessage: "Submitting Data...",
-      onSuccess: (value) => {
-        setTimeout(() => navigate(-1), 0);
+      onSuccess: (data) => {
+        // setTimeout(() => navigate(-1), 0);
       },
       promise: submitDataCall(data, graph, setGraph, txnId),
       successMessage: "Data submitted successfully",
