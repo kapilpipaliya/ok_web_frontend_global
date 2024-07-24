@@ -16,8 +16,8 @@ export function getBoundingRectChildren(node: HTMLElement): DOMRect {
       }
       return node.getBoundingClientRect();
     } else {
-      const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property]));
-      const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property]));
+      const getMaxProperty = (property: keyof DOMRect) => Math.max(...rectangles.map(rect => rect[property] as number));
+      const getMinProperty = (property: keyof DOMRect) => Math.min(...rectangles.map(rect => rect[property] as number));
   
       return {
         top: getMinProperty('top'),

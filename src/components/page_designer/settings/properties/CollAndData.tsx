@@ -4,7 +4,6 @@ import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
-import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -111,25 +110,6 @@ export function CollAndData() {
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
             meta={collMetaVertex.vertexes![2]}
-            title={""}
-            txnId={layoutStore.formData.txnId}
-          />
-          <ExpressionBuilder
-            componentName={"TextBox"}
-            content={graph.vertexes[layoutStore.selectedId]?.P.data || ""}
-            data={graph.vertexes[layoutStore.selectedId]}
-            meta={collMetaVertex.vertexes![2]}
-            setValue={(value) =>
-              setValueGlobal(
-                graph,
-                setGraph,
-                layoutStore.formData.txnId,
-                collMetaVertex.vertexes![2],
-                graph.vertexes[layoutStore.selectedId],
-                value,
-                false
-              )
-            }
             title={""}
             txnId={layoutStore.formData.txnId}
           />

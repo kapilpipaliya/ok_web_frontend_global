@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { Breadcrumb } from "~/components/Breadcrumb";
 import { useToast } from "~/components/Toast";
-import { getUsers } from "~/cypher/get/adminFunctions";
+import { getUsers } from "~/cypher/get/getUsers";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
 // TODO: Full Navbar Sync from super

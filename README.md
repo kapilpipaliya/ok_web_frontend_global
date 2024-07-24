@@ -38,3 +38,6 @@ when lastpass auto fill the fields, it is giving errors in development on cleanu
 
 Grid:
 <div class="display:grid grid-template-cols:repeat(2,1fr) gap:16">
+
+Scrollbar color:
+It accept two colors, neeed to fix the css in code.

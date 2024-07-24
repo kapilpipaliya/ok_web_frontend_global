@@ -39,12 +39,14 @@ export function PreviewButton() {
           class={`flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full z-index:${zIndex}`}
         >
           <div class="bg:white h:full p:4 position:relative w:full">
-            <button
+            <IconButton
               class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
+              icon="ph:x"
               onClick={handleCloseClick}
-            >
-              <Icon height={22} icon={"ph:x"} width={22} />
-            </button>
+              size={22}
+              title="Close"
+              type="button"
+            />
             <Content />
           </div>
         </div>

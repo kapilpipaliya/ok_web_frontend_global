@@ -46,10 +46,6 @@ export function FormStatus() {
           <div class="display:grid gap-x:1.5rem gap-y:2rem grid-cols:1 grid-cols:6@sm mt:2.5rem">
             <For each={metaAttributes()}>
               {(metaVertex) => {
-                const [meta, setMeta] = useMetaMemo(metaVertex);
-                const P = { ...meta().P };
-                const v = { ...metaVertex, P };
-                setMeta(v);
 
                 return (
                   <div class="grid-col-span:4@sm">
@@ -161,32 +157,4 @@ function createVertexMeta(displayName: string, name: string, other: Record<strin
 
 function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
-}
-
-function useMetaMemo(metaVertex: Vertex) {
-  return createWritableMemo(() => {
-    if ([
-      "formStatus",
-      // eslint-disable-next-line perfectionist/sort-array-includes
-      "expirationDate",
-      "expirationTime",
-      "submissionLimit",
-      "warningMessage",
-    ].includes(metaVertex.P.name)) {
-      return { ...metaVertex };
-    }
-    const form = FormMetaData.Comp;
-    const propAttribute = form.attributes.find(
-      (attr) => attr.name === "Prop",
-    )!;
-    const valueAttribute = propAttribute.attributes!.find(
-      (attr) => attr.name === "value",
-    )!;
-    const P = {
-      ...metaVertex.P,
-      componentName: valueAttribute.componentName,
-      meta: valueAttribute.meta,
-    };
-    return { ...metaVertex, P };
-  });
 }

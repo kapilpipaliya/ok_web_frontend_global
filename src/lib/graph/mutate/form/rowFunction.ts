@@ -30,7 +30,7 @@ export function getSublistRowsForType(
 ) {
   return (
     getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
-  ).sort((a, b) => a.P.pos - b.P.pos);
+  ).sort((a:Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
 export function getSublistRows(
@@ -43,7 +43,7 @@ export function getSublistRows(
   const type = getToEdge(meta, vertex);
   return (
     getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
-  ).sort((a, b) => a.P.pos - b.P.pos);
+  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
 export function newRow(

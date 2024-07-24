@@ -10,6 +10,7 @@ import {
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
+import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 
 export function newEdge(
   edgeId: Id,
@@ -108,9 +109,7 @@ export function addNewEdge(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)?.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -155,9 +154,7 @@ export function replaceEdgeProperties(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)!.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -223,9 +220,7 @@ export function replaceEdgeStart(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)!.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 //private
@@ -290,9 +285,7 @@ export function replaceEdgeEnd(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)!.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -351,9 +344,7 @@ export function deleteEdge(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)!.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 

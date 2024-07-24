@@ -1,3 +1,4 @@
+import { GraphInterface } from "~/lib/graph/graph";
 import { newVertex } from "~/lib/graph/mutate/vertex";
 
 export function createAttrCompMetaVertex(graph: GraphInterface) {

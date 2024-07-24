@@ -1,4 +1,5 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { FieldAttribute } from "~/lib/FormMetadataType";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -15,7 +16,7 @@ export function PrimaryKey() {
           componentName={"TagBox"}
           data={layoutStore.formData?.formData}
           isRealTime={false}
-          meta={{ P: modifyFieldMetaAllFields({ name: "primaryKey" } , graph, setGraph, layoutStore, true)} as unknown as Vertex}
+          meta={{ P: modifyFieldMetaAllFields({ name: "primaryKey" } as FieldAttribute , graph, setGraph, layoutStore, true)} as unknown as Vertex}
           txnId={layoutStore.formData.txnId}
         />
       </span>

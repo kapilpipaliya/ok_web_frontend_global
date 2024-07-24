@@ -59,7 +59,7 @@ export function TreeItemContent(
       <Icon
         height={17}
         icon={
-          iconMap[getComponent()] ?? "material-symbols:widgets-outline-rounded"
+          iconMap[getComponent() as keyof typeof iconMap] ?? "material-symbols:widgets-outline-rounded"
         }
         width={17}
       />

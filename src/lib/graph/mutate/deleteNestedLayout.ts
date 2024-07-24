@@ -31,18 +31,18 @@ export function deleteNestedLayout(
       if (!AttrProps.error) {
         for (const vertex of AttrProps.vertexes!) {
           // delete in edges and out edges of properties
-          deleteRow(vertex, false, graph, setGraph, txnId, {} as any);
+          deleteRow(vertex, false, graph, setGraph, txnId);
           // no commitTxn because, it's not realtime
         }
       }
 
       // delete in edges and out edges and attr
-      deleteRow(child, false, graph, setGraph, txnId, {} as any);
+      deleteRow(child, false, graph, setGraph, txnId);
     }
   };
 
   deleteChildren(vertexes);
   for (const child of vertexes) {
-    deleteRow(child, false, graph, setGraph, txnId, {} as any);
+    deleteRow(child, false, graph, setGraph, txnId);
   }
 }

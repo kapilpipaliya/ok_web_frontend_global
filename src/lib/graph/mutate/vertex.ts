@@ -13,6 +13,7 @@ import {
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
+import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 
 // return a new Vertex
 export function newVertex(
@@ -74,9 +75,7 @@ export function addNewVertex(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)?.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -115,9 +114,7 @@ export function replaceVertexProperties(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)?.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -182,9 +179,7 @@ export function mergeVertexProperties(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)?.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 
@@ -281,9 +276,7 @@ export function deleteVertex(
   );
   return {
     error: false,
-    txnDetailIndex: txnId
-      ? graph.transactions.get(txnId)?.steps.length - 1
-      : -1,
+    txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
 

@@ -25,7 +25,6 @@ const SettingPageIcon = () => {
 }
 export function HeaderRow() {
   // const [graph] = useGraph();
-  const [openDialog, setOpenDialog] = createSignal(false);
   const [layoutStore] = useDesignerLayoutStore();
 
   return (
@@ -62,7 +61,7 @@ export function HeaderRow() {
           <SaveIconButton />
         </FormContext.Provider>
         <PreviewButton />
-        <ExportSection openDialog={openDialog} setOpenDialog={setOpenDialog} />
+        <ExportSection/>
       </div>
     </header>
   );
