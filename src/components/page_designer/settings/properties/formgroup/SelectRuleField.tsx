@@ -9,8 +9,8 @@ import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
 
-import { AddNewRule } from "../../rules/AddNewRule";
 import { RulesModal } from "../../../rules/RulesModal";
+import { AddNewRule } from "../../rules/AddNewRule";
 import { Label } from "./Label";
 
 export function SelectRuleField(

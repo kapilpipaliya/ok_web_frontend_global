@@ -12,7 +12,6 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../graph/transaction/TransactionType";
-import { isAllTxnProcessed } from "../graph/transaction/isAllTxnProcessed";
 
 export function onMutatDataGet(
   graph: GraphInterface,

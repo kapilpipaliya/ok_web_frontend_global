@@ -1,10 +1,12 @@
+import { type Component, For, createEffect, onCleanup } from 'solid-js';
+
+import type { ToasterProps } from '..';
+import type { Toast } from '../types';
+
 import { defaultContainerStyle } from '../core';
-import { ToasterProps } from '..';
+import { createTimers, store } from '../core';
 import { mergeContainerOptions } from '../util';
-import { createEffect, For, onCleanup, Component } from 'solid-js';
-import { store, createTimers } from '../core';
 import { ToastContainer } from './';
-import { Toast } from '../types';
 
 export const Toaster: Component<ToasterProps> = (props) => {
   createEffect(() => {
@@ -21,11 +23,11 @@ export const Toaster: Component<ToasterProps> = (props) => {
 
   return (
     <div
+      class={props.containerClassName}
       style={{
         ...defaultContainerStyle,
         ...props.containerStyle,
       }}
-      class={props.containerClassName}
     >
       <style>{`.sldt-active{z-index:9999;}.sldt-active>*{pointer-events:auto;}`}</style>
       <For each={store.toasts}>{(toast) => <ToastContainer toast={toast as Toast} />}</For>

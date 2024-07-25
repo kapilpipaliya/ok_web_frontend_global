@@ -6,7 +6,6 @@ import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
 
 import { useToast } from "../Toast";
 

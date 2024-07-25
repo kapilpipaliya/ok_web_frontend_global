@@ -1,8 +1,7 @@
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useLocation, } from "@solidjs/router";
 import { type JSX, Show, createEffect } from "solid-js";
 
-import { useToast } from "~/components/Toast";
-import { PageContext, useLoading } from "~/lib/contexts";
+import { PageContext, } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,

@@ -1,9 +1,10 @@
-import { State, Action, ActionType, Toast } from '../types';
 import { createStore, produce as p } from 'solid-js/store';
 
+import { type Action, ActionType, type State, type Toast } from '../types';
+
 const [store, setStore] = createStore<State>({
-  toasts: [],
   pausedAt: undefined,
+  toasts: [],
 });
 
 export const createTimers = () => {
@@ -11,15 +12,15 @@ export const createTimers = () => {
   if (pausedAt) return;
   const now = Date.now();
   const timers = toasts.map((toast) => {
-    if (toast.duration === Infinity) return;
+    if (toast.duration === Number.POSITIVE_INFINITY) return;
 
     const durationLeft = (toast.duration || 0) + toast.pauseDuration - (now - toast.createdAt);
 
     if (durationLeft <= 0) {
       if (toast.visible) {
         dispatch({
-          type: ActionType.DISMISS_TOAST,
           toastId: toast.id,
+          type: ActionType.DISMISS_TOAST,
         });
       }
       return;
@@ -27,8 +28,8 @@ export const createTimers = () => {
 
     return setTimeout(() => {
       dispatch({
-        type: ActionType.DISMISS_TOAST,
         toastId: toast.id,
+        type: ActionType.DISMISS_TOAST,
       });
     }, durationLeft);
   });
@@ -44,8 +45,8 @@ const scheduleRemoval = (toastId: string, unmountDelay: number) => {
   const timeout = setTimeout(() => {
     removalQueue.delete(toastId);
     dispatch({
-      type: ActionType.REMOVE_TOAST,
       toastId,
+      type: ActionType.REMOVE_TOAST,
     });
   }, unmountDelay);
 
@@ -119,8 +120,8 @@ export const dispatch = (action: Action) => {
       break;
     case ActionType.UPSERT_TOAST:
       store.toasts.find((t) => t.id === action.toast.id)
-        ? dispatch({ type: ActionType.UPDATE_TOAST, toast: action.toast })
-        : dispatch({ type: ActionType.ADD_TOAST, toast: action.toast });
+        ? dispatch({ toast: action.toast, type: ActionType.UPDATE_TOAST })
+        : dispatch({ toast: action.toast, type: ActionType.ADD_TOAST });
       break;
     case ActionType.START_PAUSE:
       setStore(p((s) => {

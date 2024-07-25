@@ -1,9 +1,11 @@
-import { A, type useNavigate } from "@solidjs/router";
-import { type JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
-import { type useToast } from "~/components/Toast";
+import { A, type useNavigate } from "@solidjs/router";
+
+import type { useToast } from "~/components/Toast";
+import type { useLoading } from "~/lib/contexts";
+
 import { APP_BASE_URL } from "~/lib/constants";
-import { type useLoading } from "~/lib/contexts";
 
 export interface AuthenticatedMenuProps {
   navigate: ReturnType<typeof useNavigate>;

@@ -1,6 +1,7 @@
-import { setDefaultOpts, defaultOpts, store, dispatch, defaultToasterOptions } from '../core';
-import { ActionType, Toast, ToasterProps, ToastPosition } from '../types';
-import { JSX } from 'solid-js';
+import type { JSX } from 'solid-js';
+
+import { defaultOpts, defaultToasterOptions, dispatch, setDefaultOpts, store } from '../core';
+import { ActionType, type Toast, type ToastPosition, type ToasterProps } from '../types';
 
 export const generateID = (() => {
   let count = 0;
@@ -22,7 +23,7 @@ export const mergeContainerOptions = (props: ToasterProps) => {
 export const getToastWrapperStyles = (position: ToastPosition, offset: number): JSX.CSSProperties => {
   const top = position.includes('top');
   const verticalStyle: JSX.CSSProperties = top
-    ? { top: 0, 'margin-top': `${offset}px` }
+    ? { 'margin-top': `${offset}px`, top: 0 }
     : { bottom: 0, 'margin-bottom': `${offset}px` };
   const horizontalStyle: JSX.CSSProperties = position.includes('center')
     ? { 'justify-content': 'center' }
@@ -30,10 +31,10 @@ export const getToastWrapperStyles = (position: ToastPosition, offset: number): 
     ? { 'justify-content': 'flex-end' }
     : {};
   return {
-    left: 0,
-    right: 0,
     display: 'flex',
+    left: 0,
     position: 'absolute',
+    right: 0,
     transition: `all 230ms cubic-bezier(.21,1.02,.73,1)`,
     ...verticalStyle,
     ...horizontalStyle,
@@ -44,8 +45,8 @@ export const updateToastHeight = (ref: HTMLDivElement, toast: Toast) => {
   const boundingRect = ref.getBoundingClientRect();
   if (boundingRect.height !== toast.height) {
     dispatch({
+      toast: { height: boundingRect.height, id: toast.id },
       type: ActionType.UPDATE_TOAST,
-      toast: { id: toast.id, height: boundingRect.height },
     });
   }
 };

@@ -1,6 +1,7 @@
 import type { Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
+
 import { getLastTxnIndex } from "./getLastTxnIndex";
 
 export function isDisabledTxn(

@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { type JSX, Show, createSignal, onMount } from "solid-js";
+
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
 import { ZIndex } from "~/components/ZIndex";
@@ -8,6 +9,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { useLoading } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";
+
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 

@@ -3,10 +3,10 @@
 #include <chrono>
 #include <cstdlib>
 
-const int beepIntervalSeconds = 10;
+const int beepIntervalSeconds = 5;
 
 void playBeepSound() {
-    system("afplay /System/Library/Sounds/Ping.aiff");
+    system("afplay /System/Library/Sounds/Basso.aiff");
 }
 
 void beepEveryInterval() {

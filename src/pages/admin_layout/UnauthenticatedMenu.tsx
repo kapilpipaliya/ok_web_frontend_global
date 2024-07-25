@@ -1,5 +1,6 @@
+import type { JSX } from "solid-js";
+
 import { A } from "@solidjs/router";
-import { type JSX } from "solid-js";
 interface UnauthenticatedMenuProps {
   onClose: () => void;
 }

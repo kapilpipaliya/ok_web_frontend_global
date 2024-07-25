@@ -1,13 +1,15 @@
 import jsep from "jsep";
 import { For, Show, createMemo, createSignal } from "solid-js";
+
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
+
+import { SimpleWithDismissButton } from "../../../SimpleModal";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
-import { SimpleWithDismissButton } from "../../../SimpleModal";
 
 
 export function RulesList() {

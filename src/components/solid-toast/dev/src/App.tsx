@@ -1,4 +1,5 @@
-import { Component, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import { type Component, createEffect, createSignal, onCleanup } from 'solid-js';
+
 import toast, { Toaster } from '../../src';
 
 const makePromise = (): Promise<string> => {
@@ -13,25 +14,25 @@ const makePromise = (): Promise<string> => {
 
 const App: Component = () => {
   const popBlank = () => toast('Blank Toast');
-  const popSuccess = () => toast.success('Success!', { duration: Infinity });
-  const popError = () => toast.error('Error!', { duration: Infinity });
+  const popSuccess = () => toast.success('Success!', { duration: Number.POSITIVE_INFINITY });
+  const popError = () => toast.error('Error!', { duration: Number.POSITIVE_INFINITY });
   const popLoading = () => toast.loading('Loading...');
   const popPromise = () => toast.promise(makePromise(), {
+    error: err => <span class="promise-txt">{err}</span>,
     loading: <span class="promise-txt">Loading Promise</span>,
-    success: msg => <span class="promise-txt">{msg}</span>,
-    error: err => <span class="promise-txt">{err}</span>
+    success: msg => <span class="promise-txt">{msg}</span>
   });
   const popCustom = () => toast.success('Add Custom Styles', {
+    className: "border-2 border-orange-800",
+    duration: Number.POSITIVE_INFINITY,
     iconTheme: {
       primary: '#ea580c',
       secondary: '#ffedd5'
     },
-    className: "border-2 border-orange-800",
     style: {
-      color: '#c2410c',
-      background: '#ffedd5'
-    },
-    duration: Infinity
+      background: '#ffedd5',
+      color: '#c2410c'
+    }
   });
   const popTimer = () => toast.custom((t) => {
     const [life, setLife] = createSignal(100)
@@ -47,8 +48,8 @@ const App: Component = () => {
     })
 
     return (
-      <div class="bg-pink-100 shadow-md px-4 py-3 rounded overflow-hidden relative text-pink-700">
-        <div style={{width: `${life()}%`}} class="bg-pink-200 h-full absolute top-0 left-0" ></div>
+      <div class="bg-pink-100 shadow-md px-4 py-3 overflow-hidden relative text-pink-700 rounded">
+        <div class="bg-pink-200 h-full absolute top-0 left-0" style={{width: `${life()}%`}} ></div>
         <span class="relative" >Timer In The Background</span>
       </div>
     )
@@ -64,9 +65,9 @@ const App: Component = () => {
       <h1>Solid Toast Examples</h1>
       <div
         style={{
+          'align-items': 'flex-start',
           display: 'flex',
           'flex-direction': 'column',
-          'align-items': 'flex-start',
           gap: '0.5rem',
         }}
       >

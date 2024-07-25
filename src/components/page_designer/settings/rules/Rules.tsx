@@ -1,5 +1,5 @@
-import { RulesList } from "./RulesList";
 import { RulesHeader } from "./RulesHeader";
+import { RulesList } from "./RulesList";
 
 
 export function Rules() {

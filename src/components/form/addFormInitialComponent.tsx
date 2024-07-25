@@ -1,7 +1,7 @@
-import { type SetStoreFunction } from "solid-js/store";
-import { Id, type GraphInterface, type Vertex } from "~/lib/graph/graph";
-import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
-import { saveUndoPoint } from "../../lib/graph/transaction/saveUndoPoint";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
 import { addComponentAttrInPage } from "../page_designer/functions/drop/addComponentAttrInForm";
 
 export function addComponent(graph: GraphInterface, formVertex: Vertex, parentId: Id, txnId: number, setGraph: SetStoreFunction<GraphInterface>, type: string, attributes: any = {}) {

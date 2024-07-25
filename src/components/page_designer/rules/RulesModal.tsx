@@ -12,10 +12,10 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { Overlay } from "./Overlay";
 import { generateTableInputMeta } from "./generateTableInputMeta";
 import { getConditionsExpression } from "./getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./modifyFieldMetaAllFields";
-import { Overlay } from "./Overlay";
 
 
 const getMetaAttributes = (selectedRule?: Vertex | null) => {

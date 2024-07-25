@@ -1,6 +1,8 @@
 import { Show, createSignal } from "solid-js";
+
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
+
 import { AddNewRule } from "./AddNewRule";
 
 export function AddNewRuleButton() {

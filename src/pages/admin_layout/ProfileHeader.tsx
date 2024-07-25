@@ -1,4 +1,5 @@
 import { type JSX, Show } from "solid-js";
+
 import { useGraph } from "~/lib/graph/graph";
 export interface ProfileHeaderProps {
   profileImage: string;

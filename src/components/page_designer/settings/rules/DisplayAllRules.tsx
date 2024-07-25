@@ -1,5 +1,7 @@
 import { Show, createSignal } from "solid-js";
+
 import { ZIndex } from "~/components/ZIndex";
+
 import { RulesModal } from "../../rules/RulesModal";
 
 export function DisplayAllRules() {

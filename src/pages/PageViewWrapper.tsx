@@ -1,6 +1,6 @@
 import { Meta, Title } from "@solidjs/meta";
 import { clientOnly } from "@solidjs/start";
-import { Match, Show, Switch, createEffect, createSignal, on, onMount } from "solid-js";
+import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
@@ -8,7 +8,7 @@ import { getFormAttr } from "~/components/grid/getFormAttr";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { isObject } from "~/lib/utils";
 import { setGraphData } from "~/lib/websocket/setGraphData";
