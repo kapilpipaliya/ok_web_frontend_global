@@ -14,11 +14,11 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 export function FormWrapper(
-  props: {
+  props: Readonly<{
     // For Root Level Forms we use Parent vertex label as form name
     label?: string;
     submitButton?: any;
-  } & GenericComponentProps,
+  } & GenericComponentProps>,
 ) {
   const [graph, setGraph] = useGraph();
   const { previewData, previewMeta } = usePreviewContext();

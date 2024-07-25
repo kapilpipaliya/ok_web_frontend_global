@@ -11,7 +11,7 @@ type TabControlProps = {
   name: string;
 } & JSX.HTMLAttributes<HTMLElement>;
 
-export default function TabControl(props: TabControlProps) {
+export default function TabControl(props: Readonly<TabControlProps>) {
   const [local, others] = splitProps(props, [
     "as",
     "class",

@@ -18,7 +18,7 @@ interface ContainerLabelProps {
   title: string;
 }
 
-export const ContainerLabel = (props: ContainerLabelProps) => {
+export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
   const handleInfoClick = () => {
     const url = `https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}${props.hashName ? `#${props.hashName}` : ""}`;
     window.open(url, "_blank");

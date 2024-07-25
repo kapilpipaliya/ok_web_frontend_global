@@ -5,7 +5,7 @@ type TabsProps = {
   underlined?: boolean;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-const Tabs = (props: TabsProps) => {
+const Tabs = (props: Readonly<TabsProps>) => {
   const [local, others] = splitProps(props, ["class", "underlined"]);
   return (
     <div

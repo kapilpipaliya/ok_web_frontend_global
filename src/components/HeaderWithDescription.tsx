@@ -12,7 +12,7 @@ interface WithDescriptionProps {
   titleColor?: string;
 }
 
-export function HeaderWithDescription(props: WithDescriptionProps): JSX.Element {
+export function HeaderWithDescription(props: Readonly<WithDescriptionProps>): JSX.Element {
   return (
     <div
       classList={{

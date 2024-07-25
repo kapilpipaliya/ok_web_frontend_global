@@ -25,7 +25,7 @@ export function getInitials(name: string) {
   );
 }
 
-export function Avatar(props: AvatarProps) {
+export function Avatar(props: Readonly<AvatarProps>) {
   const [local, divProps] = splitProps(props, [
     "classList",
     "children",
@@ -84,7 +84,7 @@ export type AvatarBadgeProps = {
   borderColor?: string;
 } & JSX.HTMLAttributes<HTMLSpanElement>;
 
-export function AvatarBadge(props: AvatarBadgeProps) {
+export function AvatarBadge(props: Readonly<AvatarBadgeProps>) {
   const [local, spanProps] = splitProps(props, [
     "classList",
     "borderColor",
@@ -109,7 +109,7 @@ export type AvatarGroupProps = {
   "data-plus"?: string;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export function AvatarGroup(props: AvatarGroupProps) {
+export function AvatarGroup(props: Readonly<AvatarGroupProps>) {
   return (
     <div
       {...props}

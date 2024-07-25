@@ -43,6 +43,7 @@ type AnyObject = { [key: string]: any };
 
 export interface TransactionDetail {
   activeUndoIndex: number;
+  namedUndoStepIndexes: { [key: string]: number };
   preventUndoBeforeIndex: number;
   revertSteps: TransactionValue[];
   steps: TransactionValue[];

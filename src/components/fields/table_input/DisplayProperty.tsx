@@ -43,7 +43,7 @@ export const getComponentClass = (componentName: string) => {
 };
 
 // Component to display individual properties
-export function DisplayProperty(props: {
+export function DisplayProperty(props: Readonly<{
   column: Vertex;
   disabled: Accessor<boolean>;
   getMetaVertex: (columnId: Id) => Vertex;

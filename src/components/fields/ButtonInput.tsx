@@ -7,7 +7,9 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useFormContext, usePreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 
 import { useToast } from "../Toast";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
@@ -18,7 +20,7 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   meta: Vertex
 }
 
-export function ButtonInput(props: ButtonProps) {
+export function ButtonInput(props: Readonly<ButtonProps>) {
   const [local, others] = splitProps(props, ['data', 'meta', 'children']);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
@@ -45,6 +47,12 @@ export function ButtonInput(props: ButtonProps) {
     revertTransaction(txnId, graph);
     setTimeout(() => navigate(-1));
   };
+
+  const onReset = () => {
+    const initialIndex = getNamedIndex(txnId, "initial", graph);
+    if (initialIndex === undefined) return;
+    revertTransactionUpToIndex(txnId, initialIndex, graph);
+  };
   const extraProps = createMemo(() => {
     return {
       onClick: () => {
@@ -55,6 +63,8 @@ export function ButtonInput(props: ButtonProps) {
           onSubmit();
         } else if (props.meta.P.type === "cancel") {
           onCancel();
+        } else if (props.meta.P.type === "reset") {
+          onReset();
         }
       },
     };

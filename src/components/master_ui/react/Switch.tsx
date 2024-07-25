@@ -9,7 +9,7 @@ type SwitchProps = {
   size?: ({} & string) | keyof typeof switchSizes;
 } & JSX.InputHTMLAttributes<HTMLInputElement>;
 
-const Switch = (props: SwitchProps) => {
+const Switch = (props: Readonly<SwitchProps>) => {
   const [local, others] = splitProps(props, [
     "class",
     "size",

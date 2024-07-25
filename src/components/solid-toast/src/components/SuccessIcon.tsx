@@ -5,7 +5,7 @@ import type { IconProps } from '../types';
 import { genSVGCubicBezier } from '../util';
 import { MainCircle, SecondaryCircle } from './IconCircle';
 
-export const Success: Component<IconProps> = (props: IconProps) => {
+export const Success: Component<IconProps> = (props: Readonly<IconProps>) => {
   const fill = props.primary || '#34C759';
   return (
     <svg height="1.25rem" style={{ overflow: 'visible' }} viewBox="0 0 32 32" width="1.25rem">

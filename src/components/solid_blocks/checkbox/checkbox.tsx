@@ -21,7 +21,7 @@ export type CheckboxProps = {
   wrapperClass?: string;
 } & JSX.HTMLAttributes<HTMLInputElement>;
 
-export function Checkbox(props: CheckboxProps) {
+export function Checkbox(props: Readonly<CheckboxProps>) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [

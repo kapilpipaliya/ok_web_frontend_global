@@ -3,7 +3,7 @@ interface WithListProps {
     title: string;
   }
   
-  export function AlertWithList(props: WithListProps) {
+  export function AlertWithList(props: Readonly<WithListProps>) {
     return (
       <div class="bg:rgb(254,242,242) border-radius:0.375rem p:1rem">
         <div class="flex">

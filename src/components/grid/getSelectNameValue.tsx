@@ -9,12 +9,12 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { selectedValue } from "../fields/selectedValue";
 import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
 
-export function getSelectNameValue(props: {
+export function getSelectNameValue(props: Readonly<{
   attribute: FieldAttribute;
   graph: GraphInterface;
   info: CellContext<any, any>;
   setGraph: SetStoreFunction<GraphInterface>;
-}) {
+}>) {
   const vertex = selectedValue(
     {
       P: props.attribute,

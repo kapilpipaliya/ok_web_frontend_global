@@ -7,7 +7,7 @@ export type SelectProps = {
   setValue?: (value: string) => void;
 } & JSX.SelectHTMLAttributes<HTMLSelectElement>;
 
-export function Select(props: SelectProps) {
+export function Select(props: Readonly<SelectProps>) {
   const [local, fieldProps] = splitProps(props, [
     "aria-orientation",
     "label",

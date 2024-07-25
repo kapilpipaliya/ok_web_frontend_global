@@ -1,13 +1,13 @@
 import { type JSX, splitProps } from "solid-js";
 
 export function Heading(
-  props: {
+  props: Readonly<{
     divider?: boolean;
     etc: any;
     heading?: string;
     subheading?: string;
   } & JSX.HTMLAttributes<HTMLDivElement> &
-    JSX.IntrinsicAttributes,
+    JSX.IntrinsicAttributes>,
 ) {
   const [local, customProps] = splitProps(props, [
     "heading",

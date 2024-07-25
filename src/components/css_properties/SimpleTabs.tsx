@@ -4,7 +4,7 @@ import { For } from 'solid-js';
 import { evaluate } from '~/lib/expression_eval';
 import { isObject } from '~/lib/utils';
 
-export function TabsWithUnderline(props: { displayValueKey: string, onTabClick: (index: number) => void, selectedIndex: number, tabs: Array<{ name: string }> }) {
+export function TabsWithUnderline(props: Readonly<{ displayValueKey: string, onTabClick: (index: number) => void, selectedIndex: number, tabs: Array<{ name: string }> }>) {
   const getOptionLabel = (option: any) => {
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {

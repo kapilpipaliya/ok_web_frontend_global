@@ -8,13 +8,13 @@ export type TableCellProps = {
   disabled?: boolean;
 } & JSX.HTMLAttributes<HTMLTableCellElement>;
 
-export function TableHeader(props: TableCellProps) {
+export function TableHeader(props: Readonly<TableCellProps>) {
   const [] = useContext(tableContext);
 
   return <th {...props} />;
 }
 
-export function TableRow(props: TableCellProps) {
+export function TableRow(props: Readonly<TableCellProps>) {
   const [] = useContext(tableContext);
 
   return <td {...props} />;
@@ -22,7 +22,7 @@ export function TableRow(props: TableCellProps) {
 
 export type TableProps = {} & JSX.HTMLAttributes<HTMLTableElement>;
 
-export function TableGroup(props: TableProps) {
+export function TableGroup(props: Readonly<TableProps>) {
   return (
     <tableContext.Provider value={[]}>
       <table {...props} />

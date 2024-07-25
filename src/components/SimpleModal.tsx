@@ -14,7 +14,7 @@ interface SimpleWithDismissButtonProps {
   title: string;
 }
 const ModalContext = createContext<SimpleWithDismissButtonProps>();
-export function SimpleWithDismissButton(props: SimpleWithDismissButtonProps) {
+export function SimpleWithDismissButton(props: Readonly<SimpleWithDismissButtonProps>) {
   const zIndex = useZIndex();
   return (
     <ModalContext.Provider value={props}>

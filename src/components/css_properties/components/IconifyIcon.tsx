@@ -1,7 +1,7 @@
 import { Icon, type IconifyIconProps } from "@iconify-icon/solid";
 import { splitProps } from "solid-js";
 
-export const IconifyIcon = (props: IconifyIconProps) => {
+export const IconifyIcon = (props: Readonly<IconifyIconProps>) => {
   const [selected, restProps] = splitProps(props, ["icon", "height", "width"]);
   if (selected.icon === "allCustom") {
     return (

@@ -10,7 +10,7 @@ export type BarProps = {
   position?: Omit<JSX.CSSProperties["position"], "static">;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export function Bar(props: BarProps) {
+export function Bar(props: Readonly<BarProps>) {
   const [local, rest] = splitProps(props, [
     "placement",
     "position",

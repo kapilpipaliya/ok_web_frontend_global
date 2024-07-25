@@ -8,7 +8,7 @@ interface TextAreaProps
   value: string;
 }
 
-export function TextEditor(props: TextAreaProps) {
+export function TextEditor(props: Readonly<TextAreaProps>) {
   const [text, setText] = createWritableMemo(() => props.value);
 
   return (

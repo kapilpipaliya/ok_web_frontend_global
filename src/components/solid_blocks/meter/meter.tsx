@@ -8,7 +8,7 @@ export type MeterProps = {
   value?: number | string;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export function Meter(props: MeterProps) {
+export function Meter(props: Readonly<MeterProps>) {
   return (
     <div
       {...props}

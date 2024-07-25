@@ -9,12 +9,12 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { selectedValue } from "../fields/selectedValue";
 
 // seems like not correct, test it.
-export const getTagValue = (props: {
+export const getTagValue = (props: Readonly<{
   attribute: FieldAttribute;
   graph: GraphInterface;
   info: CellContext<any, any>;
   setGraph: SetStoreFunction<GraphInterface>;
-}) => {
+}>) => {
   const vertex = selectedValue(
     {
       P: props.attribute,

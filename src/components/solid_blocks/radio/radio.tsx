@@ -36,7 +36,7 @@ export type RadioProps = {
   value?: string;
 } & JSX.HTMLAttributes<HTMLInputElement>;
 
-export function Radio(props: RadioProps) {
+export function Radio(props: Readonly<RadioProps>) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [
@@ -103,7 +103,7 @@ export type RadioGroupProps = {
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
 // This is just a wrapper that run setValue when value is changed.
-export function RadioGroup(props: RadioGroupProps) {
+export function RadioGroup(props: Readonly<RadioGroupProps>) {
   const [local, divProps] = splitProps(props, [
     "setValue",
     "value",

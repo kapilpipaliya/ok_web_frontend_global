@@ -10,7 +10,7 @@ export type PageHeaderProps = {
   title: string;
 };
 
-export function Breadcrumb(props: PageHeaderProps) {
+export function Breadcrumb(props: Readonly<PageHeaderProps>) {
   const headerStyle = {
     margin: "10px",
     "margin-bottom": "1rem",

@@ -14,7 +14,7 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
 
-export function SelectedAttrConfigPopOver(props: { item: Vertex }) {
+export function SelectedAttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const zIndex = useZIndex();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();

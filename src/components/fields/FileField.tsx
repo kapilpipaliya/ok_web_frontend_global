@@ -22,7 +22,7 @@ interface Properties
 }
 
 /* Work In Progress */
-export function FileField(props: Properties) {
+export function FileField(props: Readonly<Properties>) {
   const [p, customProps] = splitProps(props, [
     "label",
     "prefix",

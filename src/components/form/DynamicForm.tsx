@@ -32,6 +32,7 @@ import {
 } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { isPageDesignerPath } from "~/lib/utils";
@@ -115,7 +116,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       txnId,
     });
     if (!id() && formData.formData?.L[0] === "Form") {
-      const layoutId = addFormInitialComponent(formData.formData!, graph, txnId, setGraph);
+      const layoutId = addFormInitialComponent(formData.formData, graph, txnId, setGraph);
       if (layoutId === -1) {
         setError("Adding component to layout failed");
         return;
@@ -123,6 +124,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     }
     saveUndoPoint(txnId, graph);
     setPreventUndoAtOrBeforeIndex(txnId, graph);
+    saveStepIndex(txnId, "initial", graph);
 
     setLayoutStore?.("formData", formData);
     setIsLoading(false);

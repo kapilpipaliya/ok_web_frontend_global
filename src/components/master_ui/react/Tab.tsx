@@ -5,7 +5,7 @@ type TabProps = {
   active?: boolean;
 } & JSX.AnchorHTMLAttributes<HTMLAnchorElement>;
 
-const Tab = (props: TabProps) => {
+const Tab = (props: Readonly<TabProps>) => {
   const [local, others] = splitProps(props, ["class", "active"]);
   return (
     <a {...others} class={clsx("tab", local.class, local.active && "active")} />

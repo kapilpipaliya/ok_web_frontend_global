@@ -25,7 +25,7 @@ type GenralProps = {
   }>;
 };
 
-export const GeneralSection = (props: GenralProps) => {
+export const GeneralSection = (props: Readonly<GenralProps>) => {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);

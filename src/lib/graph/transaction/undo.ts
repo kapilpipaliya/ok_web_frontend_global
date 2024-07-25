@@ -27,7 +27,7 @@ export function undoAllowed(
   return activeUndoIndex > 0;
 }
 
-export function undo(txnId: number, graph: Store<GraphInterface>, revertTransactionUpToIndex?: number, hardUndo?: boolean) {
+export function undo(txnId: number, graph: Store<GraphInterface>, revertTransactionUpToIndex?: number, removeAfterSteps?: boolean) {
   if (!undoAllowed(txnId, graph, revertTransactionUpToIndex)) return;
 
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
@@ -41,7 +41,7 @@ export function undo(txnId: number, graph: Store<GraphInterface>, revertTransact
     .forEach((txn) => txn.revert());
   txnValue.activeUndoIndex = newUndoIndex;
   
-  if(hardUndo) {
+  if(removeAfterSteps) {
     txnValue.steps = txnValue.steps.slice(0, newUndoIndex + 1);
     txnValue.activeUndoIndex = txnValue.steps.length - 1;
     txnValue.undoStepIndexes = txnValue.undoStepIndexes.filter(index => index <= txnValue.activeUndoIndex);

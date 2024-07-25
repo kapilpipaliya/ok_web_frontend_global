@@ -64,11 +64,11 @@ export function RouteDesigner() {
   );
 }
 
-const DynamicElement = (props: {
+const DynamicElement = (props: Readonly<{
   element: any;
   setShowModal: any;
   showModal: any;
-}) => {
+}>) => {
   return (
     <Switch>
       <Match when={props.element.type === "table"}>

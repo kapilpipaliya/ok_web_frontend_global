@@ -20,7 +20,7 @@ import { addNewRow, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunctio
 
 import { DisplayProperty } from "./DisplayProperty";
 
-export const SortableRow = (props: {
+export const SortableRow = (props: Readonly<{
   dragFromIndex: Accessor<null | number>;
   dragToIndex: Accessor<null | number>;
   handleDrop: (event: DragEvent) => void;

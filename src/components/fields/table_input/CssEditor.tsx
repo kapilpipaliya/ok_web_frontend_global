@@ -11,7 +11,7 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 // Component for handling the CSS Editor
-export function CssEditor(props: { joinVertex: Vertex; metaVertex: Vertex; txnId: number; }) {
+export function CssEditor(props: Readonly<{ joinVertex: Vertex; metaVertex: Vertex; txnId: number; }>) {
   const [graph, setGraph] = useGraph();
   const [showCssEditor, setShowCssEditor] = createSignal(false);
   return (

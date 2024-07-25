@@ -59,9 +59,9 @@ export const CollapsibleSection = (
   );
 };
 
-export const SectionList = (props: {
+export const SectionList = (props: Readonly<{
   filteredSections: () => CSSJSONSchemaSearchType;
-}) => {
+}>) => {
   const sectionCount = createMemo(
     () => Object.keys(props.filteredSections()).length,
   );

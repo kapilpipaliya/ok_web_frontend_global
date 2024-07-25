@@ -28,12 +28,12 @@ import { setSelectValueHelper } from "./setSelectValueHelper";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
-  props: {
+  props: Readonly<{
     componentName: string;
     isRealTime?: boolean;
     title: string;
     txnId?: number;
-  } & GenericComponentProps,
+  } & GenericComponentProps>,
 ) {
   const [graph, setGraph] = useGraph();
   const formData = useFormContext();

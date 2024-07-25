@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { createMemo, splitProps } from "solid-js";
+import { JSX, createMemo, splitProps } from "solid-js";
 
 import type { selectSizes } from "../core";
 
@@ -8,10 +8,10 @@ import SelectIndicator from "./SelectIndicator";
 type SelectProps = {
   indicator?: JSX.Element;
   outlined?: boolean;
-  size?: keyof typeof selectSizes | string;
+  size?: keyof typeof selectSizes;
 } & JSX.SelectHTMLAttributes<HTMLSelectElement>;
 
-const Select = (props: SelectProps) => {
+const Select = (props: Readonly<SelectProps>) => {
   const [local, others] = splitProps(props, [
     "class",
     "size",

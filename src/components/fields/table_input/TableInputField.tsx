@@ -29,11 +29,11 @@ import { SortableRow } from "./SortableRow";
 import { insertNewRow } from "./insertNewRow";
 
 export function TableInputField(
-  props: {
+  props: Readonly<{
     isRealTime?: boolean;
     isTableInside?: boolean;
     txnId?: number;
-  } & GenericComponentProps,
+  } & GenericComponentProps>,
 ) {
   const [graph, setGraph] = useGraph();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);

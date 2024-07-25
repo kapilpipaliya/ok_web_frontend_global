@@ -5,7 +5,7 @@ import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
-export const HoverAttrConfigPopOver = (props: { item: Vertex }) => {
+export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () =>

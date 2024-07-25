@@ -2,7 +2,7 @@ import { type JSX, createContext, useContext } from "solid-js";
 
 const ZIndexContext = createContext<number>();
 
-export function ZIndex(props: { children: JSX.Element }): JSX.Element {
+export function ZIndex(props: Readonly<{ children: JSX.Element }>): JSX.Element {
   const context = useContext(ZIndexContext);
 
   let zIndex: number;

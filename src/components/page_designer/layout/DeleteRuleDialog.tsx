@@ -10,7 +10,7 @@ const getAttributeNames = (graph: GraphInterface, ids: Array<Id | number>): stri
   return ids.map(id => graph.vertexes[id]?.P.name).filter(name => name !== undefined);
 };
 
-const AttributeList = (props: { attributes: string[], title: string }) => (
+const AttributeList = (props: Readonly<{ attributes: string[], title: string }>) => (
   <Show when={props.attributes.length > 0}>
     <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
       <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" role="list">

@@ -8,7 +8,7 @@ interface GraphViewProps {
 }
 
 export function GraphView() {
-  const GraphView = (props: GraphViewProps) => {
+  const GraphView = (props: Readonly<GraphViewProps>) => {
     const [json, setJson] = createSignal({});
     const mount = (container: HTMLDivElement) => {
       // TODO: Dynamically import library only when required.

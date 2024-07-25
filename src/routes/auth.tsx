@@ -6,7 +6,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 import { useGraph } from "~/lib/graph/graph";
 
-export default function AuthLayout(props: RouteSectionProps) {
+export default function AuthLayout(props: Readonly<RouteSectionProps>) {
   // const navigate = useNavigate();
 
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);

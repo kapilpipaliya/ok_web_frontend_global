@@ -105,7 +105,7 @@ interface DividerProps {
   width?: string;
 }
 
-export function Divider(props: DividerProps): JSX.Element {
+export function Divider(props: Readonly<DividerProps>): JSX.Element {
   return (
     <div
       class={props.class || ""}

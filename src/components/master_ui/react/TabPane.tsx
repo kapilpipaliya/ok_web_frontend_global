@@ -9,7 +9,7 @@ type TabPaneProps = {
   name: string;
 } & JSX.HTMLAttributes<HTMLElement>;
 
-const TabPane = (props: TabPaneProps) => {
+const TabPane = (props: Readonly<TabPaneProps>) => {
   const [local, others] = splitProps(props, ["as", "name"]);
   const tabView = useTabView();
   const Component = local.as || "div";

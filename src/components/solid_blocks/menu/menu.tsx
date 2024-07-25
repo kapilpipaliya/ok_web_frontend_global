@@ -53,7 +53,7 @@ const getMenuItems = () => {
   };
 };
 
-export function Menu(props: MenuProps) {
+export function Menu(props: Readonly<MenuProps>) {
   const [open, setOpen] = createSignal(!!props.open);
   const [local, divProps] = splitProps(props, [
     "open",
@@ -190,13 +190,13 @@ export function Menu(props: MenuProps) {
 
 export type MenuButtonProps = JSX.HTMLAttributes<HTMLButtonElement>;
 
-export function MenuButton(props: MenuButtonProps) {
+export function MenuButton(props: Readonly<MenuButtonProps>) {
   return <button {...props} aria-haspopup="menu" />;
 }
 
 export type MenuItemProps = JSX.HTMLAttributes<HTMLDivElement>;
 
-export function MenuItem(props: MenuItemProps) {
+export function MenuItem(props: Readonly<MenuItemProps>) {
   return <div tabIndex="0" {...props} role="menuitem" />;
 }
 
@@ -204,7 +204,7 @@ export type MenuItemGroupProps = {
   title?: JSX.Element;
 } & JSX.HTMLAttributes<HTMLDivElement>;
 
-export function MenuItemGroup(props: MenuItemGroupProps) {
+export function MenuItemGroup(props: Readonly<MenuItemGroupProps>) {
   const [local, divProps] = splitProps(props, ["title", "children"]);
   return (
     <div {...divProps} role="group">
@@ -232,7 +232,7 @@ export type MenuOptionProps = {
   value: string;
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
-export function MenuOption(props: MenuOptionProps) {
+export function MenuOption(props: Readonly<MenuOptionProps>) {
   const [local, divProps] = splitProps(props, ["value", "onchange"]);
   const [value, change, type] = useContext(MenuOptionsContext);
   const selectedValue = createMemo(() => value().includes(props.value));
@@ -283,7 +283,7 @@ export type MenuOptionGroupProps = (
 ) &
   Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
-export function MenuOptionGroup(props: MenuOptionGroupProps): JSX.Element {
+export function MenuOptionGroup(props: Readonly<MenuOptionGroupProps>): JSX.Element {
   const [local, divProps] = splitProps(props, [
     "title",
     "value",

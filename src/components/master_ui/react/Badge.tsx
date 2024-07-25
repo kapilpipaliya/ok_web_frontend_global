@@ -10,7 +10,7 @@ type BadgeProps = {
   size?: ({} & string) | keyof typeof badgeSizes;
 } & JSX.IntrinsicElements["span"];
 
-const Badge = (props: BadgeProps) => {
+const Badge = (props: Readonly<BadgeProps>) => {
   return (
     <span
       {...props}

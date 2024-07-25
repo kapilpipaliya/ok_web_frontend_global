@@ -24,7 +24,7 @@ type TabViewProps = {
   children: any;
 };
 
-const TabView = (props: TabViewProps) => {
+const TabView = (props: Readonly<TabViewProps>) => {
   const [local, others] = splitProps(props, ["activeTab", "children"]);
   const [activeTab, setActiveTab] = createSignal<string | undefined>(
     local.activeTab,

@@ -15,9 +15,9 @@ interface LabeledFieldProps {
 }
 
 export function Label(
-  props: JSX.HTMLAttributes<HTMLSpanElement> &
+  props: Readonly<JSX.HTMLAttributes<HTMLSpanElement> &
     JSX.IntrinsicAttributes &
-    LabeledFieldProps,
+    LabeledFieldProps>,
 ) {
   const formData = useFormContext();
 

@@ -11,7 +11,7 @@ interface WithAccentBorderProps {
   padding?: string;
 }
 
-export function SimpleWarningAlert(props: WithAccentBorderProps): JSX.Element {
+export function SimpleWarningAlert(props: Readonly<WithAccentBorderProps>): JSX.Element {
   return (
     <div
       style={{

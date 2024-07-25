@@ -8,7 +8,7 @@ export const generateID = (() => {
   return () => String(++count);
 })();
 
-export const mergeContainerOptions = (props: ToasterProps) => {
+export const mergeContainerOptions = (props: Readonly<ToasterProps>) => {
   setDefaultOpts((s) => ({
     containerClassName: props.containerClassName ?? s.containerClassName,
     containerStyle: props.containerStyle ?? s.containerStyle,

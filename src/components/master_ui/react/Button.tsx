@@ -18,7 +18,7 @@ type ButtonProps = {
   square?: boolean;
 } & JSX.HTMLAttributes<HTMLElement>;
 
-export function Button(props: ButtonProps) {
+export function Button(props: Readonly<ButtonProps>) {
   const [local, others] = splitProps(props, [
     "as",
     "children",

@@ -250,7 +250,7 @@ export function Table(
   );
 }
 
-export function TableHeadCell(props: any) {
+export function TableHeadCell(props: Readonly<{children: JSX.Element}>) {
   return (
     <div
       class="bg:#37c border:1px|solid|#347fdd color:white font-weight:600 p:10px"

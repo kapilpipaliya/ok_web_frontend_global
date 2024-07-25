@@ -34,7 +34,7 @@ export interface ValidationConfigType {
   required: boolean;
 }
 
-export function ValidationConfig(props: ValidationProps) {
+export function ValidationConfig(props: Readonly<ValidationProps>) {
   const rules =
     validations[props.componentMeta.P.name as keyof typeof validations]?.split(
       "|",
@@ -58,13 +58,13 @@ export function ValidationConfig(props: ValidationProps) {
     props.setValue(props.meta, values);
   };
 
-  const RuleInput = (inputProps: {
+  const RuleInput = (inputProps: Readonly<{
     label: string;
     onChange: (e: any) => void;
     rule: string;
     type: string;
     value: any;
-  }) => (
+  }>) => (
     <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
       <label class="f:15 flex:.5">{inputProps.label}</label>
       <input
@@ -80,7 +80,7 @@ export function ValidationConfig(props: ValidationProps) {
     </div>
   );
 
-  const RegexInput = (regexprops: { index: number }) => (
+  const RegexInput = (regexprops: Readonly<{ index: number }>) => (
     <div class="">
       <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
         <label class="f:15 flex:.5">Regex</label>

@@ -1,6 +1,6 @@
 import type { JSX } from "solid-js";
 
-const Spinner = (props: JSX.SvgSVGAttributes<SVGSVGElement>) => {
+const Spinner = (props: Readonly<JSX.SvgSVGAttributes<SVGSVGElement>>) => {
   return (
     <svg
       {...props}
