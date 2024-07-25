@@ -41,3 +41,6 @@ Grid:
 
 Scrollbar color:
 It accept two colors, neeed to fix the css in code.
+
+Note:
+createdResource caled Two times, making API Calles two times, so used onMount

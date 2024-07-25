@@ -9,17 +9,11 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
-import { useToast } from "~/components/Toast";
 import { usePageContext } from "~/lib/contexts";
-import {
-  type EdgeMap,
-  type Id,
-  type Vertex,
-  type VertexMap,
-  useGraph,
-} from "~/lib/graph/graph";
+import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 
+import { IconButton } from "../IconButton";
 import { SearchBar } from "../css_properties/SearchBar";
 import { AddNewButton } from "./AddNew";
 import { deleteRowConfirm } from "./deleteRowConfirm";
@@ -29,11 +23,11 @@ import { setGridHeaders } from "./setGridHeaders";
 interface DataGridProps {
   tableId: string;
 }
+
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { events } = usePageContext();
-  const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal<Id | null>(null);
   const [tableStore, setTableStore] = createStore({
     data: [],
@@ -41,6 +35,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
+  const [layout, setLayout] = createSignal<'card' | 'table'>('table'); // State for layout
+  const [cardSize, setCardSize] = createSignal(3); // State for card size
 
   if (!props.tableId) {
     return <>Incorrect Configuration</>;
@@ -56,9 +52,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     result?: any;
   };
   const [error, setError] = createSignal<null | string>(null);
-
-  // createdResource caled Two times, making API Calles two times, so used onMount
   const [isLoading, setIsLoading] = createSignal(false);
+  const [search, setSearch] = createSignal("");
+  const [filteredData, setFilteredData] = createSignal([] as Vertex[]);
+
   onMount(async () => {
     setIsLoading(true);
     const data = await getTableData(props.tableId);
@@ -70,14 +67,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setIsLoading(false);
   });
 
-  const [search, setSearch] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal([]);
-
   const handleSearch = (value: string) => {
     setSearch(value);
     if (value && value.length > 0) {
       setIsSearching(true);
-
       const filtered = tableStore.data.filter((item: Vertex) =>
         Object.values(item.P).some((prop: any) =>
           prop?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -98,10 +91,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setIsShowLoadMore(true);
     }
     setGraphData(graph, setGraph, data.graph!);
-    const resultData = Object.values(data.graph!.vertexes as Vertex[]).filter(
+    const resultData = Object.values(data.graph!.vertexes).filter(
       (v) => v.L[0] === props.tableId,
     );
-    const nodes: any = tableStore.data
+    const nodes: Vertex[] = tableStore.data
       ? [...tableStore.data, ...resultData]
       : resultData;
     events?.setTitle(data.form!.title);
@@ -117,6 +110,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setSearch("");
     setFilteredData(nodes);
   }
+
   const onDelete = deleteRowConfirm(deleteRowId);
 
   return (
@@ -124,7 +118,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       <Match when={isLoading()}>
         <LoaderNew loaderHeight="55vh" />
       </Match>
-      <Match when={error()}>Error {error()}</Match>
+      <Match when={error()}>
+        <div>Error: {error()}</div>
+      </Match>
       <Match when={true}>
         <div class="flex ai:center jc:space-between p:4|10">
           <AddNewButton onClick={() => navigate("new")} />
@@ -134,18 +130,38 @@ export function DataGrid(props: Readonly<DataGridProps>) {
               placeholder="Search Data..."
               value={search()}
             />
+            <IconButton
+              icon={layout() === 'table' ?  'fa6-regular:id-card' : 'fa:table'}
+              onClick={() => setLayout(layout() === 'table' ? 'card' : 'table')}
+              title="Table Layout"
+            />
+            <Show when={layout() === 'card'}>
+              <input
+                max="10"
+                min="1"
+                onInput={(e) => setCardSize(Number(e.currentTarget.value))}
+                style={{ 'margin-left': '10px' }}
+                type="number"
+                value={cardSize()}
+              />
+            </Show>
           </nav>
         </div>
-        <CommonTable
-          data={filteredData()}
-          defaultRowsPerPage={10}
-          headers={tableStore.tableColumns}
-          isSearching={isSearching()}
-          isShowLoadMore={isShowLoadMore()}
-          onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
-          rowsPerPageOptions={[5, 10, 15]}
-          totalItems={filteredData().length}
-        />
+
+
+            <CommonTable
+              cardSize={cardSize()}
+              data={filteredData()}
+              defaultRowsPerPage={10}
+              headers={tableStore.tableColumns}
+              isSearching={isSearching()}
+              isShowLoadMore={isShowLoadMore()}
+              layout={layout()}
+              onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
+              rowsPerPageOptions={[5, 10, 15]}
+              totalItems={filteredData().length}
+            />
+        
         <Show when={deleteRowId()}>
           <DeleteDialog
             message="Are you sure you want to delete this item?"

@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 
-import { TextFieldOptionsField } from "../../constants/FieldType";
+import type { TextFieldOptionsField } from "../../constants/FieldType";
+
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
 interface InputFieldProps { handleChange: (event: Event) => void; meta: TextFieldOptionsField; selectedValue: () => string; }
 

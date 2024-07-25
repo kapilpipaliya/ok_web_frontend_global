@@ -1,7 +1,6 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
 import {
-  type Accessor,
   For,
   type JSX,
   Match,
@@ -10,14 +9,23 @@ import {
   createSignal,
 } from "solid-js";
 
-import { IconButton } from "./IconButton";
+import type { Vertex } from "~/lib/graph/graph";
+
+import { CardDetailRow, CardDetailsContainer } from "~/pages/admin_dashboard/CardDetails";
+import { CardHeader } from "~/pages/admin_dashboard/CardHeader";
+import { CardOptionsContainer } from "~/pages/admin_dashboard/CardOptions";
+import { CardContainer, CardHeaderContainer } from "~/pages/admin_dashboard/SimpleCard";
+
+import { TableActions } from "./TableActions";
 
 type TableProps = {
-  data: any[];
+  cardSize: number;
+  data: Vertex[];
   defaultRowsPerPage?: number;
   headers: ColumnDef<any>[];
   isSearching: boolean;
   isShowLoadMore?: boolean;
+  layout: 'card' | 'table';
   onLoadMore: (skip: number, limit: number) => void;
   rowsPerPageOptions?: number[];
   totalItems: number;
@@ -54,7 +62,7 @@ export function CommonTable(props: Readonly<TableProps>) {
   };
 
   const getValue = (header: any, row: any) => {
-    const keys = header.accessorKey.split("."); // Split accessorKey by '.'
+    const keys = header.accessorKey.split(".");
     let value = row;
     for (const key of keys) {
       value = value[key];
@@ -62,46 +70,75 @@ export function CommonTable(props: Readonly<TableProps>) {
     return value;
   };
 
+  const FallBack = () => <div
+    class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}
+  >
+    No records to display
+  </div>
+
+  const Content = (props: { header: ColumnDef<any>, row: Vertex }) => {
+    return <>
+        {props.header.cell?.({
+          getValue: () => getValue(props.header, props.row),
+          row: { original: props.row },
+        })}
+      </>
+  }
+
+  const hideHeaders = () => {
+    return props.headers.filter((header) => !["Actions", "name"].includes(header.header) && !["Actions", "name"].includes(header.name));
+  }
+
+
   return (
     <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) p:4|10 width:100%">
-      <Table headers={props.headers.length}>
-        <For each={props.headers}>
-          {(header) => <TableHeadCell>{header.header}</TableHeadCell>}
-        </For>
-        <For
-          each={displayedRows()}
-          fallback={
-            <div
-              class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}
-            >
-              No records to display
-            </div>
-          }
-        >
-          {(row, index) => (
+      <Switch>
+        <Match when={props.layout === 'table'}>
+          <Table headers={props.headers.length}>
             <For each={props.headers}>
-              {(header: any) => (
-                <TableBodyCell index={index()}>
-                  <Switch>
-                    <Match when={header === "Edit"}>
-                      {header.cell?.({
-                        getValue: () => getValue(header, row),
-                        row: { original: row },
-                      })}
-                    </Match>
-                    <Match when={true}>
-                      {header.cell?.({
-                        getValue: () => getValue(header, row),
-                        row: { original: row },
-                      })}
-                    </Match>
-                  </Switch>
-                </TableBodyCell>
+              {(header) => <TableHeadCell>{header.header}</TableHeadCell>}
+            </For>
+            <For
+              each={displayedRows()}
+              fallback={<FallBack />}
+            >
+              {(row, index) => (
+                <For each={props.headers}>
+                  {(header: any) => (
+                    <TableBodyCell index={index()}>
+                      <Content header={header} row={row} />
+                    </TableBodyCell>
+                  )}
+                </For>
               )}
             </For>
-          )}
-        </For>
-      </Table>
+          </Table>
+        </Match>
+        <Match when={props.layout === 'card'}>
+          <div class={`display:grid gap-x:0.75rem gap-x:1rem@xl gap-y:1rem grid-cols:1 grid-cols:${props.cardSize}@lg mt:1.5rem`}>
+            <For each={displayedRows()} fallback={<FallBack />}>{(row) => (
+              <CardContainer>
+                <CardHeaderContainer >
+                  <CardHeader title={row.P.name} />
+                  <Show when={props.headers.find((header) => header.header === "Actions")}>
+                    {header => <CardOptionsContainer><Content header={header()} row={row} /></CardOptionsContainer>}
+                  </Show>
+                </CardHeaderContainer>
+                <CardDetailsContainer>
+                  <For each={hideHeaders()}>
+                    {(header) => (
+                      <CardDetailRow label={header.header}>
+                        <Content header={header} row={row} />
+                      </CardDetailRow>
+                    )}
+                  </For>
+                </CardDetailsContainer>
+              </CardContainer>
+            )}</For>
+          </div>
+        </Match>
+      </Switch>
+
       <TableActions
         currentPage={currentPage}
         data={props.data}
@@ -125,6 +162,7 @@ export function CommonTable(props: Readonly<TableProps>) {
       >
         <div class="display:flex justify-content:end padding:5px|10px">
           <button
+            class="bg:blue-50 br:5px cursor:pointer p:10px text:white"
             onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
           >
             Load More
@@ -134,99 +172,6 @@ export function CommonTable(props: Readonly<TableProps>) {
     </div>
   );
 }
-
-const TableActions = (props: Readonly<{
-  currentPage: Accessor<number>;
-  data: any;
-  displayedRows: Accessor<any[]>;
-  handleFirstPage: () => void;
-  handleLastPage: () => void;
-  handleNextPage: () => void;
-  handlePreviousPage: () => void;
-  handleRowsPerPageChange: (e: Event) => void;
-  rowsPerPage: Accessor<number>;
-  rowsPerPageOptions?: number[];
-  totalPages: Accessor<number>;
-}>) => {
-  return (
-    <Show when={props.displayedRows().length > 0}>
-      <div class="align-items:center display:flex justify-content:space-between padding:.5rem|1rem">
-        <div class="margin-right:1rem">
-          <label html-for="rowsPerPage">Rows per page:</label>
-          <select
-            class="margin-left:0.5rem"
-            id="rowsPerPage"
-            onChange={props.handleRowsPerPageChange}
-            value={props.rowsPerPage()}
-          >
-            <For each={props.rowsPerPageOptions || [10, 20, 50, 100]}>
-              {(option) => <option value={option}>{option}</option>}
-            </For>
-          </select>
-        </div>
-        <div class="font-weight:500 margin-right:1rem">
-          <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
-            (props.currentPage() + 1) * props.rowsPerPage(),
-            props.data.length,
-          )} of ${props.data.length}`}</span>
-        </div>
-        <div class="flex gap:10px">
-          <IconButton
-          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
-            classList={{
-              "color:black": props.currentPage() !== 0,
-              "color:lightgrey": props.currentPage() === 0,
-            }}
-            disabled={props.currentPage() === 0}
-            icon="icon-park-outline:go-start"
-            onClick={props.handleFirstPage}
-            size={22}
-            title="Move first"
-          />
-          <IconButton
-            class="bg:#d3d3d345:hover jc:center p:4 r:50%"
-            classList={{
-              "color:black": props.currentPage() !== 0,
-              "color:lightgrey": props.currentPage() === 0,
-            }}
-            disabled={props.currentPage() === 0}
-            icon="icon-park-outline:left"
-            onClick={props.handlePreviousPage}
-            size={22}
-            title="Previous"
-          />
-          <IconButton
-          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
-            classList={{
-              "color:black": props.currentPage() !== props.totalPages() - 1,
-              "color:lightgrey": props.currentPage() === props.totalPages() - 1,
-            }}
-            disabled={props.currentPage() === props.totalPages() - 1}
-            icon="icon-park-outline:right"
-            onClick={props.handleNextPage}
-            size={22}
-            title="Next"
-          />
-          <IconButton
-          class="bg:#d3d3d345:hover jc:center p:4 r:50%"
-            classList={{
-              "color:black": props.currentPage() !== props.totalPages() - 1,
-              "color:lightgrey": props.currentPage() === props.totalPages() - 1,
-            }}
-            disabled={props.currentPage() === props.totalPages() - 1}
-            icon="icon-park-outline:go-end"
-            onClick={props.handleLastPage}
-            size={22}
-            title="Move last"
-          />
-        </div>
-      </div>
-    </Show>
-  );
-};
-
-export default TableActions;
-
 
 export function Table(
   props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,
@@ -250,7 +195,7 @@ export function Table(
   );
 }
 
-export function TableHeadCell(props: Readonly<{children: JSX.Element}>) {
+export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
   return (
     <div
       class="bg:#37c border:1px|solid|#347fdd color:white font-weight:600 p:10px"
