@@ -9,7 +9,7 @@ import { sortChildren } from "~/components/page_designer/functions/sortChildren"
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 
-import { PageDesignerLabels } from "./constant";
+import { PageDesignerLabels } from "./PageDesignerLabels";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,

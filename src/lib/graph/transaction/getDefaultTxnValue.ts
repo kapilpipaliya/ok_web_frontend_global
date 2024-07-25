@@ -1,4 +1,4 @@
-import { TransactionDetail } from "../graph";
+import type { TransactionDetail } from "../graph";
 
 export function getDefaultTxnValue() {
   return {

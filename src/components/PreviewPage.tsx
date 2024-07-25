@@ -1,5 +1,5 @@
 
-import { For, JSX, createSignal } from "solid-js";
+import { For, type JSX, createSignal } from "solid-js";
 
 import { IconButton } from "./IconButton";
 

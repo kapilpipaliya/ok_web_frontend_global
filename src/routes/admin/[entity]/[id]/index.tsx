@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { Match, Switch } from "solid-js";
 
-import { PageDesignerLabels } from "~/components/page_designer/functions/constant";
+import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
 import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
 import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";

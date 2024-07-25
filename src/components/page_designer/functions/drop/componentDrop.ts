@@ -12,7 +12,7 @@ import { processChildrenAttrs } from "~/components/page_designer/functions/drop/
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/rowFunction";
-import { PageDesignerLabels } from "../constant";
+import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getUniqueName } from "../getChildrenAttrs";
 import { getCompPropsObj } from "./getCompPropsObj";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";

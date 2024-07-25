@@ -3,7 +3,7 @@
 import type { FieldWithCustomProperty } from "./FieldType";
 
 import { extraPropertyValues } from "./CSSMetadata";
-import { sizeTypes } from "./constants";
+import { defaultPixelSizeTypes, sizeTypes } from "./constants";
 
 export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
   borderColor: {
@@ -66,7 +66,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     label: "Border Width",
     mainFieldType: "textFieldOptions",
     name: "border-width",
-    options: ["px"].concat(sizeTypes.filter(size => size !== "px")),
+    options: defaultPixelSizeTypes,
     type: "number",
     // TODO: Add support for options
     // options: extraPropertyValues["border-width"].values,

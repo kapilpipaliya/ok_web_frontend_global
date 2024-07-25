@@ -6,7 +6,7 @@ import type { GraphInterface, } from "~/lib/graph/graph";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { loadPageData } from "~/components/page_designer/functions/loadPageData";
 
-import { PageDesignerLabels } from "../functions/constant";
+import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(

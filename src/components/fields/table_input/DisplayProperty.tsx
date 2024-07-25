@@ -51,7 +51,7 @@ export function DisplayProperty(props: Readonly<{
   joinVertex: Vertex;
   setValue?: (data: any) => void;
   txnId: number;
-}) {
+}>) {
   // if there is no parent FormContext, it should still work.
   const { txnId: formTxnId } = useFormContext();
   const [graph, setGraph] = useGraph();

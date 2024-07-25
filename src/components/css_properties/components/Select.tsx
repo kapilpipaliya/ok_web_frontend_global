@@ -1,44 +1,50 @@
 import { Icon } from "@iconify-icon/solid";
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { path } from "rambda";
-import { For, Match, Show, Switch, createSignal } from "solid-js";
+import { For, Match, type Setter, Show, Switch, createSignal } from "solid-js";
 
-import { useZIndex } from "~/components/ZIndex";
+import { DropdownMenu } from "~/components/DropdownMenu";
+import { ZIndex } from "~/components/ZIndex";
 
 import type { SelectField } from "../constants/FieldType";
 
 import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
-function formatString(str: string) {
+
+function formatString(str: string): string {
   return str
-    .split("-") // Split the string by hyphen
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each part
-    .join(" "); // Join the parts with a space
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
+
 export const Select = () => {
   const meta = useComponentMeta() as SelectField;
   const [cssState, setCssState] = useCssEditor();
-  const [state, setState] = useCssState();
-  const [cssDefault, setCssDefault] = useCssDefaultEditor();
+  const [state] = useCssState();
+  const [cssDefault] = useCssDefaultEditor();
   const [isActive, setIsActive] = createSignal(false);
+
   const toggleDropdown = () => setIsActive(!isActive());
-  const zIndex = useZIndex();
-  const selectedValue = () =>
-    {
-      const projections = [state() || "", ...(meta.projections ?? []), meta.name];
-      return path(projections, cssState) ||
-        path(projections, cssDefault) ||
-        meta.value ||
-        "";
-    };
+
+  const selectedValue = (): string => {
+    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    return (
+      path(projections, cssState) ||
+      path(projections, cssDefault) ||
+      meta.value ||
+      ""
+    );
+  };
 
   const selectOption = (option: any) => {
     if (meta.isAddToClass ?? true) {
-      setCssState(state(), ...(meta.projections ?? []), { [meta.name]: option.value || option });
+      setCssState(state(), ...(meta.projections ?? []), {
+        [meta.name]: option.value || option,
+      });
     }
-    if (meta.onChangeInput)
-      meta.onChangeInput(meta.name, option.value || option);
+    if (meta.onChangeInput) meta.onChangeInput(meta.name, option.value || option);
     setIsActive(false);
   };
 
@@ -55,7 +61,7 @@ export const Select = () => {
       <Switch>
         <Match when={meta.isLabelOnTop}>
           <div class={"w:full"}>
-            <LabelWrapper/>
+            <LabelWrapper />
             <Content />
           </div>
         </Match>
@@ -73,75 +79,98 @@ export const Select = () => {
   );
 
   function Content() {
+    const [reference, setReference] = createSignal<HTMLElement | null>(null);
+
     return (
       <div class={`${meta.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
-        <div
-          classList={{
-            "flex ai:center b:1px|solid|lightgray f:14 jc:space-between p:2|7 r:5": true,
-            open: isActive(),
-          }}
-          onClick={toggleDropdown}
-        >
-          <button
-            aria-controls={`select-dropdown${meta.label}`}
-            aria-expanded={isActive()}
-            aria-haspopup="listbox"
-            aria-labelledby="select button"
-            class="select-button"
-            role="combobox"
-          >
-            <span class={`selected-value ${!selectedValue() && "color:lightgray"}`}>
-              {selectedValue() ? formatString(selectedValue()) : `Select Value`}
-            </span>
-            <span class="arrow" />
-          </button>
-          <div>
-            <Icon
-              height={22}
-              icon={"teenyicons:down-small-outline"}
-              width={22}
-            />
-          </div>
-        </div>
-
-        <ul
-          class={`{scrollbar-width:thin} border-radius:.28571429rem border:1px|solid|rgba(34,36,38,.15) box-shadow:-1px|0px|14px|3px|rgba(17,36,38,.15) cursor:auto max-h:15rem outline:0 overflow:auto position:absolute text-align:left text-shadow:none top:100% transition:opacity|.1s|ease will-change:transform,opacity z-index:${zIndex}`}
-          classList={{
-            "b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:full": true,
-            hidden: !isActive(),
-            visible: isActive(),
-          }}
-          id={`select-dropdown${meta.label}`}
-        >
-          <For each={meta.options}>
-            {(option) => {
-              const label = () => option.value || option;
-              return (
-                <li
-                  classList={{
-                    "bg:#efefef:hover": selectedValue() !== label(),
-                    "bg:rgb(229,234,253)": selectedValue() === label(),
-                    "bg:rgb(229,234,253):hover": selectedValue() === label(),
-                    "flex rel ai:center cursor:pointer f:14 jc:space-between p:5 r:5": true,
-                    "font-weight:medium": selectedValue() === label(),
-                  }}
-                  onClick={() => selectOption(option)}
-                >
-                  <label>{formatString(label())}</label>
-                  <Show when={selectedValue() === label()}>
-                    <Icon
-                      class="color:dodgerblue"
-                      height={22}
-                      icon={"icon-park-outline:check-one"}
-                      width={22}
-                    />
-                  </Show>
-                </li>
-              );
-            }}
-          </For>
-        </ul>
+        <DropdownButton
+          isActive={isActive()}
+          selectedValue={selectedValue()}
+          setReference={setReference}
+          toggleDropdown={toggleDropdown}
+        />
+        <Show when={isActive()}>
+          <ZIndex>
+            <DropdownMenu onClickOutside={() => setIsActive(false)} parentRef={reference()!}>
+              <DropdownList
+                options={meta.options}
+                selectOption={selectOption}
+                selectedValue={selectedValue()}
+              /></DropdownMenu>
+          </ZIndex>
+        </Show>
       </div>
     );
   }
 };
+
+interface DropdownButtonProps {
+  isActive: boolean;
+  selectedValue: string;
+  setReference: Setter<HTMLElement | null>;
+  toggleDropdown: () => void;
+}
+
+const DropdownButton = (props: DropdownButtonProps) => (
+  <div // NOSONAR
+    classList={{
+      "flex ai:center b:1px|solid|lightgray f:14 jc:space-between p:2|7 r:5": true,
+      open: props.isActive,
+    }}
+    onClick={props.toggleDropdown}
+    ref={props.setReference}
+  >
+    <button // NOSONAR Temparary ignore it
+      aria-controls="select-dropdown"
+      aria-expanded={props.isActive}
+      aria-haspopup="listbox"
+      aria-labelledby="select button"
+      class="select-button"
+      role="combobox"
+    >
+      <span class={`selected-value ${!props.selectedValue && "color:lightgray"}`}>
+        {props.selectedValue ? formatString(props.selectedValue) : `Select Value`}
+      </span>
+      <span class="arrow" />
+    </button>
+    <Icon height={22} icon={"teenyicons:down-small-outline"} width={22} />
+  </div>
+);
+
+interface DropdownListProps {
+  options: any[];
+  selectOption: (option: any) => void;
+  selectedValue: string;
+}
+
+const DropdownList = (props: DropdownListProps) => (
+  <ul class="w:full">
+    <For each={props.options}>
+      {(option) => {
+        const label = () => option.value || option;
+        return (
+          <li // NOSONAR
+            classList={{
+              "bg:#efefef:hover": props.selectedValue !== label(),
+              "bg:rgb(229,234,253)": props.selectedValue === label(),
+              "bg:rgb(229,234,253):hover": props.selectedValue === label(),
+              "flex rel ai:center cursor:pointer f:14 jc:space-between p:5 r:5": true,
+              "font-weight:medium": props.selectedValue === label(),
+            }}
+            onClick={() => props.selectOption(option)}
+          >
+            <label>{formatString(label())}</label>
+            <Show when={props.selectedValue === label()}>
+              <Icon
+                class="color:dodgerblue"
+                height={22}
+                icon={"icon-park-outline:check-one"}
+                width={22}
+              />
+            </Show>
+          </li>
+        );
+      }}
+    </For>
+  </ul>
+);

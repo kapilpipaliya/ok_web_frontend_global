@@ -31,7 +31,7 @@ export const SortableRow = (props: Readonly<{
   setDragToIndex: (index: number) => void;
   tableColumnsTemplate: Accessor<Vertex[]>;
   txnId: number;
-} & GenericComponentProps) => {
+} & GenericComponentProps>) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
   const { cleanUpConfig } = useFormContext();

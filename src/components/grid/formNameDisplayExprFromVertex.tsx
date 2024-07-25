@@ -20,8 +20,9 @@ export function formNameDisplayExprFromVertex(
   );
   if (collectionVertex) {
     const nameKeys = getNameKeyForCollection(graph, collectionVertex);
+    if (nameKeys.length === 0) return;
     return nameKeys.length === 1
-      ? `P.${nameKeys[0]}`
-      : nameKeys.map((name) => `$P.${name}`).join(" ");
+      ? `::'P.${nameKeys[0]}'`
+      : nameKeys.map((name) => `(::'P.${name}')`).join("+(' ')");
   }
 }

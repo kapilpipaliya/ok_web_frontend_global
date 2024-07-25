@@ -147,7 +147,7 @@ export function DynamicComponent(
   const Content = () => (
     <Dynamic
       {...deNullifyAndMergeCSS()}
-      component={component()!}
+      component={component()}
       componentName={componentName()}
       data={props.data}
       disabled={props.disabled}
