@@ -6,12 +6,12 @@ import { ColorPickerInput } from "~/components/css_properties/components/ColorPi
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
 import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
 import { Select } from "~/components/css_properties/components/Select";
-import { TextFieldWithSelect } from "~/components/css_properties/components/TextFieldWithSelect";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
 
 import type { GenericField, TextFieldOptionsField, } from "../constants/FieldType";
 
 import { ComponentMetaContext } from "../CssEditorContext";
+import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
 
 export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
   return (

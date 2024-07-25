@@ -172,7 +172,7 @@ export function DynamicComponent(
       <Match keyed when={!expressionProperties().hidden && component()}>
         <Switch>
           <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
-            <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label}>
+            <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
               <Content />
             </Label>
           </Match>

@@ -12,6 +12,7 @@ interface LabeledFieldProps {
   children: JSX.Element;
   label?: string;
   position?: "bottom" | "left" | "right" | "system" | "top";
+  required?: boolean;
 }
 
 export function Label(
@@ -41,6 +42,7 @@ export function Label(
     "label",
     "position",
     "children",
+    "required",
   ]);
 
   return (
@@ -48,14 +50,14 @@ export function Label(
       <Switch fallback={<>{local.children}</>}>
         <Match when={local.label && (position() === "top" || position() === "left")}>
           <span class={generateLabelClass()} {...restProps}>
-            {local.label}
+            {local.label}{local.required && <span class="color:red"> *</span>}
           </span>
           {local.children}
         </Match>
         <Match when={local.label && (position() === "bottom" || position() === "right")}>
           {local.children}
           <span class={generateLabelClass()} {...restProps}>
-            {local.label}
+            {local.label}{local.required && <span class="color:red"> *</span>}
           </span>
         </Match>
       </Switch>
