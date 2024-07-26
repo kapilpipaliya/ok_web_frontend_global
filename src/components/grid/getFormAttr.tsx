@@ -4,7 +4,7 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
@@ -16,7 +16,7 @@ export async function getFormAttr(
   if (!form) {
     form = FormMetaData.Form;
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-    const data = await getDataMGCall({
+    const data = await fetchDataFromMG({
       expression: `g:'Form[${tableId}]'`,
       incoming,
       outgoing,

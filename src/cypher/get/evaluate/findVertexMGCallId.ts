@@ -2,7 +2,7 @@ import { int } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
-import type { ContextType } from "./ContextType";
+import type { ContextType } from "../../types/ContextType";
 
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
 

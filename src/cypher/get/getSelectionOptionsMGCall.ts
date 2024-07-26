@@ -4,9 +4,9 @@
 // TODO:
 import type { Vertex } from "~/lib/graph/graph";
 
-import type { ServerResult } from "./ServerResult";
+import type { ServerResult } from "../types/ServerResult";
 
-import { retryTransaction } from "../mutate/mutate_api/retryTransaction";
+import { retryTransaction } from "../mutate/mutation_handlers/retryTransaction";
 import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
 import { handleMutationData } from "./handleMutationData";
 

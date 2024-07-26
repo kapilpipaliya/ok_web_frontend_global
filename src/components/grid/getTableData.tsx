@@ -1,6 +1,6 @@
 
 
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
@@ -28,7 +28,7 @@ export async function getTableData(
       skip: skip,
     });
 
-    const result = await getDataMGCall({
+    const result = await fetchDataFromMG({
       expression,
       incoming,
       outgoing,

@@ -5,7 +5,7 @@ import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
 import { getFormAttr } from "~/components/grid/getFormAttr";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -41,7 +41,7 @@ export function PageViewWrapper(
 
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
-    const data = await getDataMGCall({
+    const data = await fetchDataFromMG({
       expression:
         props.expression ??
         (props.formId
@@ -91,7 +91,7 @@ export function PageViewWrapper(
         false,
       );
 
-      const data = await getDataMGCall({
+      const data = await fetchDataFromMG({
         expression: `id:'${props.dataId}'`,
         incoming,
         outgoing,

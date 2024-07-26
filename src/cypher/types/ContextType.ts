@@ -8,4 +8,5 @@ export interface ContextType {
   relationships?: { [key: string]: Edge };
   session?: Session;
   tx?: TransactionPromise;
+  vertexes?: Vertex[];
 }

@@ -5,7 +5,7 @@ import {
   convertRelationshipToJson,
 } from "~/lib/convertNodeToJson";
 
-import type { ContextType } from "./ContextType";
+import type { ContextType } from "../../types/ContextType";
 
 export function processResult(
   records: Record[],

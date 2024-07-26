@@ -5,7 +5,7 @@ import { type Session, types } from "neo4j-driver";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { getDriver } from "~/cypher/driver";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -24,7 +24,7 @@ async function getInitialData(args: { subdomain: string }) {
 
     const form = FormMetaData.Comp;
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-    const result = await getDataMGCall({ expression: `g:'Comp'`, incoming, outgoing });
+    const result = await fetchDataFromMG({ expression: `g:'Comp'`, incoming, outgoing });
 
     if (result.graph) {
       Object.assign(nodeObj, result.graph.vertexes);

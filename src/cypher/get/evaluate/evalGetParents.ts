@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
-import type { ContextType } from "./ContextType";
+import type { ContextType } from "../../types/ContextType";
 
 import { processResult } from "./processResult";
 

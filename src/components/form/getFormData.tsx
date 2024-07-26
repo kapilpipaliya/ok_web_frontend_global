@@ -1,7 +1,7 @@
-import type { ServerResult } from "~/cypher/get/ServerResult";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
@@ -13,7 +13,7 @@ export const getFormData = async (
   try {
     const form = FormMetaData[formId] || FormMetaDataAuth[formId];
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-    const result = await getDataMGCall({
+    const result = await fetchDataFromMG({
       expression: `id:'${id}'`,
       incoming,
       outgoing,

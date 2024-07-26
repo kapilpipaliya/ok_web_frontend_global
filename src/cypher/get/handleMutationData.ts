@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
-import { mutateData } from "../mutate/mutate_api/mutateData";
+import { mutateData } from "../mutate/mutation_handlers/mutateData";
 
 export async function handleMutationData(
   mutationData: any,

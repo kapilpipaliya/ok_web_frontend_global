@@ -2,7 +2,7 @@ import type { TransactionPromise } from "neo4j-driver-core";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { retryTransaction } from "~/cypher/mutate/mutate_api/retryTransaction";
+import { retryTransaction } from "~/cypher/mutate/mutation_handlers/retryTransaction";
 
 import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
 import { handleMutationData } from "./handleMutationData";

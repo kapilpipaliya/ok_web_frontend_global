@@ -6,7 +6,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalAsync } from "~/lib/expression_eval";
 
-import type { ServerResult } from "./ServerResult";
+import type { ServerResult } from "../types/ServerResult";
 
 import { replaceExpressionToLabel } from "./replaceExpressionToLabel";
 
