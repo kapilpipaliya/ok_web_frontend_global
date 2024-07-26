@@ -18,6 +18,7 @@ import {
   type GraphInterface,
   type Id,
   type VertexMap,
+  Vertex,
 } from "./lib/graph/graph";
 import { getDefaultTxnValue } from "./lib/graph/transaction/getDefaultTxnValue";
 import masterConfig from "./master.css";
@@ -39,7 +40,7 @@ export default function App() {
     edges: {} as EdgeMap,
     isSideBarOpen: false,
     isSubSideBarOpen: false,
-    member: {},
+    member: {P: {}} as Vertex,
     navBarHeight: 45,
     navigationData: [],
     get newTxnId() {
@@ -55,6 +56,7 @@ export default function App() {
       return newVertexId.toString();
     },
     transactions,
+    userSetting: {P: {}} as Vertex,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
     vertexes: {} as VertexMap,
   });

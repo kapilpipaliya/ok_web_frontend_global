@@ -18,6 +18,7 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
+  console.log('renew')
   const [graph, setGraph] = useGraph();
   const location = useLocation();
   const navBarVertexId = graph.newVertexId;

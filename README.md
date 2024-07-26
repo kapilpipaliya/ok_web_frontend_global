@@ -44,3 +44,30 @@ It accept two colors, neeed to fix the css in code.
 
 Note:
 createdResource caled Two times, making API Calles two times, so used onMount
+
+# Playwright commands:
+npx playwright test
+npx playwright show-report
+
+npx playwright test
+Runs the end-to-end tests.
+
+npx playwright test --ui
+Starts the interactive UI mode.
+
+npx playwright test --project=chromium
+Runs the tests only on Desktop Chrome.
+
+npx playwright test example
+Runs the tests in a specific file.
+
+npx playwright test --debug
+Runs the tests in debug mode.
+
+npx playwright codegen
+Auto generate tests with Codegen.
+
+
+Note:
+Neo4j Session Management: 
+Proper session management is crucial in database operations to prevent resource leaks. The session is closed in a finally block to ensure it is always closed, even if an error occurs.

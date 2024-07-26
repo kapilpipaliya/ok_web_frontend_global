@@ -1,40 +1,77 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import type { Node } from "neo4j-driver";
+import { int, type Node, type Session } from "neo4j-driver";
 
 import { getDriver } from "~/cypher/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import { getSubDomain } from "~/server/getSubDomain";
 
-// Main POST function
+async function getSubdomainFromRequest(request: Request): Promise<string> {
+  const host = request.headers.get("host");
+  if (!host) throw new Error("Host header is missing");
+  return getSubDomain(host);
+}
+
+async function getUserEmailFromSession(): Promise<string> {
+  const httpSession = await getHttpsSession();
+  if (!httpSession.data.email) {
+    throw new Error("Not Authorized: Email is undefined");
+  }
+  return httpSession.data.email;
+}
+
+async function findUserByEmail(session: Session, email: string): Promise<{ user: Node | null, userSetting: Node | null }> {
+  const query = `
+    MATCH (u:User)
+    WHERE u.email = $email OR u.username = $email
+    OPTIONAL MATCH (u)-[r:UserSetting]->(s:UserSetting)
+    RETURN u, s
+  `;
+  const result = await session.run(query, { email });
+  const user = result.records.length > 0 ? result.records[0].get("u") as Node : null;
+  let userSetting = result.records.length > 0 ? result.records[0].get("s") as Node : null;
+
+  if (user && !userSetting) {
+    // Create a new UserSetting if it doesn't exist
+    const createUserSettingQuery = `
+      MATCH (u:User)
+      WHERE ID(u) = $userId
+      CREATE (u)-[:UserSetting]->(s:UserSetting { createdAt: localDateTime() })
+      RETURN s
+    `;
+    const createResult = await session.run(createUserSettingQuery, { userId: int(user.identity) });
+    userSetting = createResult.records.length > 0 ? createResult.records[0].get("s") as Node : null;
+  }
+
+  return { user, userSetting };
+}
+
 export async function GET({ request }: APIEvent) {
-  const subdomainFromUrl = await getSubDomain(request.headers.get("host")!);
-  const neo4jSession = (await getDriver(subdomainFromUrl)).session();
+  let neo4jSession: Session | undefined;
   try {
-    const httpSession = await getHttpsSession();
-    if (httpSession.data?.subdomain === undefined) {
-      return { error: "Not Authorized Domain" };
-    }
-    // session only works with https
-    const email = httpSession.data.email;
-    if (email === undefined) {
-      return { error: "Not Authorized Email or username" };
-    }
-    const query =
-      "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
-    const result = await neo4jSession.run(query, { email: email });
+    const subdomainFromUrl = await getSubdomainFromRequest(request);
+    neo4jSession = (await getDriver(subdomainFromUrl)).session();
 
-    if (result.records.length === 0) {
-      return { error: `Not Authorized Email or username ${email}` };
-    }
-    const user = result.records[0].get("u") as Node;
-    const { password, ...properties } = convertNodeToJson(user).P;
+    const email = await getUserEmailFromSession();
+    const { user, userSetting } = await findUserByEmail(neo4jSession, email);
 
-    return {
-      id: user.elementId,
-      properties,
-    };
-  } catch (error: any) {
-    return new Response(error.message, { status: 500 });
+    if (!user) {
+      return new Response(JSON.stringify({ error: `Not Authorized: No user found with email or username ${email}` }), { status: 401 });
+    }
+
+    const userVertex = convertNodeToJson(user);
+    delete userVertex.P.password;
+
+    const response: any = { user: userVertex };
+
+    if (userSetting) {
+      response.userSetting = convertNodeToJson(userSetting);
+    }
+
+    return new Response(JSON.stringify(response), { status: 200 });
+  } catch (error: unknown) {
+    return new Response(error instanceof Error ? error.message : "Unknown error", { status: 500 });
+  } finally {
+    if (neo4jSession) neo4jSession.close();
   }
 }

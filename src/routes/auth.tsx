@@ -19,7 +19,8 @@ export default function AuthLayout(props: Readonly<RouteSectionProps>) {
     }
   });
 
-  // getAPI(API.getUserUrl).then((user) => {
+  // getAPI(API.getUserUrl).then((data) => {
+  //   const user = data.user;
   //   if (user?.id) {
   //     navigate(`${APP_BASE_URL}`);
   //   }

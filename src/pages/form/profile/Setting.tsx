@@ -47,16 +47,17 @@ export function Settings() {
 
   getAPI(API.getUserUrl)
     .then((data: { [key: string]: any }) => {
+      const user = data.user;
       setIsMainScreenLoad(true);
       setProfileData({
         country: "United States",
-        email: data.properties.email,
-        id: data.id,
+        email: user.P.email,
+        id: user.id,
         profileImage:
-          data.properties.profileImage ??
+          user.P.profileImage ??
           "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
-        uId: data.properties.uId,
-        username: data.properties.username,
+        uId: user.P.uId,
+        username: user.P.username,
       });
 
       loadContactData();

@@ -4,54 +4,35 @@ import { type Session, types } from "neo4j-driver";
 
 import { getDriver } from "~/cypher/driver";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import {
-  convertNodeToJson,
-  convertRelationshipToJson,
-} from "~/lib/convertNodeToJson";
+import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { Edge, Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getSubDomain } from "~/server/getSubDomain";
 
-type JsonData = Record<string, any>;
 // exporting this function breaks the api
-async function getInitialData(args: {
-  subdomain: string;
-}): Promise<{ [key: string]: any }> {
-  const nodeObj: JsonData = {};
-  const relationshipObj: JsonData = {};
+async function getInitialData(args: { subdomain: string }) {
+  const nodeObj: Record<string, Vertex> = {};
+  const relationshipObj: Record<string, Edge> = {};
 
   const session = (await getDriver(args.subdomain)).session();
-  await fetchFromMGAndSaveToArray(
-    session,
-    `MATCH (n:DataType)
-    OPTIONAL MATCH (n)-[r]->(m)
-    RETURN n, r, m`,
-    {},
-    nodeObj,
-    relationshipObj,
-  );
-  await fetchFromMGAndSaveToArray(
-    session,
-    `MATCH (n:CompCategory)
-      OPTIONAL MATCH (n)-[r]->(m)
-      RETURN n, r, m`,
-    {},
-    nodeObj,
-    relationshipObj,
-  );
-  const form = FormMetaData.Comp;
-  const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-  const result = await getDataMGCall({
-    expression: `g:'Comp'`,
-    incoming,
-    outgoing,
-  });
-  if (result.graph) {
-    Object.assign(nodeObj, result.graph.vertexes);
-    Object.assign(relationshipObj, result.graph.edges);
+  
+  try {
+    await fetchFromMGAndSaveToArray(session, `MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`, {}, nodeObj, relationshipObj);
+    await fetchFromMGAndSaveToArray(session, `MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`, {}, nodeObj, relationshipObj);
+
+    const form = FormMetaData.Comp;
+    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+    const result = await getDataMGCall({ expression: `g:'Comp'`, incoming, outgoing });
+
+    if (result.graph) {
+      Object.assign(nodeObj, result.graph.vertexes);
+      Object.assign(relationshipObj, result.graph.edges);
+    }
+  } finally {
+    await session.close(); // Ensure the session is always closed
   }
 
-  await session.close();
   return {
     edges: relationshipObj,
     timestamp: new Date().getTime(),
@@ -62,16 +43,12 @@ async function getInitialData(args: {
 async function fetchFromMGAndSaveToArray(
   session: Session,
   query: string,
-  params: Record<string, any>,
-  nodeObj: JsonData,
-  relationshipObj: JsonData,
-): Promise<{
-  nodeObj: JsonData;
-  relationshipObj: JsonData;
-}> {
+  params: Record<string, unknown>,
+  nodeObj: Record<string, Vertex>,
+  relationshipObj: Record<string, Edge>,
+): Promise<void> {
   try {
     const result = await session.run(query, params);
-
     for (const record of result.records) {
       record.forEach((value) => {
         if (value instanceof types.Node) {
@@ -92,8 +69,6 @@ async function fetchFromMGAndSaveToArray(
         }
       });
     }
-
-    return { nodeObj, relationshipObj };
   } catch (error) {
     console.error("Failed to execute query:", query, "Error:", error);
     throw error;
@@ -101,11 +76,11 @@ async function fetchFromMGAndSaveToArray(
 }
 
 export async function GET({ request }: APIEvent) {
-  // const { formName, formId } = await request.json();
   const subdomain = await getSubDomain(request.headers.get("host")!);
 
   try {
-    return getInitialData({ subdomain });
+    const data = await getInitialData({ subdomain });
+    return data;
   } catch (error) {
     console.error("Failed to get Initial Data", error);
     return new Response("Internal Server Error", { status: 500 });

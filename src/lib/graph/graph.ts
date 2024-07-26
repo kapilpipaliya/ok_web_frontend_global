@@ -57,12 +57,13 @@ export interface GraphInterface {
   edges: EdgeMap;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  member?: AnyObject | null;
+  member?: Vertex;
   navBarHeight: number;
   navigationData?: AnyObject[];
   newTxnId: number;
   newVertexId: Id;
   transactions: Map<number, TransactionDetail>;
+  userSetting: Vertex;
   vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
 }

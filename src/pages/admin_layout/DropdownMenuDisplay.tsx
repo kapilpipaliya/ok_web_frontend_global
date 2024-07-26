@@ -17,7 +17,7 @@ export function DropdownMenuDisplay(): JSX.Element {
   const [graph, setGraph] = useGraph();
   const [loadingSite, setLoadingSite] = useLoading();
   const navigate = useNavigate();
-  const { showLoadingToast } = useToast();
+  const { showLoadingToast, showErrorToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: HTMLButtonElement;
 
@@ -32,17 +32,23 @@ export function DropdownMenuDisplay(): JSX.Element {
     getAPI(API.getUserUrl)
       .then((data) => {
         if (data) {
-          setGraph("member", data);
+          if (data.user) {
+            setGraph("member", data.user);
+          }
+          if (data.userSetting) {
+            setGraph("userSetting", data.userSetting);
+          }
         }
       })
-      .catch((err: any) => {
-        if (err.message) {
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.message) {
+          showErrorToast(err.message);
           navigate("/auth/login");
         }
       });
   });
 
-  const profileImage = graph.member?.properties?.profileImage ||
+  const profileImage = graph.member?.P?.profileImage ||
     "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png";
 
   return (
@@ -65,7 +71,7 @@ export function DropdownMenuDisplay(): JSX.Element {
               <ProfileHeader profileImage={profileImage} />
               <hr class="color:rgb(223,223,223)" />
               <MenuItems
-                isAuthenticated={!!graph.member?.properties?.email}
+                isAuthenticated={!!graph.member?.P?.email}
                 navigate={navigate}
                 onClose={handleClose}
                 setLoadingSite={setLoadingSite}
