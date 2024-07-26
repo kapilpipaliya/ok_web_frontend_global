@@ -5,7 +5,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import { evalAsync } from "~/lib/expression_eval";
 import { Vertex } from "~/lib/graph/graph";
 
-import type { NestedExpression } from "./NestedExpression";
+import type { NestedExpression } from "../types/NestedExpression";
 
 import { ContextType } from "../types/ContextType";
 

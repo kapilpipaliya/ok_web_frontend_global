@@ -11,49 +11,43 @@ export async function newEdgeMGCall(
   edgeType: string,
   startVertexId: Id,
   endVertexId: Id,
-  properties: { [key: string]: any } = {},
-) {
+  properties: { [key: string]: any } = {}
+): Promise<{ edge?: any; error: boolean }> {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
-  const driver = getDriver(subDomain);
-  const transaction = (await driver).session().beginTransaction();
+  const driver = await getDriver(subDomain);
+  const session = driver.session();
+  const transaction = session.beginTransaction();
 
   try {
     const createEdgeQuery = `
       MATCH (startVertex), (endVertex)
-      WHERE id(startVertex) = $startVertexId AND id(endVertex) = $toId
+      WHERE id(startVertex) = $startVertexId AND id(endVertex) = $endVertexId
       CREATE (startVertex)-[e:${edgeType}]->(endVertex)
-      SET e.createdAt = localDateTime()
+      SET e = $properties, e.createdAt = localDateTime()
       RETURN e
     `;
+
     const edgeResult = await transaction.run(createEdgeQuery, {
       startVertexId: int(startVertexId),
-      toId: int(endVertexId),
+      endVertexId: int(endVertexId),
+      properties
     });
 
-    // Extract the new vertex ID from the result
     if (edgeResult.records.length === 0) {
-      throw new Error("Failed to create Edge.");
+      throw new Error("Failed to create edge.");
     }
 
     const newEdge = convertRelationshipToJson(edgeResult.records[0].get("e"));
-    // Commit the transaction
     await transaction.commit();
 
-    return {
-      edge: newEdge,
-      error: false,
-    };
+    return { edge: newEdge, error: false };
   } catch (error) {
-    console.error(error);
-
-    // Rollback the transaction in case of an error
+    console.error("Error creating new edge:", error);
     await transaction.rollback();
     return { error: true };
   } finally {
-    // await session.close();
-    // on application exit:
-    // await driver.close();
+    await session.close();
   }
 }

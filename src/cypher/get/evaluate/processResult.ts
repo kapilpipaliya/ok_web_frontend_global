@@ -1,10 +1,5 @@
 import type { Record } from "neo4j-driver";
-
-import {
-  convertNodeToJson,
-  convertRelationshipToJson,
-} from "~/lib/convertNodeToJson";
-
+import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import type { ContextType } from "../../types/ContextType";
 
 export function processResult(
@@ -14,38 +9,39 @@ export function processResult(
   typeLabel: string,
   inward?: boolean,
 ) {
-  return records.map((record) => {
-    const vertex = convertNodeToJson(record.get(nodeLabel));
-    const relationship = convertRelationshipToJson(record.get(typeLabel));
+  const vertices = records.map((record) => convertNodeToJson(record.get(nodeLabel)));
+  const relationships = records.map((record) => convertRelationshipToJson(record.get(typeLabel)));
 
-    if (context.nodes) {
+  if (context.nodes) {
+    for (const vertex of vertices) {
       context.nodes[vertex.id] = vertex;
     }
+  }
 
-    if (context.relationships) {
-      if (context.nodes![relationship.S]) {
-        if (context.nodes![relationship.S].OUT[relationship.T]) {
-          context.nodes![relationship.S].OUT[relationship.T].push(
-            relationship.id,
-          );
-        } else {
-          context.nodes![relationship.S].OUT[relationship.T] = [
-            relationship.id,
-          ];
-        }
-      }
-      if (context.nodes![relationship.E]) {
-        if (context.nodes![relationship.E].IN[relationship.T]) {
-          context.nodes![relationship.E].IN[relationship.T].push(
-            relationship.id,
-          );
-        } else {
-          context.nodes![relationship.E].IN[relationship.T] = [relationship.id];
-        }
-      }
+  if (context.relationships) {
+    for (const relationship of relationships) {
+      updateNodeRelations(context, relationship);
       context.relationships[relationship.id] = relationship;
     }
+  }
 
-    return vertex;
-  });
+  return vertices;
+}
+
+function updateNodeRelations(context: ContextType, relationship: any) {
+  if (!context.nodes) return;
+
+  if (context.nodes[relationship.S]) {
+    if (!context.nodes[relationship.S].OUT[relationship.T]) {
+      context.nodes[relationship.S].OUT[relationship.T] = [];
+    }
+    context.nodes[relationship.S].OUT[relationship.T].push(relationship.id);
+  }
+
+  if (context.nodes[relationship.E]) {
+    if (!context.nodes[relationship.E].IN[relationship.T]) {
+      context.nodes[relationship.E].IN[relationship.T] = [];
+    }
+    context.nodes[relationship.E].IN[relationship.T].push(relationship.id);
+  }
 }

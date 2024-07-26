@@ -8,27 +8,30 @@ export function calculateFilter(input: string) {
   const parseSkipLimit = (filter: string) => {
     let skip = 0;
     let limit = 0;
+
     const skipMatch = filter.match(/skip\s*=\s*(\d+)/i);
-    const limitMatch = filter.match(/limit\s*=\s*(\d+)/i);
     if (skipMatch) {
       skip = Number.parseInt(skipMatch[1], 10);
     }
+
+    const limitMatch = filter.match(/limit\s*=\s*(\d+)/i);
     if (limitMatch) {
       limit = Number.parseInt(limitMatch[1], 10);
     }
-    return { limit, skip };
+
+    return { skip, limit };
   };
 
   const parseFilter = (input: string, startChar: string, endChar: string) => {
     const filterStart = input.indexOf(startChar);
-    if (filterStart > 0) {
-      type = input.slice(0, filterStart);
+    if (filterStart >= 0) {
+      type = input.slice(0, filterStart).trim();
       const filterEnd = input.indexOf(endChar, filterStart);
       if (filterEnd > filterStart) {
         filter = input.slice(filterStart + 1, filterEnd);
-        const { limit: l, skip: s } = parseSkipLimit(filter);
-        skip = s;
-        limit = l;
+        const { skip: parsedSkip, limit: parsedLimit } = parseSkipLimit(filter);
+        skip = parsedSkip;
+        limit = parsedLimit;
         filter = filter
           .replace(/skip\s*=\s*\d+/i, "")
           .replace(/limit\s*=\s*\d+/i, "")
@@ -43,7 +46,7 @@ export function calculateFilter(input: string) {
     isMultiple = false;
     parseFilter(input, "(", ")");
   } else {
-    type = input;
+    type = input.trim();
   }
 
   return { filter, isMultiple, limit, skip, type };

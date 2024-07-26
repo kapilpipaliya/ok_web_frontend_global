@@ -1,11 +1,9 @@
 import jsep from "jsep";
 import { getRequestURL } from "vinxi/http";
-
-import type { Vertex } from "~/lib/graph/graph";
-
 import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
 import { getSubDomain } from "~/server/getSubDomain";
+import type { Vertex } from "~/lib/graph/graph";
 
 export async function checkIfNameExistsMGCall(vertex: Vertex) {
   "use server";
@@ -21,59 +19,52 @@ export async function checkIfNameExistsMGCall(vertex: Vertex) {
     return { error: true, message: "Please configure the name first" };
   }
 
-  const buildUniqueCheckQuery = (label: string, name: string, id?: string) => {
-    let baseQuery = `MATCH (v:${label}) WHERE v.name = $name`;
-    if (id) {
-      baseQuery += ` AND v.elementId != $id`;
-    }
-    baseQuery += ` RETURN v`;
-    return baseQuery;
-  };
-
-
-  const buildUniqueConstrainCheckQuery = (keys: Vertex[]) => {
-    let baseQuery = `MATCH (v:${label}) WHERE `;
-    const params: Record<string, string> = {};
-    if (id) {
-      baseQuery += `v.elementId != $id AND `;
-    }
-    for (const key of keys) {
-      baseQuery += `v.${key.P.name} = $${key.P.name} AND `;
-      params[key.P.name] = vertex.P[key.P.name];
-    }
-    baseQuery = baseQuery.slice(0, -4);
-    baseQuery += ` RETURN v`;
-    return { params, query: baseQuery };
-  };
-
   try {
-    const checkQuery = buildUniqueCheckQuery(label, name, id);
-    const params = id ? { id, name } : { name };
-    const result = await session.run(checkQuery, params);
-    const nameExists = result.records.length > 0;
-
-    if (nameExists) {
+    if (await doesNameExist(session, label, name, id)) {
       return { error: true, message: "Provided name already exists" };
     }
 
     const uniqueConstrains = await evalAsync(jsep(`g:'Form[${label}]->$0Unique'`), {});
-    if (uniqueConstrains.length > 0) {
-      for (const uniqueConstraintVertex of uniqueConstrains) {
-        const keys = await evalAsync(jsep('->$0Key'), { vertexes: [uniqueConstraintVertex] });
-        if (keys.length > 0) {
-          const { params, query } = buildUniqueConstrainCheckQuery(keys);
-          const result = await session.run(query, params);
-          const uniquConstrainExists = result.records.length > 0;
-          if (uniquConstrainExists) {
-            return { error: true, message: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists` };
-          }
+    for (const uniqueConstraintVertex of uniqueConstrains) {
+      const keys = await evalAsync(jsep('->$0Key'), { vertexes: [uniqueConstraintVertex] });
+      if (keys.length > 0) {
+        const uniqueConstraintExists = await doesUniqueConstraintExist(session, label, id, keys, vertex);
+        if (uniqueConstraintExists) {
+          return {
+            error: true,
+            message: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`
+          };
         }
       }
     }
+
     return { error: false };
   } catch (error: any) {
     return { error: true, message: error.message };
   } finally {
     await session.close();
   }
+}
+
+async function doesNameExist(session: any, label: string, name: string, id?: string) {
+  const query = `MATCH (v:${label}) WHERE v.name = $name ${id ? 'AND v.elementId != $id' : ''} RETURN v`;
+  const params = id ? { name, id } : { name };
+  const result = await session.run(query, params);
+  return result.records.length > 0;
+}
+
+async function doesUniqueConstraintExist(session: any, label: string, id: string | undefined, keys: Vertex[], vertex: Vertex) {
+  const params: Record<string, any> = { id };
+  let query = `MATCH (v:${label}) WHERE ${id ? 'v.elementId != $id AND ' : ''}`;
+
+  for (const key of keys) {
+    query += `v.${key.P.name} = $${key.P.name} AND `;
+    params[key.P.name] = vertex.P[key.P.name];
+  }
+
+  query = query.slice(0, -5); // Remove the last ' AND '
+  query += " RETURN v";
+  
+  const result = await session.run(query, params);
+  return result.records.length > 0;
 }

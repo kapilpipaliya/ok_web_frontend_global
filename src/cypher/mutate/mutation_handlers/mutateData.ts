@@ -1,6 +1,6 @@
 import type { TransactionPromise } from "neo4j-driver-core";
 
-import type { MutationArgs } from "./MutationArgs";
+import type { MutationArgs } from "../../types/MutationArgs";
 
 import { handleMutationObject } from "./handleMutationObject";
 import { mapIds } from "./mapIds";

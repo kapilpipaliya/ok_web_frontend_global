@@ -1,8 +1,5 @@
-// Function to retrieve child vertices of a node based on a specific edge type.
 import type { Session } from "neo4j-driver";
-
 import { int } from "neo4j-driver";
-
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function getChildrenOrParentVertex(
@@ -10,13 +7,18 @@ export async function getChildrenOrParentVertex(
   id: string,
   edgeType: string,
   endLabel: string,
-  inward: boolean,
-) {
-  const result = await session.run(
-    !inward
-      ? `MATCH (n)-[r:${edgeType}]->(m:${endLabel}) WHERE id(n) = $id RETURN m;`
-      : `MATCH (n${endLabel})<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`,
-    { id: int(id) },
-  );
-  return result.records.map((v) => convertNodeToJson(v.get("m")));
+  inward: boolean
+): Promise<any[]> {
+  try {
+    const query = inward
+      ? `MATCH (n${endLabel})<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`
+      : `MATCH (n)-[r:${edgeType}]->(m:${endLabel}) WHERE id(n) = $id RETURN m;`;
+
+    const result = await session.run(query, { id: int(id) });
+
+    return result.records.map((record) => convertNodeToJson(record.get("m")));
+  } catch (error) {
+    console.error(`Error fetching vertices for id ${id}:`, error);
+    throw new Error(`Error fetching vertices for id ${id}: ${error.message}`);
+  }
 }

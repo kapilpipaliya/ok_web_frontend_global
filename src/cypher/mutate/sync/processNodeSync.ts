@@ -16,8 +16,8 @@ export async function processNodeSync(
   expression: NestedExpression,
   vertexes: Vertex[],
   inward: boolean,
-  createdVertex?: Vertex,
-) {
+  createdVertex?: Vertex
+): Promise<{ graph: { edges: EdgeMap; vertexes: VertexMap }; result: Vertex[] }> {
   const context = {
     nodes: {} as VertexMap,
     relationships: {} as EdgeMap,
@@ -25,56 +25,63 @@ export async function processNodeSync(
     setChildren: true,
     vertexes,
   };
+
   const mainResult = await evalAsync(jsep(expression.expression), context);
 
-  if (mainResult && mainResult.length > 0) {
-    let children: Vertex[] = [];
-    if (createdVertex && mainResult.length > 0) {
-      const edge = Object.values(context.relationships)[0];
-      const outLabel = mainResult[0].L[0];
+  if (!mainResult || mainResult.length === 0) {
+    return { graph: { edges: context.relationships, vertexes: context.nodes }, result: mainResult };
+  }
+
+  let children: Vertex[] = [];
+  if (createdVertex) {
+    const edgeType = Object.values(context.relationships)[0]?.T;
+    const outLabel = mainResult[0]?.L[0];
+    if (edgeType && outLabel) {
       children = await addNodeEdges(
         sessionSource,
         sessionTarget,
         createdVertex,
         mainResult,
-        edge.T,
+        edgeType,
         outLabel,
-        inward,
+        inward
       );
     }
+  }
 
-    for (const vertex of mainResult) {
-      const newCreatedVertex =
-        children.find((child) => child.P.name === vertex.P.name) ||
-        (await findOrCreateNodeAndUpdateProperties(
+  for (const vertex of mainResult) {
+    const newCreatedVertex =
+      children.find((child) => child.P.name === vertex.P.name) ||
+      (await findOrCreateNodeAndUpdateProperties(
+        sessionSource,
+        sessionTarget,
+        vertex,
+        vertex.L[0]
+      ));
+
+    if (expression.incoming && expression.incoming.length > 0) {
+      for (const exp of expression.incoming) {
+        await processNodeSync(
           sessionSource,
           sessionTarget,
-          vertex,
-          vertex.L[0],
-        ));
-      if (expression.incoming && expression.incoming.length > 0) {
-        for (const exp of expression.incoming) {
-          await processNodeSync(
-            sessionSource,
-            sessionTarget,
-            exp,
-            [vertex],
-            true,
-            newCreatedVertex,
-          );
-        }
+          exp,
+          [vertex],
+          true,
+          newCreatedVertex
+        );
       }
-      if (expression.outgoing && expression.outgoing.length > 0) {
-        for (const exp of expression.outgoing) {
-          await processNodeSync(
-            sessionSource,
-            sessionTarget,
-            exp,
-            [vertex],
-            false,
-            newCreatedVertex,
-          );
-        }
+    }
+
+    if (expression.outgoing && expression.outgoing.length > 0) {
+      for (const exp of expression.outgoing) {
+        await processNodeSync(
+          sessionSource,
+          sessionTarget,
+          exp,
+          [vertex],
+          false,
+          newCreatedVertex
+        );
       }
     }
   }

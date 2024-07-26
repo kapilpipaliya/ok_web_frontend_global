@@ -11,50 +11,42 @@ import {
 import { getSubDomain } from "~/server/getSubDomain";
 
 export async function getOutEdges(
-  fromId: any | string,
+  fromId: number | string,
   type: string,
-  options: {
-    isInward?: boolean;
-  } = {},
-) {
+  options: { isInward?: boolean } = {}
+): Promise<{ error: boolean; message?: string; pairs?: [Edge, Vertex][] }> {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
-  const driver = getDriver(subDomain);
-  const transaction = (await driver).session();
+  const driver = await getDriver(subDomain);
+  const session = driver.session();
 
   try {
-    // Cypher query to create a new vertex
-    const matchVertexQuery = `MATCH (sourceNode)${
-      options.isInward ? "<-" : "-"
-    }[relationshipType${type ? `:${type}` : ""}]${options.isInward ? "-" : "->"}(targetNode)
-WHERE id(sourceNode) = $fromId
-RETURN targetNode, relationshipType
-`;
-    const vertexResult = await transaction.run(matchVertexQuery, {
+    const matchVertexQuery = `
+      MATCH (sourceNode)${options.isInward ? "<-" : "-"}[relationshipType${
+      type ? `:${type}` : ""
+    }]${options.isInward ? "-" : "->"}(targetNode)
+      WHERE id(sourceNode) = $fromId
+      RETURN targetNode, relationshipType
+    `;
+
+    const vertexResult = await session.run(matchVertexQuery, {
       fromId: int(fromId),
     });
 
-    const resultNodes = [] as [Edge, Vertex][];
-    for (const record of vertexResult.records) {
+    const resultNodes: [Edge, Vertex][] = vertexResult.records.map((record) => {
       const targetNode = convertNodeToJson(record.get("targetNode"));
       const targetRelationship = convertRelationshipToJson(
-        record.get("relationshipType"),
+        record.get("relationshipType")
       );
+      return [targetRelationship, targetNode];
+    });
 
-      resultNodes.push([targetRelationship, targetNode]);
-    }
-    return {
-      error: false,
-      pairs: resultNodes,
-    };
+    return { error: false, pairs: resultNodes };
   } catch (error) {
     console.error(error);
-
     return { error: true, message: "An error occurred" };
   } finally {
-    // await session.close();
-    // on application exit:
-    // await driver.close();
+    await session.close();
   }
 }
