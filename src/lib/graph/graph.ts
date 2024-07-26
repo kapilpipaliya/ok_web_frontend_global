@@ -62,8 +62,10 @@ export interface GraphInterface {
   navigationData?: AnyObject[];
   newTxnId: number;
   newVertexId: Id;
+  saveUserSetting: (properties: {[key: string]: any}) => void;
   transactions: Map<number, TransactionDetail>;
   userSetting: Vertex;
+  userSettingId: Id;
   vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
 }

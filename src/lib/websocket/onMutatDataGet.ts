@@ -13,6 +13,36 @@ import {
   vertexOldIdToNewIdMap,
 } from "../graph/transaction/TransactionType";
 
+function handleInsertVertex(
+  oldId: string,
+  newId: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>
+) {
+  vertexOldIdToNewIdMap.set(oldId, newId);
+  updateVertexId(oldId, newId, graph, setGraph);
+}
+
+function handleInsertEdge(
+  oldId: string,
+  newId: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>
+) {
+  edgeOldIdToNewIdMap.set(oldId, newId);
+  updateEdgeId(oldId, newId, graph, setGraph);
+}
+
+function handleDeleteVertex(
+  error: boolean,
+  message: string,
+  showErrorToast: (msg: string) => void
+) {
+  if (error) {
+    showErrorToast(message);
+  }
+}
+
 export function onMutatDataGet(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -29,7 +59,7 @@ export function onMutatDataGet(
         | "replaceEdgeStart"]?: any;
     }[];
     txnId: number;
-  },
+  }
 ) {
   const { showErrorToast } = useToast();
   batch(() => {
@@ -38,51 +68,29 @@ export function onMutatDataGet(
       // It's complicated to insert replace without error.
       // When saving Form with Select field, table is giving error.
       if (txnObject.insert) {
-        vertexOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
-        updateVertexId(
+        handleInsertVertex(
           txnObject.insert[0],
           txnObject.insert[1],
           graph,
-          setGraph,
+          setGraph
         );
       }
       if (txnObject.insertEdge) {
-        edgeOldIdToNewIdMap.set(
-          txnObject.insertEdge[0],
-          txnObject.insertEdge[1],
-        );
-        updateEdgeId(
+        handleInsertEdge(
           txnObject.insertEdge[0],
           txnObject.insertEdge[1],
           graph,
-          setGraph,
+          setGraph
         );
       }
-      if (txnObject.replace) {
-        // TODO: handle on backend
-        // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
-      }
       if (txnObject.deleteVertex) {
-        if (txnObject.deleteVertex.error) {
-          showErrorToast(txnObject.deleteVertex.message);
-        }
-        // TODO: handle on backend
-        // deleteVertex(0, txnObject.insert[0]);
+        handleDeleteVertex(
+          txnObject.deleteVertex.error,
+          txnObject.deleteVertex.message,
+          showErrorToast
+        );
       }
-      if (txnObject.replaceEdge) {
-        // TODO: handle on backend
-        // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
-      }
-      // if(txnObject.replaceEdgeStart){
-      //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
-      // }
-      // if(txnObject.replaceEdgeEnd){
-      //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
-      // }
-      if (txnObject.deleteEdge) {
-        // TODO: handle on backend
-        // deleteEdge(0, txnObject.insert[0]);
-      }
+      // TODO: handle other cases for replace, replaceEdge, deleteEdge, replaceEdgeStart, replaceEdgeEnd
     }
 
     /*if (isAllTxnProcessed(graph)) {

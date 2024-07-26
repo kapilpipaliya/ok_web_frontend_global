@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import { type Accessor, Match, Show, Switch, createSignal, onMount } from "solid-js";
+import { type Accessor, Match, Show, Switch, createEffect, createSignal, on, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { IFormMetaData } from "~/lib/FormMetadataType";
@@ -35,8 +35,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
-  const [layout, setLayout] = createSignal<'card' | 'table'>('table'); // State for layout
-  const [cardSize, setCardSize] = createSignal(3); // State for card size
+  const [layout, setLayout] = createSignal<'card' | 'table'>(graph.vertexes[graph.userSettingId]?.P.layout || 'table');
+  const [cardSize, setCardSize] = createSignal(graph.vertexes[graph.userSettingId]?.P.cardSize || 3);
+
+  createEffect(on([cardSize, layout], () => {
+    graph.saveUserSetting({cardSize: cardSize(), layout: layout()});
+  }, {defer: true}));
 
   if (!props.tableId) {
     return <>Incorrect Configuration</>;

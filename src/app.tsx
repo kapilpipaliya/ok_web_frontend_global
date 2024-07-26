@@ -3,7 +3,7 @@ import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Show, Suspense, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { type SetStoreFunction, createStore } from "solid-js/store";
 
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
@@ -12,16 +12,29 @@ import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { Toaster } from "./components/solid-toast/src";
+import { submitDataCall } from "./lib/api/api_functions";
 import {
   type EdgeMap,
   GraphContext,
   type GraphInterface,
   type Id,
+  type Vertex,
   type VertexMap,
-  Vertex,
 } from "./lib/graph/graph";
+import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
+import { commitTxn } from "./lib/graph/transaction/commitTxn";
 import { getDefaultTxnValue } from "./lib/graph/transaction/getDefaultTxnValue";
 import masterConfig from "./master.css";
+
+const saveUserSetting = (properties: {[key: string]: any}, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) => {
+  const newTxn = graph.newTxnId;
+  mergeVertexProperties(newTxn, graph.userSettingId, graph, setGraph, properties);
+  const data = commitTxn(newTxn, graph);
+  if (!data) {
+    return;
+  }
+  submitDataCall({ ...data }, graph, setGraph, newTxn);
+};
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -33,6 +46,7 @@ export default function App() {
   let txnId = 0;
 
   const transactions = new ReactiveMap() as GraphInterface["transactions"];
+
 
   const graph = createStore<GraphInterface>({
     activeClickOutside: 0,
@@ -55,8 +69,14 @@ export default function App() {
       newVertexId = newVertexId + 1;
       return newVertexId.toString();
     },
+    saveUserSetting: (properties: {[key: string]: any}) => {
+      saveUserSetting(properties, graph[0], graph[1]);
+    },
     transactions,
-    userSetting: {P: {}} as Vertex,
+    get userSetting() {
+      return this.vertexes[this.userSettingId]; // NOSONAR
+    },
+    userSettingId: "",
     vertexLabelIdMap: {} as { [key: string]: Id[] },
     vertexes: {} as VertexMap,
   });

@@ -2,11 +2,12 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { type Session, types } from "neo4j-driver";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 import { getDriver } from "~/cypher/driver";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { Edge, Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getSubDomain } from "~/server/getSubDomain";
 

@@ -1,5 +1,6 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { int, type Node, type Session } from "neo4j-driver";
+
+import { type Node, type Session, int } from "neo4j-driver";
 
 import { getDriver } from "~/cypher/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
