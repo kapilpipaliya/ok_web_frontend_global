@@ -1,9 +1,11 @@
 import jsep from "jsep";
 import { getRequestURL } from "vinxi/http";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
 import { getSubDomain } from "~/server/getSubDomain";
-import type { Vertex } from "~/lib/graph/graph";
 
 export async function checkIfNameExistsMGCall(vertex: Vertex) {
   "use server";
@@ -48,7 +50,7 @@ export async function checkIfNameExistsMGCall(vertex: Vertex) {
 
 async function doesNameExist(session: any, label: string, name: string, id?: string) {
   const query = `MATCH (v:${label}) WHERE v.name = $name ${id ? 'AND v.elementId != $id' : ''} RETURN v`;
-  const params = id ? { name, id } : { name };
+  const params = id ? { id, name } : { name };
   const result = await session.run(query, params);
   return result.records.length > 0;
 }
