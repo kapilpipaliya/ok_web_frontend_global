@@ -18,6 +18,7 @@ export const CollapsibleSection = (
     title: string;
   }>,
 ) => {
+  // dont used createWritableMemo here, because props.isOpen is not a state.
   const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true);
 
   // Sync with setAllOpen signal

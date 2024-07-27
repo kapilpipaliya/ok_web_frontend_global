@@ -80,9 +80,9 @@ export const FieldWithCustomBox = () => {
                     isLabelOnTop: meta.isLabelOnTop,
                     label: item.label,
                     name: item.name,
-                    options: meta.options,
                     placeholder: "0",
                     type: meta.type ?? "number",
+                    unitOptions: meta.options,
                   } as GenericField}
                 />
               );

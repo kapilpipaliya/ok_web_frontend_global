@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
-import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,

@@ -12,7 +12,6 @@ import {
 } from "~/components/page_designer/LayoutContext";
 
 import { HeaderRow } from "../header/HeaderRow";
-import { PageSetting } from "./PageSetting";
 import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {
@@ -51,13 +50,6 @@ export function PageDesignerWrapper(): JSX.Element {
           }}
         >
           <RenderMainContent />
-        </div>
-        <div
-          classList={{
-            "display:none": layoutStore.selectedSection === "build",
-          }}
-        >
-          <PageSetting />
         </div>
       </DesignerLayoutStoreContext.Provider>
     </ZIndex>

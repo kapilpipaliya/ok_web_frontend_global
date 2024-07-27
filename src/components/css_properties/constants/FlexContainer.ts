@@ -5,6 +5,7 @@ import type {
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
+import { defaultPixelSizeTypes } from "./csseditor_constants";
 
 export const gapFields = {
   gap: {
@@ -12,18 +13,21 @@ export const gapFields = {
     label: "Gap",
     name: "gap",
     type: "number",
+    unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   rowGap: {
     componentName: "textFieldOptions",
     label: "Row Gap",
     name: "row-gap",
     type: "number",
+    unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   columnGap: {
     componentName: "textFieldOptions",
     label: "Column Gap",
     name: "column-gap",
     type: "number",
+    unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
 }
 export const FlexContainer = {

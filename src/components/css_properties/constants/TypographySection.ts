@@ -7,7 +7,7 @@ import type {
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
-import { sizeTypes } from "./constants";
+import { sizeTypes } from "./csseditor_constants";
 
 export const TypographySection = {
   fontFamily: createSelectOptions(
@@ -35,7 +35,7 @@ export const TypographySection = {
     isLabelOnTop: true,
     label: "Size",
     name: "font-size",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
 
@@ -44,7 +44,7 @@ export const TypographySection = {
     isLabelOnTop: true,
     label: "Line height",
     name: "line-height",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   colorPicker: {
@@ -65,7 +65,7 @@ export const TypographySection = {
     isLabelOnTop: true,
     label: "Spacing",
     name: "letter-spacing",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   textIndent: {
@@ -73,7 +73,7 @@ export const TypographySection = {
     isLabelOnTop: true,
     label: "Indent",
     name: "text-indent",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   fontStyle: {

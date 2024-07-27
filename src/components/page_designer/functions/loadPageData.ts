@@ -4,9 +4,9 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
-import { setGraphData } from "~/lib/websocket/setGraphData";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,

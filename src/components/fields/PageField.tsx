@@ -2,7 +2,7 @@ import { splitProps } from "solid-js";
 
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import type { GenericComponentProps } from "./ComponentType";
+import type { GenericComponentProps } from "./FieldType";
 
 export function PageField(props: Readonly<GenericComponentProps>) {
     const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'children']);

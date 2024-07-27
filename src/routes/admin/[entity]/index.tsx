@@ -1,8 +1,8 @@
 import { useParams } from "@solidjs/router";
 
-import { AbstractGrid } from "~/components/grid/AbstractGrid";
+import { GridWrapper } from "~/components/grid/GridWrapper";
 
 export default function TablePage() {
   const params = useParams();
-  return <AbstractGrid tableId={params.entity} />;
+  return <GridWrapper tableId={params.entity} />;
 }

@@ -3,7 +3,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { handleComponentDrag } from "~/components/page_designer/functions/handleComponentDrag";
-import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
+import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,

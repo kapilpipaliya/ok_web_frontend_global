@@ -1,14 +1,15 @@
+import { createWritableMemo } from "@solid-primitives/memo";
 import { path } from "rambda";
-import { type Component, Match, Switch, createEffect, createSignal } from "solid-js";
+import { type Component, Match, Switch, } from "solid-js";
 
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
 import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../../CssEditorContext";
-import { sizeTypes } from "../../constants/constants";
+import { sizeTypes } from "../../constants/csseditor_constants";
 import { CenterDiv } from "../CenterDiv";
 import { Container } from "../Container";
 import { LabelWrapper } from "../LabelWrapper";
-import { TextFielWithUnitContent } from "./TextFielWithUnitContent";
+import { TextFieldWithUnitContent } from "./TextFieldWithUnitContent";
 
 // TODO: Add example values support in text field.
 export const TextFieldWithSelect: Component = () => {
@@ -17,17 +18,16 @@ export const TextFieldWithSelect: Component = () => {
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
 
+  // input will automatically display value without units, if its number field.
   const selectedValue = (): string => {
     const projections = [state() || "", ...(meta.projections ?? []), meta.name];
     return path(projections, cssState) || path(projections, cssDefault) || "";
   };
 
-  const [selectedOption, setSelectedOption] = createSignal(determineSelectedOption());
-
-  createEffect(() => setSelectedOption(determineSelectedOption()));
+  const [selectedOption, setSelectedOption] = createWritableMemo(() => determineSelectedOption());
 
   function determineSelectedOption(): string {
-    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.options?.[0] ?? "";
+    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.unitOptions?.[0] ?? "";
   }
 
   function changeValue(value: string) {
@@ -55,7 +55,7 @@ export const TextFieldWithSelect: Component = () => {
     if (meta.inputProps?.min !== undefined && numericValue < meta.inputProps.min) return;
     if (meta.inputProps?.max !== undefined && numericValue > meta.inputProps.max) return;
 
-    changeValue(meta.options ? `${numericValue}${selectedOption()}` : `${numericValue}`);
+    changeValue(meta.unitOptions ? `${numericValue}${selectedOption()}` : `${numericValue}`);
   }
 
   const resetValue = () => {
@@ -69,7 +69,7 @@ export const TextFieldWithSelect: Component = () => {
         <Match when={meta.isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper onResetIconClick={resetValue} />
-            <TextFielWithUnitContent
+            <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
@@ -82,7 +82,7 @@ export const TextFieldWithSelect: Component = () => {
         <Match when={meta.label}>
           <CenterDiv>
             <LabelWrapper onResetIconClick={resetValue} />
-            <TextFielWithUnitContent
+            <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
@@ -93,7 +93,7 @@ export const TextFieldWithSelect: Component = () => {
           </CenterDiv>
         </Match>
         <Match when={true}>
-          <TextFielWithUnitContent
+          <TextFieldWithUnitContent
             changeValue={changeValue}
             determineSelectedOption={determineSelectedOption}
             handleInputChange={handleInputChange}

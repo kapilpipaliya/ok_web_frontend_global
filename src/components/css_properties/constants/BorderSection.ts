@@ -3,7 +3,7 @@
 import type { FieldWithCustomProperty } from "./FieldType";
 
 import { extraPropertyValues } from "./CSSMetadata";
-import { defaultPixelSizeTypes, sizeTypes } from "./constants";
+import { defaultPixelSizeTypes, sizeTypes } from "./csseditor_constants";
 
 export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
   borderColor: {

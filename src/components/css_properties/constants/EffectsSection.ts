@@ -9,7 +9,7 @@ import type {
 
 import { extraPropertyValues } from "./CSSMetadata";
 import { createGridOptions, } from "./FieldType";
-import { sizeTypes } from "./constants";
+import { sizeTypes } from "./csseditor_constants";
 
 export const EffectsSection = {
   filter: {
@@ -36,7 +36,7 @@ export const EffectsSection = {
           isLabelOnTop: true,
           label: "Value",
           name: "value",
-          options: sizeTypes,
+          unitOptions: sizeTypes,
           type: "number",
         } as TextFieldOptionsField,
       ]),
@@ -63,7 +63,7 @@ export const EffectsSection = {
           isLabelOnTop: true,
           label: "Value",
           name: "value",
-          options: sizeTypes,
+          unitOptions: sizeTypes,
           type: "number",
         } as TextFieldOptionsField,
       ]),
@@ -93,7 +93,7 @@ export const EffectsSection = {
     isLabelOnTop: true,
     label: "Perspective",
     name: "perspective",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
 

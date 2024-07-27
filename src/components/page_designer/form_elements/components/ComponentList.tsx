@@ -13,7 +13,7 @@ import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { ComonentItem } from "./ComonentItem";
 

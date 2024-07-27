@@ -7,7 +7,7 @@ import type {
 } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
-import { defaultPixelSizeTypes } from "./constants";
+import { defaultPixelSizeTypes } from "./csseditor_constants";
 
 export const TextShadow = {
   textShadow: {
@@ -24,32 +24,32 @@ export const TextShadow = {
           isLabelOnTop: true,
           label: "X Offset",
           name: "offset-x",
-          options: defaultPixelSizeTypes,
           type: "number",
+          unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Y Offset",
           name: "offset-y",
-          options: defaultPixelSizeTypes,
           type: "number",
+          unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Blur",
           name: "blur-radius",
-          options: defaultPixelSizeTypes,
           type: "number",
+          unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Spread",
           name: "spread",
-          options: defaultPixelSizeTypes,
           type: "number",
+          unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
       ]),
     },

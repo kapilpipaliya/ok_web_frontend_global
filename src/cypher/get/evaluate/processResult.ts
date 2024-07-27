@@ -1,6 +1,6 @@
 import type { Record } from "neo4j-driver";
 
-import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import { convertNodeToJson, convertRelationshipToJson } from "~/cypher/convertNodeToJson";
 
 import type { ContextType } from "../../types/ContextType";
 

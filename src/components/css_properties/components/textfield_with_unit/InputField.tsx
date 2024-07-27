@@ -1,36 +1,47 @@
-import { Show } from "solid-js";
+import { type JSX, Show, splitProps } from "solid-js";
 
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
-interface InputFieldProps { handleChange: (event: Event) => void; meta: TextFieldOptionsField; selectedValue: () => string; }
+
+interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+  handleChange: (event: Event) => void;
+  meta: TextFieldOptionsField;
+  selectedValue: () => string;
+} 
 
 export function InputField(props: InputFieldProps) {
+  const [local, others] = splitProps(props, [
+    "class",
+    "meta",
+    "selectedValue",
+    "handleChange",
+  ]);
+
+  const InnerInput = () => (
+    <input
+      class={`${local.class ?? ""} ${local.meta.showInside ? 'outline:none p:5' : ''} f:14 w:100%`}
+      onInput={local.handleChange}
+      placeholder={local.meta.type === "number" ? "0" : local.meta.placeholder ?? ""}
+      step="any"
+      type={local.meta.type || "text"}
+      value={local.meta.type === "number" ? getValueWithoutUnits(local.selectedValue()) : local.selectedValue()}
+      {...local.meta.inputProps}
+      {...others}
+    />
+  );
+
   return (
     <Show
-      fallback={<label>
-        {props.meta.label}
-        <input
-          class={"f:14 w:100%"}
-          onInput={props.handleChange}
-          placeholder={`${props.meta.type === "number" ? "0" : props.meta.placeholder ?? ""}`}
-          step="any"
-          type={props.meta.type || "text"}
-          value={props.meta.type === "number" ? getValueWithoutUnits(props.selectedValue()) : props.selectedValue()}
-          {...props.meta.inputProps} />
-      </label>}
-      when={props.meta.showInside}
+      fallback={
+        <label>
+          {local.meta.label}
+          <InnerInput />
+        </label>
+      }
+      when={local.meta.showInside}
     >
-      <input
-        class="f:14 outline:none p:5 w:100%"
-        onInput={props.handleChange}
-        placeholder={`${props.meta.type === "number" ? "0" : props.meta.placeholder ?? ""}`}
-        step="any"
-        type={props.meta.type || "text"}
-        value={props.meta.type === "number" ? getValueWithoutUnits(
-          props.meta.value ? props.meta.value() : props.selectedValue()
-        ) : props.selectedValue()}
-        {...props.meta.inputProps} />
+      <InnerInput />
     </Show>
   );
 }

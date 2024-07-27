@@ -11,14 +11,12 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { usePageContext } from "~/lib/contexts";
 import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { IconButton } from "../IconButton";
-import { SearchBar } from "../css_properties/SearchBar";
-import { AddNewButton } from "./AddNew";
-import { deleteRowConfirm } from "./deleteRowConfirm";
-import { getTableData } from "./getTableData";
-import { setGridHeaders } from "./setGridHeaders";
+import { GridHeader } from "./GridHeader";
+import { setGridHeaders } from "./SetGridHeaders";
+import { getTableData } from "./functions/getTableData";
+import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 
 interface DataGridProps {
   tableId: string;
@@ -39,8 +37,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [cardSize, setCardSize] = createSignal(graph.vertexes[graph.userSettingId]?.P.cardSize || 3);
 
   createEffect(on([cardSize, layout], () => {
-    graph.saveUserSetting({cardSize: cardSize(), layout: layout()});
-  }, {defer: true}));
+    graph.saveUserSetting({ cardSize: cardSize(), layout: layout() });
+  }, { defer: true }));
 
   if (!props.tableId) {
     return <>Incorrect Configuration</>;
@@ -115,7 +113,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setFilteredData(nodes);
   }
 
-  const onDelete = deleteRowConfirm(deleteRowId);
+  const onDelete = useDeleteRowConfirm(deleteRowId);
 
   return (
     <Switch>
@@ -126,46 +124,27 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <div>Error: {error()}</div>
       </Match>
       <Match when={true}>
-        <div class="flex ai:center jc:space-between p:4|10">
-          <AddNewButton onClick={() => navigate("new")} />
-          <nav class="flex ai:center mb:10">
-            <SearchBar
-              handleChange={handleSearch}
-              placeholder="Search Data..."
-              value={search()}
-            />
-            <IconButton
-              icon={layout() === 'table' ?  'fa6-regular:id-card' : 'fa:table'}
-              onClick={() => setLayout(layout() === 'table' ? 'card' : 'table')}
-              title="Table Layout"
-            />
-            <Show when={layout() === 'card'}>
-              <input
-                max="10"
-                min="1"
-                onInput={(e) => setCardSize(Number(e.currentTarget.value))}
-                style={{ 'margin-left': '10px' }}
-                type="number"
-                value={cardSize()}
-              />
-            </Show>
-          </nav>
-        </div>
-
-
-            <CommonTable
-              cardSize={cardSize()}
-              data={filteredData()}
-              defaultRowsPerPage={10}
-              headers={tableStore.tableColumns}
-              isSearching={isSearching()}
-              isShowLoadMore={isShowLoadMore()}
-              layout={layout()}
-              onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
-              rowsPerPageOptions={[5, 10, 15]}
-              totalItems={filteredData().length}
-            />
-        
+        <GridHeader
+          cardSize={cardSize()}
+          columns={tableStore.tableColumns}
+          layout={layout()}
+          onSearch={handleSearch}
+          searchValue={search()}
+          setCardSize={setCardSize}
+          setLayout={setLayout}
+        />
+        <CommonTable
+          cardSize={cardSize()}
+          data={filteredData()}
+          defaultRowsPerPage={10}
+          headers={tableStore.tableColumns}
+          isSearching={isSearching()}
+          isShowLoadMore={isShowLoadMore()}
+          layout={layout()}
+          onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalItems={filteredData().length}
+        />
         <Show when={deleteRowId()}>
           <DeleteDialog
             message="Are you sure you want to delete this item?"

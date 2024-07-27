@@ -3,7 +3,7 @@ import { Dynamic } from "solid-js/web";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import type { GenericComponentProps } from "./ComponentType";
+import type { GenericComponentProps } from "./FieldType";
 
 function getAttrs(meta: Vertex) {
   return meta.P.attr ? JSON.parse(meta.P.attr) : {};

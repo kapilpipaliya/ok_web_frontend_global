@@ -7,7 +7,7 @@ import type {
 } from "./FieldType";
 
 import { createGridOptions } from "./FieldType";
-import { sizeTypes, } from "./constants";
+import { sizeTypes, } from "./csseditor_constants";
 
 export const Transform = {
   transform: {
@@ -38,8 +38,8 @@ export const Transform = {
           isLabelOnTop: true,
           label: "Value",
           name: "value",
-          options: sizeTypes,
           type: "number",
+          unitOptions: sizeTypes,
         } as TextFieldOptionsField,
         {
           align: "end",

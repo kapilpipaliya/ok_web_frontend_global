@@ -2,7 +2,7 @@
 import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
 
 import { useToast } from "~/components/Toast";
-import { generateBoxShadow } from "~/components/css_properties/utils/generateBoxShadow";
+import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";

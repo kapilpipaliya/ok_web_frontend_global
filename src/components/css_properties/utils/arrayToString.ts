@@ -1,10 +1,10 @@
 import { isObject } from "~/lib/utils";
 
-import { generateBoxShadow } from "./generateBoxShadow";
-import { generateFilter } from "./generateFilter";
-import { generateTextShadow } from "./generateTextShadow";
-import { generateTransform } from "./generateTransform";
-import { generateTransition } from "./generateTransition";
+import { generateBoxShadow } from "./generate/generateBoxShadow";
+import { generateFilter } from "./generate/generateFilter";
+import { generateTextShadow } from "./generate/generateTextShadow";
+import { generateTransform } from "./generate/generateTransform";
+import { generateTransition } from "./generate/generateTransition";
 
 export function arrayToString(name: string, arr: any[]): string {
   return arr.map(item => {

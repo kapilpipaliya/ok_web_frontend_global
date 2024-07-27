@@ -5,7 +5,7 @@ import type {
 
 import { CSSWideKeywords, } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
-import { sizeTypes } from "./constants";
+import { sizeTypes } from "./csseditor_constants";
 
 export const ColumnsSection = {
   columnCount: {
@@ -13,7 +13,7 @@ export const ColumnsSection = {
     isLabelOnTop: true,
     label: "Column Count",
     name: "column-count",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   columnGap: {
@@ -21,7 +21,7 @@ export const ColumnsSection = {
     isLabelOnTop: true,
     label: "Column Gap",
     name: "column-gap",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   columnRule: {componentName: "textFieldOptions", label: "Column Rule", name: "column-rule", type: "text"} as TextFieldOptionsField,

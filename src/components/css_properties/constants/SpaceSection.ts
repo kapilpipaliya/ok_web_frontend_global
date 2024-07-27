@@ -1,7 +1,7 @@
  
 import type { FieldWithCustomProperty } from "./FieldType";
 
-import { sizeTypes } from "./constants";
+import { sizeTypes } from "./csseditor_constants";
 
 export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty } = {
   margin: {

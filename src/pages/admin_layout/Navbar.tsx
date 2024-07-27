@@ -2,7 +2,7 @@
 import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show, splitProps } from "solid-js";
 
-import type { DisplayComponentProps } from "~/components/fields/ComponentType";
+import type { DisplayComponentProps } from "~/components/fields/FieldType";
 
 import { IconButton } from "~/components/IconButton";
 import { useGraph } from "~/lib/graph/graph";

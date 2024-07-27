@@ -1,7 +1,7 @@
 import { Show, createSignal, onMount } from "solid-js";
 
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
-import { checkIfNameExistsMGCall } from "~/cypher/get/checkUniqueConstrains";
+import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
@@ -62,7 +62,7 @@ export function SaveAsTemplateMenu(
   };
 
   const saveAsTemplate = async (name: string) => {
-    const res = await checkIfNameExistsMGCall({ L: ["TemplatePage"], P: { name } } as unknown as Vertex);
+    const res = await checkUniqueConstrains({ L: ["TemplatePage"], P: { name } } as unknown as Vertex);
     if (res.error) {
       setError(res.message);
       return;

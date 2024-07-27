@@ -7,7 +7,7 @@ import { handlePageDrag } from "~/components/page_designer/functions/handlePageD
 import { handleParentChange } from "~/components/page_designer/functions/handleParentChange";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
-import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 
 import { PageDesignerLabels } from "./PageDesignerLabels";
 

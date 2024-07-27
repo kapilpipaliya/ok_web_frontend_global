@@ -1,7 +1,7 @@
 import { type JSXElement, Show } from "solid-js";
 
-import { formCancel } from "./formCancel";
-import { formSubmit } from "./formSubmit";
+import { formCancel } from "./functions/formCancel";
+import { formSubmit } from "./functions/formSubmit";
 
 export function SaveCancelButton(
   props: Readonly<{

@@ -7,7 +7,7 @@ import type {
 
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
-import { timesTypes } from "./constants";
+import { timesTypes } from "./csseditor_constants";
 
 export const Transition = {
   transition: {
@@ -24,16 +24,16 @@ export const Transition = {
           isLabelOnTop: true,
           label: "Duration",
           name: "duration",
-          options: timesTypes,
           type: "number",
+          unitOptions: timesTypes,
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
           label: "Delay",
           name: "delay",
-          options: timesTypes,
           type: "number",
+          unitOptions: timesTypes,
         } as TextFieldOptionsField,
       ]),
       type: createSelectOptions(

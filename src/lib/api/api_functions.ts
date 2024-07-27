@@ -4,7 +4,7 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
+import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
 
 import { updateSubmittedIndex } from "../graph/transaction/updateSubmittedIndex";
 

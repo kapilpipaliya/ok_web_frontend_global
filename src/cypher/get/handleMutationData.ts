@@ -4,7 +4,7 @@ import { int } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 import { mutateData } from "../mutate/mutation_handlers/mutateData";
 

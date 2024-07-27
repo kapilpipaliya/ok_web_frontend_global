@@ -43,7 +43,7 @@ export const DisplaySection = {
     componentName: "textFieldOptions",
     label: "Opacity",
     name: "opacity",
-    options: ['%'],
+    unitOptions: ['%'],
     type: "number",
     inputProps: {
       min: 0,

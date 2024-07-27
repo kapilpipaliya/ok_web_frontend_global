@@ -4,9 +4,9 @@ import { type Session, types } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
+import { convertNodeToJson, convertRelationshipToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getSubDomain } from "~/server/getSubDomain";

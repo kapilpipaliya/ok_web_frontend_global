@@ -1,17 +1,14 @@
 import jsep from "jsep";
-import { getRequestURL } from "vinxi/http";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { getDriver } from "~/cypher/driver";
 import { evalAsync } from "~/lib/expression_eval";
-import { getSubDomain } from "~/server/getSubDomain";
 
-export async function checkIfNameExistsMGCall(vertex: Vertex) {
+import { getSessionForSubdomain } from "./getSessionForSubdomain";
+
+export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
-  const session = (await getDriver(subDomain)).session();
+  const session = await getSessionForSubdomain();
 
   const label = vertex.L[0];
   const name = vertex.P.name;

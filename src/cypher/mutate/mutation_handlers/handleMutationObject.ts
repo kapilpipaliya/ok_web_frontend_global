@@ -1,14 +1,14 @@
 import { isObject } from "~/lib/utils";
 
-import { handleDeleteEdge } from "./handleDeleteEdge";
-import { handleDeleteVertex } from "./handleDeleteVertex";
-import { handleInsert } from "./handleInsert";
-import { handleInsertEdge } from "./handleInsertEdge";
-import { handleMerge } from "./handleMerge";
-import { handleReplace } from "./handleReplace";
-import { handleReplaceEdge } from "./handleReplaceEdge";
-import { handleReplaceEdgeEnd } from "./handleReplaceEdgeEnd";
-import { handleReplaceEdgeStart } from "./handleReplaceEdgeStart";
+import { handleDeleteEdge } from "./handlers/handleDeleteEdge";
+import { handleDeleteVertex } from "./handlers/handleDeleteVertex";
+import { handleInsert } from "./handlers/handleInsert";
+import { handleInsertEdge } from "./handlers/handleInsertEdge";
+import { handleMerge } from "./handlers/handleMerge";
+import { handleReplace } from "./handlers/handleReplace";
+import { handleReplaceEdge } from "./handlers/handleReplaceEdge";
+import { handleReplaceEdgeEnd } from "./handlers/handleReplaceEdgeEnd";
+import { handleReplaceEdgeStart } from "./handlers/handleReplaceEdgeStart";
 
 export async function handleMutationObject(
   mutationObject: any,

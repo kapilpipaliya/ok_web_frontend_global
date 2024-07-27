@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
-import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import { checkUserExistence } from "~/routes/api/signup/checkUserExistence";
 import { createUserInDB } from "~/routes/api/signup/createUserInDB";
 import { getNewPortsForUser } from "~/routes/api/signup/getNewPortsForUser";

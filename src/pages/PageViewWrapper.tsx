@@ -4,14 +4,14 @@ import { Show, createEffect, createSignal, on, onMount } from "solid-js";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { getFormAttr } from "~/components/grid/getFormAttr";
+import { getFormAttr } from "~/components/grid/functions/getFormAttr";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { isObject } from "~/lib/utils";
-import { setGraphData } from "~/lib/websocket/setGraphData";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );

@@ -8,8 +8,8 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
-import { getSelectNameValue } from "~/components/grid/getSelectNameValue";
-import { getTagValue } from "~/components/grid/getTagValue";
+import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
+import { getTagValue } from "~/components/grid/functions/getTagValue";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 export function setGridHeaders(

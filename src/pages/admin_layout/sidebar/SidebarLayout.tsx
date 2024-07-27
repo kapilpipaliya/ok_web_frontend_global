@@ -5,7 +5,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";

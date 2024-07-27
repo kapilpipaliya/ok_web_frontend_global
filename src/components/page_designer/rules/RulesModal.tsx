@@ -4,7 +4,7 @@ import { createMemo, createSignal, } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useZIndex } from "~/components/ZIndex";
-import { TableInputField } from "~/components/fields/table_input/TableInputField";
+import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
@@ -13,9 +13,9 @@ import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransa
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { Overlay } from "./Overlay";
-import { generateTableInputMeta } from "./generateTableInputMeta";
-import { getConditionsExpression } from "./getConditionsExpression";
-import { modifyFieldMetaAllFields } from "./modifyFieldMetaAllFields";
+import { generateTableInputMeta } from "./functions/generateTableInputMeta";
+import { getConditionsExpression } from "./functions/getConditionsExpression";
+import { modifyFieldMetaAllFields } from "./functions/modifyFieldMetaAllFields";
 
 
 const getMetaAttributes = (selectedRule?: Vertex | null) => {

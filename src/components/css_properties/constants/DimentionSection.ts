@@ -1,6 +1,6 @@
 
 import { type TextFieldOptionsField, createGridOptions } from "./FieldType";
-import { sizeTypes } from "./constants";
+import { sizeTypes } from "./csseditor_constants";
 
 export const DimentionSection = {
   width: createGridOptions("grid", "Dimention", [
@@ -9,24 +9,24 @@ export const DimentionSection = {
       isLabelOnTop: true,
       label: "Width",
       name: "width",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
       componentName: "textFieldOptions",
       isLabelOnTop: true,
       label: "Min width",
       name: "min-width",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
       componentName: "textFieldOptions",
       isLabelOnTop: true,
       label: "Max width",
       name: "max-width",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
   ]),
   // eslint-disable-next-line perfectionist/sort-objects
@@ -36,24 +36,24 @@ export const DimentionSection = {
       isLabelOnTop: true,
       label: "Height",
       name: "height",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
       componentName: "textFieldOptions",
       isLabelOnTop: true,
       label: "Min height",
       name: "min-height",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
       componentName: "textFieldOptions",
       isLabelOnTop: true,
       label: "Max height",
       name: "max-height",
-      options: sizeTypes,
       type: "number",
+      unitOptions: sizeTypes,
     } as TextFieldOptionsField,
   ]),
 };

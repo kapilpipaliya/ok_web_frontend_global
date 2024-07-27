@@ -14,7 +14,7 @@ import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { type NavItem, getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { type Id, useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PageItem } from "./PageItem";

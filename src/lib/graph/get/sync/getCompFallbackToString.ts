@@ -2,8 +2,8 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
+import { getChildVertex } from "./getChildVertex";
 import { getStringComponent } from "./getStringComponent";
-import { getChildVertex } from "./traverse";
 
 export function getCompFallbackToString(
   attrVertex: Vertex | undefined,

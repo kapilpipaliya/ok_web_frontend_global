@@ -1,12 +1,14 @@
-import { Icon } from "@iconify-icon/solid";
+
+
+import { IconButton } from "~/components/IconButton";
 
 export function IncrementButton(props: { downIncrement: (event: MouseEvent) => void; }) {
   return (
-    <button
+    <IconButton
       class="bg:transparent border:none cursor:ns-resize"
+      icon={"gg:scroll-v"}
       onMouseDown={props.downIncrement}
-    >
-      <Icon class="color:grey" icon="gg:scroll-v" />
-    </button>
+      size={16}
+    />
   );
 }

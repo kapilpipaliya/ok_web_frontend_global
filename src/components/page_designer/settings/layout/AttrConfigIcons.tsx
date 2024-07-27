@@ -5,7 +5,7 @@ import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

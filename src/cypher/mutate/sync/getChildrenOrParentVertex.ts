@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import { int } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getChildrenOrParentVertex(
   session: Session,

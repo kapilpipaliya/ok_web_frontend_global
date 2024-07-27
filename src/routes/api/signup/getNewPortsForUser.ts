@@ -1,7 +1,7 @@
 // Function to configure ports for the user's database
 import type { TransactionPromise } from "neo4j-driver-core";
 
-import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getNewPortsForUser(tx: TransactionPromise) {
   // Query to retrieve database port configuration

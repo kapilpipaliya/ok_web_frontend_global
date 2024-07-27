@@ -11,9 +11,9 @@ import {
   onCleanup,
 } from "solid-js";
 
+import { TabsWithUnderline } from "~/components/SimpleTabs";
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
-import { TabsWithUnderline } from "~/components/css_properties/SimpleTabs";
-import { genericInputComponents } from "~/components/form/genericInputComponents";
+import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";

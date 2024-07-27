@@ -4,7 +4,6 @@ import { batch } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
@@ -17,7 +16,7 @@ export function deleteRow(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
 ) {
-  const { showErrorToast } = useToast();
+
 
   batch(() => {
     if (isRealTime) {
@@ -29,7 +28,7 @@ export function deleteRow(
       for (const edgeId of inEdges[type]) {
         const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
         if (deleteEdgeResult?.error)
-          showErrorToast(deleteEdgeResult.error.toString());
+          alert(deleteEdgeResult.error.toString());
       }
     }
     // delete all outEdges of vertex
@@ -43,13 +42,13 @@ export function deleteRow(
           setGraph,
         );
         if (deleteEdgeResult?.error)
-          showErrorToast(deleteEdgeResult.error.toString());
+          alert(deleteEdgeResult.error.toString());
       }
     }
 
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id, graph, setGraph);
-    if (deleteResult.error) showErrorToast(deleteResult.error.toString());
+    if (deleteResult.error) alert(deleteResult.error.toString());
     if (isRealTime) commitTxn(txnId, graph);
   });
 }

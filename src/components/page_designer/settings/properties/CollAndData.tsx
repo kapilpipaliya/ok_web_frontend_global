@@ -4,7 +4,7 @@ import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 
-import { SelectInputField } from "~/components/fields/SelectInputField";
+import { SelectField } from "~/components/fields/SelectField";
 import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -120,8 +120,8 @@ export function CollAndData() {
       </div>
 
       <div class="text-center mb:2 mt:2">OR</div>
-      <span class="flex.5 mt:5">Collection:</span>
-      <SelectInputField
+      <span class="flex:.5 mt:5">Collection:</span>
+      <SelectField
         componentName={"SelectBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}
@@ -131,8 +131,8 @@ export function CollAndData() {
         title={"Select Collection"}
         txnId={layoutStore.formData.txnId}
       />
-      <span class="flex.5 mt:5">Data:</span>
-      <SelectInputField
+      <span class="flex:.5 mt:5">Data:</span>
+      <SelectField
         componentName={"TagBox"}
         data={graph.vertexes[layoutStore.selectedId]}
         disabled={false}

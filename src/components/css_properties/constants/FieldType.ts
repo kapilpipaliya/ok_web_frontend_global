@@ -45,19 +45,27 @@ export interface GridField extends CSSField {
   padding: string;
 }
 
+ export interface AnotherOption {
+  icon?: string;
+  label: string;
+  value: string;
+}
+export type OptionType = AnotherOption[] | string[];
+
 export interface TextFieldOptionsField extends CSSField {
   componentName: "textFieldOptions";
   inputProps?: any
-  isAddToClass: boolean;
-  isLabelOnTop: boolean;
+  isAddToClass?: boolean;
+  isLabelOnTop?: boolean;
   label: string;
   leftIcon?: JSXElement;
   onChangeInput?: (value: string) => void;
-  options: string[]; // { label: string; value: string }[];
+  options: OptionType;
   placeholder?: string;
   showInside?: boolean;
-  type: string;
-  value?: string;
+  type?: string;
+  unitOptions?: string[];
+  // value?: string; // depricated
 }
 
 export interface ToggleField extends CSSField {

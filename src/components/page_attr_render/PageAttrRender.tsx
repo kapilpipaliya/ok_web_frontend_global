@@ -45,23 +45,28 @@ export function PageAttrRender(
           return getDataVertex(graph, getLastItem(parentItems, 1));
         };
 
-        const Content = () => (
+        const Content = () => {
+          const getData = createMemo(() => {
+            const data = getSelectionOptions(graph, setGraph, item.P.data ?? "->$0Data", [
+              ...useRepeaterVertexContext(),
+            ]).vertexes;
+            if (!data || data.length === 0) {
+              return props.data;
+            }
+            return data;
+          });
+          return (
             <DynamicComponent
               // NOTE: For repeater we cant use parentData
               componentName={componentName()}
               // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
-              data={
-                props.data ||
-                getSelectionOptions(graph, setGraph, item.P.data ?? "->$0Data", [
-                  ...useRepeaterVertexContext(),
-                ]).vertexes
-              }
+              data={getData()}
               // setValue={props.setValue}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
-              txnId={txnId}
-            />
-        );
+              txnId={txnId} />
+          );
+        };
 
         const PageComponentWithPreview = () => (
           <PageRenderVertexContext.Provider

@@ -49,8 +49,8 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
               }}
               onSelect={(value) => {
                 setSelectedAllState(value);
-                // @ts-expect-error ignore
                 const joinedState = selectedAllState()
+                // @ts-expect-error ignore
                   .map((option) => option.selector)
                   .join("");
                 if (!stateName().includes(joinedState)) {

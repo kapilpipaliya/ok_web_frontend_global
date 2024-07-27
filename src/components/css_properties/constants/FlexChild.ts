@@ -5,6 +5,7 @@ import type {
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
+import { Icons } from "./Icons";
 
 export const FlexChild = {
   // Do we need to imporove this?
@@ -19,6 +20,12 @@ export const FlexChild = {
     componentName: "textFieldOptions",
     label: "Flex",
     name: "flex",
+    options: [
+      { icon: Icons.flex.auto, label: "auto", value: "0 0 auto" },
+      { icon: Icons.flex.expand, label: "expand", value: "1 1 0%" },
+      { icon: Icons.flex.collapse, label: "collapse", value: "0 1 auto" },
+      { icon: "customIcon", label: "Custom", value: "custom" },
+    ]
   } as TextFieldOptionsField,
   order: {
     componentName: "textFieldOptions",

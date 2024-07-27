@@ -4,7 +4,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { modifyFieldMetaAllFields } from "../../rules/modifyFieldMetaAllFields";
+import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
 
 export function PrimaryKey() {
   const [layoutStore] = useDesignerLayoutStore();

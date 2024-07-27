@@ -6,8 +6,8 @@ import { useGraph } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
+import { getModalClass } from "../../../../../lib/ui/getModalClass";
 import { useDesignerLayoutStore } from "../../../LayoutContext";
-import { getModalClass } from "../../rules/getModalClass";
 
 export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
   const [graph, setGraph] = useGraph();

@@ -11,10 +11,10 @@ import {
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { CardDetailRow, CardDetailsContainer } from "~/pages/admin_dashboard/CardDetails";
-import { CardHeader } from "~/pages/admin_dashboard/CardHeader";
-import { CardOptionsContainer } from "~/pages/admin_dashboard/CardOptions";
-import { CardContainer, CardHeaderContainer } from "~/pages/admin_dashboard/SimpleCard";
+import { CardDetailRow, CardDetailsContainer } from "~/components/Card/CardDetails";
+import { CardHeader } from "~/components/Card/CardHeader";
+import { CardOptionsContainer } from "~/components/Card/CardOptions";
+import { CardContainer, CardHeaderContainer } from "~/components/Card/SimpleCard";
 
 import { TableActions } from "./TableActions";
 

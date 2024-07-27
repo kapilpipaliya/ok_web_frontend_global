@@ -1,12 +1,12 @@
 import { klona } from "klona";
 
-import { TableInputField } from "~/components/fields/table_input/TableInputField";
+import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { generateTableInputMeta } from "../../rules/generateTableInputMeta";
-import { modifyFieldMetaAllFields } from "../../rules/modifyFieldMetaAllFields";
+import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
+import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
 
 export function UniqueConstrains() {
   const [layoutStore] = useDesignerLayoutStore();

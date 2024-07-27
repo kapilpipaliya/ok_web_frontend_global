@@ -2183,9 +2183,9 @@ function populateMessage(err) {
 /**
  * JSONata
  * @param {Object} expr - JSONata expression
- * @param {Object} options
- * @param {boolean} options.recover: attempt to recover on parse error
- * @param {Function} options.RegexEngine: RegEx class constructor to use
+ * @param {Object} unitOptions
+ * @param {boolean} unitOptions.recover: attempt to recover on parse error
+ * @param {Function} unitOptions.RegexEngine: RegEx class constructor to use
  * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
  */
 export function jsonata(expr: string, options?: {}) {

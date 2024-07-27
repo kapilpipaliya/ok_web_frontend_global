@@ -30,21 +30,21 @@ import {
   type Vertex,
   useGraph,
 } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { isPageDesignerPath } from "~/lib/utils";
-import { setGraphData } from "~/lib/websocket/setGraphData";
 
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 import { FormGroup } from "./FormGroup";
 import { ImportExportButtons } from "./ImportExportButtons";
 import { SaveCancelButton } from "./SaveCancelButton";
-import { addFormInitialComponent } from "./addFormInitialComponent";
-import { getFormData } from "./getFormData";
-import { getInitialFormState } from "./getInitialFormState";
+import { addFormInitialComponent } from "./functions/addFormInitialComponent";
+import { getFormData } from "./functions/getFormData";
+import { getInitialFormState } from "./functions/getInitialFormState";
 
 
 export interface DynamicFormProps {
@@ -185,7 +185,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                 <For each={Object.keys(formData.groupByTabsAndGroup.main)}>
                   {(group) => (
                     <div class="dx-fieldset max-w:100%">
-                      <Show when={props.importExportButtons ?? true}>
+                      <Show when={props.importExportButtons /* ?? true will be enabled in future*/}>
                         <ImportExportButtons setPopup={setPopup} />
                       </Show>
 

@@ -8,13 +8,13 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { PageContext, useLoading, } from "~/lib/contexts";
 import { type GraphInterface, useGraph } from "~/lib/graph/graph";
+import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/utils";
-import { updateVertex } from "~/lib/websocket/setGraphData";
 import { Navbar } from "~/pages/admin_layout/Navbar";
 
 import { DropdownMenuDisplay } from "./DropdownMenuDisplay";

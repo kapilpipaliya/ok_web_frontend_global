@@ -3,7 +3,7 @@ import { Show, createSignal, onCleanup, onMount } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
-import { insertNewRow } from "~/components/fields/table_input/insertNewRow";
+import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

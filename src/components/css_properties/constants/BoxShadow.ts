@@ -8,7 +8,7 @@ import {
   type ToggleField,
   createGridOptions,
 } from "./FieldType";
-import { defaultPixelSizeTypes } from "./constants";
+import { defaultPixelSizeTypes } from "./csseditor_constants";
 
 export const BoxShadow = {
   boxShadow: {
@@ -28,7 +28,7 @@ export const BoxShadow = {
           isLabelOnTop: true,
           label: "X Offset",
           name: "offset-x",
-          options: defaultPixelSizeTypes,
+          unitOptions: defaultPixelSizeTypes,
           type: "number",
         } as TextFieldOptionsField,
         {
@@ -38,7 +38,7 @@ export const BoxShadow = {
           isLabelOnTop: true,
           label: "Y Offset",
           name: "offset-y",
-          options: defaultPixelSizeTypes,
+          unitOptions: defaultPixelSizeTypes,
           type: "number",
         } as TextFieldOptionsField,
         {
@@ -48,7 +48,7 @@ export const BoxShadow = {
           isLabelOnTop: true,
           label: "Blur",
           name: "blur",
-          options: defaultPixelSizeTypes,
+          unitOptions: defaultPixelSizeTypes,
           type: "number",
         } as TextFieldOptionsField,
         {
@@ -58,7 +58,7 @@ export const BoxShadow = {
           isLabelOnTop: true,
           label: "Spread",
           name: "spread",
-          options: defaultPixelSizeTypes,
+          unitOptions: defaultPixelSizeTypes,
           type: "number",
         } as TextFieldOptionsField,
       ]),

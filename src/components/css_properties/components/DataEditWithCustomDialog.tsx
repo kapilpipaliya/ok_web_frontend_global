@@ -5,6 +5,11 @@ import {
 } from "solid-js";
 
 import type { DataEditorField } from "../constants/FieldType";
+import type { ShadowAttributes } from "../utils/generate/generateBoxShadow";
+import type { FilterAttributes } from "../utils/generate/generateFilter";
+import type { TextShadowAttributes } from "../utils/generate/generateTextShadow";
+import type { TransformAttributes } from "../utils/generate/generateTransform";
+import type { TransitionAttributes } from "../utils/generate/generateTransition";
 
 import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { LabelWrapper } from "./LabelWrapper";
@@ -16,7 +21,7 @@ export const DataEditWithCustomDialog = () => {
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
 
-  const selectedValue = () =>
+  const selectedValue = (): FilterAttributes[] | ShadowAttributes[] | TextShadowAttributes[] | TransformAttributes[] | TransitionAttributes[] =>
     {
       const projections = [state() || "", ...(meta.projections ?? []), meta.name];
       return path(projections, cssState) ||
@@ -30,7 +35,7 @@ export const DataEditWithCustomDialog = () => {
 
 
   const deleteOption = (index: number) => {
-    const currentOptions = [...selectedValue()] as { [key: string]: string }[];
+    const currentOptions = [...selectedValue()];
     currentOptions.splice(index, 1);
     setCssState(state(), ...(meta.projections ?? []), { [meta.name]: currentOptions });
   };
@@ -38,7 +43,7 @@ export const DataEditWithCustomDialog = () => {
   return (
     <div
       class={
-        "b:1px|solid|lightgray color:#333 m:10px p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
+        "b:1px|solid|lightgray color:#333 my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
       }
     >
       <div
