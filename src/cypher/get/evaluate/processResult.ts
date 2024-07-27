@@ -11,11 +11,8 @@ export function processResult(
   typeLabel?: string,
   inward?: boolean,
 ) {
-  if (nodeLabel === "ALL_LABELS") {
-    return records.map((record) => record.get(0)[0]);
-  }
   const vertices = records.map((record) => convertNodeToJson(record.get(nodeLabel)));
-  const relationships = typeLabel === "child" || typeLabel === "parent" ? records.map((record) => convertRelationshipToJson(record.get(typeLabel))) : [];
+  const relationships = typeLabel ? records.map((record) => convertRelationshipToJson(record.get(typeLabel))) : [];
 
   if (context.nodes) {
     for (const vertex of vertices) {

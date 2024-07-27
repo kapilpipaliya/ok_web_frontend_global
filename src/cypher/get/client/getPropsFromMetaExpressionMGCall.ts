@@ -26,9 +26,7 @@ export async function getPropsFromMetaExpressionMGCall(
 
       const metaRows = await getSelectionOptionsBase(data, metaVertex.P.meta, tx);
       const metaRowsResult = (metaRows.result as Vertex[]) || [];
-      const results = await getComponentPropertiesMGCall(metaRowsResult, tx);
-
-      return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      return await getComponentPropertiesMGCall(metaRowsResult, tx);
     }, maxRetries);
   } catch (error) {
     console.error("Error in getPropsFromMetaExpressionMGCall:", error, metaVertex, data);

@@ -28,7 +28,7 @@ export async function addNodeEdges(
   );
 
   const results: Vertex[] = [];
-  const globalCollections = ["Nav", "DataType", "Comp", "CompCategory", "Page"];
+  const globalCollections = ["DataType", "Comp", "CompCategory",]; // "Nav", "Page"
 
   for (const superVertex of superChildrenVertexes) {
     const superProperties = { ...superVertex.P };

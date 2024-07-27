@@ -26,7 +26,10 @@ export async function evalGetRelatedNodes(
   if (!query) return;
   try {
     const result = await runQuery(session, query, params, context.tx);
-    return processResult(result.records, context, relationType, "r", relationType === "parent");
+    if (params.allLabels) {
+      return result.records.map((record) => record.get(0)[0]);
+    }
+    return processResult(result.records, context, "n", relationType === "parent" || relationType === "child" ? "r" : "", relationType === "parent");
   } catch (error) {
     handleQueryError(relationType, vertexes, error);
   } finally {
@@ -44,38 +47,38 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
     const type = getEdgeType(edgeType, vertexes);
     if (type === "*") {
       query = `
-        MATCH (parent)-[r]->(child)
+        MATCH (parent)-[r]->(n)
         WHERE id(parent) IN $ids
-        RETURN r, child
+        RETURN r, n
       `;
     } else if (type.includes("|")) {
       query = `
-        MATCH (parent)-[r]->(child)
+        MATCH (parent)-[r]->(n)
         WHERE id(parent) IN $ids AND type(r) IN $types
-        RETURN r, child
+        RETURN r, n
       `;
       params = { ids, types: type.split("|") };
     } else {
       query = `
-        MATCH (parent)-[r:${type}]->(child)
+        MATCH (parent)-[r:${type}]->(n)
         WHERE id(parent) IN $ids
-        RETURN r, child
+        RETURN r, n
       `;
     }
   } else if (relationType === "parent") {
     const type = getEdgeType(edgeType, vertexes);
     if (type.includes("|")) {
       query = `
-        MATCH (parent)-[r]->(child)
+        MATCH (n)-[r]->(child)
         WHERE id(child) IN $ids AND type(r) IN $types
-        RETURN r, parent
+        RETURN r, n
       `;
       params = { ids, types: type.split("|") };
     } else {
       query = `
-        MATCH (parent)-[r:${type}]->(child)
+        MATCH (n)-[r:${type}]->(child)
         WHERE id(child) IN $ids
-        RETURN r, parent
+        RETURN r, n
       `;
     }
   } else if (relationType === "g") {
@@ -85,21 +88,22 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
       return { error: "label must be provided." };
     }
     if (label === "ALL_LABELS") {
-      query = "MATCH (g) RETURN DISTINCT labels(g)";
+      query = "MATCH (n) RETURN DISTINCT labels(n)";
+      params = {allLabels: true};
     } else {
-      query = `MATCH (g:${label})`;
+      query = `MATCH (n:${label})`;
       if (searchParams.filter) {
-        query += " WHERE g.name = $name";
+        query += " WHERE n.name = $name";
         params = { name: searchParams.filter };
       }
-      query += " RETURN g";
+      query += " RETURN n";
     }
 
     if (searchParams.skip) query += ` SKIP ${searchParams.skip}`;
     if (searchParams.limit) query += ` LIMIT ${searchParams.limit}`;
   } else if (relationType === "id") {
-    query = "MATCH (id) WHERE id(id) = $id RETURN id";
-    params = { id: edgeType };
+    query = "MATCH (n) WHERE id(n) = $id RETURN n";
+    params = { id: int(edgeType) };
   }
 
   if (!params) {

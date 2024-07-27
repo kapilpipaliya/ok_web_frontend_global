@@ -90,6 +90,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         !Object.keys(vertexIds).includes(vertex.P.name)
     );
     const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+    // Default value can be only entered when it is in Form Builder
     const isForm = layoutStore.formData?.formData.L[0] === "Form";
     const isFormField = isForm && genericInputComponents.includes(componentName);
 

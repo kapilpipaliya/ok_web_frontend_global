@@ -38,13 +38,5 @@ export function getPropsFromMetaExpression(
 
   const metaRows =
     getSelectionOptions(graph, setGraph, meta, [data]).vertexes || [];
-  const results = getComponentProperties(graph, setGraph, metaRows);
-
-  return results.reduce(
-    (acc, curr) => {
-      Object.assign(acc, curr);
-      return acc;
-    },
-    {} as { [key: string]: any },
-  );
+  return getComponentProperties(graph, setGraph, metaRows);
 }
