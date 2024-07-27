@@ -2,9 +2,11 @@ import {
   type JSX,
   Match,
   Switch,
+  children,
   createMemo,
   splitProps,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
 
 import { useFormContext } from "~/lib/contexts";
 
@@ -44,25 +46,43 @@ export function Label(
     "children",
     "required",
   ]);
+  const resolvedChildren = children(() => local.children);
+
+  // note: table should not be wrapped inside label
+  const component = createMemo(() => isFirstElementSupportedByLabel(resolvedChildren() as HTMLElement) ? "label" : "div");
 
   return (
-    <label class={`flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}>
-      <Switch fallback={<>{local.children}</>}>
+    <Dynamic class={`flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`} component={component()}>
+      <Switch fallback={<>{resolvedChildren()}</>}>
         <Match when={local.label && (position() === "top" || position() === "left")}>
           <span class={generateLabelClass()} {...restProps}>
             {local.label}{local.required && <span class="color:red"> *</span>}
           </span>
-          {local.children}
+          {resolvedChildren()}
         </Match>
         <Match when={local.label && (position() === "bottom" || position() === "right")}>
-          {local.children}
+          {resolvedChildren()}
           <span class={generateLabelClass()} {...restProps}>
             {local.label}{local.required && <span class="color:red"> *</span>}
           </span>
         </Match>
       </Switch>
-    </label>
+    </Dynamic>
   );
 }
 
 // Other label component: https://github.com/radix-ui/primitives/blob/main/packages/react/label/src/Label.tsx
+
+export function isFirstElementSupportedByLabel(node: HTMLElement | HTMLElement[]): boolean {
+  if (!node) {
+    return false;
+  }
+
+  const firstElement = Array.isArray(node) ? node[0] : node;
+  if (!firstElement) {
+    return false;
+  }
+
+  const supportedTags = ['input', 'select', 'textarea', 'output', 'meter', 'progress'];
+  return supportedTags.includes(firstElement.tagName.toLowerCase());
+}
