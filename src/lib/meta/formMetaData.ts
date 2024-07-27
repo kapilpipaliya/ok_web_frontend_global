@@ -26,6 +26,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
   (x) => x.name === "Rule",
 );
+const permissionMetaAttribute = FormMetaData.Coll.attributes.find(
+  (x) => x.name === "Role",
+);
+FormMetaData.Page.attributes.push(permissionMetaAttribute!);
 
 FormMetaData.Form = {
   attributes: [

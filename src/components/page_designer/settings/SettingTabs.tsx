@@ -9,6 +9,7 @@ import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
+import { Permission } from "./permission/Permission";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { FormStatusWrapper } from "./status/FormStatusWrapper";
@@ -23,7 +24,7 @@ export function SettingTabs() {
       baseTabs.push("Keys");
     }
     if (layoutStore.formData?.formData?.L[0] === "Form" || layoutStore.formData?.formData?.L[0] === "Page") {
-      baseTabs.push("Rules", "SEO");
+      baseTabs.push("Rules", "Permission", "SEO");
     }
     return baseTabs;
   });
@@ -80,11 +81,12 @@ export function SettingTabs() {
         <Show when={selectedTab() === "Keys"}>
           {/* <PrimaryKey /> */}
           <NameKey />
-          <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
-            <Divider class="mt:10" />
-            <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
-            <UniqueConstrains />
-          </Show>
+          <Divider class="mt:10" />
+          <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
+          <UniqueConstrains />
+        </Show>
+        <Show when={selectedTab() === "Permission"}>
+          <Permission />
         </Show>
       </Show>
       <Show when={selectedTab() === "Rules"}>

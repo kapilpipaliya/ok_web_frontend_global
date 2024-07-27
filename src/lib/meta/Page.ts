@@ -81,31 +81,6 @@ export const Page: IFormMetaData = {
 
       type: "Attr",
     },
-    {
-      attributes: [
-        {
-          collection: "g:'Role'",
-          componentName: "SelectBox",
-
-          name: "role",
-        },
-        {
-          attributes: [
-            {
-              collection: "g:'Perm'",
-              componentName: "SelectBox",
-
-              name: "perm",
-            },
-          ],
-          componentName: "DynamicTable",
-          name: "Perm",
-        },
-      ],
-      componentName: "DynamicTable",
-      name: "Role",
-      tab: "Permission",
-    },
   ],
   name: "Page",
   title: "Page",
