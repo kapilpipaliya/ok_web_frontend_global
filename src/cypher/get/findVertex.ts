@@ -1,12 +1,15 @@
 import { int } from "neo4j-driver";
-import { getRequestURL } from "vinxi/http";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { getDriver } from "~/cypher/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
-import { getSubDomain } from "~/server/getSubDomain";
 
+import { getSessionForSubdomain } from "./getSessionForSubdomain";
+
+/**
+ * @deprecated This function is deprecated and will be removed in future versions.
+ * Please use the new API methods for finding vertexes.
+ */
 export async function findVertexesMGCall(options: {
   attribute?: string;
   id?: number | string;
@@ -14,9 +17,7 @@ export async function findVertexesMGCall(options: {
   value?: number | string;
 }): Promise<{ error?: boolean; message?: string; vertexes?: Vertex }> {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
-  const session = (await getDriver(subDomain)).session();
+  const session = await getSessionForSubdomain();
 
   try {
     let query: string;

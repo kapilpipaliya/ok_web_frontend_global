@@ -2,7 +2,7 @@ import { useLocation } from "@solidjs/router";
 import { type JSX, Show, createEffect, createSignal, onMount } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
-import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
+import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";

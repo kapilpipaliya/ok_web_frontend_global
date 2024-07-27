@@ -1,21 +1,24 @@
 import jsep from "jsep";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { evalAsync } from "~/lib/expression_eval";
-import { Vertex } from "~/lib/graph/graph";
 
+import type { ContextType } from "../types/ContextType";
 import type { NestedExpression } from "../types/NestedExpression";
-
-import { ContextType } from "../types/ContextType";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,
-  context: ContextType,
+  context: ContextType = {
+    nodes: {} as { [key: string]: any },
+    relationships: {} as { [key: string]: any },
+    vertexes: undefined as any,
+  },
 ): Promise<ServerResult> {
   "use server";
   const mainResult = await evalAsync(jsep(expression.expression), context);
-  
+
   await processIncomingOutgoingExpressions(expression, mainResult, context);
 
   return {

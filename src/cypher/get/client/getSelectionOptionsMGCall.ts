@@ -4,11 +4,11 @@
 // TODO:
 import type { Vertex } from "~/lib/graph/graph";
 
-import type { ServerResult } from "../types/ServerResult";
+import type { ServerResult } from "../../types/ServerResult";
 
-import { retryTransaction } from "../mutate/mutation_handlers/retryTransaction";
-import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
-import { handleMutationData } from "./handleMutationData";
+import { retryTransaction } from "../../mutate/mutation_handlers/retryTransaction";
+import { getSelectionOptionsBase } from "../getSelectionOptionsBase";
+import { handleMutationData } from "../handleMutationData";
 
 export async function getSelectionOptionsMGCall(
   vertex: Vertex[],

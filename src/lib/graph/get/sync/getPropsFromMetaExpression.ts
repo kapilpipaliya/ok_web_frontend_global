@@ -33,15 +33,13 @@ export function getPropsFromMetaExpression(
   metaVertex: Vertex,
   data: Vertex,
 ) {
-  if (!metaVertex.P.meta) return {};
-  const meta = metaVertex.P.meta.split("++");
-  const results = [] as { [key: string]: any }[];
-  for (const metaPart of meta) {
-    const metaRows =
-      getSelectionOptions(graph, setGraph, metaPart, [data]).vertexes || [];
-    const metaData = getComponentProperties(graph, setGraph, metaRows);
-    results.push(metaData);
-  }
+  const meta = metaVertex.P.meta;
+  if (!meta) return {};
+
+  const metaRows =
+    getSelectionOptions(graph, setGraph, meta, [data]).vertexes || [];
+  const results = getComponentProperties(graph, setGraph, metaRows);
+
   return results.reduce(
     (acc, curr) => {
       Object.assign(acc, curr);

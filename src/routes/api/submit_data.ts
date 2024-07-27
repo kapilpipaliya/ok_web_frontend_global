@@ -8,7 +8,7 @@ export async function POST({ request }: APIEvent) {
   const data = await request.json();
   const subdomain = await getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
-  // const session = getSessionForSubdomain();
+  // const session = await getSessionForSubdomain();
   const tx = session.beginTransaction();
   try {
     const res = await mutateData(data, tx);

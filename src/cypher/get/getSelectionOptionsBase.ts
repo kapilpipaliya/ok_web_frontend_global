@@ -8,8 +8,6 @@ import { evalAsync } from "~/lib/expression_eval";
 
 import type { ServerResult } from "../types/ServerResult";
 
-import { replaceExpressionToLabel } from "./replaceExpressionToLabel";
-
 export async function getSelectionOptionsBase(
   vertex: Vertex[],
   collection: string,
@@ -17,7 +15,6 @@ export async function getSelectionOptionsBase(
 ): Promise<{ error: boolean } & Partial<ServerResult>> {
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
-  collection = await replaceExpressionToLabel(collection, vertex[0], tx);
 
   const value = await evalAsync(jsep(collection), {
     nodes,

@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import jsep from "jsep";
 
-import type { NestedExpression } from "~/cypher/get/NestedExpression";
+import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { EdgeMap, Vertex, VertexMap } from "~/lib/graph/graph";
 
 import { addNodeEdges } from "~/cypher/mutate/sync/addNodeEdges";

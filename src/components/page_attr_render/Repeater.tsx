@@ -8,7 +8,7 @@ import {
 } from "~/components/page_attr_render/PageAttrContext";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";

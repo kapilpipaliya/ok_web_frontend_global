@@ -1,0 +1,89 @@
+import jsep from "jsep";
+
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
+import { evalAsync } from "~/lib/expression_eval";
+
+import { getSessionForSubdomain } from "../getSessionForSubdomain";
+
+interface TreeNode {
+  P: any;
+  children?: TreeNode[];
+  expanded: boolean;
+  id: string;
+  name: string;
+}
+
+interface TreeOptions {
+  addChild?: (child: Vertex) => boolean;
+  nameExpr?: (child: Vertex) => string;
+}
+
+export async function getTreeDataMGCall(
+  treeLevels: { [key: string]: any },
+  vertexes: Vertex[] = [],
+  options: TreeOptions = {}
+) {
+  "use server";
+  const nodes: { [key: string]: Vertex } = {};
+  const relationships: { [key: string]: Edge } = {};
+  const session = await getSessionForSubdomain();
+
+  try {
+    const getChildren = async (
+      levels: { [key: string]: any },
+      vertexes: Vertex[]
+    ): Promise<TreeNode[]> => {
+      if (!levels.collection) return [];
+
+      const children = await evalAsync(jsep(levels.collection), {
+        nodes,
+        relationships,
+        session,
+        vertexes,
+      });
+
+      const childNodes: TreeNode[] = [];
+      // Using await Promise.all close the session first, so used for...of
+      for (const child of (children || []).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos)) {
+        const name =
+          levels?.nameExpr?.(child) ||
+          options?.nameExpr?.(child) ||
+          child.P.name;
+
+        const navItem: TreeNode = {
+          P: child.P,
+          expanded: true,
+          id: child.id,
+          name,
+        };
+
+        if (
+          levels.child &&
+          ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
+        ) {
+          navItem.children = await getChildren(levels.child, [child]);
+        }
+
+        childNodes.push(navItem);
+      }
+
+      return childNodes;
+    };
+
+    const children = await getChildren(treeLevels, vertexes);
+
+    return {
+      children,
+      graph: {
+        edges: relationships,
+        vertexes: nodes,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching tree data:", error);
+    throw error; // Rethrow the error after logging
+  } finally {
+    await session.close();
+  }
+}

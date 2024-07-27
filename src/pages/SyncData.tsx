@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { Breadcrumb } from "~/components/Breadcrumb";
 import { useToast } from "~/components/Toast";
-import { getUsers } from "~/cypher/get/getUsers";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
 // TODO: Full Navbar Sync from super
@@ -20,8 +20,10 @@ export function SyncData() {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedUsers, setSelectedUsers] = createSignal([] as Vertex[]);
 
-  getUsers().then((res: any) => {
-    setUsers(res.vertexes || []);
+  fetchDataFromMG({
+    expression: `g:'User'`
+  }).then((res: any) => {
+    setUsers(res.result || []);
   });
 
   async function migrateNodes(element: Vertex, node: any) {

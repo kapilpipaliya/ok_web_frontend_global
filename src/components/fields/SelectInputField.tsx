@@ -11,7 +11,7 @@ import {
 import type { GenericComponentProps } from "~/components/fields/ComponentType";
 
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useFormContext } from "~/lib/contexts";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";

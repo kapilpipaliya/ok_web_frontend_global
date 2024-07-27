@@ -19,7 +19,7 @@ export function calculateFilter(input: string) {
       limit = Number.parseInt(limitMatch[1], 10);
     }
 
-    return { skip, limit };
+    return { limit, skip };
   };
 
   const parseFilter = (input: string, startChar: string, endChar: string) => {
@@ -29,7 +29,7 @@ export function calculateFilter(input: string) {
       const filterEnd = input.indexOf(endChar, filterStart);
       if (filterEnd > filterStart) {
         filter = input.slice(filterStart + 1, filterEnd);
-        const { skip: parsedSkip, limit: parsedLimit } = parseSkipLimit(filter);
+        const { limit: parsedLimit, skip: parsedSkip } = parseSkipLimit(filter);
         skip = parsedSkip;
         limit = parsedLimit;
         filter = filter

@@ -31,11 +31,11 @@ export async function retryTransaction(
         }
       } else {
         console.error("Failed to handle mutation object:", error);
+        await tx.rollback(); 
         throw error;
       }
     } finally {
-      await tx.rollback();
-      await tx.close();
+      await tx.close(); //  the transaction will be automatically rolled back if not commited.
       await session.close();
     }
   } while (attempt < maxRetries);

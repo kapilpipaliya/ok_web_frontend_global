@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 
-import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { checkIfNameExistsMGCall } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useFormContext } from "~/lib/contexts";
 import { useGraph } from "~/lib/graph/graph";

@@ -1,4 +1,4 @@
-import { connectToNeo4jWithRetry } from "~/cypher/retry";
+import { connectToNeo4jWithRetry } from "~/cypher/connectToNeo4jWithRetry";
 import { createDockerContainer } from "~/server/docker/createDockerContainer";
 
 export async function waitForDockerCreate(

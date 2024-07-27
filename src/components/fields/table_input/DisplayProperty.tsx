@@ -11,8 +11,8 @@ import {
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/getPropsFromMetaExpressionMGCall";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/client/getPropsFromMetaExpressionMGCall";
+import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useFormContext } from "~/lib/contexts";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";

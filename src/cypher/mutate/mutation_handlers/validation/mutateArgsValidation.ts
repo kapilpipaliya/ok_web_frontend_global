@@ -1,6 +1,6 @@
 import { isObject } from "~/lib/utils";
 
-import type { MutationArgs } from "../../types/MutationArgs";
+import type { MutationArgs } from "../../../types/MutationArgs";
 
 import { validateIdMap } from "./validateIdMap";
 import { validateMutationObjects } from "./validateMutationObjects";

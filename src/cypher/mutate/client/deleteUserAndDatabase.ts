@@ -5,19 +5,19 @@ import { removeDockerContainer } from "~/server/docker/removeDockerContainer";
 import { stopDockerContainer } from "~/server/docker/stopDockerContainer";
 import { getSubDomain } from "~/server/getSubDomain";
 
-// Main function to initiate the migration process.
-export async function deleteUser(args: any) {
+// unused function, To be used in the future
+// WIP
+export async function deleteUserAndDatabase(userName: string) {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
 
-  console.log("Starting migration process...");
   const sessionSource = (await getDriver(subDomain)).session();
 
   try {
-    const stopDockerRes = await stopDockerContainer("user");
+    const stopDockerRes = await stopDockerContainer(userName);
     if (!stopDockerRes.error) {
-      const removeDockerRes = await removeDockerContainer("user");
+      const removeDockerRes = await removeDockerContainer(userName);
       if (!removeDockerRes.error) {
         return {
           error: false,
@@ -25,22 +25,18 @@ export async function deleteUser(args: any) {
         };
       }
     }
-
+    // TODO: delete user from super user database too
     return {
       error: false,
-      message: "Migration completed successfully",
+      message: "User deleted successfully",
     };
   } catch (error) {
-    console.error("Error migrating nodes:", error);
+    console.error("Error deleting user:", error);
     return {
       error: true,
-      message: "Error migrating nodes",
+      message: "Error deleting user",
     };
   } finally {
-    console.log("Closing database sessions...");
     await sessionSource.close();
-    console.log("Database sessions closed.");
   }
 }
-
-deleteUser({ nodesToTransfer: "kano" });

@@ -1,16 +1,21 @@
 import type { Record } from "neo4j-driver";
+
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
+
 import type { ContextType } from "../../types/ContextType";
 
 export function processResult(
   records: Record[],
   context: ContextType,
   nodeLabel: string,
-  typeLabel: string,
+  typeLabel?: string,
   inward?: boolean,
 ) {
+  if (nodeLabel === "ALL_LABELS") {
+    return records.map((record) => record.get(0)[0]);
+  }
   const vertices = records.map((record) => convertNodeToJson(record.get(nodeLabel)));
-  const relationships = records.map((record) => convertRelationshipToJson(record.get(typeLabel)));
+  const relationships = typeLabel === "child" || typeLabel === "parent" ? records.map((record) => convertRelationshipToJson(record.get(typeLabel))) : [];
 
   if (context.nodes) {
     for (const vertex of vertices) {

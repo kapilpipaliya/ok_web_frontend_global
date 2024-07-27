@@ -3,10 +3,8 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { type Session, int } from "neo4j-driver";
 
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
+import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
-import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
-import { deleteVertexMGCall } from "~/cypher/mutate/deleteVertex";
-import { newRowMGCall } from "~/cypher/mutate/newRow";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import { getSubDomain } from "~/server/getSubDomain";
 
@@ -244,16 +242,18 @@ const supportTicket = async (
     const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
       case "send": {
-        const data = await newRowMGCall(
+        // deleted this function intentionally, use mutation handler instead
+        /*const data = await newRowMGCall(
           parentVertexId,
           "SupportUser",
           "",
           newMessage,
         );
-        return data;
+        return data;*/
       }
       case "get": {
         const result = await findVertexesMGCall({ id: parentVertexId });
+
         const messagesResult = await getSelectionOptionsMGCall(
           [result.vertexes!],
           "->SupportUser",
@@ -271,9 +271,10 @@ const supportTicket = async (
     subdomain: string,
   ) {
     const { id } = payload;
-    await deleteVertexMGCall(id);
+    // deleted this function intentionally, use mutation handler instead
+    /*await deleteVertexMGCall(id);
     return {
       message: "Support Ticket deleted successfully",
-    };
+    };*/
   }
 };

@@ -1,7 +1,7 @@
 import { Show, createSignal, onMount } from "solid-js";
 
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
-import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { checkIfNameExistsMGCall } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";

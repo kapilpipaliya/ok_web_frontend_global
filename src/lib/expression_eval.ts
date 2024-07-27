@@ -3,10 +3,7 @@ import jsep from "jsep";
 // https://github.com/donmccurdy/expression-eval
 import { path } from "rambda";
 
-import { evalGetChildren } from "~/cypher/get/evaluate/evalGetChildren";
-import { evalGetParents } from "~/cypher/get/evaluate/evalGetParents";
-import { evalGlobalColl } from "~/cypher/get/evaluate/evalGlobalColl";
-import { evalVertexById } from "~/cypher/get/evaluate/evalVertexById";
+import {evalGetChildren, evalGetParents, evalGlobalColl, evalVertexById} from "~/cypher/get/evaluate/evalFunctions";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 //import { eval as eval1} from 'expression-eval';
 import { IdAttr, type Vertex } from "~/lib/graph/graph";

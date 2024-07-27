@@ -1,14 +1,17 @@
 import type { TransactionPromise } from "neo4j-driver-core";
+
 import type { Vertex } from "~/lib/graph/graph";
+
 import { retryTransaction } from "~/cypher/mutate/mutation_handlers/retryTransaction";
-import { getSelectionOptionsBase } from "./getSelectionOptionsBase";
-import { handleMutationData } from "./handleMutationData";
+
+import { getSelectionOptionsBase } from "../getSelectionOptionsBase";
+import { handleMutationData } from "../handleMutationData";
 
 export async function getPropsFromMetaExpressionMGCall(
   metaVertex: Vertex,
   data: Vertex[],
   mutationData?: any,
-  maxRetries: number = 10
+  maxRetries = 10
 ): Promise<{ [key: string]: any }> {
   "use server";
   try {
@@ -21,14 +24,9 @@ export async function getPropsFromMetaExpressionMGCall(
         }
       }
 
-      const metaParts = metaVertex.P.meta.split("++");
-      const results = [];
-      for (const metaPart of metaParts) {
-        const metaRows = await getSelectionOptionsBase(data, metaPart, tx);
-        const metaRowsResult = (metaRows.result as Vertex[]) || [];
-        const metaData = await getComponentPropertiesMGCall(metaRowsResult, tx);
-        results.push(metaData);
-      }
+      const metaRows = await getSelectionOptionsBase(data, metaVertex.P.meta, tx);
+      const metaRowsResult = (metaRows.result as Vertex[]) || [];
+      const results = await getComponentPropertiesMGCall(metaRowsResult, tx);
 
       return results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
     }, maxRetries);
