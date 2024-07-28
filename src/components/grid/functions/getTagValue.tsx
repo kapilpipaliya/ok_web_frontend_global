@@ -1,7 +1,7 @@
 import type { CellContext } from "@tanstack/solid-table";
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { FieldAttribute } from "~/lib/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";

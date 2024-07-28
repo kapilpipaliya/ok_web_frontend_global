@@ -71,3 +71,12 @@ Auto generate tests with Codegen.
 Note:
 Neo4j Session Management: 
 Proper session management is crucial in database operations to prevent resource leaks. The session is closed in a finally block to ensure it is always closed, even if an error occurs.
+
+Very good headless library:
+https://github.com/lxsmnsyc/terracotta
+
+Good Emoji Picker:
+https://github.com/lxsmnsyc/solid-emoji-
+
+Youtube Player:
+https://github.com/ddPn08/ponzu.love/blob/main/src/components/youtube.tsx

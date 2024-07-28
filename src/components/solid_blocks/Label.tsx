@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext } from "~/lib/contexts";
+import { useFormContext } from "../form/FormContext";
 
 interface LabeledFieldProps {
   children: JSX.Element;

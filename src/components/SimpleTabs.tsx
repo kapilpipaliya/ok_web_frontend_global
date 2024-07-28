@@ -1,8 +1,8 @@
 import jsep from 'jsep';
 import { For } from 'solid-js';
 
+import { isObject } from "~/lib/data_structure/object/isObject";
 import { evaluate } from '~/lib/expression_eval';
-import { isObject } from '~/lib/utils';
 
 export function TabsWithUnderline(props: Readonly<{ displayValueKey: string, onTabClick: (index: number) => void, selectedIndex: number, tabs: Array<{ name: string }> }>) {
   const getOptionLabel = (option: any) => {

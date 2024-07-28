@@ -1,4 +1,4 @@
-import { isObject } from "~/lib/utils";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 import { generateBoxShadow } from "./generate/generateBoxShadow";
 import { generateFilter } from "./generate/generateFilter";

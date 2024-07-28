@@ -1,4 +1,4 @@
-import type { FieldAttribute } from "~/lib/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type Vertex, useGraph } from "~/lib/graph/graph";

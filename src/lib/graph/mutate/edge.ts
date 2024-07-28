@@ -103,7 +103,11 @@ export function addNewEdge(
       data,
       insertEdge: () => updateEdge(data),
       redo: () => addNewEdge(0, updateEdge(data), graph, setGraph),
-      revert: () => deleteEdge(0, actualEdgeId, graph, setGraph),
+      revert: () => {
+        const actualEdgeId2 =
+          edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+        return deleteEdge(0, actualEdgeId2, graph, setGraph);
+      },
     },
     graph,
   );
@@ -306,7 +310,7 @@ export function deleteEdge(
   const edge = updateEdge(graph.edges[actualEdgeId]);
   batch(() => {
     const type = edge.T;
-    // @ts-expect-error
+    // @ts-expect-error ignore
     setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) =>
       Array.isArray(ids) && ids.includes(actualEdgeId)
         ? pipe(
@@ -315,7 +319,7 @@ export function deleteEdge(
           )
         : ids,
     );
-    // @ts-expect-error
+    // @ts-expect-error ignore
     setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) =>
       Array.isArray(ids) && ids.includes(actualEdgeId)
         ? pipe(
@@ -324,21 +328,23 @@ export function deleteEdge(
           )
         : ids,
     );
-    // @ts-expect-error
+    // @ts-expect-error ignore
     setGraph("edges", actualEdgeId, undefined);
   });
+
+  const data = klona(edge);
 
   transactionDetailAdd(
     txnId,
     {
-      data: edge,
-      deleteEdge: () => updateEdge(edge),
+      data,
+      deleteEdge: () => updateEdge(data),
       redo: () => {
         const actualEdgeId2 =
           edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
         return deleteEdge(0, actualEdgeId2, graph, setGraph);
       },
-      revert: () => addNewEdge(0, updateEdge(edge), graph, setGraph),
+      revert: () => addNewEdge(0, updateEdge(data), graph, setGraph),
     },
     graph,
   );

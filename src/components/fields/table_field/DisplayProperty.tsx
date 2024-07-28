@@ -14,7 +14,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/client/getPropsFromMetaExpressionMGCall";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { useFormContext } from "~/lib/contexts";
+import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
@@ -22,8 +22,8 @@ import { type Id, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { getColumnProps } from "~/lib/graph/mutate/form/rowFunction";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 
+import { useFormContext } from "../../form/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 

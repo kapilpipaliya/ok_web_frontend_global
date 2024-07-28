@@ -6,13 +6,12 @@ import { Show, Suspense, createSignal } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 
 import "~/css/base.css";
-import { LoadingContext } from "~/lib/contexts";
 import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { Toaster } from "./components/solid-toast/src";
-import { submitDataCall } from "./lib/api/api_functions";
+import { submitDataCall } from "./lib/api/service/data/submitDataCall";
 import {
   type EdgeMap,
   GraphContext,
@@ -49,9 +48,16 @@ export default function App() {
 
 
   const graph = createStore<GraphInterface>({
+    APP_BASE_URL: '/admin',
     activeClickOutside: 0,
     componentIdMap: {},
     edges: {} as EdgeMap,
+    events: {
+      // setTitle: (title:string) =>
+        // ?mergeVertexProperties(0, navBarVertexId, graph, setGraph, { title }),
+    },
+    isDevelopment: true,
+    isLoadingPage: false,
     isSideBarOpen: false,
     isSubSideBarOpen: false,
     member: {P: {}} as Vertex,
@@ -87,7 +93,6 @@ export default function App() {
         return (
           <CSSRuntimeProvider config={masterConfig}>
             <GraphContext.Provider value={graph}>
-              <LoadingContext.Provider value={loadingSite}>
                 <MetaProvider>
                   <div
                     classList={{
@@ -112,7 +117,6 @@ export default function App() {
                     </div>
                   </Show>
                 </MetaProvider>
-              </LoadingContext.Provider>
             </GraphContext.Provider>
           </CSSRuntimeProvider>
         );

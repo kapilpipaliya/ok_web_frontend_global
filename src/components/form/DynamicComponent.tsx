@@ -3,11 +3,11 @@ import type { SetStoreFunction } from "solid-js/store";
 import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext, usePreviewContext } from "~/lib/contexts";
+import { useFormContext, usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { ifNotNull } from "~/lib/utils";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";

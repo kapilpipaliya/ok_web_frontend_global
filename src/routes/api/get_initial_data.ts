@@ -7,7 +7,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson, convertRelationshipToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { getSubDomain } from "~/server/getSubDomain";
 

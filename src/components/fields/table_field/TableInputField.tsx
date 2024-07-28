@@ -20,10 +20,10 @@ import {
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/rowFunction";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { sortVertexesByPosition } from "~/lib/sortVertexesByPosition";
 
 import { SortableRow } from "./SortableRow";
 import { insertNewRow } from "./insertNewRow";

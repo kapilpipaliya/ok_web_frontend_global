@@ -12,12 +12,12 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useFormContext } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 
+import { useFormContext } from "../../form/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
 export const SortableRow = (props: Readonly<{

@@ -5,7 +5,6 @@ import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import {
@@ -99,16 +98,24 @@ export function replaceVertexProperties(
     {
       data,
       redo: () =>
-        replaceVertexProperties(0, actualVertexId, graph, setGraph, data.P),
-      replace: () => updateVertex(klona(graph.vertexes[actualVertexId])),
+        {
+          const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return replaceVertexProperties(0, actualVertexId2, graph, setGraph, data.P);
+        },
+      replace: () => updateVertex(data),
       revert: () =>
-        replaceVertexProperties(
-          0,
-          actualVertexId,
-          graph,
-          setGraph,
-          originalProperties,
-        ),
+        {
+          const actualVertexId2 =
+          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return replaceVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            originalProperties
+          );
+        },
     },
     graph,
   );
@@ -134,23 +141,21 @@ export function mergeVertexProperties(
   }
   const originalProperties = {} as { [key: string]: any };
   for (const property in properties) {
-    originalProperties[property] = vertex.P[property];
+    // clonning json will remove undefined value, so used null as default.
+    originalProperties[property] = vertex.P[property] ?? null;
   }
+  const clonedProperties = klona(properties);
   // It will only merge top level properties.
-  setGraph("vertexes", actualVertexId, "P", klona(properties));
+  setGraph("vertexes", actualVertexId, "P", clonedProperties);
+  const data = updateVertex(klona(vertex));
+  data.P = clonedProperties;
 
   transactionDetailAdd(
     txnId,
     {
-      data: properties,
+      data: clonedProperties,
       merge: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return updateVertex(
-          Object.assign({}, graph.vertexes[actualVertexId2], {
-            P: klona(properties),
-          }),
-        );
+        return updateVertex(data);
       },
       redo: () => {
         const actualVertexId2 =
@@ -160,7 +165,7 @@ export function mergeVertexProperties(
           actualVertexId2,
           graph,
           setGraph,
-          klona(properties),
+          clonedProperties,
         );
       },
       revert: () => {
@@ -193,7 +198,6 @@ export function deleteVertex(
   error: boolean | string;
   txnDetailIndex?: number;
 } {
-  const { showErrorToast } = useToast();
   const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
 
   if (!graph.vertexes[actualVertexId]) {
@@ -203,48 +207,50 @@ export function deleteVertex(
   //  this must check
   //  if the in and out edges are empty else not allow to delete.
 
-  const vertex = klona(graph.vertexes[actualVertexId]);
+  const vertex = graph.vertexes[actualVertexId];
 
   if (
     Object.keys(vertex.OUT).filter((label) => label !== "AttrInst").length > 0
   ) {
-    showErrorToast(
+    alert(
       `there are multiple children exist when deleting ${vertex.L[0]} (${actualVertexId})`,
     );
     return { error: "Vertex Children Exist When deleting vertex" };
   }
+
+  if (Object.keys(vertex.IN).length > 0) {
+    alert(
+      `there are multiple Parent exist when deleting ${vertex.L[0]} (${actualVertexId})`,
+    );
+    return { error: "Vertex Children Exist When deleting vertex" };
+  }
+  
   for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
     const attrInstEdge = graph.edges[attrInstEdgeId];
     if (attrInstEdge) {
       const endVertex = graph.vertexes[attrInstEdge.E];
-      deleteEdge(txnId, attrInstEdgeId, graph, setGraph);
+      deleteEdge(0, attrInstEdgeId, graph, setGraph);
       if (endVertex) {
         for (const metaAttrEdgeId of endVertex.OUT.MetaAttr || []) {
           const metaAttrEdge = graph.edges[metaAttrEdgeId];
           if (metaAttrEdge) {
             const endVertex = graph.vertexes[metaAttrEdge.E];
-            deleteEdge(txnId, metaAttrEdgeId, graph, setGraph);
+            deleteEdge(0, metaAttrEdgeId, graph, setGraph);
             if (endVertex) {
-              deleteVertex(txnId, metaAttrEdge.E, graph, setGraph);
+              deleteVertex(0, metaAttrEdge.E, graph, setGraph);
             }
           }
         }
 
-        deleteVertex(txnId, attrInstEdge.E, graph, setGraph);
+        deleteVertex(0, attrInstEdge.E, graph, setGraph);
       }
     }
   }
 
-  if (Object.keys(vertex.IN).length > 0) {
-    showErrorToast(
-      `there are multiple Parent exist when deleting ${vertex.L[0]} (${actualVertexId})`,
-    );
-    return { error: "Vertex Children Exist When deleting vertex" };
-  }
-
+  const data = klona(vertex);
   batch(() => {
     graph.vertexes[actualVertexId].L.forEach((label) =>
-      // @ts-ignore
+      // @ts-expect-error ignore
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
         Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)
           ? pipe(
@@ -254,10 +260,10 @@ export function deleteVertex(
           : vertexIds,
       ),
     );
-    // @ts-ignore
+    // @ts-expect-error ignore
     setGraph("vertexes", actualVertexId, undefined);
   });
-  const data = klona(vertex);
+
   transactionDetailAdd(
     txnId,
     {
@@ -269,7 +275,7 @@ export function deleteVertex(
         return deleteVertex(0, actualVertexId2, graph, setGraph);
       },
       revert: () => {
-        return addNewVertex(0, updateVertex(vertex), graph, setGraph);
+        return addNewVertex(0, updateVertex(data), graph, setGraph);
       },
     },
     graph,

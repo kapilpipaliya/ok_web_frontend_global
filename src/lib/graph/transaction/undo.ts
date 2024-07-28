@@ -13,7 +13,7 @@ export function undoAllowed(
 
   const txnValue = graph.transactions.get(txnId);
   if (!txnValue) return false;
-  if (txnValue.steps.length <= 1) return false;
+  if (txnValue.steps.length === 0) return false;
 
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
   const preventUndoBeforeIndex = txnValue.preventUndoBeforeIndex ?? -1;
@@ -24,7 +24,7 @@ export function undoAllowed(
 
   if (newUndoIndex < preventUndoBeforeIndex) return false;
   
-  return activeUndoIndex > 0;
+  return activeUndoIndex > -1;
 }
 
 export function undo(txnId: number, graph: Store<GraphInterface>, revertTransactionUpToIndex?: number, removeAfterSteps?: boolean) {

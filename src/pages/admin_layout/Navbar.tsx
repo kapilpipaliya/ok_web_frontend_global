@@ -30,7 +30,6 @@ export function Navbar(
     "meta",
     "data",
   ]);
-  // let {events} = usePageContext();
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
   return (

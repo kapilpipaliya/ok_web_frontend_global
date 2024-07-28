@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { klona } from "klona/json";
 import { onCleanup } from "solid-js";
 
-import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/Toast";
 

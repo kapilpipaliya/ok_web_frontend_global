@@ -11,13 +11,11 @@ import { DeleteDialog } from "~/components/DeleteDialog";
 import { IconButton } from "~/components/IconButton";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
-import {
-  deleteSupportTicketCall,
-  getChatsSupportCall,
-  sendChatsSupportCall,
-} from "~/lib/api/api_functions";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { deleteSupportTicketCall } from "~/lib/api/service/support/deleteSupportTicketCall";
+import { getChatsSupportCall } from "~/lib/api/service/support/getChatsSupportCall";
+import { sendChatsSupportCall } from "~/lib/api/service/support/sendChatsSupportCall";
 
 export const SupportTicketSection = (
   props: Readonly<{

@@ -3,7 +3,7 @@ import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
-import { useClickOutside } from "~/lib/useClickOutside";
+import { useClickOutside } from "~/lib/hooks/useClickOutside";
 
 interface CustomModalProps {
   bodyClass?: JSX.CSSProperties;

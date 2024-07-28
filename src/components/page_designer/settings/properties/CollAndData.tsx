@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { onCleanup } from "solid-js";
 
-import type { FieldAttribute } from "~/lib/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import {DynamicComponent} from "~/components/form/DynamicComponent";

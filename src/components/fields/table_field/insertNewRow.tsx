@@ -6,6 +6,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/Toast";
 import { addNewRow } from "~/lib/graph/mutate/form/rowFunction";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 export function insertNewRow(
   txnId: number,
@@ -22,7 +23,7 @@ export function insertNewRow(
     return;
   }
   const outerOwner = getOwner();
-  return runWithOwner(outerOwner, () =>
+  runWithOwner(outerOwner, () =>
     addNewRow(
       txnId || 0,
       meta,
@@ -30,7 +31,8 @@ export function insertNewRow(
       setGraph,
       data,
       properties,
-      isRealTime ?? false,
+      isRealTime ?? false
     ),
   );
+  saveUndoPoint(txnId, graph);
 }

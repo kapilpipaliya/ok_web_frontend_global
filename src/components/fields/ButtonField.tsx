@@ -3,8 +3,8 @@ import type { JSX } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { createMemo, splitProps } from "solid-js";
 
-import { submitDataCall } from "~/lib/api/api_functions";
-import { useFormContext, usePreviewContext } from "~/lib/contexts";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
@@ -12,6 +12,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 
 import { useToast } from "../Toast";
+import { useFormContext } from "../form/FormContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {

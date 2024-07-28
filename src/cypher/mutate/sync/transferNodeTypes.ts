@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
 
 import { processNodeSync } from "~/cypher/mutate/sync/processNodeSync";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 

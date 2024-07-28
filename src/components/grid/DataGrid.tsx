@@ -4,12 +4,11 @@ import { useNavigate } from "@solidjs/router";
 import { type Accessor, Match, Show, Switch, createEffect, createSignal, on, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { IFormMetaData } from "~/lib/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
-import { usePageContext } from "~/lib/contexts";
 import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
@@ -25,7 +24,6 @@ interface DataGridProps {
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
-  const { events } = usePageContext();
   const [deleteRowId, setDeleteRowId] = createSignal<Id | null>(null);
   const [tableStore, setTableStore] = createStore({
     data: [],
@@ -99,7 +97,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     const nodes: Vertex[] = tableStore.data
       ? [...tableStore.data, ...resultData]
       : resultData;
-    events?.setTitle(data.form!.title);
+    graph.events?.setTitle(data.form!.title);
     const tableColumns = setGridHeaders(
       data.form!,
       graph,

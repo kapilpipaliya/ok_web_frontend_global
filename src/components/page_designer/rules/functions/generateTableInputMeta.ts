@@ -1,7 +1,7 @@
 
 import { onCleanup } from "solid-js";
 
-import type { FieldAttribute } from "~/lib/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useGraph } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";

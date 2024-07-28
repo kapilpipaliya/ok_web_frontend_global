@@ -2,9 +2,9 @@ import { Icon } from "@iconify-icon/solid";
 import { type Accessor, Show, createMemo } from "solid-js";
 
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { iconMap } from "~/lib/ui/iconMap";
 
 import { nameExpr } from "../utils/nameExpr";
 

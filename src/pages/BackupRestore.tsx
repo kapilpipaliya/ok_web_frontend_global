@@ -2,9 +2,12 @@ import type { JSX } from "solid-js";
 
 import { A } from "@solidjs/router";
 
-import { APP_BASE_URL } from "~/lib/constants";
+import { useGraph } from "~/lib/graph/graph";
+
+
 
 export function BackupRestore() {
+  const [graph] = useGraph();
   const C = (
     props: Readonly<{
       children: JSX.Element;
@@ -31,12 +34,12 @@ export function BackupRestore() {
             <div class="flex gap:0.5rem m:1rem">
               <A
                 class="b:2|solid|blue-40"
-                href={`${APP_BASE_URL}/SimpleImport`}
+                href={`${graph.APP_BASE_URL}/SimpleImport`}
               >
                 Go to Simple Import
               </A>
 
-              <A class="b:2|solid|blue-40" href={`${APP_BASE_URL}/Nav`}>
+              <A class="b:2|solid|blue-40" href={`${graph.APP_BASE_URL}/Nav`}>
                 Configure Navigation
               </A>
             </div>

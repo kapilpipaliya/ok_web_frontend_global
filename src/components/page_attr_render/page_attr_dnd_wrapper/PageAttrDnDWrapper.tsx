@@ -11,6 +11,7 @@ import {
   PageRenderVertexContext,
   usePageRenderVertexContext,
 } from "~/components/page_attr_render/PageAttrContext";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
@@ -18,7 +19,6 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { usePreviewContext } from "~/lib/contexts";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";

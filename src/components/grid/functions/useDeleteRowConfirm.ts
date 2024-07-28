@@ -3,7 +3,7 @@ import type { Accessor } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/Toast";
-import { submitDataCall } from "~/lib/api/api_functions";
+import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";

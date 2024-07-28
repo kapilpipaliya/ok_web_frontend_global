@@ -4,13 +4,13 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 import { Match, Switch } from "solid-js";
 
-import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
 import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/components/grid/functions/getTagValue";
-import { capitalizeFirstLetter } from "~/lib/utils";
+import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 export function setGridHeaders(
   formNew: IFormMetaData,

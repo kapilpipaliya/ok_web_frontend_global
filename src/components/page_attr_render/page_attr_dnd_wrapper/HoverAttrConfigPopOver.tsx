@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 
 import { useZIndex } from "~/components/ZIndex";
-import { iconMap } from "~/lib/constants";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { iconMap } from "~/lib/ui/iconMap";
 
 import { ComponentName } from "./ComponentName";
 

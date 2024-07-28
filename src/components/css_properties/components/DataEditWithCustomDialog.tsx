@@ -13,7 +13,7 @@ import type { TransitionAttributes } from "../utils/generate/generateTransition"
 
 import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
 import { LabelWrapper } from "./LabelWrapper";
-import { PropertyRow } from "./shadow_editor/PropertyRow";
+import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 
 export const DataEditWithCustomDialog = () => {
   const meta = useComponentMeta() as DataEditorField;
@@ -60,7 +60,7 @@ export const DataEditWithCustomDialog = () => {
       </div>
       <For each={selectedValue() as unknown as { [key: string]: string }[]}>
         {(option, i) => (
-          <PropertyRow
+          <CssPropertyRow
             deleteOption={deleteOption}
             index={i}
             label={meta.label}

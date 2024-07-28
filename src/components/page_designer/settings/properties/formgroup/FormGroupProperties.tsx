@@ -27,15 +27,15 @@ import {
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerLayoutStore } from "../../../LayoutContext";
+import { type PageLayoutObject, useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { Content } from "./Content";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPageField } from "./SelectPageField";
-import { SelectRuleField } from "./SelectRuleField";
 import { UniqueNameField } from "./UniqueNameField";
+import { SelectRuleField } from "./rule_field/SelectRuleField";
 
 function modifyMetaVertexExpr(metaVertex: Vertex) {
   return {
@@ -51,6 +51,7 @@ function modifyMetaVertexExpr(metaVertex: Vertex) {
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   selectedLayout: Vertex;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue(meta: Vertex, data: any): void;
   txnId: number;
 }
@@ -64,83 +65,10 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   createVertices(vertexIds, graph, setGraph);
 
   const metaTxnId = graph.newTxnId;
-  const propAttributes = createMemo(() => {
-    const form = FormMetaData.Comp;
-    const propAttribute = form.attributes.find(
-      (attr) => attr.name === "Prop",
-    )!;
-    const valueAttribute = propAttribute.attributes!.find(
-      (attr) => attr.name === "value",
-    )!;
-    return props.metaAttributes.map(vertex => {
-      return cloneVertexWithEdges(metaTxnId, vertex, {
-        // Adding componentName and meta from the FormMetaData
-        componentName: valueAttribute.componentName,
-        meta: valueAttribute.meta,
-      }, graph, setGraph);
-    });
-  });
-  onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
-  });
+  const propAttributes = createMemo(() => createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph));
 
-  function moveClassToLast(vertices: Vertex[]) {
-    const otherVertices = vertices.filter(
-      (vertex) =>
-        !Object.keys(vertexIds).includes(vertex.P.name)
-    );
-    const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-    // Default value can be only entered when it is in Form Builder
-    const isForm = layoutStore.formData?.formData.L[0] === "Form";
-    const isFormField = isForm && genericInputComponents.includes(componentName);
-
-    const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
-
-    return [
-      graph.vertexes[vertexIds.name],
-      ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
-      graph.vertexes[vertexIds.label],
-      ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
-      graph.vertexes[vertexIds.calculatedValue],
-      graph.vertexes[vertexIds.required],
-      graph.vertexes[vertexIds.hidden],
-      graph.vertexes[vertexIds.disabled],
-      ...nonCssVertices,
-
-    ];
-  }
-
-  onCleanup(() => {
-    cleanupVertices(vertexIds, graph, setGraph);
-  });
-
-  const Classes = () => {
-    const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-    const isForm = layoutStore.formData?.formData.L[0] === "Form";
-    const isFormField = isForm && genericInputComponents.includes(componentName);
-    const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
-    const metaAttributes = [
-      graph.vertexes[vertexIds.class],
-      ...(isFormField ? [graph.vertexes[vertexIds.labelClass]] : []),
-      ...classVertices,
-    ];
-
-    const [selectedIndex, setSelectedIndex] = createSignal(0);
-    const handleTabClick = (index: number) => {
-      setSelectedIndex(index);
-    };
-
-    return <>
-      <TabsWithUnderline displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'" onTabClick={handleTabClick} selectedIndex={selectedIndex()} tabs={metaAttributes as unknown as { name: string }[]} />
-      <Show keyed when={selectedIndex() + 1}>
-        <CSSPropertiesEditorWrapper
-          data={props.selectedLayout}
-          meta={metaAttributes[selectedIndex()]}
-          setValue={(data) => props.setValue(metaAttributes[selectedIndex()], data)}
-          txnId={props.txnId}
-        />
-      </Show></>
-  }
+  onCleanup(() => revertTransaction(metaTxnId, graph));
+  onCleanup(() => cleanupVertices(vertexIds, graph, setGraph));
 
   return (
     <>
@@ -152,84 +80,24 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           setValue={props.setValue}
         />
       </div>
-
-      <For each={moveClassToLast(propAttributes())}>
-        {(metaVertex) => {
-          const metaProps = getPropsFromMetaExpression(
-            graph,
-            setGraph,
-            metaVertex,
-            metaVertex
-          );
-          mergeVertexProperties(metaTxnId, metaVertex.id, graph, setGraph, metaProps);
-          const componentName = createMemo(() =>
-            getComponentForCollRow(metaVertex, metaVertex, graph, setGraph)
-          );
-
-          return (
-            <div>
-              <Switch>
-                <Match when={metaVertex.P.name === "name"}>
-                  <UniqueNameField
-                    meta={metaVertex}
-                    metaVertex={metaVertex}
-                    selectedLayout={props.selectedLayout}
-                    setValue={props.setValue}
-                    txnId={props.txnId}
-                  />
-                </Match>
-                <Match when={metaVertex.P.name === "thankYouPage"}>
-                  <SelectPageField
-                    meta={metaVertex}
-                    metaVertex={metaVertex}
-                    selectedLayout={props.selectedLayout}
-                    setValue={props.setValue}
-                    txnId={props.txnId}
-                  />
-                </Match>
-                <Match when={metaVertex.P.name === "required" || metaVertex.P.name === "hidden" || metaVertex.P.name === "disabled" || metaVertex.P.name === "calculatedValue"}>
-                  <SelectRuleField
-                    metaVertex={metaVertex}
-                    selectedLayout={props.selectedLayout}
-                    txnId={props.txnId}
-                  />
-                </Match>
-                <Match when={componentName() === "Table"}>
-                  <h3>
-                    <Label metaVertex={metaVertex} />
-                  </h3>
-                  <Content
-                    componentName={componentName}
-                    meta={metaVertex}
-                    selectedLayout={props.selectedLayout}
-                    setValue={props.setValue}
-                    txnId={props.txnId}
-                  />
-                </Match>
-                <Match when={props.selectedLayout}>
-                  <HighlightSetValueContent
-                    componentName={componentName}
-                    meta={metaVertex}
-                    metaVertex={metaVertex}
-                    selectedLayout={props.selectedLayout}
-                    setValue={props.setValue}
-                    txnId={props.txnId}
-                  />
-
-                  <SelectRuleField
-                    metaVertex={modifyMetaVertexExpr(metaVertex)}
-                    selectedLayout={props.selectedLayout}
-                    txnId={props.txnId}
-                  />
-                </Match>
-              </Switch>
-            </div>
-          );
-        }}
+      <For each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}>
+        {(metaVertex) => (
+          <PropertyField
+            metaTxnId={metaTxnId}
+            metaVertex={metaVertex}
+            selectedLayout={props.selectedLayout}
+            setValue={props.setValue}
+            txnId={props.txnId}
+          />
+        )}
       </For>
-      <Classes />
-
-
+      <ClassesComponent
+        metaAttributes={props.metaAttributes}
+        selectedLayout={props.selectedLayout}
+        setValue={props.setValue}
+        txnId={props.txnId}
+        vertexIds={vertexIds}
+      />
     </>
   );
 }
@@ -244,14 +112,16 @@ function createVertexIds() {
     label: `labelVertex${createUniqueId()}`,
     labelClass: `labelClassVertex${createUniqueId()}`,
     name: `nameVertex${createUniqueId()}`,
+    perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
-    thankYouPage: `thankYouPageVertex${createUniqueId()}`
+    thankYouPage: `thankYouPageVertex${createUniqueId()}`,
   };
 }
 
-function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
+function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  addNewVertex(0, newVertex(vertexIds.perm, ["MetaTemp"], createVertexMeta("Permission", "perm")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Expr", "calculatedValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
@@ -266,7 +136,160 @@ function createVertexMeta(displayName: string, name: string, other: Record<strin
   return { displayName, name, ...other };
 }
 
+function createPropAttributes(metaAttributes: Vertex[], txnId: number, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+  return metaAttributes.map(vertex => {
+    const form = FormMetaData.Comp;
+    const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
+    const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
+    return cloneVertexWithEdges(txnId, vertex, {
+      componentName: valueAttribute.componentName,
+      meta: valueAttribute.meta,
+    }, graph, setGraph);
+  });
+}
+
+function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, layoutStore: PageLayoutObject) {
+  const otherVertices = vertices.filter(vertex => !Object.keys(vertexIds).includes(vertex.P.name));
+  const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+  const isForm = layoutStore.formData?.formData.L[0] === "Form";
+  const isFormField = isForm && genericInputComponents.includes(componentName);
+
+  const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
+
+  return [
+    graph.vertexes[vertexIds.name],
+    ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
+    graph.vertexes[vertexIds.label],
+    ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
+    graph.vertexes[vertexIds.calculatedValue],
+    graph.vertexes[vertexIds.required],
+    graph.vertexes[vertexIds.hidden],
+    graph.vertexes[vertexIds.disabled],
+    ...nonCssVertices,
+  ];
+}
+
 function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
 }
 
+interface PropertyFieldProps {
+  metaTxnId: number;
+  metaVertex: Vertex;
+  selectedLayout: Vertex;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setValue: (meta: Vertex, data: any) => void;
+  txnId: number;
+}
+
+function PropertyField(props: Readonly<PropertyFieldProps>) {
+  const [graph, setGraph] = useGraph();
+  const componentName = createMemo(() => getComponentForCollRow(props.metaVertex, props.metaVertex, graph, setGraph));
+  const metaProps = getPropsFromMetaExpression(graph, setGraph, props.metaVertex, props.metaVertex);
+  mergeVertexProperties(props.metaTxnId, props.metaVertex.id, graph, setGraph, metaProps);
+
+  return (
+    <div>
+      <Switch>
+        <Match when={props.metaVertex.P.name === "name"}>
+          <UniqueNameField
+            meta={props.metaVertex}
+            metaVertex={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            setValue={props.setValue}
+            txnId={props.txnId}
+          />
+        </Match>
+        <Match when={props.metaVertex.P.name === "thankYouPage"}>
+          <SelectPageField
+            meta={props.metaVertex}
+            metaVertex={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            setValue={props.setValue}
+            txnId={props.txnId}
+          />
+        </Match>
+        <Match when={props.metaVertex.P.name === "required" || props.metaVertex.P.name === "hidden" || props.metaVertex.P.name === "disabled" || props.metaVertex.P.name === "calculatedValue"}>
+          <SelectRuleField
+            metaVertex={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            txnId={props.txnId}
+          />
+        </Match>
+        <Match when={componentName() === "Table"}>
+          <h3>
+            <Label metaVertex={props.metaVertex} />
+          </h3>
+          <Content
+            componentName={componentName}
+            meta={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            setValue={props.setValue}
+            txnId={props.txnId}
+          />
+        </Match>
+        <Match when={props.selectedLayout}>
+          <HighlightSetValueContent
+            componentName={componentName}
+            meta={props.metaVertex}
+            metaVertex={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            setValue={props.setValue}
+            txnId={props.txnId}
+          />
+          <SelectRuleField
+            metaVertex={modifyMetaVertexExpr(props.metaVertex)}
+            selectedLayout={props.selectedLayout}
+            txnId={props.txnId}
+          />
+        </Match>
+      </Switch>
+    </div>
+  );
+}
+
+interface ClassesComponentProps {
+  metaAttributes: Vertex[];
+  selectedLayout: Vertex;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setValue: (meta: Vertex, data: any) => void;
+  txnId: number;
+  vertexIds: ReturnType<typeof createVertexIds>;
+}
+
+function ClassesComponent(props: Readonly<ClassesComponentProps>) {
+  const [graph] = useGraph();
+  const [layoutStore] = useDesignerLayoutStore();
+  const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+  // Default value can be only entered when it is in Form Builder
+  const isForm = layoutStore.formData?.formData.L[0] === "Form";
+  const isFormField = isForm && genericInputComponents.includes(componentName);
+  const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
+  const metaClasses = [
+    graph.vertexes[props.vertexIds.class],
+    ...(isFormField ? [graph.vertexes[props.vertexIds.labelClass]] : []),
+    ...classVertices,
+  ];
+
+  const [selectedIndex, setSelectedIndex] = createSignal(0);
+  const handleTabClick = (index: number) => setSelectedIndex(index);
+
+  return (
+    <>
+      <TabsWithUnderline
+        displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'"
+        onTabClick={handleTabClick}
+        selectedIndex={selectedIndex()}
+        tabs={metaClasses as unknown as { name: string }[]}
+      />
+      <Show keyed when={selectedIndex() + 1}>
+        <CSSPropertiesEditorWrapper
+          data={props.selectedLayout}
+          meta={metaClasses[selectedIndex()]}
+          setValue={(data) => props.setValue(metaClasses[selectedIndex()], data)}
+          txnId={props.txnId}
+        />
+      </Show>
+    </>
+  );
+}

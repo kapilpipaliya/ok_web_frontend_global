@@ -9,7 +9,7 @@ import {
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
-import { useClickOutside } from "~/lib/useClickOutside";
+import { useClickOutside } from "~/lib/hooks/useClickOutside";
 
 import { useZIndex } from "./ZIndex";
 

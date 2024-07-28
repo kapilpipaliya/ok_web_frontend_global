@@ -5,8 +5,8 @@ import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { isObject } from "~/lib/data_structure/object/isObject";
 import { evaluate } from "~/lib/expression_eval";
-import { isObject } from "~/lib/utils";
 
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";

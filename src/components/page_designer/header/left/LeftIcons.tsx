@@ -4,7 +4,7 @@ import { Show } from "solid-js";
 
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { IconButton } from "~/components/IconButton";
-import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
+import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { LeftToggleButton } from "./LeftToggleButton";

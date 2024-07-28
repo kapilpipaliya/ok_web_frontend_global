@@ -3,8 +3,8 @@ import { createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import { contactUsCall } from "~/lib/api/api_functions";
-import { validateEmail } from "~/lib/validations";
+import { contactUsCall } from "~/lib/api/service/support/contactUsCall";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
 // Deprecated: This component will be replaced in the next major version.
 export function ContactForm() {

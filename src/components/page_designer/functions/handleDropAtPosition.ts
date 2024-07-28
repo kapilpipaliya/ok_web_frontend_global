@@ -8,6 +8,7 @@ import { handleParentChange } from "~/components/page_designer/functions/handleP
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
 import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 import { PageDesignerLabels } from "./PageDesignerLabels";
 
@@ -73,8 +74,9 @@ export async function handleDropAtPosition(
       toVertex,
       position,
     );
+    saveUndoPoint(txnId, graph);
   } else {
-    return await handleParentChange(
+    await handleParentChange(
       graph,
       setGraph,
       txnId,
@@ -84,5 +86,7 @@ export async function handleDropAtPosition(
       position,
       toVertex,
     );
+    saveUndoPoint(txnId, graph);
+    return;
   }
 }

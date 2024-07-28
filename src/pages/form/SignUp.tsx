@@ -4,19 +4,16 @@ import { createSignal } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import { registerUserCall } from "~/lib/api/api_functions";
-import { APP_BASE_URL } from "~/lib/constants";
-import { useLoading } from "~/lib/contexts";
-import {
-  validateEmail,
-  validatePassword,
-  validateUsername,
-} from "~/lib/validations";
+import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
+import { useGraph } from "~/lib/graph/graph";
+import { validateEmail } from "~/lib/validation/validateEmail";
+import { validatePassword } from "~/lib/validation/validatePassword";
+import { validateUsername } from "~/lib/validation/validateUsername";
 
 export function SignUp() {
+  const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
-  const [loadingSite, setLoadingSite] = useLoading();
 
   const [formData, setFormData] = createSignal({
     email: "",
@@ -45,16 +42,16 @@ export function SignUp() {
     } else if (passwordError) {
       showErrorToast(passwordError); // Show the error message if validation fails
     } else {
-      setLoadingSite(true);
+      setGraph('isLoadingPage', true);
       await showLoadingToast({
         loadMessage: "Registering User...",
         onError: (v) => {
-          setLoadingSite(false);
+          setGraph('isLoadingPage', false);
         },
         onSuccess: (value) => {
-          setLoadingSite(false);
+          setGraph('isLoadingPage', false);
           if (value != null && value.id !== null) {
-            navigate(`${APP_BASE_URL}/Page`);
+            navigate(`${graph.APP_BASE_URL}/Page`);
           }
         },
         promise: registerUserCall(formData),

@@ -1,7 +1,7 @@
 import { createEffect, createSignal } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
-import { isNegative } from "~/lib/utils";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 

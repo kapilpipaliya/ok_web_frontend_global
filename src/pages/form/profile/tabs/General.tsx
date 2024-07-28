@@ -8,7 +8,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { validateEmail } from "~/lib/validations";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
 type GenralProps = {
   originalProfileData: {

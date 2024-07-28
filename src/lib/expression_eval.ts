@@ -8,8 +8,8 @@ import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 //import { eval as eval1} from 'expression-eval';
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { jsonata } from "~/lib/jsonata/jsonata";
-import { isObject } from "~/lib/utils";
 
+import { isObject } from "./data_structure/object/isObject";
 import { calculateFilter } from "./graph/get/sync/calculateFilter";
 import { getTextValue } from "./graph/get/sync/getTextValue";
 

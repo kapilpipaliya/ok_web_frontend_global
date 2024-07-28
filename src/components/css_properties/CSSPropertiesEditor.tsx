@@ -2,12 +2,9 @@ import { Icon } from "@iconify-icon/solid";
 import { Show, batch, createSignal } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { useFormContext } from "~/lib/contexts";
-import { isDevelopment } from "~/lib/isDevelopment";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import type { CSSStore } from "./CssEditorContext";
 
@@ -15,6 +12,7 @@ import { DropdownMenu } from "../DropdownMenu";
 import { MultiSelectField } from "../MultiSelect";
 import { ZIndex } from "../ZIndex";
 import { DynamicComponent } from "../form/DynamicComponent";
+import { useFormContext } from "../form/FormContext";
 import { AddNewCssState } from "./AddNewCssState";
 import { useCssEditor, useCssState } from "./CssEditorContext";
 import { ResetButton } from "./ResetButton";
@@ -47,6 +45,7 @@ function getOptions(cssState: CSSStore) {
 export function CSSPropertiesEditor(
   props: Readonly<{ data: Vertex, meta: Vertex, setValue?: (data: CSSStore) => void }>,
 ) {
+  const [graph] = useGraph();
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
@@ -85,7 +84,7 @@ export function CSSPropertiesEditor(
         meta={{P: {class: props.data.P.value}} as unknown as Vertex}
       /><br/>
     </Show>
-    {isDevelopment ? JSON.stringify(cssState) : null}
+    {graph.isDevelopment ? JSON.stringify(cssState) : null}
     <ResetButton />
     <TextEditor
       disabled={true}

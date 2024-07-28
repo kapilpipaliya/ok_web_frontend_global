@@ -1,11 +1,11 @@
 import type { Store } from "solid-js/store";
 
-import type { IFormMetaData } from "~/lib/FormMetadataType";
 import type { GraphInterface } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormMetaData } from "~/components/page_designer/functions/getChildrenAttrs";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 

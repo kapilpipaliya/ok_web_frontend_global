@@ -55,7 +55,7 @@ export async function handleParentChange(
     setGraph,
     txnId,
     fromVertex,
-    toParentVertex!,
+    toParentVertex,
     toVertex,
     position,
   );

@@ -1,26 +1,24 @@
 import type { JSX } from "solid-js";
 
-import { A, type useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 
-import type { useToast } from "~/components/Toast";
-import type { useLoading } from "~/lib/contexts";
-
-import { APP_BASE_URL } from "~/lib/constants";
+import { useToast } from "~/components/Toast";
+import { useGraph } from "~/lib/graph/graph";
 
 export interface AuthenticatedMenuProps {
-  navigate: ReturnType<typeof useNavigate>;
   onClose: () => void;
-  setLoadingSite: ReturnType<typeof useLoading>[1];
-  showLoadingToast: ReturnType<typeof useToast>['showLoadingToast'];
   signOutCall: () => Promise<void>;
 }
 
 
 export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.Element {
+  const [graph, setGraph] = useGraph();
+  const navigate = useNavigate();
+  const { showLoadingToast } = useToast();
   return (
     <>
       <li class="m:5|10 mt:5px">
-        <A class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none" href={`${APP_BASE_URL}/setting`} onclick={props.onClose}>
+        <A class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none" href={`${graph.APP_BASE_URL}/setting`} onclick={props.onClose}>
           Account Setting
         </A>
       </li>
@@ -35,18 +33,18 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
           class="flex ai:center color:#333 cursor:default p:10px|7px r:5|5|5|5 text-decoration:none"
           onclick={async () => {
             props.onClose();
-            props.setLoadingSite(true);
-            await props.showLoadingToast({
+            setGraph('isLoadingPage', true);
+            await showLoadingToast({
               loadMessage: "Logging Out...",
               onSuccess: (value) => {
                 if (value != null && value.message !== null) {
-                  props.navigate("/auth/login");
+                  navigate("/auth/login");
                 }
               },
               promise: props.signOutCall(),
               successMessage: "Log Out Successfully",
             });
-            props.setLoadingSite(false);
+            setGraph('isLoadingPage', false);
           }}
         >
           Sign Out

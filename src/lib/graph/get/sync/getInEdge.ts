@@ -1,6 +1,6 @@
 import type { Vertex } from "~/lib/graph/graph";
 
-import { capitalizeFirstLetter } from "~/lib/utils";
+import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 export function getInEdge(meta: Vertex, vertex: Vertex) {
   if (meta.P.type) return meta.P.type;

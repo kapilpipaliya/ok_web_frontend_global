@@ -4,12 +4,12 @@ import { untrack } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
+import { groupBy } from "~/lib/data_structure/object/groupBy";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
-import { groupBy } from "~/lib/utils";
 
 export function getInitialFormState(
   graph: Store<GraphInterface>,

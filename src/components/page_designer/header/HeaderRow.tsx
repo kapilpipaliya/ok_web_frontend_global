@@ -2,7 +2,8 @@
 import { Show, } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
-import { FormContext } from "~/lib/contexts";
+import { FormContext } from "~/components/page_designer/PreviewContext";
+import { useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { LeftIcons } from "./left/LeftIcons";
@@ -14,6 +15,7 @@ import { PreviewButton } from "./right/PreviewButton";
 import { RightToggleButton } from "./right/RightToggleButton";
 import { SaveIconButton } from "./right/SaveIconButton";
 
+
 const SettingPageIcon = () => {
   const [, setLayoutStore] = useDesignerLayoutStore();
   return <IconButton
@@ -23,8 +25,24 @@ const SettingPageIcon = () => {
     size={22}
   />
 }
+
+function DebugInfo() {
+  const [graph] = useGraph();
+  const [layoutStore] = useDesignerLayoutStore();
+  return (
+    <Show when={layoutStore.formData.txnId}>
+      <div class="flex flex:row gap:2">
+        <span>Txn ID: {layoutStore.formData.txnId}</span>
+        <span>Steps: {graph.transactions.get(layoutStore.formData.txnId)?.steps.length}</span>
+        <span>Submitted Step: {graph.transactions.get(layoutStore.formData.txnId)?.submittedIndex}</span>
+        <span>Active Undo Point Index: {graph.transactions.get(layoutStore.formData.txnId)?.activeUndoIndex}</span>
+        <span>Undo Points: {graph.transactions.get(layoutStore.formData.txnId)?.undoStepIndexes.join(", ")}</span>
+      </div>
+    </Show>
+  );
+}
 export function HeaderRow() {
-  // const [graph] = useGraph();
+
   const [layoutStore] = useDesignerLayoutStore();
 
   return (
@@ -38,15 +56,7 @@ export function HeaderRow() {
           {/* <SettingPageIcon /> */}
         </div>
       </Show>
-      {/* <Show when={layoutStore.formData.txnId}>
-              <div class="flex flex:row gap:2">
-                <span>Txn ID: {layoutStore.formData.txnId}</span>
-                <span>Steps: {graph.transactions.get(layoutStore.formData.txnId)?.steps.length}</span>
-                <span>Submitted Step: {graph.transactions.get(layoutStore.formData.txnId)?.submittedIndex}</span>
-                <span>Active Undo Point: {graph.transactions.get(layoutStore.formData.txnId)?.activeUndoIndex}</span>
-                <span>Undo Points: {graph.transactions.get(layoutStore.formData.txnId)?.undoStepIndexes.join(", ")}</span>
-              </div>
-            </Show> */}
+      <DebugInfo />
       <Show when={layoutStore.selectedSection === "setting"}>
         <div class="flex ai:center">
           <MiddleSectionButtons />
@@ -61,7 +71,7 @@ export function HeaderRow() {
           <SaveIconButton />
         </FormContext.Provider>
         <PreviewButton />
-        <ExportSection/>
+        <ExportSection />
       </div>
     </header>
   );

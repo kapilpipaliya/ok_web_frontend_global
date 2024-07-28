@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";

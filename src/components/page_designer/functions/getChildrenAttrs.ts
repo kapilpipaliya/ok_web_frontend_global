@@ -12,10 +12,10 @@ import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import type {
   FieldAttribute,
   IFormMetaData,
-} from "../../../lib/FormMetadataType";
+} from "../../../lib/meta/FormMetadataType";
 
+import { sortVertexesByPosition } from "../../../lib/graph/get/sync/sortVertexesByPosition";
 import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
-import { sortVertexesByPosition } from "../../../lib/sortVertexesByPosition";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,

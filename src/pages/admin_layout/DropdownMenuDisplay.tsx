@@ -4,8 +4,7 @@ import { type JSX, Show, createSignal, } from "solid-js";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
 import { ZIndex } from "~/components/ZIndex";
-import { signOutCall } from "~/lib/api/api_functions";
-import { useLoading } from "~/lib/contexts";
+import { signOutCall } from "~/lib/api/service/user/signOutCall";
 import { useGraph } from "~/lib/graph/graph";
 
 import { MenuItems } from "./MenuItems";
@@ -13,7 +12,6 @@ import { ProfileHeader } from "./ProfileHeader";
 
 export function DropdownMenuDisplay(): JSX.Element {
   const [graph, setGraph] = useGraph();
-  const [loadingSite, setLoadingSite] = useLoading();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
@@ -46,11 +44,7 @@ export function DropdownMenuDisplay(): JSX.Element {
               <ProfileHeader profileImage={profileImage} />
               <hr class="color:rgb(223,223,223)" />
               <MenuItems
-                isAuthenticated={!!graph.member?.P?.email}
-                navigate={navigate}
                 onClose={handleClose}
-                setLoadingSite={setLoadingSite}
-                showLoadingToast={showLoadingToast}
                 signOutCall={signOutCall} />
             </ul>
           </DropdownMenu>

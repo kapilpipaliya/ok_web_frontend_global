@@ -22,19 +22,26 @@ export function redo(txnId: number, graph: Store<GraphInterface>) {
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
 
-  const nextUndoIndex = txnValue.undoStepIndexes.find(
+  let nextUndoIndex = txnValue.undoStepIndexes.find(
     (index) => index > activeUndoIndex,
   );
-  if (nextUndoIndex !== undefined) {
-    txnValue.activeUndoIndex = nextUndoIndex;
-    txnValue.steps
-      .slice(activeUndoIndex + 1, nextUndoIndex + 1)
-      .forEach((step) => {
-        if (step.redo) {
-          step.redo();
-        }
-      });
+  if (nextUndoIndex === undefined) {
+    nextUndoIndex = txnValue.activeUndoIndex + 1;
+    if (nextUndoIndex >= txnValue.steps.length) {
+      console.error("No next undo index found");
+      return;
+    }
   }
+
+  txnValue.activeUndoIndex = nextUndoIndex;
+  txnValue.steps
+    .slice(activeUndoIndex + 1, nextUndoIndex + 1)
+    .forEach((step) => {
+      if (step.redo) {
+        step.redo();
+      }
+    });
+
 
   graph.transactions.set(txnId, txnValue);
 }

@@ -1,14 +1,14 @@
-import type { IFormMetaData } from "~/lib/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { Coll } from "./Coll";
-import { CollCategory } from "./CollCategory";
-import { Comp } from "./Comp";
-import { CompCategory } from "./CompCategory";
-import { DataType } from "./DataType";
-import { FormCategory } from "./FormCategory";
-import { Login } from "./Login";
-import { Page } from "./Page";
-import { SignUp } from "./SignUp";
+import { Login } from "./auth/Login";
+import { SignUp } from "./auth/SignUp";
+import { Comp } from "./base/Comp";
+import { CompCategory } from "./base/CompCategory";
+import { DataType } from "./base/DataType";
+import { Coll } from "./page/Coll";
+import { CollCategory } from "./page/CollCategory";
+import { FormCategory } from "./page/FormCategory";
+import { Page } from "./page/Page";
 
 export const FormMetaData: { [key: string]: IFormMetaData } = {
   // TODO: Coll has only one Attr. Add validation for that.
@@ -27,7 +27,7 @@ const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
   (x) => x.name === "Rule",
 );
 const permissionMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.name === "Role",
+  (x) => x.name === "Perm",
 );
 FormMetaData.Page.attributes.push(permissionMetaAttribute!);
 

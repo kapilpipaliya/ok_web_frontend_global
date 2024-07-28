@@ -1,6 +1,6 @@
 import type { Store } from "solid-js/store";
 
-import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";

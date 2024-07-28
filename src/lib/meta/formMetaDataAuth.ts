@@ -1,11 +1,11 @@
-import type { IFormMetaData } from "~/lib/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { Dashboard } from "./Dashboard";
-import { Import } from "./Import";
-import { Nav } from "./Nav";
-import { Perm } from "./Perm";
-import { Role } from "./Role";
-import { User } from "./User";
+import { Perm } from "./auth/Perm";
+import { Role } from "./auth/Role";
+import { User } from "./auth/User";
+import { Import } from "./other/Import";
+import { Nav } from "./other/Nav";
+import { Dashboard } from "./page/Dashboard";
 
 export const FormMetaDataAuth: { [key: string]: IFormMetaData; } = {
   Dashboard: Dashboard,

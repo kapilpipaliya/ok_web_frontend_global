@@ -1,4 +1,4 @@
-import { isObject } from "~/lib/utils";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { MutationArgs } from "../../../types/MutationArgs";
 

@@ -13,15 +13,15 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { useFormContext } from "~/lib/contexts";
+import { isObject } from "~/lib/data_structure/object/isObject";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { isObject } from "~/lib/utils";
 
-import { ensureArray } from "../../lib/ensureArray";
+import { ensureArray } from "../../lib/data_structure/array/ensureArray";
+import { useFormContext } from "../form/FormContext";
 import { isStaticOptions } from "./utils/isStaticOptions";
 import { selectedValue } from "./utils/selectedValue";
 import { setSelectValueHelper } from "./utils/setSelectValueHelper";

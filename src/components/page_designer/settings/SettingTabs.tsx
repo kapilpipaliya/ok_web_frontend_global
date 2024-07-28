@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/HeaderWithDescription";
-import { capitalizeFirstLetter } from "~/lib/utils";
+import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";

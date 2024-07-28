@@ -3,7 +3,7 @@ import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { isObject } from "~/lib/utils";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "./CssEditorContext";
 

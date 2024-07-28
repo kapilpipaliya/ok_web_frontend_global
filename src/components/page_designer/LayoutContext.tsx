@@ -2,9 +2,9 @@ import type { createStore } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
-import type { IFormContext } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
+import type { IFormContext } from "../form/FormContext";
 import type { IDToRuleMap } from "./functions/getChildrenAttrs";
 
 export function getInitialDesignerLayoutStore() {

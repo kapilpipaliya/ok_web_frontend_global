@@ -2,8 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
-import { iconMap } from "~/lib/constants";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { iconMap } from "~/lib/ui/iconMap";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";

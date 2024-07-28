@@ -2,9 +2,9 @@ import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
 
 import { useToast } from "~/components/Toast";
-import { resetPasswordCall } from "~/lib/api/api_functions";
+import { resetPasswordCall } from "~/lib/api/service/user/resetPasswordCall";
 import { useGraph } from "~/lib/graph/graph";
-import { validatePassword } from "~/lib/validations";
+import { validatePassword } from "~/lib/validation/validatePassword";
 
 export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
   const [graph, setGraph] = useGraph();

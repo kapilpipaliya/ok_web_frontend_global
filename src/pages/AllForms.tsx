@@ -1,7 +1,6 @@
 import { A } from "@solidjs/router";
 import { For } from "solid-js";
 
-import { APP_BASE_URL } from "~/lib/constants";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 
 export function AllForms() {
@@ -13,7 +12,7 @@ export function AllForms() {
     <div class="">
       <For each={allForms()}>
         {(vertexId) => (
-          <A href={`${APP_BASE_URL}/${graph.vertexes[vertexId].P[IdAttr]}/new`}>
+          <A href={`${graph.APP_BASE_URL}/${graph.vertexes[vertexId].P[IdAttr]}/new`}>
             {graph.vertexes[vertexId].P[IdAttr]}
           </A>
         )}

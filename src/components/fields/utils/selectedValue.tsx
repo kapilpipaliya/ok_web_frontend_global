@@ -11,7 +11,7 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 
-import { ensureArray } from "../../../lib/ensureArray";
+import { ensureArray } from "../../../lib/data_structure/array/ensureArray";
 import { isStaticOptions } from "./isStaticOptions";
 
 export function selectedValue(

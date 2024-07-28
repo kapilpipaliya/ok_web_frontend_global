@@ -1,14 +1,13 @@
 import { A, useParams } from "@solidjs/router";
 import { For } from "solid-js";
 
-import { APP_BASE_URL } from "~/lib/constants";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 
 export function UserDashBoardGrid() {
   const params = useParams();
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   const dashboard = findVertexByLabelAndUniqueId(
     graph,
     "Dashboard",
@@ -29,7 +28,7 @@ export function UserDashBoardGrid() {
           <div class="flex bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:10">
             <h3 class="f:18@md font:semibold" />
             <p class="f:18@md font:semibold mb:0 mt:5 mx:auto">
-              <A href={`${APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
+              <A href={`${graph.APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
                 {tableLayout.P.title || tableLayout.P[IdAttr]}
               </A>
             </p>

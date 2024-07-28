@@ -52,9 +52,13 @@ export interface TransactionDetail {
 }
 
 export interface GraphInterface {
+  APP_BASE_URL: string;
   activeClickOutside: number;
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
+  events: { [key: string]: any };
+  isDevelopment: boolean;
+  isLoadingPage?: boolean;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
   member?: Vertex;

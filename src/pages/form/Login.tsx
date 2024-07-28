@@ -4,20 +4,17 @@ import { Show, createSignal, onMount } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
-import { signInCall } from "~/lib/api/api_functions";
 import { postAPI } from "~/lib/api/postApi";
-import { APP_BASE_URL } from "~/lib/constants";
-import { useLoading } from "~/lib/contexts";
-import {
-  validateEmail,
-  validatePassword,
-  validateUsername,
-} from "~/lib/validations";
+import { signInCall } from "~/lib/api/service/user/signInCall";
+import { useGraph } from "~/lib/graph/graph";
+import { validateEmail } from "~/lib/validation/validateEmail";
+import { validatePassword } from "~/lib/validation/validatePassword";
+import { validateUsername } from "~/lib/validation/validateUsername";
 
 export function Login() {
+  const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
-  const [loadingSite, setLoadingSite] = useLoading();
   const [formData, setFormData] = createSignal({
     email: "",
     loginType: "login",
@@ -65,17 +62,17 @@ export function Login() {
     if (passwordError) {
       showErrorToast(passwordError);
     } else {
-      setLoadingSite(true);
+      setGraph('isLoadingPage', true);
       await showLoadingToast({
         loadMessage: "Logging In...",
         onError(error) {
-          setLoadingSite(false);
+          setGraph('isLoadingPage', false);
         },
         onSuccess: (value) => {
-          setLoadingSite(false);
+          setGraph('isLoadingPage', false);
 
           if (value != null && value.id !== null) {
-            navigate(`${APP_BASE_URL}/Page`);
+            navigate(`${graph.APP_BASE_URL}/Page`);
           }
         },
         promise: signInCall(formData),

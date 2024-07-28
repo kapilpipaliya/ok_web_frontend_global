@@ -1,24 +1,20 @@
 import { type JSX, Show } from "solid-js";
 
+import { useGraph } from "~/lib/graph/graph";
+
 import { AuthenticatedMenu } from "./AuthenticatedMenu";
 import { UnauthenticatedMenu } from "./UnauthenticatedMenu";
 export interface MenuItemsProps {
-  isAuthenticated: boolean;
-  navigate: ReturnType<typeof useNavigate>;
   onClose: () => void;
-  setLoadingSite: ReturnType<typeof useLoading>[1];
-  showLoadingToast: ReturnType<typeof useToast>['showLoadingToast'];
   signOutCall: () => Promise<void>;
 }
 
 export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {
+  const [graph] = useGraph();
   return (
-    <Show fallback={<UnauthenticatedMenu onClose={props.onClose} />} when={props.isAuthenticated}>
+    <Show fallback={<UnauthenticatedMenu onClose={props.onClose} />} when={!!graph.member?.P?.email}>
       <AuthenticatedMenu
-        navigate={props.navigate}
         onClose={props.onClose}
-        setLoadingSite={props.setLoadingSite}
-        showLoadingToast={props.showLoadingToast}
         signOutCall={props.signOutCall} />
     </Show>
   );

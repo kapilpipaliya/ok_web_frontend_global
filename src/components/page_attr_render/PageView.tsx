@@ -2,7 +2,7 @@ import { Match, Show, Switch, createMemo } from "solid-js";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { PreviewContext } from "~/lib/contexts";
+import { PreviewContext } from "~/components/page_designer/PreviewContext";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrContext";

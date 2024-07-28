@@ -2,7 +2,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 

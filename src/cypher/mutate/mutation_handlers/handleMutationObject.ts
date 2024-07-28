@@ -1,4 +1,4 @@
-import { isObject } from "~/lib/utils";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 import { handleDeleteEdge } from "./handlers/handleDeleteEdge";
 import { handleDeleteVertex } from "./handlers/handleDeleteVertex";

@@ -7,11 +7,11 @@ import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
 import { getFormAttr } from "~/components/grid/functions/getFormAttr";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { isObject } from "~/lib/data_structure/object/isObject";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { isObject } from "~/lib/utils";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
