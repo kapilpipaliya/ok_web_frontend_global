@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext, usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
@@ -13,6 +13,7 @@ import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
+import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 
 export function getText(

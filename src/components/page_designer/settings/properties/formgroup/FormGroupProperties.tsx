@@ -35,6 +35,7 @@ import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 
 function modifyMetaVertexExpr(metaVertex: Vertex) {
@@ -160,6 +161,7 @@ function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof create
     graph.vertexes[vertexIds.name],
     ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
     graph.vertexes[vertexIds.label],
+    graph.vertexes[vertexIds.perm],
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     graph.vertexes[vertexIds.calculatedValue],
     graph.vertexes[vertexIds.required],
@@ -211,6 +213,14 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         </Match>
         <Match when={props.metaVertex.P.name === "required" || props.metaVertex.P.name === "hidden" || props.metaVertex.P.name === "disabled" || props.metaVertex.P.name === "calculatedValue"}>
           <SelectRuleField
+            metaVertex={props.metaVertex}
+            selectedLayout={props.selectedLayout}
+            txnId={props.txnId}
+          />
+        </Match>
+
+        <Match when={props.metaVertex.P.name === "perm"}>
+          <SelectPermissionField
             metaVertex={props.metaVertex}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}

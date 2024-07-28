@@ -11,7 +11,7 @@ import {
   getInitialDesignerLayoutStore,
 } from "~/components/page_designer/LayoutContext";
 
-import { HeaderRow } from "../header/HeaderRow";
+import { HeaderRow } from "../header/header_row/HeaderRow";
 import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {

@@ -4,7 +4,6 @@ import { getOwner, runWithOwner } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
 import { addNewRow } from "~/lib/graph/mutate/form/rowFunction";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
@@ -17,13 +16,12 @@ export function insertNewRow(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any } = {},
 ) {
-  const { showErrorToast } = useToast();
   if (!data) {
-    showErrorToast("Table data is not set");
+    alert("cant add new row");
     return;
   }
   const outerOwner = getOwner();
-  runWithOwner(outerOwner, () =>
+  const result = runWithOwner(outerOwner, () =>
     addNewRow(
       txnId || 0,
       meta,
@@ -34,5 +32,9 @@ export function insertNewRow(
       isRealTime ?? false
     ),
   );
-  saveUndoPoint(txnId, graph);
+  if (!result?.error) {
+    saveUndoPoint(txnId, graph);
+  }
+
+  return result;
 }

@@ -1,0 +1,42 @@
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+
+import { Label } from "../Label";
+import { SelectRelation } from "../rule_field/SelectRelation";
+import { ConfigurePermissionButton } from "./ConfigurePermissionButton";
+
+interface SelectPermissionFieldProps {
+  metaVertex: Vertex;
+  selectedLayout: Vertex;
+  txnId: number;
+}
+
+export function SelectPermissionField(props: SelectPermissionFieldProps) {
+  const [layoutStore] = useDesignerLayoutStore();
+
+  const meta = {
+    P: {
+      class: "flex:1",
+      collection: () => `id:'${layoutStore.formData.formData.id}'->$0Perm`,
+      componentName: "TagBox",
+      displayName: props.metaVertex.P.displayName,
+      name: props.metaVertex.P.name,
+      useLocalStorage: true,
+    },
+  } as unknown as Vertex;
+
+  return (
+    <div
+    // fix class for select
+      class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+    >
+      <span class="f:15 flex:.5">
+        <Label metaVertex={props.metaVertex} />
+      </span>
+      <div class="flex f:15 flex:1 gap:1px">
+        <SelectRelation data={props.selectedLayout} meta={meta} txnId={props.txnId} />
+        <ConfigurePermissionButton title="All Permissions" />
+      </div>
+    </div>
+  );
+}

@@ -10,12 +10,13 @@ import {
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
-import { useFormContext, usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
+import { useFormContext } from "../form/FormContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
