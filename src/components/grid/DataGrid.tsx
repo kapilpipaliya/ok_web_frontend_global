@@ -16,6 +16,7 @@ import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
+import { DataGridState } from "./DataGridContext";
 
 interface DataGridProps {
   tableId: string;
@@ -24,23 +25,57 @@ interface DataGridProps {
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
-  const [deleteRowId, setDeleteRowId] = createSignal<Id | null>(null);
-  const [tableStore, setTableStore] = createStore({
-    data: [],
-    tableColumns: [],
-  } as { data: any[]; tableColumns: ColumnDef<any>[] });
-  const [isSearching, setIsSearching] = createSignal(false);
-  const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
-  const [layout, setLayout] = createSignal<'card' | 'table'>(graph.vertexes[graph.userSettingId]?.P.layout || 'table');
-  const [cardSize, setCardSize] = createSignal(graph.vertexes[graph.userSettingId]?.P.cardSize || 3);
 
-  createEffect(on([cardSize, layout], () => {
-    graph.saveUserSetting({ cardSize: cardSize(), layout: layout() });
+  const [appState, setAppState] = createStore<DataGridState>({
+    cardSize: graph.vertexes[graph.userSettingId]?.P.cardSize || 3,
+    deleteRowId: null,
+    error: null,
+    filteredData: [],
+    isLoading: false,
+    isSearching: false,
+    isShowLoadMore: true,
+    layout: graph.vertexes[graph.userSettingId]?.P.layout || 'table',
+    search: '',
+    tableStore: {
+      data: [],
+      tableColumns: [],
+    },
+  });
+
+  createEffect(on([() => appState.cardSize, () => appState.layout], () => {
+    graph.saveUserSetting({ cardSize: appState.cardSize, layout: appState.layout });
   }, { defer: true }));
 
   if (!props.tableId) {
     return <>Incorrect Configuration</>;
   }
+
+  onMount(async () => {
+    setAppState("isLoading", true);
+    const data = await getTableData(props.tableId);
+    if (data.error) {
+      setAppState("error", data.error);
+    } else {
+      onTableDataGet(data);
+    }
+    setAppState("isLoading", false);
+  });
+
+  const handleSearch = (value: string) => {
+    setAppState("search", value);
+    if (value && value.length > 0) {
+      setAppState("isSearching", true);
+      const filtered = appState.tableStore.data.filter((item: Vertex) =>
+        Object.values(item.P).some((prop: any) =>
+          prop?.toString().toLowerCase().includes(value.toLowerCase()),
+        ),
+      );
+      setAppState("filteredData", filtered);
+    } else {
+      setAppState("isSearching", false);
+      setAppState("filteredData", appState.tableStore.data);
+    }
+  };
 
   type TableData = {
     error?: string;
@@ -51,105 +86,69 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     };
     result?: any;
   };
-  const [error, setError] = createSignal<null | string>(null);
-  const [isLoading, setIsLoading] = createSignal(false);
-  const [search, setSearch] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal([] as Vertex[]);
-
-  onMount(async () => {
-    setIsLoading(true);
-    const data = await getTableData(props.tableId);
-    if (data.error) {
-      setError(data.error);
-    } else {
-      onTableDataGet(data);
-    }
-    setIsLoading(false);
-  });
-
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    if (value && value.length > 0) {
-      setIsSearching(true);
-      const filtered = tableStore.data.filter((item: Vertex) =>
-        Object.values(item.P).some((prop: any) =>
-          prop?.toString().toLowerCase().includes(value.toLowerCase()),
-        ),
-      );
-      setFilteredData(filtered);
-    } else {
-      setIsSearching(false);
-      setFilteredData(tableStore.data);
-    }
-  };
-
   function onTableDataGet(data: TableData) {
     const vertexCount = Object.keys(data.graph!.vertexes).length;
-    if (vertexCount < 10 || vertexCount === 0) {
-      setIsShowLoadMore(false);
-    } else {
-      setIsShowLoadMore(true);
-    }
+    setAppState("isShowLoadMore", vertexCount >= 10);
     setGraphData(graph, setGraph, data.graph!);
     const resultData = Object.values(data.graph!.vertexes).filter(
       (v) => v.L[0] === props.tableId,
     );
-    const nodes: Vertex[] = tableStore.data
-      ? [...tableStore.data, ...resultData]
+    const nodes: Vertex[] = appState.tableStore.data
+      ? [...appState.tableStore.data, ...resultData]
       : resultData;
-    graph.events?.setTitle(data.form!.title);
+    graph.events?.setTitle?.(data.form!.title);
     const tableColumns = setGridHeaders(
       data.form!,
       graph,
       setGraph,
-      setDeleteRowId,
+      (id) => setAppState("deleteRowId", id),
       navigate,
       props.tableId,
     );
-    setTableStore({ data: nodes, tableColumns });
-    setSearch("");
-    setFilteredData(nodes);
+    setAppState("tableStore", { data: nodes, tableColumns });
+    setAppState("search", "");
+    setAppState("filteredData", nodes);
   }
 
-  const onDelete = useDeleteRowConfirm(deleteRowId);
+  const onDelete = useDeleteRowConfirm(() => appState.deleteRowId);
 
   return (
     <Switch>
-      <Match when={isLoading()}>
+      <Match when={appState.isLoading}>
         <LoaderNew loaderHeight="55vh" />
       </Match>
-      <Match when={error()}>
-        <div>Error: {error()}</div>
+      <Match when={appState.error}>
+        <div>Error: {appState.error}</div>
       </Match>
       <Match when={true}>
         <GridHeader
-          cardSize={cardSize()}
-          columns={tableStore.tableColumns}
-          layout={layout()}
+          cardSize={appState.cardSize}
+          columns={appState.tableStore.tableColumns}
+          layout={appState.layout}
           onSearch={handleSearch}
-          searchValue={search()}
-          setCardSize={setCardSize}
-          setLayout={setLayout}
+          searchValue={appState.search}
+          setCardSize={(value: number) => setAppState("cardSize", value)}
+          setLayout={(value: 'card' | 'table') => setAppState("layout", value)}
         />
         <CommonTable
-          cardSize={cardSize()}
-          data={filteredData()}
+          cardSize={appState.cardSize}
+          data={appState.filteredData}
           defaultRowsPerPage={10}
-          headers={tableStore.tableColumns}
-          isSearching={isSearching()}
-          isShowLoadMore={isShowLoadMore()}
-          layout={layout()}
+          headers={appState.tableStore.tableColumns}
+          isSearching={appState.isSearching}
+          isShowLoadMore={appState.isShowLoadMore}
+          layout={appState.layout}
           onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
           rowsPerPageOptions={[5, 10, 15]}
-          totalItems={filteredData().length}
+          totalItems={appState.filteredData.length}
         />
-        <Show when={deleteRowId()}>
+        <Show when={appState.deleteRowId}>
           <DeleteDialog
             message="Are you sure you want to delete this item?"
-            onCancel={() => setDeleteRowId(null)}
+            onCancel={() => setAppState("deleteRowId", null)}
             onConfirm={onDelete}
-            open={deleteRowId as unknown as Accessor<boolean>}
-            setOpen={setDeleteRowId}
+            open={(() => appState.deleteRowId) as unknown as Accessor<boolean>}
+            setOpen={(id) => setAppState("deleteRowId", id)}
             title="Delete Item"
           />
         </Show>
