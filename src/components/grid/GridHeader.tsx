@@ -1,23 +1,17 @@
-import type { ColumnDef } from "@tanstack/solid-table";
-
 import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../css_properties/SearchBar";
 import { AddNewButton } from "./AddNew";
+import { useDataGridContext } from "./DataGridContext";
 
 interface GridHeaderProps {
-  cardSize: number;
-  columns: ColumnDef<any>[];
-  layout: 'card' | 'table';
   onSearch: (value: string) => void;
-  searchValue: string;
-  setCardSize: (size: number) => void;
-  setLayout: (layout: 'card' | 'table') => void;
 }
 
-export function GridHeader(props: GridHeaderProps) {
+export function GridHeader(props: Readonly<GridHeaderProps>) {
+  const [gridState, setGridState] = useDataGridContext();
   const navigate = useNavigate();
   const onAddNew = () => navigate("new")
   return (
@@ -27,21 +21,21 @@ export function GridHeader(props: GridHeaderProps) {
         <SearchBar
           handleChange={props.onSearch}
           placeholder="Search Data..."
-          value={props.searchValue}
+          value={gridState.search}
         />
         <IconButton
-          icon={props.layout === 'table' ? 'fa6-regular:id-card' : 'fa:table'}
-          onClick={() => props.setLayout(props.layout === 'table' ? 'card' : 'table')}
+          icon={gridState.layout === 'table' ? 'fa6-regular:id-card' : 'fa:table'}
+          onClick={() => setGridState("layout", gridState.layout === 'table' ? 'card' : 'table')}
           title="Table Layout"
         />
-        <Show when={props.layout === 'card'}>
+        <Show when={gridState.layout === 'card'}>
           <input
             max="10"
             min="1"
-            onInput={(e) => props.setCardSize(Number(e.currentTarget.value))}
+            onInput={(e) => setGridState("cardSize", Number(e.currentTarget.value))}
             style={{ 'margin-left': '10px' }}
             type="number"
-            value={props.cardSize}
+            value={gridState.cardSize}
           />
         </Show>
       </div>
