@@ -8,18 +8,21 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { DynamicForm } from "~/components/form/DynamicForm";
 
+import { useZIndex } from "../ZIndex";
+
 export const QuickEditModal = (p: {
   graph: GraphInterface;
   info: any;
   setGraph: SetStoreFunction<GraphInterface>;
   tableId: any;
 }) => {
+  const zIndex = useZIndex();
   const [isOpen, setIsOpen] = createSignal(false);
 
   const closePopUp = () => {
     setIsOpen(false);
   };
-  const modalContainerClass = "position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:20  background-color:rgba(0,0,0,0.5)";
+  const modalContainerClass = `position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:${zIndex}  background-color:rgba(0,0,0,0.5)`;
   const modalClass = "position:relative  width:80vw  max-width:800px  padding:15px  background-color:white";
 
   return (

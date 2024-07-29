@@ -11,7 +11,7 @@ import { evaluate } from "~/lib/expression_eval";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
-import { ZIndex } from "./ZIndex";
+import { ZIndex, useZIndex } from "./ZIndex";
 
 export type Option =
   | {
@@ -139,6 +139,7 @@ export function MultiSelectField(
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   const Options = () => {
+    const zIndex = useZIndex();
     const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(
       new Set(),
     );
@@ -267,7 +268,7 @@ export function MultiSelectField(
 
     return (
       <div
-        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100%`}
+        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100% z-index:${zIndex}`}
       >
         <Show
           fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>}

@@ -7,7 +7,7 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import {
-  getFormMetaData,
+  generateFormMetaAttributes,
 } from "~/components/page_designer/functions/getChildrenAttrs";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
@@ -37,7 +37,7 @@ export function FormField(
   } as unknown as IFormContext);
 
   if (!props.data?.id) {
-    const form = getFormMetaData(graph, () => { }, props.meta);
+    const form = generateFormMetaAttributes(graph, () => { }, props.meta);
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
         acc[attr.name] = attr.defaultValue;

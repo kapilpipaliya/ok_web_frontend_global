@@ -30,7 +30,7 @@ export function getChildrenAttrs(
 
 
 // todo: write test for this function
-export function getFormMetaData(
+export function generateFormMetaAttributes(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   rootVertex: Vertex,
@@ -57,7 +57,7 @@ export function getFormMetaData(
         ...vertex.P,
         attributes:
           componentName === "DynamicTable" && !ignoreTable
-            ? getFormMetaData(graph, setGraph, vertex, ignoreTable).attributes
+            ? generateFormMetaAttributes(graph, setGraph, vertex, ignoreTable).attributes
             : undefined,
         componentName: componentName,
         name: vertex.P.name,

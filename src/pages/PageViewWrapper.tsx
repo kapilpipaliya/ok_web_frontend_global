@@ -1,10 +1,14 @@
 import { Meta, Title } from "@solidjs/meta";
 import { clientOnly } from "@solidjs/start";
-import { Show, createEffect, createSignal, on, onMount } from "solid-js";
+import { Show, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
+
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { getFormAttr } from "~/components/grid/functions/getFormAttr";
+import { getConfiguredPermissions } from "~/components/grid/permissions";
+import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -12,6 +16,7 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr"
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -34,32 +39,10 @@ export function PageViewWrapper(
   const [mounted, setMounted] = createSignal(false);
   const [isPreview, setIsPreview] = createSignal(false);
   const [error, setError] = createSignal<string>();
+  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex()?.id, graph, setGraph));
 
-  // load form meta data
-  async function loadFormDesignerMetaData() {
-    const form = FormMetaData[props.pageVertexLabel!] || FormMetaData.Form;
-
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-
-    const data = await fetchDataFromMG({
-      expression:
-        props.expression ??
-        (props.formId
-          ? `id:'${props.formId}'`
-          : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`),
-      incoming,
-      outgoing,
-    });
-    if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
-      setError(`No ${props.pageVertexLabel} found`);
-      return;
-    }
-    if (!data.result[0].P.public) {
-      setError(`${props.pageVertexLabel} is not authorized`);
-      return;
-    }
-    setIsPreview(props.pageId === "preview");
-
+   const metaDtaInitialize = (data: ServerResult) => {
     if (props.formId) {
       delete data.graph.vertexes[props.formId];
     }
@@ -74,20 +57,45 @@ export function PageViewWrapper(
       const metaVertex_ = graph.vertexes[data.result.id];
       setMetaVertex(metaVertex_);
     }
+  };
+
+  // load form meta data
+  async function loadFormDesignerMetaData() {
+    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel!] || FormMetaDataAuth[props.pageVertexLabel!] : null;
+    if (!form) {
+      form = FormMetaData.Form;
+      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+
+      const data = await fetchDataFromMG({
+        expression:
+          props.expression ??
+          (props.formId
+            ? `id:'${props.formId}'`
+            : `g:'${props.pageVertexLabel ?? "Form"}[${props.pageVertexName}]'`),
+        incoming,
+        outgoing,
+      });
+      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
+        setError(`No ${props.pageVertexLabel} configured`);
+        return;
+      }      
+      metaDtaInitialize(data);
+    }
+    form =  metaVertex() ? generateFormMetaAttributes(
+      graph,
+      setGraph,
+      metaVertex()!
+    ) : (FormMetaData[props.pageVertexLabel!] || FormMetaDataAuth[props.pageVertexLabel!]);
+    setFormMetaData(form);
+    setIsPreview(props.pageId === "preview");
   }
   async function loadData() {
-    if (!props.dataId) {
+    if (!props.dataId || props.dataId === "new") {
       return;
     }
     try {
-      const formAttrResult = await getFormAttr(props.pageVertexName ?? "");
-      if (formAttrResult.error) {
-        setError(formAttrResult.error);
-        return;
-      }
-
       const { incoming, outgoing } = getEdgesFromRowsAttr(
-        formAttrResult.form!.attributes,
+        formMetaData()!.attributes,
         false,
       );
 
@@ -107,10 +115,13 @@ export function PageViewWrapper(
       setError(`Error When Loading Form: ${e.message}`);
     }
   }
-  onMount(() => {
+  onMount(async () => {
     setMounted(true);
-    loadFormDesignerMetaData();
-    loadData();
+    await loadFormDesignerMetaData();
+    if (metaVertex() && !metaVertex()!.P.public) {
+      setError(`${props.pageVertexLabel} is not authorized`);
+    }
+    await loadData();
   });
   const [count, setCount] = createSignal(1);
 
@@ -147,7 +158,7 @@ export function PageViewWrapper(
       <Show when={metaVertex()?.P.seoDescription}>
         <Meta content={metaVertex()?.P.seoDescription} name="description" />
       </Show>
-      <Show when={mounted() && metaVertex() && (props.dataId ? dataVertex() : true)}>
+      <Show when={mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
         <Show
           fallback={
             <PreviewPage>

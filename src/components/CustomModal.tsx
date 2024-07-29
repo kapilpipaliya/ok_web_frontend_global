@@ -5,6 +5,8 @@ import { Portal } from "solid-js/web";
 import { useGraph } from "~/lib/graph/graph";
 import { useClickOutside } from "~/lib/hooks/useClickOutside";
 
+import { useZIndex } from "./ZIndex";
+
 interface CustomModalProps {
   bodyClass?: JSX.CSSProperties;
   children: JSX.Element;
@@ -18,9 +20,10 @@ interface CustomModalProps {
 }
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
+  const zIndex = useZIndex();
   const [open, setOpen] = (props.open && props.setOpen) ? [props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>] : createSignal(false);
 
-  const modalContainerClass = "position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:20  background-color:rgba(0,0,0,0.5)";
+  const modalContainerClass = `position:fixed  top:0  left:0  width:100%  height:100%  display:flex  jc:center  ai:center  z-index:${zIndex}  background-color:rgba(0,0,0,0.5)`;
   const modalClass = "position:relative  width:80vw  max-width:800px  padding:15px  background-color:white";
 
   const Content = () => {

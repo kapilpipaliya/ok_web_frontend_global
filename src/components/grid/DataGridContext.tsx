@@ -1,8 +1,9 @@
-import { ColumnDef } from "@tanstack/solid-table";
-import { JSX, createContext, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import type { ColumnDef } from "@tanstack/solid-table";
+import type { createStore } from "solid-js/store";
 
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { type JSX, createContext, useContext } from "solid-js";
+
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 export function getInitialGridState(graph: GraphInterface) {
   return {
@@ -10,10 +11,12 @@ export function getInitialGridState(graph: GraphInterface) {
     deleteRowId: null as Id | null,
     error: null as null | string,
     filteredData: [] as Vertex[],
+    formId: null as Id | null,
     isLoading: false,
     isSearching: false,
     isShowLoadMore: true,
     layout: (graph.vertexes[graph.userSettingId]?.P.layout || 'table') as 'card' | 'table',
+    metaVertex: null as Vertex | null,
     search: '',
     tableStore: {
       data: [] as any[],

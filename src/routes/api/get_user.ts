@@ -21,15 +21,17 @@ async function getUserEmailFromSession(): Promise<string> {
   return httpSession.data.email;
 }
 
-async function findUserByEmail(session: Session, email: string): Promise<{ user: Node | null, userSetting: Node | null }> {
+async function findUserByEmail(session: Session, email: string): Promise<{ roles: Node[], user: Node | null, userSetting: Node | null }> {
   const query = `
     MATCH (u:User)
     WHERE u.email = $email OR u.username = $email
-    OPTIONAL MATCH (u)-[r:UserSetting]->(s:UserSetting)
-    RETURN u, s
+    OPTIONAL MATCH (u)-[:UserSetting]->(s:UserSetting)
+    OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
+    RETURN u, s, collect(r) AS roles
   `;
   const result = await session.run(query, { email });
   const user = result.records.length > 0 ? result.records[0].get("u") as Node : null;
+  const roles = result.records.length > 0 ? result.records[0].get("roles") as Node[] : [];
   let userSetting = result.records.length > 0 ? result.records[0].get("s") as Node : null;
 
   if (user && !userSetting) {
@@ -44,7 +46,7 @@ async function findUserByEmail(session: Session, email: string): Promise<{ user:
     userSetting = createResult.records.length > 0 ? createResult.records[0].get("s") as Node : null;
   }
 
-  return { user, userSetting };
+  return { roles, user, userSetting };
 }
 
 export async function GET({ request }: APIEvent) {
@@ -54,7 +56,7 @@ export async function GET({ request }: APIEvent) {
     neo4jSession = (await getDriver(subdomainFromUrl)).session();
 
     const email = await getUserEmailFromSession();
-    const { user, userSetting } = await findUserByEmail(neo4jSession, email);
+    const { roles, user, userSetting } = await findUserByEmail(neo4jSession, email);
 
     if (!user) {
       return new Response(JSON.stringify({ error: `Not Authorized: No user found with email or username ${email}` }), { status: 401 });
@@ -67,6 +69,9 @@ export async function GET({ request }: APIEvent) {
 
     if (userSetting) {
       response.userSetting = convertNodeToJson(userSetting);
+    }
+    if (roles.length > 0) {
+      response.roles = roles.map((role) => convertNodeToJson(role));
     }
 
     return new Response(JSON.stringify(response), { status: 200 });

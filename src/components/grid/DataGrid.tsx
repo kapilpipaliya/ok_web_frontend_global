@@ -1,22 +1,29 @@
-import type { ColumnDef } from "@tanstack/solid-table";
-
 import { useNavigate } from "@solidjs/router";
-import { type Accessor, Match, Show, Switch, createEffect, createSignal, on, onMount } from "solid-js";
+import { type Accessor, Match, Show, Switch, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
-import { type EdgeMap, type Id, type Vertex, type VertexMap, useGraph } from "~/lib/graph/graph";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { isValidResponse } from "~/lib/api/isValidResponse";
+import { isObject } from "~/lib/data_structure/object/isObject";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
+import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
+import { DataGridProvider, type DataGridState, getInitialGridState } from "./DataGridContext";
 import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
-import { DataGridProvider, DataGridState, getInitialGridState } from "./DataGridContext";
+import { getConfiguredPermissions } from "./permissions";
 
 interface DataGridProps {
   tableId: string;
@@ -27,18 +34,59 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const navigate = useNavigate();
 
   const [gridState, setGridState] = createStore<DataGridState>(getInitialGridState(graph));
+  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
+
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex?.id, graph, setGraph));
 
   createEffect(on([() => gridState.cardSize, () => gridState.layout], () => {
     graph.saveUserSetting({ cardSize: gridState.cardSize, layout: gridState.layout });
   }, { defer: true }));
 
   if (!props.tableId) {
-    return <>Incorrect Configuration</>;
+    setGridState("error", "No tableId provided");
   }
+
+  const metaDtaInitialize = (data: ServerResult) => {
+    setGraphData(graph, setGraph, data.graph);
+
+    if (Array.isArray(data.result)) {
+      if (data.result.length > 0) {
+        const metaVertex_ = graph.vertexes[data.result[0].id];
+        setGridState("metaVertex", metaVertex_);
+      }
+    } else if (isObject(data.result)) {
+      const metaVertex_ = graph.vertexes[data.result.id];
+      setGridState("metaVertex", metaVertex_);
+    }
+  };
+  const loadMetaData = async () => {
+    let form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+    if (!form) {
+      form = FormMetaData.Form;
+      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+      const data = await fetchDataFromMG({
+        expression: `g:'Form[${props.tableId}]'`,
+        incoming,
+        outgoing,
+      });
+      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
+        setGridState("error", `No ${props.tableId} configured`);
+        return;
+      }
+      metaDtaInitialize(data);
+    }
+    form = gridState.metaVertex ? generateFormMetaAttributes(
+      graph,
+      setGraph,
+      gridState.metaVertex
+    ) : FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+    setFormMetaData(form);
+  };
 
   onMount(async () => {
     setGridState("isLoading", true);
-    const data = await getTableData(props.tableId);
+    await loadMetaData();
+    const data = await getTableData(formMetaData()!, props.tableId);
     if (data.error) {
       setGridState("error", data.error);
     } else {
@@ -63,16 +111,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     }
   };
 
-  type TableData = {
-    error?: string;
-    form?: IFormMetaData;
-    graph?: {
-      edges: EdgeMap;
-      vertexes: VertexMap;
-    };
-    result?: any;
-  };
-  function onTableDataGet(data: TableData) {
+  function onTableDataGet(data: ServerResult) {
     const vertexCount = Object.keys(data.graph!.vertexes).length;
     setGridState("isShowLoadMore", vertexCount >= 10);
     setGraphData(graph, setGraph, data.graph!);
@@ -82,9 +121,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     const nodes: Vertex[] = gridState.tableStore.data
       ? [...gridState.tableStore.data, ...resultData]
       : resultData;
-    graph.events?.setTitle?.(data.form!.title);
+    graph.events?.setTitle?.(formMetaData()!.title);
     const tableColumns = setGridHeaders(
-      data.form!,
+      formMetaData()!,
       graph,
       setGraph,
       (id) => setGridState("deleteRowId", id),
@@ -109,9 +148,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         </Match>
         <Match when={true}>
           <GridHeader
+            allConfiguredPermission={allConfiguredPermission()}
             onSearch={handleSearch}
           />
           <CommonTable
+            allConfiguredPermission={allConfiguredPermission()}
             cardSize={gridState.cardSize}
             data={gridState.filteredData}
             defaultRowsPerPage={10}
@@ -119,7 +160,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             isSearching={gridState.isSearching}
             isShowLoadMore={gridState.isShowLoadMore}
             layout={gridState.layout}
-            onLoadMore={(skip, limit) => getTableData(props.tableId, skip, limit)}
+            onLoadMore={(skip, limit) => getTableData(formMetaData()!, props.tableId, skip, limit)}
             rowsPerPageOptions={[5, 10, 15]}
             totalItems={gridState.filteredData.length}
           />

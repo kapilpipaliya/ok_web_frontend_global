@@ -6,7 +6,7 @@ import { type JSX, Show, onMount } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import { type GraphInterface, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
 export function AuthenticateUser(props: { children: JSX.Element; }) {
@@ -26,6 +26,12 @@ export function AuthenticateUser(props: { children: JSX.Element; }) {
         if (data.userSetting) {
           setGraph("userSettingId", data.userSetting.id);
           updateVertex(data.userSetting.id, data.userSetting, graph, setGraph, false);
+        }
+        if (data.roles) {
+          setGraph("userRoles", data.roles.map((role: Vertex) => role.id));
+          for (const role of data.roles) {
+            updateVertex(role.id, role, graph, setGraph, false);
+          }
         }
       }
     } catch (err: unknown) {

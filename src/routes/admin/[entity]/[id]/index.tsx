@@ -21,7 +21,7 @@ export default function FormEdit() {
         <PageDesignerWrapper />
       </Match>
       <Match when={!Object.keys(FormMetaData).includes(params.entity) && !Object.keys(FormMetaDataAuth).includes(params.entity)}>
-        <PageViewWrapper dataId={params.id} pageVertexLabel={"Form"} pageVertexName={params.entity} />
+        <PageViewWrapper dataId={params.id} pageVertexName={params.entity} />
       </Match>
       <Match when={true}>
         <DynamicForm

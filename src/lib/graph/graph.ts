@@ -68,6 +68,7 @@ export interface GraphInterface {
   newVertexId: Id;
   saveUserSetting: (properties: {[key: string]: any}) => void;
   transactions: Map<number, TransactionDetail>;
+  userRoles: Id[];
   userSetting: Vertex;
   userSettingId: Id;
   vertexLabelIdMap: { [key: string]: Id[] };

@@ -79,6 +79,7 @@ export default function App() {
       saveUserSetting(properties, graph[0], graph[1]);
     },
     transactions,
+    userRoles: [],
     get userSetting() {
       return this.vertexes[this.userSettingId]; // NOSONAR
     },

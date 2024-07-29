@@ -1,12 +1,15 @@
 import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../css_properties/SearchBar";
 import { AddNewButton } from "./AddNew";
 import { useDataGridContext } from "./DataGridContext";
 
 interface GridHeaderProps {
+  allConfiguredPermission: Vertex[];
   onSearch: (value: string) => void;
 }
 
