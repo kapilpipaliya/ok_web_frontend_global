@@ -11,7 +11,6 @@ import { Portal } from "solid-js/web";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";

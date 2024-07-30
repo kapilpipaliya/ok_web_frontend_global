@@ -5,6 +5,10 @@ import type { Vertex } from "~/lib/graph/graph";
 
 export function getInitialPreviewStore() {
   return {
+    hasDeletePermission: false as boolean | undefined,
+    hasEditPermission: false as boolean | undefined,
+    hasInsertPermission: false as boolean | undefined,
+    hasViewPermission: false as boolean | undefined,
     isDesignMode: false as boolean | undefined,
     previewData: undefined as Vertex | undefined,
     previewMeta: undefined as Vertex | undefined,

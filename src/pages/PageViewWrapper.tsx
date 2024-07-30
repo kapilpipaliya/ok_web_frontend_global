@@ -44,8 +44,9 @@ export function PageViewWrapper(
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
   const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex()?.id, graph, setGraph));
   const hasInsertPermission = createMemo(() => formMetaData() && !id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
-  const hasEditPermission = createMemo(() => formMetaData() && id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
+  const hasEditPermission = createMemo(() => formMetaData() && !!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
   const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
+  const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
 
   const authError = createMemo(() => {
     if (!id()) {
@@ -176,6 +177,15 @@ export function PageViewWrapper(
 
   const cleanUpConfig = {};
 
+  const Content = () => <PageView
+    data={dataVertex()}
+    hasDeletePermission={hasDeletePermission()}
+    hasEditPermission={hasEditPermission()}
+    hasInsertPermission={hasInsertPermission()}
+    hasViewPermission={hasViewPermission()}
+    metaVertex={metaVertex()}
+  />
+
   return (
     <Show keyed when={count()}>
       <Show when={metaVertex()?.P.seoTitle}>
@@ -199,18 +209,12 @@ export function PageViewWrapper(
         <Show
           fallback={
             <PreviewPage>
-              <PageView
-                data={dataVertex()}
-                metaVertex={metaVertex()}
-              />
+              <Content />
             </PreviewPage>
           }
           when={!isPreview()}
         >
-          <PageView
-            data={dataVertex()}
-            metaVertex={metaVertex()}
-          />
+          <Content />
         </Show>
       </Show>
     </Show>
