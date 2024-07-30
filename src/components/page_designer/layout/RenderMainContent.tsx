@@ -50,7 +50,7 @@ export function RenderMainContent() {
       <Show when={layoutStore.formData}>
         <ResizableContainer view={layoutStore.view}>
           <PageView
-            isPreview={false}
+            isDesignMode={true}
             metaVertex={layoutStore.formData?.formData}
           />
         </ResizableContainer>

@@ -201,7 +201,6 @@ export function PageViewWrapper(
             <PreviewPage>
               <PageView
                 data={dataVertex()}
-                isPreview={true}
                 metaVertex={metaVertex()}
               />
             </PreviewPage>
@@ -210,7 +209,6 @@ export function PageViewWrapper(
         >
           <PageView
             data={dataVertex()}
-            isPreview={true}
             metaVertex={metaVertex()}
           />
         </Show>

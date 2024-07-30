@@ -54,7 +54,7 @@ export function DynamicComponent(
 ) {
   const [graph, setGraph] = useGraph();
   const { formData } = useFormContext() ?? {};
-  const {previewData, previewMeta} = usePreviewContext();
+  const [previewStore] = usePreviewContext();
 
   const componentName = () =>
     props.componentName ?? props.meta.P.componentName;
@@ -95,10 +95,10 @@ export function DynamicComponent(
   const expressionProperties = createMemo(() => {
     const values = {} as Record<string, any>;
     for (const [property, rule] of extraProperties().entries()) {
-      if (property === "disabled" && !previewMeta) {
+      if (property === "disabled" && previewStore.isDesignMode) {
         continue;
       }
-      if (property === "hidden" && !previewMeta) {
+      if (property === "hidden" && previewStore.isDesignMode) {
         continue;
       }
       if (formData && rule) {

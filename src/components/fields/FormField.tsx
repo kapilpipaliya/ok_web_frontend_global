@@ -24,7 +24,7 @@ export function FormField(
   } & GenericComponentProps>,
 ) {
   const [graph, setGraph] = useGraph();
-  const { previewData, previewMeta } = usePreviewContext();
+  const [previewStore] = usePreviewContext();
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -49,7 +49,7 @@ export function FormField(
       graph,
       setGraph,
       txnId,
-      props.label ?? previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
+      props.label ?? previewStore.previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
       defaultValues,
     );
     if (createResult.error) return createResult.error;

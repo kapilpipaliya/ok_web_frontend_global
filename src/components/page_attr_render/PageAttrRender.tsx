@@ -25,7 +25,7 @@ export function PageAttrRender(
   const parentItems = usePageRenderVertexContext();
   const [graph, setGraph] = useGraph();
   const { formData, txnId } = useFormContext();
-  const {previewData, previewMeta} = usePreviewContext();
+  const [previewStore] = usePreviewContext();
 
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
@@ -107,7 +107,7 @@ export function PageAttrRender(
               <li>
                 <Show
                   fallback={<PageComponentWithPreview />}
-                  when={!previewMeta}
+                  when={previewStore.isDesignMode}
                 >
                   <PageAttrDnDWrapper item={item}>
                     <Content />
@@ -116,7 +116,7 @@ export function PageAttrRender(
               </li>
             </Match>
             <Match when={true}>
-              <Show fallback={<PageComponentWithPreview />} when={!previewMeta}>
+              <Show fallback={<PageComponentWithPreview />} when={previewStore.isDesignMode}>
                 <PageAttrDnDWrapper item={item}>
                   <Content />
                 </PageAttrDnDWrapper>

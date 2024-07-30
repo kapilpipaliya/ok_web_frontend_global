@@ -1,4 +1,5 @@
 import { Match, Show, Switch, createMemo } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
@@ -10,7 +11,7 @@ import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrConte
 export function PageView(
   props: Readonly<{
     data?: Vertex;
-    isPreview?: boolean;
+    isDesignMode?: boolean;
     metaVertex?: Vertex;
   }>,
 ) {
@@ -18,27 +19,19 @@ export function PageView(
 
   const dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
-  const Content = () => {
-    return <Switch>
-      <Match when={true}>
-        <RepeaterVertexContext.Provider
-          value={props.data ? [props.data, ...useRepeaterVertexContext()] : useRepeaterVertexContext()}
-        >
-          <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
-        </RepeaterVertexContext.Provider>
-      </Match>
-    </Switch>
-  }
+  const previewStore = createStore({ get isDesignMode() { return props.isDesignMode }, previewData: props.data, previewMeta: props.metaVertex });
+
   return (
     <Show keyed when={props.metaVertex}>
       <Switch>
-        <Match when={props.isPreview}>
-          <PreviewContext.Provider value={{ previewData: props.data, previewMeta: props.metaVertex! }}>
-            <Content />
-          </PreviewContext.Provider>
-        </Match>
         <Match when={true}>
-          <Content />
+          <PreviewContext.Provider value={previewStore}>
+            <RepeaterVertexContext.Provider
+              value={props.data ? [props.data, ...useRepeaterVertexContext()] : useRepeaterVertexContext()}
+            >
+              <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+            </RepeaterVertexContext.Provider>
+          </PreviewContext.Provider>
         </Match>
       </Switch>
     </Show>

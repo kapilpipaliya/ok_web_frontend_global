@@ -19,7 +19,6 @@ import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShad
 
 export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null>; }>) {
   const [layoutStore] = useDesignerLayoutStore();
-  const {previewData, previewMeta} = usePreviewContext();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
@@ -28,18 +27,17 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
-    if (!previewMeta) {
-      if (isActiveTargetItem()) {
-        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
-      }
-
-      if (isSelectedLayoutId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-60";
-      } else if (isSelectedHoverId(props.item.id)) {
-        boxShadow += " b:1px|solid|blue-80";
-      }
+    if (isActiveTargetItem()) {
+      const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+      boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
     }
+
+    if (isSelectedLayoutId(props.item.id)) {
+      boxShadow += " b:1px|solid|blue-60";
+    } else if (isSelectedHoverId(props.item.id)) {
+      boxShadow += " b:1px|solid|blue-80";
+    }
+
 
     return boxShadow;
   });

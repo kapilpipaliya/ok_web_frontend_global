@@ -30,7 +30,6 @@ export function TreeItem(
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
-  const {previewMeta} = usePreviewContext();
   const activeItemChanged = createSelector(() => layoutStore.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
@@ -47,7 +46,7 @@ export function TreeItem(
       layoutStore,
       setLayoutStore,
       props.metaVertex,
-      !!previewMeta,
+      false,
       props.collapsedKeys,
       children,
       graph,
@@ -92,25 +91,24 @@ export function TreeItem(
     e.stopPropagation();
     setLayoutStore("hoverId", -1);
   };
-  const isAfter = createMemo(() => !previewMeta && isActiveTargetItem() && layoutStore.position === "after");
+  const isAfter = createMemo(() => isActiveTargetItem() && layoutStore.position === "after");
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
-    if (!previewMeta) {
-      if (isActiveTargetItem()) {
-        if (layoutStore.position !== "after") {
-          const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
-          boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
-        }
-      }
-
-      if (isSelectedLayoutId(props.metaVertex.id)) {
-        boxShadow += " bg:rgb(197,221,255)";
-      } else if (isSelectedHoverId(props.metaVertex.id)) {
-        boxShadow += " bg:#F2EDED";
+    if (isActiveTargetItem()) {
+      if (layoutStore.position !== "after") {
+        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
       }
     }
+
+    if (isSelectedLayoutId(props.metaVertex.id)) {
+      boxShadow += " bg:rgb(197,221,255)";
+    } else if (isSelectedHoverId(props.metaVertex.id)) {
+      boxShadow += " bg:#F2EDED";
+    }
+
 
     return boxShadow;
   });

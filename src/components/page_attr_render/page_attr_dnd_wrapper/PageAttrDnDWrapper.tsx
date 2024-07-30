@@ -34,7 +34,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const {previewMeta} = usePreviewContext();
+  const [previewStore] = usePreviewContext();
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
 
@@ -66,7 +66,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       layoutStore,
       setLayoutStore,
       props.item,
-      !!previewMeta,
+      previewStore.isDesignMode,
       false,
       childrenAttrs,
       graph,

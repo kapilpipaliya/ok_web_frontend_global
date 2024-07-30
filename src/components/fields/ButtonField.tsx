@@ -27,7 +27,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const { showLoadingToast } = useToast();
   const { formData, txnId } = useFormContext();
   const navigate = useNavigate();
-  const {previewData, previewMeta} = usePreviewContext();
+  const [previewStore] = usePreviewContext();
 
   const onSubmit = async () => {
     if (isAnyFieldInvalid(graph, setGraph, props.meta, formData)) {
@@ -57,7 +57,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const extraProps = createMemo(() => {
     return {
       onClick: () => {
-        if (!previewMeta) {
+        if (previewStore.isDesignMode) {
           return;
         }
         if (props.meta.P.type === "submit") {

@@ -24,7 +24,6 @@ export function PreviewButton() {
       <PreviewPage>
         <PageView
           // data={dataVertex()}
-          isPreview={true}
           metaVertex={layoutStore.formData.formData}
         />
       </PreviewPage>
