@@ -1,9 +1,8 @@
 import { For, Show, createEffect, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import {
-  PageRenderVertexContext,
   RepeaterVertexContext,
-  usePageRenderVertexContext,
   useRepeaterVertexContext,
 } from "~/components/page_attr_render/PageAttrContext";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
@@ -12,6 +11,9 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+
+import { PageRenderContextProvider, getInitialPageRenderStore } from "./PageRenderContext";
+
 
 export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
   const [graph, setGraph] = useGraph();
@@ -61,6 +63,8 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
     }
   });
 
+  const repeterStore = createStore(getInitialPageRenderStore());
+
   return (
     <Show when={!isFetching()}>
       <For each={options()}>
@@ -68,11 +72,9 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
           <RepeaterVertexContext.Provider
             value={[vertex, ...useRepeaterVertexContext()]}
           >
-            <PageRenderVertexContext.Provider
-              value={[...usePageRenderVertexContext(), props.meta]}
-            >
+            <PageRenderContextProvider item={vertex} store={repeterStore}>
               <PageAttrRender data={vertex} metaVertex={props.meta} />
-            </PageRenderVertexContext.Provider>
+            </PageRenderContextProvider>
           </RepeaterVertexContext.Provider>
         )}
       </For>

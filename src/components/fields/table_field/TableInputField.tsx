@@ -14,9 +14,9 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 import { AddNewButton } from "~/components/grid/AddNew";
 import {
   RepeaterVertexContext,
-  usePageRenderVertexContext,
   useRepeaterVertexContext,
 } from "~/components/page_attr_render/PageAttrContext";
+import { usePageRenderContext } from "~/components/page_attr_render/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -45,9 +45,9 @@ export function TableInputField(
         .vertexes || []),
   );
 
-  const parentItems = usePageRenderVertexContext();
+  const [parentItems] = usePageRenderContext();
   const parentData = createMemo(() =>
-    getDataVertex(graph, getLastItem(parentItems, 1)),
+    getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1)),
   );
 
   // load data:

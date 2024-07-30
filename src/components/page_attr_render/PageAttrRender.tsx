@@ -1,10 +1,9 @@
 import { toTitle } from "case-switcher-js";
 import { For, Match, Show, Switch, createMemo } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
-  PageRenderVertexContext,
-  usePageRenderVertexContext,
   useRepeaterVertexContext,
 } from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
@@ -17,12 +16,13 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useFormContext } from "../form/FormContext";
+import { PageRenderContextProvider, getInitialPageRenderStore, usePageRenderContext } from "./PageRenderContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
   props: Readonly<{ data?: Vertex; metaVertex: Vertex }>,
 ) {
-  const parentItems = usePageRenderVertexContext();
+  const [parentItems] = usePageRenderContext();
   const [graph, setGraph] = useGraph();
   const { formData, txnId } = useFormContext();
   const [previewStore] = usePreviewContext();
@@ -35,7 +35,7 @@ export function PageAttrRender(
             item.P.componentName || getCompFallbackToString(item, graph)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
-          return getCompFallbackToString(getLastItem(parentItems, 1), graph)?.P[
+          return getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 1), graph)?.P[
             IdAttr
           ];
         });
@@ -43,7 +43,7 @@ export function PageAttrRender(
         // Need Repetitive parent checks?
         // @ts-ignore
         const parentData = () => {
-          return getDataVertex(graph, getLastItem(parentItems, 1));
+          return getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1));
         };
 
         const Content = () => {
@@ -68,13 +68,12 @@ export function PageAttrRender(
               txnId={txnId} />
           );
         };
+        const repeterStore = createStore(getInitialPageRenderStore());
 
         const PageComponentWithPreview = () => (
-          <PageRenderVertexContext.Provider
-            value={[...usePageRenderVertexContext(), item]}
-          >
+          <PageRenderContextProvider item={item} store={repeterStore}>
             <Content />
-          </PageRenderVertexContext.Provider>
+          </PageRenderContextProvider>
         );
         // currently context is not reactive, but we are assuming it will work.
         return (

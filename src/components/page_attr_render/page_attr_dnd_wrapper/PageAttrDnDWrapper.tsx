@@ -6,11 +6,8 @@ import {
   createSelector,
   createSignal,
 } from "solid-js";
+import { createStore } from "solid-js/store";
 
-import {
-  PageRenderVertexContext,
-  usePageRenderVertexContext,
-} from "~/components/page_attr_render/PageAttrContext";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
@@ -23,6 +20,7 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { PageRenderContextProvider, getInitialPageRenderStore } from "../PageRenderContext";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
 
@@ -86,9 +84,10 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     );
     resetDragDropState(setLayoutStore);
   };
+  const repeterStore = createStore(getInitialPageRenderStore());
 
   return (
-    <PageRenderVertexContext.Provider value={[...usePageRenderVertexContext(), props.item]}>
+    <PageRenderContextProvider item={props.item} store={repeterStore}>
       <div // NOSONAR
         onClick={handleClick}
         onDragEnter={handleDragOverEvent}
@@ -122,6 +121,6 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
           <BorderOverlay item={props.item} reference={reference} />
         </Show>
       </div>
-    </PageRenderVertexContext.Provider>
+    </PageRenderContextProvider>
   );
 }

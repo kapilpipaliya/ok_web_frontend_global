@@ -61,8 +61,8 @@ export function DynamicComponent(
 
   const componentName = () =>
     props.componentName ?? props.meta.P.componentName;
-  // const parentItems = usePageRenderVertexContext();
-  // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems, 2), graph)?.P[IdAttr]);
+  // const [parentItems] = usePageRenderVertexContext();
+  // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
 
   const component = createMemo(() => getDynamicComponent(componentName()));
   const setValue = (value: unknown) => {
