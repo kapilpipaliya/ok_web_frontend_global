@@ -68,7 +68,7 @@ export function HighlightSetValueContent(
         <IconButton
           data-testid="clearIcon"
           icon="mdi:close"
-          iconCss="color:#ff0000 cursor:pointer"
+          iconClass="color:#ff0000 cursor:pointer"
           onClick={() => props.setValue(props.metaVertex, null)}
           size={24}
         />

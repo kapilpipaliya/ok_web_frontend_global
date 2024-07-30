@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
@@ -8,13 +7,15 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { DynamicForm } from "~/components/form/DynamicForm";
 
+import { IconButton } from "../IconButton";
 import { useZIndex } from "../ZIndex";
 
 export const QuickEditModal = (p: {
+  disabled?: boolean;
   graph: GraphInterface;
   info: any;
   setGraph: SetStoreFunction<GraphInterface>;
-  tableId: any;
+  tableId: string;
 }) => {
   const zIndex = useZIndex();
   const [isOpen, setIsOpen] = createSignal(false);
@@ -27,13 +28,13 @@ export const QuickEditModal = (p: {
 
   return (
     <Show when={p.tableId}>
-      <Icon
+      <IconButton
         aria-disabled={isOpen()}
-        class="radius:5px background-color:#e6f8ff:hover color:cornflowerblue cursor:pointer padding:5px"
-        height={22}
+        disabled={p.disabled}
         icon="fluent:edit-12-regular"
+        iconClass="radius:5px background-color:#e6f8ff:hover color:cornflowerblue cursor:pointer padding:5px"
         onClick={() => setIsOpen(true)}
-        width={22}
+        size={22}
       />
       <Show when={isOpen()}>
         <Portal>

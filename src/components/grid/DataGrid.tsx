@@ -23,7 +23,7 @@ import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
-import { getConfiguredPermissions } from "./permissions";
+import { getConfiguredPermissions, hasPermissions } from "./permissions";
 
 interface DataGridProps {
   tableId: string;
@@ -37,6 +37,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
 
   const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex?.id, graph, setGraph));
+  const hasInsertPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
+  const hasEditPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
+  const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
+  const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
+
+  setGridState({allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission});
 
   createEffect(on([() => gridState.cardSize, () => gridState.layout], () => {
     graph.saveUserSetting({ cardSize: gridState.cardSize, layout: gridState.layout });
@@ -123,6 +129,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       : resultData;
     graph.events?.setTitle?.(formMetaData()!.title);
     const tableColumns = setGridHeaders(
+      gridState,
       formMetaData()!,
       graph,
       setGraph,
@@ -135,7 +142,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setGridState("filteredData", nodes);
   }
 
-  const onDelete = useDeleteRowConfirm(() => gridState.deleteRowId);
+  const onDelete = useDeleteRowConfirm(gridState);
 
   return (
     <DataGridProvider value={[gridState, setGridState]}>
@@ -146,9 +153,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         <Match when={gridState.error}>
           <div>Error: {gridState.error}</div>
         </Match>
-        <Match when={true}>
+        <Match when={formMetaData()}>
           <GridHeader
-            allConfiguredPermission={allConfiguredPermission()}
+            formMetaData={formMetaData()}
             onSearch={handleSearch}
           />
           <CommonTable

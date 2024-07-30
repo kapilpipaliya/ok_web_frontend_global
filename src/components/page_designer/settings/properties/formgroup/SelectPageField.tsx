@@ -27,7 +27,7 @@ export function SelectPageField(
         <IconButton
 
           icon={"mingcute:settings-5-line"}
-          iconCss={"opacity:.5 opacity:1:hover"}
+          iconClass={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();
             window.open(`/admin/ThankYouPage/${option.id}`, "_blank");

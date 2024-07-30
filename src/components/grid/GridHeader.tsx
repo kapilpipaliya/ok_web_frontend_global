@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../css_properties/SearchBar";
@@ -9,7 +9,7 @@ import { AddNewButton } from "./AddNew";
 import { useDataGridContext } from "./DataGridContext";
 
 interface GridHeaderProps {
-  allConfiguredPermission: Vertex[];
+  formMetaData?: IFormMetaData | null;
   onSearch: (value: string) => void;
 }
 
@@ -19,7 +19,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
   const onAddNew = () => navigate("new")
   return (
     <div class="flex ai:center jc:space-between p:4|10">
-      <AddNewButton onClick={onAddNew} />
+      <AddNewButton disabled={!!props.formMetaData && !gridState.hasInsertPermission()} onClick={onAddNew} />
       <div class="flex ai:center mb:10">
         <SearchBar
           handleChange={props.onSearch}

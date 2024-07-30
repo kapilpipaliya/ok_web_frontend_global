@@ -8,7 +8,7 @@ export function LeftToggleButton() {
     <IconButton
       class="border-radius:5px gap:10px outline-offset:2px:focus outline:2px|solid|transparent"
       icon="solar:widget-add-outline"
-      iconCss="color:#37c cursor:pointer"
+      iconClass="color:#37c cursor:pointer"
       onClick={() => setLayoutStore("isLeftOpen", !layoutStore.isLeftOpen)}
       size={22}
     >

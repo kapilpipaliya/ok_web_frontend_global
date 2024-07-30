@@ -1,8 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { Icon } from "@iconify-icon/solid";
-import { Match, Switch } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -12,7 +11,12 @@ import { getSelectNameValue } from "~/components/grid/functions/getSelectNameVal
 import { getTagValue } from "~/components/grid/functions/getTagValue";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
+import type { DataGridState } from "./DataGridContext";
+
+import { IconButton } from "../IconButton";
+
 export function setGridHeaders(
+  gridState: DataGridState,
   formNew: IFormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -83,50 +87,42 @@ export function setGridHeaders(
     accessorKey: "Actions",
     cell: (info) => {
       return (
-        <Switch>
-          <Match when={formNew.isInlineEditable}>
-            <div class="flex ai:center cursor:pointer  gap:10px jc:center">
+        <div class={`${!formNew.isInlineEditable ? 'py:0.25rem r:7' : ''} flex ai:center gap:10px jc:center`}>
+          <Switch>
+            <Match when={gridState.formMetaData() && !gridState.hasEditPermission()}>
+              <></>
+            </Match>
+            <Match when={formNew.isInlineEditable}>
               <QuickEditModal
+                disabled={!!gridState.formMetaData() && !gridState.hasEditPermission()}
                 graph={graph}
                 info={info}
                 setGraph={setGraph}
                 tableId={tableId}
               />
-              <Icon
-                class="color:rgb(255,0,0)"
-                height={22}
-                icon="fluent:delete-12-regular"
-                onclick={() => {
-                  setDeleteRowId(info.row.original.id);
-                }}
-                width={22}
+            </Match>
+            <Match when={true}>
+              <IconButton
+                disabled={!!gridState.formMetaData() && !gridState.hasEditPermission()}
+                icon="fluent:edit-12-regular"
+                iconClass="color:#3477CC"
+                onClick={() => navigate(`./${info.row.original.id}`)}
+                size={21}
               />
-            </div>
-          </Match>
-
-          <Match when={!formNew.isInlineEditable}>
-            <div class="py:0.25rem">
-              <div class="flex ai:center cursor:pointer  gap:10px jc:center r:7">
-                <Icon
-                  class={"color:#3477CC"}
-                  height={21}
-                  icon="fluent:edit-12-regular"
-                  onClick={() => navigate(`./${info.row.original.id}`)}
-                  width={21}
-                />
-                <Icon
-                  class="color:rgb(255,0,0)"
-                  height={22}
-                  icon="fluent:delete-12-regular"
-                  onclick={() => {
-                    setDeleteRowId(info.row.original.id);
-                  }}
-                  width={22}
-                />
-              </div>
-            </div>
-          </Match>
-        </Switch>
+            </Match>
+          </Switch>
+          <Show
+            when={!!gridState.formMetaData() && gridState.hasDeletePermission()}
+          >
+            <IconButton
+              disabled={!!gridState.formMetaData() && !gridState.hasDeletePermission()}
+              icon="fluent:delete-12-regular"
+              iconClass="color:rgb(255,0,0)"
+              onClick={() => setDeleteRowId(info.row.original.id)}
+              size={22}
+            />
+          </Show>
+        </div>
       );
     },
     footer: "",

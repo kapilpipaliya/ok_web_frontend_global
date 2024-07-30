@@ -1,13 +1,13 @@
 import { Meta, Title } from "@solidjs/meta";
 import { clientOnly } from "@solidjs/start";
-import { Show, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
+import { Match, Show, Switch, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { getConfiguredPermissions } from "~/components/grid/permissions";
+import { getConfiguredPermissions, hasPermissions } from "~/components/grid/permissions";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
@@ -40,9 +40,27 @@ export function PageViewWrapper(
   const [isPreview, setIsPreview] = createSignal(false);
   const [error, setError] = createSignal<string>();
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
-  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex()?.id, graph, setGraph));
 
-   const metaDtaInitialize = (data: ServerResult) => {
+  const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex()?.id, graph, setGraph));
+  const hasInsertPermission = createMemo(() => formMetaData() && !id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
+  const hasEditPermission = createMemo(() => formMetaData() && id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
+  const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
+
+  const authError = createMemo(() => {
+    if (!id()) {
+      if (!hasInsertPermission()) {
+        return `You are not authorized to insert ${props.pageVertexName}`;
+      }
+    } else {
+      if (!hasEditPermission() && !hasViewPermission()) {
+        return `You are not authorized to edit or view ${props.pageVertexName}`;
+      }
+    }
+    return "";
+  });
+
+  const metaDtaInitialize = (data: ServerResult) => {
     if (props.formId) {
       delete data.graph.vertexes[props.formId];
     }
@@ -75,22 +93,32 @@ export function PageViewWrapper(
         incoming,
         outgoing,
       });
-      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
-        setError(`No ${props.pageVertexLabel} configured`);
+      if (!isValidResponse(data) || !data.result || data.result.length === 0) {
+        setError(`No ${props.pageVertexName} configured`);
         return;
-      }      
+      }
       metaDtaInitialize(data);
+      if (metaVertex()) {
+        form = generateFormMetaAttributes(
+          graph,
+          setGraph,
+          metaVertex()!
+        )
+      }
     }
-    form =  metaVertex() ? generateFormMetaAttributes(
-      graph,
-      setGraph,
-      metaVertex()!
-    ) : (FormMetaData[props.pageVertexLabel!] || FormMetaDataAuth[props.pageVertexLabel!]);
     setFormMetaData(form);
+    if (!formMetaData()) {
+      setError(`No ${props.pageVertexName} configured`);
+      return;
+    }
+
     setIsPreview(props.pageId === "preview");
   }
   async function loadData() {
-    if (!props.dataId || props.dataId === "new") {
+    if (!id()) {
+      return;
+    }
+    if (!formMetaData() || (!hasInsertPermission() && !hasEditPermission())) {
       return;
     }
     try {
@@ -100,12 +128,12 @@ export function PageViewWrapper(
       );
 
       const data = await fetchDataFromMG({
-        expression: `id:'${props.dataId}'`,
+        expression: `id:'${id()}'`,
         incoming,
         outgoing,
       });
-      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
-        setError(`No ${props.pageVertexLabel} found`);
+      if (!isValidResponse(data) || !data.result || data.result.length === 0) {
+        setError(`No ${props.pageVertexName} found`);
         return;
       }
       setGraphData(graph, setGraph, data.graph);
@@ -119,7 +147,8 @@ export function PageViewWrapper(
     setMounted(true);
     await loadFormDesignerMetaData();
     if (metaVertex() && !metaVertex()!.P.public) {
-      setError(`${props.pageVertexLabel} is not authorized`);
+      setError(`${props.pageVertexName} is not authorized`);
+      return;
     }
     await loadData();
   });
@@ -149,16 +178,24 @@ export function PageViewWrapper(
 
   return (
     <Show keyed when={count()}>
-      <Show when={error()}>
-        <SimpleWarningAlert message={error()} />
-      </Show>
       <Show when={metaVertex()?.P.seoTitle}>
         <Title>{metaVertex()?.P.seoTitle}</Title>
       </Show>
       <Show when={metaVertex()?.P.seoDescription}>
         <Meta content={metaVertex()?.P.seoDescription} name="description" />
       </Show>
-      <Show when={mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
+
+
+      <Switch>
+        <Match when={error()}>
+          <SimpleWarningAlert message={error()} />
+        </Match>
+        <Match when={formMetaData() && authError()}>
+          <SimpleWarningAlert message={authError()} />
+        </Match>
+      </Switch>
+
+      <Show when={!authError() && mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
         <Show
           fallback={
             <PreviewPage>

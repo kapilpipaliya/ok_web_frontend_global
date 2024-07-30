@@ -1,17 +1,24 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { createStore } from "solid-js/store";
 
-import { type JSX, createContext, useContext } from "solid-js";
+import { type Accessor, type JSX, createContext, useContext } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 export function getInitialGridState(graph: GraphInterface) {
   return {
+    allConfiguredPermission: (() => []) as Accessor<Vertex[]>,
     cardSize: graph.vertexes[graph.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
     error: null as null | string,
     filteredData: [] as Vertex[],
     formId: null as Id | null,
+    formMetaData: (() => null) as Accessor<IFormMetaData | null>,
+    hasDeletePermission: (() => false) as Accessor<boolean | null>,
+    hasEditPermission: (() => false) as Accessor<boolean | null>,
+    hasInsertPermission: (() => false) as Accessor<boolean | null>,
+    hasViewPermission: (() => false) as Accessor<boolean | null>,
     isLoading: false,
     isSearching: false,
     isShowLoadMore: true,

@@ -103,7 +103,7 @@ export function AddNewRule(
         </label>
         <IconButton
           icon="ic:round-check"
-          iconCss="ml:2"
+          iconClass="ml:2"
           onClick={addNewState}
           size={21}
         />

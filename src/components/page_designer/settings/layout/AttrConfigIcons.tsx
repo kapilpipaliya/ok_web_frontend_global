@@ -34,7 +34,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
       <IconButton
         class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
         icon={icon()}
-        iconCss="transition:0.5s|ease-in-out"
+        iconClass="transition:0.5s|ease-in-out"
         onClick={() => toggleHidden(props.metaVertex.id)}
         size={18}
         title={tooltipContent()}
@@ -49,7 +49,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mingcute:settings-5-line"
-          iconCss="transition:0.5s|ease-in-out"
+          iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
             setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer);
           }}
@@ -69,7 +69,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mage:copy"
-          iconCss="transition:0.5s|ease-in-out"
+          iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
             cloneLayoutAndChildren(
               props.metaVertex,
@@ -89,7 +89,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         <IconButton
           class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mage:trash"
-          iconCss="transition:0.5s|ease-in-out"
+          iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
             deleteLayoutAttr(
               layoutStore,

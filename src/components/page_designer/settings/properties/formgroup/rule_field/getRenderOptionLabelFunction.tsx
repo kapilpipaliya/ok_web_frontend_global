@@ -17,7 +17,7 @@ export function getRenderOptionLabelFunction(component: typeof RulesModal) {
         <IconButton
           class="center-content flex"
           icon={"mingcute:settings-5-line"}
-          iconCss={"opacity:.5 opacity:1:hover"}
+          iconClass={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();
             setIsOpenRule(true);

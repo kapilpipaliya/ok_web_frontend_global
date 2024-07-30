@@ -100,9 +100,9 @@ export const SortableRow = (props: Readonly<{
       >
         <td>
           <div class="flex ai:center jc:center">
-            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconCss="transition:transform|2s|ease-in-out" size={20}/>
+            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconClass="transition:transform|2s|ease-in-out" size={20}/>
             <Show when={expandVertex()}>
-              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconCss="transition:transform|2s|ease-in-out" onClick={toggleExpanded} size={20}/>
+              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconClass="transition:transform|2s|ease-in-out" onClick={toggleExpanded} size={20}/>
             </Show>
             <IconButton class="color:red cursor:pointer m:5px" icon="mingcute:delete-line" onClick={handleDeleteRow} size={20}/>
             <Show when={expandVertex()}>

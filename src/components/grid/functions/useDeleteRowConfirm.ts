@@ -1,20 +1,26 @@
-import type { Accessor } from "solid-js";
+
 
 import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { type Id, useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-export function useDeleteRowConfirm(id: Accessor<Id | null>) {
+import type { GridState, } from "../DataGridContext";
+
+export function useDeleteRowConfirm(gridState: GridState) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
 
   return async () => {
-    if (!id()) {
+    if (!gridState.deleteRowId) {
+      return;
+    }
+    if (!gridState.hasDeletePermission()) {
+      showErrorToast("You do not have permission to delete this row.");
       return;
     }
     const txnId = graph.newTxnId;

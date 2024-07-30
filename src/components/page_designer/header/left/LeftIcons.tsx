@@ -17,7 +17,7 @@ export const LeftIcons = () => {
       <IconButton
         class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer jc:center r:5|5|5|5"
         icon="flowbite:caret-left-outline"
-        iconCss={"color:lightgrey color:black:hover"}
+        iconClass={"color:lightgrey color:black:hover"}
         onClick={() => navigate(removeLastPathSegment())}
         size={30}
         title="Back"
