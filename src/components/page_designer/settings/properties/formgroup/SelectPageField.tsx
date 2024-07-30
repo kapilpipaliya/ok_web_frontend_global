@@ -57,6 +57,7 @@ export function SelectPageField(
         data={props.selectedLayout}
         isRealTime={false}
         meta={meta}
+        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
     );
@@ -67,14 +68,12 @@ export function SelectPageField(
       window.open(`/admin/ThankYouPage/new`, "_blank");
     };
     return (
-      <>
-        <IconButton
+      <IconButton
           icon="ic:round-add"
           onClick={handleAddNewClick}
           size={21}
           title="Add New Rule"
         />
-      </>
     );
   };
 

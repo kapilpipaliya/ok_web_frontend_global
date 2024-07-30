@@ -1,8 +1,10 @@
 import type { SetStoreFunction } from "solid-js/store";
 
+import { createLazyMemo } from "@solid-primitives/memo";
 import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
+import { getConfiguredPermissions, hasPermissions } from "~/components/grid/permissions";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -47,6 +49,7 @@ export function DynamicComponent(
     isRealTime?: boolean;
     isTableInside?: boolean;
     meta: Vertex;
+    noPermissionCheck?: boolean;
     setValue?: (data: any) => void;
     title?: string;
     txnId?: number;
@@ -76,7 +79,7 @@ export function DynamicComponent(
   // const repeaterContext = useRepeaterVertexContext();
 
   // Extra properties to be added
-  const extraProperties = createMemo(() => {
+  const extraRuleProperties = createMemo(() => {
     const propertyRuleMap = new Map<string, Vertex>();
     for (const edgeType in props.meta.OUT) {
       for (const edge of props.meta.OUT[edgeType]) {
@@ -92,9 +95,28 @@ export function DynamicComponent(
     return propertyRuleMap;
   });
 
+  const allConfiguredPermission = createLazyMemo(() => getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph));
+  const hasInsertPermission = createLazyMemo(() => hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
+  const hasEditPermission = createLazyMemo(() => hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
+  const hasViewPermission = createLazyMemo(() => hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
+  const hasDeletePermission = createLazyMemo(() => hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
+
   const expressionProperties = createMemo(() => {
-    const values = {} as Record<string, any>;
-    for (const [property, rule] of extraProperties().entries()) {
+    const values = {
+    get hasDeletePermission() {
+      return hasDeletePermission();
+    },
+    get hasEditPermission() {
+      return hasEditPermission();
+    },
+    get hasInsertPermission() {
+      return hasInsertPermission();
+    },
+    get hasViewPermission() {
+      return hasViewPermission();
+    },
+    } as Record<string, any>;
+    for (const [property, rule] of extraRuleProperties().entries()) {
       if (property === "disabled" && previewStore.isDesignMode) {
         continue;
       }
@@ -113,6 +135,7 @@ export function DynamicComponent(
         }
       }
     }
+
     return values;
   });
   const deNullifyAndMergeCSS = createMemo(() => {
@@ -170,7 +193,7 @@ export function DynamicComponent(
   return (
     <Switch>
       <Match when={!component()}>NO INPUT {componentName()}</Match>
-      <Match keyed when={!expressionProperties().hidden && component()}>
+      <Match keyed when={!expressionProperties().hidden && component() && ((props.noPermissionCheck || previewStore.isDesignMode) ? true : (hasInsertPermission() || hasViewPermission() || hasEditPermission()))}>
         <Switch>
           <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
             <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>

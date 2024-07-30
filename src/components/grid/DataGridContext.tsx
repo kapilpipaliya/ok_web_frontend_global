@@ -24,6 +24,7 @@ export function getInitialGridState(graph: GraphInterface) {
     isShowLoadMore: true,
     layout: (graph.vertexes[graph.userSettingId]?.P.layout || 'table') as 'card' | 'table',
     metaVertex: null as Vertex | null,
+    noPermissionCheck: false,
     search: '',
     tableStore: {
       data: [] as any[],

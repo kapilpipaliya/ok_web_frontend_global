@@ -63,6 +63,7 @@ export function UniqueNameField(
           data={props.selectedLayout}
           isRealTime={false}
           meta={props.meta}
+          noPermissionCheck={true}
           setValue={(data: string) =>
             setUniqueNameValue(props.metaVertex, data)
           }

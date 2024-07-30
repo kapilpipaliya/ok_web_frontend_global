@@ -29,6 +29,7 @@ export function Permission() {
             data={layoutStore.formData?.formData}
             isRealTime={false}
             meta={{ P: { collection: '->$0Perm', name: "globalPerm" } as unknown as FieldAttribute } as unknown as Vertex}
+            noPermissionCheck={true}
             txnId={layoutStore.formData.txnId}
           />
 </div>
@@ -40,6 +41,7 @@ export function Permission() {
         data={layoutStore.formData?.formData}
         isRealTime={false}
         meta={graph.vertexes[metaVertexId]}
+        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
       </div>

@@ -48,6 +48,8 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
             isRealTime={false}
             isTableInside={true}
             meta={metaVertex}
+            // TODO: Remove this when permissions are working For inbuilt forms.
+            noPermissionCheck={true}
             // setValue={props.setValue}
             title={toTitle(
               metaVertex.P.displayName ||

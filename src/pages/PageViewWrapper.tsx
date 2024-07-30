@@ -42,7 +42,7 @@ export function PageViewWrapper(
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
 
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
-  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex()?.id, graph, setGraph));
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex(), graph, setGraph));
   const hasInsertPermission = createMemo(() => formMetaData() && !id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
   const hasEditPermission = createMemo(() => formMetaData() && !!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
   const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
@@ -119,7 +119,7 @@ export function PageViewWrapper(
     if (!id()) {
       return;
     }
-    if (!formMetaData() || (!hasInsertPermission() && !hasEditPermission())) {
+    if (!formMetaData() || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission())) {
       return;
     }
     try {
@@ -204,6 +204,16 @@ export function PageViewWrapper(
           <SimpleWarningAlert message={authError()} />
         </Match>
       </Switch>
+
+      {/* <div>
+        <p>hasInsertPermission: {hasInsertPermission()?.toString()}</p>
+        <p>hasEditPermission: {hasEditPermission()?.toString()}</p>
+        <p>hasViewPermission: {hasViewPermission()?.toString()}</p>
+        <p>hasDeletePermission: {hasDeletePermission()?.toString()}</p>
+        <p>mounted: {mounted().toString()}</p>
+        <p>authError: {authError()}</p>
+        <p>metaVertex: {metaVertex()?.id}</p>
+      </div> */}
 
       <Show when={!authError() && mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
         <Show

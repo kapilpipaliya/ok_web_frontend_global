@@ -32,6 +32,7 @@ export function TableInputField(
   props: Readonly<{
     isRealTime?: boolean;
     isTableInside?: boolean;
+    noPermissionCheck?: boolean;
     txnId?: number;
   } & GenericComponentProps>,
 ) {
@@ -166,6 +167,7 @@ export function TableInputField(
                       isRealTime={props.isRealTime ?? false}
                       joinVertex={vertex}
                       meta={props.meta}
+                      noPermissionCheck={props.noPermissionCheck}
                       rowIndex={index()}
                       setDragFromIndex={setDragFromIndex}
                       setDragToIndex={setDragToIndex}

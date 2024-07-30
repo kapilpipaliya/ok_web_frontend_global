@@ -127,6 +127,7 @@ export function RulesModal(
                       }
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
+                      noPermissionCheck={true}
                       txnId={layoutStore.formData.txnId}
                     />
                   </div>

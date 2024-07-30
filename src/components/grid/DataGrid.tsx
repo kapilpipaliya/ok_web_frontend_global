@@ -87,6 +87,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       gridState.metaVertex
     ) : FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
     setFormMetaData(form);
+    
+    setGridState("noPermissionCheck", !gridState.metaVertex);
   };
 
   onMount(async () => {

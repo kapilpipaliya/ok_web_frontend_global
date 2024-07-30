@@ -40,37 +40,36 @@ export function SEOFormGroupProperties() {
   });
 
   return (
-    <>
-      <For each={metaAttributes()}>
-        {(metaVertex) => {
-          return (
-            <div>
-              <div
-                class={`flex ai:center gap:2 justify-content:space-between mt:6`}
-              >
-                <span class="f:15 flex:.5">
-                  <Label metaVertex={metaVertex} />
-                </span>
-                <span class="f:15 flex:1">
-                  <Switch>
-                    <Match when={true}>
-                      <DynamicComponent
-                        componentName={metaVertex.P.componentName}
-                        data={layoutStore.formData.formData}
-                        isRealTime={false}
-                        meta={metaVertex}
-                        txnId={layoutStore.formData.txnId}
-                      />
-                    </Match>
-                  </Switch>
+    <For each={metaAttributes()}>
+      {(metaVertex) => {
+        return (
+          <div>
+            <div
+              class={`flex ai:center gap:2 justify-content:space-between mt:6`}
+            >
+              <span class="f:15 flex:.5">
+                <Label metaVertex={metaVertex} />
+              </span>
+              <span class="f:15 flex:1">
+                <Switch>
+                  <Match when={true}>
+                    <DynamicComponent
+                      componentName={metaVertex.P.componentName}
+                      data={layoutStore.formData.formData}
+                      isRealTime={false}
+                      meta={metaVertex}
+                      noPermissionCheck={true}
+                      txnId={layoutStore.formData.txnId}
+                    />
+                  </Match>
+                </Switch>
 
-                </span>
-              </div>
+              </span>
             </div>
-          );
-        }}
-      </For>
-    </>
+          </div>
+        );
+      }}
+    </For>
   );
 }
 

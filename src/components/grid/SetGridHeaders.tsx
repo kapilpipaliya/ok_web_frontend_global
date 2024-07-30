@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch, createSignal } from "solid-js";
 
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -86,36 +86,40 @@ export function setGridHeaders(
   tableColumns.push({
     accessorKey: "Actions",
     cell: (info) => {
+      const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
         <div class={`${!formNew.isInlineEditable ? 'py:0.25rem r:7' : ''} flex ai:center gap:10px jc:center`}>
-          <Switch>
-            <Match when={gridState.formMetaData() && !gridState.hasEditPermission()}>
-              <></>
-            </Match>
-            <Match when={formNew.isInlineEditable}>
+          <Show when={gridState.noPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
+            <IconButton
+              disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && (!gridState.hasEditPermission() && !gridState.hasViewPermission())}
+              icon="fluent:edit-12-regular"
+              iconClass="color:#3477CC"
+              onClick={() => {
+                if (formNew.isInlineEditable) {
+                  setIsEditModelOpen(true);
+                } else {
+                  return navigate(`./${info.row.original.id}`);
+                }
+              }}
+              size={21}
+            />
+            <Show when={isEditModalOpen()}>
               <QuickEditModal
-                disabled={!!gridState.formMetaData() && !gridState.hasEditPermission()}
+                disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && !gridState.hasEditPermission()}
                 graph={graph}
                 info={info}
+                onClose={setIsEditModelOpen}
                 setGraph={setGraph}
                 tableId={tableId}
               />
-            </Match>
-            <Match when={true}>
-              <IconButton
-                disabled={!!gridState.formMetaData() && !gridState.hasEditPermission()}
-                icon="fluent:edit-12-regular"
-                iconClass="color:#3477CC"
-                onClick={() => navigate(`./${info.row.original.id}`)}
-                size={21}
-              />
-            </Match>
-          </Switch>
+            </Show>
+          </Show>
+
           <Show
-            when={!!gridState.formMetaData() && gridState.hasDeletePermission()}
+            when={gridState.noPermissionCheck || (!!gridState.formMetaData() && gridState.hasDeletePermission())}
           >
             <IconButton
-              disabled={!!gridState.formMetaData() && !gridState.hasDeletePermission()}
+              disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && !gridState.hasDeletePermission()}
               icon="fluent:delete-12-regular"
               iconClass="color:rgb(255,0,0)"
               onClick={() => setDeleteRowId(info.row.original.id)}

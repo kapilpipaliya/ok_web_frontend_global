@@ -82,6 +82,7 @@ export function CSSPropertiesEditor(
         componentName={formData.P.name}
         data={formData}
         meta={{P: {class: props.data.P.value}} as unknown as Vertex}
+        noPermissionCheck
       /><br/>
     </Show>
     {graph.isDevelopment ? JSON.stringify(cssState) : null}

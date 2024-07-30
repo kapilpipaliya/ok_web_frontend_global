@@ -20,6 +20,7 @@ export function DefaultValueContent(
       data={props.selectedLayout}
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}
+      noPermissionCheck={true}
       setValue={(data) => props.setValue(props.meta, data)}
       txnId={props.txnId}
     />

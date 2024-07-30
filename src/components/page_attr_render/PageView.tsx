@@ -29,8 +29,8 @@ export function PageView(
     get hasInsertPermission() { return props.hasInsertPermission ?? true; },
     get hasViewPermission() { return props.hasViewPermission ?? true; },
     get isDesignMode() { return props.isDesignMode; },
-    previewData: props.data,
-    previewMeta: props.metaVertex,
+    get previewData() { return props.data; },
+    get previewMeta() { return props.metaVertex; },
   });
 
   return (

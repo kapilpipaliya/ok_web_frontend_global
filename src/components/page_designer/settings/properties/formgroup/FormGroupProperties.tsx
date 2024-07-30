@@ -159,7 +159,7 @@ function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof create
 
   return [
     graph.vertexes[vertexIds.name],
-    ...(isForm ? [graph.vertexes[vertexIds.thankYouPage]] : []),
+    ...(isForm && componentName === "Form" ? [graph.vertexes[vertexIds.thankYouPage]] : []),
     graph.vertexes[vertexIds.label],
     graph.vertexes[vertexIds.perm],
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),

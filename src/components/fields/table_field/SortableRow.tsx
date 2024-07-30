@@ -26,6 +26,7 @@ export const SortableRow = (props: Readonly<{
   handleDrop: (event: DragEvent) => void;
   isRealTime: boolean;
   joinVertex: Vertex;
+  noPermissionCheck?: boolean;
   rowIndex: number;
   setDragFromIndex: (index: number) => void;
   setDragToIndex: (index: number) => void;
@@ -121,6 +122,7 @@ export const SortableRow = (props: Readonly<{
               getMetaVertex={getMetaVertex}
               isRealTime={props.isRealTime}
               joinVertex={props.joinVertex}
+              noPermissionCheck={props.noPermissionCheck}
               setValue={props.setValue}
               txnId={props.txnId}
             />
@@ -140,6 +142,7 @@ export const SortableRow = (props: Readonly<{
               isTableInside={false}
               // When we have a Table we pass original Table Meta Vertex
               meta={expandVertex()!}
+              noPermissionCheck={props.noPermissionCheck}
               setValue={props.setValue}
               txnId={props.txnId}
             />

@@ -14,6 +14,7 @@ export function SelectRelation(props: SelectRelationProps) {
       data={props.data}
       isRealTime={false}
       meta={props.meta}
+      noPermissionCheck={true}
       txnId={props.txnId} />
   );
 }

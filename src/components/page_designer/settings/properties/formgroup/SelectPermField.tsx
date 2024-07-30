@@ -71,6 +71,7 @@ export function SelectPermField(
         data={props.selectedLayout}
         isRealTime={false}
         meta={meta}
+        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
     );

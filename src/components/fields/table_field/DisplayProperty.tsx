@@ -49,6 +49,7 @@ export function DisplayProperty(props: Readonly<{
   getMetaVertex: (columnId: Id) => Vertex;
   isRealTime: boolean;
   joinVertex: Vertex;
+  noPermissionCheck?: boolean;
   setValue?: (data: any) => void;
   txnId: number;
 }>) {
@@ -172,6 +173,7 @@ export function DisplayProperty(props: Readonly<{
         isTableInside={false}
         // When we have a Table we pass original Table Meta Vertex
         meta={componentName() === "DynamicTable" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
+        noPermissionCheck={props.noPermissionCheck}
         setValue={props.setValue}
         title={toTitle(props.column.P.displayName || props.column.P[IdAttr] || "")}
         txnId={props.txnId} />

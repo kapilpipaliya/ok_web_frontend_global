@@ -19,6 +19,7 @@ export function Content(
       data={props.selectedLayout}
       isRealTime={false}
       meta={props.meta}
+      noPermissionCheck={true}
       setValue={(data) => props.setValue(props.meta, data)}
       txnId={props.txnId}
     />

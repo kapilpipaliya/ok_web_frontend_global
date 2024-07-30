@@ -21,6 +21,7 @@ export function UniqueConstrains() {
           data={layoutStore.formData?.formData}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
+          noPermissionCheck={true}
           txnId={layoutStore.formData.txnId}
         />
     </div>

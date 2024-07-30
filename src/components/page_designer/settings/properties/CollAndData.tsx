@@ -110,6 +110,7 @@ export function CollAndData() {
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
             meta={collMetaVertex.vertexes![2]}
+            noPermissionCheck={true}
             title={""}
             txnId={layoutStore.formData.txnId}
           />
