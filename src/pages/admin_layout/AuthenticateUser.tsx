@@ -9,7 +9,7 @@ import { getAPI } from "~/lib/api/getApi";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
-export function AuthenticateUser(props: { children: JSX.Element; }) {
+export function AuthenticateUser(props: Readonly<{ children: JSX.Element; }>) {
   const [graph, setGraph] = useGraph();
 
   const navigate = useNavigate();

@@ -17,6 +17,7 @@ import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { DebugPermissionInfo } from "~/pages/DebugPermissionInfo";
 
 export function getText(
   graph: GraphInterface,
@@ -103,18 +104,18 @@ export function DynamicComponent(
 
   const expressionProperties = createMemo(() => {
     const values = {
-    get hasDeletePermission() {
-      return hasDeletePermission();
-    },
-    get hasEditPermission() {
-      return hasEditPermission();
-    },
-    get hasInsertPermission() {
-      return hasInsertPermission();
-    },
-    get hasViewPermission() {
-      return hasViewPermission();
-    },
+      get hasDeletePermission() {
+        return hasDeletePermission();
+      },
+      get hasEditPermission() {
+        return hasEditPermission();
+      },
+      get hasInsertPermission() {
+        return hasInsertPermission();
+      },
+      get hasViewPermission() {
+        return hasViewPermission();
+      },
     } as Record<string, any>;
     for (const [property, rule] of extraRuleProperties().entries()) {
       if (property === "disabled" && previewStore.isDesignMode) {
@@ -191,21 +192,36 @@ export function DynamicComponent(
   );
 
   return (
+    <> 
+    {/* <Show when={!props.noPermissionCheck && graph.isDevelopment}>
+      comp:{componentName()}
+      <DebugPermissionInfo
+        allConfiguredPermission={allConfiguredPermission()}
+        authError={""}
+        hasDeletePermission={hasDeletePermission() ?? false}
+        hasEditPermission={hasEditPermission() ?? false}
+        hasInsertPermission={hasInsertPermission() ?? false}
+        hasViewPermission={hasViewPermission() ?? false}
+        metaVertexId={props.meta.id}
+        mounted={true}
+        userRoles={graph.userRoles}
+      />
+    </Show> */}
     <Switch>
-      <Match when={!component()}>NO INPUT {componentName()}</Match>
-      <Match keyed when={!expressionProperties().hidden && component() && ((props.noPermissionCheck || previewStore.isDesignMode) ? true : (hasInsertPermission() || hasViewPermission() || hasEditPermission()))}>
-        <Switch>
-          <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
-            <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
+        <Match when={!component()}>NO INPUT {componentName()}</Match>
+        <Match keyed when={!expressionProperties().hidden && component() && ((props.noPermissionCheck || previewStore.isDesignMode) ? true : (hasInsertPermission() || hasViewPermission() || hasEditPermission()))}>
+          <Switch>
+            <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
+              <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
+                <Content />
+              </Label>
+            </Match>
+            <Match when={true}>
               <Content />
-            </Label>
-          </Match>
-          <Match when={true}>
-            <Content />
-          </Match>
-        </Switch>
-      </Match>
-    </Switch>
+            </Match>
+          </Switch>
+        </Match>
+      </Switch></>
   );
 }
 

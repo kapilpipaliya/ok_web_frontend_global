@@ -17,6 +17,8 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
+
+import { DebugPermissionInfo } from "./DebugPermissionInfo";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -80,8 +82,8 @@ export function PageViewWrapper(
 
   // load form meta data
   async function loadFormDesignerMetaData() {
-    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel!] || FormMetaDataAuth[props.pageVertexLabel!] : null;
-    if (!form) {
+    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] || FormMetaDataAuth[props.pageVertexLabel] : null;
+    if (!form || props.pageVertexLabel === "Form") {
       form = FormMetaData.Form;
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
@@ -205,15 +207,19 @@ export function PageViewWrapper(
         </Match>
       </Switch>
 
-      {/* <div>
-        <p>hasInsertPermission: {hasInsertPermission()?.toString()}</p>
-        <p>hasEditPermission: {hasEditPermission()?.toString()}</p>
-        <p>hasViewPermission: {hasViewPermission()?.toString()}</p>
-        <p>hasDeletePermission: {hasDeletePermission()?.toString()}</p>
-        <p>mounted: {mounted().toString()}</p>
-        <p>authError: {authError()}</p>
-        <p>metaVertex: {metaVertex()?.id}</p>
-      </div> */}
+      {/* <Show when={graph.isDevelopment}>
+        <DebugPermissionInfo
+          allConfiguredPermission={allConfiguredPermission()}
+          authError={authError()}
+          hasDeletePermission={hasDeletePermission() ?? false}
+          hasEditPermission={hasEditPermission() ?? false}
+          hasInsertPermission={hasInsertPermission() ?? false}
+          hasViewPermission={hasViewPermission() ?? false}
+          metaVertexId={metaVertex()?.id}
+          mounted={mounted()}
+          userRoles={graph.userRoles}
+        />
+      </Show> */}
 
       <Show when={!authError() && mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
         <Show
