@@ -22,7 +22,7 @@ export function SelectRuleField(props: SelectRuleFieldProps) {
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
+      collection: () => `id:'${layoutStore.formStore.formData.id}'->Rule`,
       componentName: "SelectBox",
       displayName: props.meta.P.displayName,
       name: props.meta.P.name,

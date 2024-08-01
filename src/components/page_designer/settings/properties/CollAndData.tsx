@@ -23,7 +23,7 @@ function initializeMetaVertex(graph: GraphInterface, setGraph: SetStoreFunction<
 
   addNewVertex(
     metaTxnId,
-    newVertex(metaVertexId, ["MetaAttr"], {
+    newVertex(metaVertexId, ["Attr"], {
       label: "Attr",
       name: "Attr",
       type: "Attr",
@@ -66,14 +66,14 @@ function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunctio
     setValueGlobal(
       graph,
       setGraph,
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       collMetaVertex[0],
       graph.vertexes[layoutStore.selectedId],
       value,
       false
     );
     setSelectionValue(
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       graph.vertexes[layoutStore.selectedId],
       graph,
       setGraph,
@@ -97,7 +97,7 @@ export function CollAndData() {
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = getSelectionOptions(graph, setGraph, "->MetaAttr", [metaVertex]);
+  const collMetaVertex = getSelectionOptions(graph, setGraph, "->Attr", [metaVertex]);
   const onCollectionChange = handleCollectionChange(graph, setGraph, layoutStore, collMetaVertex.vertexes);
 
   return (
@@ -112,7 +112,7 @@ export function CollAndData() {
             isNoPermissionCheck={true}
             meta={collMetaVertex.vertexes![2]}
             title={""}
-            txnId={layoutStore.formData.txnId}
+            txnId={layoutStore.formStore.txnId}
           />
           {/* 
             <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
@@ -130,7 +130,7 @@ export function CollAndData() {
         meta={collMetaVertex.vertexes![0]}
         setValue={onCollectionChange}
         title={"Select Collection"}
-        txnId={layoutStore.formData.txnId}
+        txnId={layoutStore.formStore.txnId}
       />
       <span class="flex:.5 mt:5">Data:</span>
       <SelectField
@@ -140,7 +140,7 @@ export function CollAndData() {
         isRealTime={false}
         meta={collMetaVertex.vertexes![1]}
         title={"Select Data"}
-        txnId={layoutStore.formData.txnId}
+        txnId={layoutStore.formStore.txnId}
       />
     </>
   );

@@ -20,10 +20,10 @@ export function SettingTabs() {
 
   const tabs = createMemo(() => {
     const baseTabs = ["layout", "settings"];
-    if (layoutStore.formData?.formData?.L[0] === "Form") {
+    if (layoutStore.formStore?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
-    if (layoutStore.formData?.formData?.L[0] === "Form" || layoutStore.formData?.formData?.L[0] === "Page") {
+    if (layoutStore.formStore?.formData?.L[0] === "Form" || layoutStore.formStore?.formData?.L[0] === "Page") {
       baseTabs.push("Rules", "Permission", "SEO");
     }
     return baseTabs;
@@ -74,10 +74,11 @@ export function SettingTabs() {
         <LayoutTree />
       </div>
       <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
+        {/* {JSON.stringify(layoutStore.formStore)} */}
         <FormConfig />
         <FormStatusWrapper />
       </div>
-      <Show when={layoutStore.formData?.formData?.L[0] === "Form"}>
+      <Show when={layoutStore.formStore?.formData?.L[0] === "Form"}>
         <Show when={selectedTab() === "Keys"}>
           {/* <PrimaryKey /> */}
           <NameKey />
@@ -85,9 +86,9 @@ export function SettingTabs() {
           <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
           <UniqueConstrains />
         </Show>
-        <Show when={selectedTab() === "Permission"}>
-          <Permission />
-        </Show>
+      </Show>
+      <Show when={selectedTab() === "Permission"}>
+        <Permission />
       </Show>
       <Show when={selectedTab() === "Rules"}>
         <Rules />

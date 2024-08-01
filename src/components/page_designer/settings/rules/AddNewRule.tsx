@@ -21,7 +21,7 @@ export function AddNewRule(
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let inputRef: HTMLInputElement;
-  const prevTxnIndex = getLastTxnIndex(layoutStore.formData.txnId, graph);
+  const prevTxnIndex = getLastTxnIndex(layoutStore.formStore.txnId, graph);
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
   const metaTxnId = graph.newTxnId;
 
@@ -37,15 +37,15 @@ export function AddNewRule(
     )!;
     addNewVertex(
       metaTxnId,
-      newVertex(rulesMetaVertexId, ["MetaAttr"], metaAttribute),
+      newVertex(rulesMetaVertexId, ["Attr"], metaAttribute),
       graph,
       setGraph,
     );
 
     const rowResult = insertNewRow(
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       graph.vertexes[rulesMetaVertexId],
-      layoutStore.formData.formData,
+      layoutStore.formStore.formData,
       false,
       graph,
       setGraph,
@@ -60,13 +60,13 @@ export function AddNewRule(
     )!;
     addNewVertex(
       metaTxnId,
-      newVertex(condMetaVertexId, ["MetaAttr"], condMetaAttribute),
+      newVertex(condMetaVertexId, ["Attr"], condMetaAttribute),
       graph,
       setGraph,
     );
 
     insertNewRow(
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       graph.vertexes[condMetaVertexId],
       rule,
       false,

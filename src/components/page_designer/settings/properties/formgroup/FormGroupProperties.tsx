@@ -152,7 +152,7 @@ function createPropAttributes(metaAttributes: Vertex[], txnId: number, graph: Gr
 function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, layoutStore: PageLayoutObject) {
   const otherVertices = vertices.filter(vertex => !Object.keys(vertexIds).includes(vertex.P.name));
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-  const isForm = layoutStore.formData?.formData.L[0] === "Form";
+  const isForm = layoutStore.formStore?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
@@ -271,7 +271,7 @@ function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [layoutStore] = useDesignerLayoutStore();
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
   // Default value can be only entered when it is in Form Builder
-  const isForm = layoutStore.formData?.formData.L[0] === "Form";
+  const isForm = layoutStore.formStore?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
   const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
   const metaClasses = [

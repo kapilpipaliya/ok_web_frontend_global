@@ -25,7 +25,7 @@ export function UniqueNameField(
           isUniqueIdUsed(
             graph,
             setGraph,
-            layoutStore.formData.formData,
+            layoutStore.formStore.formData,
             props.selectedLayout,
             data,
           )

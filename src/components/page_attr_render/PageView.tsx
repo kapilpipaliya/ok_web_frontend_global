@@ -17,6 +17,7 @@ export function PageView(
     hasViewPermission?: boolean | null;
     id?: Id;
     isDesignMode?: boolean;
+    isNoPermissionCheck?: boolean;
     metaVertex?: Vertex;
   }>,
 ) {

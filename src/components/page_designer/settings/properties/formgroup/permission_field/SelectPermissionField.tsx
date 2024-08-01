@@ -17,7 +17,7 @@ export function SelectPermissionField(props: SelectPermissionFieldProps) {
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formData.formData.id}'->$0Perm`,
+      collection: () => `id:'${layoutStore.formStore.formData.id}'->$0Perm`,
       componentName: "TagBox",
       displayName: props.meta.P.displayName,
       name: props.meta.P.name,

@@ -15,7 +15,7 @@ export function generateTableInputMeta(metaAttribute: FieldAttribute) {
 
   addNewVertex(
     metaTxnId,
-    newVertex(metaVertexId, ["MetaAttr"], metaAttribute),
+    newVertex(metaVertexId, ["Attr"], metaAttribute),
     graph,
     setGraph,
   );

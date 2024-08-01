@@ -72,7 +72,7 @@ export function GraphView() {
     <Show when={load()}>
       <GraphView
         edges={Object.entries(graph.edges)
-          .filter(([_, edge]) => edge.T !== "MetaAttr")
+          .filter(([_, edge]) => edge.T !== "Attr")
           .map(([key, value]) => ({
             ...value,
             end: value.E,
@@ -80,7 +80,7 @@ export function GraphView() {
             type: value.T,
           }))}
         nodes={Object.entries(graph.vertexes)
-          .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")
+          .filter(([_, vertex]) => vertex.L[0] !== "Attr")
           .map(([key, value]) => ({
             ...value,
             label: value.L[0],

@@ -170,7 +170,7 @@ export function rowMetaInitialize(
           setGraph,
           metaTxnId,
           graph.vertexes[metaInstanceResult.vertexId!],
-          "MetaAttr",
+          "Attr",
           undefined,
           P,
         );
@@ -212,7 +212,7 @@ export function rowMetaInitialize(
         setGraph,
         metaTxnId,
         graph.vertexes[rowMetaAttrInst.vertex!.id],
-        "MetaAttr",
+        "Attr",
       );
       if (AttrRowResult.error) {
         showErrorToast(AttrRowResult.error.toString());

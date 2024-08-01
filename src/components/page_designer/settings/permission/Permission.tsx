@@ -23,27 +23,27 @@ export function Permission() {
     <div class="mt:6">
       <HeaderWithDescription description="All the permissions to the form level" paddingXSm="0.25rem" title="Form Permissions" />
 
-<div class="mt:.5rem px:0.25rem">
-  <DynamicComponent
-            componentName={"TagBox"}
-            data={layoutStore.formData?.formData}
-            isNoPermissionCheck={true}
-            isRealTime={false}
-            meta={{ P: { collection: '->$0Perm', name: "globalPerm" } as unknown as FieldAttribute } as unknown as Vertex}
-            txnId={layoutStore.formData.txnId}
-          />
-</div>
+      <div class="mt:.5rem px:0.25rem">
+        <DynamicComponent
+          componentName={"TagBox"}
+          data={layoutStore.formStore?.formData}
+          isNoPermissionCheck={true}
+          isRealTime={false}
+          meta={{ P: { collection: '->$0Perm', name: "globalPerm" } as unknown as FieldAttribute } as unknown as Vertex}
+          txnId={layoutStore.formStore.txnId}
+        />
+      </div>
 
 
       <HeaderWithDescription description="All the permissions that are used in the form." paddingXSm="0.25rem" title="All Form Permissions" />
       <div class="mt:.5rem px:0.25rem">
-      <TableInputField
-        data={layoutStore.formData?.formData}
-        isNoPermissionCheck={true}
-        isRealTime={false}
-        meta={graph.vertexes[metaVertexId]}
-        txnId={layoutStore.formData.txnId}
-      />
+        <TableInputField
+          data={layoutStore.formStore?.formData}
+          isNoPermissionCheck={true}
+          isRealTime={false}
+          meta={graph.vertexes[metaVertexId]}
+          txnId={layoutStore.formStore.txnId}
+        />
       </div>
 
 

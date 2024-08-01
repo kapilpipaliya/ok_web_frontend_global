@@ -13,17 +13,17 @@ export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData),
+    getChildrenAttrs(graph, setGraph, layoutStore.formStore.formData),
   );
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {
     e.stopPropagation();
-    addStepBefore(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formData?.formData, step);
+    addStepBefore(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formStore.formData, step);
   };
 
   const handleAddStepAfter = (e: MouseEvent, step: Vertex) => {
     e.stopPropagation();
-    addStepAfter(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formData?.formData, step);
+    addStepAfter(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formStore.formData, step);
   };
 
   return (

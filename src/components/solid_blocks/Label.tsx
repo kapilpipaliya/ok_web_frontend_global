@@ -26,7 +26,7 @@ export function Label(
 
   const position = createMemo(() =>
     !props.position || props.position === "system"
-      ? formStore!.formMeta?.P.position || "top"
+      ? formStore?.formMeta?.P.position || "top"
       : props.position,
   );
   
@@ -81,6 +81,9 @@ export function isFirstElementSupportedByLabel(node: HTMLElement | HTMLElement[]
   const firstElement = Array.isArray(node) ? node[0] : node;
   if (!firstElement) {
     return false;
+  }
+  if (typeof firstElement === 'string') {
+    return true;
   }
 
   const supportedTags = ['input', 'select', 'textarea', 'output', 'meter', 'progress'];

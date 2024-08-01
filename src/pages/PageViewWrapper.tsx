@@ -14,7 +14,9 @@ import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -39,6 +41,7 @@ export function PageViewWrapper(
     dataId?: Id
     expression?: string;
     formId?: string;
+    isNoPermissionCheck?: boolean;
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
@@ -56,7 +59,8 @@ export function PageViewWrapper(
   let onConfirmExit: () => void;
 
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
-  const isNoPermissionCheck = createMemo(() => formStore.formMetaData?.isNoPermissionCheck);
+  const [previewStore] = usePreviewContext();
+  const isNoPermissionCheck = createMemo(() => props.isNoPermissionCheck ||formStore.formMetaData?.isNoPermissionCheck || previewStore.isNoPermissionCheck);
   const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, formStore.formMeta, graph, setGraph));
   const hasInsertPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph))));
   const hasEditPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph))));
@@ -153,7 +157,7 @@ export function PageViewWrapper(
     if (!id()) {
       return;
     }
-    if (!formStore.formMetaData || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission())) {
+    if (!isNoPermissionCheck() && (!formStore.formMetaData || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission()))) {
       return;
     }
     try {
@@ -208,7 +212,8 @@ export function PageViewWrapper(
     saveUndoPoint(formStore.txnId, graph);
     setPreventUndoAtOrBeforeIndex(formStore.txnId, graph);
     saveStepIndex(formStore.txnId, "initial", graph);
-    setLayoutStore?.("formData", formStore);
+    // direct assignment not make it reactive
+    setLayoutStore?.({get formStore() { return formStore; }});
     await loadData();
   });
 
@@ -270,7 +275,7 @@ export function PageViewWrapper(
   return (
     <Show keyed when={formStore.count}>
       <Show when={formStore.formMeta?.P.seoTitle}>
-        <Title>{formStore.formMeta?.P.seoTitle}</Title>
+        <Title>{getPageTitle(formStore.formMeta)}</Title>
       </Show>
       <Show when={formStore.formMeta?.P.seoDescription}>
         <Meta content={formStore.formMeta?.P.seoDescription} name="description" />

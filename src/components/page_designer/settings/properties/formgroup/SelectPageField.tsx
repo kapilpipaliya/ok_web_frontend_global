@@ -57,7 +57,7 @@ export function SelectPageField(
         isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
-        txnId={layoutStore.formData.txnId}
+        txnId={layoutStore.formStore.txnId}
       />
     );
   };

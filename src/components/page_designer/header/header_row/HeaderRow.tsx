@@ -38,7 +38,7 @@ export function HeaderRow() {
         <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
           <RightToggleButton />
         </Show>
-        <FormContext.Provider value={layoutStore.formData}>
+        <FormContext.Provider value={[layoutStore.formStore]}>
           <SaveIconButton />
         </FormContext.Provider>
         <PreviewButton />

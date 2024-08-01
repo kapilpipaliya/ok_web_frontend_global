@@ -71,12 +71,12 @@ export function PageItem(
     onClickAddComponent(
       graph,
       setGraph,
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       layoutStore.draggedVertices[0],
-      layoutStore.formData || {},
+      layoutStore.formStore || {},
       layoutStore.selectedId !== -1
         ? layoutStore.selectedId
-        : layoutStore.formData.formData.id,
+        : layoutStore.formStore.formData.id,
     );
     setLayoutStore("draggedVertices", []);
   };

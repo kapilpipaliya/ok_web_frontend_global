@@ -12,7 +12,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
-  const prevTxnIndex = getLastTxnIndex(layoutStore.formData.txnId, graph);
+  const prevTxnIndex = getLastTxnIndex(layoutStore.formStore.txnId, graph);
 
   const metaVertexId = graph.newVertexId;
   const dataVertexId = graph.newVertexId;
@@ -31,11 +31,11 @@ export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
 
   const onImport = () => {
     const jsxParser = new JsxParser({
-      formData: layoutStore.formData.formData,
+      formData: layoutStore.formStore.formData,
       jsx: graph.vertexes[dataVertexId].P.jsx || "",
       parent: graph.vertexes[layoutStore.selectedId],
       showWarnings: true,
-      txnId: layoutStore.formData.txnId,
+      txnId: layoutStore.formStore.txnId,
     });
     jsxParser.render(graph, setGraph);
     // reset layout
@@ -83,7 +83,7 @@ export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
                 setGraph("vertexes", dataVertexId, "P", { jsx: data })
               }
               title={"Write HTML"}
-              txnId={layoutStore.formData.txnId}
+              txnId={layoutStore.formStore.txnId}
             />
           </div>
           <div class="modal-footer">

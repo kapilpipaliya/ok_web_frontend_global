@@ -26,7 +26,7 @@ export function getExportCode(
   ) => {
     const { showErrorToast } = useToast();
 
-    const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
+    const metaVertexes = getSublistRowsForType(graph, "Attr", meta);
     // const props = meta.P;
     const selectMetaVertexes = metaVertexes.filter((meta) =>
       ["SelectBox", "TagBox"].includes(meta.P.componentName),

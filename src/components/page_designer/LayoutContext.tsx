@@ -4,14 +4,14 @@ import { createContext, useContext } from "solid-js";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import type { IFormContext } from "../form/FormContext";
+import type { FormStoreObject } from "../form/FormContext";
 import type { IDToRuleMap } from "./functions/getChildrenAttrs";
 
 export function getInitialDesignerLayoutStore() {
   return {
     activeItem: null as Id | null | number,
     draggedVertices: [] as Array<Vertex>,
-    formData: {} as IFormContext,
+    formStore: {} as FormStoreObject,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     inputBackground: "white",

@@ -20,7 +20,7 @@ export function ShareSection() {
     if (layoutStore) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
-      const { L, P, id } = layoutStore.formData.formData;
+      const { L, P, id } = layoutStore.formStore.formData;
 
       if (isNegative(id)) {
         setError(`Please save the ${L[0]} first.`);

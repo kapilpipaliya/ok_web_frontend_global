@@ -5,7 +5,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export function FormConfig() {
   const params = useParams();
   return (
-    <PageViewWrapper dataId={params.id} pageVertexName={params.entity} />
+    <PageViewWrapper dataId={params.id} isNoPermissionCheck={true} pageVertexName={params.entity} />
   );
 }
 // showMainFieldsOnly={true}

@@ -47,11 +47,12 @@ export function RenderMainContent() {
           <FormElementsWrapper  />
         </Show>
       </Show>
-      <Show when={layoutStore.formData}>
+      <Show when={layoutStore.formStore}>
         <ResizableContainer view={layoutStore.view}>
           <PageView
             isDesignMode={true}
-            metaVertex={layoutStore.formData?.formData}
+            isNoPermissionCheck={true}
+            metaVertex={layoutStore.formStore?.formData}
           />
         </ResizableContainer>
       </Show>

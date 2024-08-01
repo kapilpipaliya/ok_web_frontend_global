@@ -14,9 +14,9 @@ export function getInitialFormStore(graph: GraphInterface) {
     count: 1,
     discardPopup: false,
     error: undefined as string | undefined,
-    formData: undefined as Vertex | undefined,
+    formData: undefined as unknown as Vertex,
     formId: undefined as string | undefined,
-    formMeta: undefined as Vertex | undefined,
+    formMeta: undefined as unknown as Vertex,
     formMetaData: null as IFormMetaData | null,
     isPreview: false,
     mounted: false,
@@ -25,7 +25,7 @@ export function getInitialFormStore(graph: GraphInterface) {
 }
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
-type FormStore = ReturnType<typeof createStore<FormStoreObject>>;
+export type FormStore = ReturnType<typeof createStore<FormStoreObject>>;
 
 export const FormContext = createContext<FormStore>();
 

@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { useNavigate } from "@solidjs/router";
-import { type JSX, Show, onMount } from "solid-js";
+import { type JSX, Match, Switch, onMount } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -15,8 +15,8 @@ export function AuthenticateUser(props: Readonly<{ children: JSX.Element; }>) {
   const navigate = useNavigate();
   const { showErrorToast } = useToast();
 
+  setGraph('isLoadingPage', true);
   const loadUser = async (graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) => {
-    setGraph('isLoadingPage', true);
     try {
       const data = await getAPI(API.getUserUrl);
       if (data) {
@@ -49,13 +49,13 @@ export function AuthenticateUser(props: Readonly<{ children: JSX.Element; }>) {
   });
 
   return (
-    <>
-      <Show when={graph.isLoadingPage}>
+    <Switch>
+      <Match when={graph.isLoadingPage}>
         Loading
-      </Show>
-      <Show when={!graph.isLoadingPage}>
+      </Match>
+      <Match when={!graph.isLoadingPage}>
         {props.children}
-      </Show>
-    </>
+      </Match>
+    </Switch>
   );
 }

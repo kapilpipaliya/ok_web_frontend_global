@@ -78,7 +78,7 @@ export function FormField(
   });
 
   return (
-    <FormContext.Provider value={formData}>
+    <FormContext.Provider value={[formData, setFormData]}>
       <div class="">
         <PageAttrRender data={formData.formData} metaVertex={props.meta} />
       </div>

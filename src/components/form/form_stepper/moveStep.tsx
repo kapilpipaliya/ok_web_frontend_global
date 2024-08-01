@@ -21,9 +21,9 @@ export function moveStep(
   sortChildren(
     graph,
     setGraph,
-    layoutStore.formData.txnId,
+    layoutStore.formStore.txnId,
     fromVertex,
-    layoutStore.formData.formData,
+    layoutStore.formStore.formData,
     toVertex,
     position,
   );

@@ -20,7 +20,7 @@ export function PropertiesBody() {
       return setPropertyValueGlobal(
         graph,
         setGraph,
-        layoutStore.formData.txnId,
+        layoutStore.formStore.txnId,
         meta,
         graph.vertexes[layoutStore.selectedId],
         graph.vertexes[layoutStore.selectedComponent],
@@ -47,7 +47,7 @@ export function PropertiesBody() {
         metaAttributes={selectedComponentProperties().vertexes ?? []}
         selectedLayout={graph.vertexes[layoutStore.selectedId]}
         setValue={setPropertyValue}
-        txnId={layoutStore.formData.txnId}
+        txnId={layoutStore.formStore.txnId}
       />
       <ZIndex>
         <Show when={isImportModalOpen()}>

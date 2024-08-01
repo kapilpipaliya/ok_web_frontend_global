@@ -18,11 +18,11 @@ export function UniqueConstrains() {
   return (
     <div class="mt:6">
       <TableInputField
-          data={layoutStore.formData?.formData}
+          data={layoutStore.formStore?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
-          txnId={layoutStore.formData.txnId}
+          txnId={layoutStore.formStore.txnId}
         />
     </div>
   );

@@ -41,7 +41,7 @@ export function TableInputField(
 
   const tableColumnsTemplate = createMemo(
     () =>
-      sortVertexesByPosition(getSelectionOptions(graph, setGraph, `->MetaAttr++->Attr`, [props.meta])
+      sortVertexesByPosition(getSelectionOptions(graph, setGraph, `->Attr`, [props.meta])
         .vertexes || []),
   );
 

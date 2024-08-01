@@ -10,7 +10,7 @@ export function modifyFieldMetaAllFields(attribute: FieldAttribute, graph: Graph
   attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
   attribute.valueKey = "id";
   attribute.childrenKey = "attributes";
-  attribute.options = () => generateFormMetaAttributes(graph, setGraph, layoutStore.formData.formData, ignoreTable)
+  attribute.options = () => generateFormMetaAttributes(graph, setGraph, layoutStore.formStore.formData, ignoreTable)
     .attributes;
   return attribute;
 }

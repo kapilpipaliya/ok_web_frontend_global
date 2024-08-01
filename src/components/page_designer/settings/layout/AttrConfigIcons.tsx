@@ -75,10 +75,10 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               undefined,
               undefined,
-              layoutStore.formData.txnId,
+              layoutStore.formStore.txnId,
               graph,
               setGraph,
-              layoutStore.formData.formData
+              layoutStore.formStore.formData
             );
           }}
           title="Duplicate"
@@ -97,7 +97,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               graph,
               setGraph,
-              layoutStore.formData.txnId,
+              layoutStore.formStore.txnId,
               getComponent(),
               showSuccessToast
             );

@@ -50,7 +50,7 @@ export function TreeItem(
       children,
       graph,
       setGraph,
-      layoutStore.formData.formData,
+      layoutStore.formStore.formData,
       (position) => {
         if (position === "center" && Date.now() - startTime > 1000) {
           if (props.collapsedKeys().includes(props.metaVertex.id)) {
@@ -157,7 +157,7 @@ export function TreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
         />
-        <Show when={layoutStore.formData.formData.id !== props.metaVertex.id}>
+        <Show when={layoutStore.formStore.formData.id !== props.metaVertex.id}>
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
       </div>
@@ -171,7 +171,7 @@ export function TreeItem(
         <ul class="pb:5 pl:8 pt:3">
           <For each={children()}>
             {(vertex) => (
-              <Show when={layoutStore.formData}>
+              <Show when={layoutStore.formStore}>
                 <TreeItem
                   collapsedKeys={props.collapsedKeys}
                   metaVertex={vertex}

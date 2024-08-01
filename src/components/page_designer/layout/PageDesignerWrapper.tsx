@@ -13,6 +13,7 @@ import {
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { RenderMainContent } from "./RenderMainContent";
+import { getPageTitle } from "./getPageTitle";
 
 export function PageDesignerWrapper(): JSX.Element {
   const [layoutStore, setLayoutStore] = createStore(
@@ -42,7 +43,7 @@ export function PageDesignerWrapper(): JSX.Element {
       <DesignerLayoutStoreContext.Provider
         value={[layoutStore, setLayoutStore]}
       >
-        <Title>{layoutStore.formData?.formData?.P.name ?? `New ${layoutStore.formData?.formData?.L[0] ?? "Form"} Builder`} - Easy Form Forge</Title>
+        <Title>{getPageTitle(layoutStore.formStore?.formData)}</Title>
         <HeaderRow />
         <div
           classList={{

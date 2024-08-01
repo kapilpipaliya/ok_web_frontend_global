@@ -1,12 +1,12 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
+import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
 import { onCleanup } from "solid-js";
 
 import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/Toast";
-import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
@@ -29,7 +29,7 @@ export function addMetaVertexes(
     // }
     const attr = klona(attribute);
     if (attr.name) {
-      attr.label = capitalizeFirstLetter(attr.name);
+      attr.label = toTitle(attr.name);
     }
     if (!attr.tab) attr.tab = "main";
     // @ts-ignore

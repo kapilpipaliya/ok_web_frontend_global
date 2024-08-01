@@ -55,7 +55,7 @@ export function RulesModal(
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
 
-  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formData.txnId, graph);
+  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formStore.txnId, graph);
 
 
   const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedRule));
@@ -89,7 +89,7 @@ export function RulesModal(
 
   const onRulesCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpToIndex(layoutStore.formData.txnId, prevTxnIndex, graph);
+      revertTransactionUpToIndex(layoutStore.formStore.txnId, prevTxnIndex, graph);
     }
     props.closeModal();
   };
@@ -123,12 +123,12 @@ export function RulesModal(
                       data={
                         props.selectedRule
                           ? props.selectedRule
-                          : layoutStore.formData.formData
+                          : layoutStore.formStore.formData
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={layoutStore.formData.txnId}
+                      txnId={layoutStore.formStore.txnId}
                     />
                   </div>
                 </div>

@@ -15,10 +15,10 @@ export function DuplicateButton(props: { item: Vertex; }) {
         props.item,
         undefined,
         undefined,
-        layoutStore.formData.txnId,
+        layoutStore.formStore.txnId,
         graph,
         setGraph,
-        layoutStore.formData.formData
+        layoutStore.formStore.formData!
       )}
       size={20}
       title="Duplicate" />

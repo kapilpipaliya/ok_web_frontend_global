@@ -17,8 +17,8 @@ export function addStepBefore(
 ) {
   const layoutRowId = addComponentAttrInPage(
     formVertex,
-    layoutStore.formData.formData,
-    layoutStore.formData.txnId,
+    layoutStore.formStore.formData,
+    layoutStore.formStore.txnId,
     graph,
     setGraph,
     "Step"
@@ -31,9 +31,9 @@ export function addStepBefore(
   sortChildren(
     graph,
     setGraph,
-    layoutStore.formData.txnId,
+    layoutStore.formStore.txnId,
     fromVertex,
-    layoutStore.formData.formData,
+    layoutStore.formStore.formData,
     toVertex,
     "before",
   );

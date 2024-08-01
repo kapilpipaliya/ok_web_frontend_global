@@ -40,10 +40,10 @@ export function SaveAsTemplateMenu(
       props.item,
       dataVertex,
       newFormTxnId,
-      layoutStore.formData.txnId,
+      layoutStore.formStore.txnId,
       graph,
       setGraph,
-      layoutStore.formData.formData,
+      layoutStore.formStore.formData,
     );
     const data = commitTxn(newFormTxnId, graph);
 

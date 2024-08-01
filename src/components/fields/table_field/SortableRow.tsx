@@ -66,7 +66,7 @@ export const SortableRow = (props: Readonly<{
       : ({ P: { componentName: "Error" } } as unknown as Vertex);
   };
 
-  // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
+  // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "Attr"], [p.joinVertex]));
   const rowColumnsMetaAttrs = createMemo(() =>
     props.tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand"),
   );

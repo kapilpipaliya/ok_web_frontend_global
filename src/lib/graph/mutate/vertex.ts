@@ -231,7 +231,7 @@ export function deleteVertex(
       const endVertex = graph.vertexes[attrInstEdge.E];
       deleteEdge(0, attrInstEdgeId, graph, setGraph);
       if (endVertex) {
-        for (const metaAttrEdgeId of endVertex.OUT.MetaAttr || []) {
+        for (const metaAttrEdgeId of endVertex.OUT.Attr || []) {
           const metaAttrEdge = graph.edges[metaAttrEdgeId];
           if (metaAttrEdge) {
             const endVertex = graph.vertexes[metaAttrEdge.E];

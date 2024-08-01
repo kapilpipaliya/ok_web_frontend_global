@@ -36,7 +36,7 @@ export function onChangeHandler(
     }
 
     const attribute = (
-      getSelectionOptions(graph, setGraph, "-MetaAttr->MetaAttr", [
+      getSelectionOptions(graph, setGraph, "-Attr->Attr", [
         changedFieldAttribute,
       ]).vertexes || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
