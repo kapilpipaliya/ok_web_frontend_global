@@ -32,7 +32,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
 
-  const [gridState, setGridState] = createStore<DataGridState>(getInitialGridState(graph));
+  const gridStore = createStore<DataGridState>(getInitialGridState(graph));
+  const [gridState, setGridState] = gridStore;
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
 
   const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex, graph, setGraph));
@@ -150,7 +151,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const onDelete = useDeleteRowConfirm(gridState);
 
   return (
-    <DataGridProvider value={[gridState, setGridState]}>
+    <DataGridProvider value={gridStore}>
       <Switch>
         <Match when={gridState.isLoading}>
           <LoaderNew loaderHeight="55vh" />

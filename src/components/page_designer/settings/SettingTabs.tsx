@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { FormContext } from "~/components/form/FormContext";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -69,33 +70,37 @@ export function SettingTabs() {
   return (
     <>
       <Tabs />
-
-      <div classList={{ "display:none": selectedTab() !== "layout" }}>
-        <LayoutTree />
-      </div>
       <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
-        {/* {JSON.stringify(layoutStore.formStore)} */}
         <FormConfig />
-        <FormStatusWrapper />
+        <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
+          <FormStatusWrapper />
+        </FormContext.Provider>
       </div>
-      <Show when={layoutStore.formStore?.formData?.L[0] === "Form"}>
-        <Show when={selectedTab() === "Keys"}>
-          {/* <PrimaryKey /> */}
-          <NameKey />
-          <Divider class="mt:10" />
-          <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
-          <UniqueConstrains />
+
+      <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
+        <div classList={{ "display:none": selectedTab() !== "layout" }}>
+          <LayoutTree />
+        </div>
+
+        <Show when={layoutStore.formStore?.formData?.L[0] === "Form"}>
+          <Show when={selectedTab() === "Keys"}>
+            {/* <PrimaryKey /> */}
+            <NameKey />
+            <Divider class="mt:10" />
+            <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
+            <UniqueConstrains />
+          </Show>
         </Show>
-      </Show>
-      <Show when={selectedTab() === "Permission"}>
-        <Permission />
-      </Show>
-      <Show when={selectedTab() === "Rules"}>
-        <Rules />
-      </Show>
-      <Show when={selectedTab() === "SEO"}>
-        <SEOFormGroupProperties />
-      </Show>
+        <Show when={selectedTab() === "Permission"}>
+          <Permission />
+        </Show>
+        <Show when={selectedTab() === "Rules"}>
+          <Rules />
+        </Show>
+        <Show when={selectedTab() === "SEO"}>
+          <SEOFormGroupProperties />
+        </Show>
+      </FormContext.Provider>
     </>
   );
 }

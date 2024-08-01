@@ -49,7 +49,9 @@ export function PageViewWrapper(
 ) {
   const [graph, setGraph] = useGraph();
 
-  const [formStore, setFormStore] = createStore(getInitialFormStore(graph));
+  const pageFormStore = createStore(getInitialFormStore(graph));
+  const [formStore, setFormStore] = pageFormStore;
+
   setFormStore({
     get formId() {
       return props.pageVertexName;
@@ -213,7 +215,7 @@ export function PageViewWrapper(
     setPreventUndoAtOrBeforeIndex(formStore.txnId, graph);
     saveStepIndex(formStore.txnId, "initial", graph);
     // direct assignment not make it reactive
-    setLayoutStore?.({get formStore() { return formStore; }});
+    setLayoutStore?.({get formStore() { return formStore; }, get setFormStore() { return setFormStore; }});
     await loadData();
   });
 
@@ -305,7 +307,7 @@ export function PageViewWrapper(
         />
       </Show> */}
       <Show when={formStore.formData}>
-        <FormContext.Provider value={[formStore, setFormStore]}>
+        <FormContext.Provider value={pageFormStore}>
           <Show when={!authError() && formStore.mounted && formStore.formMeta && ((props.dataId && props.dataId !== "new") ? formStore.formData : true)}>
             <Show
               fallback={

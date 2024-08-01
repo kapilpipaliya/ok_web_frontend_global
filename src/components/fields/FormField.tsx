@@ -31,10 +31,11 @@ export function FormField(
   // const [dataVertex, setDataVertex] = createSignal<Vertex>();
   // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
 
-  const [formData, setFormData] = createStore({
+  const formFieldStore = createStore({
     cleanUpConfig: () => cleanUpConfig,
     txnId,
   } as unknown as IFormContext);
+  const [formData, setFormData] = formFieldStore;
 
   if (!props.data?.id) {
     const form = generateFormMetaAttributes(graph, () => { }, props.meta);
@@ -78,7 +79,7 @@ export function FormField(
   });
 
   return (
-    <FormContext.Provider value={[formData, setFormData]}>
+    <FormContext.Provider value={formFieldStore}>
       <div class="">
         <PageAttrRender data={formData.formData} metaVertex={props.meta} />
       </div>

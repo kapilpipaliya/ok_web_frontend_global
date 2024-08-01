@@ -16,9 +16,10 @@ import { RenderMainContent } from "./RenderMainContent";
 import { getPageTitle } from "./getPageTitle";
 
 export function PageDesignerWrapper(): JSX.Element {
-  const [layoutStore, setLayoutStore] = createStore(
+  const pageDesignerStore = createStore(
     getInitialDesignerLayoutStore(),
   );
+  const [layoutStore, setLayoutStore] = pageDesignerStore;
 
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;
@@ -41,7 +42,7 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider
-        value={[layoutStore, setLayoutStore]}
+        value={pageDesignerStore}
       >
         <Title>{getPageTitle(layoutStore.formStore?.formData)}</Title>
         <HeaderRow />
