@@ -9,7 +9,6 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 export function getInitialFormState(
   graph: Store<GraphInterface>,
@@ -24,7 +23,7 @@ export function getInitialFormState(
 
     dataVertex = createResult.vertex!;
   }
-  const form = FormMetaData[label] || FormMetaDataAuth[label];
+  const form = FormMetaData[label];
 
   // Load Form Meta and Data from API
   const metaVertexResult = untrack(() => createMeta(form, graph, setGraph));

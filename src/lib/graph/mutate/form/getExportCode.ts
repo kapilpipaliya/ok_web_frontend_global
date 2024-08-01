@@ -6,7 +6,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";
 import { getPkForCollection } from "../../get/sync/getPkForCollection";
@@ -50,7 +49,7 @@ export function getExportCode(
           // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
-          if (FormMetaData[label] || FormMetaDataAuth[label]) {
+          if (FormMetaData[label]) {
             const pksResult = {} as { [primaryKey: string]: any };
             pksResult.name = v.P.name;
             if (!result.OUT) {

@@ -16,7 +16,7 @@ import {
 } from "solid-js";
 import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 
-import { DeleteDialog } from "~/components/DeleteDialog";
+import { DialogWithButtons } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { TableTabs } from "~/components/TableTabs";
 import {
@@ -76,6 +76,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
   const [formData, setFormData] = createStore({
     cleanUpConfig: () => cleanUpConfig,
+    get formId() {return props.formId},
     txnId,
   } as IFormContext);
   const [activeTab, setActiveTab] = createSignal("main");
@@ -257,7 +258,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
               <Show when={popup()}>PopOver</Show>
               <Show when={discardPopup()}>
-                <DeleteDialog
+                <DialogWithButtons
                   message="Discard unsaved changes - are you sure?"
                   onCancel={() => setDiscardPopup(false)}
                   onConfirm={() => {

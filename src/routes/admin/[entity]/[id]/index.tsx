@@ -6,7 +6,6 @@ import { PageDesignerLabels } from "~/components/page_designer/functions/PageDes
 import { PageDesignerWrapper } from "~/components/page_designer/layout/PageDesignerWrapper";
 import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 const DynamicForm = clientOnly(() => import("~/components/form/DynamicForm"));
@@ -20,7 +19,7 @@ export default function FormEdit() {
       <Match when={PageDesignerLabels.includes(params.entity)}>
         <PageDesignerWrapper />
       </Match>
-      <Match when={!Object.keys(FormMetaData).includes(params.entity) && !Object.keys(FormMetaDataAuth).includes(params.entity)}>
+      <Match when={!Object.keys(FormMetaData).includes(params.entity)}>
         <PageViewWrapper dataId={params.id} pageVertexName={params.entity} />
       </Match>
       <Match when={true}>

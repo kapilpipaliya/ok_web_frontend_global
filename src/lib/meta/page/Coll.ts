@@ -6,7 +6,6 @@ import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findV
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
 import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
-import { FormMetaDataAuth } from "../formMetaDataAuth";
 import { collectionAttr } from "./collectionAttr";
 
 export const Coll: IFormMetaData = {
@@ -35,8 +34,7 @@ export const Coll: IFormMetaData = {
               ({} as IFormContext);
             const [graph, setGraph] = useGraph();
             const val = options.value;
-            if (Object.keys(FormMetaData).includes(val) ||
-              Object.keys(FormMetaDataAuth).includes(val)) {
+            if (Object.keys(FormMetaData).includes(val)) {
               return false;
             }
             return !findVertexByLabelAndUniqueIdWithSkip(

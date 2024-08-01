@@ -19,12 +19,12 @@ export function useDeleteRowConfirm(gridState: GridState) {
     if (!gridState.deleteRowId) {
       return;
     }
-    if (!gridState.hasDeletePermission()) {
+    if (!(gridState.hasDeletePermission() ?? gridState.noPermissionCheck)) {
       showErrorToast("You do not have permission to delete this row.");
       return;
     }
     const txnId = graph.newTxnId;
-    const deleteResult = deleteVertex(txnId, id()!, graph, setGraph);
+    const deleteResult = deleteVertex(txnId, gridState.deleteRowId, graph, setGraph);
     if (deleteResult?.error) {
       showErrorToast(deleteResult?.error.toString());
       return;

@@ -1,22 +1,41 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { Login } from "./auth/Login";
+import { Perm } from "./auth/Perm";
+import { Role } from "./auth/Role";
 import { SignUp } from "./auth/SignUp";
+import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
 import { CompCategory } from "./base/CompCategory";
 import { DataType } from "./base/DataType";
+import { File } from "./base/File";
+import { Import } from "./other/Import";
+import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
 import { CollCategory } from "./page/CollCategory";
+import { Dashboard } from "./page/Dashboard";
 import { FormCategory } from "./page/FormCategory";
 import { Page } from "./page/Page";
 
+const FormMetaDataAuth: { [key: string]: IFormMetaData; } = {
+  Dashboard: Dashboard,
+  Import: Import,
+  Nav: Nav,
+  Perm: Perm,
+  Role: Role,
+  User: User,
+  // TODO: Dynamic Filter on Grid: Role->Filter
+};
+
 export const FormMetaData: { [key: string]: IFormMetaData } = {
+  ...FormMetaDataAuth,
   // TODO: Coll has only one Attr. Add validation for that.
   Coll: Coll,
   CollCategory: CollCategory,
   Comp: Comp,
   CompCategory: CompCategory,
   DataType: DataType,
+  File: File,
   FormCategory: FormCategory,
   LogIn: Login,
   Page: Page,

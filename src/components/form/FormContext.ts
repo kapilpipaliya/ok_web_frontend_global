@@ -5,6 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 export interface IFormContext {
     cleanUpConfig: () => { [key: string]: any };
     formData: Vertex;
+    formId: string;
     formMeta: Vertex;
     groupByTabsAndGroup: {
       [tab: string]: {

@@ -7,7 +7,7 @@ import type { Id } from "~/lib/graph/graph";
 
 import { ChipDropDown } from "~/components/Chip";
 import { CustomModal } from "~/components/CustomModal";
-import { DeleteDialog } from "~/components/DeleteDialog";
+import { DialogWithButtons } from "~/components/DeleteDialog";
 import { IconButton } from "~/components/IconButton";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
@@ -271,7 +271,7 @@ export const SupportTicketSection = (
                     <div class="flex ai:center jc:center">
                       <OpenDialog id={row.id} />
                       <IconButton icon="fluent:delete-48-regular" onClick={() => setDeleteRowId(row.id)} title="Delete" />
-                      <DeleteDialog
+                      <DialogWithButtons
                         message={"Are you sure you want to delete this ticket?"}
                         onCancel={() => {
                           setDeleteRowId(null);

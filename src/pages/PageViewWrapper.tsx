@@ -16,7 +16,6 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr"
 import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -80,7 +79,7 @@ export function PageViewWrapper(
 
   // load form meta data
   async function loadFormDesignerMetaData() {
-    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] || FormMetaDataAuth[props.pageVertexLabel] : null;
+    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] : null;
     if (!form || props.pageVertexLabel === "Form") {
       form = FormMetaData.Form;
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);

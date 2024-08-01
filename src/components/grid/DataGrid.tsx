@@ -5,7 +5,7 @@ import { createStore } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DeleteDialog } from "~/components/DeleteDialog";
+import { DialogWithButtons } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
@@ -15,7 +15,6 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr"
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 import { getConfiguredPermissions, hasPermissions } from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
@@ -36,13 +35,13 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [gridState, setGridState] = createStore<DataGridState>(getInitialGridState(graph));
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
 
-  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex?.id, graph, setGraph));
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex, graph, setGraph));
   const hasInsertPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
   const hasEditPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
   const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
   const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
 
-  setGridState({allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission});
+  setGridState({allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission, get tableId() {return props.tableId}});
 
   createEffect(on([() => gridState.cardSize, () => gridState.layout], () => {
     graph.saveUserSetting({ cardSize: gridState.cardSize, layout: gridState.layout });
@@ -66,7 +65,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     }
   };
   const loadMetaData = async () => {
-    let form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+    let form = FormMetaData[props.tableId];
     if (!form) {
       form = FormMetaData.Form;
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
@@ -85,7 +84,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       graph,
       setGraph,
       gridState.metaVertex
-    ) : FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+    ) : FormMetaData[props.tableId];
     setFormMetaData(form);
     
     setGridState("noPermissionCheck", !gridState.metaVertex);
@@ -94,6 +93,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   onMount(async () => {
     setGridState("isLoading", true);
     await loadMetaData();
+    if (gridState.error) {
+      setGridState("isLoading", false);
+      return;
+    }
     const data = await getTableData(formMetaData()!, props.tableId);
     if (data.error) {
       setGridState("error", data.error);
@@ -153,6 +156,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
           <LoaderNew loaderHeight="55vh" />
         </Match>
         <Match when={gridState.error}>
+          {/* TODO: CSS */}
           <div>Error: {gridState.error}</div>
         </Match>
         <Match when={formMetaData()}>
@@ -174,7 +178,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             totalItems={gridState.filteredData.length}
           />
           <Show when={gridState.deleteRowId}>
-            <DeleteDialog
+            <DialogWithButtons
               message="Are you sure you want to delete this item?"
               onCancel={() => setGridState("deleteRowId", null)}
               onConfirm={onDelete}

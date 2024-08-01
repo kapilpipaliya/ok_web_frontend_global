@@ -4,14 +4,13 @@ import type { Id } from "~/lib/graph/graph";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
 export const getFormData = async (
   formId: string,
   id: Id,
 ): Promise<{ error: string; graph?: ServerResult["graph"] }> => {
   try {
-    const form = FormMetaData[formId] || FormMetaDataAuth[formId];
+    const form = FormMetaData[formId];
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
     const result = await fetchDataFromMG({
       expression: `id:'${id}'`,

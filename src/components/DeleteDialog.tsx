@@ -6,9 +6,9 @@ autofocus
 
 import { CustomModal } from "./CustomModal";
 
-export function DeleteDialog(
+export function DialogWithButtons(
   props: Readonly<{
-    hasDeletePermission?: boolean;
+    hasPermission?: boolean;
     message?: string;
     onCancel?: () => void;
     onConfirm: () => void;
@@ -18,14 +18,14 @@ export function DeleteDialog(
   }>,
 ) {
   const handleConfirm = () => {
-    if (props.hasDeletePermission) {
+    if (props.hasPermission ?? true) {
       props.onConfirm();
     }
   };
 
   return (
     <CustomModal
-      customTitle={<span>{props.title || "Delete Confirmation"}</span>}
+      customTitle={<span>{props.title}</span>}
       dialogClass="min-w:20% r:10px p:0"
       footer={() => (
         <div class="flex ai:center jc:end">
@@ -33,14 +33,16 @@ export function DeleteDialog(
             autofocus
             class="danger mr:7px"
             onClick={props.onCancel}
+            type="button"
             use:autofocus
           >
             Cancel
           </button>
-          <Show when={props.hasDeletePermission}>
+          <Show when={props.hasPermission ?? true}>
             <button
               class="mr:10px"
               onClick={handleConfirm}
+              type="button"
             >
               Confirm
             </button>
@@ -52,14 +54,14 @@ export function DeleteDialog(
     >
       <Show
         fallback={
-          <p class="color:-gray-50 p:10px|0px">
-            You do not have permission to delete the row.
+          <p class="color:gray-50 p:10px|0px">
+            You do not have permission to perform the action.
           </p>
         }
-        when={props.hasDeletePermission}
+        when={props.hasPermission ?? true}
       >
         <p class="p:10px|0px">
-          {props.message || "Are you sure you want to delete this item?"}
+          {props.message}
         </p>
       </Show>
     </CustomModal>

@@ -106,7 +106,7 @@ export function DynamicComponent(
     return hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph) ?? parentRenderItems?.[0]?.hasDeletePermission;
   });
 
-  const isNoPermissionCheck = () => (props.noPermissionCheck || previewStore.isDesignMode);
+  const isNoPermissionCheck = () => (!previewStore || props.noPermissionCheck || previewStore.isDesignMode);
   const hasPermission = () => (hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const hasNoPermission = () => !hasInsertPermission() && !hasViewPermission() && !hasEditPermission();
   const isDisabledPermission = () => {
@@ -124,29 +124,31 @@ export function DynamicComponent(
         return;
       }*/
 
-      if (previewStore.isViewOnly) {
-        showErrorToast("You do not have permission to modify this field.");
-        return;
+      if (!isNoPermissionCheck()) {
+        if (previewStore.isViewOnly) {
+          showErrorToast("You do not have permission to modify this field.");
+          return;
+        }
+
+        if (!hasInsertPermission() && !hasEditPermission()) {
+          showErrorToast("You do not have permission to set this value.");
+          return;
+        }
+        if (existingValue === undefined && !hasInsertPermission()) {
+          showErrorToast("You do not have insert permission to set this value.");
+          return;
+        }
+
+
+        // Additional checks, e.g., role-based or context-sensitive permissions
+        /*if (!hasRolePermission('editor') || !isOwnerOfData(props.data)) {
+          showErrorToast("You do not have the necessary permissions to modify this data.");
+          return;
+        }*/
       }
 
-      if (!hasInsertPermission() && !hasEditPermission()) {
-        showErrorToast("You do not have permission to set this value.");
-        return;
-      }
-      if (existingValue === undefined && !hasInsertPermission()) {
-        showErrorToast("You do not have insert permission to set this value.");
-        return;
-      }
-
-
-      // Additional checks, e.g., role-based or context-sensitive permissions
-      /*if (!hasRolePermission('editor') || !isOwnerOfData(props.data)) {
-        showErrorToast("You do not have the necessary permissions to modify this data.");
-        return;
-      }
-  
       // Log the action for auditing purposes
-      logAction('modify', props.meta.P.name, value, currentUser);*/
+      // logAction('modify', props.meta.P.name, value, currentUser);
 
       // TODO: if only insert permission, and value is set dont display it.
       setValueGlobal(graph, setGraph, props.txnId!, props.meta, props.data!, value, false);
@@ -225,12 +227,13 @@ export function DynamicComponent(
       isRealTime={props.isRealTime}
       isTableInside={props.isTableInside}
       meta={props.meta}
+      noPermissionCheck={isNoPermissionCheck()}
       setValue={componentName() !== "DynamicTable" ? setValue : undefined}
       title={props.title ?? ""}
       txnId={props.txnId}
       value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
       {...expressionProperties()}
-      disabled={isNoPermissionCheck() ? false : (props.disabled ?? previewStore.isViewOnly ?? isDisabledPermission() ?? expressionProperties().disabled ?? customMetaProps.disabled)}
+      disabled={isNoPermissionCheck() ? customMetaProps.disabled : (props.disabled ?? previewStore.isViewOnly ?? isDisabledPermission() ?? expressionProperties().disabled ?? customMetaProps.disabled)}
     >
       <Show when={props.meta.id}>
         <PageAttrRender data={props.data} metaVertex={props.meta} />
