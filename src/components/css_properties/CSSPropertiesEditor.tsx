@@ -49,7 +49,7 @@ export function CSSPropertiesEditor(
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
-  const {formData} = useFormContext();
+  const [formStore] = useFormContext();
   let buttonRef: HTMLInputElement;
 
   function getSelectedValues() {
@@ -76,11 +76,11 @@ export function CSSPropertiesEditor(
   };
 
   return <>
-    <Show when={formData?.L[0] === "Comp"}>
+    <Show when={formStore?.formData?.L[0] === "Comp"}>
       <span>Preview:</span><br/>
       <DynamicComponent
-        componentName={formData.P.name}
-        data={formData}
+        componentName={formStore!.formData!.P.name}
+        data={formStore!.formData}
         isNoPermissionCheck
         meta={{P: {class: props.data.P.value}} as unknown as Vertex}
       /><br/>

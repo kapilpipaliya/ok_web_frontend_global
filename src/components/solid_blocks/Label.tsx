@@ -22,11 +22,11 @@ export function Label(
     JSX.IntrinsicAttributes &
     LabeledFieldProps>,
 ) {
-  const formData = useFormContext();
+  const [formStore] = useFormContext();
 
   const position = createMemo(() =>
     !props.position || props.position === "system"
-      ? formData.formMeta?.P.position || "top"
+      ? formStore!.formMeta?.P.position || "top"
       : props.position,
   );
   

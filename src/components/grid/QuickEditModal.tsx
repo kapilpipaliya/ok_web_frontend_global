@@ -5,7 +5,6 @@ import { Portal } from "solid-js/web";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { DynamicForm } from "~/components/form/DynamicForm";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { useZIndex } from "../ZIndex";

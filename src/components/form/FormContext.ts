@@ -1,22 +1,34 @@
+import type { createStore } from "solid-js/store";
+
 import { createContext, useContext } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-export interface IFormContext {
-    cleanUpConfig: () => { [key: string]: any };
-    formData: Vertex;
-    formId: string;
-    formMeta: Vertex;
-    groupByTabsAndGroup: {
-      [tab: string]: {
-        [group: string]: Vertex[];
-      };
-    };
-    metaTxnId: number;
-    tabs: string[];
-    txnId: number;
-  }
+import { InitialPermissions } from "../page_attr_render/InitialPermissions";
 
-export const FormContext = createContext({} as IFormContext);
+export function getInitialFormStore(graph: GraphInterface) {
+  return {
+    ...InitialPermissions,
+    cleanUpConfig: () => ({ rowMetaTxnIds: [] as number[] }),
+    count: 1,
+    discardPopup: false,
+    error: undefined as string | undefined,
+    formData: undefined as Vertex | undefined,
+    formId: undefined as string | undefined,
+    formMeta: undefined as Vertex | undefined,
+    formMetaData: null as IFormMetaData | null,
+    isPreview: false,
+    mounted: false,
+    txnId: graph.newTxnId,
+  };
+}
 
-export const useFormContext = () => useContext(FormContext);
+export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
+type FormStore = ReturnType<typeof createStore<FormStoreObject>>;
+
+export const FormContext = createContext<FormStore>();
+
+export function useFormContext() {
+  return useContext(FormContext) || [];
+}

@@ -25,34 +25,34 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const [local, others] = splitProps(props, ['data', 'meta', 'children']);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
-  const { formData, txnId } = useFormContext();
+  const [formStore] = useFormContext();
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, props.meta, formData)) {
+    if (isAnyFieldInvalid(graph, setGraph, props.meta, formStore!.formData!)) {
       return;
     }
-    const data = commitTxn(txnId, graph);
+    const data = commitTxn(formStore!.txnId, graph);
     await showLoadingToast({
       loadMessage: "Submitting Data...",
       onSuccess: (data) => {
         // setTimeout(() => navigate(-1), 0);
       },
-      promise: submitDataCall(data, graph, setGraph, txnId),
+      promise: submitDataCall(data, graph, setGraph, formStore!.txnId),
       successMessage: "Data submitted successfully",
     });
   };
 
   const onCancel = () => {
-    revertTransaction(txnId, graph);
+    revertTransaction(formStore!.txnId, graph);
     setTimeout(() => navigate(-1));
   };
 
   const onReset = () => {
-    const initialIndex = getNamedIndex(txnId, "initial", graph);
+    const initialIndex = getNamedIndex(formStore!.txnId, "initial", graph);
     if (initialIndex === undefined) return;
-    revertTransactionUpToIndex(txnId, initialIndex, graph);
+    revertTransactionUpToIndex(formStore!.txnId, initialIndex, graph);
   };
   const extraProps = createMemo(() => {
     return {

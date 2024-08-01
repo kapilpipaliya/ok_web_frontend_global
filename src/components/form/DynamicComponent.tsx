@@ -57,7 +57,7 @@ export function DynamicComponent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const formStore = useFormContext() ?? {};
+  const [formStore] = useFormContext();
   const { showErrorToast } = useToast();
 
   const componentName = () =>
@@ -106,7 +106,7 @@ export function DynamicComponent(
     return hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph) ?? parentRenderItems?.[0]?.hasDeletePermission;
   });
 
-  const isNoPermissionCheck = () => (!previewStore || props.isNoPermissionCheck || formStore?.formMeta.P.isNoPermissionCheck || previewStore.isDesignMode);
+  const isNoPermissionCheck = () => (!previewStore || props.isNoPermissionCheck || formStore?.formMeta?.P.isNoPermissionCheck || previewStore.isDesignMode);
   const hasPermission = () => (hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const hasNoPermission = () => !hasInsertPermission() && !hasViewPermission() && !hasEditPermission();
   const isDisabledPermission = () => {
@@ -169,7 +169,7 @@ export function DynamicComponent(
       if (property === "hidden" && previewStore.isDesignMode) {
         continue;
       }
-      if (formStore.formData && rule) {
+      if (formStore?.formData && rule) {
         try {
           values[property] = evaluateRule(rule, formStore.formData, graph, setGraph);
           if (property.toLowerCase().endsWith("class")) {

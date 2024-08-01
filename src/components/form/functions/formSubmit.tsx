@@ -11,20 +11,19 @@ import { useToast } from "../../Toast";
 
 export function formSubmit(closePopUp?: () => void) {
   const navigate = useNavigate();
-  const formData = useFormContext();
+  const [formStore] = useFormContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useGraph();
 
   return async () => {
-    const txnId = formData.txnId;
     const navigateToParentRoute = () => {
       // navigate(removeLastPathSegment());
     };
 
-    const label = formData.formData.L[0].replace(/([A-Z])/g, " $1").trim();
-    if (graph.transactions.get(txnId)?.steps.length === 0) {
+    const label = formStore!.formData!.L[0].replace(/([A-Z])/g, " $1").trim();
+    if (graph.transactions.get(formStore!.txnId)?.steps.length === 0) {
       showWarningToast(`There is nothing to save for ${label}.`);
-    } else if (isDisabledTxn(txnId, graph)) {
+    } else if (isDisabledTxn(formStore!.txnId, graph)) {
       showWarningToast(`${label} is already saved.`);
     }
 
@@ -39,16 +38,16 @@ export function formSubmit(closePopUp?: () => void) {
     // TODO: add validation on form that AttrsTableData keys should not available.
     // !!!TODO!!! Handle Error Received From server when commit
     if (!isRealTime) {
-      data = commitTxn(txnId, graph);
+      data = commitTxn(formStore!.txnId, graph);
       if (!data) {
         showWarningToast("No data to Submit");
         return;
       }
 
-      const name = formData?.formData?.P.name;
+      const name = formStore!.formData!.P.name;
 
       const res = await checkUniqueConstrains(
-        formData.formData,
+        formStore!.formData!,
       );
 
       if (res.error) {
@@ -66,7 +65,7 @@ export function formSubmit(closePopUp?: () => void) {
             navigateToParentRoute();
           }
         },
-        promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
+        promise: submitDataCall({ ...data, name }, graph, setGraph, formStore!.txnId),
         successMessage: `${label} Saved Successfully`,
       });
     }

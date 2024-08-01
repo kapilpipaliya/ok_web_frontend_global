@@ -36,7 +36,7 @@ export function SelectField(
   } & GenericComponentProps>,
 ) {
   const [graph, setGraph] = useGraph();
-  const formData = useFormContext();
+  const [formStore] = useFormContext();
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
 
@@ -171,7 +171,7 @@ export function SelectField(
         }
         onChangeHandler(
           txnId,
-          formData?.formData,
+          formStore!.formData!,
           props.data!,
           props.meta,
           graph,

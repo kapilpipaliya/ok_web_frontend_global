@@ -5,15 +5,13 @@ import { Match, Show, Switch, createEffect, createMemo, on, onCleanup, onMount, 
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DialogWithButtons } from "~/components/DeleteDialog";
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { FormContext } from "~/components/form/FormContext";
+import { FormContext, getInitialFormStore } from "~/components/form/FormContext";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
-import { InitialPermissions } from "~/components/page_attr_render/InitialPermissions";
 import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
@@ -21,7 +19,7 @@ import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { type GraphInterface, type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph } from "~/lib/graph/graph";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -31,25 +29,9 @@ import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-
-import { DebugPermissionInfo } from "./DebugPermissionInfo";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
-
-const getInitialFormStore = (graph: GraphInterface) => ({
-  ...InitialPermissions,
-  count: 1,
-  discardPopup: false,
-  error: undefined as string | undefined,
-  formData: undefined as Vertex | undefined,
-  formId: undefined as string | undefined,
-  formMeta: undefined as Vertex | undefined,
-  formMetaData: null as IFormMetaData | null,
-  isPreview: false,
-  mounted: false,
-  txnId: graph.newTxnId,
-});
 
 export function PageViewWrapper(
   props: Readonly<{
@@ -318,7 +300,7 @@ export function PageViewWrapper(
         />
       </Show> */}
       <Show when={formStore.formData}>
-        <FormContext.Provider value={formStore}>
+        <FormContext.Provider value={[formStore, setFormStore]}>
           <Show when={!authError() && formStore.mounted && formStore.formMeta && ((props.dataId && props.dataId !== "new") ? formStore.formData : true)}>
             <Show
               fallback={

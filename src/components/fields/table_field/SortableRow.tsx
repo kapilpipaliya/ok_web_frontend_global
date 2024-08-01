@@ -35,15 +35,15 @@ export const SortableRow = (props: Readonly<{
 } & GenericComponentProps>) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
-  const { cleanUpConfig } = useFormContext();
+  const [formStore] = useFormContext();
   const [expanded, setExpanded] = createSignal(true);
   const [disabled] = createSignal(false);
 
   createComputed(
     on(props.tableColumnsTemplate, (columns) => {
       const metaTxnId = rowMetaInitialize(graph, setGraph, props.joinVertex, props.meta, columns);
-      if (metaTxnId && cleanUpConfig) {
-        const config = cleanUpConfig();
+      if (metaTxnId && formStore?.cleanUpConfig) {
+        const config = formStore.cleanUpConfig();
         if (!config.rowMetaTxnIds) {
           config.rowMetaTxnIds = [];
         }

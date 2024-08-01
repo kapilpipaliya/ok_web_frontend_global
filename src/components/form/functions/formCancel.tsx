@@ -8,7 +8,7 @@ import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 export function formCancel(closePopUp?: () => void) {
   const [graph] = useGraph();
-  const { txnId } = useFormContext();
+  const [formStore] = useFormContext();
   const navigate = useNavigate();
 
   const navigateToParentRoute = () => {
@@ -16,8 +16,8 @@ export function formCancel(closePopUp?: () => void) {
   };
 
   return () => {
-    revertTransaction(txnId, graph);
-    deleteTxnId(txnId, graph);
+    revertTransaction(formStore!.txnId, graph);
+    deleteTxnId(formStore!.txnId, graph);
     if (!closePopUp) {
       navigateToParentRoute();
     } else {

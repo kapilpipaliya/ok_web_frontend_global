@@ -23,7 +23,7 @@ export function PageAttrRender(
 ) {
   const [parentItems] = usePageRenderContext();
   const [graph, setGraph] = useGraph();
-  const { formData, txnId } = useFormContext();
+  const [formStore] = useFormContext();
   const [previewStore] = usePreviewContext();
 
   return (
@@ -64,7 +64,7 @@ export function PageAttrRender(
               // setValue={props.setValue}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
-              txnId={txnId} />
+              txnId={formStore!.txnId} />
           );
         };
         const PageComponentWithPreview = () => (

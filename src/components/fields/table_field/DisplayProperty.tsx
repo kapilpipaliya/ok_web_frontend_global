@@ -54,7 +54,7 @@ export function DisplayProperty(props: Readonly<{
   txnId: number;
 }>) {
   // if there is no parent FormContext, it should still work.
-  const { txnId: formTxnId } = useFormContext();
+  const [formStore] = useFormContext();
   const [graph, setGraph] = useGraph();
   const metaVertex = createMemo(() => props.getMetaVertex(props.column.id));
   const outerOwner = getOwner();
@@ -73,9 +73,9 @@ export function DisplayProperty(props: Readonly<{
         async (v) => {
           if (metaVertex().P.meta) {
             let metaData;
-            if (formTxnId) {
-              const mutationData = formTxnId
-                ? commitTxn(formTxnId, graph)
+            if (formStore?.txnId) {
+              const mutationData = formStore.txnId
+                ? commitTxn(formStore.txnId, graph)
                 : undefined;
               metaData = await getPropsFromMetaExpressionMGCall(
                 metaVertex(),
@@ -128,9 +128,9 @@ export function DisplayProperty(props: Readonly<{
           ).vertexes,
           async (vertexes) => {
             let componentName = "";
-            if (formTxnId) {
-              const mutationData = formTxnId
-                ? commitTxn(formTxnId, graph)
+            if (formStore?.txnId) {
+              const mutationData = formStore.txnId
+                ? commitTxn(formStore.txnId, graph)
                 : undefined;
               const res = await getSelectionOptionsMGCall(
                 [props.joinVertex],
