@@ -7,7 +7,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { getConfiguredPermissions, hasPermissions } from "~/components/grid/permissions";
+import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
@@ -17,8 +17,6 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
-
-import { DebugPermissionInfo } from "./DebugPermissionInfo";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -185,6 +183,7 @@ export function PageViewWrapper(
     hasEditPermission={hasEditPermission()}
     hasInsertPermission={hasInsertPermission()}
     hasViewPermission={hasViewPermission()}
+    id={id()}
     metaVertex={metaVertex()}
   />
 

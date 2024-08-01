@@ -2,13 +2,13 @@ import { toTitle } from "case-switcher-js";
 
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
-export function Label(props: Readonly<{ metaVertex: Vertex }>) {
+export function Label(props: Readonly<{ meta: Vertex }>) {
   return (
     <>
       {toTitle(
-        props.metaVertex.P.displayName ||
-          props.metaVertex.P[IdAttr] ||
-          props.metaVertex.P.key ||
+        props.meta.P.displayName ||
+          props.meta.P[IdAttr] ||
+          props.meta.P.key ||
           "",
       )}
     </>

@@ -1,6 +1,5 @@
 import { toTitle } from "case-switcher-js";
 import { For, Match, Show, Switch, createMemo } from "solid-js";
-import { createStore } from "solid-js/store";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
@@ -16,7 +15,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useFormContext } from "../form/FormContext";
-import { PageRenderContextProvider, getInitialPageRenderStore, usePageRenderContext } from "./PageRenderContext";
+import { usePageRenderContext } from "./PageRenderContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
@@ -68,12 +67,8 @@ export function PageAttrRender(
               txnId={txnId} />
           );
         };
-        const repeterStore = createStore(getInitialPageRenderStore());
-
         const PageComponentWithPreview = () => (
-          <PageRenderContextProvider item={item} store={repeterStore}>
-            <Content />
-          </PageRenderContextProvider>
+          <Content />
         );
         // currently context is not reactive, but we are assuming it will work.
         return (

@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { createMemo, splitProps } from "solid-js";
+import { Show, createMemo, splitProps } from "solid-js";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -61,6 +61,9 @@ export function ButtonField(props: Readonly<ButtonProps>) {
           return;
         }
         if (props.meta.P.type === "submit") {
+          if (previewStore.isViewOnly) {
+            return;
+          }
           onSubmit();
         } else if (props.meta.P.type === "cancel") {
           onCancel();
@@ -71,11 +74,13 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     };
   });
   return (
-    <button {...others} {...extraProps}>
-      {local.data?.P?.[local.meta.P.name] ??
-        local.meta.P.text ??
-        local.meta.P.children}
-      {local.children}
-    </button>
+    <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
+      <button {...others} {...extraProps}>
+        {local.data?.P?.[local.meta.P.name] ??
+          local.meta.P.text ??
+          local.meta.P.children}
+        {local.children}
+      </button>
+    </Show>
   );
 }

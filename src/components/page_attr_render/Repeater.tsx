@@ -12,7 +12,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { PageRenderContextProvider, getInitialPageRenderStore } from "./PageRenderContext";
+import { getInitialPageRenderStore } from "./PageRenderContext";
 
 
 export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
@@ -72,9 +72,7 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
           <RepeaterVertexContext.Provider
             value={[vertex, ...useRepeaterVertexContext()]}
           >
-            <PageRenderContextProvider item={vertex} store={repeterStore}>
               <PageAttrRender data={vertex} metaVertex={props.meta} />
-            </PageRenderContextProvider>
           </RepeaterVertexContext.Provider>
         )}
       </For>

@@ -6,7 +6,6 @@ import {
   createSelector,
   createSignal,
 } from "solid-js";
-import { createStore } from "solid-js/store";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
@@ -20,7 +19,6 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { PageRenderContextProvider, getInitialPageRenderStore } from "../PageRenderContext";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
 
@@ -84,43 +82,40 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     );
     resetDragDropState(setLayoutStore);
   };
-  const repeterStore = createStore(getInitialPageRenderStore());
 
   return (
-    <PageRenderContextProvider item={props.item} store={repeterStore}>
-      <div // NOSONAR
-        onClick={handleClick}
-        onDragEnter={handleDragOverEvent}
-        onDragLeave={() => handleDragLeave(setLayoutStore)}
-        onDragOver={handleDragOverEvent}
-        onDrop={handleDropEvent}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseOver={handleMouseEnter} // NOSONAR
-        ref={el => {
-          setReference(el);
-          // @ts-expect-error ignore
-          el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
-          el.getBoundingClientRect = () => {
-            if (layoutStore?.hiddenNodes.includes(props.item.id)) {
-              // @ts-expect-error ignore
-              return el.getBoundingClientRectOriginal();
-            }
-            return getBoundingRectChildren(el);
-          };
-        }}
-        style="display:contents;"
-      >
-        <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
-          {resolvedChildren()}
-        </Show>
-        <Show when={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
-          <AttrConfigPopOverWrapper isSelectedLayoutId={isSelectedLayoutId(props.item.id)} item={props.item} reference={reference} />
-        </Show>
-        <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
-          <BorderOverlay item={props.item} reference={reference} />
-        </Show>
-      </div>
-    </PageRenderContextProvider>
+    <div // NOSONAR
+      onClick={handleClick}
+      onDragEnter={handleDragOverEvent}
+      onDragLeave={() => handleDragLeave(setLayoutStore)}
+      onDragOver={handleDragOverEvent}
+      onDrop={handleDropEvent}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseOver={handleMouseEnter} // NOSONAR
+      ref={el => {
+        setReference(el);
+        // @ts-expect-error ignore
+        el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
+        el.getBoundingClientRect = () => {
+          if (layoutStore?.hiddenNodes.includes(props.item.id)) {
+            // @ts-expect-error ignore
+            return el.getBoundingClientRectOriginal();
+          }
+          return getBoundingRectChildren(el);
+        };
+      }}
+      style="display:contents;"
+    >
+      <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
+        {resolvedChildren()}
+      </Show>
+      <Show when={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
+        <AttrConfigPopOverWrapper isSelectedLayoutId={isSelectedLayoutId(props.item.id)} item={props.item} reference={reference} />
+      </Show>
+      <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
+        <BorderOverlay item={props.item} reference={reference} />
+      </Show>
+    </div>
   );
 }

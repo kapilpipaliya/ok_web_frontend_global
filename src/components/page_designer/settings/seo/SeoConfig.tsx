@@ -48,7 +48,7 @@ export function SEOFormGroupProperties() {
               class={`flex ai:center gap:2 justify-content:space-between mt:6`}
             >
               <span class="f:15 flex:.5">
-                <Label metaVertex={metaVertex} />
+                <Label meta={metaVertex} />
               </span>
               <span class="f:15 flex:1">
                 <Switch>

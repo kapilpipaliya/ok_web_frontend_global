@@ -2,9 +2,9 @@
 import { type Accessor, Match, Show, Switch } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
-import { Content } from "./Content";
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";
 
@@ -12,7 +12,6 @@ export function HighlightSetValueContent(
   props: Readonly<{
     componentName: Accessor<string>;
     meta: Vertex;
-    metaVertex: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
     txnId: number;
@@ -20,14 +19,14 @@ export function HighlightSetValueContent(
 ) {
   return (
     <div
-      class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
     >
       <span class="f:15 flex:.5">
-        <Label metaVertex={props.metaVertex} />
+        <Label meta={props.meta} />
       </span>
       <span class="f:15 flex:1">
         <Switch>
-          <Match when={props.metaVertex.P.name === "defaultValue"}>
+          <Match when={props.meta.P.name === "defaultValue"}>
             <DefaultValueContent
               meta={props.meta}
               selectedLayout={props.selectedLayout}
@@ -36,11 +35,13 @@ export function HighlightSetValueContent(
             />
           </Match>
           <Match when={true}>
-            <Content
-              componentName={props.componentName}
+            <DynamicComponent
+              componentName={props.componentName()}
+              data={props.selectedLayout}
+              isRealTime={false}
               meta={props.meta}
-              selectedLayout={props.selectedLayout}
-              setValue={props.setValue}
+              noPermissionCheck={true}
+              setValue={(data) => props.setValue(props.meta, data)}
               txnId={props.txnId}
             />
           </Match>
@@ -61,15 +62,15 @@ export function HighlightSetValueContent(
       </span>
       <Show
         when={
-          props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined &&
-          props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null
+          props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
+          props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
         }
       >
         <IconButton
           data-testid="clearIcon"
           icon="mdi:close"
           iconClass="color:#ff0000 cursor:pointer"
-          onClick={() => props.setValue(props.metaVertex, null)}
+          onClick={() => props.setValue(props.meta, null)}
           size={24}
         />
       </Show>

@@ -1,15 +1,16 @@
 import { createContext, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
+
+import { InitialPermissions } from "../page_attr_render/InitialPermissions";
 
 export function getInitialPreviewStore() {
   return {
-    hasDeletePermission: false as boolean | undefined,
-    hasEditPermission: false as boolean | undefined,
-    hasInsertPermission: false as boolean | undefined,
-    hasViewPermission: false as boolean | undefined,
+    ...InitialPermissions,
+    id: undefined as Id | undefined,
     isDesignMode: false as boolean | undefined,
+    isViewOnly: false as boolean | null | undefined,
     previewData: undefined as Vertex | undefined,
     previewMeta: undefined as Vertex | undefined,
   };

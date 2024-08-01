@@ -11,7 +11,7 @@ import { SelectRelation } from "./SelectRelation";
 import { getRenderOptionLabelFunction } from "./getRenderOptionLabelFunction";
 
 interface SelectRuleFieldProps {
-  metaVertex: Vertex;
+  meta: Vertex;
   selectedLayout: Vertex;
   txnId: number;
 }
@@ -24,8 +24,8 @@ export function SelectRuleField(props: SelectRuleFieldProps) {
       class: "flex:1",
       collection: () => `id:'${layoutStore.formData.formData.id}'->Rule`,
       componentName: "SelectBox",
-      displayName: props.metaVertex.P.displayName,
-      name: props.metaVertex.P.name,
+      displayName: props.meta.P.displayName,
+      name: props.meta.P.name,
       renderLabel: getRenderOptionLabelFunction(RulesModal),
       useLocalStorage: true,
     },
@@ -33,10 +33,10 @@ export function SelectRuleField(props: SelectRuleFieldProps) {
 
   return (
     <div
-      class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
     >
       <span class="f:15 flex:.5">
-        <Label metaVertex={props.metaVertex} />
+        <Label meta={props.meta} />
       </span>
       <div class="flex f:15 flex:1">
         <SelectRelation data={props.selectedLayout} meta={meta} txnId={props.txnId} />

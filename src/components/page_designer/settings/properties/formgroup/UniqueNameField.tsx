@@ -11,7 +11,6 @@ import { Label } from "./Label";
 export function UniqueNameField(
   props: Readonly<{
     meta: Vertex;
-    metaVertex: Vertex;
     selectedLayout: Vertex;
     setValue: (meta: Vertex, data: any) => void;
     txnId: number;
@@ -52,10 +51,10 @@ export function UniqueNameField(
   }
   return (
     <div
-      class={`${props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.metaVertex.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
     >
       <span class="f:15 flex:.5">
-        <Label metaVertex={props.metaVertex} />
+        <Label meta={props.meta} />
       </span>
       <span class="f:15 flex:1">
         <DynamicComponent
@@ -65,7 +64,7 @@ export function UniqueNameField(
           meta={props.meta}
           noPermissionCheck={true}
           setValue={(data: string) =>
-            setUniqueNameValue(props.metaVertex, data)
+            setUniqueNameValue(props.meta, data)
           }
           txnId={0}
         />

@@ -4,8 +4,11 @@ import { type JSX, createContext, useContext } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { InitialPermissions } from "./InitialPermissions";
+
 export function getInitialPageRenderStore() {
   return {
+    ...InitialPermissions,
     vertexes: [] as Vertex[],
   };
 }

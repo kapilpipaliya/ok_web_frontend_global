@@ -13,6 +13,7 @@ import {
 
 import { TabsWithUnderline } from "~/components/SimpleTabs";
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
@@ -30,7 +31,6 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { type PageLayoutObject, useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
-import { Content } from "./Content";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPageField } from "./SelectPageField";
@@ -38,13 +38,13 @@ import { UniqueNameField } from "./UniqueNameField";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 
-function modifyMetaVertexExpr(metaVertex: Vertex) {
+function modifyMetaVertexExpr(meta: Vertex) {
   return {
-    ...metaVertex,
+    ...meta,
     P: {
-      ...metaVertex.P,
-      displayName: `${metaVertex.P.displayName ?? metaVertex.P.name} Expr`,
-      name: `${metaVertex.P.name}`,
+      ...meta.P,
+      displayName: `${meta.P.displayName ?? meta.P.name} Expr`,
+      name: `${meta.P.name}`,
     },
   };
 }
@@ -82,10 +82,10 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}>
-        {(metaVertex) => (
+        {(meta) => (
           <PropertyField
+            meta={meta}
             metaTxnId={metaTxnId}
-            metaVertex={metaVertex}
             selectedLayout={props.selectedLayout}
             setValue={props.setValue}
             txnId={props.txnId}
@@ -176,8 +176,8 @@ function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: G
 }
 
 interface PropertyFieldProps {
+  meta: Vertex;
   metaTxnId: number;
-  metaVertex: Vertex;
   selectedLayout: Vertex;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: (meta: Vertex, data: any) => void;
@@ -186,69 +186,68 @@ interface PropertyFieldProps {
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
-  const componentName = createMemo(() => getComponentForCollRow(props.metaVertex, props.metaVertex, graph, setGraph));
-  const metaProps = getPropsFromMetaExpression(graph, setGraph, props.metaVertex, props.metaVertex);
-  mergeVertexProperties(props.metaTxnId, props.metaVertex.id, graph, setGraph, metaProps);
+  const componentName = createMemo(() => getComponentForCollRow(props.meta, props.meta, graph, setGraph));
+  const metaProps = getPropsFromMetaExpression(graph, setGraph, props.meta, props.meta);
+  mergeVertexProperties(props.metaTxnId, props.meta.id, graph, setGraph, metaProps);
 
   return (
     <div>
       <Switch>
-        <Match when={props.metaVertex.P.name === "name"}>
+        <Match when={props.meta.P.name === "name"}>
           <UniqueNameField
-            meta={props.metaVertex}
-            metaVertex={props.metaVertex}
+            meta={props.meta}
             selectedLayout={props.selectedLayout}
             setValue={props.setValue}
             txnId={props.txnId}
           />
         </Match>
-        <Match when={props.metaVertex.P.name === "thankYouPage"}>
+        <Match when={props.meta.P.name === "thankYouPage"}>
           <SelectPageField
-            meta={props.metaVertex}
-            metaVertex={props.metaVertex}
+            meta={props.meta}
             selectedLayout={props.selectedLayout}
             setValue={props.setValue}
             txnId={props.txnId}
           />
         </Match>
-        <Match when={props.metaVertex.P.name === "required" || props.metaVertex.P.name === "hidden" || props.metaVertex.P.name === "disabled" || props.metaVertex.P.name === "calculatedValue"}>
+        <Match when={props.meta.P.name === "required" || props.meta.P.name === "hidden" || props.meta.P.name === "disabled" || props.meta.P.name === "calculatedValue"}>
           <SelectRuleField
-            metaVertex={props.metaVertex}
+            meta={props.meta}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
           />
         </Match>
 
-        <Match when={props.metaVertex.P.name === "perm"}>
+        <Match when={props.meta.P.name === "perm"}>
           <SelectPermissionField
-            metaVertex={props.metaVertex}
+            meta={props.meta}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
           />
         </Match>
         <Match when={componentName() === "Table"}>
           <h3>
-            <Label metaVertex={props.metaVertex} />
+            <Label meta={props.meta} />
           </h3>
-          <Content
-            componentName={componentName}
-            meta={props.metaVertex}
-            selectedLayout={props.selectedLayout}
-            setValue={props.setValue}
+          <DynamicComponent
+            componentName={componentName()}
+            data={props.selectedLayout}
+            isRealTime={false}
+            meta={props.meta}
+            noPermissionCheck={true}
+            setValue={(data) => props.setValue(props.meta, data)}
             txnId={props.txnId}
           />
         </Match>
         <Match when={props.selectedLayout}>
           <HighlightSetValueContent
             componentName={componentName}
-            meta={props.metaVertex}
-            metaVertex={props.metaVertex}
+            meta={props.meta}
             selectedLayout={props.selectedLayout}
             setValue={props.setValue}
             txnId={props.txnId}
           />
           <SelectRuleField
-            metaVertex={modifyMetaVertexExpr(props.metaVertex)}
+            meta={modifyMetaVertexExpr(props.meta)}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
           />

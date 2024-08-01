@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { PreviewContext, type PreviewStoreObject } from "~/components/page_designer/PreviewContext";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrContext";
 
@@ -15,6 +15,7 @@ export function PageView(
     hasEditPermission?: boolean | null;
     hasInsertPermission?: boolean | null;
     hasViewPermission?: boolean | null;
+    id?: Id;
     isDesignMode?: boolean;
     metaVertex?: Vertex;
   }>,
@@ -23,12 +24,21 @@ export function PageView(
 
   const dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
+  const isViewOnlyForm = createMemo(() => {
+    if (!props.id && !props.hasInsertPermission) return true;
+    if (props.id && !props.hasEditPermission) {
+      return props.hasViewPermission;
+    }
+  });
+
   const previewStore = createStore<PreviewStoreObject>({
     get hasDeletePermission() { return props.hasDeletePermission ?? true; },
     get hasEditPermission() { return props.hasEditPermission ?? true; },
     get hasInsertPermission() { return props.hasInsertPermission ?? true; },
     get hasViewPermission() { return props.hasViewPermission ?? true; },
+    get id() { return props.id; },
     get isDesignMode() { return props.isDesignMode; },
+    get isViewOnly() { return isViewOnlyForm(); },
     get previewData() { return props.data; },
     get previewMeta() { return props.metaVertex; },
   });

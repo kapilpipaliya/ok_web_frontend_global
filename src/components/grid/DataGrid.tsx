@@ -17,13 +17,13 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormMetaDataAuth } from "~/lib/meta/formMetaDataAuth";
 
+import { getConfiguredPermissions, hasPermissions } from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
 import { DataGridProvider, type DataGridState, getInitialGridState } from "./DataGridContext";
 import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
-import { getConfiguredPermissions, hasPermissions } from "./permissions";
 
 interface DataGridProps {
   tableId: string;
