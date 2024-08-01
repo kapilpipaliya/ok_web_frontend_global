@@ -109,8 +109,8 @@ export function CollAndData() {
             componentName={"TextBox"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
+            isNoPermissionCheck={true}
             meta={collMetaVertex.vertexes![2]}
-            noPermissionCheck={true}
             title={""}
             txnId={layoutStore.formData.txnId}
           />

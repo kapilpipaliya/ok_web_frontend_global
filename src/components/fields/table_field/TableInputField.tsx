@@ -30,9 +30,9 @@ import { insertNewRow } from "./insertNewRow";
 
 export function TableInputField(
   props: Readonly<{
+    isNoPermissionCheck?: boolean;
     isRealTime?: boolean;
     isTableInside?: boolean;
-    noPermissionCheck?: boolean;
     txnId?: number;
   } & GenericComponentProps>,
 ) {
@@ -164,10 +164,10 @@ export function TableInputField(
                       dragFromIndex={dragFromIndex}
                       dragToIndex={dragToIndex}
                       handleDrop={handleDrop}
+                      isNoPermissionCheck={props.isNoPermissionCheck}
                       isRealTime={props.isRealTime ?? false}
                       joinVertex={vertex}
                       meta={props.meta}
-                      noPermissionCheck={props.noPermissionCheck}
                       rowIndex={index()}
                       setDragFromIndex={setDragFromIndex}
                       setDragToIndex={setDragToIndex}

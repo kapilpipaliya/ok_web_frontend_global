@@ -19,9 +19,9 @@ export function UniqueConstrains() {
     <div class="mt:6">
       <TableInputField
           data={layoutStore.formData?.formData}
+          isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
-          noPermissionCheck={true}
           txnId={layoutStore.formData.txnId}
         />
     </div>

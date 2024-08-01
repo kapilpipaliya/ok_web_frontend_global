@@ -54,9 +54,9 @@ export function SelectPageField(
       <DynamicComponent
         componentName={"SelectBox"}
         data={props.selectedLayout}
+        isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
-        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
     );

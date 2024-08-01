@@ -1,27 +1,59 @@
 import { Meta, Title } from "@solidjs/meta";
+import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { Match, Show, Switch, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
+import { Match, Show, Switch, createEffect, createMemo, on, onCleanup, onMount, untrack } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
+import { DialogWithButtons } from "~/components/DeleteDialog";
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
+import { FormContext } from "~/components/form/FormContext";
+import { SaveCancelButton } from "~/components/form/SaveCancelButton";
+import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
+import { InitialPermissions } from "~/components/page_attr_render/InitialPermissions";
 import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
+import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+
+import { DebugPermissionInfo } from "./DebugPermissionInfo";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
 
+const getInitialFormStore = (graph: GraphInterface) => ({
+  ...InitialPermissions,
+  count: 1,
+  discardPopup: false,
+  error: undefined as string | undefined,
+  formData: undefined as Vertex | undefined,
+  formId: undefined as string | undefined,
+  formMeta: undefined as Vertex | undefined,
+  formMetaData: null as IFormMetaData | null,
+  isPreview: false,
+  mounted: false,
+  txnId: graph.newTxnId,
+});
+
 export function PageViewWrapper(
   props: Readonly<{
+    closePopUp?: () => void;
     dataId?: Id
     expression?: string;
     formId?: string;
@@ -31,21 +63,31 @@ export function PageViewWrapper(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const txnId = graph.newTxnId;
 
-  const [dataVertex, setDataVertex] = createSignal<Vertex>();
-  const [metaVertex, setMetaVertex] = createSignal<Vertex>();
-  const [mounted, setMounted] = createSignal(false);
-  const [isPreview, setIsPreview] = createSignal(false);
-  const [error, setError] = createSignal<string>();
-  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
+  const [formStore, setFormStore] = createStore(getInitialFormStore(graph));
+  setFormStore({
+    get formId() {
+      return props.pageVertexName;
+    }
+  });
+  const [, setLayoutStore] = useDesignerLayoutStore() || [];
+  let onConfirmExit: () => void;
 
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
-  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, metaVertex(), graph, setGraph));
-  const hasInsertPermission = createMemo(() => formMetaData() && !id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
-  const hasEditPermission = createMemo(() => formMetaData() && !!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
-  const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
-  const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
+  const isNoPermissionCheck = createMemo(() => formStore.formMetaData?.isNoPermissionCheck);
+  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, formStore.formMeta, graph, setGraph));
+  const hasInsertPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph))));
+  const hasEditPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph))));
+  const hasViewPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || hasPermissions(allConfiguredPermission(), 'view', graph, setGraph)));
+  const hasDeletePermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph)));
+
+  setFormStore({
+    get hasDeletePermission() { return hasDeletePermission(); },
+    get hasEditPermission() { return hasEditPermission(); },
+    get hasInsertPermission() { return hasInsertPermission(); },
+    get hasViewPermission() { return hasViewPermission(); },
+    get isNoPermissionCheck() { return isNoPermissionCheck(); },
+  });
 
   const authError = createMemo(() => {
     if (!id()) {
@@ -69,17 +111,20 @@ export function PageViewWrapper(
     if (Array.isArray(data.result)) {
       if (data.result.length > 0) {
         const metaVertex_ = graph.vertexes[data.result[0].id];
-        setMetaVertex(metaVertex_);
+        setFormStore("formMeta", metaVertex_);
       }
     } else if (isObject(data.result)) {
       const metaVertex_ = graph.vertexes[data.result.id];
-      setMetaVertex(metaVertex_);
+      setFormStore("formMeta", metaVertex_);
     }
   };
 
   // load form meta data
   async function loadFormDesignerMetaData() {
     let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] : null;
+    if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
+      form = FormMetaData[props.pageVertexName];
+    }
     if (!form || props.pageVertexLabel === "Form") {
       form = FormMetaData.Form;
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
@@ -94,36 +139,44 @@ export function PageViewWrapper(
         outgoing,
       });
       if (!isValidResponse(data) || !data.result || data.result.length === 0) {
-        setError(`No ${props.pageVertexName} configured`);
+        setFormStore("error", `No ${props.pageVertexName} configured`);
         return;
       }
       metaDtaInitialize(data);
-      if (metaVertex()) {
+      if (formStore.formMeta) {
         form = generateFormMetaAttributes(
           graph,
           setGraph,
-          metaVertex()!
+          formStore.formMeta
         )
       }
     }
-    setFormMetaData(form);
-    if (!formMetaData()) {
-      setError(`No ${props.pageVertexName} configured`);
+    setFormStore("formMetaData", form);
+    if (!formStore.formMetaData) {
+      setFormStore("error", `No ${props.pageVertexName} configured`);
       return;
     }
+    if (!formStore.formMeta) {
+      const metaVertexResult = untrack(() => createMeta(form, graph, setGraph));
 
-    setIsPreview(props.pageId === "preview");
+      if (metaVertexResult.error) {
+        return { error: "Meta Vertex Error" };
+      }
+      setFormStore("formMeta", metaVertexResult.vertex!);
+    }
+
+    setFormStore("isPreview", props.pageId === "preview");
   }
   async function loadData() {
     if (!id()) {
       return;
     }
-    if (!formMetaData() || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission())) {
+    if (!formStore.formMetaData || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission())) {
       return;
     }
     try {
       const { incoming, outgoing } = getEdgesFromRowsAttr(
-        formMetaData()!.attributes,
+        formStore.formMetaData.attributes,
         false,
       );
 
@@ -133,31 +186,54 @@ export function PageViewWrapper(
         outgoing,
       });
       if (!isValidResponse(data) || !data.result || data.result.length === 0) {
-        setError(`No ${props.pageVertexName} found`);
+        setFormStore("error", `No ${props.pageVertexName} found`);
         return;
       }
       setGraphData(graph, setGraph, data.graph);
-      setDataVertex(data.result[0]);
+      setFormStore("formData", data.result[0]);
     } catch (e: any) {
       console.error("error", e);
-      setError(`Error When Loading Form: ${e.message}`);
+      setFormStore("error", `Error When Loading Form: ${e.message}`);
     }
   }
   onMount(async () => {
-    setMounted(true);
+    setFormStore("mounted", true);
     await loadFormDesignerMetaData();
-    if (metaVertex() && !metaVertex()!.P.public) {
-      setError(`${props.pageVertexName} is not authorized`);
+    if (formStore.formMeta && !isNoPermissionCheck() && !formStore.formMeta.P.public) {
+      setFormStore("error", `${props.pageVertexName} is not authorized`);
       return;
     }
+    if (!props.pageVertexName) {
+      return;
+    }
+    if (!id()) {
+      const newVertexObj = newVertex(graph.newVertexId, [props.pageVertexName], {});
+      // TODO: Do Create Transformation for the vertex
+      const addNewVertexResult = addNewVertex(formStore.txnId, newVertexObj, graph, setGraph);
+      if (addNewVertexResult.error) {
+        setFormStore("error", addNewVertexResult.error && "Error when creating new vertex");
+        return;
+      }
+      setFormStore("formData", graph.vertexes[newVertexObj.id]);
+    }
+    if (!id() && formStore.formData?.L[0] === "Form") {
+      const layoutId = addFormInitialComponent(formStore.formData, graph, formStore.txnId, setGraph);
+      if (layoutId === -1) {
+        setFormStore("error", "Adding component to layout failed");
+        return;
+      }
+    }
+    saveUndoPoint(formStore.txnId, graph);
+    setPreventUndoAtOrBeforeIndex(formStore.txnId, graph);
+    saveStepIndex(formStore.txnId, "initial", graph);
+    setLayoutStore?.("formData", formStore);
     await loadData();
   });
-  const [count, setCount] = createSignal(1);
 
   createEffect(
     on(
       () => props.formId ?? "new",
-      (v) => setCount((v) => v + 1),
+      () => setFormStore("count", formStore.count + 1),
       { defer: true },
     ),
   );
@@ -165,9 +241,9 @@ export function PageViewWrapper(
   createEffect(
     on(
       () => props.expression ?? "new",
-      (v) => {
-        setMetaVertex(undefined);
-        setDataVertex(undefined);
+      () => {
+        setFormStore("formMeta", undefined);
+        setFormStore("formData", undefined);
         loadFormDesignerMetaData();
       },
       { defer: true },
@@ -175,32 +251,54 @@ export function PageViewWrapper(
   );
 
   const cleanUpConfig = {};
+  onCleanup(() => {
+    // @ts-expect-error ignore
+    // setLayoutStore?.("formData", undefined);
+
+    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+      revertTransaction(rowMetaTxnId, graph);
+  });
+
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (isDisabledTxn(formStore.txnId, graph)) {
+      // allow navigation
+      return;
+    }
+    // preventDefault to block immediately and prompt user async
+    e.preventDefault();
+    setTimeout(() => {
+      setFormStore("discardPopup", true);
+    }, 100);
+    onConfirmExit = () => {
+      // user wants to proceed anyway so retry with force=true
+      e.retry(true);
+    };
+  });
 
   const Content = () => <PageView
-    data={dataVertex()}
+    data={formStore.formData}
     hasDeletePermission={hasDeletePermission()}
     hasEditPermission={hasEditPermission()}
     hasInsertPermission={hasInsertPermission()}
     hasViewPermission={hasViewPermission()}
     id={id()}
-    metaVertex={metaVertex()}
+    metaVertex={formStore.formMeta}
   />
 
   return (
-    <Show keyed when={count()}>
-      <Show when={metaVertex()?.P.seoTitle}>
-        <Title>{metaVertex()?.P.seoTitle}</Title>
+    <Show keyed when={formStore.count}>
+      <Show when={formStore.formMeta?.P.seoTitle}>
+        <Title>{formStore.formMeta?.P.seoTitle}</Title>
       </Show>
-      <Show when={metaVertex()?.P.seoDescription}>
-        <Meta content={metaVertex()?.P.seoDescription} name="description" />
+      <Show when={formStore.formMeta?.P.seoDescription}>
+        <Meta content={formStore.formMeta?.P.seoDescription} name="description" />
       </Show>
-
 
       <Switch>
-        <Match when={error()}>
-          <SimpleWarningAlert message={error()} />
+        <Match when={formStore.error}>
+          <SimpleWarningAlert message={formStore.error} />
         </Match>
-        <Match when={formMetaData() && authError()}>
+        <Match when={formStore.formMetaData && authError()}>
           <SimpleWarningAlert message={authError()} />
         </Match>
       </Switch>
@@ -213,23 +311,47 @@ export function PageViewWrapper(
           hasEditPermission={hasEditPermission() ?? false}
           hasInsertPermission={hasInsertPermission() ?? false}
           hasViewPermission={hasViewPermission() ?? false}
-          metaVertexId={metaVertex()?.id}
-          mounted={mounted()}
+          isNoPermissionCheck={isNoPermissionCheck()}
+          metaVertexId={formStore.formMeta?.id}
+          mounted={formStore.mounted}
           userRoles={graph.userRoles}
         />
       </Show> */}
-
-      <Show when={!authError() && mounted() && metaVertex() && ((props.dataId && props.dataId !== "new") ? dataVertex() : true)}>
-        <Show
-          fallback={
-            <PreviewPage>
+      <Show when={formStore.formData}>
+        <FormContext.Provider value={formStore}>
+          <Show when={!authError() && formStore.mounted && formStore.formMeta && ((props.dataId && props.dataId !== "new") ? formStore.formData : true)}>
+            <Show
+              fallback={
+                <PreviewPage>
+                  <Content />
+                </PreviewPage>
+              }
+              when={!formStore.isPreview}
+            >
               <Content />
-            </PreviewPage>
-          }
-          when={!isPreview()}
-        >
-          <Content />
-        </Show>
+            </Show>
+            <Show when={isNoPermissionCheck()}>
+              <SaveCancelButton
+                closePopUp={props.closePopUp}
+                disabled={isDisabledTxn(formStore.txnId, graph)}
+              />
+            </Show>
+          </Show>
+        </FormContext.Provider>
+      </Show>
+      <Show when={formStore.discardPopup}>
+        <DialogWithButtons
+          message="Discard unsaved changes - are you sure?"
+          onCancel={() => setFormStore("discardPopup", false)}
+          onConfirm={() => {
+            revertTransaction(formStore.txnId, graph);
+            setFormStore("discardPopup", false);
+            onConfirmExit();
+          }}
+          open={() => formStore.discardPopup}
+          setOpen={setFormStore.bind(null, "discardPopup")}
+          title="Discard changes"
+        />
       </Show>
     </Show>
   );

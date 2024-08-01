@@ -24,9 +24,9 @@ export const SortableRow = (props: Readonly<{
   dragFromIndex: Accessor<null | number>;
   dragToIndex: Accessor<null | number>;
   handleDrop: (event: DragEvent) => void;
+  isNoPermissionCheck?: boolean;
   isRealTime: boolean;
   joinVertex: Vertex;
-  noPermissionCheck?: boolean;
   rowIndex: number;
   setDragFromIndex: (index: number) => void;
   setDragToIndex: (index: number) => void;
@@ -120,9 +120,9 @@ export const SortableRow = (props: Readonly<{
               column={column}
               disabled={disabled}
               getMetaVertex={getMetaVertex}
+              isNoPermissionCheck={props.isNoPermissionCheck}
               isRealTime={props.isRealTime}
               joinVertex={props.joinVertex}
-              noPermissionCheck={props.noPermissionCheck}
               setValue={props.setValue}
               txnId={props.txnId}
             />
@@ -138,11 +138,11 @@ export const SortableRow = (props: Readonly<{
               componentName={"DynamicTable"}
               data={props.joinVertex}
               disabled={disabled()}
+              isNoPermissionCheck={props.isNoPermissionCheck}
               isRealTime={props.isRealTime}
               isTableInside={false}
               // When we have a Table we pass original Table Meta Vertex
               meta={expandVertex()!}
-              noPermissionCheck={props.noPermissionCheck}
               setValue={props.setValue}
               txnId={props.txnId}
             />

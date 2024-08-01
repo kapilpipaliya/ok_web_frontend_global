@@ -41,6 +41,13 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   Page: Page,
   SignUp: SignUp,
 };
+for (const key in FormMetaData) {
+  // @ts-expect-error ignore
+  FormMetaData[key].isNoPermissionCheck = true;
+  // @ts-expect-error ignore
+  FormMetaData[key].addActionButtons = true;
+}
+
 
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
   (x) => x.name === "Rule",

@@ -27,9 +27,9 @@ export function Permission() {
   <DynamicComponent
             componentName={"TagBox"}
             data={layoutStore.formData?.formData}
+            isNoPermissionCheck={true}
             isRealTime={false}
             meta={{ P: { collection: '->$0Perm', name: "globalPerm" } as unknown as FieldAttribute } as unknown as Vertex}
-            noPermissionCheck={true}
             txnId={layoutStore.formData.txnId}
           />
 </div>
@@ -39,9 +39,9 @@ export function Permission() {
       <div class="mt:.5rem px:0.25rem">
       <TableInputField
         data={layoutStore.formData?.formData}
+        isNoPermissionCheck={true}
         isRealTime={false}
         meta={graph.vertexes[metaVertexId]}
-        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
       </div>

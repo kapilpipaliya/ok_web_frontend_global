@@ -34,7 +34,7 @@ export function getInitialFormState(
 
   const groupByTabsAndGroupFn = () => {
     const mainAttributes =
-      getSelectionOptions(graph, setGraph, "->MetaAttr", [
+      getSelectionOptions(graph, setGraph, "->Attr", [
         metaVertexResult.vertex!,
       ]).vertexes || []; //.sort((a, b) => a.P.pos - b.P.pos);
 

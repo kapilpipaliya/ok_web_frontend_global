@@ -6,6 +6,7 @@ import { Portal } from "solid-js/web";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { DynamicForm } from "~/components/form/DynamicForm";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { useZIndex } from "../ZIndex";
 
@@ -27,7 +28,7 @@ export const QuickEditModal = (p: {
   return (
     <Show when={p.tableId}>
       <Portal>
-        <div class={modalContainerClass} onClick={closePopUp}>
+        <div class={modalContainerClass}>
           <div class={`${modalClass} min-w:30% p:0 r:10px`} role="dialog">
             <div class="display:flex font-weight:bold jc:space-between mb:4">
               <span>Quick Edit</span>
@@ -41,17 +42,7 @@ export const QuickEditModal = (p: {
             </div>
             <hr class="color:lightgrey" />
             <div class="max-h:50vh mt:10 overflow:auto p:3">
-              <DynamicForm
-                buttonAlign="end"
-                closePopUp={closePopUp}
-                doMount={false}
-                formId={p.tableId}
-                graph={p.graph}
-                id={p.info.row.original.id}
-                importExportButtons={false}
-                setGraph={p.setGraph}
-                showMainFieldsOnly={true}
-              />
+            <PageViewWrapper closePopUp={closePopUp} dataId={p.info.row.original.id} pageVertexName={p.tableId} />
             </div>
           </div>
         </div>

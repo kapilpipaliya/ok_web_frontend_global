@@ -7,6 +7,7 @@ export function DebugPermissionInfo(props: Readonly<{
   hasEditPermission: boolean;
   hasInsertPermission: boolean;
   hasViewPermission: boolean;
+  isNoPermissionCheck: boolean;
   metaVertexId?: string;
   mounted: boolean;
   userRoles: string[];
@@ -22,6 +23,7 @@ export function DebugPermissionInfo(props: Readonly<{
       <p>mounted: {props.mounted.toString()}</p>
       <p>authError: {props.authError}</p>
       <p>metaVertex: {props.metaVertexId}</p>
+      <p>isNoPermissionCheck: {props.isNoPermissionCheck?.toString()}</p>
     </div>
   );
 }

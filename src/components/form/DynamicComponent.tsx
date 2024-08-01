@@ -47,17 +47,17 @@ export function DynamicComponent(
     componentName?: string;
     data?: Vertex;
     disabled?: boolean;
+    isNoPermissionCheck?: boolean;
     isRealTime?: boolean;
     isTableInside?: boolean;
     meta: Vertex;
-    noPermissionCheck?: boolean;
     setValue?: (data: any) => void;
     title?: string;
     txnId?: number;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const { formData } = useFormContext() ?? {};
+  const formStore = useFormContext() ?? {};
   const { showErrorToast } = useToast();
 
   const componentName = () =>
@@ -106,7 +106,7 @@ export function DynamicComponent(
     return hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph) ?? parentRenderItems?.[0]?.hasDeletePermission;
   });
 
-  const isNoPermissionCheck = () => (!previewStore || props.noPermissionCheck || previewStore.isDesignMode);
+  const isNoPermissionCheck = () => (!previewStore || props.isNoPermissionCheck || formStore?.formMeta.P.isNoPermissionCheck || previewStore.isDesignMode);
   const hasPermission = () => (hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const hasNoPermission = () => !hasInsertPermission() && !hasViewPermission() && !hasEditPermission();
   const isDisabledPermission = () => {
@@ -169,9 +169,9 @@ export function DynamicComponent(
       if (property === "hidden" && previewStore.isDesignMode) {
         continue;
       }
-      if (formData && rule) {
+      if (formStore.formData && rule) {
         try {
-          values[property] = evaluateRule(rule, formData, graph, setGraph);
+          values[property] = evaluateRule(rule, formStore.formData, graph, setGraph);
           if (property.toLowerCase().endsWith("class")) {
             values[property] = mergeCSS("", values[property]);
           }
@@ -224,10 +224,10 @@ export function DynamicComponent(
       component={component()}
       componentName={componentName()}
       data={props.data}
+      isNoPermissionCheck={isNoPermissionCheck()}
       isRealTime={props.isRealTime}
       isTableInside={props.isTableInside}
       meta={props.meta}
-      noPermissionCheck={isNoPermissionCheck()}
       setValue={componentName() !== "DynamicTable" ? setValue : undefined}
       title={props.title ?? ""}
       txnId={props.txnId}
@@ -243,21 +243,23 @@ export function DynamicComponent(
 
   return (
     <>
-      {/* <Show when={!props.noPermissionCheck && graph.isDevelopment}>
-      comp:{componentName()}
-      <DebugPermissionInfo
-        allConfiguredPermission={allConfiguredPermission()}
-        authError={""}
-        hasDeletePermission={hasDeletePermission() ?? false}
-        hasEditPermission={hasEditPermission() ?? false}
-        hasInsertPermission={hasInsertPermission() ?? false}
-        hasViewPermission={hasViewPermission() ?? false}
-        metaVertexId={props.meta.id}
-        mounted={true}
-        userRoles={graph.userRoles}
-      />
-    </Show> */}
-      <PageRenderContextProvider item={props.meta} store={repeterStore}><Switch>
+      {/* <Show when={!props.isNoPermissionCheck && graph.isDevelopment}>
+        comp:{componentName()}
+        <DebugPermissionInfo
+          allConfiguredPermission={allConfiguredPermission()}
+          authError={""}
+          hasDeletePermission={hasDeletePermission() ?? false}
+          hasEditPermission={hasEditPermission() ?? false}
+          hasInsertPermission={hasInsertPermission() ?? false}
+          hasViewPermission={hasViewPermission() ?? false}
+          isNoPermissionCheck={isNoPermissionCheck()}
+          metaVertexId={props.meta.id}
+          mounted={true}
+          userRoles={graph.userRoles}
+        />
+      </Show> */}
+      <PageRenderContextProvider item={props.meta} store={repeterStore}>
+        <Switch>
         <Match when={!component()}>NO INPUT {componentName()}</Match>
         <Match keyed when={!expressionProperties().hidden && component() && (isNoPermissionCheck() || !hasNoPermission())}>
           <Switch>

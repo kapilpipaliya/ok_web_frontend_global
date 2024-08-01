@@ -231,9 +231,9 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
           <DynamicComponent
             componentName={componentName()}
             data={props.selectedLayout}
+            isNoPermissionCheck={true}
             isRealTime={false}
             meta={props.meta}
-            noPermissionCheck={true}
             setValue={(data) => props.setValue(props.meta, data)}
             txnId={props.txnId}
           />

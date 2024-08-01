@@ -38,9 +38,9 @@ export function HighlightSetValueContent(
             <DynamicComponent
               componentName={props.componentName()}
               data={props.selectedLayout}
+              isNoPermissionCheck={true}
               isRealTime={false}
               meta={props.meta}
-              noPermissionCheck={true}
               setValue={(data) => props.setValue(props.meta, data)}
               txnId={props.txnId}
             />

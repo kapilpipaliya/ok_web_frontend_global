@@ -56,9 +56,9 @@ export function SEOFormGroupProperties() {
                     <DynamicComponent
                       componentName={metaVertex.P.componentName}
                       data={layoutStore.formData.formData}
+                      isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={metaVertex}
-                      noPermissionCheck={true}
                       txnId={layoutStore.formData.txnId}
                     />
                   </Match>

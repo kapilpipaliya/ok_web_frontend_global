@@ -7,8 +7,8 @@ export function SaveCancelButton(
   props: Readonly<{
     buttonAlign?: string;
     closePopUp?: () => void;
+    customSubmitButton?: JSXElement;
     disabled?: boolean;
-    submitButton?: JSXElement;
   }>,
 ) {
   const onSubmit = formSubmit(props.closePopUp);
@@ -30,9 +30,9 @@ export function SaveCancelButton(
             Save
           </button>
         }
-        when={props.submitButton}
+        when={props.customSubmitButton}
       >
-        {props.submitButton}
+        {props.customSubmitButton}
       </Show>
     </div>
   );

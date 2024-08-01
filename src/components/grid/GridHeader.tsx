@@ -3,8 +3,6 @@ import { Show } from "solid-js";
 
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { FormMetaData } from "~/lib/meta/formMetaData";
-
 import { IconButton } from "../IconButton";
 import { SearchBar } from "../css_properties/SearchBar";
 import { AddNewButton } from "./AddNew";
@@ -21,7 +19,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
   const onAddNew = () => navigate("new")
   return (
     <div class="flex ai:center jc:space-between p:4|10">
-      <AddNewButton disabled={gridState.noPermissionCheck ? false : (!!props.formMetaData && !gridState.hasInsertPermission())} onClick={onAddNew} />
+      <AddNewButton disabled={gridState.isNoPermissionCheck ? false : (!!props.formMetaData && !gridState.hasInsertPermission())} onClick={onAddNew} />
       <div class="flex ai:center mb:10">
         <SearchBar
           handleChange={props.onSearch}

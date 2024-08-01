@@ -32,12 +32,13 @@ export function PageView(
   });
 
   const previewStore = createStore<PreviewStoreObject>({
-    get hasDeletePermission() { return props.hasDeletePermission ?? true; },
-    get hasEditPermission() { return props.hasEditPermission ?? true; },
-    get hasInsertPermission() { return props.hasInsertPermission ?? true; },
-    get hasViewPermission() { return props.hasViewPermission ?? true; },
+    get hasDeletePermission() { return props.hasDeletePermission; },
+    get hasEditPermission() { return props.hasEditPermission; },
+    get hasInsertPermission() { return props.hasInsertPermission; },
+    get hasViewPermission() { return props.hasViewPermission; },
     get id() { return props.id; },
     get isDesignMode() { return props.isDesignMode; },
+    get isNoPermissionCheck() { return props.isNoPermissionCheck; },
     get isViewOnly() { return isViewOnlyForm(); },
     get previewData() { return props.data; },
     get previewMeta() { return props.metaVertex; },

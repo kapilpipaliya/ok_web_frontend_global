@@ -6,6 +6,7 @@ import { onCleanup } from "solid-js";
 import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/Toast";
+import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
@@ -27,6 +28,9 @@ export function addMetaVertexes(
     //   continue;
     // }
     const attr = klona(attribute);
+    if (attr.name) {
+      attr.label = capitalizeFirstLetter(attr.name);
+    }
     if (!attr.tab) attr.tab = "main";
     // @ts-ignore
     if (!attr.group) attr.group = "main";
@@ -36,8 +40,8 @@ export function addMetaVertexes(
       setGraph,
       txnId,
       vertex,
-      "MetaAttr",
-      "MetaAttr",
+      "Attr",
+      "Attr",
       attr,
     );
     if (addAttributeResult.error) {

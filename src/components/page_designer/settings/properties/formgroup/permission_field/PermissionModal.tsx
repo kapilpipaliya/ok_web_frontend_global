@@ -93,9 +93,9 @@ export function PermissionModal(
                           ? props.selectedAttr
                           : layoutStore.formData.formData
                       }
+                      isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      noPermissionCheck={true}
                       txnId={layoutStore.formData.txnId}
                     />
                   </div>

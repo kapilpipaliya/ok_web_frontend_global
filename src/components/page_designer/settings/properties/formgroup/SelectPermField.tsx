@@ -69,9 +69,9 @@ export function SelectPermField(
     return (
       <DynamicComponent
         data={props.selectedLayout}
+        isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
-        noPermissionCheck={true}
         txnId={layoutStore.formData.txnId}
       />
     );

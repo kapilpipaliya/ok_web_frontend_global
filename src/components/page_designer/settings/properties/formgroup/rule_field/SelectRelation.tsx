@@ -12,9 +12,9 @@ export function SelectRelation(props: SelectRelationProps) {
   return (
     <DynamicComponent
       data={props.data}
+      isNoPermissionCheck={true}
       isRealTime={false}
       meta={props.meta}
-      noPermissionCheck={true}
       txnId={props.txnId} />
   );
 }

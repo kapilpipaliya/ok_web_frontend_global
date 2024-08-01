@@ -45,11 +45,11 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
           <DynamicComponent
             componentName={componentName()}
             data={props.vertex}
+            // TODO: Remove this when permissions are working For inbuilt forms.
+            isNoPermissionCheck={true}
             isRealTime={false}
             isTableInside={true}
             meta={metaVertex}
-            // TODO: Remove this when permissions are working For inbuilt forms.
-            noPermissionCheck={true}
             // setValue={props.setValue}
             title={toTitle(
               metaVertex.P.displayName ||

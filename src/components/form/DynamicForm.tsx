@@ -64,7 +64,7 @@ export interface DynamicFormProps {
   submitButton?: JSXElement;
 }
 
-
+/* depricated */
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
 
@@ -177,8 +177,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                 <SaveCancelButton
                   buttonAlign={props.buttonAlign}
                   closePopUp={props.closePopUp}
+                  customSubmitButton={props.submitButton}
                   disabled={isDisabledTxn(txnId, graph)}
-                  submitButton={props.submitButton}
                 />
               </Show>
 
@@ -251,8 +251,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
                 <SaveCancelButton
                   buttonAlign={props.buttonAlign}
                   closePopUp={props.closePopUp}
+                  customSubmitButton={props.submitButton}
                   disabled={isDisabledTxn(txnId, graph)}
-                  submitButton={props.submitButton}
                 />
               </Show>
 

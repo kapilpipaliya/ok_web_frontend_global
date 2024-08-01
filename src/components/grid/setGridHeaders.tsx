@@ -89,9 +89,9 @@ export function setGridHeaders(
       const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
         <div class={`${!formNew.isInlineEditable ? 'py:0.25rem r:7' : ''} flex ai:center gap:10px jc:center`}>
-          <Show when={gridState.noPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
+          <Show when={gridState.isNoPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
             <IconButton
-              disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && (!gridState.hasEditPermission() && !gridState.hasViewPermission())}
+              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && (!gridState.hasEditPermission() && !gridState.hasViewPermission())}
               icon="fluent:edit-12-regular"
               iconClass="color:#3477CC"
               onClick={() => {
@@ -105,7 +105,7 @@ export function setGridHeaders(
             />
             <Show when={isEditModalOpen()}>
               <QuickEditModal
-                disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && !gridState.hasEditPermission()}
+                disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && !gridState.hasEditPermission()}
                 graph={graph}
                 info={info}
                 onClose={setIsEditModelOpen}
@@ -116,10 +116,10 @@ export function setGridHeaders(
           </Show>
 
           <Show
-            when={gridState.noPermissionCheck || (!!gridState.formMetaData() && gridState.hasDeletePermission())}
+            when={gridState.isNoPermissionCheck || (!!gridState.formMetaData() && gridState.hasDeletePermission())}
           >
             <IconButton
-              disabled={!gridState.noPermissionCheck && !!gridState.formMetaData() && !gridState.hasDeletePermission()}
+              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && !gridState.hasDeletePermission()}
               icon="fluent:delete-12-regular"
               iconClass="color:rgb(255,0,0)"
               onClick={() => setDeleteRowId(info.row.original.id)}

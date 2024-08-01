@@ -16,9 +16,9 @@ export function NameKey() {
         <DynamicComponent
           componentName={"TagBox"}
           data={layoutStore.formData?.formData}
+          isNoPermissionCheck={true}
           isRealTime={false}
           meta={{ P: modifyFieldMetaAllFields({ name: "nameKey" } as FieldAttribute , graph, setGraph, layoutStore, true)} as unknown as Vertex}
-          noPermissionCheck={true}
           txnId={layoutStore.formData.txnId}
         />
       </span>

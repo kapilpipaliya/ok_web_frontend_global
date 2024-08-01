@@ -60,9 +60,9 @@ export function UniqueNameField(
         <DynamicComponent
           componentName={"TextBox"}
           data={props.selectedLayout}
+          isNoPermissionCheck={true}
           isRealTime={false}
           meta={props.meta}
-          noPermissionCheck={true}
           setValue={(data: string) =>
             setUniqueNameValue(props.meta, data)
           }

@@ -20,11 +20,11 @@ export function getInitialGridState(graph: GraphInterface) {
     hasInsertPermission: (() => false) as Accessor<boolean | null | undefined>,
     hasViewPermission: (() => false) as Accessor<boolean | null | undefined>,
     isLoading: false,
+    isNoPermissionCheck: false,
     isSearching: false,
     isShowLoadMore: true,
     layout: (graph.vertexes[graph.userSettingId]?.P.layout || 'table') as 'card' | 'table',
     metaVertex: null as Vertex | null,
-    noPermissionCheck: false,
     search: '',
     tableId: null as null | string,
     tableStore: {
