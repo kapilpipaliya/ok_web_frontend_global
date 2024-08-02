@@ -1,5 +1,11 @@
-import { type JSX, createEffect, createSignal, splitProps } from "solid-js";
+import { createWritableMemo } from "@solid-primitives/memo";
+import { type JSX, Match, Switch, createEffect, createSignal, splitProps } from "solid-js";
 
+import { getSelectedVertexValue } from "~/lib/graph/get/sync/getSelectedVertexValue";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+
+import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "./tools";
 
 export type FileUploaderProps = {
@@ -7,57 +13,112 @@ export type FileUploaderProps = {
   label?: string;
   media?: string;
   meta?: any;
-  setValue?: (meta: any, data: any, file: File) => void;
+  setValue?: (file: File) => void;
+  txnId?: number;
 } & JSX.HTMLAttributes<HTMLLabelElement>;
 
+async function uploadFile(file: File, apiUrl: string) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(apiUrl, {
+      body: formData,
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+
+    const data = await response.json();
+    console.log('File uploaded successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('There was a problem with the file upload:', error);
+    throw error;
+  }
+}
+
 export function FileUploader(props: FileUploaderProps) {
-  const [inputProps, content, labelProps] = splitProps(
-    props,
-    [],
-    ["setValue", "meta", "data", "label"],
-  );
-  const [file, setFile] = createSignal<File | any | null>(null);
+  const [graph, setGraph] = useGraph();
+  const [localProps, others] = splitProps(props, ["setValue", "meta", "data", "label", "media"]);
+  const [file, setFile] = createSignal<File | null>(null);
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
+  let inputRef: HTMLInputElement | undefined;
+
+  const [selectedFiles, setSelectedFiles] = createWritableMemo(() => getSelectedVertexValue(graph, props.data, props.meta));
+
+  const handleFileUpload = async (file: File) => {
+    if (file) {
+      try {
+        return await uploadFile(file, '/api/uploadImage');
+      } catch (error) {
+        // Handle the error case
+        console.error('Upload error:', error);
+      }
+    }
+  };
+
+  // on file select
+  // 4. on reload it should display preview.
+  const setValue = async (files?: FileList | null) => {
+    const txnId = props.txnId ?? 0;
+    const file = files?.[0];
+    if (file) {
+      setFile(file);
+      setFullBoxMedia(URL.createObjectURL(file));
+      // localProps.setValue?.(file);
+      const data = await handleFileUpload(file);
+      if (data?.graph) {
+        setGraphData(graph, setGraph, data.graph);
+        if (!props.data) {
+          setSelectedFiles(data.result);
+        } else {
+          setSelectValueHelper(
+            txnId,
+            props.meta,
+            props.data as Vertex,
+            "TagBox",
+            data.result,
+            false,
+            graph,
+            setGraph,
+          );
+        }
+      }
+    }
+  };
 
   createEffect(() => {
-    if (props.media) {
-      setFile(props.media);
-      setFullBoxMedia(props.media);
+    if (localProps.media) {
+      setFile(localProps.media);
+      setFullBoxMedia(localProps.media);
     }
   });
 
-  const handleDrop = (event: any) => {
+  const handleDrop = (event: DragEvent) => {
     event.preventDefault();
-    const droppedFile = event.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile(droppedFile);
-      setFullBoxMedia(URL.createObjectURL(droppedFile));
-      props.setValue?.(props.meta, props.data, droppedFile);
-    }
+    setValue(event.dataTransfer?.files);
   };
 
-  const handleDragOver = (event: any) => {
+  const handleDragOver = (event: DragEvent) => {
     event.preventDefault();
   };
 
-  const handleInputChange = (event: any) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setFullBoxMedia(URL.createObjectURL(selectedFile));
-      props.setValue?.(props.meta, props.data, selectedFile);
-    }
+  const handleInputChange = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    setValue(input.files);
   };
 
   const handleFullBoxClick = () => {
-    const fileInput = document.getElementById("fileInput");
-    if (fileInput) {
-      fileInput.click();
+    if (inputRef) {
+      inputRef.click();
     }
   };
 
   return (
-    <div
+    <div // NOSONAR
       draggable={false}
       onClick={handleFullBoxClick}
       onDragOver={handleDragOver}
@@ -73,21 +134,21 @@ export function FileUploader(props: FileUploaderProps) {
         "text-align": "center",
       }}
     >
-      <label {...labelProps}>
-        <input
-          accept="image/*, video/*"
-          style={{ display: "none" }}
-          type="file"
-          {...inputProps}
-          onChange={(event) => {
-            runEvent(event, handleInputChange);
-          }}
-        />
-        {file() !== null ? (
-          <>
-            {file().type.startsWith("image/") ? (
+      <input
+        accept="image/*, video/*"
+        onChange={(event) => {
+          runEvent(event, handleInputChange);
+        }}
+        ref={inputRef!}
+        style={{ display: "none" }}
+        type="file"
+        {...others}
+      />
+      <Switch>
+        <Match when={file()}>
+          <Switch>
+            <Match when={file()!.type.startsWith("image/")}>
               <img
-                {...(props as JSX.HTMLAttributes<HTMLInputElement>)}
                 alt="Media"
                 src={fullBoxMedia()}
                 style={{
@@ -96,9 +157,9 @@ export function FileUploader(props: FileUploaderProps) {
                   "max-width": "100%",
                 }}
               />
-            ) : (
+            </Match>
+            <Match when={file()!.type.startsWith("video/")}>
               <video
-                {...(props as JSX.HTMLAttributes<HTMLVideoElement>)}
                 controls
                 src={fullBoxMedia()}
                 style={{
@@ -107,12 +168,13 @@ export function FileUploader(props: FileUploaderProps) {
                   "max-width": "100%",
                 }}
               />
-            )}
-          </>
-        ) : (
-          <span>{props.label || "Click to select a media file"}</span>
-        )}
-      </label>
+            </Match>
+          </Switch>
+        </Match>
+        <Match when={!file()}>
+          <span>{localProps.label || "Click to select a media file"}</span>
+        </Match>
+      </Switch>
     </div>
   );
 }

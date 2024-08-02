@@ -8,7 +8,7 @@ import { SelectField } from "~/components/fields/SelectField";
 import {DynamicComponent} from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

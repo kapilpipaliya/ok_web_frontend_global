@@ -64,7 +64,7 @@ export function PageAttrRender(
               // setValue={props.setValue}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
-              txnId={formStore!.txnId} />
+              txnId={formStore?.txnId} />
           );
         };
         const PageComponentWithPreview = () => (

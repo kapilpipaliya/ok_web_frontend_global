@@ -10,33 +10,30 @@ import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
-type GenralProps = {
-  originalProfileData: {
-    [key: string]: any;
-  };
-  profileData: {
-    [key: string]: any;
-  };
-  setOriginalProfileData: SetStoreFunction<{
-    [key: string]: any;
-  }>;
-  setProfileData: SetStoreFunction<{
-    [key: string]: any;
-  }>;
+type GeneralProps = {
+  originalProfileData: { [key: string]: any };
+  profileData: { [key: string]: any };
+  setOriginalProfileData: SetStoreFunction<{ [key: string]: any }>;
+  setProfileData: SetStoreFunction<{ [key: string]: any }>;
 };
 
-export const GeneralSection = (props: Readonly<GenralProps>) => {
+export const GeneralSection = (props: Readonly<GeneralProps>) => {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
-  const [selectedImage, setSelectedImage] = createSignal(null);
-  const handleImageChange = async (e: any) => {
-    setSelectedImage(e.target.files[0]);
+  const [selectedImage, setSelectedImage] = createSignal<File | null>(null);
+
+  const handleImageChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    if (target.files) {
+      setSelectedImage(target.files[0]);
+    }
   };
 
-  const handleInputChange = (e: any) => {
-    const { name, value } = e.target;
-    props.setProfileData({ ...props.profileData, [name]: value.toLowerCase() });
+  const handleInputChange = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value } = target;
+    props.setProfileData((prev) => ({ ...prev, [name]: value.toLowerCase() }));
   };
 
   const profileCall = async () => {
@@ -48,16 +45,15 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
       }
     }
 
-    if (selectedImage() !== null) {
+    if (selectedImage()) {
       const formData = new FormData();
-      //@ts-ignore
-      formData.append(selectedImage()?.name, selectedImage()!);
+      formData.append(selectedImage()!.name, selectedImage()!);
       const res = await fetch(
         `/api/uploadImage?name=profile&username=${props.profileData.username}`,
         {
           body: formData,
           method: "POST",
-        },
+        }
       );
       const result = await res.json();
 
@@ -66,35 +62,38 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
         updatedData.profileImage = result.newFilename;
       }
     }
+    
     const payload = {
       panel: "profile",
       uId: props.profileData.uId,
       userId: props.profileData.id,
       ...updatedData,
     };
+
     return await postAPI(API.profileUrl, payload);
   };
 
   const onClickSave = async () => {
-    if (
-      equals(props.profileData, props.originalProfileData) &&
-      selectedImage() == null
-    ) {
+    if (equals(props.profileData, props.originalProfileData) && !selectedImage()) {
       showErrorToast("No changes to save");
-      return false;
+      return;
     }
+
     if (!props.profileData.username.trim()) {
       showErrorToast("Please enter username");
-      return false;
+      return;
     }
+
     if (!props.profileData.email.trim()) {
       showErrorToast("Please enter email");
-      return false;
+      return;
     }
-    if (validateEmail(props.profileData.email)) {
+
+    if (!validateEmail(props.profileData.email)) {
       showErrorToast("Please enter valid email");
-      return false;
+      return;
     }
+
     await showLoadingToast({
       loadMessage: "Saving Changes...",
       onError: (error) => {
@@ -104,39 +103,38 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
       onSuccess: async (data) => {
         if (data.user) {
           setSelectedImage(null);
-          await getAPI(API.getUserUrl).then((data: { [key: string]: any }) => {
-            const user = data.user;
-            setIsEdit(false);
-            props.setProfileData({
-              country: "United States",
-              email: user.P.email.toLowerCase(),
-              id: user.id,
-              profileImage:
-                user.P.profileImage ??
-                "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
-              uId: user.P.uId,
-              username: user.P.username.toLowerCase(),
-            });
-            // loadContactData();
-            props.setOriginalProfileData(props.profileData); // Set original data
-            setGraph("member", data);
+          const user = (await getAPI(API.getUserUrl)).user;
+          setIsEdit(false);
+          props.setProfileData({
+            country: "United States",
+            email: user.P.email.toLowerCase(),
+            id: user.id,
+            profileImage:
+              user.P.profileImage ??
+              "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
+            uId: user.P.uId,
+            username: user.P.username.toLowerCase(),
           });
+          // loadContactData();
+          props.setOriginalProfileData(props.profileData);
+          setGraph("member", data);
         }
       },
-      promise: profileCall(), // This should return a promise
+      promise: profileCall(),
     });
   };
 
   const handleAvatarClick = () => {
     if (isEdit()) {
-      const fileInput = document.getElementById("fileInput");
+      const fileInput = document.getElementById("fileInput") as HTMLInputElement;
       fileInput?.click();
     }
   };
+
   return (
     <div class="bg:#f5f7fa box-shadow:0|0|12|.1|rgb(237,239,241) m:20 max-w:70%@>lg p:10px|15px r:8 w:80%">
-      <div class={"font-weight:700"}>Personal Info</div>
-      <div class={"font-weight:400"}>
+      <div class="font-weight:700">Personal Info</div>
+      <div class="font-weight:400">
         Update personal details here
         <div class="flex m:10|0 mt:2rem">
           <input
@@ -165,53 +163,51 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
             />
           </div>
           <div class="ml:10">
-            <div style={"font-size: 22px; font-weight: 600;"}>
+            <div style="font-size: 22px; font-weight: 600;">
               {props.profileData.username}
             </div>
-            <div style={"font-size: 18px;"}>{props.profileData.email}</div>
+            <div style="font-size: 18px;">
+              {props.profileData.email}
+            </div>
           </div>
         </div>
         <div class="grid@>lg gap:10 grid-template-columns:repeat(2,50%) justify-self:center p:10">
           <div>
-            <span class={"color:dimgrey font-weight:500 font:15"}>User Id</span>
+            <span class="color:dimgrey font-weight:500 font:15">User Id</span>
             <input
-              disabled={true}
-              name={"id"}
+              disabled
+              name="id"
               onChange={handleInputChange}
-              placeholder={"Id"}
+              placeholder="Id"
               value={props.profileData.id}
             />
           </div>
           <div>
-            <span class={"color:dimgrey font-weight:500 font:15"}>
-              UserName
-            </span>
+            <span class="color:dimgrey font-weight:500 font:15">UserName</span>
             <input
               disabled={!isEdit()}
-              name={"username"}
+              name="username"
               onChange={handleInputChange}
-              placeholder={"Username"}
+              placeholder="Username"
               value={props.profileData.username}
             />
           </div>
           <div>
-            <span class={"color:dimgrey font-weight:500 font:15"}>
-              Email Address
-            </span>
+            <span class="color:dimgrey font-weight:500 font:15">Email Address</span>
             <input
               disabled={!isEdit()}
-              name={"email"}
+              name="email"
               onChange={handleInputChange}
-              placeholder={"Email Address"}
+              placeholder="Email Address"
               value={props.profileData.email}
             />
           </div>
           <div class="d:grid">
-            <span class={"color:dimgrey font-weight:500 font:15"}>Country</span>
+            <span class="color:dimgrey font-weight:500 font:15">Country</span>
             <select
               class="border:1px|solid|#ccc p:5|10 r:4"
               disabled={!isEdit()}
-              name={"country"}
+              name="country"
               onChange={handleInputChange}
               value={props.profileData.country}
             >
@@ -221,14 +217,12 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
             </select>
           </div>
         </div>
-        <div class={"flex jc:end"}>
+        <div class="flex jc:end">
           <Show
             fallback={
               <button
                 class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
-                onClick={() => {
-                  setIsEdit(true);
-                }}
+                onClick={() => setIsEdit(true)}
               >
                 Edit Settings
               </button>
@@ -245,9 +239,7 @@ export const GeneralSection = (props: Readonly<GenralProps>) => {
               Cancel
             </button>
             <button
-              class={
-                "bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
-              }
+              class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
               onClick={onClickSave}
             >
               Save Changes

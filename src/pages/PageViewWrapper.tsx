@@ -22,7 +22,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { type Id, useGraph } from "~/lib/graph/graph";
-import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
+import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";

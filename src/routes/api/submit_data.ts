@@ -1,14 +1,11 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { getDriver } from "~/cypher/driver";
+import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
-import { getSubDomain } from "~/server/getSubDomain";
 
 export async function POST({ request }: APIEvent) {
   const data = await request.json();
-  const subdomain = await getSubDomain(request.headers.get("host")!);
-  const session = (await getDriver(subdomain)).session();
-  // const session = await getSessionForSubdomain();
+  const session = await getSessionForSubdomain(request);
   const tx = session.beginTransaction();
   try {
     const res = await mutateData(data, tx);

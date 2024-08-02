@@ -6,6 +6,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evaluate } from "~/lib/expression_eval";
 
+/* deprecated */
 export function getSelectionOptions(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,

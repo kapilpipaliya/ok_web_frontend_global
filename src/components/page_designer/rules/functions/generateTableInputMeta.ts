@@ -4,7 +4,7 @@ import { onCleanup } from "solid-js";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useGraph } from "~/lib/graph/graph";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
