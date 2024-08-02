@@ -9,13 +9,13 @@ import { mutateArgsValidation } from "./validation/mutateArgsValidation";
 export async function mutateData(
   args: MutationArgs,
   tx: TransactionPromise,
-): Promise<any> {
+) {
   const clientToServerVertexIdMap = new Map<number, number>();
   const clientToServerEdgeIdMap = new Map<number, number>();
 
   const validationResult = mutateArgsValidation(args);
   if (!validationResult) {
-    return { error: true, message: "Invalid argument shape" };
+    return { error: "Invalid argument shape" };
   }
   if (Object.keys(validationResult).length > 0) {
     return validationResult;

@@ -31,6 +31,6 @@ export async function getTableData(
     return result;
   } catch (e: any) {
     console.error("error", e);
-    return { error: `Error When Loading Form: ${e.message}` };
+    return { error: `Error When Loading Form2: ${e.message}` };
   }
 }

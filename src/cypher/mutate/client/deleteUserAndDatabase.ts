@@ -33,8 +33,7 @@ export async function deleteUserAndDatabase(userName: string) {
   } catch (error) {
     console.error("Error deleting user:", error);
     return {
-      error: true,
-      message: "Error deleting user",
+      error: "Error deleting user",
     };
   } finally {
     await sessionSource.close();

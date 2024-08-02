@@ -21,12 +21,12 @@ export const getFormData = async (
     // @ts-ignore
     if (result.error || !result.graph) {
       // @ts-ignore
-      return { error: result.error || "Error When Loading Form" };
+      return { error: result.error || "Error When Loading Form4" };
     }
 
     return { error: "", graph: result.graph };
   } catch (e: any) {
     console.error("error", e);
-    return { error: `Error When Loading Form: ${e.message}` };
+    return { error: `Error When Loading Form1: ${e.message}` };
   }
 };

@@ -8,7 +8,7 @@ import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
 import { CompCategory } from "./base/CompCategory";
 import { DataType } from "./base/DataType";
-import { File } from "./base/File";
+import { File, FileDirectory, FileTag } from "./file/File";
 import { Import } from "./other/Import";
 import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
@@ -36,6 +36,8 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   CompCategory: CompCategory,
   DataType: DataType,
   File: File,
+  FileDirectory: FileDirectory,
+  FileTag: FileTag,
   FormCategory: FormCategory,
   LogIn: Login,
   Page: Page,

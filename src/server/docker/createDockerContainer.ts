@@ -1,4 +1,3 @@
-// @ts-ignore
 import Docker from "dockerode";
 
 import { startDockerContainer } from "~/server/docker/startDockerContainer";

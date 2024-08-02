@@ -17,17 +17,22 @@ export async function fetchDataFromMG(
   },
 ): Promise<ServerResult> {
   "use server";
-  const mainResult = await evalAsync(jsep(expression.expression), context);
+  try {
+    const mainResult = await evalAsync(jsep(expression.expression), context);
 
-  await processIncomingOutgoingExpressions(expression, mainResult, context);
+    await processIncomingOutgoingExpressions(expression, mainResult, context);
 
-  return {
-    graph: {
-      edges: context.relationships!,
-      vertexes: context.nodes!,
-    },
-    result: mainResult,
-  };
+    return {
+      graph: {
+        edges: context.relationships!,
+        vertexes: context.nodes!,
+      },
+      result: mainResult,
+    };
+  } catch (error: any) {
+    console.error("Error in fetchDataFromMG:", error);
+    return { error: error.message };
+  }
 }
 
 async function processIncomingOutgoingExpressions(

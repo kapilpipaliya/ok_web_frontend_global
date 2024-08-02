@@ -15,12 +15,12 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   const id = vertex.id;
 
   if (!name) {
-    return { error: true, message: "Please configure the name first" };
+    return { error: "Please configure the name first" };
   }
 
   try {
     if (await doesNameExist(session, label, name, id)) {
-      return { error: true, message: "Provided name already exists" };
+      return { error: "Provided name already exists" };
     }
 
     const uniqueConstrains = await evalAsync(jsep(`g:'Form[${label}]->$0Unique'`), {});
@@ -30,8 +30,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
         const uniqueConstraintExists = await doesUniqueConstraintExist(session, label, id, keys, vertex);
         if (uniqueConstraintExists) {
           return {
-            error: true,
-            message: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`
+            error: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`
           };
         }
       }
@@ -39,7 +38,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
 
     return { error: false };
   } catch (error: any) {
-    return { error: true, message: error.message };
+    return { error: error.message };
   } finally {
     await session.close();
   }

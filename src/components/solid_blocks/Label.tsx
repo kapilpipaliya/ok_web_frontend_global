@@ -52,7 +52,7 @@ export function Label(
   const component = createMemo(() => isFirstElementSupportedByLabel(resolvedChildren() as HTMLElement) ? "label" : "div");
 
   return (
-    <Dynamic class={`flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`} component={component()}>
+    <Dynamic class={`inline-flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`} component={component()}>
       <Switch fallback={<>{resolvedChildren()}</>}>
         <Match when={local.label && (position() === "top" || position() === "left")}>
           <span class={generateLabelClass()} {...restProps}>

@@ -15,7 +15,7 @@ export async function findVertexesMGCall(options: {
   id?: number | string;
   label?: string;
   value?: number | string;
-}): Promise<{ error?: boolean; message?: string; vertexes?: Vertex }> {
+}): Promise<{ error?: string; vertexes?: Vertex }> {
   "use server";
   const session = await getSessionForSubdomain();
 
@@ -36,20 +36,20 @@ export async function findVertexesMGCall(options: {
       query = `MATCH (v:${options.label}}) RETURN v`;
       params = { value: options.value };
     } else {
-      return { error: true, message: "Invalid parameters" };
+      return { error:  "Invalid parameters" };
     }
 
     const result = await session.run(query, params);
     if (result.records.length === 0) {
-      return { error: true, message: "No vertex found" };
+      return { error:  "No vertex found" };
     }
 
     const vertexes = result.records.map(record => convertNodeToJson(record.get("v")));
-    return { error: false, vertexes: vertexes[0] };
+    return { error: "", vertexes: vertexes[0] };
 
   } catch (error) {
     console.error(error);
-    return { error: true, message: "An error occurred" };
+    return { error:  "An error occurred" };
   } finally {
     await session.close();
   }

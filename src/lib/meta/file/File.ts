@@ -31,3 +31,40 @@ export const File: IFormMetaData = {
   name: "File",
   title: "File",
 };
+export const FileDirectory: IFormMetaData = {
+  attributes: [
+    // The name of the directory.
+    { componentName: "TextBox", displayName: "Directory Name", name: "name" },
+    // The date and time when the directory was created.
+    { componentName: "DateBox", disabled: true, displayName: "Creation Date", name: "creationDate" },
+    // Information about the user who created the directory.
+    { componentName: "TextBox", disabled: true, displayName: "Creator", name: "creator" },
+    // The location of the directory in your storage system.
+    { componentName: "TextBox", disabled: true, displayName: "Directory Path", name: "directoryPath" },
+    // A brief description or notes about the directory.
+    { componentName: "TextArea", displayName: "Description", name: "description" },
+    // Tags or categories assigned to the directory.
+    { componentName: "TagBox", displayName: "Tags", name: "fileTag" },
+    // The number of files in the directory.
+    { componentName: "NumberBox", disabled: true, displayName: "File Count", name: "fileCount" },
+  ],
+  isInlineEditable: false,
+  name: "FileDirectory",
+  title: "Directory",
+};
+
+export const FileTag: IFormMetaData = {
+  attributes: [
+    // The name of the tag.
+    { componentName: "TextBox", displayName: "Tag Name", name: "name" },
+    // A brief description or notes about the tag.
+    { componentName: "TextArea", displayName: "Description", name: "description" },
+    // The date and time when the tag was created.
+    { componentName: "DateBox", disabled: true, displayName: "Creation Date", name: "creationDate" },
+    // Information about the user who created the tag.
+    { componentName: "TextBox", disabled: true, displayName: "Creator", name: "creator" },
+  ],
+  isInlineEditable: false,
+  name: "FileTag",
+  title: "File Tag",
+};

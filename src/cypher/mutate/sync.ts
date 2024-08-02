@@ -32,8 +32,7 @@ export async function syncNodesMGCall(args: {
   } catch (error) {
     console.error("Error migrating nodes:", error);
     return {
-      error: true,
-      message: "Error migrating nodes.",
+      error: "Error migrating nodes.",
     };
   } finally {
     console.log("Closing database sessions...");

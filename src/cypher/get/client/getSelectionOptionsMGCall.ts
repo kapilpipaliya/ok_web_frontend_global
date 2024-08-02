@@ -28,13 +28,13 @@ export async function getSelectionOptionsMGCall(
           tx,
         );
         if (mutationError.error) {
-          return { error: true };
+          return { error: mutationError.error };
         }
       }
       return await getSelectionOptionsBase(vertex, collection, tx);
     }, maxRetries ?? 10);
-  } catch (e) {
+  } catch (e: any) {
     console.error("getSelectionOptionsMGCall", e, vertex, collection);
-    return { error: true };
+    return { error: e.message };
   }
 }
