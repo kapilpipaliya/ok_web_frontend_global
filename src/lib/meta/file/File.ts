@@ -1,4 +1,14 @@
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+
+const parentDirectory: FieldAttribute = {
+  // TODO: Display Tree Information in options.
+  collection: "g:'FileDirectory'",
+  componentName: "SelectBox",
+  displayName: "Parent Directory",
+  inward: true,
+  name: "FileDirectory",
+  type: "FileDirectory",
+}
 
 export const File: IFormMetaData = {
   attributes: [
@@ -26,6 +36,7 @@ export const File: IFormMetaData = {
     { componentName: "TextBox", disabled: true, displayName: "Thumbnail URL", name: "thumbnailUrl" },
     // If applicable, an expiration date for temporary files, after which they may be automatically deleted.
     { componentName: "DateBox", disabled: true, displayName: "Expiration Date", name: "expirationDate" },
+    parentDirectory,
   ],
   isInlineEditable: false,
   name: "File",
@@ -47,6 +58,7 @@ export const FileDirectory: IFormMetaData = {
     { componentName: "TagBox", displayName: "Tags", name: "fileTag" },
     // The number of files in the directory.
     { componentName: "NumberBox", disabled: true, displayName: "File Count", name: "fileCount" },
+    parentDirectory,
   ],
   isInlineEditable: false,
   name: "FileDirectory",

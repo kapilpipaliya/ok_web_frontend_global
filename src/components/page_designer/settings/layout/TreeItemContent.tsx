@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, Show, createMemo } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
@@ -7,21 +7,21 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { nameExpr } from "../utils/nameExpr";
+import {TreeItemExpandButton} from "./TreeItemExpandButton";
 
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
-  }>,
+  }>
 ) {
   const [graph, setGraph] = useGraph();
   const children = createMemo(() =>
-    getChildrenAttrs(graph, setGraph, props.metaVertex),
+    getChildrenAttrs(graph, setGraph, props.metaVertex)
   );
   const getComponent = () =>
-    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P
-      .name as string;
+    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
 
   return (
     <div
@@ -31,30 +31,12 @@ export function TreeItemContent(
       }}
     >
       &nbsp;
-      <Show when={children().length}>
-        <button
-          class="cursor:pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            props.toggleExpand(props.metaVertex.id);
-          }}
-        >
-          <Icon
-            classList={{
-              "mt:7px": true,
-              "transform 2s ease-in-out": true,
-              "transform:rotate(0deg)": props
-                .collapsedKeys()
-                .includes(props.metaVertex.id),
-              "transform:rotate(180deg)": !props
-                .collapsedKeys()
-                .includes(props.metaVertex.id),
-              "transition:transform 0.2s|linear": true,
-            }}
-            icon="mingcute:down-fill"
-          />
-        </button>
-      </Show>
+      <TreeItemExpandButton
+        hasChildren={!!children().length}
+        isCollapsed={props.collapsedKeys().includes(props.metaVertex.id)}
+        metaVertexId={props.metaVertex.id}
+        toggleExpand={props.toggleExpand}
+      />
       &nbsp;
       <Icon
         height={17}
