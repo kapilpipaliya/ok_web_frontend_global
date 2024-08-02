@@ -15,7 +15,7 @@ export const createNewDirectory = async (parent: Vertex, fileName: string, setGr
   console.log(`Create new directory '${fileName}' under ${parent.id}`);
 };
 
-export function TreeItem(props: { item: Vertex; }) {
+export function FileManagerTreeItem(props: { item: Vertex; }) {
   const [children, setChildren] = createSignal<Vertex[]>([]);
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
@@ -88,7 +88,7 @@ export function TreeItem(props: { item: Vertex; }) {
       <Show when={fileManagerStore.expandedKeys.includes(props.item.id)}>
         <div class="pl:4">
           <For each={children()}>
-            {(child) => <TreeItem item={child} />}
+            {(child) => <FileManagerTreeItem item={child} />}
           </For>
         </div>
       </Show>

@@ -3,7 +3,7 @@ import { Show, batch, onMount } from 'solid-js';
 import { useGraph } from '~/lib/graph/graph';
 
 import { useFileManagerStore } from '../FileManagerContext';
-import { TreeItem } from './TreeItem';
+import { FileManagerTreeItem } from './FileManagerTreeItem';
 import { getRootLevelData } from './getRootLevelData';
 
 export function Sidebar() {
@@ -25,10 +25,9 @@ export function Sidebar() {
 
   return (
     <div class="w-1/4">
-      <h2>Sidebar</h2>
       <div>
         <Show when={fileManagerStore.root}>
-          <TreeItem item={fileManagerStore.root!} />
+          <FileManagerTreeItem item={fileManagerStore.root!} />
         </Show>
       </div>
     </div>

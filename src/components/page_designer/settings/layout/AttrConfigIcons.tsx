@@ -3,6 +3,7 @@ import { Show, createSelector } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
+import { SaveAsTemplateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
@@ -81,11 +82,12 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               layoutStore.formStore.formData
             );
           }}
+          size={18}
           title="Duplicate"
         />
 
+        <SaveAsTemplateButton class="mr:5px opacity:.5 opacity:1:hover" item={props.metaVertex} size={20}/>
         <HideShowIcon />
-
         <IconButton
           class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mage:trash"
