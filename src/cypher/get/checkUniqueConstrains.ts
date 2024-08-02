@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { evalAsync } from "~/lib/expression_eval";
 
 import { getSessionForSubdomain } from "./getSessionForSubdomain";
-
+import { isReservedKeyword } from "./reservedKeywords";
 export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
   const session = await getSessionForSubdomain();
@@ -16,6 +16,10 @@ export async function checkUniqueConstrains(vertex: Vertex) {
 
   if (!name) {
     return { error: "Please configure the name first" };
+  }
+
+  if (label === "Form" && isReservedKeyword(name)) {
+    return { error: `The name "${name}" is a reserved word and cannot be used` };
   }
 
   try {
