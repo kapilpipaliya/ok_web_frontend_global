@@ -1,26 +1,20 @@
 
-import type { SetStoreFunction } from "solid-js/store";
 
-import { For, Show, createSignal, onMount } from "solid-js";
+import { For, Show, createSelector, createSignal, onMount } from "solid-js";
 
-import { TreeItemExpandButton } from "~/components/page_designer/settings/layout/TreeItemExpandButton";
-import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
+import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
+import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
 import { getRootLevelData } from './getRootLevelData';
 
-export const createNewDirectory = async (parent: Vertex, fileName: string, setGraph: SetStoreFunction<GraphInterface>) => {
-  // Implementation of creating a new directory in the backend and updating the graph.
-  // This is a placeholder function and needs to be implemented according to your backend logic.
-  console.log(`Create new directory '${fileName}' under ${parent.id}`);
-};
 
 export function FileManagerTreeItem(props: { item: Vertex; }) {
   const [children, setChildren] = createSignal<Vertex[]>([]);
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
-  const [contextMenuVisible, setContextMenuVisible] = createSignal(false);
-  const [newFileName, setNewFileName] = createSignal("");
 
   const toggleExpand = () => {
     setFileManagerStore('expandedKeys', keys => {
@@ -35,79 +29,54 @@ export function FileManagerTreeItem(props: { item: Vertex; }) {
     });
   };
 
-  const handleDoubleClick = () => {
-    setFileManagerStore('selectedItem', props.item);
-  };
-
-  const handleContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
-    setContextMenuVisible(true);
-  };
-
-  const handleContextMenuSubmit = async () => {
-    await createNewDirectory(props.item, newFileName(), setGraph);
-    setContextMenuVisible(false);
-    setNewFileName("");
-  };
-
-  const handleContextMenuClose = () => {
-    setContextMenuVisible(false);
-    setNewFileName("");
-  };
-
   onMount(async () => {
-    if (fileManagerStore.expandedKeys.includes(props.item.id)) {
-      const data = await getRootLevelData(graph, setGraph, props.item);
+    const data = await getRootLevelData(graph, setGraph, props.item);
+    // @ts-expect-error ignore
+    if (!data.error && data.result) {
       // @ts-expect-error ignore
-      if (!data.error && data.result.length > 0) {
-        // @ts-expect-error ignore
-        setChildren(data.result);
-      }
+      setChildren(data.result);
     }
   });
   // const children = createMemo(() =>
   //   sortVertexesByPosition(evaluate(jsep("->FileDirectory"), { graph, setGraph, vertexes: [props.item] }) || [])
   // );
+  const isSelectedHoverId = createSelector(() => fileManagerStore.treeItemHoverId);
+  const handleMouseOver = (e: MouseEvent) => {
+    e.stopPropagation();
+    setFileManagerStore("treeItemHoverId", props.item.id);
+  };
 
+  const handleMouseLeave = (e: MouseEvent) => {
+    e.stopPropagation();
+    setFileManagerStore("treeItemHoverId", null);
+  };
   return (
-    <div class="position:relative">
-      <div
-        class="cursor:pointer p:2"
-        onClick={toggleExpand}
-        onContextMenu={handleContextMenu}
-        onDblClick={handleDoubleClick}
+    <>
+      <TreeItemContainer
+        // draggable={true}
+        hasChildren={!!children().length}
+        isHovered={isSelectedHoverId(props.item.id)}
+        onMouseEnter={handleMouseOver}
+        onmouseleave={handleMouseLeave}
       >
-        <TreeItemExpandButton
+        <FileManagerTreeItemContent
           hasChildren={!!children().length}
-          isCollapsed={!fileManagerStore.expandedKeys.includes(props.item.id)}
-          metaVertexId={props.item.id}
+          item={props.item}
           toggleExpand={toggleExpand}
         />
-        {props.item.P.name}
-      </div>
+        <Show when={fileManagerStore.root?.id !== props.item.id}>
+          <FileManagerConfigIcons metaVertex={props.item} />
+        </Show>
+      </TreeItemContainer>
       <Show when={fileManagerStore.expandedKeys.includes(props.item.id)}>
-        <div class="pl:4">
+        <ul class="pb:5 pl:8 pt:3">
           <For each={children()}>
             {(child) => <FileManagerTreeItem item={child} />}
           </For>
-        </div>
+        </ul>
       </Show>
-      <Show when={contextMenuVisible()}>
-        <div class="absolute border bg:white left:0 p:2 top:0 z:10">
-          <input
-            class="border mb:2 p:1"
-            onInput={(e) => setNewFileName(e.currentTarget.value)}
-            placeholder="New Directory Name"
-            type="text"
-            value={newFileName()} />
-          <button class="bg:blue-50 color:white p:1" onClick={handleContextMenuSubmit}>
-            Create
-          </button>
-          <button class="bg:gray-50 color:white ml:2 p:1" onClick={handleContextMenuClose}>
-            Cancel
-          </button>
-        </div>
-      </Show>
-    </div>
+    </>
   );
 }
+
+

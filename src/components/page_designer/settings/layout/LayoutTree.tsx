@@ -3,7 +3,7 @@ import { For, Show, createSignal } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { TreeItem } from "./LayoutTreeItem";
+import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {
   const [layoutStore] = useDesignerLayoutStore();
@@ -42,7 +42,7 @@ export function LayoutTree() {
     <For each={rootVertexes()}>
       {(item) => (
         <Show when={layoutStore.formStore}>
-          <TreeItem
+          <LayoutTreeItem
             collapsedKeys={collapsedKeys}
             metaVertex={item}
             toggleExpand={toggleExpand}

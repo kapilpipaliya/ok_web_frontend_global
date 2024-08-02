@@ -8,6 +8,7 @@ const getInitialFileManagerStore = () => {
     expandedKeys: [] as string[],
     root: null as Vertex | null,
     selectedItem: null as Vertex | null,
+    treeItemHoverId: null as null | string,
   };
 };
 

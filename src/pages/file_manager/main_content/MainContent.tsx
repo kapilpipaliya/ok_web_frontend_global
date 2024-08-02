@@ -49,7 +49,7 @@ export function MainContent() {
   });
 
   return (
-    <div class="bg:gray-10 w:3/4">
+    <div>
       <div>
         <Show keyed when={fileManagerStore.selectedItem}>
           <FileManagerMainArea item={fileManagerStore.selectedItem!} />

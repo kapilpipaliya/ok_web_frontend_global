@@ -43,7 +43,6 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
     );
   };
 
-
   return (
     <div class="flex ai:center">
       <Show when={isSelectedLayoutId(props.metaVertex.id) || isSelectedHoverId(props.metaVertex.id)}>

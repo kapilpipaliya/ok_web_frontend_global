@@ -14,10 +14,10 @@ import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { AttrConfigIcons } from "./AttrConfigIcons";
+import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
 
-
-export function TreeItem(
+export function LayoutTreeItem(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
@@ -108,34 +108,18 @@ export function TreeItem(
       boxShadow += " bg:#F2EDED";
     }
 
-
     return boxShadow;
   });
 
-
-
   return (
     <>
-      <div // NOSONAR
-        classList={{
-          "align-items:center": true,
-          "bg:#F2EDED": isSelectedHoverId(props.metaVertex.id),
-          "bg:rgb(197,221,255)": isSelectedLayoutId(props.metaVertex.id),
-          // little dark shadow on top,little lite shadow on bottom
-          "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px":
-            !(isActiveTargetItem()) &&
-            children().length > 0,
-          "display:flex": true,
-          "font-size:14px": true,
-          "font-weight:bold": !!children().length,
-          "font-weight:normal": !children().length,
-          [getBorder()]: true,
-          "justify-content:space-between": true,
-          "r:0|5|5|0": !children().length,
-          "r:5|5|5|5": !!children().length,
-          "w:100%": true,
-        }}
+      <TreeItemContainer
+        class={getBorder()}
         draggable={true}
+        hasChildren={!!children().length}
+        isDragOver={isActiveTargetItem()}
+        isHovered={isSelectedHoverId(props.metaVertex.id)}
+        isSelected={isSelectedLayoutId(props.metaVertex.id)}
         onClick={handleClick}
         onDragEnter={e => {
           startTime = Date.now();
@@ -160,7 +144,7 @@ export function TreeItem(
         <Show when={layoutStore.formStore.formData.id !== props.metaVertex.id}>
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
-      </div>
+      </TreeItemContainer>
 
       <Show
         when={
@@ -172,7 +156,7 @@ export function TreeItem(
           <For each={children()}>
             {(vertex) => (
               <Show when={layoutStore.formStore}>
-                <TreeItem
+                <LayoutTreeItem
                   collapsedKeys={props.collapsedKeys}
                   metaVertex={vertex}
                   toggleExpand={props.toggleExpand}
