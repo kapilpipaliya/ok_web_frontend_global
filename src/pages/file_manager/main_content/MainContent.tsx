@@ -1,42 +1,19 @@
-import { For, Show, batch, createEffect, createSignal, onMount } from "solid-js";
+import { useParams } from "@solidjs/router";
+import { Show, batch, onMount } from "solid-js";
 
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import { getRootLevelData } from "../sidebar/getRootLevelData";
-
-export function FileManagerMainArea(props: { item: Vertex }) {
-  const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
-  const [graph, setGraph] = useGraph();
-  const [children, setChildren] = createSignal<Vertex[]>([]);
-
-  const fetchChildren = async (item: Vertex) => {
-    const data = await getRootLevelData(graph, setGraph, item);
-    // @ts-expect-error ignore
-    if (!data.error && data.result) {
-      // @ts-expect-error ignore
-      setChildren(data.result);
-    }
-  }
-  createEffect(() => fetchChildren(props.item));
-  return (
-    <div class="">
-      {props.item.P.name}
-      <div>
-        <For each={children()}>
-          {(child) => <div>{child.P.name}</div>}
-        </For>
-      </div>
-    </div>
-  );
-}
+import { getFilesData } from "../sidebar/getFilesData";
+import { FileManagerMainArea } from "./FileManagerMainArea";
 
 export function MainContent() {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const [graph, setGraph] = useGraph();
+  const params = useParams();
 
   onMount(async () => {
-    const data = await getRootLevelData(graph, setGraph);
+    const data = await getFilesData(graph, setGraph, params.folderId);
     // @ts-expect-error ignore
     if (!data.error && data.result.length > 0) {
       batch(() => {
@@ -51,7 +28,7 @@ export function MainContent() {
   return (
     <div>
       <div>
-        <Show keyed when={fileManagerStore.selectedItem}>
+        <Show keyed when={fileManagerStore.selectedItem?.id}>
           <FileManagerMainArea item={fileManagerStore.selectedItem!} />
         </Show>
       </div>

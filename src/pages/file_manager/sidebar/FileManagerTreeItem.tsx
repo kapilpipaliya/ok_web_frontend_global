@@ -8,10 +8,10 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
 import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
-import { getRootLevelData } from './getRootLevelData';
+import { getFilesData } from './getFilesData';
 
 
-export function FileManagerTreeItem(props: { item: Vertex; }) {
+export function FileManagerTreeItem(props: Readonly<{ item: Vertex; }>) {
   const [children, setChildren] = createSignal<Vertex[]>([]);
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
@@ -28,17 +28,19 @@ export function FileManagerTreeItem(props: { item: Vertex; }) {
       return newKeys;
     });
   };
-
-  onMount(async () => {
-    const data = await getRootLevelData(graph, setGraph, props.item);
+  const getChildrenItems = async () => {
+    const data = await getFilesData(graph, setGraph, props.item.id);
     // @ts-expect-error ignore
     if (!data.error && data.result) {
       // @ts-expect-error ignore
       setChildren(data.result);
     }
-  });
+  }
+
+  onMount(getChildrenItems);
+
   // const children = createMemo(() =>
-  //   sortVertexesByPosition(evaluate(jsep("->FileDirectory"), { graph, setGraph, vertexes: [props.item] }) || [])
+  //   sortVertexesByPosition(evaluate(jsep("<-ParentFolder"), { graph, setGraph, vertexes: [props.item] }) || [])
   // );
   const isSelectedHoverId = createSelector(() => fileManagerStore.treeItemHoverId);
   const handleMouseOver = (e: MouseEvent) => {
@@ -64,9 +66,7 @@ export function FileManagerTreeItem(props: { item: Vertex; }) {
           item={props.item}
           toggleExpand={toggleExpand}
         />
-        <Show when={fileManagerStore.root?.id !== props.item.id}>
-          <FileManagerConfigIcons metaVertex={props.item} />
-        </Show>
+        <FileManagerConfigIcons getChildrenItems={getChildrenItems} metaVertex={props.item} />
       </TreeItemContainer>
       <Show when={fileManagerStore.expandedKeys.includes(props.item.id)}>
         <ul class="pb:5 pl:8 pt:3">

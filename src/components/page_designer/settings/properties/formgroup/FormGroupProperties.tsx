@@ -112,6 +112,7 @@ function createVertexIds() {
     hidden: `hiddenVertex${createUniqueId()}`,
     label: `labelVertex${createUniqueId()}`,
     labelClass: `labelClassVertex${createUniqueId()}`,
+    labelPosition: `labelPositionVertex${createUniqueId()}`,
     name: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
@@ -122,6 +123,8 @@ function createVertexIds() {
 function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+  // Todo: make this display proper options.
+  addNewVertex(0, newVertex(vertexIds.labelPosition, ["MetaTemp"], createVertexMeta("Label Position", "labelPosition", { componentName: "SelectBox" })), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.perm, ["MetaTemp"], createVertexMeta("Permission", "perm")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Expr", "calculatedValue")), graph, setGraph);
   addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
@@ -161,6 +164,7 @@ function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof create
     graph.vertexes[vertexIds.name],
     ...(isForm && componentName === "Form" ? [graph.vertexes[vertexIds.thankYouPage]] : []),
     graph.vertexes[vertexIds.label],
+    graph.vertexes[vertexIds.labelPosition],
     graph.vertexes[vertexIds.perm],
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     graph.vertexes[vertexIds.calculatedValue],

@@ -15,9 +15,9 @@ export async function GET({ request }: APIEvent) {
     neo4jSession = await getSessionForSubdomain(request);
 
     const result = await neo4jSession.run(
-      'MATCH (d:FileDirectory)-[:FileDirectoryFile*0..1]->(f) ' +
+      'MATCH (d:Folder)-[:ParentFolder*0..1]->(f) ' +
       'WHERE id(d) = $id ' +
-      'OPTIONAL MATCH (f)-[:FileDirectoryFile]->(sub) ' +
+      'OPTIONAL MATCH (f)-[:ParentFolder]->(sub) ' +
       'RETURN f, collect(sub) as subDirs', { id: int(id) }
     );
 

@@ -1,9 +1,7 @@
-import type { SetStoreFunction } from "solid-js/store";
+
 
 import { type Setter, Show, } from "solid-js";
 import { Portal } from "solid-js/web";
-
-import type { GraphInterface } from "~/lib/graph/graph";
 
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
@@ -11,10 +9,8 @@ import { useZIndex } from "../ZIndex";
 
 export const QuickEditModal = (p: {
   disabled?: boolean;
-  graph: GraphInterface;
   info: any;
   onClose: Setter<boolean>;
-  setGraph: SetStoreFunction<GraphInterface>;
   tableId: string;
 }) => {
   const zIndex = useZIndex();

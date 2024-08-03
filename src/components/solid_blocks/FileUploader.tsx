@@ -52,7 +52,7 @@ export function FileUploader(props: FileUploaderProps) {
   const handleFileUpload = async (file: File) => {
     if (file) {
       try {
-        return await uploadFile(file, '/api/uploadImage');
+        return await uploadFile(file, '/api/file/upload');
       } catch (error) {
         // Handle the error case
         console.error('Upload error:', error);

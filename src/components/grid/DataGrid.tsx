@@ -21,10 +21,12 @@ import { generateFormMetaAttributes } from "../page_designer/functions/getChildr
 import { DataGridProvider, type DataGridState, getInitialGridState } from "./DataGridContext";
 import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
-import { getTableData } from "./functions/getTableData";
+import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 
 interface DataGridProps {
+  getTableData?: typeof defaultGetTableData;
+  isShowPagination?: boolean;
   tableId: string;
 }
 
@@ -98,7 +100,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setGridState("isLoading", false);
       return;
     }
-    const data = await getTableData(formMetaData()!, props.tableId);
+    const data = await (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId);
     if (data.error) {
       setGridState("error", data.error);
     } else {
@@ -124,12 +126,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   };
 
   function onTableDataGet(data: ServerResult) {
-    const vertexCount = Object.keys(data.graph!.vertexes).length;
+    const vertexCount = data.result.length;
     setGridState("isShowLoadMore", vertexCount >= 10);
-    setGraphData(graph, setGraph, data.graph!);
-    const resultData = Object.values(data.graph!.vertexes).filter(
-      (v) => v.L[0] === props.tableId,
-    );
+    setGraphData(graph, setGraph, data.graph);
+    const resultData = data.result;
     const nodes: Vertex[] = gridState.tableStore.data
       ? [...gridState.tableStore.data, ...resultData]
       : resultData;
@@ -173,8 +173,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             headers={gridState.tableStore.tableColumns}
             isSearching={gridState.isSearching}
             isShowLoadMore={gridState.isShowLoadMore}
+            isShowPagination={props.isShowPagination}
             layout={gridState.layout}
-            onLoadMore={(skip, limit) => getTableData(formMetaData()!, props.tableId, skip, limit)}
+            onLoadMore={(skip, limit) => (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit)}
             rowsPerPageOptions={[5, 10, 15]}
             totalItems={gridState.filteredData.length}
           />

@@ -30,14 +30,12 @@ export function TreeItemContent(
         "d:flex ai:center": true,
       }}
     >
-      &nbsp;
       <TreeItemExpandButton
         hasChildren={!!children().length}
         isCollapsed={props.collapsedKeys().includes(props.metaVertex.id)}
         metaVertexId={props.metaVertex.id}
         toggleExpand={props.toggleExpand}
       />
-      &nbsp;
       <Icon
         height={17}
         icon={

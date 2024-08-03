@@ -18,6 +18,7 @@ import {
 
 import { getChildVertex } from "../../get/sync/getChildVertex";
 import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
+import { getInEdge } from "../../get/sync/getInEdge";
 import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { commitTxn } from "../../transaction/commitTxn";
@@ -54,6 +55,7 @@ export function newRow(
   label: string,
   edgeType?: string,
   properties?: { [key: string]: any },
+  inward?: boolean,
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
   const { showErrorToast } = useToast();
 
@@ -75,8 +77,8 @@ export function newRow(
       graph.newVertexId,
       edgeType || label!,
       {},
-      parentVertex.id,
-      vertexNew.id,
+      inward ? vertexNew.id : parentVertex.id,
+      inward ? parentVertex.id : vertexNew.id,
     );
     const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
     if (insertEdgeResult.error) {
@@ -106,7 +108,7 @@ export function addNewRow(
   if (isRealTime) {
     txnId = graph.newTxnId;
   }
-  const type = getToEdge(meta, parentVertex);
+  const type = meta.P.inward ? getInEdge(meta, parentVertex) : getToEdge(meta, parentVertex);
   const label = meta.P.label;
 
   const newRowResult = newRow(
@@ -117,6 +119,7 @@ export function addNewRow(
     label,
     type,
     properties,
+    meta.P.inward,
   );
   if (isRealTime) commitTxn(txnId, graph);
   return newRowResult;

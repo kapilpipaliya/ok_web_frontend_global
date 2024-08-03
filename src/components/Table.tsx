@@ -26,6 +26,7 @@ type TableProps = {
   headers: ColumnDef<any>[];
   isSearching: boolean;
   isShowLoadMore?: boolean;
+  isShowPagination?: boolean;
   layout: 'card' | 'table';
   onLoadMore: (skip: number, limit: number) => void;
   rowsPerPageOptions?: number[];
@@ -104,19 +105,21 @@ export function CommonTable(props: Readonly<TableProps>) {
         </Match>
       </Switch>
 
-      <TableActions
-        currentPage={currentPage}
-        data={props.data}
-        displayedRows={displayedRows}
-        handleFirstPage={() => handlePageChange(0)}
-        handleLastPage={() => handlePageChange(totalPages() - 1)}
-        handleNextPage={() => handlePageChange(currentPage() + 1)}
-        handlePreviousPage={() => handlePageChange(currentPage() - 1)}
-        handleRowsPerPageChange={handleRowsPerPageChange}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={props.rowsPerPageOptions}
-        totalPages={totalPages}
-      />
+      <Show when={props.isShowPagination}>
+        <TableActions
+          currentPage={currentPage}
+          data={props.data}
+          displayedRows={displayedRows}
+          handleFirstPage={() => handlePageChange(0)}
+          handleLastPage={() => handlePageChange(totalPages() - 1)}
+          handleNextPage={() => handlePageChange(currentPage() + 1)}
+          handlePreviousPage={() => handlePageChange(currentPage() - 1)}
+          handleRowsPerPageChange={handleRowsPerPageChange}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={props.rowsPerPageOptions}
+          totalPages={totalPages}
+        />
+      </Show>
       <Show
         when={
           (currentPage() === totalPages() - 1 ||

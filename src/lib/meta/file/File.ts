@@ -2,12 +2,12 @@ import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType"
 
 const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.
-  collection: "g:'FileDirectory'",
+  collection: "g:'Folder'",
   componentName: "SelectBox",
-  displayName: "Parent Directory",
-  inward: true,
-  name: "FileDirectory",
-  type: "FileDirectory",
+  displayName: "Parent Folder",
+  name: "ParentFolder",
+  type: "ParentFolder",
+  validation: { required: true },
 }
 
 export const File: IFormMetaData = {
@@ -42,7 +42,7 @@ export const File: IFormMetaData = {
   name: "File",
   title: "File",
 };
-export const FileDirectory: IFormMetaData = {
+export const Folder: IFormMetaData = {
   attributes: [
     // The name of the directory.
     { componentName: "TextBox", displayName: "Directory Name", name: "name" },
@@ -61,8 +61,8 @@ export const FileDirectory: IFormMetaData = {
     parentDirectory,
   ],
   isInlineEditable: false,
-  name: "FileDirectory",
-  title: "Directory",
+  name: "Folder",
+  title: "Folder",
 };
 
 export const FileTag: IFormMetaData = {

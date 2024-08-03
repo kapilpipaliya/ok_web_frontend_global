@@ -7,14 +7,14 @@ import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInDB(
   tx: TransactionPromise,
-  username: any,
-  email: any,
+  username: string,
+  email: string,
   subdomainFromUrl: string,
-  password: any,
-  subdomain: any,
-  driverPort: any,
-  logsPort: any,
-  labPort: any,
+  password: string,
+  subdomain: string,
+  driverPort: number,
+  logsPort: number,
+  labPort: number,
 ) {
   const uId = uuidv4();
   let user;

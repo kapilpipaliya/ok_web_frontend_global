@@ -106,10 +106,8 @@ export function setGridHeaders(
             <Show when={isEditModalOpen()}>
               <QuickEditModal
                 disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && !gridState.hasEditPermission()}
-                graph={graph}
                 info={info}
                 onClose={setIsEditModelOpen}
-                setGraph={setGraph}
                 tableId={tableId}
               />
             </Show>

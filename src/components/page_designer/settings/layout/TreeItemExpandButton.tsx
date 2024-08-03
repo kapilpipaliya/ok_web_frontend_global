@@ -1,7 +1,8 @@
-import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
+
+import { IconButton } from "~/components/IconButton";
 
 export function TreeItemExpandButton(
   props: Readonly<{
@@ -13,24 +14,23 @@ export function TreeItemExpandButton(
 ) {
   return (
     <Show when={props.hasChildren}>
-      <button
-        class="cursor:pointer"
+      <IconButton
+        icon="mingcute:down-fill"
+        iconClassList={{
+          "mx:4px": true,
+          "transform 2s ease-in-out": true,
+          "transform:rotate(0deg)": props.isCollapsed,
+          "transform:rotate(180deg)": !props.isCollapsed,
+          "transition:transform 0.2s|linear": true,
+        }}
+        noCenter
         onClick={(e) => {
           e.stopPropagation();
           props.toggleExpand(props.metaVertexId);
         }}
+        size="1em"
       >
-        <Icon
-          classList={{
-            "mt:7px": true,
-            "transform 2s ease-in-out": true,
-            "transform:rotate(0deg)": props.isCollapsed,
-            "transform:rotate(180deg)": !props.isCollapsed,
-            "transition:transform 0.2s|linear": true,
-          }}
-          icon="mingcute:down-fill"
-        />
-      </button>
+      </IconButton>
     </Show>
   );
 }

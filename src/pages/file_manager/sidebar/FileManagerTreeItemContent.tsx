@@ -1,5 +1,6 @@
 import type { Id, Vertex } from "~/lib/graph/graph";
 
+import { IconButton } from "~/components/IconButton";
 import { TreeItemExpandButton } from "~/components/page_designer/settings/layout/TreeItemExpandButton";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -10,19 +11,23 @@ export function FileManagerTreeItemContent(props: { hasChildren: boolean; item: 
     setFileManagerStore('selectedItem', props.item);
   };
   return <div
+    class="cursor:pointer"
     classList={{
       "bl:1px|dashed|black pl:10": !props.hasChildren,
       "d:flex ai:center": true,
     }}
-    onDblClick={handleDoubleClick}
+    onClick={handleDoubleClick}
   >
-    &nbsp;
     <TreeItemExpandButton
       hasChildren={props.hasChildren}
       isCollapsed={!fileManagerStore.expandedKeys.includes(props.item.id)}
       metaVertexId={props.item.id}
       toggleExpand={props.toggleExpand} />
-    &nbsp;
+    <IconButton
+      class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+      icon={props.item.L[0] === "Folder" ? "ic:round-folder" : "ic:round-file"}
+      size={16}
+    />
     {props.item.P.name}
   </div>;
 }

@@ -11,6 +11,8 @@ import { updateSession } from "~/routes/api/signup/updateSession";
 import { waitForDockerCreate } from "~/routes/api/signup/waitForDockerCreate";
 import { getSubDomain } from "~/server/getSubDomain";
 
+import { createRootFolder } from "./signup/createRootFolder";
+
 async function signupAdmin(request: APIEvent["request"]) {
   const { email, password, subdomain, username } = await request.json();
 
@@ -42,6 +44,7 @@ async function signupAdmin(request: APIEvent["request"]) {
     );
     console.log("FetchCSVData");
 
+    await createRootFolder(tx);
     syncNodesMGCall({
       nodesToTransfer: ["DataType", "CompCategory", "Comp", "Nav"],
       userport: driverPort,

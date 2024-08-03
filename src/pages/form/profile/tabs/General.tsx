@@ -49,7 +49,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
       const formData = new FormData();
       formData.append(selectedImage()!.name, selectedImage()!);
       const res = await fetch(
-        `/api/uploadImage?name=profile&username=${props.profileData.username}`,
+        `/api/file/upload?name=profile&username=${props.profileData.username}`,
         {
           body: formData,
           method: "POST",

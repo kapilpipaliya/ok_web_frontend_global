@@ -1,4 +1,4 @@
-import { Show, createSelector, } from "solid-js";
+import { Show, createSelector, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
@@ -11,20 +11,17 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useFileManagerStore } from "../FileManagerContext";
+import { useFileManagerStore } from "../FileManagerContext";  // Import QuickEditModal
+import { QuickEditModal } from "~/components/grid/QuickEditModal";
 
-export const createNewDirectory = async (parent: Vertex, fileName: string) => {
-  // Implementation of creating a new directory in the backend and updating the graph.
-  // This is a placeholder function and needs to be implemented according to your backend logic.
-  console.log(`Create new directory '${fileName}' under ${parent.id}`);
-};
 
-export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
+export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () => void, metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const isSelectedItemId = createSelector(() => fileManagerStore.selectedItem?.id);
   const isHoveredItemId = createSelector(() => fileManagerStore.treeItemHoverId);
   const { showErrorToast, showSuccessToast } = useToast();
+  const [isEditModalOpen, setIsEditModalOpen] = createSignal(false);
 
   const [state, setState] = createStore({
     buttonRef: null as HTMLElement | null,
@@ -43,8 +40,9 @@ export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) 
         L: [],
         OUT: {},
         P: {
-          label: "FileDirectory",
-          type: "FileDirectory",
+          inward: true,
+          label: "Folder",
+          type: "ParentFolder",
         },
         id: props.metaVertex.id,
       } as Vertex;
@@ -67,6 +65,7 @@ export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) 
 
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
       showSuccessToast("Directory created successfully");
+      props.getChildrenItems?.();
     } catch (error) {
       console.error(error);
       showErrorToast("Failed to create directory");
@@ -98,6 +97,26 @@ export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) 
   return (
     <div class="flex ai:center">
       <Show when={state.showDialog || isSelectedItemId(props.metaVertex.id) || isHoveredItemId(props.metaVertex.id)}>
+        <Show when={props.metaVertex.L[0] === "File"}>
+          <IconButton
+            class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            icon="ic:round-download"
+            iconClass="transition:0.5s|ease-in-out"
+            onClick={() => {
+              window.open(`/api/file/download?fileId=${props.metaVertex.id}`, '_blank');
+            }}
+            size={18}
+            title="Download"
+          />
+        </Show>
+        <IconButton
+          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+          icon="mdi:settings"
+          iconClass="transition:0.5s|ease-in-out"
+          onClick={() => setIsEditModalOpen(true)}
+          size={18}
+          title="Settings"
+        />
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mdi:folder-plus"
@@ -114,25 +133,27 @@ export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) 
           size={18}
           title="Create New File"
         />
-        <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mdi:rename-box"
-          iconClass="transition:0.5s|ease-in-out"
-          onClick={(e) => openDialog(`Rename ${props.metaVertex.L[0] === "FileDirectory" ? "Directory" : "File"}`, `Enter ${props.metaVertex.L[0] === "FileDirectory" ? "Directory" : "File"} Name`, "Enter new name", handleRenameItem, e.currentTarget)}
-          size={18}
-          title="Rename"
-        />
-        <IconButton
-          class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mdi:delete"
-          iconClass="transition:0.5s|ease-in-out"
-          onClick={() => {
-            // Implement delete functionality
-            console.log("Delete item");
-          }}
-          size={18}
-          title="Delete"
-        />
+        <Show when={fileManagerStore.root?.id !== props.metaVertex.id}>
+          <IconButton
+            class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            icon="mdi:rename-box"
+            iconClass="transition:0.5s|ease-in-out"
+            onClick={(e) => openDialog(`Rename ${props.metaVertex.L[0]}`, `Enter ${props.metaVertex.L[0]} Name`, "Enter new name", handleRenameItem, e.currentTarget)}
+            size={18}
+            title="Rename"
+          />
+          <IconButton
+            class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            icon="mdi:delete"
+            iconClass="transition:0.5s|ease-in-out"
+            onClick={() => {
+              // Implement delete functionality
+              console.log("Delete item");
+            }}
+            size={18}
+            title="Delete"
+          />
+        </Show>
       </Show>
       <Show when={state.showDialog}>
         <ZIndex>
@@ -153,6 +174,14 @@ export function FileManagerConfigIcons(props: Readonly<{ metaVertex: Vertex }>) 
             />
           </DropdownMenu>
         </ZIndex>
+      </Show>
+      <Show when={isEditModalOpen()}>
+        <QuickEditModal
+          disabled={false}
+          info={{ row: { original: props.metaVertex } }}
+          onClose={() => setIsEditModalOpen(false)}
+          tableId={props.metaVertex.L[0]}
+        />
       </Show>
     </div>
   );

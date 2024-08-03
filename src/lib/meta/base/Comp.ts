@@ -36,11 +36,11 @@ export const Comp: IFormMetaData = {
       displayName: "Children",
       name: "child",
     },
-    {
-      componentName: "CheckBox",
-      displayName: "Required",
-      name: "required",
-    },
+    // {
+    //   componentName: "CheckBox",
+    //   displayName: "Hidden",
+    //   name: "hide",
+    // },
     { componentName: "TextArea", name: "description" },
     // TODO: add validation, duplicate row with same name is not allowed.
     {

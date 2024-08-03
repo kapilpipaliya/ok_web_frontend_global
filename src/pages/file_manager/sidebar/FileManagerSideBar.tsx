@@ -4,14 +4,14 @@ import { useGraph } from '~/lib/graph/graph';
 
 import { useFileManagerStore } from '../FileManagerContext';
 import { FileManagerTreeItem } from './FileManagerTreeItem';
-import { getRootLevelData } from './getRootLevelData';
+import { getFilesData } from './getFilesData';
 
 export function Sidebar() {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const [graph, setGraph] = useGraph();
 
   onMount(async () => {
-    const data = await getRootLevelData(graph, setGraph);
+    const data = await getFilesData(graph, setGraph);
     // @ts-expect-error ignore
     if (!data.error && data.result.length > 0) {
       batch(() => {
@@ -24,7 +24,7 @@ export function Sidebar() {
   });
 
   return (
-    <div class="w-1/4">
+    <div class="">
       <div>
         <Show when={fileManagerStore.root}>
           <FileManagerTreeItem item={fileManagerStore.root!} />

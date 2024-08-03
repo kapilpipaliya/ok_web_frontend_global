@@ -13,16 +13,16 @@ export async function GET({ request }: APIEvent) {
     // directories without a parent directory
     // and their immediate files
     const directoriesResult = await neo4jSession.run(
-      'MATCH (d:FileDirectory) ' +
-      'WHERE NOT (d)<-[:FileDirectoryFile]-(:FileDirectory) ' +
-      'OPTIONAL MATCH (d)-[:FileDirectoryFile]->(f:File) ' +
+      'MATCH (d:Folder) ' +
+      'WHERE NOT (d)<-[:ParentFolder]-(:Folder) ' +
+      'OPTIONAL MATCH (d)-[:ParentFolder]->(f:File) ' +
       'RETURN d, collect(f) as files'
     );
 
     // root-level files (files that are not connected to any directory)
     const filesResult = await neo4jSession.run(
       'MATCH (f:File) ' +
-      'WHERE NOT (f)-[:FileDirectoryFile]->(:FileDirectory) ' +
+      'WHERE NOT (f)-[:ParentFolder]->(:Folder) ' +
       'RETURN f'
     );
 
