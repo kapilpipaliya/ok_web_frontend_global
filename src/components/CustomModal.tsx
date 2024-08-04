@@ -7,12 +7,12 @@ import { useClickOutside } from "~/lib/hooks/useClickOutside";
 import { useZIndex } from "./ZIndex";
 
 interface CustomModalProps {
-  bodyClass?: JSX.CSSProperties;
+  bodyClass?: string;
   children: JSX.Element;
   closeButton?: boolean;
   customTitle?: JSX.Element;
-  dialogClass: string;
-  footer: (setOpen: Setter<boolean>) => JSX.Element;
+  dialogClass?: string;
+  footer?: (setOpen: Setter<boolean>) => JSX.Element;
   isCloseOnOutsideClick?: boolean;
   open?: Accessor<boolean>;
   setOpen?: (open: boolean) => void;
@@ -46,7 +46,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
             {props.title}
           </Show>
           <Show when={props.closeButton !== false}>
-            <button class="bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5" onClick={() => setOpen(false)} title="Close">
+            <button class="bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5" onClick={() => setOpen(false)} title="Close" type="button">
               ✕
             </button>
           </Show>
@@ -54,13 +54,13 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       );
     };
     return (
-      <div aria-modal="true" class={`${modalClass} ${props.dialogClass} r:10`} ref={setFloating} role="dialog">
+      <div aria-modal="true" class={`${modalClass} ${props.dialogClass ?? ""} r:10`} ref={setFloating} role="dialog">
         <Header />
         <hr class="fg:lightgrey" />
-        <div class={`${props.bodyClass} overflow:auto p:3`}>
+        <div class={`${props.bodyClass ?? ""} overflow:auto p:3`}>
           {props.children}
         </div>
-        {props.footer(setOpen)}
+        {props.footer?.(setOpen)}
       </div>
     );
   };

@@ -8,7 +8,7 @@ import { Sidebar } from './sidebar/FileManagerSideBar';
 
 export default function FileManager(props: Readonly<{
   enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'],
-  setFileManagerStore: (fileManagerStore: FileManagerObject) => void;
+  setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
 }>) {
   return (
     <FileManagerStoreProvider enableRowSelection={props.enableRowSelection} setFileManagerStore={props.setFileManagerStore}>

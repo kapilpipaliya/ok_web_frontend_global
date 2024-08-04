@@ -9,11 +9,10 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import { DialogWithButtons } from "~/components/DeleteDialog";
 import PreviewPage from "~/components/PreviewPage";
 import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
-import { FormContext, getInitialFormStore } from "~/components/form/FormContext";
+import { FormContext, type FormStore, getInitialFormStore } from "~/components/form/FormContext";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
@@ -41,6 +40,7 @@ export function PageViewWrapper(
     dataId?: Id
     expression?: string;
     formId?: string;
+    initializeFormStoreParent?: (formStore: FormStore) => void;
     isNoPermissionCheck?: boolean;
     pageId?: string;
     pageVertexLabel?: string;
@@ -57,7 +57,6 @@ export function PageViewWrapper(
       return props.pageVertexName;
     }
   });
-  const [, setLayoutStore] = useDesignerLayoutStore() || [];
   let onConfirmExit: () => void;
 
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
@@ -214,8 +213,7 @@ export function PageViewWrapper(
     saveUndoPoint(formStore.txnId, graph);
     setPreventUndoAtOrBeforeIndex(formStore.txnId, graph);
     saveStepIndex(formStore.txnId, "initial", graph);
-    // direct assignment not make it reactive
-    setLayoutStore?.({get formStore() { return formStore; }, get setFormStore() { return setFormStore; }});
+    props.initializeFormStoreParent?.(pageFormStore);
     await loadData();
   });
 

@@ -20,7 +20,7 @@ export type FileManagerObject = ReturnType<typeof getInitialFileManagerStore>;
 type FileManagerStore = ReturnType<typeof createStore<FileManagerObject>>;
 export const FileManagerStoreContext = createContext<FileManagerStore>();
 
-export function FileManagerStoreProvider(props: Readonly<{ children: JSX.Element , enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'], onFileSelected?: (file: Vertex) => void, setFileManagerStore: (fileManagerStore: FileManagerObject) => void }>) {
+export function FileManagerStoreProvider(props: Readonly<{ children: JSX.Element , enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'], onFileSelected?: (file: Vertex) => void, setFileManagerStore?: (fileManagerStore: FileManagerObject) => void }>) {
   const fileManagerStore = createStore({...getInitialFileManagerStore(), get enableRowSelection() { return props.enableRowSelection}});
   props.setFileManagerStore?.(fileManagerStore[0]);
   return (

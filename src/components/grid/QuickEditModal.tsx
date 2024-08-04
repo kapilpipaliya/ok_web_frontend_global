@@ -2,7 +2,7 @@ import type { Setter } from "solid-js";
 
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { CustomModal2 } from "../CustomModal2";
+import { CustomModal } from "../CustomModal";
 
 export const QuickEditModal = (p: {
   disabled?: boolean;
@@ -15,9 +15,10 @@ export const QuickEditModal = (p: {
   };
 
   return (
-    <CustomModal2
-      isOpen={!!p.tableId}
-      onClose={p.onClose}
+    <CustomModal
+      dialogClass="min-w:30% p:6"
+      open={() => !!p.tableId}
+      setOpen={() => p.onClose(false)}
       title="Quick Edit"
     >
       <PageViewWrapper
@@ -25,6 +26,6 @@ export const QuickEditModal = (p: {
         dataId={p.info.row.original.id}
         pageVertexName={p.tableId}
       />
-    </CustomModal2>
+    </CustomModal>
   );
 };
