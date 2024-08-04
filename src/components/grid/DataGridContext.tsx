@@ -3,6 +3,7 @@ import type { createStore } from "solid-js/store";
 
 import { type Accessor, type JSX, createContext, useContext } from "solid-js";
 
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
@@ -12,6 +13,9 @@ export function getInitialGridState(graph: GraphInterface) {
     cardSize: graph.vertexes[graph.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
     error: null as null | string,
+    fetchTableData: (() => {}) as (skip?: number, limit?: number, isLoadMore?: boolean) => Promise<{
+      error: string;
+  } | ServerResult>,
     filteredData: [] as Vertex[],
     formId: null as Id | null,
     formMetaData: (() => null) as Accessor<IFormMetaData | null>,
@@ -35,7 +39,7 @@ export function getInitialGridState(graph: GraphInterface) {
   };
 }
 export type DataGridState = ReturnType<typeof getInitialGridState>;
-type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
+export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
 export const DataGridStoreContext = createContext<DataGridStore>();
 
 

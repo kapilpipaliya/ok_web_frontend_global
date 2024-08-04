@@ -20,7 +20,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getConfiguredPermissions, hasPermissions } from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
-import { DataGridProvider, type DataGridState, getInitialGridState } from "./DataGridContext";
+import { DataGridProvider, type DataGridState, type DataGridStore, getInitialGridState } from "./DataGridContext";
 import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
@@ -31,6 +31,7 @@ interface DataGridProps {
   enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'];
   enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'];
   getTableData?: typeof defaultGetTableData;
+  initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
   tableId: string;
 }
@@ -49,7 +50,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
   const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
 
-  setGridState({allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission, get tableId() {return props.tableId}});
+  setGridState({ allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission, get tableId() { return props.tableId } });
 
   createEffect(on([() => gridState.cardSize, () => gridState.layout], () => {
     graph.saveUserSetting({ cardSize: gridState.cardSize, layout: gridState.layout });
@@ -94,7 +95,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       gridState.metaVertex
     ) : FormMetaData[props.tableId];
     setFormMetaData(form);
-    
+
     setGridState("isNoPermissionCheck", !gridState.metaVertex);
   };
 
@@ -105,13 +106,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setGridState("isLoading", false);
       return;
     }
-    const data = await (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId);
-    if (data.error) {
-      setGridState("error", data.error);
-    } else {
-      onTableDataGet(data);
-    }
-    setGridState("isLoading", false);
+    await fetchTableData();
+    setGridState({fetchTableData});
+    props.initializeGridStoreParent?.(gridStore);
   });
 
   const handleSearch = (value: string) => {
@@ -129,6 +126,18 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setGridState("filteredData", gridState.tableStore.data);
     }
   };
+
+  async function fetchTableData(skip?: number, limit?: number, isLoadMore?: boolean) {
+    setGridState("isLoading", true);
+    const data = await (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit);
+    if (data.error) {
+      setGridState("error", data.error);
+    } else {
+      onTableDataGet(data, isLoadMore);
+    }
+    setGridState("isLoading", false);
+    return data;
+  }
 
   function onTableDataGet(data: ServerResult, isLoadMore?: boolean) {
     const vertexCount = data.result.length;
@@ -184,7 +193,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             isShowPagination={props.isShowPagination}
             layout={gridState.layout}
             // TODO: Fix load more is broken, it doesnt update the state
-            onLoadMore={(skip, limit) => (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit)}
+            onLoadMore={(skip, limit) => fetchTableData(skip, limit, true)}
             rowsPerPageOptions={[5, 10, 15]}
             selectedRows={gridState.selectedRows}
             setSelectedRows={(rows: Vertex[]) => setGridState("selectedRows", rows)}
