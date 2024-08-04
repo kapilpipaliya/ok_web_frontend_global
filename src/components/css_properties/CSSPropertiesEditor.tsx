@@ -5,6 +5,7 @@ import { reconcile } from "solid-js/store";
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
 import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import type { CSSStore } from "./CssEditorContext";
 
@@ -17,8 +18,11 @@ import { AddNewCssState } from "./AddNewCssState";
 import { useCssEditor, useCssState } from "./CssEditorContext";
 import { ResetButton } from "./ResetButton";
 import { cssStateToString } from "./utils/cssStateToString";
+import { getCssSelectedFileEdgeName } from "./utils/getCssSelectedFileEdgeName";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+
 const defaultStateLabel = "Default State";
+
 function getOptions(cssState: CSSStore) {
   const pseudoClasses = [
     "",
@@ -45,7 +49,7 @@ function getOptions(cssState: CSSStore) {
 export function CSSPropertiesEditor(
   props: Readonly<{ data: Vertex, meta: Vertex, setValue?: (data: CSSStore) => void }>,
 ) {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
@@ -68,29 +72,54 @@ export function CSSPropertiesEditor(
   const handleAddNewClick = () => {
     setShowDropdown(!showDropdown());
   };
+
+  const clearStateFileSelection = (currentState: string) => {
+    const txnId = formStore?.txnId;
+    if (!txnId) {
+      return;
+    }
+    if (!props.meta || !props.data) {
+      return;
+    }
+    const edgesPrefixToRemove = getCssSelectedFileEdgeName(props.data.L[0], props.meta.P.name, currentState, "");
+    for (const edgeName in props.data.OUT) {
+      if (edgeName.startsWith(edgesPrefixToRemove)) {
+        for (const edgeId of props.data.OUT[edgeName]) {
+          deleteEdge(txnId, edgeId, graph, setGraph);
+        }
+      }
+    }
+  };
+
   const removeState = () => {
     batch(() => {
+      clearStateFileSelection(state());
       setCssState(state(), reconcile({}));
       setState("");
     });
   };
 
+  const resetCssState = () => {
+    clearStateFileSelection("");
+    setCssState(reconcile({ "": {} }));
+  };
+
   return <>
     <Show when={formStore?.formData?.L[0] === "Comp"}>
-      <span>Preview:</span><br/>
+      <span>Preview:</span><br />
       <DynamicComponent
-        componentName={formStore!.formData!.P.name}
+        componentName={formStore!.formData.P.name}
         data={formStore!.formData}
         isNoPermissionCheck
-        meta={{P: {class: props.data.P.value}} as unknown as Vertex}
-      /><br/>
+        meta={{ P: { class: props.data.P.value } } as unknown as Vertex}
+      /><br />
     </Show>
     {graph.isDevelopment ? JSON.stringify(cssState) : null}
-    <ResetButton />
+    <ResetButton onReset={resetCssState} />
     <TextEditor
       disabled={true}
       onValueChange={handleCSSStateChange}
-      value={cssStateToString(cssState)}
+      value={cssStateToString(cssState, props.meta, props.data, graph)}
     />
 
     Current State
@@ -125,5 +154,4 @@ export function CSSPropertiesEditor(
     </div>
     <StyleEditor />
   </>
-
 }

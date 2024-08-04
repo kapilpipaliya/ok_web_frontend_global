@@ -173,7 +173,7 @@ export function DynamicComponent(
         try {
           values[property] = evaluateRule(rule, formStore.formData, graph, setGraph);
           if (property.toLowerCase().endsWith("class")) {
-            values[property] = mergeCSS("", values[property]);
+            values[property] = mergeCSS("", values[property], {P: {name: property}} as unknown as Vertex, props.meta, graph);
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) { /* empty */ }
@@ -194,7 +194,7 @@ export function DynamicComponent(
           if (key.toLowerCase().endsWith('class')) {
             const value = customMetaProps[key];
             if (value !== null) {
-              result[key] = mergeCSS("", value);
+              result[key] = mergeCSS("", value, {P: {name: key}} as unknown as Vertex, props.meta, graph);
             }
           } else {
             Object.defineProperty(result, key, descriptor);
@@ -203,7 +203,7 @@ export function DynamicComponent(
           // Handle properties without getters
           const value = descriptor.value;
           if (value !== null) {
-            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value) : value;
+            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value, {P: {name: key}} as unknown as Vertex, props.meta, graph) : value;
           }
         }
       }

@@ -3,6 +3,7 @@ import { type Setter, Show } from "solid-js";
 import { Drawer } from "~/components/Drawer";
 import { ResizableContainer } from "~/components/ResizableDivView";
 import { ZIndex } from "~/components/ZIndex";
+import { FormContext } from "~/components/form/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
@@ -44,7 +45,7 @@ export function RenderMainContent() {
         when={!layoutStore.isSmallScreen}
       >
         <Show when={layoutStore.isLeftOpen}>
-          <FormElementsWrapper  />
+          <FormElementsWrapper />
         </Show>
       </Show>
       <Show when={layoutStore.formStore}>
@@ -75,7 +76,7 @@ export function RenderMainContent() {
         }
         when={!layoutStore.isSmallScreen}
       >
-        <SettingsWrapper/>
+        <SettingsWrapper />
       </Show>
       <Show when={layoutStore.showPropertiesDrawer}>
         <ZIndex>
@@ -88,13 +89,15 @@ export function RenderMainContent() {
                 setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>
             }
           >
-            <PropertiesWrapper />
+            <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
+              <PropertiesWrapper />
+            </FormContext.Provider>
           </Drawer>
         </ZIndex>
       </Show>
       <Show when={Object.keys(layoutStore.usedAttrsInRules).length > 0 || layoutStore.usedAttrsInUniqueConstraints.length > 0 || layoutStore.usedAttrsInNameKeys.length > 0 || layoutStore.shouldContainAtLeastOneForm}>
         <ZIndex>
-          <DeleteAttributeDialog/>
+          <DeleteAttributeDialog />
         </ZIndex>
       </Show>
     </div>

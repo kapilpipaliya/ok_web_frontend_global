@@ -3,12 +3,14 @@ import type { RowSelectionOptions } from '@tanstack/solid-table';
 import { type JSX, createContext, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
+import type { DataGridStore } from '~/components/grid/DataGridContext';
 import type { Vertex } from '~/lib/graph/graph';
 
 const getInitialFileManagerStore = () => {
   return {
     enableRowSelection: undefined as RowSelectionOptions<Vertex>['enableRowSelection'],
     expandedKeys: [] as string[],
+    gridStore: null as DataGridStore | null,
     root: null as Vertex | null,
     selectedFile: null as null | string,
     selectedItem: null as Vertex | null,

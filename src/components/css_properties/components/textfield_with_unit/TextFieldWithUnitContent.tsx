@@ -129,7 +129,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
         </Show>
         <InputField handleChange={handleInputChange} meta={props.meta} onFocus={handleInputFocus} selectedValue={props.selectedValue}/>
         <Show when={props.meta.showFilePicker}>
-          <FilePickerButton />
+          <FilePickerButton handleChange={handleInputChange} selectedValue={props.selectedValue}/>
         </Show>
       </div>
       <UnitsDropdown

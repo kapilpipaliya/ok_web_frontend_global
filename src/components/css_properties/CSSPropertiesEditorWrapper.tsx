@@ -1,3 +1,4 @@
+import { MultiProvider } from "@solid-primitives/context";
 import { createSignal } from "solid-js";
 import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
 
@@ -7,6 +8,7 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "./CssEditorContext";
 
+import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import {
   CssDefaultEditorContext,
@@ -14,9 +16,10 @@ import {
   CssStateContext,
 } from "./CssEditorContext";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+
 export function CSSPropertiesEditorWrapper(
   props: Readonly<{
-    data?: Vertex; // temp vertex
+    data?: Vertex;
     disabled?: boolean;
     isRealTime?: boolean;
     meta: Vertex;
@@ -57,20 +60,19 @@ export function CSSPropertiesEditorWrapper(
   };
 
   return (
-    <CssEditorContext.Provider
-      value={[cssState, onCSSStateChange as SetStoreFunction<CSSStore>]}
+    <MultiProvider
+      values={[
+        [CssEditorContext, [cssState, onCSSStateChange as SetStoreFunction<CSSStore>]],
+        [CssDefaultEditorContext, [cssDefaultState, setCssDefaultCssState]],
+        [CssStateContext, [state, setState]],
+        [CssEditorPropsProvider, {get data() {return props.data}, get meta() {return props.meta}}],
+      ]}
     >
-      <CssDefaultEditorContext.Provider
-        value={[cssDefaultState, setCssDefaultCssState]}
-      >
-        <CssStateContext.Provider value={[state, setState]}>
-          <CSSPropertiesEditor
-            data={props.data!}
-            meta={props.meta}
-            setValue={props.setValue}
-          />
-        </CssStateContext.Provider>
-      </CssDefaultEditorContext.Provider>
-    </CssEditorContext.Provider>
+      <CSSPropertiesEditor
+        data={props.data!}
+        meta={props.meta}
+        setValue={props.setValue}
+      />
+    </MultiProvider>
   );
 }

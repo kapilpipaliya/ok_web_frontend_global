@@ -10,7 +10,7 @@ interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   selectedValue: () => string;
 } 
 
-export function InputField(props: InputFieldProps) {
+export function InputField(props: Readonly<InputFieldProps>) {
   const [local, others] = splitProps(props, [
     "class",
     "meta",

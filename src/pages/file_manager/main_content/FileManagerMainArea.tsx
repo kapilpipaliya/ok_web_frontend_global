@@ -1,8 +1,6 @@
 import jsep from "jsep";
 import { For, createEffect, createSignal } from "solid-js";
 
-import type { DataGridStore } from "~/components/grid/DataGridContext";
-
 import { useToast } from "~/components/Toast";
 import { DataGrid } from "~/components/grid/DataGrid";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
@@ -19,7 +17,6 @@ import { getFilesData } from "../sidebar/getFilesData";
 export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
-  let gridStore: DataGridStore;
 
   const [children, setChildren] = createSignal<Vertex[]>([]);
   const [breadcrumb, setBreadcrumb] = createSignal<Vertex[]>([]);
@@ -85,7 +82,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
       await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
       showSuccessToast("File uploaded successfully");
 
-      gridStore[0].fetchTableData();
+      fileManagerStore.gridStore?.[0].fetchTableData();
     }
     return (
       <div>
@@ -111,7 +108,17 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
         </For>
       </div>
       <div>
-        <DataGrid CustomAddNewButton={AddNewFileButton} enableRowSelection={fileManagerStore.enableRowSelection} getTableData={() => fetchChildren(props.item)} initializeGridStoreParent={(gridStore_) => gridStore = gridStore_} isShowPagination={false} tableId="File" />
+        <DataGrid
+          CustomAddNewButton={AddNewFileButton}
+          enableRowSelection={fileManagerStore.enableRowSelection}
+          getTableData={() => fetchChildren(props.item)}
+          initializeGridStoreParent={(gridStore_) => {
+            setFileManagerStore({
+              get gridStore() {
+                return gridStore_;
+              }
+            });
+          }} isShowPagination={false} tableId="File" />
       </div>
     </div>
   );

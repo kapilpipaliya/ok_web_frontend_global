@@ -1,7 +1,8 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
+import { IconButton } from "../IconButton";
 import { type CSSStore, useCssEditor } from "./CssEditorContext";
 
 
@@ -42,19 +43,23 @@ function filterTruthyCSSStore(store: CSSStore): Partial<CSSStore> {
   return filteredStore;
 }
 
-export function ResetButton() {
+export function ResetButton(props:Readonly<{ onReset: () => void }>) {
   const [cssState, setCssState] = useCssEditor();
 
   return (
     <Show when={Object.entries(filterTruthyCSSStore(cssState)).length}>
       <div class="d:flex jc:end">
-        <button
-          class="ai:center bg:red-50 bg:red-70:hover color:white d:flex gap:10px px:16px py:8px r:6 transition:background-color|200ms"
-          onClick={() => setCssState(reconcile({ "" : {} }))}
+        <IconButton
+          class="bg:red-50 bg:red-70:hover color:white gap:10px px:16px py:8px r:6 transition:background-color|200ms"
+          icon="mdi:close"
+          onClick={() => {
+            setCssState(reconcile({ "" : {} }));
+            props.onReset();
+          }}
+           title="Reset"
         >
-          <Icon icon="mdi:close" />
           <span>Reset</span>
-        </button>
+        </IconButton>
       </div>
     </Show>
   );
