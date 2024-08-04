@@ -2,7 +2,7 @@ import type {APIEvent} from "@solidjs/start/dist/server";
 import type {HTTPEvent} from "vinxi/runtime/http-types";
 
 import fs from "node:fs/promises";
-import {getQuery} from "vinxi/runtime/http-types";
+import {getQuery} from "vinxi/http";
 
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {deleteFileMetadataFromNeo4j, getFileMetadataFromNeo4j} from "~/routes/api/upload/saveFileMetadataToNeo4j";

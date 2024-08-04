@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
-import { Show } from "solid-js";
+import { type JSX, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
 
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
@@ -9,6 +10,7 @@ import { AddNewButton } from "./AddNew";
 import { useDataGridContext } from "./DataGridContext";
 
 interface GridHeaderProps {
+  CustomAddNewButton?: (props: { disabled: boolean; onClick: () => void }) => JSX.Element;
   formMetaData?: IFormMetaData | null;
   onSearch: (value: string) => void;
 }
@@ -16,10 +18,15 @@ interface GridHeaderProps {
 export function GridHeader(props: Readonly<GridHeaderProps>) {
   const [gridState, setGridState] = useDataGridContext();
   const navigate = useNavigate();
-  const onAddNew = () => navigate("new")
+  const onAddNew = () => navigate("new");
+
   return (
     <div class="flex ai:center jc:space-between p:4|10">
-      <AddNewButton disabled={gridState.isNoPermissionCheck ? false : (!!props.formMetaData && !gridState.hasInsertPermission())} onClick={onAddNew} />
+      <Dynamic 
+        component={props.CustomAddNewButton || AddNewButton} 
+        disabled={gridState.isNoPermissionCheck ? false : (!!props.formMetaData && !gridState.hasInsertPermission())} 
+        onClick={onAddNew} 
+      />
       <div class="flex ai:center mb:10">
         <SearchBar
           handleChange={props.onSearch}

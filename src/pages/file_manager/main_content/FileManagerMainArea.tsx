@@ -7,6 +7,7 @@ import { type Vertex, useGraph } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
+import { AddNewFileButton } from "./AddNewFileButton";
 
 export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
   const [graph, setGraph] = useGraph();
@@ -52,8 +53,8 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
       <div class="d:flex gap:2 p:2">
         <For each={breadcrumb()}>
           {(item, index) => (
-            <button 
-              class={`c:blue ${index() === 0 ? 'font-weight:600' : ''} cursor:pointer`} 
+            <button
+              class={`c:blue ${index() === 0 ? 'font-weight:600' : ''} cursor:pointer`}
               onClick={() => setFileManagerStore('selectedItem', item)}
               type="button"
             >
@@ -64,7 +65,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
         </For>
       </div>
       <div>
-        <DataGrid enableRowSelection={fileManagerStore.enableRowSelection} getTableData={() => fetchChildren(props.item)} isShowPagination={false} tableId="File" />
+        <DataGrid CustomAddNewButton={AddNewFileButton} enableRowSelection={fileManagerStore.enableRowSelection} getTableData={() => fetchChildren(props.item)} isShowPagination={false} tableId="File" />
       </div>
     </div>
   );

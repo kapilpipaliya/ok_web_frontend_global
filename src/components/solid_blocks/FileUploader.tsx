@@ -9,10 +9,11 @@ import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "./tools";
 
 export type FileUploaderProps = {
-  data?: any;
+  data?: Vertex;
   label?: string;
   media?: string;
-  meta?: any;
+  meta?: Vertex;
+  onUploadSuccess?: (data: any) => void;
   setValue?: (file: File) => void;
   txnId?: number;
 } & JSX.HTMLAttributes<HTMLLabelElement>;
@@ -42,7 +43,7 @@ async function uploadFile(file: File, apiUrl: string) {
 
 export function FileUploader(props: FileUploaderProps) {
   const [graph, setGraph] = useGraph();
-  const [localProps, others] = splitProps(props, ["setValue", "meta", "data", "label", "media"]);
+  const [localProps, others] = splitProps(props, ["setValue", "meta", "data", "label", "media", "onUploadSuccess"]);
   const [file, setFile] = createSignal<File | null>(null);
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
   let inputRef: HTMLInputElement | undefined;
@@ -72,12 +73,17 @@ export function FileUploader(props: FileUploaderProps) {
       const data = await handleFileUpload(file);
       if (data?.graph) {
         setGraphData(graph, setGraph, data.graph);
+        // Call the onUploadSuccess callback if provided
+        if (localProps.onUploadSuccess) {
+          localProps.onUploadSuccess(data);
+          return;
+        }
         if (!props.data) {
           setSelectedFiles(data.result);
         } else {
           setSelectValueHelper(
             txnId,
-            props.meta,
+            props.meta!,
             props.data as Vertex,
             "TagBox",
             data.result,

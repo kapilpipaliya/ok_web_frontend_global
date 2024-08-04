@@ -1,6 +1,6 @@
 import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-const parentDirectory: FieldAttribute = {
+export const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.
   collection: "g:'Folder'",
   componentName: "SelectBox",

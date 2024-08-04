@@ -2,7 +2,7 @@ import type {APIEvent} from "@solidjs/start/dist/server";
 import type {HTTPEvent} from "vinxi/runtime/http-types";
 
 import path from "node:path";
-import {readMultipartFormData} from "vinxi/runtime/http-types";
+import {readMultipartFormData} from "vinxi/http";
 
 import {processResult} from "~/cypher/get/evaluate/processResult";
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";

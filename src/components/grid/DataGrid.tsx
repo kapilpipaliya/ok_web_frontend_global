@@ -27,6 +27,7 @@ import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 
 interface DataGridProps {
+  CustomAddNewButton?: (props: { disabled: boolean; onClick: () => void }) => JSX.Element;
   enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'];
   enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'];
   getTableData?: typeof defaultGetTableData;
@@ -129,12 +130,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     }
   };
 
-  function onTableDataGet(data: ServerResult) {
+  function onTableDataGet(data: ServerResult, isLoadMore?: boolean) {
     const vertexCount = data.result.length;
     setGridState("isShowLoadMore", vertexCount >= 10);
     setGraphData(graph, setGraph, data.graph);
     const resultData = data.result;
-    const nodes: Vertex[] = gridState.tableStore.data
+    const nodes: Vertex[] = isLoadMore && gridState.tableStore.data
       ? [...gridState.tableStore.data, ...resultData]
       : resultData;
     graph.events?.setTitle?.(formMetaData()!.title);
@@ -166,6 +167,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         </Match>
         <Match when={formMetaData()}>
           <GridHeader
+            CustomAddNewButton={props.CustomAddNewButton}
             formMetaData={formMetaData()}
             onSearch={handleSearch}
           />
@@ -181,6 +183,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             isShowLoadMore={gridState.isShowLoadMore}
             isShowPagination={props.isShowPagination}
             layout={gridState.layout}
+            // TODO: Fix load more is broken, it doesnt update the state
             onLoadMore={(skip, limit) => (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit)}
             rowsPerPageOptions={[5, 10, 15]}
             selectedRows={gridState.selectedRows}
