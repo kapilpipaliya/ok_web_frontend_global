@@ -3,7 +3,8 @@ import { type Component, Show, createSignal, onCleanup } from "solid-js";
 
 import type { OptionType } from "../../constants/FieldType";
 
-import { FilePickerButton, IncrementButton } from "./IncrementButton";
+import { FilePickerButton } from "./FilePickerButton";
+import { IncrementButton } from "./IncrementButton";
 import { InputField } from "./InputField";
 import { SuggestionsDropdown } from "./SuggestionsDropdown";
 import { UnitsDropdown } from "./UnitsDropdown";

@@ -1,6 +1,6 @@
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 
-import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
+import {Table, TableBodyCell, TableHeadCell} from "~/components/SimpleTable";
 
 export function RouteDesigner() {
   const [elements, setElements]: any = createSignal([]);

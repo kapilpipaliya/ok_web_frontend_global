@@ -5,16 +5,15 @@ import { TreeItemExpandButton } from "~/components/page_designer/settings/layout
 
 import { useFileManagerStore } from "../FileManagerContext";
 
-export function FileManagerTreeItemContent(props: { hasChildren: boolean; item: Vertex; toggleExpand: (itemId: Id) => void; }) {
+export function FileManagerTreeItemContent(props: Readonly<{ hasChildren: boolean; item: Vertex; toggleExpand: (itemId: Id) => void; }>) {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const handleDoubleClick = () => {
     setFileManagerStore('selectedItem', props.item);
   };
-  return <div
-    class="cursor:pointer"
+  return <div // NOSONAR
+    class="ai:center cursor:pointer d:flex flex:1"
     classList={{
       "bl:1px|dashed|black pl:10": !props.hasChildren,
-      "d:flex ai:center": true,
     }}
     onClick={handleDoubleClick}
   >
@@ -28,6 +27,6 @@ export function FileManagerTreeItemContent(props: { hasChildren: boolean; item: 
       icon={props.item.L[0] === "Folder" ? "ic:round-folder" : "ic:round-file"}
       size={16}
     />
-    {props.item.P.name}
+    <span>{props.item.P.name}</span>
   </div>;
 }

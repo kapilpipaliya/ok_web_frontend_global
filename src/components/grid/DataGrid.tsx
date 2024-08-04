@@ -1,3 +1,5 @@
+import type { RowSelectionOptions } from "@tanstack/solid-table";
+
 import { useNavigate } from "@solidjs/router";
 import { type Accessor, Match, Show, Switch, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -25,6 +27,8 @@ import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 
 interface DataGridProps {
+  enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'];
+  enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'];
   getTableData?: typeof defaultGetTableData;
   isShowPagination?: boolean;
   tableId: string;
@@ -170,6 +174,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             cardSize={gridState.cardSize}
             data={gridState.filteredData}
             defaultRowsPerPage={10}
+            enableMultiRowSelection={props.enableMultiRowSelection}
+            enableRowSelection={props.enableRowSelection}
             headers={gridState.tableStore.tableColumns}
             isSearching={gridState.isSearching}
             isShowLoadMore={gridState.isShowLoadMore}
@@ -177,6 +183,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             layout={gridState.layout}
             onLoadMore={(skip, limit) => (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit)}
             rowsPerPageOptions={[5, 10, 15]}
+            selectedRows={gridState.selectedRows}
+            setSelectedRows={(rows: Vertex[]) => setGridState("selectedRows", rows)}
             totalItems={gridState.filteredData.length}
           />
           <Show when={gridState.deleteRowId}>

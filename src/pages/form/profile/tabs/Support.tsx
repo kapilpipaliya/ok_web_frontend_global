@@ -9,7 +9,7 @@ import { ChipDropDown } from "~/components/Chip";
 import { CustomModal } from "~/components/CustomModal";
 import { DialogWithButtons } from "~/components/DeleteDialog";
 import { IconButton } from "~/components/IconButton";
-import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
+import {Table, TableBodyCell, TableHeadCell} from "~/components/SimpleTable";
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";

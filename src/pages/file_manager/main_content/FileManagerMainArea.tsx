@@ -52,18 +52,19 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
       <div class="d:flex gap:2 p:2">
         <For each={breadcrumb()}>
           {(item, index) => (
-            <span 
+            <button 
               class={`c:blue ${index() === 0 ? 'font-weight:600' : ''} cursor:pointer`} 
               onClick={() => setFileManagerStore('selectedItem', item)}
+              type="button"
             >
               {item.P.name}
               {index() < breadcrumb().length - 1 && " / "}
-            </span>
+            </button>
           )}
         </For>
       </div>
       <div>
-        <DataGrid getTableData={() => fetchChildren(props.item)} isShowPagination={false} tableId="File" />
+        <DataGrid enableRowSelection={fileManagerStore.enableRowSelection} getTableData={() => fetchChildren(props.item)} isShowPagination={false} tableId="File" />
       </div>
     </div>
   );
