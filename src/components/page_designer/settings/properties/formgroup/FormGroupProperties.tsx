@@ -3,16 +3,12 @@ import type { SetStoreFunction } from "solid-js/store";
 import {
   For,
   Match,
-  Show,
   Switch,
   createMemo,
-  createSignal,
   createUniqueId,
   onCleanup,
 } from "solid-js";
 
-import { TabsWithUnderline } from "~/components/SimpleTabs";
-import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
@@ -31,6 +27,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { type PageLayoutObject, useDesignerLayoutStore } from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
+import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPageField } from "./SelectPageField";
@@ -103,7 +100,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   );
 }
 
-function createVertexIds() {
+export function createVertexIds() {
   return {
     calculatedValue: `calculatedValueVertex${createUniqueId()}`,
     class: `classVertex${createUniqueId()}`,
@@ -166,6 +163,7 @@ function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof create
     graph.vertexes[vertexIds.label],
     graph.vertexes[vertexIds.labelPosition],
     graph.vertexes[vertexIds.perm],
+    // Default value can be only entered when it is in Form Builder
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     graph.vertexes[vertexIds.calculatedValue],
     graph.vertexes[vertexIds.required],
@@ -261,48 +259,5 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
   );
 }
 
-interface ClassesComponentProps {
-  metaAttributes: Vertex[];
-  selectedLayout: Vertex;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setValue: (meta: Vertex, data: any) => void;
-  txnId: number;
-  vertexIds: ReturnType<typeof createVertexIds>;
-}
 
-function ClassesComponent(props: Readonly<ClassesComponentProps>) {
-  const [graph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
-  const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-  // Default value can be only entered when it is in Form Builder
-  const isForm = layoutStore.formStore?.formData.L[0] === "Form";
-  const isFormField = isForm && genericInputComponents.includes(componentName);
-  const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
-  const metaClasses = [
-    graph.vertexes[props.vertexIds.class],
-    ...(isFormField ? [graph.vertexes[props.vertexIds.labelClass]] : []),
-    ...classVertices,
-  ];
 
-  const [selectedIndex, setSelectedIndex] = createSignal(0);
-  const handleTabClick = (index: number) => setSelectedIndex(index);
-
-  return (
-    <>
-      <TabsWithUnderline
-        displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'"
-        onTabClick={handleTabClick}
-        selectedIndex={selectedIndex()}
-        tabs={metaClasses as unknown as { name: string }[]}
-      />
-      <Show keyed when={selectedIndex() + 1}>
-        <CSSPropertiesEditorWrapper
-          data={props.selectedLayout}
-          meta={metaClasses[selectedIndex()]}
-          setValue={(data) => props.setValue(metaClasses[selectedIndex()], data)}
-          txnId={props.txnId}
-        />
-      </Show>
-    </>
-  );
-}

@@ -153,7 +153,9 @@ export const SupportTicketSection = (
   const OpenDialog = (props: Readonly<{ id: string }>) => {
     const [openDialog, setOpenDialog] = createSignal(false);
     return (
-      <><IconButton class="color:#37c" icon="bi:chat-text" onClick={() => setOpenDialog(true)} size={22} /><CustomModal
+      <>
+      <IconButton class="color:#37c" icon="bi:chat-text" onClick={() => setOpenDialog(true)} size={22} />
+      <CustomModal
         dialogClass="min-w:30% r:10px p:0"
         footer={() => (
           <div class="flex ai:center jc:center">
@@ -186,7 +188,8 @@ export const SupportTicketSection = (
         <div>
           <Chat id={props.id} />
         </div>
-      </CustomModal></>
+      </CustomModal>
+      </>
     );
   };
 

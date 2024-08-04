@@ -25,7 +25,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
   };
 
   return (
-    <span class={`${props.class ?? ""} flex ai:center font-weight:400 font:14 gap:2`}>
+    <span class={`${props.class ?? ""} flex ai:center font-weight:400 font:14 gap:2 white-space:nowrap`}>
       {props.title}
       <Show when={props.showResetIcon ?? false}>
         &nbsp;

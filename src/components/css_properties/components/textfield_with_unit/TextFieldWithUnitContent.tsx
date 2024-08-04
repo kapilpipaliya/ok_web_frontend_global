@@ -3,7 +3,7 @@ import { type Component, Show, createSignal, onCleanup } from "solid-js";
 
 import type { OptionType } from "../../constants/FieldType";
 
-import { IncrementButton } from "./IncrementButton";
+import { FilePickerButton, IncrementButton } from "./IncrementButton";
 import { InputField } from "./InputField";
 import { SuggestionsDropdown } from "./SuggestionsDropdown";
 import { UnitsDropdown } from "./UnitsDropdown";
@@ -114,7 +114,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
 
   return (
     <div
-      class={`${props.meta.showInside ? "b:1px|solid|#ccc" : ""} ${props.meta.showInside ? "p:0|5|0|5" : ""} ${!props.meta.isLabelOnTop ? "max-w:50%" : ""} flex rel ai:center jc:space-between r:5`}
+      class={`${props.meta.showInside ? "b:1px|solid|#ccc" : ""} ${props.meta.showInside ? "p:0|5|0|5" : ""} ${props.meta.isLabelOnTop ? "" : "max-w:50% w:50%"} flex rel ai:center jc:space-between r:5`}
       ref={setReference}
     >
       <div class={"flex ai:center flex:1"}>
@@ -127,6 +127,9 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
           </Show>
         </Show>
         <InputField handleChange={handleInputChange} meta={props.meta} onFocus={handleInputFocus} selectedValue={props.selectedValue}/>
+        <Show when={props.meta.showFilePicker}>
+          <FilePickerButton />
+        </Show>
       </div>
       <UnitsDropdown
         isDropdownOpen={isDropdownOpen}
