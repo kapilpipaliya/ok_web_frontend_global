@@ -78,12 +78,12 @@ export interface GraphInterface {
 
 export const GraphContext = createContext<
   ReturnType<typeof createStore<GraphInterface>>
->([] as any);
+>();
 
 export function useGraph() {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  if (!graph || !setGraph) {
+  const graphStore = useContext(GraphContext)!;
+  if (!graphStore) {
     throw new Error("useGraph must be used within a GraphProvider");
   }
-  return [graph, setGraph] as const;
+  return graphStore;
 }

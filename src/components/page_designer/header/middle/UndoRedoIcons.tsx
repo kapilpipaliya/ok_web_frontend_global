@@ -13,15 +13,15 @@ export function UndoRedoIcons() {
   const [graph] = useGraph();
   const icons = [
     {
-      disabled: () => !undoAllowed(layoutStore.formStore?.txnId, graph),
+      disabled: () => !undoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
       icon: "ci:arrow-undo-up-left",
-      onClick: () => undo(layoutStore.formStore.txnId, graph),
+      onClick: () => undo(layoutStore.formStore[0].txnId, graph),
       tooltip: "Undo",
     },
     {
-      disabled: () => !redoAllowed(layoutStore.formStore?.txnId, graph),
+      disabled: () => !redoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
       icon: "ci:arrow-undo-up-right",
-      onClick: () => redo(layoutStore.formStore.txnId, graph),
+      onClick: () => redo(layoutStore.formStore[0].txnId, graph),
       tooltip: "Redo",
     },
   ];

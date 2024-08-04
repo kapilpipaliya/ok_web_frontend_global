@@ -26,23 +26,22 @@ export function Permission() {
       <div class="mt:.5rem px:0.25rem">
         <DynamicComponent
           componentName={"TagBox"}
-          data={layoutStore.formStore?.formData}
+          data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={{ P: { collection: '->$0Perm', name: "globalPerm" } as unknown as FieldAttribute } as unknown as Vertex}
-          txnId={layoutStore.formStore.txnId}
+          txnId={layoutStore.formStore[0].txnId}
         />
       </div>
-
 
       <HeaderWithDescription description="All the permissions that are used in the form." paddingXSm="0.25rem" title="All Form Permissions" />
       <div class="mt:.5rem px:0.25rem">
         <TableInputField
-          data={layoutStore.formStore?.formData}
+          data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
-          txnId={layoutStore.formStore.txnId}
+          txnId={layoutStore.formStore[0].txnId}
         />
       </div>
 

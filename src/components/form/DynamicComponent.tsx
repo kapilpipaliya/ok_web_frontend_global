@@ -173,7 +173,7 @@ export function DynamicComponent(
         try {
           values[property] = evaluateRule(rule, formStore.formData, graph, setGraph);
           if (property.toLowerCase().endsWith("class")) {
-            values[property] = mergeCSS("", values[property], {P: {name: property}} as unknown as Vertex, props.meta, graph);
+            values[property] = mergeCSS("", values[property], { P: { name: property } } as unknown as Vertex, props.meta, graph);
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) { /* empty */ }
@@ -194,7 +194,7 @@ export function DynamicComponent(
           if (key.toLowerCase().endsWith('class')) {
             const value = customMetaProps[key];
             if (value !== null) {
-              result[key] = mergeCSS("", value, {P: {name: key}} as unknown as Vertex, props.meta, graph);
+              result[key] = mergeCSS("", value, { P: { name: key } } as unknown as Vertex, props.meta, graph);
             }
           } else {
             Object.defineProperty(result, key, descriptor);
@@ -203,7 +203,7 @@ export function DynamicComponent(
           // Handle properties without getters
           const value = descriptor.value;
           if (value !== null) {
-            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value, {P: {name: key}} as unknown as Vertex, props.meta, graph) : value;
+            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value, { P: { name: key } } as unknown as Vertex, props.meta, graph) : value;
           }
         }
       }
@@ -260,20 +260,20 @@ export function DynamicComponent(
       </Show> */}
       <PageRenderContextProvider item={props.meta} store={repeterStore}>
         <Switch>
-        <Match when={!component()}>NO INPUT {componentName()}</Match>
-        <Match keyed when={!expressionProperties().hidden && component() && (isNoPermissionCheck() || !hasNoPermission())}>
-          <Switch>
-            <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
-              <Label class={mergeCSS("", selectedProps.labelClass)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
+          <Match when={!component()}>NO INPUT {componentName()}</Match>
+          <Match keyed when={!expressionProperties().hidden && component() && (isNoPermissionCheck() || !hasNoPermission())}>
+            <Switch>
+              <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
+                <Label class={mergeCSS("", selectedProps.labelClass, { P: { name: 'labelClass' } } as unknown as Vertex, props.meta, graph)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
+                  <Content />
+                </Label>
+              </Match>
+              <Match when={true}>
                 <Content />
-              </Label>
-            </Match>
-            <Match when={true}>
-              <Content />
-            </Match>
-          </Switch>
-        </Match>
-      </Switch>
+              </Match>
+            </Switch>
+          </Match>
+        </Switch>
       </PageRenderContextProvider>
     </>
   );

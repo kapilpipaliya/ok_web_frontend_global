@@ -1,4 +1,4 @@
-import type { SetStoreFunction, createStore } from "solid-js/store";
+import type { createStore } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
@@ -11,7 +11,7 @@ export function getInitialDesignerLayoutStore() {
   return {
     activeItem: null as Id | null | number,
     draggedVertices: [] as Array<Vertex>,
-    formStore: {} as FormStoreObject,
+    formStore: [] as unknown as ReturnType<typeof createStore<FormStoreObject>>,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     inputBackground: "white",
@@ -26,7 +26,6 @@ export function getInitialDesignerLayoutStore() {
     selectedComponent: -1 as Id | number,
     selectedId: -1 as Id | number,
     selectedSection: "build",
-    setFormStore: (() => {}) as unknown as SetStoreFunction<FormStoreObject>,
     shouldContainAtLeastOneForm: false,
     showPropertiesDrawer: false,
     usedAttrsInNameKeys: [] as Array<Id | number>,

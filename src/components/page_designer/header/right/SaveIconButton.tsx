@@ -8,12 +8,12 @@ import { useGraph } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
 export function SaveIconButton() {
-  const [formStore] = useFormContext();
+  const formStore = useFormContext();
   const [graph] = useGraph();
 
   const onSubmit = formSubmit();
   const isDisabled = createMemo(
-    () => !!formStore!.txnId && isDisabledTxn(formStore!.txnId, graph),
+    () => !!formStore?.[0]?.txnId && isDisabledTxn(formStore?.[0]?.txnId, graph),
   );
 
   return (

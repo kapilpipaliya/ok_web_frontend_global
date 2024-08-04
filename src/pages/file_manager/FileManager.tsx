@@ -31,8 +31,21 @@ export default function FileManager(props: Readonly<{
 // Root is not possible to move.
 
 // Delete File/Folder:
-// In the delete dialog, show where the file is used.
+// In the delete dialog, show where the file is used. (IMP)
 // Dont allow to delete non empty folders.
 // Implement proper validations and authorization checks to ensure that user can only delete their own files and folders.
 
+// Implement validation that only authorized users can view or download the file.
+
 // Provide UI to replace the file.
+
+// Make file upload component validate according to properties (file type, size, restrictions).
+
+// Provide clear instructions and feedback during file upload process, such as progress indicators and error messages.
+
+// Implement a search functionality to quickly find files or folders by name.
+
+// Implement a file preview feature to allow users to view the contents of a file before downloading it.
+
+// Implement a file sharing feature to allow users to share files with others.
+

@@ -56,7 +56,7 @@ export function SelectPermField(
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formStore.formData.id}'->Rule`,
+      collection: () => `id:'${layoutStore.formStore[0].formData.id}'->Rule`,
       componentName: "SelectBox",
       displayName: props.metaVertex.P.displayName,
       name: props.metaVertex.P.name,
@@ -72,7 +72,7 @@ export function SelectPermField(
         isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
-        txnId={layoutStore.formStore.txnId}
+        txnId={layoutStore.formStore[0].txnId}
       />
     );
   };

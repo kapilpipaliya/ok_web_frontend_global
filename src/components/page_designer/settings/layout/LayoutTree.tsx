@@ -33,15 +33,15 @@ export function LayoutTree() {
     //     ? [steps()[0]]
     //     : [];
     // }
-    return layoutStore.formStore?.formData
-      ? [layoutStore.formStore.formData]
+    return layoutStore.formStore[0]?.formData
+      ? [layoutStore.formStore[0].formData]
       : [];
   };
 
   return (
     <For each={rootVertexes()}>
       {(item) => (
-        <Show when={layoutStore.formStore}>
+        <Show when={layoutStore.formStore[0]}>
           <LayoutTreeItem
             collapsedKeys={collapsedKeys}
             metaVertex={item}

@@ -75,10 +75,10 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               undefined,
               undefined,
-              layoutStore.formStore.txnId,
+              layoutStore.formStore[0].txnId,
               graph,
               setGraph,
-              layoutStore.formStore.formData
+              layoutStore.formStore[0].formData
             );
           }}
           size={18}
@@ -98,7 +98,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               graph,
               setGraph,
-              layoutStore.formStore.txnId,
+              layoutStore.formStore[0].txnId,
               getComponent(),
               showSuccessToast
             );

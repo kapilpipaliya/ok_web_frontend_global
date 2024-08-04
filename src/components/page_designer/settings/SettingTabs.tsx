@@ -21,10 +21,10 @@ export function SettingTabs() {
 
   const tabs = createMemo(() => {
     const baseTabs = ["layout", "settings"];
-    if (layoutStore.formStore?.formData?.L[0] === "Form") {
+    if (layoutStore.formStore[0]?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
-    if (layoutStore.formStore?.formData?.L[0] === "Form" || layoutStore.formStore?.formData?.L[0] === "Page") {
+    if (layoutStore.formStore[0]?.formData?.L[0] === "Form" || layoutStore.formStore[0]?.formData?.L[0] === "Page") {
       baseTabs.push("Rules", "Permission", "SEO");
     }
     return baseTabs;
@@ -72,35 +72,40 @@ export function SettingTabs() {
       <Tabs />
       <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
         <FormConfig />
-        <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
-          <FormStatusWrapper />
-        </FormContext.Provider>
+        <Show when={layoutStore.formStore[0]}>
+          <FormContext.Provider value={layoutStore.formStore}>
+            <FormStatusWrapper />
+          </FormContext.Provider>
+        </Show>
+
       </div>
 
-      <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
-        <div classList={{ "display:none": selectedTab() !== "layout" }}>
-          <LayoutTree />
-        </div>
+      <Show when={layoutStore.formStore[0]}>
+        <FormContext.Provider value={layoutStore.formStore}>
+          <div classList={{ "display:none": selectedTab() !== "layout" }}>
+            <LayoutTree />
+          </div>
 
-        <Show when={layoutStore.formStore?.formData?.L[0] === "Form"}>
-          <Show when={selectedTab() === "Keys"}>
-            {/* <PrimaryKey /> */}
-            <NameKey />
-            <Divider class="mt:10" />
-            <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
-            <UniqueConstrains />
+          <Show when={layoutStore.formStore[0]?.formData?.L[0] === "Form"}>
+            <Show when={selectedTab() === "Keys"}>
+              {/* <PrimaryKey /> */}
+              <NameKey />
+              <Divider class="mt:10" />
+              <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
+              <UniqueConstrains />
+            </Show>
           </Show>
-        </Show>
-        <Show when={selectedTab() === "Permission"}>
-          <Permission />
-        </Show>
-        <Show when={selectedTab() === "Rules"}>
-          <Rules />
-        </Show>
-        <Show when={selectedTab() === "SEO"}>
-          <SEOFormGroupProperties />
-        </Show>
-      </FormContext.Provider>
+          <Show when={selectedTab() === "Permission"}>
+            <Permission />
+          </Show>
+          <Show when={selectedTab() === "Rules"}>
+            <Rules />
+          </Show>
+          <Show when={selectedTab() === "SEO"}>
+            <SEOFormGroupProperties />
+          </Show>
+        </FormContext.Provider>
+      </Show>
     </>
   );
 }

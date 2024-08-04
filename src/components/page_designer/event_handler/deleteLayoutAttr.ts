@@ -15,7 +15,7 @@ function validateLayoutDeletion(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>
 ): boolean {
-  const usedAttrs = getAllFieldsUsedInAllRules(graph, setGraph, layoutStore.formStore.formData);
+  const usedAttrs = getAllFieldsUsedInAllRules(graph, setGraph, layoutStore.formStore[0].formData);
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
   if (Object.keys(usedAttrsInRules).length > 0) {
@@ -23,25 +23,25 @@ function validateLayoutDeletion(
     return true;
   }
 
-  const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore.formData, layoutVertex, "->$0Unique->$0Key");
+  const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore[0].formData, layoutVertex, "->$0Unique->$0Key");
 
   if (usedAttrsInUniqueConstraints.length > 0) {
     setLayoutStore("usedAttrsInUniqueConstraints", usedAttrsInUniqueConstraints);
     return true;
   }
 
-  const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore.formData, layoutVertex, "->$0NameKey");
+  const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore[0].formData, layoutVertex, "->$0NameKey");
 
   if (usedAttrsInNameKeys.length > 0) {
     setLayoutStore("usedAttrsInNameKeys", usedAttrsInNameKeys);
     return true;
   }
 
-  if (layoutStore.formStore.formData.L[0] === "Form") {
+  if (layoutStore.formStore[0].formData.L[0] === "Form") {
     const childContainsFormAttr = allFormAttrsInPageFromLevel(graph, layoutVertex, "Form");
 
     if (childContainsFormAttr.length > 0) {
-      const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(graph, layoutStore.formStore.formData, "Form", childContainsFormAttr);
+      const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(graph, layoutStore.formStore[0].formData, "Form", childContainsFormAttr);
 
       if (rootContainsFormAttrExcludingChild.length === 0) {
         setLayoutStore("shouldContainAtLeastOneForm", true);

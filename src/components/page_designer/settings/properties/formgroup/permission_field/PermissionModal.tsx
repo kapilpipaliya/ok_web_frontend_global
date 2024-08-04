@@ -41,7 +41,7 @@ export function PermissionModal(
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
 
-  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formStore.txnId, graph);
+  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedAttr));
 
@@ -57,7 +57,7 @@ export function PermissionModal(
 
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpToIndex(layoutStore.formStore.txnId, prevTxnIndex, graph);
+      revertTransactionUpToIndex(layoutStore.formStore[0].txnId, prevTxnIndex, graph);
     }
     props.closeModal();
   };
@@ -91,12 +91,12 @@ export function PermissionModal(
                       data={
                         props.selectedAttr
                           ? props.selectedAttr
-                          : layoutStore.formStore.formData
+                          : layoutStore.formStore[0].formData
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={layoutStore.formStore.txnId}
+                      txnId={layoutStore.formStore[0].txnId}
                     />
                   </div>
                 </div>

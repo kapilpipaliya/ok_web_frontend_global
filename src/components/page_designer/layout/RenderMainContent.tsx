@@ -48,12 +48,12 @@ export function RenderMainContent() {
           <FormElementsWrapper />
         </Show>
       </Show>
-      <Show when={layoutStore.formStore}>
+      <Show when={layoutStore.formStore[0]}>
         <ResizableContainer view={layoutStore.view}>
           <PageView
             isDesignMode={true}
             isNoPermissionCheck={true}
-            metaVertex={layoutStore.formStore?.formData}
+            metaVertex={layoutStore.formStore[0]?.formData}
           />
         </ResizableContainer>
       </Show>
@@ -89,9 +89,12 @@ export function RenderMainContent() {
                 setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>
             }
           >
-            <FormContext.Provider value={[layoutStore.formStore, layoutStore.setFormStore]}>
-              <PropertiesWrapper />
-            </FormContext.Provider>
+            <Show when={layoutStore.formStore[0]}>
+              <FormContext.Provider value={layoutStore.formStore}>
+                <PropertiesWrapper />
+              </FormContext.Provider>
+            </Show>
+
           </Drawer>
         </ZIndex>
       </Show>

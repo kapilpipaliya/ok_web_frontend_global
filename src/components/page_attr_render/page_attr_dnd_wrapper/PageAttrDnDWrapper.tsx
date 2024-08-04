@@ -67,7 +67,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       childrenAttrs,
       graph,
       setGraph,
-      layoutStore.formStore.formData
+      layoutStore.formStore[0].formData
     );
   };
 

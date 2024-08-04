@@ -18,12 +18,12 @@ export function RulesList() {
   const [selectedRule, setSelectedRule] = createSignal<Vertex | null>(null);
   const [selectedRuleToDelete, setSelectedRuleToDelete] = createSignal<Vertex | null>(null);
   const rules = createMemo(() => {
-    if (layoutStore.formStore?.formData) {
+    if (layoutStore.formStore[0]?.formData) {
       return (
         evaluate(jsep("->Rule"), {
           graph,
           setGraph,
-          vertexes: [layoutStore.formStore.formData],
+          vertexes: [layoutStore.formStore[0].formData],
         }) || []
       ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
     }
@@ -52,7 +52,7 @@ export function RulesList() {
     const count: Id[] = [];
     for (const key in rule.IN) {
       for (const edge of rule.IN[key]) {
-        if (graph.edges[edge].S !== layoutStore.formStore.formData.id) {
+        if (graph.edges[edge].S !== layoutStore.formStore[0].formData.id) {
           count.push(graph.edges[edge].S);
         }
       }
@@ -70,12 +70,12 @@ export function RulesList() {
       vertexes: [rule],
     }) || [];
     for (const condition of conditions) {
-      deleteRow(condition, false, graph, setGraph, layoutStore.formStore.txnId);
+      deleteRow(condition, false, graph, setGraph, layoutStore.formStore[0].txnId);
     }
   };
   const deleteRule = (rule: Vertex) => {
     removeAllConditions(rule);
-    deleteRow(rule, false, graph, setGraph, layoutStore.formStore.txnId);
+    deleteRow(rule, false, graph, setGraph, layoutStore.formStore[0].txnId);
     setSelectedRuleToDelete(null);
   };
   const DeleteConfirmDialog = () => {

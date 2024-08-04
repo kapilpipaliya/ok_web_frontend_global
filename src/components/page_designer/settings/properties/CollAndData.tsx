@@ -66,14 +66,14 @@ function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunctio
     setValueGlobal(
       graph,
       setGraph,
-      layoutStore.formStore.txnId,
+      layoutStore.formStore[0].txnId,
       collMetaVertex[0],
       graph.vertexes[layoutStore.selectedId],
       value,
       false
     );
     setSelectionValue(
-      layoutStore.formStore.txnId,
+      layoutStore.formStore[0].txnId,
       graph.vertexes[layoutStore.selectedId],
       graph,
       setGraph,
@@ -112,7 +112,7 @@ export function CollAndData() {
             isNoPermissionCheck={true}
             meta={collMetaVertex.vertexes![2]}
             title={""}
-            txnId={layoutStore.formStore.txnId}
+            txnId={layoutStore.formStore[0].txnId}
           />
           {/* 
             <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
@@ -130,7 +130,7 @@ export function CollAndData() {
         meta={collMetaVertex.vertexes![0]}
         setValue={onCollectionChange}
         title={"Select Collection"}
-        txnId={layoutStore.formStore.txnId}
+        txnId={layoutStore.formStore[0].txnId}
       />
       <span class="flex:.5 mt:5">Data:</span>
       <SelectField
@@ -140,7 +140,7 @@ export function CollAndData() {
         isRealTime={false}
         meta={collMetaVertex.vertexes![1]}
         title={"Select Data"}
-        txnId={layoutStore.formStore.txnId}
+        txnId={layoutStore.formStore[0].txnId}
       />
     </>
   );

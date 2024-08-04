@@ -15,11 +15,11 @@ export function NameKey() {
       <span class="f:15 flex:1">
         <DynamicComponent
           componentName={"TagBox"}
-          data={layoutStore.formStore?.formData}
+          data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={{ P: modifyFieldMetaAllFields({ name: "nameKey" } as FieldAttribute , graph, setGraph, layoutStore, true)} as unknown as Vertex}
-          txnId={layoutStore.formStore.txnId}
+          txnId={layoutStore.formStore[0].txnId}
         />
       </span>
     </div>

@@ -20,7 +20,7 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
-  const isForm = layoutStore.formStore?.formData.L[0] === "Form";
+  const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
   const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
   const metaClasses = [

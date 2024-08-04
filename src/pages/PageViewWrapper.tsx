@@ -5,6 +5,7 @@ import { Match, Show, Switch, createEffect, createMemo, on, onCleanup, onMount, 
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DialogWithButtons } from "~/components/DeleteDialog";
 import PreviewPage from "~/components/PreviewPage";
@@ -108,7 +109,8 @@ export function PageViewWrapper(
 
   // load form meta data
   async function loadFormDesignerMetaData() {
-    let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] : null;
+    // let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] : null;
+    let form: IFormMetaData | null = null;
     if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
       form = FormMetaData[props.pageVertexName];
     }

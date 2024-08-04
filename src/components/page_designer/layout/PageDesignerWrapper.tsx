@@ -44,7 +44,7 @@ export function PageDesignerWrapper(): JSX.Element {
       <DesignerLayoutStoreContext.Provider
         value={pageDesignerStore}
       >
-        <Title>{getPageTitle(layoutStore.formStore?.formData)}</Title>
+        <Title>{getPageTitle(layoutStore.formStore[0]?.formData)}</Title>
         <HeaderRow />
         <div
           classList={{

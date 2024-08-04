@@ -39,8 +39,8 @@ export async function handleDrop(
     const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      layoutStore.formStore.txnId,
-      layoutStore.formStore.formData,
+      layoutStore.formStore[0].txnId,
+      layoutStore.formStore[0].formData,
       fromVertex,
       toVertex,
       layoutStore.position,

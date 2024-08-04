@@ -22,7 +22,7 @@ export function DeleteButton(props: {
         props.item,
         graph,
         setGraph,
-        layoutStore.formStore.txnId,
+        layoutStore.formStore[0].txnId,
         props.componentName,
         showSuccessToast
       )}

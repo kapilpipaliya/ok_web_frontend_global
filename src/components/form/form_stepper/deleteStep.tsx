@@ -34,7 +34,7 @@ export function deleteStep(
     item,
     graph,
     setGraph,
-    layoutStore.formStore.txnId,
+    layoutStore.formStore[0].txnId,
     item.P.name,
     showSuccessToast,
   );
