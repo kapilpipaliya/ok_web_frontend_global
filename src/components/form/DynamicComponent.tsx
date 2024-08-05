@@ -47,6 +47,7 @@ export function DynamicComponent(
     componentName?: string;
     data?: Vertex;
     disabled?: boolean;
+    isLabelWrap?: boolean;
     isNoPermissionCheck?: boolean;
     isRealTime?: boolean;
     isTableInside?: boolean;
@@ -263,7 +264,7 @@ export function DynamicComponent(
           <Match when={!component()}>NO INPUT {componentName()}</Match>
           <Match keyed when={!expressionProperties().hidden && component() && (isNoPermissionCheck() || !hasNoPermission())}>
             <Switch>
-              <Match when={componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
+              <Match when={(props.isLabelWrap ?? true) && componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
                 <Label class={mergeCSS("", selectedProps.labelClass, { P: { name: 'labelClass' } } as unknown as Vertex, props.meta, graph)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
                   <Content />
                 </Label>

@@ -169,6 +169,7 @@ export function DisplayProperty(props: Readonly<{
         componentName={componentName()}
         data={props.joinVertex}
         disabled={props.disabled()}
+        isLabelWrap={false}
         isNoPermissionCheck={props.isNoPermissionCheck}
         isRealTime={props.isRealTime}
         isTableInside={false}

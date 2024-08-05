@@ -143,6 +143,8 @@ export function TableInputField(
                                 attribute.P[IdAttr] ||
                                 "",
                             )}
+                            {/* Add Proper Validation check */}
+                            {attribute.P.validation?.required && <span class="color:red"> *</span>}
                           </th>
                         </Match>
                         <Match when={true}>

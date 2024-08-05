@@ -1,4 +1,4 @@
-import { type Placement, autoUpdate } from "@floating-ui/dom";
+import { type Placement, autoUpdate, flip, shift } from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
 import { type JSX, createSignal, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -21,6 +21,10 @@ export function DropdownMenu(
   const zIndex = useZIndex();
 
   const position = useFloating(reference, floating, {
+    middleware: [
+      flip(),  // Automatically flip the dropdown if it doesn't fit
+      shift({ padding: 8 })  // Adjust the dropdown to stay within the viewport with a padding of 8px
+    ],
     placement: props.placement ?? "bottom-start",
     strategy: "fixed",
     whileElementsMounted: autoUpdate,

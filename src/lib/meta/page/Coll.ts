@@ -314,6 +314,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
         {
           componentName: "TextBox",
           name: "name",
+          validation: { required: true },
         },
         {
           collection: "g:'Role'",
