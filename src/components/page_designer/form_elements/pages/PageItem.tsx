@@ -105,7 +105,7 @@ export function PageItem(
             parentRef={menuRef!}
           >
             {toTitle(props.child.name)} Preview
-            <PageViewWrapper formId={props.child.id} />
+            <PageViewWrapper formId={props.child.id} isNoPermissionCheck={true}/>
           </DropdownMenu>
         </Show>
       </div>

@@ -3,7 +3,7 @@ import type { RowSelectionOptions } from '@tanstack/solid-table';
 import type { Vertex } from '~/lib/graph/graph';
 
 import { type FileManagerObject, FileManagerStoreProvider } from './FileManagerContext';
-import { MainContent } from './main_content/MainContent';
+import { FileManagerMainContent } from './main_content/FileManagerMainContent';
 import { Sidebar } from './sidebar/FileManagerSideBar';
 
 export default function FileManager(props: Readonly<{
@@ -15,7 +15,7 @@ export default function FileManager(props: Readonly<{
     <FileManagerStoreProvider enableRowSelection={props.enableRowSelection} setFileManagerStore={props.setFileManagerStore}>
       <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
         <Sidebar />
-        <MainContent fileId={props.fileId} />
+        <FileManagerMainContent fileId={props.fileId} />
       </div>
     </FileManagerStoreProvider>
   );

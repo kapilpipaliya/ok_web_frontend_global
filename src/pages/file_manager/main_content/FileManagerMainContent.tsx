@@ -7,7 +7,7 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
 import { FileManagerMainArea } from "./FileManagerMainArea";
 
-export function MainContent(props: Readonly<{ fileId?: string }>) {
+export function FileManagerMainContent(props: Readonly<{ fileId?: string }>) {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const [graph, setGraph] = useGraph();
   const params = useParams();

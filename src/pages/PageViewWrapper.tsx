@@ -39,6 +39,7 @@ export function PageViewWrapper(
   props: Readonly<{
     closePopUp?: () => void;
     dataId?: Id
+    enableSEO?: boolean;
     expression?: string;
     formId?: string;
     initializeFormStoreParent?: (formStore: FormStore) => void;
@@ -62,7 +63,7 @@ export function PageViewWrapper(
 
   const id = createMemo(() => (props.dataId === "new" ? undefined : props.dataId));
   const [previewStore] = usePreviewContext();
-  const isNoPermissionCheck = createMemo(() => props.isNoPermissionCheck ||formStore.formMetaData?.isNoPermissionCheck || previewStore.isNoPermissionCheck);
+  const isNoPermissionCheck = createMemo(() => props.isNoPermissionCheck || formStore.formMetaData?.isNoPermissionCheck || previewStore.isNoPermissionCheck);
   const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, formStore.formMeta, graph, setGraph));
   const hasInsertPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!id() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph))));
   const hasEditPermission = createMemo(() => formStore.formMetaData && (isNoPermissionCheck() || (!!id() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph))));
@@ -192,11 +193,12 @@ export function PageViewWrapper(
       setFormStore("error", `${props.pageVertexName} is not authorized`);
       return;
     }
-    if (!props.pageVertexName) {
+    if (!formStore.formMeta?.P.name) {
+      setFormStore("error", "No name for the page");
       return;
     }
     if (!id()) {
-      const newVertexObj = newVertex(graph.newVertexId, [props.pageVertexName], {});
+      const newVertexObj = newVertex(graph.newVertexId, [formStore.formMeta.P.name], {});
       // TODO: Do Create Transformation for the vertex
       const addNewVertexResult = addNewVertex(formStore.txnId, newVertexObj, graph, setGraph);
       if (addNewVertexResult.error) {
@@ -276,11 +278,13 @@ export function PageViewWrapper(
 
   return (
     <Show keyed when={formStore.count}>
-      <Show when={formStore.formMeta?.P.seoTitle}>
-        <Title>{getPageTitle(formStore.formMeta)}</Title>
-      </Show>
-      <Show when={formStore.formMeta?.P.seoDescription}>
-        <Meta content={formStore.formMeta?.P.seoDescription} name="description" />
+      <Show when={props.enableSEO}>
+        <Show when={formStore.formMeta?.P.seoTitle}>
+          <Title>{getPageTitle(formStore.formMeta)}</Title>
+        </Show>
+        <Show when={formStore.formMeta?.P.seoDescription}>
+          <Meta content={formStore.formMeta?.P.seoDescription} name="description" />
+        </Show>
       </Show>
 
       <Switch>
