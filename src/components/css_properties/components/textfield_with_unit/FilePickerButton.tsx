@@ -105,7 +105,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
         title="File Manager"
       >
         <div>
-          <FileManager enableRowSelection={vertex => (vertex as unknown as Vertex).L[0] === "File"} setFileManagerStore={setFileManagerStore} />
+          <FileManager enableRowSelection={vertex => (vertex as unknown as Vertex).L[0] === "File"} fileId={selectedFileVertex()[0]?.id} setFileManagerStore={setFileManagerStore} />
         </div>
       </CustomModal>
     </>

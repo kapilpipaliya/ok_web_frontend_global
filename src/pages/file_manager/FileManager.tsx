@@ -8,13 +8,14 @@ import { Sidebar } from './sidebar/FileManagerSideBar';
 
 export default function FileManager(props: Readonly<{
   enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'],
+  fileId?: string;
   setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
 }>) {
   return (
     <FileManagerStoreProvider enableRowSelection={props.enableRowSelection} setFileManagerStore={props.setFileManagerStore}>
       <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
         <Sidebar />
-        <MainContent />
+        <MainContent fileId={props.fileId} />
       </div>
     </FileManagerStoreProvider>
   );

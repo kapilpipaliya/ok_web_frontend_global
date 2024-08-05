@@ -12,7 +12,6 @@ const getInitialFileManagerStore = () => {
     expandedKeys: [] as string[],
     gridStore: null as DataGridStore | null,
     root: null as Vertex | null,
-    selectedFile: null as null | string,
     selectedItem: null as Vertex | null,
     treeItemHoverId: null as null | string
   };

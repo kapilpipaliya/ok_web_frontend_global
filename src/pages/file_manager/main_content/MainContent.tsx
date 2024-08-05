@@ -7,13 +7,13 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
 import { FileManagerMainArea } from "./FileManagerMainArea";
 
-export function MainContent() {
+export function MainContent(props: Readonly<{ fileId?: string }>) {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
   const [graph, setGraph] = useGraph();
   const params = useParams();
 
   onMount(async () => {
-    const data = await getFilesData(graph, setGraph, params.folderId);
+    const data = await getFilesData(graph, setGraph, params.folderId, props.fileId);
     // @ts-expect-error ignore
     if (!data.error && data.result.length > 0) {
       batch(() => {
