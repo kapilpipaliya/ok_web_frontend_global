@@ -11,6 +11,6 @@ export default {
     ui,
   ],
   variables: {
-    primary: colors.yellow,
+    primary: colors.yellow[50],
   },
 } as Config;

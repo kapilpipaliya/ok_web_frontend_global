@@ -57,6 +57,7 @@ export interface GraphInterface {
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   events: { [key: string]: any };
+  globalTheme: Vertex;
   isDevelopment: boolean;
   isLoadingPage?: boolean;
   isSideBarOpen?: boolean;
@@ -73,6 +74,11 @@ export interface GraphInterface {
   userSettingId: Id;
   vertexes: VertexMap;
   vertexLabelIdMap: { [key: string]: Id[] };
+
+  // isAuthenticated: false,
+  // theme: "light" as "light" | "dark",
+  // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
+  // language: "en" as string,
 }
 
 

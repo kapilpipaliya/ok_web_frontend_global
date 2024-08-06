@@ -6,6 +6,7 @@ import {
   createEffect,
   createSignal,
   type JSX,
+  on,
   onCleanup,
   useContext,
 } from "solid-js";
@@ -47,7 +48,7 @@ export function CSSRuntimeProvider(
     return currentIdentifier === identifier;
   };
 
-  createEffect(() => {
+  createEffect(on([() => JSON.stringify(props.config), () => props.root], async () => {
     (async () => {
       if (!(typeof window !== "undefined")) { return; }
       if (!(await waitInitialized())) { return; }
@@ -91,7 +92,7 @@ export function CSSRuntimeProvider(
         newRuntimeCSS.refresh(resolvedConfig);
       }
     })();
-  });
+  }));
 
   createEffect(() => {
     onCleanup(() => {
