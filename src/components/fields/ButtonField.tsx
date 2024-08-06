@@ -1,7 +1,8 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { createMemo, Show, splitProps } from "solid-js";
+import { createEffect, createMemo, Show, splitProps } from "solid-js";
+import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -13,21 +14,44 @@ import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransa
 
 import { useFormContext } from "../form/FormContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
+import { createForwardRef } from "../terracotta/utils/dynamic-prop";
+import { createARIADisabledState } from "../terracotta/utils/state-props";
+import useEventListener from "../terracotta/utils/use-event-listener";
 import { useToast } from "../Toast";
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+  as?: string;
   children?: JSX.Element;
   data: Vertex;
   meta: Vertex
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
-  const [local, others] = splitProps(props, ['data', 'meta', 'children']);
+  const [local, others] = splitProps(props, ['as', 'ref', 'data', 'meta', 'children']);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const [formStore] = useFormContext();
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
+  const [internalRef, setInternalRef] = createForwardRef(props);
+
+  createEffect(() => {
+    const current = internalRef();
+    if (current instanceof HTMLElement) {
+      // This behavior is redundant for buttons
+      if (current.tagName !== 'BUTTON') {
+        useEventListener(current, 'keydown', e => {
+          switch (e.key) {
+            case 'Enter':
+            case ' ': {
+              current.click();
+              break;
+            }
+          }
+        });
+      }
+    }
+  });
 
   const onSubmit = async () => {
     if (isAnyFieldInvalid(graph, setGraph, props.meta, formStore!.formData!)) {
@@ -75,12 +99,12 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
   return (
     <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
-      <button {...others} {...extraProps}>
+      <Dynamic {...createARIADisabledState(() => props.disabled)} component={local.as ?? "button"} ref={setInternalRef} tabIndex={props.disabled ? -1 : 0} {...others} {...extraProps}>
         {local.data?.P?.[local.meta.P.name] ??
           local.meta.P.text ??
           local.meta.P.children}
         {local.children}
-      </button>
+      </Dynamic>
     </Show>
   );
 }
