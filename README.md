@@ -80,3 +80,45 @@ https://github.com/lxsmnsyc/solid-emoji-
 
 Youtube Player:
 https://github.com/ddPn08/ponzu.love/blob/main/src/components/youtube.tsx
+
+
+OnBoard:
+ Shepherd, Intro.js, or React Joyride can be useful for this purpose.
+ https://github.com/shepherd-pro/shepherd
+ https://github.com/usablica/intro.js
+ https://github.com/gilbarbara/react-joyride
+
+ Help Tooltip:
+ https://atomiks.github.io/tippyjs/
+
+
+ good npm package:
+ https://www.npmjs.com/package/neogma
+ auto generate cypher queries
+
+ official cypher builer:
+ https://github.com/neo4j/cypher-builder
+ https://www.npmjs.com/package/@neo4j/cypher-builder
+
+ data visualization tool:
+ https://www.npmjs.com/package/neo4j-bloom
+ https://www.npmjs.com/package/neodash
+
+ query builder:
+Visual query builder for Neo4j graph database
+https://github.com/Nhogs/popoto/blob/master/src/query/query.js
+https://www.npmjs.com/package/sgnm-neo4j?activeTab=code
+https://www.npmjs.com/package/@neo4j/graph-schema-utils
+https://www.npmjs.com/package/@douglasgabr/cypher-builder
+https://www.npmjs.com/package/cypher-query-builder
+https://www.npmjs.com/package/typed-cypher-query-builder
+https://www.npmjs.com/package/@hammerbot/cypher-query-builder
+https://www.npmjs.com/package/typed-neo4j
+https://www.npmjs.com/package/neo4j-qb
+https://www.npmjs.com/package/@hugoms154/neo4j-selectionset-builder
+
+Simple helper functions:
+https://github.com/YizYah/neo-forte
+for parsing date:
+https://www.npmjs.com/package/@qualitech/qneo4j-helper
+

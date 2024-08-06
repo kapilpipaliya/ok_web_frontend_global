@@ -1,9 +1,17 @@
-import { NotFound404 } from "~/pages/NotFound404";
+import { GetInitialData } from "~/GetInitialData";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import { AuthenticateUser } from "~/pages/admin_layout/AuthenticateUser";
 
 export default function Notfound() {
   return (
-    <div class="flex:auto">
-      <NotFound404 />
-    </div>
+    <GetInitialData>
+      <AuthenticateUser>
+        <PageViewWrapper
+          pageId={""}
+          pageVertexLabel={"Page"}
+          pageVertexName={"404"}
+        />
+      </AuthenticateUser>
+    </GetInitialData>
   );
 }
