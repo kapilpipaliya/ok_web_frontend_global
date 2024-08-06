@@ -1,22 +1,22 @@
 import { Meta, Title } from "@solidjs/meta";
 import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { Match, Show, Switch, createEffect, createMemo, on, onCleanup, onMount, untrack } from "solid-js";
+import { createEffect, createMemo, Match, on, onCleanup, onMount, Show, Switch, untrack } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DialogWithButtons } from "~/components/DeleteDialog";
-import PreviewPage from "~/components/PreviewPage";
-import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
 import { FormContext, type FormStore, getInitialFormStore } from "~/components/form/FormContext";
-import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
+import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { getConfiguredPermissions, hasPermissions } from "~/components/page_attr_render/permissions";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import PreviewPage from "~/components/PreviewPage";
+import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -80,7 +80,7 @@ export function PageViewWrapper(
 
   const authError = createMemo(() => {
     if (id()) {
-      if (!hasEditPermission() && !hasViewPermission()) {
+      if (!(hasEditPermission() || hasViewPermission())) {
         return `You are not authorized to edit or view ${props.pageVertexName}`;
       }
     } else if (!hasInsertPermission()) {
@@ -126,7 +126,7 @@ export function PageViewWrapper(
         incoming,
         outgoing,
       });
-      if (!isValidResponse(data) || !data.result || data.result.length === 0) {
+      if (!(isValidResponse(data) && data.result ) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} configured`);
         return;
       }
@@ -159,7 +159,7 @@ export function PageViewWrapper(
     if (!id()) {
       return;
     }
-    if (!isNoPermissionCheck() && (!formStore.formMetaData || (!hasInsertPermission() && !hasEditPermission() && !hasViewPermission()))) {
+    if (!isNoPermissionCheck() && (!formStore.formMetaData || (!((hasInsertPermission() || hasEditPermission() ) || hasViewPermission())))) {
       return;
     }
     try {
@@ -173,7 +173,7 @@ export function PageViewWrapper(
         incoming,
         outgoing,
       });
-      if (!isValidResponse(data) || !data.result || data.result.length === 0) {
+      if (!(isValidResponse(data) && data.result ) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} found`);
         return;
       }
@@ -244,8 +244,9 @@ export function PageViewWrapper(
     // @ts-expect-error ignore
     // setLayoutStore?.("formData", undefined);
 
-    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
       revertTransaction(rowMetaTxnId, graph);
+    }
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {

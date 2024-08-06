@@ -11,13 +11,17 @@ export function arrayToString(name: string, arr: any[]): string {
     if (isObject(item)) {
       if (name === "box-shadow") {
         return generateBoxShadow(arr);
-      } else if (name === "text-shadow") {
+      }
+      if (name === "text-shadow") {
         return generateTextShadow(arr);
-      } else if (name === "filter") {
+      }
+      if (name === "filter") {
         return generateFilter(arr);
-      } else if (name === "transition") {
+      }
+      if (name === "transition") {
         return generateTransition(arr);
-      } else if (name === "transform") {
+      }
+      if (name === "transform") {
         return generateTransform(arr);
       }
       return Object.entries(item)

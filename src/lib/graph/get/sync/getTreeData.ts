@@ -7,11 +7,11 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 
 export interface NavItem {
-  P: any;
   children?: NavItem[];
   expanded: boolean;
   id: string;
   name: string;
+  P: any;
 }
 
 export function getTreeData(
@@ -29,7 +29,7 @@ export function getTreeData(
     vertexes: Vertex[],
   ): NavItem[] => {
     const result: NavItem[] = [];
-    if (!levels.collection) return result;
+    if (!levels.collection) { return result; }
     const children = evaluate(jsep(levels.collection), {
       graph,
       setGraph,
@@ -41,10 +41,10 @@ export function getTreeData(
       const name =
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem: NavItem = {
-        P: child.P,
         expanded: true,
         id: child.id,
         name: name,
+        P: child.P,
       };
       if (
         levels.child &&

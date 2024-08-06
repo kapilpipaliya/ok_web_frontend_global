@@ -1,8 +1,8 @@
-import { Show, createSignal, onCleanup } from "solid-js";
+import { createSignal, onCleanup, Show } from "solid-js";
 
-import { ZIndex } from "~/components/ZIndex";
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { ZIndex } from "~/components/ZIndex";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";

@@ -1,4 +1,4 @@
-import { type Node, type Session, int } from "neo4j-driver";
+import { int, type Node, type Session } from "neo4j-driver";
 
 export async function findUserByEmail(session: Session, email: string): Promise<{ roles: Node[], user: Node | null, userSetting: Node | null }> {
   const query = `

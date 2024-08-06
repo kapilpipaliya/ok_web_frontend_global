@@ -1,5 +1,5 @@
 import { toTitle } from "case-switcher-js";
-import { For, Match, Show, Switch, createMemo } from "solid-js";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import {
@@ -8,15 +8,15 @@ import {
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFormContext } from "../form/FormContext";
-import { usePageRenderContext } from "./PageRenderContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
+import { usePageRenderContext } from "./PageRenderContext";
 
 export function PageAttrRender(
   props: Readonly<{ data?: Vertex; metaVertex: Vertex }>,
@@ -28,7 +28,7 @@ export function PageAttrRender(
 
   return (
     <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
-      {(item, index) => {
+      {(item, _index) => {
         const componentName = createMemo(
           () =>
             item.P.componentName || getCompFallbackToString(item, graph)?.P[IdAttr],
@@ -41,7 +41,7 @@ export function PageAttrRender(
         // TODO: Is This Parent Vertex is ok?
         // Need Repetitive parent checks?
         // @ts-ignore
-        const parentData = () => {
+        const _parentData = () => {
           return getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1));
         };
 

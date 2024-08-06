@@ -20,7 +20,7 @@ export function setParentValue(
 
   // delete removed edges:
   const type = getInEdge(meta, vertex);
-  if (!type) showWarningToast("edge type cant be empty");
+  if (!type) { showWarningToast("edge type cant be empty"); }
   const previousEdges = vertex.IN[type] || [];
 
   let valueArray = [] as Id[];
@@ -35,10 +35,11 @@ export function setParentValue(
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that start with same vertex
-    if (valueArray.includes(graph.edges[edgeId].S)) continue;
+    if (valueArray.includes(graph.edges[edgeId].S)) { continue; }
     const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-    if (deleteEdgeResult?.error)
+    if (deleteEdgeResult?.error) {
       showErrorToast(deleteEdgeResult.error.toString());
+    }
   }
 
   // add added edges:
@@ -53,8 +54,9 @@ export function setParentValue(
       graph,
       setGraph,
     );
-    if (insertEdgeResult.error)
+    if (insertEdgeResult.error) {
       showErrorToast(insertEdgeResult.error.toString());
+    }
   }
 }
 function vertexInEdgeContainVertex(

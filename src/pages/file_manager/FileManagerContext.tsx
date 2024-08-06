@@ -1,6 +1,6 @@
 import type { RowSelectionOptions } from '@tanstack/solid-table';
 
-import { type JSX, createContext, useContext } from 'solid-js';
+import { createContext, type JSX, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 
 import type { DataGridStore } from '~/components/grid/DataGridContext';
@@ -11,8 +11,8 @@ const getInitialFileManagerStore = () => {
     enableRowSelection: undefined as RowSelectionOptions<Vertex>['enableRowSelection'],
     expandedKeys: [] as string[],
     gridStore: null as DataGridStore | null,
-    root: null as Vertex | null,
-    selectedItem: null as Vertex | null,
+    root: null as null | Vertex,
+    selectedItem: null as null | Vertex,
     treeItemHoverId: null as null | string
   };
 };

@@ -1,8 +1,8 @@
 import { useParams } from "@solidjs/router";
 
 import { GetInitialData } from "~/GetInitialData";
-import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { AuthenticateUser } from "~/pages/admin_layout/AuthenticateUser";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export default function PageShareView() {
   const params = useParams();

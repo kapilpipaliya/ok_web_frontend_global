@@ -1,14 +1,14 @@
 /* eslint-disable perfectionist/sort-objects */
 
 
+import { defaultPixelSizeTypes } from "./csseditor_constants";
 import {
   type ColorPickerField,
+  createGridOptions,
   type DataEditorField,
   type TextFieldOptionsField,
   type ToggleField,
-  createGridOptions,
 } from "./FieldType";
-import { defaultPixelSizeTypes } from "./csseditor_constants";
 
 export const BoxShadow = {
   boxShadow: {

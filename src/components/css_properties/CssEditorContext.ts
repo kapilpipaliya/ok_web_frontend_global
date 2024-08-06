@@ -1,5 +1,5 @@
 import { createContext, createSignal, useContext } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { GenericField } from "./constants/FieldType";
 

@@ -35,6 +35,6 @@ export async function GET({ request }: APIEvent) {
   } catch (error: unknown) {
     return new Response(error instanceof Error ? error.message : "Unknown error", { status: 500 });
   } finally {
-    if (neo4jSession) neo4jSession.close();
+    if (neo4jSession) { neo4jSession.close(); }
   }
 }

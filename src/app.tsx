@@ -2,8 +2,8 @@ import { ReactiveMap } from "@solid-primitives/map";
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Show, Suspense, createSignal } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { createSignal, Show, Suspense } from "solid-js";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import "~/css/base.css";
 import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
@@ -48,8 +48,8 @@ export default function App() {
 
 
   const graph = createStore<GraphInterface>({
-    APP_BASE_URL: '/admin',
     activeClickOutside: 0,
+    APP_BASE_URL: '/admin',
     componentIdMap: {},
     edges: {} as EdgeMap,
     events: {
@@ -64,7 +64,7 @@ export default function App() {
     navBarHeight: 45,
     navigationData: [],
     get newTxnId() {
-      txnId = txnId + 1;
+      txnId += 1;
       transactions.set(txnId, {
         ...getDefaultTxnValue(),
         undoStepIndexes: [0],
@@ -72,7 +72,7 @@ export default function App() {
       return txnId;
     },
     get newVertexId() {
-      newVertexId = newVertexId + 1;
+      newVertexId += 1;
       return newVertexId.toString();
     },
     saveUserSetting: (properties: {[key: string]: any}) => {
@@ -84,8 +84,8 @@ export default function App() {
       return this.vertexes[this.userSettingId]; // NOSONAR
     },
     userSettingId: "",
-    vertexLabelIdMap: {} as { [key: string]: Id[] },
     vertexes: {} as VertexMap,
+    vertexLabelIdMap: {} as { [key: string]: Id[] },
   });
 
   return (

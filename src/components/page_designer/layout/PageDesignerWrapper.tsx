@@ -5,15 +5,15 @@ import { type JSX, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
-import { ZIndex } from "~/components/ZIndex";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
 } from "~/components/page_designer/LayoutContext";
+import { ZIndex } from "~/components/ZIndex";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
-import { RenderMainContent } from "./RenderMainContent";
 import { getPageTitle } from "./getPageTitle";
+import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {
   const pageDesignerStore = createStore(
@@ -33,7 +33,7 @@ export function PageDesignerWrapper(): JSX.Element {
   const debouncedHandleResize = debounce(handleResize, 200);
 
   onMount(() => {
-    if (isServer) return;
+    if (isServer) { return; }
     handleResize(); // Initial check
 
     makeEventListener(window, "resize", debouncedHandleResize);

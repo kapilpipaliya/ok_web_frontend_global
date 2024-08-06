@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js';
 
 import { defaultOpts, defaultToasterOptions, dispatch, setDefaultOpts, store } from '../core';
-import { ActionType, type Toast, type ToastPosition, type ToasterProps } from '../types';
+import { ActionType, type Toast, type ToasterProps, type ToastPosition } from '../types';
 
 export const generateID = (() => {
   let count = 0;
@@ -35,7 +35,7 @@ export const getToastWrapperStyles = (position: ToastPosition, offset: number): 
     left: 0,
     position: 'absolute',
     right: 0,
-    transition: `all 230ms cubic-bezier(.21,1.02,.73,1)`,
+    transition: 'all 230ms cubic-bezier(.21,1.02,.73,1)',
     ...verticalStyle,
     ...horizontalStyle,
   };

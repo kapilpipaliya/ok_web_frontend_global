@@ -1,13 +1,13 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { toTitle } from "case-switcher-js";
 import {
-  type Accessor, Match,
+  type Accessor, createComputed,
+  createMemo,
+  getOwner,
+  Match,
+  on, runWithOwner,
   Show,
-  Switch,
-  createComputed,
-  createMemo, getOwner,
-  on,
-  runWithOwner
+  Switch
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -18,7 +18,7 @@ import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedP
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
-import { type Id, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getColumnProps } from "~/lib/graph/mutate/form/rowFunction";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -29,14 +29,14 @@ import { DefaultValue } from "./DefaultValue";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {
-    case "TextBox":
-      return "min-w:150px";
-    case "TextArea":
-      return "min-w:200px";
     case "CheckBox":
       return "min-w:50px";
     case "SelectBox":
       return "min-w:200px";
+    case "TextArea":
+      return "min-w:200px";
+    case "TextBox":
+      return "min-w:150px";
     default:
       return "";
   }

@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import {
@@ -9,7 +9,7 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { getInitialPageRenderStore } from "./PageRenderContext";
@@ -63,7 +63,7 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
     }
   });
 
-  const repeterStore = createStore(getInitialPageRenderStore());
+  const _repeterStore = createStore(getInitialPageRenderStore());
 
   return (
     <Show when={!isFetching()}>

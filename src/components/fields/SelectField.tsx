@@ -1,11 +1,11 @@
 import {
-  For,
-  Show,
   batch,
   createMemo,
   createSignal,
+  For,
   getOwner,
   runWithOwner,
+  Show,
 } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
@@ -15,7 +15,7 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -64,7 +64,7 @@ export function SelectField(
         return { id: val.trim(), label: label.trim() };
       });
     }
-    if (Array.isArray(options)) return options;
+    if (Array.isArray(options)) { return options; }
     return options ? [options] : [];
   };
 
@@ -74,7 +74,7 @@ export function SelectField(
     );
   };
 
-  const getDynamicOptions = () => {
+  const _getDynamicOptions = () => {
     return (
       getSelectionOptions(graph, setGraph, getCollection(), [
         props.data as Vertex,
@@ -128,7 +128,7 @@ export function SelectField(
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {
       batch(() => {
-        if (!value) return;
+        if (!value) { return; }
         let txnId = props.txnId ?? 0;
         if (props.isRealTime) {
           txnId = graph.newTxnId;
@@ -176,7 +176,7 @@ export function SelectField(
           graph,
           setGraph,
         );
-        if (props.isRealTime) commitTxn(txnId, graph);
+        if (props.isRealTime) { commitTxn(txnId, graph); }
       });
     });
   };
@@ -213,14 +213,14 @@ export function SelectField(
         loadOptions={loadOptions}
         onRemove={(e) => onChangeSelect(e, true)}
         onSelect={(e) => onChangeSelect(e, false)}
-        optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
         options={options()}
+        optionValueKey={props.meta.P.valueKey ? props.meta.P.valueKey : "id"}
         placeholder={`${props.title}`}
         renderLabel={props.meta.P.renderLabel}
         selectedValues={() => {
           if (isStaticOptions(props.meta)) {
             const value = props.data?.P[props.meta.P[IdAttr]];
-            if (!value) return [];
+            if (!value) { return []; }
             if (
               !Array.isArray(value) &&
               getComponent() === "SelectBox"
@@ -233,13 +233,12 @@ export function SelectField(
               return option ? [option] : [{label: value, value}];
             }
             return ensureArray(value);
-          } else {
+          }
             return selectedValue(props.meta, props.data as Vertex, graph).map(
               (id) => {
                 return graph.vertexes[id];
               },
             );
-          }
         }}
         selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
       />

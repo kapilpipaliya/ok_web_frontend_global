@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch, createSignal } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -181,7 +181,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
                   Add Regex
                 </button>
                 <For each={values.regex}>
-                  {(regex, index) => <RegexInput index={index()} />}
+                  {(_regex, index) => <RegexInput index={index()} />}
                 </For>
               </Match>
             </Switch>

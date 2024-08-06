@@ -1,6 +1,6 @@
-import { type Placement, autoUpdate, flip, shift } from "@floating-ui/dom";
+import { autoUpdate, flip, type Placement, shift } from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
-import { type JSX, createSignal, onMount, splitProps } from "solid-js";
+import { createSignal, type JSX, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
@@ -36,7 +36,7 @@ export function DropdownMenu(
 
   useClickOutside(graph, setGraph, (event) => {
     const path = event.composedPath();
-    if (!path.includes(floating()!) && !path.includes(props.parentRef)) {
+    if (!(path.includes(floating()!) || path.includes(props.parentRef))) {
       props.onClickOutside?.();
     }
   });

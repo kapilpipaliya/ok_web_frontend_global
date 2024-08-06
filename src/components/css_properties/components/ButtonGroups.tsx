@@ -23,7 +23,7 @@ export const ButtonGroups = () => {
         "";
     };
   const handleChange = (
-    e: Event,
+    _e: Event,
     option: { key: JSX.Element; value: string },
   ) => {
     if (meta.onChangeInput) {
@@ -43,7 +43,7 @@ export const ButtonGroups = () => {
               <CustomTooltip message={option.tooltip ?? option.value}>
                 <input
                   checked={selectedValue() === option.value}
-                  class={`hidden`}
+                  class={'hidden'}
                   name={meta.name}
                   onChange={(e) => handleChange(e, option)}
                   type="radio"

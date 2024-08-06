@@ -1,9 +1,9 @@
 import { IconButton } from "~/components/IconButton";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useToast } from "../../Toast";
 
 export function DeleteButton(props: {
   componentName: string;

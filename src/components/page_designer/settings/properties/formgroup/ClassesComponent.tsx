@@ -1,10 +1,10 @@
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
-import { TabsWithUnderline } from "~/components/SimpleTabs";
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { TabsWithUnderline } from "~/components/SimpleTabs";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { createVertexIds } from "./FormGroupProperties";
 

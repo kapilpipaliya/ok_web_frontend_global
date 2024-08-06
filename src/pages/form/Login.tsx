@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
-import { Show, createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
@@ -65,7 +65,7 @@ export function Login() {
       setGraph('isLoadingPage', true);
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError(error) {
+        onError(_error) {
           setGraph('isLoadingPage', false);
         },
         onSuccess: (value) => {

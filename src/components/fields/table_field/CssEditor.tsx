@@ -1,13 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  type Setter,
-  Show, createSignal
+  createSignal,
+  type Setter, Show
 } from "solid-js";
 
+import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
-import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 // Component for handling the CSS Editor

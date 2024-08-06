@@ -1,19 +1,19 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { Show, createMemo, splitProps } from "solid-js";
+import { createMemo, Show, splitProps } from "solid-js";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 
-import { useToast } from "../Toast";
 import { useFormContext } from "../form/FormContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
+import { useToast } from "../Toast";
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: JSX.Element;
@@ -36,7 +36,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     const data = commitTxn(formStore!.txnId, graph);
     await showLoadingToast({
       loadMessage: "Submitting Data...",
-      onSuccess: (data) => {
+      onSuccess: (_data) => {
         // setTimeout(() => navigate(-1), 0);
       },
       promise: submitDataCall(data, graph, setGraph, formStore!.txnId),
@@ -51,7 +51,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
 
   const onReset = () => {
     const initialIndex = getNamedIndex(formStore!.txnId, "initial", graph);
-    if (initialIndex === undefined) return;
+    if (initialIndex === undefined) { return; }
     revertTransactionUpToIndex(formStore!.txnId, initialIndex, graph);
   };
   const extraProps = createMemo(() => {

@@ -34,14 +34,14 @@ export function Signature() {
   };
 
   const startDrawing = (event: MouseEvent) => {
-    if (!canvasRef) return;
+    if (!canvasRef) { return; }
     isDrawing = true;
     context?.beginPath();
     context?.moveTo(event.offsetX, event.offsetY);
   };
 
   const draw = (event: MouseEvent) => {
-    if (!isDrawing || !context) return;
+    if (!(isDrawing && context)) { return; }
     context.lineTo(event.offsetX, event.offsetY);
     context.stroke();
   };
@@ -52,12 +52,12 @@ export function Signature() {
   };
 
   const clearCanvas = () => {
-    if (!canvasRef) return;
+    if (!canvasRef) { return; }
     context?.clearRect(0, 0, canvasRef.width, canvasRef.height);
   };
 
   const submitSignature = () => {
-    if (!canvasRef) return;
+    if (!canvasRef) { return; }
     const dataURL = canvasRef.toDataURL("image/png");
     setSignatureImage(dataURL);
     setIsEditing(false);

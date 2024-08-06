@@ -7,7 +7,7 @@ export function UploadVideo() {
 
   const handleUpload = async (event: any) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) { return; }
 
     const formData = new FormData();
     formData.append("video", file);
@@ -27,7 +27,7 @@ export function UploadVideo() {
 
       const result = await response.json();
       setVideoUrl(result.url); // Adjust this according to your server's response
-    } catch (err) {
+    } catch (_err) {
       setError("Failed to upload video");
     } finally {
       setUploading(false);
@@ -45,7 +45,7 @@ export function UploadVideo() {
       {uploading() && <p class="color:blue">Uploading...</p>}
       {error() && <p class="color:red">{error()}</p>}
       {videoUrl() && (
-        <video class="height:auto width:100%" controls src={videoUrl()}></video>
+        <video class="height:auto width:100%" controls src={videoUrl()} />
       )}
     </div>
   );

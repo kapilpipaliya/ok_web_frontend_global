@@ -9,9 +9,8 @@ export function TabsWithUnderline(props: Readonly<{ displayValueKey: string, onT
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
         return evaluate(jsep(props.displayValueKey), option);
-      } else {
-        return option[props.displayValueKey];
       }
+        return option[props.displayValueKey];
     }
 
     return isObject(option) ? option.label : option;

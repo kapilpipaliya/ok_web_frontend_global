@@ -1,12 +1,12 @@
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
-import { IconButton } from "~/components/IconButton";
-import { ZIndex } from "~/components/ZIndex";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { IconButton } from "~/components/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { ZIndex } from "~/components/ZIndex";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
 
 import { RulesModal } from "../../../rules/RulesModal";
@@ -25,7 +25,7 @@ export function SelectPermField(
   const [layoutStore] = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
 
-  const RenderLabel = (option: Vertex, isSelected: boolean) => {
+  const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     const [isOpenRule, setIsOpenRule] = createSignal(false);
     return (
       <div class="flex ai:center gap:4">

@@ -1,7 +1,7 @@
  
-import { CSSWideKeywords } from "./CSSMetadata";
-import { type TextFieldOptionsField, createGridOptions, createSelectOptions } from "./FieldType";
 import { sizeTypes } from "./csseditor_constants";
+import { CSSWideKeywords } from "./CSSMetadata";
+import { createGridOptions, createSelectOptions, type TextFieldOptionsField } from "./FieldType";
 
 export const PositionSection = {
   dimentions: createGridOptions("grid", "Dimention", [

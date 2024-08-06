@@ -11,8 +11,8 @@ export function getInitialPreviewStore() {
     id: undefined as Id | undefined,
     isDesignMode: false as boolean | undefined,
     isViewOnly: false as boolean | null | undefined,
-    previewData: undefined as Vertex | undefined,
-    previewMeta: undefined as Vertex | undefined,
+    previewData: undefined as undefined | Vertex,
+    previewMeta: undefined as undefined | Vertex,
   };
 }
 

@@ -4,7 +4,7 @@ import { For } from "solid-js";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 
 export function AllForms() {
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
   // TODO: get all forms from the server
   const allForms = () => graph.vertexLabelIdMap.Form || [];
 

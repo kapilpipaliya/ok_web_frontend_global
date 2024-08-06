@@ -35,8 +35,8 @@ export interface Toast {
 
   message: ValueOrFunction<Renderable, Toast>;
 
-  pauseDuration: number;
   paused: boolean;
+  pauseDuration: number;
 
   position?: ToastPosition;
 

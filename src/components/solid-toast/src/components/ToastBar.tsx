@@ -1,6 +1,6 @@
-import { type Component, Match, Switch, createEffect } from 'solid-js';
+import { type Component, createEffect, Match, Switch } from 'solid-js';
 
-import { type ToastBarProps, resolveValue } from '../types';
+import { resolveValue, type ToastBarProps } from '../types';
 import { getToastYDirection as d, iconContainer, messageContainer, toastBarBase } from '../util';
 import { Error, Loader, Success } from './';
 
@@ -8,7 +8,7 @@ export const ToastBar: Component<ToastBarProps> = (props) => {
   let el: HTMLDivElement | undefined;
 
   createEffect(() => {
-    if (!el) return;
+    if (!el) { return; }
     const direction = d(props.toast, props.position);
     if (props.toast.visible) {
       el.animate(

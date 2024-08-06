@@ -1,16 +1,16 @@
 import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { batch } from "solid-js";
-import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 
+import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
+import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
-import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 export function newEdge(
   edgeId: Id,
@@ -19,14 +19,14 @@ export function newEdge(
   startVertexId: Id,
   endVertexId: Id,
 ): Edge {
-  !startVertexId && console.error(`edge startId should not be empty`);
-  !endVertexId && console.error(`edge endId should not be empty`);
+  !startVertexId && console.error('edge startId should not be empty');
+  !endVertexId && console.error('edge endId should not be empty');
   return {
     E: endVertexId,
+    id: edgeId,
     P: properties,
     S: startVertexId,
     T: type,
-    id: edgeId,
   };
 }
 function updateEdge(edge: Edge) {

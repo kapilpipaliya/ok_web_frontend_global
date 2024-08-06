@@ -50,22 +50,22 @@ function unwrapProperties(
 // Functions to handle database values and convert them to JSON
 export function convertNodeToJson(node: Node): Vertex {
   return {
+    id: node.elementId,
     IN: node.IN || {},
     L: node.labels,
     OUT: node.OUT || {},
     P: unwrapProperties(node.properties),
-    id: node.elementId,
   };
 }
 
 export function convertRelationshipToJson(relationship: Relationship): Edge {
   return {
     E: relationship.endNodeElementId,
+    // when disableLosslessIntegers is false, we get object in number property.
+    id: relationship.elementId,
     // Todo: data is not handled as properly, object is returned from server
     P: unwrapProperties(relationship.properties),
     S: relationship.startNodeElementId,
     T: relationship.type,
-    // when disableLosslessIntegers is false, we get object in number property.
-    id: relationship.elementId,
   };
 }

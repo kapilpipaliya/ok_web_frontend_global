@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
+  createSignal,
   For,
-  Show,
-  createSignal
+  Show
 } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
@@ -15,8 +15,8 @@ interface DropDownProps {
   isDropdownOpen: () => boolean; 
   meta: TextFieldOptionsField; 
   reference: Accessor<HTMLElement | null>;
-  selectOption: (option: string) => void; 
   selectedOption: () => string; 
+  selectOption: (option: string) => void; 
   setIsDropdownOpen: (isOpen: boolean) => void; 
   toggleDropdown: (event: MouseEvent) => void;
 }

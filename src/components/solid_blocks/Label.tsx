@@ -1,10 +1,10 @@
 import {
-  type JSX,
-  Match,
-  Switch,
   children,
   createMemo,
+  type JSX,
+  Match,
   splitProps,
+  Switch,
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
@@ -32,10 +32,10 @@ export function Label(
   
   const generateLabelClass = () => {
     const styles: { [key: string]: string } = {};
-    if (position() === "top") styles["mb"] = "5px";
-    if (position() === "right") styles["ml"] = "5px";
-    if (position() === "left") styles["mr"] = "5px";
-    if (position() === "bottom") styles["mt"] = "5px";
+    if (position() === "top") { styles.mb = "5px"; }
+    if (position() === "right") { styles.ml = "5px"; }
+    if (position() === "left") { styles.mr = "5px"; }
+    if (position() === "bottom") { styles.mt = "5px"; }
     return Object.entries(styles)
       .map(([key, value]) => `${key}:${value}`)
       .join(" ");
@@ -53,7 +53,7 @@ export function Label(
 
   return (
     <Dynamic class={`inline-flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`} component={component()}>
-      <Switch fallback={<>{resolvedChildren()}</>}>
+      <Switch fallback={resolvedChildren()}>
         <Match when={local.label && (position() === "top" || position() === "left")}>
           <span class={generateLabelClass()} {...restProps}>
             {local.label}{local.required && <span class="color:red"> *</span>}

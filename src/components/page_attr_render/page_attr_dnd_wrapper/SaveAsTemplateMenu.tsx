@@ -1,15 +1,15 @@
-import { Show, createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { DropdownMenu } from "../../DropdownMenu";
-import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useToast } from "../../Toast";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -56,7 +56,7 @@ export function SaveAsTemplateMenu(
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
       showSuccessToast("Template Saved Successfully");
       props.onClose();
-    } catch (error) {
+    } catch (_error) {
       setError("An unexpected error occurred");
     }
   };

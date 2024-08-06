@@ -7,7 +7,6 @@ export async function createRootFolder(tx: TransactionPromise): Promise<void> {
 
   try {
     await tx.run(query);
-    console.log("Root folder created successfully");
   } catch (error) {
     console.error("Error creating root folder:", error);
     throw error;

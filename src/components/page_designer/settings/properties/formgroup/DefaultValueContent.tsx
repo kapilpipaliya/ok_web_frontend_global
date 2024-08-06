@@ -1,5 +1,5 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
 

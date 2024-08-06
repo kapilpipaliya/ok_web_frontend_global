@@ -1,11 +1,11 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import {
+  createUniqueId,
   For,
   Match,
-  Switch,
-  createUniqueId,
   onCleanup,
+  Switch,
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -45,7 +45,7 @@ export function SEOFormGroupProperties() {
         return (
           <div>
             <div
-              class={`flex ai:center gap:2 justify-content:space-between mt:6`}
+              class={'flex ai:center gap:2 justify-content:space-between mt:6'}
             >
               <span class="f:15 flex:.5">
                 <Label meta={metaVertex} />

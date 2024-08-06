@@ -9,7 +9,7 @@ export async function handleReplaceEdgeEnd(
 ) {
   const id =
     clientToServerEdgeIdMap.get(replaceEdgeEnd.id) || replaceEdgeEnd.id;
-  const startId =
+  const _startId =
     clientToServerVertexIdMap.get(replaceEdgeEnd.S) || replaceEdgeEnd.S;
   const endId =
     clientToServerVertexIdMap.get(replaceEdgeEnd.E) || replaceEdgeEnd.E;

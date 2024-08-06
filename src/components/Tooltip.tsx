@@ -1,4 +1,4 @@
-import { type JSX, Show, createSignal } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 
 export function CustomTooltip(
   props: Readonly<{

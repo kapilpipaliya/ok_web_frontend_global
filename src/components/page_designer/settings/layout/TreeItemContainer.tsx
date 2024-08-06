@@ -1,4 +1,4 @@
-import { type JSX, createMemo, splitProps } from "solid-js";
+import { createMemo, type JSX, splitProps } from "solid-js";
 
 export interface TreeItemContainerProps extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element;

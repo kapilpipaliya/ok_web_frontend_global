@@ -1,5 +1,5 @@
 import { useLocation } from "@solidjs/router";
-import { type JSX, Show, createEffect, createSignal, onMount } from "solid-js";
+import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
@@ -23,7 +23,7 @@ export function Sidebar() {
   const [navData, setNavData] = createSignal<any>([]);
   const [activeSection, setActiveSection] = createSignal("Home");
   const [searchTerm, setSearchTerm] = createSignal("");
-  const [isSearchMode, setIsSearchMode] = createSignal(false);
+  const [_isSearchMode, setIsSearchMode] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const [expandedSections, setExpandedSections] = createSignal<
     Map<string, boolean>
@@ -74,12 +74,14 @@ export function Sidebar() {
 
   const sidebarIcon: any = {
     "/admin/": "fluent:home-24-regular",
+    "/admin/backup_restore": "lucide:database-backup",
     "/admin/Coll": "ep:collection-tag",
     "/admin/CollCategory": "ic:outline-collections-bookmark",
     "/admin/Comp": "iconoir:component",
     "/admin/CompCategory":
       "material-symbols-light:settings-input-component-outline",
     "/admin/Dashboard": "mage:dashboard-2",
+    "/admin/dashboards/": "akar-icons:dashboard",
     "/admin/DataType": "carbon:data-1",
     "/admin/EmailTemplatePage": "mdi:email-outline",
     "/admin/ErrorPage": "icon-park-outline:error",
@@ -91,8 +93,6 @@ export function Sidebar() {
     "/admin/TemplatePage": "eos-icons:templates-outlined",
     "/admin/ThankYouPage": "icon-park-outline:doc-success",
     "/admin/User": "ci:users",
-    "/admin/backup_restore": "lucide:database-backup",
-    "/admin/dashboards/": "akar-icons:dashboard",
   };
 
   const toggleSectionCollapse = () => {

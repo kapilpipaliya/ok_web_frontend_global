@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 import { createStore } from "solid-js/store";
 
 const icons: any = {
@@ -73,7 +73,7 @@ export const PricingPlans = (props: Readonly<{ plans: any }>) => {
   );
 };
 export const CurrentPlan = () => {
-  const [plan, setPlan] = createStore<any>({
+  const [plan, _setPlan] = createStore<any>({
     currency: "INR",
     name: "Premium",
     price: 1000,

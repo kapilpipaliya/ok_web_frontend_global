@@ -3,7 +3,6 @@ import { SelectField } from "~/components/fields/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { Repeater } from "~/components/page_attr_render/Repeater";
 
-import { Signature } from "../../SignatureBox";
 import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
@@ -12,52 +11,51 @@ import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { TextInputField } from "../../fields/TextInputField";
 import { UrlField } from "../../fields/UrlField";
+import { Signature } from "../../SignatureBox";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 import { Radio, RadioGroup } from "../../solid_blocks/radio/radio";
 
 export function getDynamicComponent(component: string) {
   switch (component) {
-    case "SelectBox":
-    case "TagBox":
-      return SelectField;
+    case "A":
+      return UrlField;
+    case "Button":
+      return ButtonField;
+    case "CheckBox":
+
+    case "ColorBox":
+    case "HtmlEditor":
+    case "ImageUploader":
+    case "NumberBox":
+    case "TextArea":
+    case "TextBox":
+      return TextInputField;
     case "DynamicTable":
       return TableInputField;
 
-    case "CheckBox":
-    case "ColorBox":
-    case "ImageUploader":
-    case "TextBox":
-    case "NumberBox":
-    case "TextArea":
-    case "HtmlEditor":
-      return TextInputField;
+    case "ErrorPage":
+
+    case "Page":
+
+    case "TemplatePage":
+
+    case "ThankYouPage":
+      return PageField;
 
     case "FileUploader":
       return FileUploader;
+
+    case "Form":
+      return FormField
+
+    case "Image":
+      return ImageField;
 
     case "Radio":
       return Radio;
 
     case "RadioGroup":
       return RadioGroup;
-
-    case "SignatureBox":
-      return Signature;
-
-    case "Repeater":
-      return Repeater;
-
-    case "Form":
-      return FormField
-
-    case "Text":
-      return TextField;
-
-    case "A":
-      return UrlField;
-
-    case "Image":
-      return ImageField;
     // case "Tabs":
     //   return Tabs;
 
@@ -106,16 +104,16 @@ export function getDynamicComponent(component: string) {
     // case "Icon":
     //   return Icon;
 
-    case "Button":
-      return ButtonField;
+    case "Repeater":
+      return Repeater;
 
-    case "Page":
-    case "ThankYouPage":
-    case "ErrorPage":
-    case "TemplatePage":
-      return PageField;
-
-    case "Box":
+    case "SelectBox":
+    case "TagBox":
+      return SelectField;
+    case "SignatureBox":
+      return Signature;
+    case "Text":
+      return TextField;
     default:
       return BoxField;
   }

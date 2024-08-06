@@ -13,7 +13,7 @@ const getAttributeNames = (graph: GraphInterface, ids: Array<Id | number>): stri
 const AttributeList = (props: Readonly<{ attributes: string[], title: string }>) => (
   <Show when={props.attributes.length > 0}>
     <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
-      <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" role="list">
+      <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" >
         <li>
           {props.title} {props.attributes.join(", ")}.
         </li>
@@ -55,7 +55,7 @@ export function DeleteAttributeDialog() {
         <For each={Object.keys(layoutStore.usedAttrsInRules)}>
           {(attr) => (
             <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
-              <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" role="list">
+              <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" >
                 <li>
                   The attribute {graph.vertexes[attr]?.P.name} is used in the following rules: {layoutStore.usedAttrsInRules[attr].map(rule => graph.vertexes[rule]?.P.name).join(", ")}.
                 </li>

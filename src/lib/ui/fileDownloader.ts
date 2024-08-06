@@ -26,7 +26,7 @@ export function fileDownloader(opt: {
     ? window.URL.createObjectURL(blob)
     : window.webkitURL.createObjectURL(blob);
 
-  const attachDataAsOctetStream = (data: any) => {
+  const attachDataAsOctetStream = (_data: any) => {
     // const link = 'data:application/octet-stream,' + encodeURIComponent(data);
     // anchor.setAttribute('href', link);
     anchor.href = blobURL;

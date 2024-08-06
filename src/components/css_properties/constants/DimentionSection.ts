@@ -1,6 +1,6 @@
 
-import { type TextFieldOptionsField, createGridOptions } from "./FieldType";
 import { sizeTypes } from "./csseditor_constants";
+import { createGridOptions, type TextFieldOptionsField } from "./FieldType";
 
 export const DimentionSection = {
   width: createGridOptions("grid", "Dimention", [

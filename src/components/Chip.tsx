@@ -1,4 +1,4 @@
-import { For, createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 
 export function StatusChip(props: Readonly<{ status: string }>) {
   const [status] = createSignal(props.status);
@@ -37,12 +37,12 @@ export function ChipDropDown(
 
   const getStatusStyles = (data: string) => {
     switch (data) {
-      case "pending":
-        return "color: orange; background-color: white;border: 1px solid orange;outline: orange;";
-      case "completed":
-        return "color: rgba(1, 130, 1); background-color: white;border: 1px solid rgba(1, 130, 1); outline: rgba(1, 130, 1);";
       case "cancelled":
         return "color: red; background-color: white;border: 1px solid red; outline: red;";
+      case "completed":
+        return "color: rgba(1, 130, 1); background-color: white;border: 1px solid rgba(1, 130, 1); outline: rgba(1, 130, 1);";
+      case "pending":
+        return "color: orange; background-color: white;border: 1px solid orange;outline: orange;";
       default:
         return "color: gray; background-color: white;border: 1px solid gray; ";
     }

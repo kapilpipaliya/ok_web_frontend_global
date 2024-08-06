@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { createStore } from "solid-js/store";
 
-import { type Accessor, type JSX, createContext, useContext } from "solid-js";
+import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
@@ -28,7 +28,7 @@ export function getInitialGridState(graph: GraphInterface) {
     isSearching: false,
     isShowLoadMore: true,
     layout: (graph.vertexes[graph.userSettingId]?.P.layout || 'table') as 'card' | 'table',
-    metaVertex: null as Vertex | null,
+    metaVertex: null as null | Vertex,
     search: '',
     selectedRows: [] as Vertex[],
     tableId: null as null | string,

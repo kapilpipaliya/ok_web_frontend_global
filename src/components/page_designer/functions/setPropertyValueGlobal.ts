@@ -12,14 +12,15 @@ export function setPropertyValueGlobal(
   txnId: number,
   meta: Vertex,
   layoutVertex: Vertex,
-  componentVertex: Vertex,
+  _componentVertex: Vertex,
   value: any,
   valueSet?: boolean,
 ) {
   return untrack(() => {
-    if (valueSet ?? true)
+    if (valueSet ?? true) {
       mergeVertexProperties(txnId, layoutVertex.id, graph, setGraph, {
         [meta.P.name]: value,
       });
+    }
   });
 }

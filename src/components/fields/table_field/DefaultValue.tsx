@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 // Component to display the default value
 

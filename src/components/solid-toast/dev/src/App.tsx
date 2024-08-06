@@ -6,7 +6,7 @@ const makePromise = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const toss = Math.random()
-      if (toss > 0.5) resolve('Successful!')
+      if (toss > 0.5) { resolve('Successful!') }
       reject('Something went wrong!')
     }, 2000)
   })
@@ -38,9 +38,8 @@ const App: Component = () => {
     const [life, setLife] = createSignal(100)
     
     createEffect(() => {
-      if (t.paused) return; 
+      if (t.paused) { return;  }
       const interval = setInterval(() => {
-        console.log(t.paused)
         setLife(l => l - 0.5)
       }, 10)
 
@@ -49,7 +48,7 @@ const App: Component = () => {
 
     return (
       <div class="bg-pink-100 shadow-md px-4 py-3 overflow-hidden relative text-pink-700 rounded">
-        <div class="bg-pink-200 h-full absolute top-0 left-0" style={{width: `${life()}%`}} ></div>
+        <div class="bg-pink-200 h-full absolute top-0 left-0" style={{width: `${life()}%`}} />
         <span class="relative" >Timer In The Background</span>
       </div>
     )

@@ -1,7 +1,7 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import { type Accessor, Match, Show, Switch, createEffect, createMemo, createSignal, on, onMount } from "solid-js";
+import { type Accessor, createEffect, createMemo, createSignal, Match, on, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -14,17 +14,17 @@ import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getConfiguredPermissions, hasPermissions } from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
 import { DataGridProvider, type DataGridState, type DataGridStore, getInitialGridState } from "./DataGridContext";
-import { GridHeader } from "./GridHeader";
-import { setGridHeaders } from "./SetGridHeaders";
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
+import { GridHeader } from "./GridHeader";
+import { setGridHeaders } from "./SetGridHeaders";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: { disabled: boolean; onClick: () => void }) => JSX.Element;
@@ -83,7 +83,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         incoming,
         outgoing,
       });
-      if (!data || !isValidResponse(data) || data.error || data.result.length === 0) {
+      if (!(data && isValidResponse(data) ) || data.error || data.result.length === 0) {
         setGridState("error", `No ${props.tableId} configured`);
         return;
       }

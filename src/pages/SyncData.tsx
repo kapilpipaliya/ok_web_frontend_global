@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -39,7 +39,7 @@ export function SyncData() {
       await showLoadingToast({
         errorMessage: `Error Transfering nodes for ${element.P.username}`,
         loadMessage: "Transfering nodes...",
-        onSuccess: (value) => {
+        onSuccess: (_value) => {
           setSelectedUsers([]);
         },
         promise: migrateNodes(element, node),
@@ -326,8 +326,7 @@ export function SyncData() {
       target: { closest: (arg0: string) => any };
     }) => {
       if (
-        !event.target.closest("#dropdownAction") &&
-        !event.target.closest("#dropdownActionButton")
+        !(event.target.closest("#dropdownAction") ||event.target.closest("#dropdownActionButton"))
       ) {
         setShowModal(false);
       }

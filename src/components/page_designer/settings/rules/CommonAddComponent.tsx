@@ -1,4 +1,4 @@
-import { type JSX, createSignal, onMount } from "solid-js";
+import { createSignal, type JSX, onMount } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 

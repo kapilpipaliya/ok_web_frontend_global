@@ -1,21 +1,21 @@
 import jsep from "jsep";
-import { type JSX, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, type JSX } from "solid-js";
 
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
 import { CustomModal } from "~/components/CustomModal";
+import { useFormContext } from "~/components/form/FormContext";
 import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
-import { useFormContext } from "~/components/form/FormContext";
 import { evaluate } from "~/lib/expression_eval";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import FileManager from "~/pages/file_manager/FileManager";
 
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
-import { useCssEditorProps } from "../../CSSEditorPropsContext";
 import { useComponentMeta, useCssState } from "../../CssEditorContext";
+import { useCssEditorProps } from "../../CSSEditorPropsContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 
 interface FilePickerButtonProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
@@ -33,7 +33,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [state] = useCssState();
 
   const selectedFileVertex = createMemo((): Vertex[] => {
-    if (!cssEditorProps?.meta || !cssEditorProps?.data) {
+    if (!(cssEditorProps?.meta && cssEditorProps?.data)) {
       return [];
     }
     return evaluate(jsep(`->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name)}`), { graph, setGraph, vertexes: [cssEditorProps.data] }) || [];
@@ -50,17 +50,17 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       showErrorToast("unable to select file");
       return;
     }
-    if (!cssEditorProps?.meta || !cssEditorProps?.data) {
+    if (!(cssEditorProps?.meta && cssEditorProps?.data)) {
       showErrorToast("unable to select file");
       return;
     }
 
     const selectedFileMetaVertex = {
+      id: "",
       IN: {},
       L: [],
       OUT: {},
       P: { type: getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name) },
-      id: "",
     } as Vertex;
 
     setSelectionValue(txnId, cssEditorProps.data, graph, setGraph, selectedFileMetaVertex, selectedFile.id);

@@ -11,7 +11,7 @@ export async function handleParentChange(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   fromVertex: Vertex,
-  fromParentVertex: Vertex | undefined,
+  fromParentVertex: undefined | Vertex,
   toParentVertex: Vertex,
   position: string,
   toVertex: Vertex,

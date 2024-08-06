@@ -1,5 +1,5 @@
 const pathToArrayPath = (path: string) => {
-  if (path == null || path === "") return [];
+  if (path == null || path === "") { return []; }
   return path.split(".");
 };
 

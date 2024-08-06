@@ -2,10 +2,10 @@ import type { Config } from "@master/css";
 
 import { RuntimeCSS } from "@master/css-runtime";
 import {
-  type JSX,
   createContext,
   createEffect,
   createSignal,
+  type JSX,
   onCleanup,
   useContext,
 } from "solid-js";
@@ -49,8 +49,8 @@ export function CSSRuntimeProvider(
 
   createEffect(() => {
     (async () => {
-      if (!(typeof window !== "undefined")) return;
-      if (!(await waitInitialized())) return;
+      if (!(typeof window !== "undefined")) { return; }
+      if (!(await waitInitialized())) { return; }
 
       const configModule = await props.config;
       const resolvedConfig =
@@ -97,7 +97,7 @@ export function CSSRuntimeProvider(
     onCleanup(() => {
       if (!isExternalRuntimeCSS) {
         (async () => {
-          if (!(await waitInitialized())) return;
+          if (!(await waitInitialized())) { return; }
 
           newRuntimeCSS?.destroy();
           newRuntimeCSS = undefined;

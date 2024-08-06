@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { type JSX, Show, createSignal, } from "solid-js";
+import { createSignal, type JSX, Show, } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
@@ -11,8 +11,8 @@ import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 
 export function DropdownMenuDisplay(): JSX.Element {
-  const [graph, setGraph] = useGraph();
-  const navigate = useNavigate();
+  const [graph, _setGraph] = useGraph();
+  const _navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: HTMLButtonElement;

@@ -15,11 +15,11 @@ export function getUrl(data: Vertex) {
 }
 
 export function cssStateToString(cssStore: CSSStore, meta: Vertex, data: Vertex, graph: GraphInterface) {
-  if (!cssStore) return "";
+  if (!cssStore) { return ""; }
 
   return Object.entries(cssStore)
     .map(([state, value]) => {
-      if (!value || state === undefined) return;
+      if (!value || state === undefined) { return; }
       if (isObject(value)) {
         return Object.entries(value)
           .map(([key, val]) => {

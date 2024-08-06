@@ -1,7 +1,6 @@
 
-import { type Accessor, For, Show, createMemo, createSelector } from "solid-js";
+import { type Accessor, createMemo, createSelector, For, Show } from "solid-js";
 
-import { useToast } from "~/components/Toast";
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
@@ -9,10 +8,11 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { useToast } from "~/components/Toast";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";

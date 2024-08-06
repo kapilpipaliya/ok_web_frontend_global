@@ -3,22 +3,22 @@ import { klona } from "klona";
 import { createMemo, createSignal, } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useZIndex } from "~/components/ZIndex";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { Overlay } from "./Overlay";
 import { generateTableInputMeta } from "./functions/generateTableInputMeta";
 import { getConditionsExpression } from "./functions/getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./functions/modifyFieldMetaAllFields";
+import { Overlay } from "./Overlay";
 
 
-const getMetaAttributes = (selectedRule?: Vertex | null) => {
+const getMetaAttributes = (selectedRule?: null | Vertex) => {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let metaAttribute = klona(
@@ -47,7 +47,7 @@ export function RulesModal(
     closeModal: () => void;
     onSubmit: () => void;
     prevTxnIndex?: number;
-    selectedRule?: Vertex | null;
+    selectedRule?: null | Vertex;
   }>,
 ) {
   const zIndex = useZIndex();
@@ -73,7 +73,7 @@ export function RulesModal(
     try {
       jsep(expr);
       setError(null);
-    } catch (e: any) {
+    } catch (_e: any) {
       setError('Please write a valid expression');
     }
     return expr;

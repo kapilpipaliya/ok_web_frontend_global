@@ -45,7 +45,7 @@ export function SignUp() {
       setGraph('isLoadingPage', true);
       await showLoadingToast({
         loadMessage: "Registering User...",
-        onError: (v) => {
+        onError: (_v) => {
           setGraph('isLoadingPage', false);
         },
         onSuccess: (value) => {

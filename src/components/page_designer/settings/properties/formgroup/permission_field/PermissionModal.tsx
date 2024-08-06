@@ -3,18 +3,18 @@ import { klona } from "klona";
 import { createSignal, } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useZIndex } from "~/components/ZIndex";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { Overlay } from "~/components/page_designer/rules/Overlay";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
+import { Overlay } from "~/components/page_designer/rules/Overlay";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useZIndex } from "~/components/ZIndex";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-const getMetaAttributes = (selectedPermission?: Vertex | null) => {
+const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   // const [graph, setGraph] = useGraph();
   // const [layoutStore] = useDesignerLayoutStore();
   const metaAttribute = klona(
@@ -33,7 +33,7 @@ export function PermissionModal(
     closeModal: () => void;
     onSubmit: () => void;
     prevTxnIndex?: number;
-    selectedAttr?: Vertex | null;
+    selectedAttr?: null | Vertex;
   }>,
 ) {
   const zIndex = useZIndex();
@@ -45,7 +45,7 @@ export function PermissionModal(
 
   const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedAttr));
 
-  const [error, setError] = createSignal<null | string>(null);
+  const [error, _setError] = createSignal<null | string>(null);
 
   const onSubmit = () => {
     if (error()) {

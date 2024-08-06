@@ -1,6 +1,6 @@
 import type { ColumnDef, RowSelectionOptions } from "@tanstack/solid-table";
 
-import { For, type JSX, Match, Show, Switch, createMemo, createSignal, } from "solid-js";
+import { createMemo, createSignal, For, type JSX, Match, Show, Switch, } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -87,7 +87,7 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 
   const hideHeaders = () => props.headers.filter(
-    (header) => !["Actions", "name"].includes(header.header) && !["Actions", "name"].includes(header.name)
+    (header) => !(["Actions", "name"].includes(header.header) || ["Actions", "name"].includes(header.name))
   );
 
   const isMultiRowSelectionEnabled = (row: Vertex) => {

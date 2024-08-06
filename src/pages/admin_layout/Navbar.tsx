@@ -22,7 +22,7 @@ export function Navbar(
     toggleSidebar: () => void;
   } & DisplayComponentProps,
 ) {
-  const [field, others] = splitProps(p, [
+  const [field, _others] = splitProps(p, [
     "showCloseDrawerBtn",
     "right",
     "left",
@@ -31,7 +31,7 @@ export function Navbar(
     "data",
   ]);
   // bg:white box-shadow:1|1|10|#ddd
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   return (
     <div class="flex bb:1px|solid|rgb(212,219,231) jc:space-between p:5|10">
       <Show

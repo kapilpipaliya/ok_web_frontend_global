@@ -31,9 +31,9 @@ export function addMetaVertexes(
     if (attr.name) {
       attr.label = toTitle(attr.name);
     }
-    if (!attr.tab) attr.tab = "main";
+    if (!attr.tab) { attr.tab = "main"; }
     // @ts-ignore
-    if (!attr.group) attr.group = "main";
+    if (!attr.group) { attr.group = "main"; }
     // if(attribute.componentName === "DynamicTable") attribute.group = attribute.id;
     const addAttributeResult = newRow(
       graph,

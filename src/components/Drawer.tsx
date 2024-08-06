@@ -1,10 +1,10 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import {
   type Accessor,
+  createSignal,
   type JSX,
   type Setter,
   Show,
-  createSignal,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
@@ -57,7 +57,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
   };
 
   const handleEscClose = (event: KeyboardEvent) => {
-    if (activeClickOutside < graph.activeClickOutside) return;
+    if (activeClickOutside < graph.activeClickOutside) { return; }
     if (event.key === "Escape" && isOpen()) {
       toggleDrawer();
     }

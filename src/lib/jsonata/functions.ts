@@ -115,7 +115,7 @@ export function string(arg, prettify = false) {
   } else if (isFunction(arg)) {
     // functions (built-in and lambda convert to empty string
     str = "";
-  } else if (typeof arg === "number" && !isFinite(arg)) {
+  } else if (typeof arg === "number" && !Number.isFinite(arg)) {
     throw {
       code: "D3001",
       stack: new Error().stack,
@@ -128,7 +128,7 @@ export function string(arg, prettify = false) {
     }
     str = JSON.stringify(
       arg,
-      (key, val) =>
+      (_key, val) =>
         typeof val !== "undefined" &&
         val !== null &&
         val.toPrecision &&
@@ -189,9 +189,8 @@ export function substringBefore(str, chars) {
   const pos = str.indexOf(chars);
   if (pos > -1) {
     return str.substr(0, pos);
-  } else {
-    return str;
   }
+    return str;
 }
 
 /**
@@ -209,9 +208,8 @@ export function substringAfter(str, chars) {
   const pos = str.indexOf(chars);
   if (pos > -1) {
     return str.substr(pos + chars.length);
-  } else {
-    return str;
   }
+    return str;
 }
 
 /**
@@ -470,7 +468,7 @@ export function replace(str, pattern, replacement, limit) {
           substitute += regexMatch.match;
           position++;
         } else {
-          var maxDigits;
+          let maxDigits;
           if (regexMatch.groups.length === 0) {
             // no sub-matches; any $ followed by a digit will be replaced by an empty string
             maxDigits = 1;
@@ -489,7 +487,7 @@ export function replace(str, pattern, replacement, limit) {
               10,
             );
           }
-          if (isNaN(index)) {
+          if (Number.isNaN(index)) {
             // not a capture group, treat the $ as literal
             substitute += "$";
           } else {
@@ -627,7 +625,7 @@ export function encodeUrlComponent(str) {
   let returnVal;
   try {
     returnVal = encodeURIComponent(str);
-  } catch (e) {
+  } catch (_e) {
     throw {
       code: "D3140",
       functionName: "encodeUrlComponent",
@@ -653,7 +651,7 @@ export function encodeUrl(str) {
   let returnVal;
   try {
     returnVal = encodeURI(str);
-  } catch (e) {
+  } catch (_e) {
     throw {
       code: "D3140",
       functionName: "encodeUrl",
@@ -679,7 +677,7 @@ export function decodeUrlComponent(str) {
   let returnVal;
   try {
     returnVal = decodeURIComponent(str);
-  } catch (e) {
+  } catch (_e) {
     throw {
       code: "D3140",
       functionName: "decodeUrlComponent",
@@ -705,7 +703,7 @@ export function decodeUrl(str) {
   let returnVal;
   try {
     returnVal = decodeURI(str);
-  } catch (e) {
+  } catch (_e) {
     throw {
       code: "D3140",
       functionName: "decodeUrl",
@@ -804,13 +802,13 @@ export function formatNumber(value, picture, options) {
   }
 
   const defaults = {
-    NaN: "NaN",
     "decimal-separator": ".",
     digit: "#",
     "exponent-separator": "e",
     "grouping-separator": ",",
     infinity: "Infinity",
     "minus-sign": "-",
+    NaN: "NaN",
     "pattern-separator": ";",
     "per-mille": "\u2030",
     percent: "%",
@@ -877,7 +875,10 @@ export function formatNumber(value, picture, options) {
       prefix.length,
       subpicture.length - suffix.length,
     );
-    let mantissaPart, exponentPart, integerPart, fractionalPart;
+    let mantissaPart;
+    let exponentPart;
+    let integerPart;
+    let fractionalPart;
     const exponentPosition = subpicture.indexOf(
       properties["exponent-separator"],
       prefix.length,
@@ -1171,13 +1172,14 @@ export function formatNumber(value, picture, options) {
   // bullet 4:
   // TODO: infinity - not sure we'd ever get this in JSON
   // bullet 5:
-  let mantissa, exponent;
+  let mantissa;
+  let exponent;
   if (pic.minimumExponentSize === 0) {
     mantissa = adjustedNumber;
   } else {
     // mantissa * 10^exponent = adjustedNumber
-    const maxMantissa = Math.pow(10, pic.scalingFactor);
-    const minMantissa = Math.pow(10, pic.scalingFactor - 1);
+    const maxMantissa = 10 ** pic.scalingFactor;
+    const minMantissa = 10 ** (pic.scalingFactor - 1);
     mantissa = adjustedNumber;
     exponent = 0;
     while (mantissa < minMantissa) {
@@ -1200,9 +1202,8 @@ export function formatNumber(value, picture, options) {
         .map((digit) => {
           if (digit >= "0" && digit <= "9") {
             return decimalDigitFamily[digit.charCodeAt(0) - 48];
-          } else {
-            return digit;
           }
+            return digit;
         })
         .join("");
     }
@@ -1211,7 +1212,7 @@ export function formatNumber(value, picture, options) {
   let stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
   let decimalPos = stringValue.indexOf(".");
   if (decimalPos === -1) {
-    stringValue = stringValue + decimal_separator;
+    stringValue += decimal_separator;
   } else {
     stringValue = stringValue.replace(".", decimal_separator);
   }
@@ -1228,8 +1229,7 @@ export function formatNumber(value, picture, options) {
     pic.minimumFactionalPartSize - (stringValue.length - decimalPos - 1);
   stringValue =
     (padLeft > 0 ? new Array(padLeft + 1).join(zero_digit) : "") + stringValue;
-  stringValue =
-    stringValue +
+  stringValue +=
     (padRight > 0 ? new Array(padRight + 1).join(zero_digit) : "");
   decimalPos = stringValue.indexOf(decimal_separator);
   // bullet 10:
@@ -1339,7 +1339,8 @@ export function number(arg) {
   } else if (
     typeof arg === "string" &&
     /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) &&
-    !isNaN(Number.parseFloat(arg)) &&
+    !Number.isNaN(Number.parseFloat(arg)) &&
+    Number.
     isFinite(arg)
   ) {
     result = Number.parseFloat(arg);
@@ -1436,7 +1437,7 @@ export function round(arg, precision) {
     // this rounding algorithm - See 'Decimal rounding' in
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
     // Shift
-    var value = arg.toString().split("e");
+    const value = arg.toString().split("e");
     arg = +(value[0] + "e" + (value[1] ? +value[1] + precision : precision));
   }
 
@@ -1445,7 +1446,7 @@ export function round(arg, precision) {
   const diff = result - arg;
   if (Math.abs(diff) === 0.5 && Math.abs(result % 2) === 1) {
     // rounded the wrong way - adjust to nearest even number
-    result = result - 1;
+    result -= 1;
   }
   if (precision) {
     // Shift back
@@ -1506,9 +1507,9 @@ export function power(arg, exp) {
     return undefined;
   }
 
-  result = Math.pow(arg, exp);
+  result = arg ** exp;
 
-  if (!isFinite(result)) {
+  if (!Number.isFinite(result)) {
     throw {
       code: "D3061",
       exp: exp,
@@ -1696,10 +1697,9 @@ export function single(arr, func) {
           index: i,
           stack: new Error().stack,
         };
-      } else {
+      }
         result = entry;
         hasFoundMatch = true;
-      }
     }
   }
 
@@ -1732,7 +1732,7 @@ export function zip() {
       return 0;
     }),
   );
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     const tuple = args.map((arg) => {
       return arg[i];
     });
@@ -1872,9 +1872,8 @@ export function append(arg1, arg2) {
 export function exists(arg) {
   if (typeof arg === "undefined") {
     return false;
-  } else {
-    return true;
   }
+    return true;
 }
 
 /**
@@ -2058,7 +2057,7 @@ export function sort(arr, comparator) {
   let comp;
   if (typeof comparator === "undefined") {
     // inject a default comparator - only works for numeric or string arrays
-    if (!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
+    if (!(isArrayOfNumbers(arr) || isArrayOfStrings(arr))) {
       throw {
         code: "D3070",
         index: 1,
@@ -2097,14 +2096,13 @@ export function sort(arr, comparator) {
   const msort = (array) => {
     if (!Array.isArray(array) || array.length <= 1) {
       return array;
-    } else {
+    }
       const middle = Math.floor(array.length / 2);
       let left = array.slice(0, middle);
       let right = array.slice(middle);
       left = msort(left);
       right = msort(right);
       return merge(left, right);
-    }
   };
 
   const result = msort(arr);

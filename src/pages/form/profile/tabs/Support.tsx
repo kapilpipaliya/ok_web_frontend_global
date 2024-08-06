@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, createSignal } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
 
@@ -38,12 +38,12 @@ export const SupportTicketSection = (
       };
 
       await sendChatsSupportCall(parentVertexId, newMessage)
-        .then((e) => {
+        .then((_e) => {
           setMessages([...messages()!, newMessage]);
           setInputMessage("");
           setTimeout(fakeReply, 1000);
         })
-        .catch((e) => {
+        .catch((_e) => {
           showErrorToast("Issue in sending message. Please try again later");
         });
     }
@@ -197,7 +197,7 @@ export const SupportTicketSection = (
     props.setIsMainScreenLoad(true);
     await showLoadingToast({
       loadMessage: "Deleting Ticket...",
-      onSuccess: (value) => {
+      onSuccess: (_value) => {
         const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
@@ -255,7 +255,7 @@ export const SupportTicketSection = (
               </div>
             }
           >
-            {(row: any, index) => {
+            {(row: any, _index) => {
               return (
                 <div>
                   <TableBodyCell>{row.id}</TableBodyCell>

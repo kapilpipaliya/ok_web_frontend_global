@@ -17,7 +17,7 @@ export async function createUserInDB(
   labPort: number,
 ) {
   const uId = uuidv4();
-  let user;
+  let _user;
   // Create user in a Main database without password
   const createUserQuery = `CREATE (u:User {
             username: $username,

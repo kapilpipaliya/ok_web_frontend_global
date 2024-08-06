@@ -13,7 +13,6 @@ export async function retryTransaction(
     try {
       return await callback(tx);
     } catch (error: any) {
-      console.log("Error message:", error.message);
       if (
         error.message.includes(
           "Cannot resolve conflicting transactions. You can retry this transaction when the conflicting transaction is finished",
@@ -21,7 +20,6 @@ export async function retryTransaction(
       ) {
         attempt++;
         if (attempt < maxRetries) {
-          console.log(`Attempt ${attempt} failed. Retrying...`);
           await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 1 second before retrying
         } else {
           // console.error('Max retries reached. Could not handle mutation object.');

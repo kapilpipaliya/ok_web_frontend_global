@@ -1,4 +1,4 @@
-import { type Accessor, type JSX, type Setter, Show, createSignal } from "solid-js";
+import { type Accessor, createSignal, type JSX, type Setter, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";

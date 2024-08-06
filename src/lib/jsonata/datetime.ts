@@ -103,7 +103,7 @@ function numberToWords(value, ordinal) {
       if (mag > magnitudes.length) {
         mag = magnitudes.length; // the largest word
       }
-      const factor = Math.pow(10, mag * 3);
+      const factor = 10 ** (mag * 3);
       const mant = Math.floor(num / factor);
       const remainder = num - mant * factor;
       words =
@@ -139,7 +139,7 @@ decades.forEach((word, index) => {
 wordValues.hundredth = 100;
 magnitudes.forEach((word, index) => {
   const lword = word.toLowerCase();
-  const val = Math.pow(10, (index + 1) * 3);
+  const val = 10 ** ((index + 1) * 3);
   wordValues[lword] = val;
   wordValues[lword + "th"] = val;
 });
@@ -251,7 +251,7 @@ function lettersToDecimal(letters, aChar) {
   for (let i = 0; i < letters.length; i++) {
     decimal +=
       (letters.charCodeAt(letters.length - i - 1) - aCode + 1) *
-      Math.pow(26, i);
+      26 ** i;
   }
   return decimal;
 }
@@ -306,13 +306,14 @@ function _formatInteger(value, format) {
         format.case === tcase.UPPER ? "A" : "a",
       );
       break;
-    case formats.ROMAN:
+    case formats.ROMAN: {
       formattedInteger = decimalToRoman(value);
       if (format.case === tcase.UPPER) {
         formattedInteger = formattedInteger.toUpperCase();
       }
       break;
-    case formats.WORDS:
+    }
+    case formats.WORDS: {
       formattedInteger = numberToWords(value, format.ordinal);
       if (format.case === tcase.UPPER) {
         formattedInteger = formattedInteger.toUpperCase();
@@ -320,10 +321,11 @@ function _formatInteger(value, format) {
         formattedInteger = formattedInteger.toLowerCase();
       }
       break;
-    case formats.DECIMAL:
+    }
+    case formats.DECIMAL: {
       formattedInteger = "" + value;
       // TODO use functionPad
-      var padLength = format.mandatoryDigits - formattedInteger.length;
+      const padLength = format.mandatoryDigits - formattedInteger.length;
       if (padLength > 0) {
         const padding = new Array(padLength + 1).join("0");
         formattedInteger = padding + formattedInteger;
@@ -371,9 +373,10 @@ function _formatInteger(value, format) {
         ) {
           suffix = "th";
         }
-        formattedInteger = formattedInteger + suffix;
+        formattedInteger += suffix;
       }
       break;
+    }
     case formats.SEQUENCE:
       throw {
         code: "D3130",
@@ -408,7 +411,8 @@ function analyseIntegerPicture(picture) {
     type: "integer",
   };
 
-  let primaryFormat, formatModifier;
+  let primaryFormat;
+  let formatModifier;
   const semicolon = picture.lastIndexOf(";");
   if (semicolon === -1) {
     primaryFormat = picture;
@@ -434,14 +438,16 @@ function analyseIntegerPicture(picture) {
     case "i":
       format.primary = formats.ROMAN;
       break;
-    case "W":
+    case "W": {
       format.case = tcase.UPPER;
       format.primary = formats.WORDS;
       break;
-    case "Ww":
+    }
+    case "Ww": {
       format.case = tcase.TITLE;
       format.primary = formats.WORDS;
       break;
+    }
     case "w":
       format.primary = formats.WORDS;
       break;
@@ -555,22 +561,22 @@ function analyseIntegerPicture(picture) {
 const defaultPresentationModifiers = {
   C: "n",
   D: "1",
+  d: "1",
   E: "n",
   F: "n",
+  f: "1",
   H: "1",
+  h: "1",
   M: "1",
+  m: "01",
   P: "n",
+  s: "01",
   W: "1",
+  w: "1",
   X: "1",
+  x: "1",
   Y: "1",
   Z: "01:01",
-  d: "1",
-  f: "1",
-  h: "1",
-  m: "01",
-  s: "01",
-  w: "1",
-  x: "1",
   z: "01:01",
 };
 
@@ -596,8 +602,8 @@ function analyseDateTimePicture(picture) {
     }
   };
 
-  let start = 0,
-    pos = 0;
+  let start = 0;
+  let pos = 0;
   while (pos < picture.length) {
     if (picture.charAt(pos) === "[") {
       // check it's not a doubled [[
@@ -630,19 +636,19 @@ function analyseDateTimePicture(picture) {
         type: "marker",
       };
       const comma = marker.lastIndexOf(","); // 2. The width modifier may be recognized by the presence of a comma
-      var presMod; // the presentation modifiers
+      let presMod; // the presentation modifiers
       if (comma !== -1) {
         // §9.8.4.2 The Width Modifier
         const widthMod = marker.substring(comma + 1);
         const dash = widthMod.indexOf("-");
-        let min, max;
+        let min;
+        let max;
         const parseWidth = (wm) => {
           if (typeof wm === "undefined" || wm === "*") {
             return undefined;
-          } else {
+          }
             // TODO validate wm is an unsigned int
             return Number.parseInt(wm);
-          }
         };
         if (dash === -1) {
           min = widthMod;
@@ -815,13 +821,14 @@ const getDateTimeFragment = (date, component) => {
       componentValue = (today - firstJan) / millisInADay + 1;
       break;
     }
-    case "F": // day of week
+    case "F": { // day of week
       componentValue = date.getUTCDay();
       if (componentValue === 0) {
         // ISO 8601 defines days 1-7: Mon-Sun
         componentValue = 7;
       }
       break;
+    }
     case "W": {
       // week in year
       const thisYear = yearMonth(date.getUTCFullYear(), 0);
@@ -914,13 +921,14 @@ const getDateTimeFragment = (date, component) => {
     case "H": // hour in day (24 hours)
       componentValue = date.getUTCHours();
       break;
-    case "h": // hour in half-day (12 hours)
+    case "h": { // hour in half-day (12 hours)
       componentValue = date.getUTCHours();
-      componentValue = componentValue % 12;
+      componentValue %= 12;
       if (componentValue === 0) {
         componentValue = 12;
       }
       break;
+    }
     case "P": // am/pm marker
       componentValue = date.getUTCHours() >= 12 ? "pm" : "am";
       break;
@@ -976,7 +984,7 @@ function formatDateTime(millis, picture, timezone) {
       if (markerSpec.component === "Y") {
         // §9.8.4.4 Formatting the Year Component
         if (markerSpec.n !== -1) {
-          componentValue = componentValue % Math.pow(10, markerSpec.n);
+          componentValue %= 10 ** markerSpec.n;
         }
       }
       if (markerSpec.names) {
@@ -1110,8 +1118,8 @@ function generateRegex(formatSpec) {
           if (part.component === "z") {
             value = value.substring(3); // remove the leading GMT
           }
-          let offsetHours = 0,
-            offsetMinutes = 0;
+          let offsetHours = 0;
+          let offsetMinutes = 0;
           if (separator) {
             offsetHours = Number.parseInt(
               value.substring(0, value.indexOf(separator.character)),
@@ -1142,7 +1150,7 @@ function generateRegex(formatSpec) {
         if (part.component === "M" || part.component === "x") {
           // months
           months.forEach((name, index) => {
-            if (part.width && part.width.max) {
+            if (part.width?.max) {
               lookup[name.substring(0, part.width.max)] = index + 1;
             } else {
               lookup[name] = index + 1;
@@ -1152,7 +1160,7 @@ function generateRegex(formatSpec) {
           // days
           days.forEach((name, index) => {
             if (index > 0) {
-              if (part.width && part.width.max) {
+              if (part.width?.max) {
                 lookup[name.substring(0, part.width.max)] = index;
               } else {
                 lookup[name] = index;
@@ -1160,7 +1168,7 @@ function generateRegex(formatSpec) {
             }
           });
         } else if (part.component === "P") {
-          lookup = { AM: 0, PM: 1, am: 0, pm: 1 };
+          lookup = { AM: 0, am: 0, PM: 1, pm: 1 };
         } else {
           // unsupported 'name' option for this component
           throw {
@@ -1189,23 +1197,26 @@ function generateRegex(formatSpec) {
     }
 
     switch (formatSpec.primary) {
-      case formats.LETTERS:
+      case formats.LETTERS: {
         matcher.regex = isUpper ? "[A-Z]+" : "[a-z]+";
         matcher.parse = (value) => lettersToDecimal(value, isUpper ? "A" : "a");
         break;
-      case formats.ROMAN:
+      }
+      case formats.ROMAN: {
         matcher.regex = isUpper ? "[MDCLXVI]+" : "[mdclxvi]+";
         matcher.parse = (value) =>
           romanToDecimal(isUpper ? value : value.toUpperCase());
         break;
-      case formats.WORDS:
+      }
+      case formats.WORDS: {
         matcher.regex =
           "(?:" +
           Object.keys(wordValues).concat("and", "[\\-, ]").join("|") +
           ")+";
         matcher.parse = (value) => wordsToNumber(value.toLowerCase());
         break;
-      case formats.DECIMAL:
+      }
+      case formats.DECIMAL: {
         matcher.regex = `[0-9]${occurrences}`;
         if (formatSpec.ordinal) {
           // ordinals
@@ -1239,6 +1250,7 @@ function generateRegex(formatSpec) {
           return Number.parseInt(digits);
         };
         break;
+      }
       case formats.SEQUENCE:
         throw {
           code: "D3130",
@@ -1484,9 +1496,8 @@ export function toMillis(timestamp, picture) {
     }
 
     return Date.parse(timestamp);
-  } else {
-    return parseDateTime.call(this, timestamp, picture);
   }
+    return parseDateTime.call(this, timestamp, picture);
 }
 
 /**

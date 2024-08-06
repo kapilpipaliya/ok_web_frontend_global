@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 
@@ -59,13 +59,12 @@ export function GraphView() {
     );
   };
 
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
     if (graph.vertexes && graph.edges) {
       setLoad(false);
       setTimeout(() => setLoad(true), 0);
-      console.log("reloading");
     }
   });
   return (
@@ -73,7 +72,7 @@ export function GraphView() {
       <GraphView
         edges={Object.entries(graph.edges)
           .filter(([_, edge]) => edge.T !== "Attr")
-          .map(([key, value]) => ({
+          .map(([_key, value]) => ({
             ...value,
             end: value.E,
             start: value.S,
@@ -81,7 +80,7 @@ export function GraphView() {
           }))}
         nodes={Object.entries(graph.vertexes)
           .filter(([_, vertex]) => vertex.L[0] !== "Attr")
-          .map(([key, value]) => ({
+          .map(([_key, value]) => ({
             ...value,
             label: value.L[0],
           }))}

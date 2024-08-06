@@ -30,7 +30,7 @@ export async function POST({request}: APIEvent, event: HTTPEvent) {
   }
 
   const fileNodes = await Promise.all(data.map(async (file) => {
-    if (!file?.filename) return null;
+    if (!file?.filename) { return null; }
     const {ext, name} = path.parse(file.filename);
     const newFilename = `${name}_${currentDate}${ext}`;
     const filePath = saveFileToDisk(userDir, newFilename, file.data);
@@ -40,10 +40,10 @@ export async function POST({request}: APIEvent, event: HTTPEvent) {
 
     const metadata = {
       checksum,
-      // fileId,
-      fileSize,
       filename: newFilename,
       filepath: filePath,
+      // fileId,
+      fileSize,
       mimeType,
       originalFilename: file.filename,
       subdomain,

@@ -1,4 +1,4 @@
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { getSelectionOptions } from "./getSelectionOptions";
 

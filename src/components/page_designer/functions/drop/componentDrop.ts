@@ -5,17 +5,17 @@ import { batch } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
 import { createAttrCompMetaVertex } from "~/components/page_designer/functions/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/components/page_designer/functions/drop/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/components/page_designer/functions/drop/processChildrenAttrs";
+import { useToast } from "~/components/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/rowFunction";
-import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getUniqueName } from "../getChildrenAttrs";
-import { getCompPropsObj } from "./getCompPropsObj";
+import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
+import { getCompPropsObj } from "./getCompPropsObj";
 
 // @Note:
 // From Component To Layout drag:
@@ -33,7 +33,7 @@ export function componentDrop(
 ) {
   const { showErrorToast } = useToast();
 
-  if (!fromVertex) return -1;
+  if (!fromVertex) { return -1; }
 
   const attrMetaVertex = createAttrMetaVertex(graph);
   const attrCompMetaVertex = createAttrCompMetaVertex(graph);

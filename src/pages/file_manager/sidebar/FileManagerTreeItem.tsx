@@ -1,9 +1,9 @@
 
 
-import { For, Show, createSelector, createSignal, onMount } from "solid-js";
+import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
 import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";

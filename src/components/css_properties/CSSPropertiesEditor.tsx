@@ -1,19 +1,19 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, batch, createSignal } from "solid-js";
+import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
 import { StyleEditor } from "~/components/css_properties/StyleEditor";
 import { TextEditor } from "~/components/css_properties/TextEditor";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import type { CSSStore } from "./CssEditorContext";
 
 import { DropdownMenu } from "../DropdownMenu";
-import { MultiSelectField } from "../MultiSelect";
-import { ZIndex } from "../ZIndex";
 import { DynamicComponent } from "../form/DynamicComponent";
 import { useFormContext } from "../form/FormContext";
+import { MultiSelectField } from "../MultiSelect";
+import { ZIndex } from "../ZIndex";
 import { AddNewCssState } from "./AddNewCssState";
 import { useCssEditor, useCssState } from "./CssEditorContext";
 import { ResetButton } from "./ResetButton";
@@ -78,7 +78,7 @@ export function CSSPropertiesEditor(
     if (!txnId) {
       return;
     }
-    if (!props.meta || !props.data) {
+    if (!(props.meta && props.data)) {
       return;
     }
     const edgesPrefixToRemove = getCssSelectedFileEdgeName(props.data.L[0], props.meta.P.name, currentState, "");

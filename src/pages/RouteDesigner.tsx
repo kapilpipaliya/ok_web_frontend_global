@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch, createSignal } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
 
 import {Table, TableBodyCell, TableHeadCell} from "~/components/SimpleTable";
 

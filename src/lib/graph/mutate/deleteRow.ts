@@ -27,8 +27,9 @@ export function deleteRow(
     for (const type in inEdges) {
       for (const edgeId of inEdges[type]) {
         const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-        if (deleteEdgeResult?.error)
+        if (deleteEdgeResult?.error) {
           alert(deleteEdgeResult.error.toString());
+        }
       }
     }
     // delete all outEdges of vertex
@@ -41,14 +42,15 @@ export function deleteRow(
           graph,
           setGraph,
         );
-        if (deleteEdgeResult?.error)
+        if (deleteEdgeResult?.error) {
           alert(deleteEdgeResult.error.toString());
+        }
       }
     }
 
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id, graph, setGraph);
-    if (deleteResult.error) alert(deleteResult.error.toString());
-    if (isRealTime) commitTxn(txnId, graph);
+    if (deleteResult.error) { alert(deleteResult.error.toString()); }
+    if (isRealTime) { commitTxn(txnId, graph); }
   });
 }

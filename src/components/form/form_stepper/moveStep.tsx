@@ -10,7 +10,7 @@ export function moveStep(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   layoutStore: Store<PageLayoutObject>,
-  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  _setLayoutStore: SetStoreFunction<PageLayoutObject>,
   steps: Vertex[],
   fromIndex: number,
   toIndex: number,

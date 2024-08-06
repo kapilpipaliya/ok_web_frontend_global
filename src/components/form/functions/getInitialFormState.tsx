@@ -17,7 +17,7 @@ export function getInitialFormState(
   txnId: number,
   label: string,
 ) {
-  let dataVertex: Vertex | undefined;
+  let dataVertex: undefined | Vertex;
   if (!id) {
     const createResult = createForm(graph, setGraph, txnId, label);
 

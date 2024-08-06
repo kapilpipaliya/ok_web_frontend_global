@@ -44,8 +44,7 @@ export async function GET({request}: APIEvent, event: HTTPEvent) {
       },
       status: 200,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (_error) {
     return new Response(JSON.stringify({error: "Error reading file from disk"}), {
       headers: {"Content-Type": "application/json"},
       status: 500,

@@ -1,12 +1,12 @@
 import { For, Match, Show, Switch } from "solid-js";
 
-import { ZIndex } from "~/components/ZIndex";
 import { ButtonGroups } from "~/components/css_properties/components/ButtonGroups";
 import { ColorPickerInput } from "~/components/css_properties/components/ColorPickerInput";
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
 import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
 import { Select } from "~/components/css_properties/components/Select";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
+import { ZIndex } from "~/components/ZIndex";
 
 import type { GenericField, TextFieldOptionsField, } from "../constants/FieldType";
 

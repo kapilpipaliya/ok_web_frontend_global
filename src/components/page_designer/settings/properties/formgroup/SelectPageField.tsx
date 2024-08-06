@@ -1,7 +1,7 @@
 
 
-import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { IconButton } from "~/components/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
@@ -18,7 +18,7 @@ export function SelectPageField(
   const [layoutStore] = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
 
-  const RenderLabel = (option: Vertex, isSelected: boolean) => {
+  const RenderLabel = (option: Vertex, _isSelected: boolean) => {
 
     return (
       <div class="flex ai:center gap:4">
@@ -64,7 +64,7 @@ export function SelectPageField(
 
   const AddNewPageButton = () => {
     const handleAddNewClick = () => {
-      window.open(`/admin/ThankYouPage/new`, "_blank");
+      window.open('/admin/ThankYouPage/new', "_blank");
     };
     return (
       <IconButton

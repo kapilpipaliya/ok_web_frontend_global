@@ -1,6 +1,6 @@
 
 import { useLocation, } from "@solidjs/router";
-import { type JSX, Show, createEffect } from "solid-js";
+import { createEffect, type JSX, Show } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 import {
@@ -25,7 +25,7 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   // Add new vertex for the navbar
   addNewVertex(
     0,
-    newVertex(navBarVertexId, ["MainNavBarTitle"], { class: `bb:1|solid|rgb(212,219,231)` }),
+    newVertex(navBarVertexId, ["MainNavBarTitle"], { class: 'bb:1|solid|rgb(212,219,231)' }),
     graph,
     setGraph
   );

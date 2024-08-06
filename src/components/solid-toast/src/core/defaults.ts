@@ -1,6 +1,6 @@
 import type { JSX } from 'solid-js';
 
-import type { ToastOptions, ToastTimeouts, ToasterProps } from '../types';
+import type { ToasterProps, ToastOptions, ToastTimeouts } from '../types';
 
 export const defaultTimeouts: ToastTimeouts = {
   blank: 4000,

@@ -5,7 +5,7 @@ export interface TextShadowAttributes {
   'offset-y': string;
 }
 
-export function generateTextShadow(shadows: Array<TextShadowAttributes>, isView?: boolean): string {
+export function generateTextShadow(shadows: TextShadowAttributes[], isView?: boolean): string {
   const separator = isView ? " " : "|";
   const separator2 = isView ? ", " : ",";
 

@@ -15,7 +15,7 @@ export function FormStatusWrapper() {
     <CustomModal
       customTitle={<span>{"Status Confirmation"}</span>}
       dialogClass="min-w:20% r:10px p:0"
-      footer={(toggle) => (
+      footer={(_toggle) => (
         <div class={"flex ai:center jc:end"}>
           <button
             autofocus

@@ -167,7 +167,7 @@ function evaluatePath(expr, input, environment) {
   let tupleBindings = undefined;
 
   // evaluate each step in turn
-  for (var ii = 0; ii < expr.steps.length; ii++) {
+  for (let ii = 0; ii < expr.steps.length; ii++) {
     const step = expr.steps[ii];
 
     if (step.tuple) {
@@ -341,7 +341,7 @@ function evaluateTupleStep(expr, input, tupleBindings, environment) {
       result = createSequence();
       result.tupleStream = true;
       for (let ss = 0; ss < sorted.length; ss++) {
-        var tuple = { "@": sorted[ss] };
+        const tuple = { "@": sorted[ss] };
         tuple[expr.index] = ss;
         result.push(tuple);
       }
@@ -409,19 +409,19 @@ function evaluateTupleStep(expr, input, tupleBindings, environment) {
  */
 function evaluateFilter(predicate, input, environment) {
   let results = createSequence();
-  if (input && input.tupleStream) {
+  if (input?.tupleStream) {
     results.tupleStream = true;
   }
   if (!Array.isArray(input)) {
     input = createSequence(input);
   }
   if (predicate.type === "number") {
-    var index = Math.floor(predicate.value); // round it down
+    let index = Math.floor(predicate.value); // round it down
     if (index < 0) {
       // count in from end of array
       index = input.length + index;
     }
-    var item = input[index];
+    const item = input[index];
     if (typeof item !== "undefined") {
       if (Array.isArray(item)) {
         results = item;
@@ -431,7 +431,7 @@ function evaluateFilter(predicate, input, environment) {
     }
   } else {
     for (index = 0; index < input.length; index++) {
-      var item = input[index];
+      const item = input[index];
       let context = item;
       let env = environment;
       if (input.tupleStream) {
@@ -490,28 +490,28 @@ function evaluateBinary(expr, input, environment) {
   const rhs = evalrhs();
   try {
     switch (op) {
-      case "+":
-      case "-":
-      case "*":
-      case "/":
-      case "%":
-        result = evaluateNumericExpression(lhs, rhs, op);
-        break;
-      case "=":
       case "!=":
+      case "=":
         result = evaluateEqualityExpression(lhs, rhs, op);
         break;
-      case "<":
-      case "<=":
-      case ">":
-      case ">=":
-        result = evaluateComparisonExpression(lhs, rhs, op);
+      case "%":
+      case "*":
+      case "+":
+      case "/":
+      case "-":
+        result = evaluateNumericExpression(lhs, rhs, op);
         break;
       case "&":
         result = evaluateStringConcat(lhs, rhs);
         break;
       case "..":
         result = evaluateRangeExpression(lhs, rhs);
+        break;
+      case "<":
+      case "<=":
+      case ">":
+      case ">=":
+        result = evaluateComparisonExpression(lhs, rhs, op);
         break;
       case "in":
         result = evaluateIncludesExpression(lhs, rhs);
@@ -536,7 +536,7 @@ function evaluateUnary(expr, input, environment) {
   let result;
 
   switch (expr.value) {
-    case "-":
+    case "-": {
       result = evaluate(expr.expression, input, environment);
       if (typeof result === "undefined") {
         result = undefined;
@@ -552,7 +552,8 @@ function evaluateUnary(expr, input, environment) {
         };
       }
       break;
-    case "[":
+    }
+    case "[": {
       // array constructor - evaluate each item
       result = [];
       const generators = Promise.all(
@@ -579,6 +580,7 @@ function evaluateUnary(expr, input, environment) {
         });
       }
       break;
+    }
     case "{":
       // object constructor - apply grouping
       result = evaluateGroupExpression(expr, input, environment);
@@ -594,7 +596,7 @@ function evaluateUnary(expr, input, environment) {
  * @param {Object} environment - Environment
  * @returns {*} Evaluated input data
  */
-function evaluateName(expr, input, environment) {
+function evaluateName(expr, input, _environment) {
   // lookup the 'name' item in the input
   return fn.lookup(input, expr.value);
 }
@@ -614,7 +616,7 @@ function evaluateLiteral(expr) {
  * @param {Object} input - Input data to evaluate against
  * @returns {*} Evaluated input data
  */
-function evaluateWildcard(expr, input) {
+function evaluateWildcard(_expr, input) {
   let results = createSequence();
   if (Array.isArray(input) && input.outerWrapper && input.length > 0) {
     input = input[0];
@@ -661,7 +663,7 @@ function flatten(arg, flattened) {
  * @param {Object} input - Input data to evaluate against
  * @returns {*} Evaluated input data
  */
-function evaluateDescendants(expr, input) {
+function evaluateDescendants(_expr, input) {
   let result;
   const resultSequence = createSequence();
   if (typeof input !== "undefined") {
@@ -728,20 +730,20 @@ function evaluateNumericExpression(lhs, rhs, op) {
   }
 
   switch (op) {
-    case "+":
-      result = lhs + rhs;
-      break;
-    case "-":
-      result = lhs - rhs;
+    case "%":
+      result = lhs % rhs;
       break;
     case "*":
       result = lhs * rhs;
       break;
+    case "+":
+      result = lhs + rhs;
+      break;
     case "/":
       result = lhs / rhs;
       break;
-    case "%":
-      result = lhs % rhs;
+    case "-":
+      result = lhs - rhs;
       break;
   }
   return result;
@@ -767,11 +769,11 @@ function evaluateEqualityExpression(lhs, rhs, op) {
   }
 
   switch (op) {
-    case "=":
-      result = isDeepEqual(lhs, rhs);
-      break;
     case "!=":
       result = !isDeepEqual(lhs, rhs);
+      break;
+    case "=":
+      result = isDeepEqual(lhs, rhs);
       break;
   }
   return result;
@@ -797,7 +799,7 @@ function evaluateComparisonExpression(lhs, rhs, op) {
     rtype === "undefined" || rtype === "string" || rtype === "number";
 
   // if either aa or bb are not comparable (string or numeric) values, then throw an error
-  if (!lcomparable || !rcomparable) {
+  if (!(lcomparable && rcomparable)) {
     throw {
       code: "T2010",
       stack: new Error().stack,
@@ -926,7 +928,7 @@ function evaluateStringConcat(lhs, rhs) {
 function evaluateGroupExpression(expr, input, environment) {
   const result = {};
   const groups = {};
-  const reduce = input && input.tupleStream ? true : false;
+  const reduce = !!(input?.tupleStream );
   // group the input sequence by 'key' expression
   if (!Array.isArray(input)) {
     input = createSequence(input);
@@ -941,7 +943,7 @@ function evaluateGroupExpression(expr, input, environment) {
     const env = reduce ? createFrameFromTuple(environment, item) : environment;
     for (let pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
       const pair = expr.lhs[pairIndex];
-      var key = evaluate(pair[0], reduce ? item["@"] : item, env);
+      const key = evaluate(pair[0], reduce ? item["@"] : item, env);
       // key has to be a string
       if (typeof key !== "string" && key !== undefined) {
         throw {
@@ -994,7 +996,7 @@ function evaluateGroupExpression(expr, input, environment) {
   );
 
   for (const generator of generators) {
-    var [key, value] = generator;
+    const [key, value] = generator;
     if (typeof value !== "undefined") {
       result[key] = value;
     }
@@ -1064,7 +1066,7 @@ function evaluateRangeExpression(lhs, rhs) {
   }
 
   result = new Array(size);
-  for (let item = lhs, index = 0; item <= rhs; item++, index++) {
+  for (let index = 0, item = lhs; item <= rhs; item++, index++) {
     result[index] = item;
   }
   result.sequence = true;
@@ -1151,7 +1153,7 @@ function evaluateRegex(expr) {
       result.next = () => {
         if (re.lastIndex >= str.length) {
           return undefined;
-        } else {
+        }
           const next = closure(str, re.lastIndex);
           if (next && next.match === "") {
             // matches zero length string; this will never progress
@@ -1163,7 +1165,6 @@ function evaluateRegex(expr) {
             };
           }
           return next;
-        }
       };
     }
 
@@ -1184,7 +1185,7 @@ function evaluateVariable(expr, input, environment) {
   let result;
   // if the variable name is empty string, then it refers to context value
   if (expr.value === "") {
-    result = input && input.outerWrapper ? input[0] : input;
+    result = input?.outerWrapper ? input[0] : input;
   } else {
     result = environment.lookup(expr.value);
   }
@@ -1203,7 +1204,7 @@ function evaluateSortExpression(expr, input, environment) {
 
   // evaluate the lhs, then sort the results in order according to rhs expression
   const lhs = input;
-  const isTupleSort = input.tupleStream ? true : false;
+  const isTupleSort = !!input.tupleStream;
 
   // sort the lhs array
   // use comparator function
@@ -1245,8 +1246,7 @@ function evaluateSortExpression(expr, input, environment) {
 
       // if aa or bb are not string or numeric values, then throw an error
       if (
-        !(atype === "string" || atype === "number") ||
-        !(btype === "string" || btype === "number")
+        !((atype === "string" || atype === "number") &&(btype === "string" || btype === "number"))
       ) {
         throw {
           code: "T2008",
@@ -1269,7 +1269,7 @@ function evaluateSortExpression(expr, input, environment) {
       if (aa === bb) {
         // both the same - move on to next term
         continue;
-      } else if (aa < bb) {
+      }if (aa < bb) {
         comp = -1;
       } else {
         comp = 1;
@@ -1299,7 +1299,7 @@ function evaluateSortExpression(expr, input, environment) {
  * @param {Object} environment - Environment
  * @returns {*} tranformer function
  */
-function evaluateTransformExpression(expr, input, environment) {
+function evaluateTransformExpression(expr, _input, environment) {
   // create a function to implement the transform definition
   const transformer = (obj) => {
     // signature <(oa):o>
@@ -1585,7 +1585,7 @@ function applyInner(proc, args, input, environment) {
   } catch (err) {
     if (proc) {
       if (
-        typeof err.token == "undefined" &&
+        typeof err.token === "undefined" &&
         typeof proc.token !== "undefined"
       ) {
         err.token = proc.token;
@@ -1834,7 +1834,7 @@ function functionEval(expr, focus) {
   }
 
   try {
-    var ast = parser(expr, false);
+    const _ast = parser(expr, false);
   } catch (err) {
     // error parsing the expression passed to $eval
     populateMessage(err);
@@ -1846,7 +1846,7 @@ function functionEval(expr, focus) {
     };
   }
   try {
-    var result = evaluate(ast, input, this.environment);
+    const _result = evaluate(ast, input, this.environment);
   } catch (err) {
     // error evaluating the expression passed to $eval
     populateMessage(err);
@@ -2190,7 +2190,7 @@ export function jsonata(expr: string, options?: {}) {
   let ast;
   let errors;
   try {
-    ast = parser(expr, options && options.recover);
+    ast = parser(expr, options?.recover);
     errors = ast.errors;
     delete ast.errors;
   } catch (err) {
@@ -2214,7 +2214,7 @@ export function jsonata(expr: string, options?: {}) {
     defineFunction(() => timestamp.getTime(), "<:n>"),
   );
 
-  if (options && options.RegexEngine) {
+  if (options?.RegexEngine) {
     jsonata.RegexEngine = options.RegexEngine;
   } else {
     jsonata.RegexEngine = RegExp;
@@ -2242,7 +2242,7 @@ export function jsonata(expr: string, options?: {}) {
       }
 
       if (typeof bindings !== "undefined") {
-        var exec_env;
+        let exec_env;
         // the variable bindings have been passed in - create a frame to hold these
         exec_env = createFrame(environment);
         for (const v in bindings) {

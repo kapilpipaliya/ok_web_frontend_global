@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { type Session, int } from "neo4j-driver";
+import { int, type Session } from "neo4j-driver";
 
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
@@ -39,15 +39,15 @@ export async function POST({ request }: APIEvent) {
   }
 
   switch (panel) {
-    case "profile":
-      // payload: { panel: 'profile',userId, username, email, profileImage }
-      return handleRequest(profile, payload, session, subdomain);
     case "password":
       // payload: { panel: 'password',currentPassword, username, newPassword  }
       return handleRequest(password, payload, session, subdomain);
     case "pricing":
       // payload: { panel: 'pricing' }
       return handleRequest(pricing, payload, session, subdomain);
+    case "profile":
+      // payload: { panel: 'profile',userId, username, email, profileImage }
+      return handleRequest(profile, payload, session, subdomain);
     case "supportTicket":
       return handleRequest(supportTicket, payload, session, subdomain);
     default:
@@ -55,7 +55,7 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-const profile = async (payload: any, session: Session, subdomain: string) => {
+const profile = async (payload: any, session: Session, _subdomain: string) => {
   const { email, profileImage, uId, userId, username } = payload;
 
   // Ensure user exists
@@ -96,9 +96,9 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   // Update user profile
   let query = "MATCH (u:User) WHERE u.uId = $uId SET ";
   const updates = [];
-  if (email) updates.push("u.email = $email");
-  if (username) updates.push("u.username = $username");
-  if (profileImage) updates.push("u.profileImage = $profileImage");
+  if (email) { updates.push("u.email = $email"); }
+  if (username) { updates.push("u.username = $username"); }
+  if (profileImage) { updates.push("u.profileImage = $profileImage"); }
   query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
   const result = await session.run(query, {
@@ -159,7 +159,7 @@ const password = async (payload: any, session: Session) => {
   };
 };
 
-const pricing = async (payload: any, session: Session) => {
+const pricing = async (_payload: any, session: Session) => {
   const query = "MATCH (n:Pricing) RETURN n;";
   const result = await session.run(query);
   const plans = result.records.map((r) => r.get("n").properties);
@@ -176,21 +176,21 @@ const supportTicket = async (
   const { action, ...payload } = data;
 
   switch (action) {
-    case "getTicktes":
-      // payload: { panel: 'supportTicket',action: 'getTicktes', email}
-      return await getTicket(payload, session);
-    case "create":
-      // payload: { panel: 'supportTicket',action: 'create',name, email, subject, message }
-      return await createTicket(payload, session);
-    case "updateStatus":
-      // payload: { panel: 'supportTicket',action: 'updateStatus',id, status }
-      return await updateStatus(payload, session);
     case "chat":
       // payload: { panel: 'supportTicket',action: 'chat',name, email, subject, message }
       return await chat(payload, session, subdomain);
+    case "create":
+      // payload: { panel: 'supportTicket',action: 'create',name, email, subject, message }
+      return await createTicket(payload, session);
     case "delete":
       // payload: { panel: 'supportTicket',action: 'delete',id }
       return await deleteTicket(payload, session, subdomain);
+    case "getTicktes":
+      // payload: { panel: 'supportTicket',action: 'getTicktes', email}
+      return await getTicket(payload, session);
+    case "updateStatus":
+      // payload: { panel: 'supportTicket',action: 'updateStatus',id, status }
+      return await updateStatus(payload, session);
     default:
       return { error: "Invalid support ticket action", status: 400 };
   }
@@ -238,7 +238,7 @@ const supportTicket = async (
     };
   }
 
-  async function chat(payload: any, session: Session, subdomain: string) {
+  async function chat(payload: any, _session: Session, _subdomain: string) {
     const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
       case "send": {
@@ -267,8 +267,8 @@ const supportTicket = async (
 
   async function deleteTicket(
     payload: any,
-    session: Session,
-    subdomain: string,
+    _session: Session,
+    _subdomain: string,
   ) {
     const { id } = payload;
     // deleted this function intentionally, use mutation handler instead

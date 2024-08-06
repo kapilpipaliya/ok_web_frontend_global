@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { A } from "@solidjs/router";
-import { Match, Show, Switch, createSignal } from "solid-js";
+import { createSignal, Match, Show, Switch } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
@@ -21,7 +21,7 @@ export function ForgotPassword() {
   const handleEmailSubmit = async (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-    const data = await sendEmail(username(), "Reset Password");
+    const _data = await sendEmail(username(), "Reset Password");
     setIsLoading(false);
     setStage(1);
   };
@@ -29,7 +29,6 @@ export function ForgotPassword() {
   const handleOtpSubmit = (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-    console.log("OTP submitted:", otp());
     setIsLoading(false);
     setStage(2); // Move to password reset stage
   };
@@ -49,7 +48,6 @@ export function ForgotPassword() {
       return; // Stop the form submission
     }
     setIsLoading(true);
-    console.log("New password submitted:", newPassword(), confirmPassword());
     // Reset password
     // On success:
     setIsLoading(false);

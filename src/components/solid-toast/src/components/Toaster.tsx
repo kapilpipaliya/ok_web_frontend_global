@@ -1,4 +1,4 @@
-import { type Component, For, createEffect, onCleanup } from 'solid-js';
+import { type Component, createEffect, For, onCleanup } from 'solid-js';
 
 import type { ToasterProps } from '..';
 import type { Toast } from '../types';
@@ -16,7 +16,7 @@ export const Toaster: Component<ToasterProps> = (props) => {
   createEffect(() => {
     const timers = createTimers();
     onCleanup(() => {
-      if (!timers) return;
+      if (!timers) { return; }
       timers.forEach((timer) => timer && clearTimeout(timer));
     });
   });
@@ -29,7 +29,7 @@ export const Toaster: Component<ToasterProps> = (props) => {
         ...props.containerStyle,
       }}
     >
-      <style>{`.sldt-active{z-index:9999;}.sldt-active>*{pointer-events:auto;}`}</style>
+      <style>{'.sldt-active{z-index:9999;}.sldt-active>*{pointer-events:auto;}'}</style>
       <For each={store.toasts}>{(toast) => <ToastContainer toast={toast as Toast} />}</For>
     </div>
   );

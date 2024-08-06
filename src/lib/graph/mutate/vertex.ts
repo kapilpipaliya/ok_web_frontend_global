@@ -1,18 +1,18 @@
 import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { batch } from "solid-js";
-import { type SetStoreFunction, type Store, reconcile } from "solid-js/store";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
+import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
+import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
-import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
 // return a new Vertex
 export function newVertex(
@@ -20,7 +20,7 @@ export function newVertex(
   labels: string[],
   properties?: { [key: string]: any },
 ): Vertex {
-  return { IN: {}, L: labels, OUT: {}, P: properties || {}, id };
+  return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
 }
 
 // add a new vertex to the graph
@@ -132,7 +132,7 @@ export function mergeVertexProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
-  types?: { [key: string]: any },
+  _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
   const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
   const vertex = graph.vertexes[actualVertexId];
@@ -332,12 +332,12 @@ export function updateVertexId(
   );
   // v->E--in->V-out-->E->v
   Object.entries(graph.vertexes[newVertexId].OUT).forEach(
-    ([edgeType, edgeIds]) => {
+    ([_edgeType, edgeIds]) => {
       setGraph("edges", edgeIds, "S", newVertexId);
     },
   );
   Object.entries(graph.vertexes[newVertexId].IN).forEach(
-    ([edgeType, edgeIds]) => {
+    ([_edgeType, edgeIds]) => {
       setGraph("edges", edgeIds, "E", newVertexId);
     },
   );

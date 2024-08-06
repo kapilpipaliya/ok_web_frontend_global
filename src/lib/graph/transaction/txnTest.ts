@@ -25,17 +25,17 @@ export function getExistingOrDefaultTxnValue(txnId: number) {
 }
 
 export function undoAllowed(txnId: number): boolean {
-  if (!txnId || !transactions.has(txnId)) return false;
+  if (!(txnId && transactions.has(txnId))) { return false; }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
-  if (txnValue.steps.length <= 1) return false;
+  if (txnValue.steps.length <= 1) { return false; }
 
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
   return activeUndoIndex > 0;
 }
 
 export function redoAllowed(txnId: number): boolean {
-  if (!txnId || !transactions.has(txnId)) return false;
+  if (!(txnId && transactions.has(txnId))) { return false; }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -44,7 +44,7 @@ export function redoAllowed(txnId: number): boolean {
 }
 
 export function undo(txnId: number) {
-  if (!undoAllowed(txnId)) return;
+  if (!undoAllowed(txnId)) { return; }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -72,7 +72,7 @@ export function undo(txnId: number) {
 }
 
 export function redo(txnId: number) {
-  if (!redoAllowed(txnId)) return;
+  if (!redoAllowed(txnId)) { return; }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -119,7 +119,7 @@ export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue,
 ) {
-  if (!txnId) return;
+  if (!txnId) { return; }
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
 
@@ -137,12 +137,6 @@ export function transactionDetailAdd(
 
     if (existingTxnValue.submittedIndex >= activeUndoIndex) {
       const removedSteps = existingTxnValue.steps.slice(
-        activeUndoIndex + 1,
-        existingTxnValue.submittedIndex + 1,
-      );
-      console.log(
-        "removedSteps",
-        removedSteps,
         activeUndoIndex + 1,
         existingTxnValue.submittedIndex + 1,
       );
@@ -166,32 +160,23 @@ export function transactionDetailAdd(
 transactionDetailAdd(1, { a: 1 });
 
 saveUndoPoint(1);
-console.log(transactions.get(1));
 transactionDetailAdd(1, { a: 2 });
 transactionDetailAdd(1, { a: 3 });
 transactionDetailAdd(1, { a: 4 });
 saveUndoPoint(1);
-console.log(transactions.get(1));
 transactionDetailAdd(1, { a: 5 });
 transactionDetailAdd(1, { a: 6 });
 transactionDetailAdd(1, { a: 7 });
 saveUndoPoint(1);
-console.log(transactions.get(1));
 undo(1);
 undo(1);
 // transactionDetailAdd(1, { a: 8 });
 transactions.get(1)!.submittedIndex = transactions.get(1)!.steps.length - 1;
-console.log(transactions.get(1)!.submittedIndex);
 saveUndoPoint(1);
-console.log(transactions.get(1));
 // redo(1);
 // redo(1);
 saveUndoPoint(1);
-console.log(transactions.get(1));
 transactionDetailAdd(1, { a: 8 });
-console.log(transactions.get(1));
 undo(1);
 undo(1);
 transactions.get(1)!.submittedIndex = transactions.get(1)!.steps.length - 1;
-console.log(transactions.get(1)!.submittedIndex);
-console.log(transactions.get(1));

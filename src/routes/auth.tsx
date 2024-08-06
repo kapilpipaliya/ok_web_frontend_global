@@ -1,6 +1,6 @@
 import type { RouteSectionProps } from "@solidjs/router";
 
-import { Show, createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";

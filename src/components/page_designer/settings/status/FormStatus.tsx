@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { For, Show, createSignal, createUniqueId, onCleanup } from "solid-js";
+import { createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
 
 import { type GraphInterface, useGraph } from "~/lib/graph/graph";
 import { addNewVertex, deleteVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -10,7 +10,7 @@ import { PROPERTIES } from "../properties/constant";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const [_layoutStore] = useDesignerLayoutStore();
 
   const vertexIds = createVertexIds();
 

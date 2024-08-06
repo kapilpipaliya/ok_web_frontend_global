@@ -11,7 +11,7 @@ export async function handlePageDrag(
   txnId: number,
   fromVertex: Vertex,
   toVertex: Vertex,
-  toParentVertex: Vertex | undefined,
+  toParentVertex: undefined | Vertex,
   formData: Vertex,
   position: string,
 ) {
@@ -23,7 +23,7 @@ export async function handlePageDrag(
     graph,
     setGraph,
   );
-  if (layoutRowId === -1) return;
+  if (layoutRowId === -1) { return; }
 
   fromVertex = graph.vertexes[layoutRowId];
 

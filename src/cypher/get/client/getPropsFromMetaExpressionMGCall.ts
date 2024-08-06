@@ -19,7 +19,6 @@ export async function getPropsFromMetaExpressionMGCall(
       if (mutationData) {
         const mutationResult = await handleMutationData(mutationData, data, tx);
         if (mutationResult.error) {
-          console.log("Mutation Error:", mutationResult);
           return {};
         }
       }

@@ -19,7 +19,7 @@ import { getTextValue } from "./graph/get/sync/getTextValue";
  */
 
 // Default operator precedence from https://github.com/EricSmekens/jsep/blob/master/src/jsep.js#L55
-const DEFAULT_PRECEDENCE = {
+const _DEFAULT_PRECEDENCE = {
   "!=": 6,
   "!==": 6,
   "%": 10,
@@ -133,7 +133,7 @@ export function evaluate(_node: jsep.Expression, context: object): any {
     case "ArrayExpression":
       return evaluateArray(node.elements, context);
 
-    case "BinaryExpression":
+    case "BinaryExpression": {
       if (node.operator === "||") {
         return evaluate(node.left, context) || evaluate(node.right, context);
       }
@@ -145,6 +145,7 @@ export function evaluate(_node: jsep.Expression, context: object): any {
         evaluate(node.right, context),
         context,
       );
+    }
 
     case "CallExpression": {
       let caller;
@@ -267,7 +268,7 @@ export async function evalAsync(
     case "ThisExpression":
       return context;
 
-    case "UnaryExpression":
+    case "UnaryExpression": {
       if (unops[`${node.operator}_async`]) {
         return unops[`${node.operator}_async`](
           await evalAsync(node.argument, context),
@@ -278,6 +279,7 @@ export async function evalAsync(
         await evalAsync(node.argument, context),
         context,
       );
+    }
 
     default:
       return undefined;
@@ -330,7 +332,7 @@ export function getChildrenUnaray(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
+    if (vertex) { return [vertex]; }
     return [];
   }
   return binops["->"](context.vertexes, collection, context);
@@ -339,7 +341,7 @@ export function getChildrenUnarayAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
+    if (vertex) { return [vertex]; }
     return [];
   }
   return binops["->_async"](context.vertexes, collection, context);
@@ -355,7 +357,7 @@ addBinaryOp(":-", 11, false, (vertexes1, projection, context) => {
   }
   try {
     return jsonata(projection).evaluate(vertexes1, context);
-  } catch (e) {
+  } catch (_e) {
     return;
   }
 });
@@ -365,7 +367,7 @@ addBinaryOp(
   12,
   false,
   (vertexes, edgeType, context) => {
-    if (!vertexes) return;
+    if (!vertexes) { return; }
     if (!Array.isArray(vertexes)) {
       vertexes = [vertexes];
     }
@@ -406,7 +408,7 @@ export async function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
+    if (vertex) { return [vertex]; }
     return [];
   }
   return binops["<-"](context.vertexes, collection, context);
@@ -416,7 +418,7 @@ export async function getPraentsAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
+    if (vertex) { return [vertex]; }
     return [];
   }
   return binops["<-_async"](context.vertexes, collection, context);
@@ -435,7 +437,7 @@ addBinaryOp(
   12,
   false,
   (vertexes, edgeType, context) => {
-    if (!vertexes) return;
+    if (!vertexes) { return; }
     if (!Array.isArray(vertexes)) {
       vertexes = [vertexes];
     }
@@ -535,7 +537,7 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (match, p1, offset, string) => projectedValueBinOps(vertexes1, p1),
+      (_match, p1, _offset, _string) => projectedValueBinOps(vertexes1, p1),
     );
   }
 
@@ -569,7 +571,7 @@ function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (match, p1, offset, string) => projectedValueUnOps(p1, context),
+      (_match, p1, _offset, _string) => projectedValueUnOps(p1, context),
     );
   }
   let vertex;

@@ -3,7 +3,7 @@ import { type Accessor, createMemo } from "solid-js";
 
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { nameExpr } from "../utils/nameExpr";

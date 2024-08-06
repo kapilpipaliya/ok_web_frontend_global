@@ -1,11 +1,11 @@
-import { type Component, Show, createSignal } from "solid-js";
+import { type Component, createSignal, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
 
 export interface AddNewRelationButtonProps {

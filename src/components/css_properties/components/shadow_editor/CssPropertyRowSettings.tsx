@@ -1,8 +1,8 @@
 
 import { type Accessor, For, type JSX, type Setter, Show } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
+import { IconButton } from "~/components/IconButton";
 
 import type { DataEditorField } from "../../constants/FieldType";
 
@@ -31,12 +31,12 @@ export function CssPropertyRowSettings(props: Readonly<CssPropertyRowSettingsPro
   return (
     <Show when={props.openMenu[0]()}>
       <div
-        class={`b:1px|solid|#ccc bg:#fff p:6 r:4`}
+        class={'b:1px|solid|#ccc bg:#fff p:6 r:4'}
       >
         <Header />
 
         <For each={Object.entries(props.meta.children)}>
-          {([sectionName, properties], index) => {
+          {([_sectionName, properties], _index) => {
             return <DynamicCSSComponent value={{ ...properties, isAddToClass: true, projections: [props.meta.name, props.rowIndex] }} />;
           }}
         </For>

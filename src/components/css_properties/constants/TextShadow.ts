@@ -6,8 +6,8 @@ import type {
   TextFieldOptionsField,
 } from "./FieldType";
 
-import { createGridOptions } from "./FieldType";
 import { defaultPixelSizeTypes } from "./csseditor_constants";
+import { createGridOptions } from "./FieldType";
 
 export const TextShadow = {
   textShadow: {

@@ -1,4 +1,4 @@
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import type { RulesModal } from "~/components/page_designer/rules/RulesModal";

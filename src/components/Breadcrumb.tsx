@@ -23,7 +23,7 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
     "margin-bottom": "0.5rem",
   };
 
-  const breadcrumbsStyle = {
+  const _breadcrumbsStyle = {
     "flex-wrap": "wrap",
   };
 

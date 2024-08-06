@@ -16,7 +16,7 @@ export function findVertexByLabelAndUniqueId(
   attribute: string,
   value: number | string,
 ) {
-  if (!value) return undefined;
+  if (!value) { return undefined; }
   const vertexId = (graph.vertexLabelIdMap[label] || []).find(
     (vertexId) => value === graph.vertexes[vertexId].P[attribute],
   );
@@ -30,7 +30,7 @@ export function findVertexByLabelAndPks(
   },
   graph: Store<GraphInterface>,
 ) {
-  if (!value) return undefined;
+  if (!value) { return undefined; }
   const vertexId = (graph.vertexLabelIdMap[label] || []).find((vertexId) => {
     for (const valueKey in value) {
       if (value[valueKey] !== graph.vertexes[vertexId].P[valueKey]) {

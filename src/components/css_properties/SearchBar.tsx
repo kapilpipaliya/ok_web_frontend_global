@@ -8,7 +8,7 @@ export function SearchBar(
     } & JSX.InputHTMLAttributes<HTMLInputElement>
   >,
 ) {
-  const [local, inputProps] = splitProps(props, ["handleChange"]);
+  const [_local, inputProps] = splitProps(props, ["handleChange"]);
   return (
     <div class="lh:28px flex align-items:center p:5|0 position:relative w:full">
       <Icon class="icon color:#9e9ea7 pl:6 position:absolute" icon="iconamoon:search" />

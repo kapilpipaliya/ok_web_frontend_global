@@ -7,7 +7,7 @@ export interface ShadowAttributes {
   spread: string;
 }
 export function generateBoxShadow(
-  shadows: Array<ShadowAttributes>,
+  shadows: ShadowAttributes[],
   isView?: boolean
 ): string {
   const separator = isView ? " " : "|";

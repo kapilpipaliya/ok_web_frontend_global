@@ -8,7 +8,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 export async function getFilesData(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, rootId?: string, fileId?: string) {
   let expression;
-  if (!rootId && !fileId) {
+  if (!(rootId || fileId)) {
     expression = `g:'Folder[root]'`;
   } else if (rootId) {
     expression = `id:'${rootId}'<-ParentFolder`;

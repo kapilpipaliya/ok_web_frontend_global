@@ -14,25 +14,30 @@ export function getDnDBoxShadowArgs(position: null | string, color: string, inse
     case "center":
       boxShadowProps.spread = "2px";
       break;
-    case "before":
+    case "before": {
       boxShadowProps['offset-y'] = "8px";
       boxShadowProps.spread = "-6px";
       break;
-    case "after":
+    }
+    case "after": {
       boxShadowProps['offset-y'] = "-8px";
       boxShadowProps.spread = "-6px";
       break;
-    case "left":
+    }
+    case "left": {
       boxShadowProps['offset-x'] = "8px";
       boxShadowProps.spread = "-6px";
       break;
-    case "right":
+    }
+    case "right": {
       boxShadowProps['offset-x'] = "-8px";
       boxShadowProps.spread = "-6px";
       break;
-    default:
+    }
+    default: {
       boxShadowProps.color = "gray-30";
       boxShadowProps.spread = "2px";
+    }
   }
 
   return boxShadowProps;

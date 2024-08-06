@@ -13,21 +13,21 @@ export function ShareSection() {
   const [error, setError] = createSignal("");
 
   createEffect(() => {
-    if (access() === "everyone") setEmail("");
+    if (access() === "everyone") { setEmail(""); }
   });
 
   const getLink = () => {
     if (layoutStore) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
-      const { L, P, id } = layoutStore.formStore[0].formData;
+      const { id, L, P } = layoutStore.formStore[0].formData;
 
       if (isNegative(id)) {
         setError(`Please save the ${L[0]} first.`);
         return "";
       }
 
-      if (!P || !P.name) {
+      if (!(P?.name)) {
         setError(`Please configure ${L[0]} Name first.`);
         return "";
       }
@@ -45,7 +45,7 @@ export function ShareSection() {
 
   const previewLink = () => {
     const url = getLink();
-    if (url) window.open(url, "_blank");
+    if (url) { window.open(url, "_blank"); }
   };
 
   const handleAccessChange = (accessType: string) => setAccess(accessType);

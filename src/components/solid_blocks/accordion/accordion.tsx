@@ -46,8 +46,8 @@ export type AccordionProps = {
 
 export const Accordion: Component<AccordionProps> = (props) => {
   const [local, detailsProps] = splitProps(props, ["setOpen"]);
-  const [accordionRef, closeAccordion] = createSignal<HTMLDetailsElement>();
-  closeAccordion;
+  const [accordionRef, _closeAccordion] = createSignal<HTMLDetailsElement>();
+  _closeAccordion;
   const [options, getIndex, opened, setOpened] = useContext(accordionContext);
   const index = getIndex ? getIndex() : 0;
 

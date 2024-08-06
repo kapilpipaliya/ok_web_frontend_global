@@ -19,8 +19,8 @@ async function getInitialData(args: { subdomain: string }) {
   const session = (await getDriver(args.subdomain)).session();
   
   try {
-    await fetchFromMGAndSaveToArray(session, `MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`, {}, nodeObj, relationshipObj);
-    await fetchFromMGAndSaveToArray(session, `MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m`, {}, nodeObj, relationshipObj);
+    await fetchFromMGAndSaveToArray(session, 'MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m', {}, nodeObj, relationshipObj);
+    await fetchFromMGAndSaveToArray(session, 'MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m', {}, nodeObj, relationshipObj);
 
     const form = FormMetaData.Comp;
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);

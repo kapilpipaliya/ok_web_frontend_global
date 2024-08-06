@@ -5,10 +5,10 @@ import { createStore } from "solid-js/store";
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import {
   generateFormMetaAttributes,
 } from "~/components/page_designer/functions/getChildrenAttrs";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -61,7 +61,7 @@ export function FormField(
       props.label ?? previewStore.previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
       defaultValues,
     );
-    if (createResult.error) return createResult.error;
+    if (createResult.error) { return createResult.error; }
     setFormData({
       formData: createResult.vertex!,
       formMeta: props.meta,
@@ -74,8 +74,9 @@ export function FormField(
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   onCleanup(() => {
-    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
       revertTransaction(rowMetaTxnId, graph);
+    }
   });
 
   return (

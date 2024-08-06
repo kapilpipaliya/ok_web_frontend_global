@@ -1,10 +1,10 @@
-import { Match, Show, Switch, createMemo } from "solid-js";
+import { createMemo, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { PreviewContext, type PreviewStoreObject } from "~/components/page_designer/PreviewContext";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrContext";
 
@@ -21,12 +21,12 @@ export function PageView(
     metaVertex?: Vertex;
   }>,
 ) {
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
 
-  const dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
+  const _dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
   const isViewOnlyForm = createMemo(() => {
-    if (!props.id && !props.hasInsertPermission) return true;
+    if (!(props.id || props.hasInsertPermission)) { return true; }
     if (props.id && !props.hasEditPermission) {
       return props.hasViewPermission;
     }

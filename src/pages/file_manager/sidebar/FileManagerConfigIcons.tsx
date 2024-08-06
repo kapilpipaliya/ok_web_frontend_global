@@ -1,14 +1,14 @@
-import { Show, createSelector, createSignal } from "solid-js";
+import { createSelector, createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { IconButton } from "~/components/IconButton";
+import { CommonAddComponent } from "~/components/page_designer/settings/rules/CommonAddComponent";
 import { useToast } from "~/components/Toast";
 import { ZIndex } from "~/components/ZIndex";
-import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { CommonAddComponent } from "~/components/page_designer/settings/rules/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useFileManagerStore } from "../FileManagerContext";  // Import QuickEditModal
@@ -17,7 +17,7 @@ import { QuickEditModal } from "~/components/grid/QuickEditModal";
 
 export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () => void, metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();
-  const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
+  const [fileManagerStore, _setFileManagerStore] = useFileManagerStore();
   const isSelectedItemId = createSelector(() => fileManagerStore.selectedItem?.id);
   const isHoveredItemId = createSelector(() => fileManagerStore.treeItemHoverId);
   const { showErrorToast, showSuccessToast } = useToast();
@@ -25,7 +25,7 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
 
   const [state, setState] = createStore({
     buttonRef: null as HTMLElement | null,
-    dialogAction: (name: string) => { },
+    dialogAction: (_name: string) => { },
     dialogLabel: "",
     dialogPlaceholder: "",
     dialogTitle: "",
@@ -36,6 +36,7 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
     try {
       const newFormTxnId = graph.newTxnId;
       const tableMetaVertex = {
+        id: props.metaVertex.id,
         IN: {},
         L: [],
         OUT: {},
@@ -44,10 +45,9 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
           label: "Folder",
           type: "ParentFolder",
         },
-        id: props.metaVertex.id,
       } as Vertex;
 
-      const rowResult = insertNewRow(
+      const _rowResult = insertNewRow(
         newFormTxnId,
         tableMetaVertex,
         props.metaVertex,
@@ -72,15 +72,11 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
     }
   };
 
-  const handleCreateNewFile = (name: string) => {
-    // Implement create new file functionality
-    console.log(`Create new file: ${name}`);
+  const handleCreateNewFile = (_name: string) => {
     // TODO: on new File add display full modal to insert file metaData or upload a file component
   };
 
-  const handleRenameItem = (name: string) => {
-    // Implement rename functionality
-    console.log(`Rename item to: ${name}`);
+  const handleRenameItem = (_name: string) => {
   };
 
   const openDialog = (title: string, label: string, placeholder: string, action: (name: string) => void, ref: HTMLElement) => {
@@ -147,8 +143,6 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
             icon="mdi:delete"
             iconClass="transition:0.5s|ease-in-out"
             onClick={() => {
-              // Implement delete functionality
-              console.log("Delete item");
             }}
             size={18}
             title="Delete"

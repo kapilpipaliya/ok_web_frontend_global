@@ -7,6 +7,7 @@
 import { parseSignature } from "./signature.js";
 
 const operators = {
+  ",": 0,
   "!": 0, // not an operator, but needed as a stop character for name tokens
   "!=": 40,
   "#": 80,
@@ -17,7 +18,6 @@ const operators = {
   "*": 60,
   "**": 60,
   "+": 50,
-  ",": 0,
   ".": 75,
   "..": 20,
   "/": 60,
@@ -134,7 +134,7 @@ const tokenizer = (path) => {
   };
 
   const next = (prefix) => {
-    if (position >= length) return null;
+    if (position >= length) { return null; }
     let currentChar = path.charAt(position);
     // skip whitespace
     while (position < length && " \t\n\r\v".indexOf(currentChar) > -1) {
@@ -263,17 +263,16 @@ const tokenizer = (path) => {
     const match = numregex.exec(path.substring(position));
     if (match !== null) {
       const num = Number.parseFloat(match[0]);
-      if (!isNaN(num) && isFinite(num)) {
+      if (!Number.isNaN(num) && Number.isFinite(num)) {
         position += match[0].length;
         return create("number", num);
-      } else {
+      }
         throw {
           code: "S0102",
           position: position,
           stack: new Error().stack,
           token: match[0],
         };
-      }
     }
     // test for quoted names (backticks)
     let name;
@@ -308,31 +307,30 @@ const tokenizer = (path) => {
           name = path.substring(position + 1, i);
           position = i;
           return create("variable", name);
-        } else {
+        }
           name = path.substring(position, i);
           position = i;
           switch (name) {
-            case "or":
-            case "in":
             case "and":
+            case "in":
+            case "or":
               return create("operator", name);
-            case "true":
-              return create("value", true);
             case "false":
               return create("value", false);
             case "null":
               return create("value", null);
-            default:
+            case "true":
+              return create("value", true);
+            default: {
               if (position === length && name === "") {
                 // whitespace at end of input
                 return null;
               }
               return create("name", name);
+            }
           }
-        }
-      } else {
-        i++;
       }
+        i++;
     }
   };
 
@@ -381,10 +379,9 @@ export function parser(source, recover) {
         err.type = "error";
         errors.push(err);
         return err;
-      } else {
+      }
         err.stack = new Error().stack;
         throw err;
-      }
     },
   };
 
@@ -414,10 +411,9 @@ export function parser(source, recover) {
       node.error = err;
       node.type = "(error)";
       return node;
-    } else {
+    }
       err.stack = new Error().stack;
       throw err;
-    }
   };
 
   const advance = (id, infix) => {
@@ -451,7 +447,7 @@ export function parser(source, recover) {
       case "variable":
         symbol = symbol_table["(name)"];
         break;
-      case "operator":
+      case "operator": {
         symbol = symbol_table[value];
         if (!symbol) {
           return handleError({
@@ -462,15 +458,17 @@ export function parser(source, recover) {
           });
         }
         break;
+      }
       case "string":
       case "number":
       case "value":
         symbol = symbol_table["(literal)"];
         break;
-      case "regex":
+      case "regex": {
         type = "regex";
         symbol = symbol_table["(regex)"];
         break;
+      }
       /* istanbul ignore next */
       default:
         return handleError({
@@ -625,7 +623,7 @@ export function parser(source, recover) {
         } else {
           this.arguments.push(expression(0));
         }
-        if (node.id !== ",") break;
+        if (node.id !== ",") { break; }
         advance(",");
       }
     }
@@ -737,13 +735,12 @@ export function parser(source, recover) {
       step.keepArray = true;
       advance("]");
       return left;
-    } else {
+    }
       this.lhs = left;
       this.rhs = expression(operators["]"]);
       this.type = "binary";
       advance("]", true);
       return this;
-    }
   });
 
   // order-by
@@ -932,7 +929,7 @@ export function parser(source, recover) {
   const seekParent = (node, slot) => {
     switch (node.type) {
       case "name":
-      case "wildcard":
+      case "wildcard": {
         slot.level--;
         if (slot.level === 0) {
           if (typeof node.ancestor === "undefined") {
@@ -945,6 +942,7 @@ export function parser(source, recover) {
           node.tuple = true;
         }
         break;
+      }
       case "parent":
         slot.level++;
         break;
@@ -958,16 +956,17 @@ export function parser(source, recover) {
           );
         }
         break;
-      case "path":
+      case "path": {
         // last step in path
         node.tuple = true;
-        var index = node.steps.length - 1;
+        let index = node.steps.length - 1;
         slot = seekParent(node.steps[index--], slot);
         while (slot.level > 0 && index >= 0) {
           // check previous steps
           slot = seekParent(node.steps[index--], slot);
         }
         break;
+      }
       default:
         // error - can't derive ancestor
         throw {
@@ -1038,8 +1037,8 @@ export function parser(source, recover) {
     switch (expr.type) {
       case "binary":
         switch (expr.value) {
-          case ".":
-            var lstep = processAST(expr.lhs);
+          case ".": {
+            const lstep = processAST(expr.lhs);
 
             if (lstep.type === "path") {
               result = lstep;
@@ -1049,7 +1048,7 @@ export function parser(source, recover) {
             if (lstep.type === "parent") {
               result.seekingParent = [lstep.slot];
             }
-            var rest = processAST(expr.rhs);
+            const rest = processAST(expr.rhs);
             if (
               rest.type === "function" &&
               rest.procedure.type === "path" &&
@@ -1094,24 +1093,25 @@ export function parser(source, recover) {
               result.keepSingletonArray = true;
             }
             // if first step is a path constructor, flag it for special handling
-            var firststep = result.steps[0];
+            const firststep = result.steps[0];
             if (firststep.type === "unary" && firststep.value === "[") {
               firststep.consarray = true;
             }
             // if the last step is an array constructor, flag it so it doesn't flatten
-            var laststep = result.steps[result.steps.length - 1];
+            const laststep = result.steps[result.steps.length - 1];
             if (laststep.type === "unary" && laststep.value === "[") {
               laststep.consarray = true;
             }
             resolveAncestry(result);
             break;
-          case "[":
+          }
+          case "[": {
             // predicated step
             // LHS is a step or a predicated step
             // RHS is the predicate expr
             result = processAST(expr.lhs);
-            var step = result;
-            var type = "predicate";
+            let step = result;
+            let type = "predicate";
             if (result.type === "path") {
               step = result.steps[result.steps.length - 1];
               type = "stages";
@@ -1126,7 +1126,7 @@ export function parser(source, recover) {
             if (typeof step[type] === "undefined") {
               step[type] = [];
             }
-            var predicate = processAST(expr.rhs);
+            const predicate = processAST(expr.rhs);
             if (typeof predicate.seekingParent !== "undefined") {
               predicate.seekingParent.forEach((slot) => {
                 if (slot.level === 1) {
@@ -1143,7 +1143,8 @@ export function parser(source, recover) {
               type: "filter",
             });
             break;
-          case "{":
+          }
+          case "{": {
             // group-by
             // LHS is a step or a predicated step
             // RHS is the object constructor expr
@@ -1164,7 +1165,8 @@ export function parser(source, recover) {
               position: expr.position,
             };
             break;
-          case "^":
+          }
+          case "^": {
             // order-by
             // LHS is the array to be ordered
             // RHS defines the terms
@@ -1172,7 +1174,7 @@ export function parser(source, recover) {
             if (result.type !== "path") {
               result = { steps: [result], type: "path" };
             }
-            var sortStep = { position: expr.position, type: "sort" };
+            const sortStep = { position: expr.position, type: "sort" };
             sortStep.terms = expr.rhs.map((terms) => {
               const expression = processAST(terms.expression);
               pushAncestry(sortStep, expression);
@@ -1184,7 +1186,8 @@ export function parser(source, recover) {
             result.steps.push(sortStep);
             resolveAncestry(result);
             break;
-          case ":=":
+          }
+          case ":=": {
             result = {
               position: expr.position,
               type: "bind",
@@ -1194,7 +1197,8 @@ export function parser(source, recover) {
             result.rhs = processAST(expr.rhs);
             pushAncestry(result, result.rhs);
             break;
-          case "@":
+          }
+          case "@": {
             result = processAST(expr.lhs);
             step = result;
             if (result.type === "path") {
@@ -1226,7 +1230,8 @@ export function parser(source, recover) {
             step.focus = expr.rhs.value;
             step.tuple = true;
             break;
-          case "#":
+          }
+          case "#": {
             result = processAST(expr.lhs);
             step = result;
             if (result.type === "path") {
@@ -1249,7 +1254,8 @@ export function parser(source, recover) {
             }
             step.tuple = true;
             break;
-          case "~>":
+          }
+          case "~>": {
             result = {
               position: expr.position,
               type: "apply",
@@ -1258,7 +1264,8 @@ export function parser(source, recover) {
             result.lhs = processAST(expr.lhs);
             result.rhs = processAST(expr.rhs);
             break;
-          default:
+          }
+          default: {
             result = {
               position: expr.position,
               type: expr.type,
@@ -1268,9 +1275,10 @@ export function parser(source, recover) {
             result.rhs = processAST(expr.rhs);
             pushAncestry(result, result.lhs);
             pushAncestry(result, result.rhs);
+          }
         }
         break;
-      case "unary":
+      case "unary": {
         result = {
           position: expr.position,
           type: expr.type,
@@ -1304,8 +1312,9 @@ export function parser(source, recover) {
           }
         }
         break;
+      }
       case "function":
-      case "partial":
+      case "partial": {
         result = {
           name: expr.name,
           position: expr.position,
@@ -1319,17 +1328,19 @@ export function parser(source, recover) {
         });
         result.procedure = processAST(expr.procedure);
         break;
-      case "lambda":
+      }
+      case "lambda": {
         result = {
           arguments: expr.arguments,
           position: expr.position,
           signature: expr.signature,
           type: expr.type,
         };
-        var body = processAST(expr.body);
+        const body = processAST(expr.body);
         result.body = tailCallOptimize(body);
         break;
-      case "condition":
+      }
+      case "condition": {
         result = { position: expr.position, type: expr.type };
         result.condition = processAST(expr.condition);
         pushAncestry(result, result.condition);
@@ -1340,7 +1351,8 @@ export function parser(source, recover) {
           pushAncestry(result, result.else);
         }
         break;
-      case "transform":
+      }
+      case "transform": {
         result = { position: expr.position, type: expr.type };
         result.pattern = processAST(expr.pattern);
         result.update = processAST(expr.update);
@@ -1348,7 +1360,8 @@ export function parser(source, recover) {
           result.delete = processAST(expr.delete);
         }
         break;
-      case "block":
+      }
+      case "block": {
         result = { position: expr.position, type: expr.type };
         // array of expressions - process each one
         result.expressions = expr.expressions.map((item) => {
@@ -1365,13 +1378,15 @@ export function parser(source, recover) {
         // TODO scan the array of expressions to see if any of them assign variables
         // if so, need to mark the block as one that needs to create a new frame
         break;
-      case "name":
+      }
+      case "name": {
         result = { steps: [expr], type: "path" };
         if (expr.keepArray) {
           result.keepSingletonArray = true;
         }
         break;
-      case "parent":
+      }
+      case "parent": {
         result = {
           slot: {
             index: ancestorIndex++,
@@ -1382,6 +1397,7 @@ export function parser(source, recover) {
         };
         ancestry.push(result);
         break;
+      }
       case "string":
       case "number":
       case "value":
@@ -1412,19 +1428,20 @@ export function parser(source, recover) {
           };
         }
         break;
-      case "error":
+      case "error": {
         result = expr;
         if (expr.lhs) {
           result = processAST(expr.lhs);
         }
         break;
-      default:
-        var code = "S0206";
+      }
+      default: {
+        let code = "S0206";
         /* istanbul ignore else */
         if (expr.id === "(end)") {
           code = "S0207";
         }
-        var err = {
+        const err = {
           code: code,
           position: expr.position,
           token: expr.value,
@@ -1432,10 +1449,10 @@ export function parser(source, recover) {
         if (recover) {
           errors.push(err);
           return { error: err, type: "error" };
-        } else {
+        }
           err.stack = new Error().stack;
           throw err;
-        }
+      }
     }
     if (expr.keepArray) {
       result.keepArray = true;

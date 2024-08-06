@@ -11,7 +11,7 @@ export function addStepBefore(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   layoutStore: Store<PageLayoutObject>,
-  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  _setLayoutStore: SetStoreFunction<PageLayoutObject>,
   formVertex: Vertex,
   toVertex: Vertex,
 ) {
@@ -24,7 +24,7 @@ export function addStepBefore(
     "Step"
   );
 
-  if (layoutRowId === -1) return;
+  if (layoutRowId === -1) { return; }
 
   const fromVertex = graph.vertexes[layoutRowId];
 

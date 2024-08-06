@@ -1,4 +1,4 @@
-import { type JSX, createSignal } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 import { For } from "solid-js/web";
 
 type CardOption = {

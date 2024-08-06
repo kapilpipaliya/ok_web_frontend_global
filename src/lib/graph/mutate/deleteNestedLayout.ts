@@ -10,7 +10,7 @@ export function deleteNestedLayout(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexes: Vertex[] = [],
-  options?: {
+  _options?: {
     addChild?: (child: Vertex) => boolean;
     nameExpr?: (child: Vertex) => string;
   },

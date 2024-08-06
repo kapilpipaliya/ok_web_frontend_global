@@ -14,7 +14,7 @@ export function updateVertex(
   setGraph: SetStoreFunction<GraphInterface>,
   skipExisting: boolean
 ) {
-  if (skipExisting && graph.vertexes[vertexId]) return;
+  if (skipExisting && graph.vertexes[vertexId]) { return; }
 
   setGraph("vertexes", vertexId, (prev) => {
     if (prev) {
@@ -41,7 +41,7 @@ function updateEdge(
   setGraph: SetStoreFunction<GraphInterface>,
   skipExisting: boolean
 ) {
-  if (skipExisting && graph.edges[edgeId]) return;
+  if (skipExisting && graph.edges[edgeId]) { return; }
 
   setGraph("edges", edgeId, edge);
 
@@ -85,8 +85,8 @@ export function setGraphData(
     deleted_vertexes?: string[];
     edges: EdgeMap;
     timestamp?: number;
-    vertexLabelIdMap?: { [key: string]: Id[] };
     vertexes: VertexMap;
+    vertexLabelIdMap?: { [key: string]: Id[] };
   },
   skipExisting = false
 ) {

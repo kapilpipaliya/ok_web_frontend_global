@@ -1,9 +1,9 @@
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
-import { ZIndex } from "~/components/ZIndex";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
+import { ZIndex } from "~/components/ZIndex";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
@@ -31,7 +31,7 @@ export function PropertiesBody() {
 
   const selectedComponentProperties = () => {
     const selectedComp = graph.vertexes[layoutStore.selectedComponent];
-    if (!selectedComp) return { error: true };
+    if (!selectedComp) { return { error: true }; }
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
 

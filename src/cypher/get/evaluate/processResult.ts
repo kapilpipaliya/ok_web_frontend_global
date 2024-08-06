@@ -9,7 +9,7 @@ export function processResult(
   context: ContextType,
   nodeLabel: string,
   typeLabel?: string,
-  inward?: boolean,
+  _inward?: boolean,
 ) {
   const vertices = records.map((record) => convertNodeToJson(record.get(nodeLabel)));
   const relationships = typeLabel ? records.map((record) => convertRelationshipToJson(record.get(typeLabel))) : [];
@@ -31,7 +31,7 @@ export function processResult(
 }
 
 function updateNodeRelations(context: ContextType, relationship: any) {
-  if (!context.nodes) return;
+  if (!context.nodes) { return; }
 
   if (context.nodes[relationship.S]) {
     if (!context.nodes[relationship.S].OUT[relationship.T]) {

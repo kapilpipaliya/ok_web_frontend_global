@@ -9,10 +9,10 @@ const [store, setStore] = createStore<State>({
 
 export const createTimers = () => {
   const { pausedAt, toasts } = store;
-  if (pausedAt) return;
+  if (pausedAt) { return; }
   const now = Date.now();
   const timers = toasts.map((toast) => {
-    if (toast.duration === Number.POSITIVE_INFINITY) return;
+    if (toast.duration === Number.POSITIVE_INFINITY) { return; }
 
     const durationLeft = (toast.duration || 0) + toast.pauseDuration - (now - toast.createdAt);
 
@@ -40,7 +40,7 @@ export const createTimers = () => {
 const removalQueue = new Map<Toast['id'], ReturnType<typeof setTimeout>>();
 
 const scheduleRemoval = (toastId: string, unmountDelay: number) => {
-  if (removalQueue.has(toastId)) return;
+  if (removalQueue.has(toastId)) { return; }
 
   const timeout = setTimeout(() => {
     removalQueue.delete(toastId);
@@ -56,7 +56,7 @@ const scheduleRemoval = (toastId: string, unmountDelay: number) => {
 const unscheduleRemoval = (toastId: string) => {
   const timeout = removalQueue.get(toastId);
   removalQueue.delete(toastId);
-  if (timeout) clearTimeout(timeout);
+  if (timeout) { clearTimeout(timeout); }
 };
 
 export const dispatch = (action: Action) => {
@@ -67,13 +67,13 @@ export const dispatch = (action: Action) => {
         return [action.toast, ...toasts];
       });
       break;
-    case ActionType.DISMISS_TOAST:
+    case ActionType.DISMISS_TOAST: {
       const { toastId } = action;
       const toasts = store.toasts;
 
       if (toastId) {
         const toastToRemove = toasts.find((t) => t.id === toastId);
-        if (toastToRemove) scheduleRemoval(toastId, toastToRemove.unmountDelay);
+        if (toastToRemove) { scheduleRemoval(toastId, toastToRemove.unmountDelay); }
         setStore(
           'toasts',
           (t) => t.id === toastId,
@@ -91,7 +91,8 @@ export const dispatch = (action: Action) => {
       }
 
       break;
-    case ActionType.REMOVE_TOAST:
+    }
+    case ActionType.REMOVE_TOAST: {
       if (!action.toastId) {
         setStore('toasts', []);
         break;
@@ -101,7 +102,8 @@ export const dispatch = (action: Action) => {
         return toasts.filter((t) => t.id !== action.toastId);
       });
       break;
-    case ActionType.UPDATE_TOAST:
+    }
+    case ActionType.UPDATE_TOAST: {
       if (action.toast.id) {
         unscheduleRemoval(action.toast.id);
       }
@@ -118,6 +120,7 @@ export const dispatch = (action: Action) => {
         }
       );
       break;
+    }
     case ActionType.UPSERT_TOAST:
       store.toasts.find((t) => t.id === action.toast.id)
         ? dispatch({ toast: action.toast, type: ActionType.UPDATE_TOAST })
@@ -131,7 +134,7 @@ export const dispatch = (action: Action) => {
         });
       }));
       break;
-    case ActionType.END_PAUSE:
+    case ActionType.END_PAUSE: {
       const pauseInterval = action.time - (store.pausedAt || 0);
       setStore(
         p((s) => {
@@ -143,6 +146,7 @@ export const dispatch = (action: Action) => {
         })
       );
       break;
+    }
   }
 };
 

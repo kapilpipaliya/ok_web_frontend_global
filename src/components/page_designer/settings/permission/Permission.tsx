@@ -2,10 +2,10 @@ import { klona } from "klona";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -15,7 +15,7 @@ export function Permission() {
   const [layoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
   const uniqueConstrainsMetaAttribute = klona(FormMetaData.Form.attributes).find((meta) => meta.name === "Perm");
-  if (!uniqueConstrainsMetaAttribute) return <></>;
+  if (!uniqueConstrainsMetaAttribute) { return <></>; }
   //modifyFieldMetaAllFields(uniqueConstrainsMetaAttribute.attributes!.find((attribute) => attribute.name === "key")!, graph, setGraph, layoutStore, true);
   const { metaVertexId } = generateTableInputMeta(uniqueConstrainsMetaAttribute);
 

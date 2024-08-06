@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
-  type JSX,
-  type Setter,
   createContext,
   createSignal,
   createUniqueId,
+  type JSX,
+  type Setter,
 } from "solid-js";
 
 // Define the context type

@@ -1,19 +1,19 @@
 import {
   type Accessor,
-  For,
-  Show,
   createComputed,
   createMemo,
   createSignal,
+  For,
   on,
+  Show,
 } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
-import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { IconButton } from "~/components/IconButton";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 

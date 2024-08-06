@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Show, createEffect, createMemo, createSignal } from "solid-js";
+import { type Accessor, createEffect, createMemo, createSignal, For, Show } from "solid-js";
 
 import type {
   CSSJSONSchemaSearchType,
@@ -76,7 +76,7 @@ export const SectionList = (props: Readonly<{
       <div class="flex jc:end mb:2 w:100%">
         <button class="btn" onClick={collapseAll} title="Collapse all">
           <Icon
-            class={` transition:transform|0.2s|linear`}
+            class={' transition:transform|0.2s|linear'}
             height={25}
             icon="mdi:collapse-all-outline"
             width={25}
@@ -84,7 +84,7 @@ export const SectionList = (props: Readonly<{
         </button>
         <button class="btn ml:2" onClick={expandAll} title="Expand all">
           <Icon
-            class={` transition:transform|0.2s|linear`}
+            class={' transition:transform|0.2s|linear'}
             height={25}
             icon="mdi:expand-all-outline"
             width={25}

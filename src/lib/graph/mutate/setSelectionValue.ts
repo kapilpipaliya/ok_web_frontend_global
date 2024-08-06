@@ -33,10 +33,11 @@ export function setSelectionValue(
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that end to same vertex
-    if (value.includes(graph.edges[edgeId].E)) continue;
+    if (value.includes(graph.edges[edgeId].E)) { continue; }
     const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-    if (deleteEdgeResult?.error)
+    if (deleteEdgeResult?.error) {
       showErrorToast(deleteEdgeResult.error.toString());
+    }
   }
 
   // add added edges:
@@ -50,8 +51,9 @@ export function setSelectionValue(
       graph,
       setGraph,
     );
-    if (insertEdgeResult.error)
+    if (insertEdgeResult.error) {
       showErrorToast(insertEdgeResult.error.toString());
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import { MultiProvider } from "@solid-primitives/context";
 import { createSignal } from "solid-js";
-import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -8,13 +8,13 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "./CssEditorContext";
 
-import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
-import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import {
   CssDefaultEditorContext,
   CssEditorContext,
   CssStateContext,
 } from "./CssEditorContext";
+import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
+import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 
 export function CSSPropertiesEditorWrapper(

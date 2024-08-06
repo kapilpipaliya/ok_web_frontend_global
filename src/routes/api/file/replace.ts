@@ -39,7 +39,7 @@ export async function PUT({ request }: APIEvent, event: HTTPEvent) {
   }
 
   const newFileNodes = await Promise.all(data.map(async (file) => {
-    if (!file?.filename) return null;
+    if (!file?.filename) { return null; }
 
     const { ext, name } = path.parse(file.filename);
     const newVersion = (oldFileMetadata.P.version || 0) + 1;
@@ -51,9 +51,9 @@ export async function PUT({ request }: APIEvent, event: HTTPEvent) {
 
     const newMetadata = {
       checksum,
-      fileSize,
       filename: newFilename,
       filepath: filePath,
+      fileSize,
       mimeType,
       originalFilename: file.filename,
       subdomain,

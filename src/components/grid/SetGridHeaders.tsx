@@ -1,14 +1,14 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { Match, Show, Switch, createSignal } from "solid-js";
+import { createSignal, Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { QuickEditModal } from "~/components/grid/QuickEditModal";
 import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/components/grid/functions/getTagValue";
+import { QuickEditModal } from "~/components/grid/QuickEditModal";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import type { DataGridState } from "./DataGridContext";
@@ -28,7 +28,7 @@ export function setGridHeaders(
 
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.componentName === "Table") continue;
+    if (attribute.componentName === "Table") { continue; }
     // @ts-ignore
     column.accessorKey = `P.${attribute.name}`;
     column.id = attribute.name;
@@ -73,11 +73,11 @@ export function setGridHeaders(
         </Switch>
       );
     };
-    column.header = (info) =>
+    column.header = (_info) =>
       capitalizeFirstLetter(
         attribute.label || attribute.title || attribute.displayName || attribute.name,
       );
-    column.footer = (info) =>
+    column.footer = (_info) =>
       capitalizeFirstLetter(
         attribute.title || attribute.displayName || attribute.name,
       );
@@ -91,7 +91,7 @@ export function setGridHeaders(
         <div class={`${formNew.isInlineEditable ? '' : 'py:0.25rem r:7'} flex ai:center gap:10px jc:center`}>
           <Show when={gridState.isNoPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
             <IconButton
-              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && (!gridState.hasEditPermission() && !gridState.hasViewPermission())}
+              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && (!(gridState.hasEditPermission() || gridState.hasViewPermission()))}
               icon="fluent:edit-12-regular"
               iconClass="color:#3477CC"
               onClick={() => {

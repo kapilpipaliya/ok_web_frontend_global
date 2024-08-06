@@ -1,12 +1,12 @@
 import jsep from "jsep";
-import { For, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, For } from "solid-js";
 
-import { useToast } from "~/components/Toast";
 import { DataGrid } from "~/components/grid/DataGrid";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
+import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evaluate } from "~/lib/expression_eval";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentDirectory } from "~/lib/meta/file/File";
@@ -18,7 +18,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
 
-  const [children, setChildren] = createSignal<Vertex[]>([]);
+  const [_children, setChildren] = createSignal<Vertex[]>([]);
   const [breadcrumb, setBreadcrumb] = createSignal<Vertex[]>([]);
 
   const fetchChildren = async (item: Vertex) => {
@@ -33,11 +33,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
 
   const fetchBreadcrumb = async (item: Vertex) => {
     const breadcrumbItems: Vertex[] = [];
-    let currentItem: Vertex | null = item;
+    let currentItem: null | Vertex = item;
 
     while (currentItem) {
       breadcrumbItems.unshift(currentItem);
-      const parentVertex: Vertex[] = evaluate(jsep(`->ParentFolder`), { graph, setGraph, vertexes: [currentItem] }) || [];
+      const parentVertex: Vertex[] = evaluate(jsep('->ParentFolder'), { graph, setGraph, vertexes: [currentItem] }) || [];
       currentItem = parentVertex[0];
     }
 
@@ -58,16 +58,16 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
 
     const onUploadSuccess = async (data: any) => {
       const currentItem = fileManagerStore.selectedItem;
-      if (!currentItem) return;
-      const folder: Vertex = currentItem.L[0] === 'Folder' ? currentItem : evaluate(jsep(`->ParentFolder`), { graph, setGraph, vertexes: [currentItem] })[0];
+      if (!currentItem) { return; }
+      const folder: Vertex = currentItem.L[0] === 'Folder' ? currentItem : evaluate(jsep('->ParentFolder'), { graph, setGraph, vertexes: [currentItem] })[0];
       const newFormTxnId = graph.newTxnId;
 
       const parentFolderMetaVertex = {
+        id: "",
         IN: {},
         L: [],
         OUT: {},
         P: parentDirectory,
-        id: "",
       } as Vertex;
 
       setSelectionValue(newFormTxnId, data.result[0], graph, setGraph, parentFolderMetaVertex, folder.id);

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, type JSX, createSignal } from "solid-js";
+import { createSignal, For, type JSX } from "solid-js";
 
 export function StarRating(
   props: Readonly<{ etc: any; heading?: string } & JSX.HTMLAttributes<HTMLDivElement> &

@@ -1,9 +1,9 @@
 
 import { IconButton } from "~/components/IconButton";
-import { useZIndex } from "~/components/ZIndex";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
+import { useZIndex } from "~/components/ZIndex";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
-import { type Vertex, useGraph, } from "~/lib/graph/graph";
+import { useGraph, type Vertex, } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { ComponentName } from "./ComponentName";

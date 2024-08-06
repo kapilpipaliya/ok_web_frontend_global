@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { useParams } from "@solidjs/router";
-import { type Node, type Session, int } from "neo4j-driver";
+import { int, type Node, type Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { processResult } from "~/cypher/get/evaluate/processResult";
@@ -51,6 +51,6 @@ export async function GET({ request }: APIEvent) {
   } catch (error: unknown) {
     return new Response(error instanceof Error ? error.message : "Unknown error", { status: 500 });
   } finally {
-    if (neo4jSession) neo4jSession.close();
+    if (neo4jSession) { neo4jSession.close(); }
   }
 }

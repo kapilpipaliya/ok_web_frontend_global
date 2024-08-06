@@ -1,4 +1,4 @@
-import { Show, batch, onMount } from 'solid-js';
+import { batch, onMount, Show } from 'solid-js';
 
 import { useGraph } from '~/lib/graph/graph';
 

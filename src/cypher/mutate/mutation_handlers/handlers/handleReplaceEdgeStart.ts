@@ -11,7 +11,7 @@ export async function handleReplaceEdgeStart(
     clientToServerEdgeIdMap.get(replaceEdgeStart.id) || replaceEdgeStart.id;
   const startId =
     clientToServerVertexIdMap.get(replaceEdgeStart.S) || replaceEdgeStart.S;
-  const endId =
+  const _endId =
     clientToServerVertexIdMap.get(replaceEdgeStart.E) || replaceEdgeStart.E;
   const type = replaceEdgeStart.T;
   const query = `match ()-[r:${type}]->()

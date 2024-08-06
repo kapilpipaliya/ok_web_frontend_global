@@ -38,8 +38,7 @@ export async function DELETE({request}: APIEvent, event: HTTPEvent) {
       headers: {"Content-Type": "application/json"},
       status: 200,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (_error) {
     return new Response(JSON.stringify({error: "Error deleting file"}), {
       headers: {"Content-Type": "application/json"},
       status: 500,

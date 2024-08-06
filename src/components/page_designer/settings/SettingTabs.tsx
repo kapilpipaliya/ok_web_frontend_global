@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { FormContext } from "~/components/form/FormContext";
+import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
@@ -127,6 +127,6 @@ export function Divider(props: Readonly<DividerProps>): JSX.Element {
         [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
         [`width:${props.width || "100%"}`]: true,
       }}
-    ></div>
+    />
   );
 }

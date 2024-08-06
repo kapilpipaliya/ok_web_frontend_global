@@ -5,9 +5,9 @@ import type {
   TextFieldOptionsField,
 } from "./FieldType";
 
+import { timesTypes } from "./csseditor_constants";
 import { createGridOptions } from "./FieldType";
 import { createSelectOptions } from "./FieldType";
-import { timesTypes } from "./csseditor_constants";
 
 export const Transition = {
   transition: {

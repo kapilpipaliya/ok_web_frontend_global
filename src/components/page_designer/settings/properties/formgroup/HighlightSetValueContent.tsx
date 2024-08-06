@@ -1,8 +1,8 @@
 
 import { type Accessor, Match, Show, Switch } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { IconButton } from "~/components/IconButton";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { DefaultValueContent } from "./DefaultValueContent";

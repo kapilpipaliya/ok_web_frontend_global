@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Node, Relationship } from "neo4j-driver";
 
 import { format } from "date-fns";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
@@ -26,9 +26,9 @@ export async function saveGraphToCypherQL() {
       const relationship = record.get("r");
       const relatedNode = record.get("m");
 
-      if (node) nodes.add(node);
-      if (relationship) relationships.add(relationship);
-      if (relatedNode) nodes.add(relatedNode);
+      if (node) { nodes.add(node); }
+      if (relationship) { relationships.add(relationship); }
+      if (relatedNode) { nodes.add(relatedNode); }
     });
 
     const timestamp = format(new Date(), "yyyyMMddHHmmss");
@@ -51,8 +51,6 @@ export async function saveGraphToCypherQL() {
         relationshipCypherQL,
       );
     });
-
-    console.log(`Graph has been saved to ${folderPath}`);
   } catch (error) {
     console.error("Error saving graph to CypherQL:", error);
   } finally {
@@ -62,7 +60,7 @@ export async function saveGraphToCypherQL() {
 
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();
-  const subdomain = await getSubDomain(request.headers.get("host")!);
+  const _subdomain = await getSubDomain(request.headers.get("host")!);
 
   try {
     return saveGraphToCypherQL();

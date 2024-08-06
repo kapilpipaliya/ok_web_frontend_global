@@ -1,8 +1,8 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { type JSX, Match, Switch, createEffect, createSignal, splitProps } from "solid-js";
+import { createEffect, createSignal, type JSX, Match, splitProps, Switch } from "solid-js";
 
 import { getSelectedVertexValue } from "~/lib/graph/get/sync/getSelectedVertexValue";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
@@ -33,7 +33,6 @@ async function uploadFile(file: File, apiUrl: string) {
     }
 
     const data = await response.json();
-    console.log('File uploaded successfully:', data);
     return data;
   } catch (error) {
     console.error('There was a problem with the file upload:', error);
@@ -48,7 +47,7 @@ export function FileUploader(props: FileUploaderProps) {
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
   let inputRef: HTMLInputElement | undefined;
 
-  const [selectedFiles, setSelectedFiles] = createWritableMemo(() => getSelectedVertexValue(graph, props.data, props.meta));
+  const [_selectedFiles, setSelectedFiles] = createWritableMemo(() => getSelectedVertexValue(graph, props.data, props.meta));
 
   const handleFileUpload = async (file: File) => {
     if (file) {

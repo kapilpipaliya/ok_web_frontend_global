@@ -1,12 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
 import { toTitle } from "case-switcher-js";
-import { Show, createSignal, onCleanup } from "solid-js";
+import { createSignal, onCleanup, Show } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -90,10 +90,10 @@ export function PageItem(
       <div // NOSONAR
         class={`relative ${itemStyle()}`}
         draggable={true}
+        ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        ondblclick={handleDoubleClick}
         ref={menuRef!}
       >
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />

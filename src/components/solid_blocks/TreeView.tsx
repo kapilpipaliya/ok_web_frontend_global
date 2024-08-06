@@ -1,16 +1,16 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
+  createContext,
+  createSignal,
   type JSX,
   type Setter,
   Show,
-  createContext,
-  createSignal,
   useContext,
 } from "solid-js";
 
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
   null,

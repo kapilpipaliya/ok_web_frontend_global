@@ -6,7 +6,7 @@ export interface TransitionAttributes {
   timingFunction: string;
 }
 
-export function generateTransition(transitions: Array<TransitionAttributes>, isView?: boolean): string {
+export function generateTransition(transitions: TransitionAttributes[], isView?: boolean): string {
   const separator = isView ? " " : "|";
   const separator2 = isView ? ", " : ",";
 

@@ -1,14 +1,14 @@
 import { createRoot, createSignal, untrack } from 'solid-js';
 
-import { ActionType, type Message, type Toast, type ToastHandler, type ToastOptions, type ToastType, type ToasterProps } from '../types';
-import { type DefaultToastOptions, type Renderable, type ValueOrFunction, resolveValue } from '../types';
+import { ActionType, type Message, type Toast, type ToasterProps, type ToastHandler, type ToastOptions, type ToastType } from '../types';
+import { type DefaultToastOptions, type Renderable, resolveValue, type ValueOrFunction } from '../types';
 import { generateID } from '../util';
-import { defaultTimeouts, defaultToastOptions, defaultToasterOptions } from './defaults';
+import { defaultTimeouts, defaultToasterOptions, defaultToastOptions } from './defaults';
 import { dispatch, store } from './store';
 
 export const [defaultOpts, setDefaultOpts] = createSignal<ToasterProps>(defaultToasterOptions);
 
-export const createToast = (message: Message, type: ToastType = 'blank', options: ToastOptions): Toast => ({
+export const createToast = (message: Message, type: ToastType, options: ToastOptions): Toast => ({
   ...defaultToastOptions,
   ...defaultOpts().toastOptions,
   ...options,
@@ -16,8 +16,8 @@ export const createToast = (message: Message, type: ToastType = 'blank', options
   duration: options.duration || defaultOpts().toastOptions?.duration || defaultTimeouts[type],
   id: options.id || generateID(),
   message,
-  pauseDuration: 0,
   paused: false,
+  pauseDuration: 0,
   position:
     options.position || defaultOpts().toastOptions?.position || defaultOpts().position || defaultToastOptions.position,
   style: {
@@ -41,7 +41,7 @@ const createToastCreator =
   };
 
 const toast = (message: Message, opts?: ToastOptions) => createToastCreator('blank')(message, opts);
-const test = untrack(() => toast);
+const _test = untrack(() => toast);
 
 toast.error = createToastCreator('error');
 toast.success = createToastCreator('success');

@@ -1,21 +1,21 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { Match, Show, Switch, createMemo, splitProps } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { createMemo, Match, Show, splitProps, Switch } from "solid-js";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type GraphInterface, IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
-import { useToast } from "../Toast";
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import { PageRenderContextProvider, usePageRenderContext } from "../page_attr_render/PageRenderContext";
 import { getConfiguredPermissions, hasPermissions, } from "../page_attr_render/permissions";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
+import { useToast } from "../Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 
@@ -109,7 +109,7 @@ export function DynamicComponent(
 
   const isNoPermissionCheck = () => (!previewStore || props.isNoPermissionCheck || formStore?.formMeta?.P.isNoPermissionCheck || previewStore.isDesignMode);
   const hasPermission = () => (hasInsertPermission() || hasViewPermission() || hasEditPermission());
-  const hasNoPermission = () => !hasInsertPermission() && !hasViewPermission() && !hasEditPermission();
+  const hasNoPermission = () => !((hasInsertPermission() || hasViewPermission() ) || hasEditPermission());
   const isDisabledPermission = () => {
     return (isNoPermissionCheck() ? undefined : hasPermission());
   }
@@ -131,7 +131,7 @@ export function DynamicComponent(
           return;
         }
 
-        if (!hasInsertPermission() && !hasEditPermission()) {
+        if (!(hasInsertPermission() || hasEditPermission())) {
           showErrorToast("You do not have permission to set this value.");
           return;
         }
@@ -177,7 +177,7 @@ export function DynamicComponent(
             values[property] = mergeCSS("", values[property], { P: { name: property } } as unknown as Vertex, props.meta, graph);
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (e) { /* empty */ }
+        } catch (_e) { /* empty */ }
       }
     }
 

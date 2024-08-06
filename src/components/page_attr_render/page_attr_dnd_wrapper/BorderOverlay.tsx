@@ -2,8 +2,8 @@ import { autoUpdate } from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
 import {
   type Accessor,
-  Show, createEffect, createMemo,
-  createSelector, createSignal, on
+  createEffect, createMemo, createSelector,
+  createSignal, on, Show
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
@@ -13,8 +13,8 @@ import type { Vertex } from "~/lib/graph/graph";
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
+import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
 export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null>; }>) {
   const [layoutStore] = useDesignerLayoutStore();
@@ -45,7 +45,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
     const ref = props.reference();
-    if (!ref) return;
+    if (!ref) { return; }
 
     const [store, setStore] = createStore({
       maxHeight: 0,
@@ -95,7 +95,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
             top: `${store.y}px`,
             width: `${store.maxWidth}px`
           }}
-        ></div>
+        />
       </Portal>
     );
   };

@@ -19,7 +19,7 @@ interface WithListProps {
           <div class="ml:0.75rem">
             <h3 class="lh:1.25rem color:rgb(153,27,27) f:0.875rem font-weight:500">{props.title}</h3>
             <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
-              <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" role="list">
+              <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem" >
                 {props.errors.map(error => (
                   <li>{error}</li>
                 ))}

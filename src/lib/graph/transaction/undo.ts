@@ -9,26 +9,26 @@ export function undoAllowed(
   graph: Store<GraphInterface>,
   revertTransactionUpToIndex?: number
 ): boolean {
-  if (!txnId || !graph.transactions.has(txnId)) return false;
+  if (!(txnId && graph.transactions.has(txnId))) { return false; }
 
   const txnValue = graph.transactions.get(txnId);
-  if (!txnValue) return false;
-  if (txnValue.steps.length === 0) return false;
+  if (!txnValue) { return false; }
+  if (txnValue.steps.length === 0) { return false; }
 
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
   const preventUndoBeforeIndex = txnValue.preventUndoBeforeIndex ?? -1;
   
-  if ((txnValue.steps.length - 1) <= preventUndoBeforeIndex) return false;
+  if ((txnValue.steps.length - 1) <= preventUndoBeforeIndex) { return false; }
 
   const newUndoIndex = revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
-  if (newUndoIndex < preventUndoBeforeIndex) return false;
+  if (newUndoIndex < preventUndoBeforeIndex) { return false; }
   
   return activeUndoIndex > -1;
 }
 
 export function undo(txnId: number, graph: Store<GraphInterface>, revertTransactionUpToIndex?: number, removeAfterSteps?: boolean) {
-  if (!undoAllowed(txnId, graph, revertTransactionUpToIndex)) return;
+  if (!undoAllowed(txnId, graph, revertTransactionUpToIndex)) { return; }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;

@@ -20,7 +20,7 @@ export function mutateArgsValidation(args: MutationArgs): any {
       return { error: `Invalid argument shape, missing required key: ${key}` };
     }
   }
-  if (!Array.isArray(args.vertexIdMap) || !Array.isArray(args.edgeIdMap)) {
+  if (!(Array.isArray(args.vertexIdMap) && Array.isArray(args.edgeIdMap))) {
     return {
       error:
         "Invalid argument shape, the inner argument to sync(mutate) must be an array and it should contain 4 elements. vertexIdMap and EdgeIdMap each item is [num, num] tuple",

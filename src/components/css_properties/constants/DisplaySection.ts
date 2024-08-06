@@ -1,6 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { type TextFieldOptionsField, type ToggleField, createSelectOptions } from "./FieldType";
+import { createSelectOptions, type TextFieldOptionsField, type ToggleField } from "./FieldType";
 import { Icons } from "./Icons";
 
 export const DisplaySection = {
@@ -15,7 +15,7 @@ export const DisplaySection = {
     ],
   } as ToggleField,
   verticalAlign: createSelectOptions("vertical-align", "Vertical align", [...extraPropertyValues["vertical-align"].values, ...CSSWideKeywords]), // TODO: Add support for specifying custom values
-  resize: createSelectOptions("resize", "Resize", [...extraPropertyValues["resize"].values, ...CSSWideKeywords]),
+  resize: createSelectOptions("resize", "Resize", [...extraPropertyValues.resize.values, ...CSSWideKeywords]),
   /*overflow: {
     align: "end",
     componentName: "fieldWithCustomProperty",
@@ -33,9 +33,9 @@ export const DisplaySection = {
     options: [...extraPropertyValues["overflow"].values, ...CSSWideKeywords],
     padding: "5px",
   } as FieldWithCustomProperty,*/
-  overflow: createSelectOptions("overflow", "Overflow", [...extraPropertyValues["overflow"].values, ...CSSWideKeywords]),
-  overflowX: createSelectOptions("overflow-x", "Overflow X", [...extraPropertyValues["overflow"].values, ...CSSWideKeywords]),
-  overflowY: createSelectOptions("overflow-y", "Overflow Y", [...extraPropertyValues["overflow"].values, ...CSSWideKeywords]),
+  overflow: createSelectOptions("overflow", "Overflow", [...extraPropertyValues.overflow.values, ...CSSWideKeywords]),
+  overflowX: createSelectOptions("overflow-x", "Overflow X", [...extraPropertyValues.overflow.values, ...CSSWideKeywords]),
+  overflowY: createSelectOptions("overflow-y", "Overflow Y", [...extraPropertyValues.overflow.values, ...CSSWideKeywords]),
   float: createSelectOptions("float", "Float", ["left", "right", "none", ...CSSWideKeywords]),
   clear: createSelectOptions("clear", "Clear", ["none", "left", "right", "both", ...CSSWideKeywords]),
   boxSizing: createSelectOptions("box-sizing", "Box Sizing", ["content-box", "border-box", ...CSSWideKeywords]),

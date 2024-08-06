@@ -6,12 +6,12 @@ import { getChildVertex } from "./getChildVertex";
 import { getStringComponent } from "./getStringComponent";
 
 export function getCompFallbackToString(
-  attrVertex: Vertex | undefined,
+  attrVertex: undefined | Vertex,
   graph: Store<GraphInterface>,
-): Vertex | undefined {
-  if (!attrVertex) return;
+): undefined | Vertex {
+  if (!attrVertex) { return; }
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
-  if (attrComp) return attrComp;
+  if (attrComp) { return attrComp; }
 
   const attrDataTypeVertex = getChildVertex(
     graph,

@@ -1,14 +1,14 @@
 import {
-  For,
-  Show,
   createEffect,
   createResource,
   createSignal,
+  For,
+  Show,
 } from "solid-js";
 
+import { SearchBar } from "~/components/css_properties/SearchBar";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
-import { SearchBar } from "~/components/css_properties/SearchBar";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
@@ -124,7 +124,7 @@ export function ComponentList() {
             {(item) => (
               <>
                 <div class={"font-size:17px font-weight:600 margin-bottom:8px margin-top:8px"}>{item.P.label || item.P.name}</div>
-                <ul class={`display:grid gap:5px grid-template-columns:repeat(2,1fr) list-style-type:none`}>
+                <ul class={'display:grid gap:5px grid-template-columns:repeat(2,1fr) list-style-type:none'}>
                   <For each={item.children}>
                     {(child) => <ComonentItem child={child} />}
                   </For>

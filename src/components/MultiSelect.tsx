@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Ref, mergeRefs } from "@solid-primitives/refs";
+import { mergeRefs, type Ref } from "@solid-primitives/refs";
 import jsep from "jsep";
-import { For, type JSX, Show, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -11,7 +11,7 @@ import { evaluate } from "~/lib/expression_eval";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
-import { ZIndex, useZIndex } from "./ZIndex";
+import { useZIndex, ZIndex } from "./ZIndex";
 
 export type Option =
   | {
@@ -19,8 +19,8 @@ export type Option =
       id: string;
       label: string;
     }
-  | Vertex
-  | string;
+  | string
+  | Vertex;
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(
   props: Readonly<{
@@ -31,8 +31,8 @@ export function MultiSelectField(
     loadOptions?: () => Promise<void>;
     onRemove: (newSelected: Option[], value: Option) => void;
     onSelect: (newSelected: Option[], value: Option) => void;
-    optionValueKey?: string;
     options: Option[];
+    optionValueKey?: string;
     placeholder?: string;
     ref?: Ref<HTMLDivElement>;
     renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
@@ -56,7 +56,7 @@ export function MultiSelectField(
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
   const getOptionValue = (option: Option) => {
-    if (!isObject(option)) return option;
+    if (!isObject(option)) { return option; }
     if (props.optionValueKey) {
       return option[props.optionValueKey as keyof Option];
     }
@@ -68,9 +68,8 @@ export function MultiSelectField(
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
         return evaluate(jsep(props.displayValueKey), option);
-      } else {
-        return option[props.displayValueKey as keyof Option];
       }
+        return option[props.displayValueKey as keyof Option];
     }
     // @ts-expect-error ignore
     return isObject(option) ? option.label : option;
@@ -110,14 +109,13 @@ export function MultiSelectField(
           // @ts-expect-error ignore
           option[childrenKey] = originalOptions;
           return true;
-        } else {
+        }
           // Otherwise, filter the children
           // @ts-expect-error ignore
           option[childrenKey] = filteredChildren;
           // Include the parent if it matches or any children match
           // @ts-expect-error ignore
           return matches || option[childrenKey].length > 0;
-        }
       }
 
       // Return true if the parent matches and there are no children
@@ -315,9 +313,9 @@ export function MultiSelectField(
         </For>
         {/* ${props.selectedValues().length === 1 && props.selectionLimit === 1 ? "display:none" : ""} */}
         <input
+          auto-complete="off"
           // @ts-expect-error disable lastpass
           AutoComplete="off"
-          auto-complete="off"
           class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
           disabled={props.disable}
           // onBlur={() => {

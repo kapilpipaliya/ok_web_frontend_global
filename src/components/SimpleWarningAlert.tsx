@@ -41,7 +41,7 @@ export function SimpleWarningAlert(props: Readonly<WithAccentBorderProps>): JSX.
           <p class="lh:1.25rem f:0.875rem" style={{ color: "rgb(180,83,9)" }}>
             {props.message || "Warning"}
             <a
-              class={`color:rgb(180,83,9) font-weight:500 text-decoration:underline`}
+              class={'color:rgb(180,83,9) font-weight:500 text-decoration:underline'}
               classList={{
                 [`color:${props.linkHoverColor ?? 'rgb(217,119,6)'}:hover`]: !props.linkHoverColor,
               }}

@@ -16,7 +16,7 @@ export function ContactForm() {
     name: "",
     subject: "",
   });
-  const [loadingSite, setLoadingSite] = createSignal(false);
+  const [_loadingSite, setLoadingSite] = createSignal(false);
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -27,7 +27,7 @@ export function ContactForm() {
       setLoadingSite(true);
       await showLoadingToast({
         loadMessage: "Sending message...",
-        onSuccess: (value) => {
+        onSuccess: (_value) => {
           navigate("/");
         },
         promise: contactUsCall(formData),

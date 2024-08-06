@@ -7,11 +7,11 @@ import { evalAsync } from "~/lib/expression_eval";
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
 
 interface TreeNode {
-  P: any;
   children?: TreeNode[];
   expanded: boolean;
   id: string;
   name: string;
+  P: any;
 }
 
 interface TreeOptions {
@@ -34,7 +34,7 @@ export async function getTreeDataMGCall(
       levels: { [key: string]: any },
       vertexes: Vertex[]
     ): Promise<TreeNode[]> => {
-      if (!levels.collection) return [];
+      if (!levels.collection) { return []; }
 
       const children = await evalAsync(jsep(levels.collection), {
         nodes,
@@ -52,10 +52,10 @@ export async function getTreeDataMGCall(
           child.P.name;
 
         const navItem: TreeNode = {
-          P: child.P,
           expanded: true,
           id: child.id,
           name,
+          P: child.P,
         };
 
         if (

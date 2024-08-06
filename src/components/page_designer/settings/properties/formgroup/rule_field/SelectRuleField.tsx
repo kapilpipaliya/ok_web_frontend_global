@@ -6,9 +6,9 @@ import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { AddNewRule } from "../../../rules/AddNewRule";
 import { Label } from "../Label";
 import { AddNewRelationButton } from "./AddNewRelationButton";
+import { getRenderOptionLabelFunction } from "./getRenderOptionLabelFunction";
 // import { DisplayAllRules } from "./DisplayAllRules";
 import { SelectRelation } from "./SelectRelation";
-import { getRenderOptionLabelFunction } from "./getRenderOptionLabelFunction";
 
 interface SelectRuleFieldProps {
   meta: Vertex;

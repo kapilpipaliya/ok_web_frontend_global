@@ -1,21 +1,21 @@
 import { type Setter, Show } from "solid-js";
 
 import { Drawer } from "~/components/Drawer";
-import { ResizableContainer } from "~/components/ResizableDivView";
-import { ZIndex } from "~/components/ZIndex";
 import { FormContext } from "~/components/form/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { ResizableContainer } from "~/components/ResizableDivView";
+import { ZIndex } from "~/components/ZIndex";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
-import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
+import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const getGridTemplateColumns = () => {
-    if (!layoutStore.isLeftOpen && !layoutStore.isRightOpen) {
+    if (!(layoutStore.isLeftOpen || layoutStore.isRightOpen)) {
       return "1,1fr";
     }
     if (layoutStore.isLeftOpen && layoutStore.isRightOpen) {

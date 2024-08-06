@@ -2,8 +2,8 @@ import neo4j, { type Driver } from "neo4j-driver";
 
 export async function connectToNeo4jWithRetry(
   uri: string,
-  username: string,
-  password: string,
+  _username: string,
+  _password: string,
   maxRetries = 5,
   initialDelay = 1000,
 ): Promise<Driver> {
@@ -19,8 +19,6 @@ export async function connectToNeo4jWithRetry(
       const session = driver.session();
       await session.run("RETURN 1");
       await session.close();
-
-      console.log("Connected to Neo4j!");
       return driver;
     } catch (error) {
       console.error(

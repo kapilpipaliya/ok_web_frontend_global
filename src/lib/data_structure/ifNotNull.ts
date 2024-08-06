@@ -1,3 +1,3 @@
-export function ifNotNull<T>(value: T | null): T | undefined {
+export function ifNotNull<T>(value: null | T): T | undefined {
   return value !== null ? value : undefined;
 }

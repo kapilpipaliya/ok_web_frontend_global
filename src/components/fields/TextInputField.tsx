@@ -1,4 +1,4 @@
-import { type Component, Match, Show, Switch, createMemo, splitProps } from 'solid-js';
+import { type Component, createMemo, Match, Show, splitProps, Switch } from 'solid-js';
 
 import type { GenericComponentProps } from './FieldType';
 

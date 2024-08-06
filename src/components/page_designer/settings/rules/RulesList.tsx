@@ -1,10 +1,10 @@
 import jsep from "jsep";
-import { For, Show, createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { evaluate } from "~/lib/expression_eval";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
 import { SimpleWithDismissButton } from "../../../SimpleModal";
@@ -15,8 +15,8 @@ import { RulesModal } from "../../rules/RulesModal";
 export function RulesList() {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [selectedRule, setSelectedRule] = createSignal<Vertex | null>(null);
-  const [selectedRuleToDelete, setSelectedRuleToDelete] = createSignal<Vertex | null>(null);
+  const [selectedRule, setSelectedRule] = createSignal<null | Vertex>(null);
+  const [selectedRuleToDelete, setSelectedRuleToDelete] = createSignal<null | Vertex>(null);
   const rules = createMemo(() => {
     if (layoutStore.formStore[0]?.formData) {
       return (
@@ -84,7 +84,7 @@ export function RulesList() {
       <SimpleWithDismissButton
         closeButtonText="Cancel"
         confirmButtonText="Delete"
-        description={`Are you sure you want to delete this rule?`}
+        description={'Are you sure you want to delete this rule?'}
         onClose={() => setSelectedRuleToDelete(null)}
         onConfirm={() => deleteRule(selectedRuleToDelete()!)}
         title="Delete Rule"
@@ -104,7 +104,7 @@ export function RulesList() {
       <For each={rules()}>
         {(rule, index) => (
           <div class="lh:1.25rem flex align-items:center b:1px|solid|lightgrey bg:gray-10:hover color:rgb(55,65,81) f:0.875rem jc:space-between px:1rem py:0.5rem" classList={{
-            "bt:none": index() != 0
+            "bt:none": index() !== 0
           }} onMouseEnter={() => highlightRule(rule)}
             onMouseLeave={() => unhighlightRule()}
           >

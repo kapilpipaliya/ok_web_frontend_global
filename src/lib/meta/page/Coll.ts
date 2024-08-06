@@ -32,7 +32,7 @@ export const Coll: IFormMetaData = {
           validationCallback: (options: any) => {
             const { formData } = (options.validator.context as IFormContext) ||
               ({} as IFormContext);
-            const [graph, setGraph] = useGraph();
+            const [graph, _setGraph] = useGraph();
             const val = options.value;
             if (Object.keys(FormMetaData).includes(val)) {
               return false;

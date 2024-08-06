@@ -1,14 +1,14 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { type Component, Show, createSignal, onCleanup } from "solid-js";
+import { type Component, createSignal, onCleanup, Show } from "solid-js";
 
 import type { OptionType } from "../../constants/FieldType";
 
 import { FilePickerButton } from "./FilePickerButton";
+import { getValueWithoutUnits } from "./getValueWithoutUnits";
 import { IncrementButton } from "./IncrementButton";
 import { InputField } from "./InputField";
 import { SuggestionsDropdown } from "./SuggestionsDropdown";
 import { UnitsDropdown } from "./UnitsDropdown";
-import { getValueWithoutUnits } from "./getValueWithoutUnits";
 
 interface ContentProps {
   changeValue: (value: string) => void;
@@ -28,7 +28,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   
   // State used to display text options
-  const [inputValue, setInputValue] = createSignal("");
+  const [_inputValue, setInputValue] = createSignal("");
   const [isAnotherDropdownOpen, setIsAnotherDropdownOpen] = createSignal(false);
   const [filteredOptions, setFilteredOptions] = createSignal<OptionType>([]);
 
@@ -101,7 +101,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   };
 
   const handleInputFocus = () => {
-    if (startValue()) return;
+    if (startValue()) { return; }
     setIsAnotherDropdownOpen(true);
     if (props.meta.options) {
       setFilteredOptions(props.meta.options);
@@ -136,8 +136,8 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
         isDropdownOpen={isDropdownOpen}
         meta={props.meta}
         reference={reference}
-        selectOption={selectOption}
         selectedOption={selectedUnitOption}
+        selectOption={selectOption}
         setIsDropdownOpen={setIsDropdownOpen}
         toggleDropdown={toggleDropdown}
       />

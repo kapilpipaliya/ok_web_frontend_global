@@ -14,10 +14,11 @@ export function getChildVertex(
   error: boolean;
   vertex?: Vertex;
 } {
-  if (path.length === 0)
+  if (path.length === 0) {
     return {
       error: true,
     };
+  }
 
   let type = path[0];
   let filter = "";
@@ -29,10 +30,11 @@ export function getChildVertex(
     type = type.slice(0, filterIndex);
   }
   if (type.includes("$0")) {
-    if (!currentVertex.L)
+    if (!currentVertex.L) {
       return {
         error: true,
       };
+    }
     type = type.replace("$0", currentVertex.L[0]);
   }
   const vertexes = (currentVertex.OUT[type] || []).map(

@@ -12,7 +12,7 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
-  const prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+  const _prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
 
   const metaVertexId = graph.newVertexId;
   const dataVertexId = graph.newVertexId;
@@ -20,7 +20,7 @@ export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
   setGraph("vertexes", metaVertexId, {
     P: { height: 700, name: "jsx", width: 700 },
   });
-  setGraph("vertexes", dataVertexId, { P: {}, id: dataVertexId });
+  setGraph("vertexes", dataVertexId, { id: dataVertexId, P: {} });
 
   onCleanup(() => {
     // @ts-expect-error ignore

@@ -43,7 +43,6 @@ export async function sendEmail(to: string, username: any) {
   try {
     // Send mail with defined transport object
     const info = await transporter.sendMail(mailOptions);
-    console.log("Message sent: %s", info.messageId);
     return info; // Optionally return the info object
   } catch (error) {
     console.error("Failed to send email:", error);

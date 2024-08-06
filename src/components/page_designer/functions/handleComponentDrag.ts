@@ -54,7 +54,7 @@ function handleComponentDropAndSort(
     undefined,
     properties,
   );
-  if (layoutRowId === -1) return layoutRowId;
+  if (layoutRowId === -1) { return layoutRowId; }
 
   fromVertex = graph.vertexes[layoutRowId];
 

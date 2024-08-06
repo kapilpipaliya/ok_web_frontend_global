@@ -1,13 +1,12 @@
 import {
-  type JSX,
-  Show,
   children,
   createMemo,
   createSelector,
   createSignal,
+  type JSX,
+  Show,
 } from "solid-js";
 
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
@@ -15,10 +14,11 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "../../Toast";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useToast } from "../../Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
 

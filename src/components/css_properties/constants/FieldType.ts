@@ -170,7 +170,7 @@ export function createButtonGroupOptions(
 
 export const createGridOptions = (
   name: string,
-  label: string,
+  _label: string,
   children: GenericField[],
 ): GridField => ({
   children,

@@ -10,7 +10,7 @@ import type { IDToRuleMap } from "./functions/getChildrenAttrs";
 export function getInitialDesignerLayoutStore() {
   return {
     activeItem: null as Id | null | number,
-    draggedVertices: [] as Array<Vertex>,
+    draggedVertices: [] as Vertex[],
     formStore: [] as unknown as ReturnType<typeof createStore<FormStoreObject>>,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,

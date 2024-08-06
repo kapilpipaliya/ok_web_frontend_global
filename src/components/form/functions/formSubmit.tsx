@@ -10,7 +10,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { useToast } from "../../Toast";
 
 export function formSubmit(closePopUp?: () => void) {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [formStore] = useFormContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useGraph();
@@ -57,7 +57,7 @@ export function formSubmit(closePopUp?: () => void) {
 
       await showLoadingToast({
         loadMessage: `Saving ${label}...`,
-        onSuccess: (value) => {
+        onSuccess: (_value) => {
           // currently we are navigating back.
           if (closePopUp) {
             closePopUp();

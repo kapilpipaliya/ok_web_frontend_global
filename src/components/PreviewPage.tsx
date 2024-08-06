@@ -1,12 +1,12 @@
 
-import { For, type JSX, createSignal } from "solid-js";
+import { createSignal, For, type JSX } from "solid-js";
 
 import { IconButton } from "./IconButton";
 
 const PreviewPage = (props: Readonly<{children: JSX.Element}>) => {
   const [view, setView] = createSignal("Desktop");
 
-  const handleViewChange = (newView: string) => {
+  const _handleViewChange = (newView: string) => {
     setView(newView);
   };
   const views = [

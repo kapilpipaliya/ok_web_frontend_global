@@ -10,5 +10,5 @@ export { default as Switch } from "./Switch";
 export { default as Tab } from "./Tab";
 export { default as TabControl } from "./TabControl";
 export { default as TabPane } from "./TabPane";
-export { default as TabView } from "./TabView";
 export { default as Tabs } from "./Tabs";
+export { default as TabView } from "./TabView";

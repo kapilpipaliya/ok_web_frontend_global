@@ -8,7 +8,7 @@ export function AdminDashBoard() {
           <h2 class="lh:1.5rem color:gray-90 f:1rem font-weight:600 leading:1.75rem">Recent Users</h2>
           <a class="lh:1.25rem color:indigo-60 color:indigo-50:hover f:0.875rem font-weight:600 leading:1.5rem" href="#">View all<span class="sr-only">, clients</span></a>
         </div>
-        <ul class="display:grid gap-x:1.5rem gap-x:2rem@xl gap-y:2rem grid-cols:1 grid-cols:3@lg mt:1.5rem" role="list">
+        <ul class="display:grid gap-x:1.5rem gap-x:2rem@xl gap-y:2rem grid-cols:1 grid-cols:3@lg mt:1.5rem" >
           <SimpleCard
             amount="$2,000.00"
             imgSrc="https://tailwindui.com/img/logos/48x48/tuple.svg"

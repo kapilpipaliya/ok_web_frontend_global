@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { path } from "rambda";
-import { For, Match, type Setter, Show, Switch, createSignal } from "solid-js";
+import { createSignal, For, Match, type Setter, Show, Switch } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
@@ -44,7 +44,7 @@ export const Select = () => {
         [meta.name]: option.value || option,
       });
     }
-    if (meta.onChangeInput) meta.onChangeInput(meta.name, option.value || option);
+    if (meta.onChangeInput) { meta.onChangeInput(meta.name, option.value || option); }
     setIsActive(false);
   };
 
@@ -94,8 +94,8 @@ export const Select = () => {
             <DropdownMenu onClickOutside={() => setIsActive(false)} parentRef={reference()!}>
               <DropdownList
                 options={meta.options}
-                selectOption={selectOption}
                 selectedValue={selectedValue()}
+                selectOption={selectOption}
               /></DropdownMenu>
           </ZIndex>
         </Show>
@@ -129,7 +129,7 @@ const DropdownButton = (props: DropdownButtonProps) => (
       role="combobox"
     >
       <span class={`selected-value ${!props.selectedValue && "color:lightgray"}`}>
-        {props.selectedValue ? formatString(props.selectedValue) : `Select Value`}
+        {props.selectedValue ? formatString(props.selectedValue) : 'Select Value'}
       </span>
       <span class="arrow" />
     </button>
@@ -139,8 +139,8 @@ const DropdownButton = (props: DropdownButtonProps) => (
 
 interface DropdownListProps {
   options: any[];
-  selectOption: (option: any) => void;
   selectedValue: string;
+  selectOption: (option: any) => void;
 }
 
 const DropdownList = (props: DropdownListProps) => (

@@ -10,7 +10,7 @@ export function transactionDetailAdd(
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
 ) {
-  if (!txnId) return;
+  if (!txnId) { return; }
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
 

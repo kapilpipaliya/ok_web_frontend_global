@@ -1,12 +1,12 @@
 import { toTitle } from "case-switcher-js";
 import {
+  createEffect,
+  createMemo,
+  createSignal,
   For,
   Match,
   Show,
   Switch,
-  createEffect,
-  createMemo,
-  createSignal,
 } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
@@ -21,12 +21,12 @@ import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/rowFunction";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { SortableRow } from "./SortableRow";
 import { insertNewRow } from "./insertNewRow";
+import { SortableRow } from "./SortableRow";
 
 export function TableInputField(
   props: Readonly<{
@@ -41,7 +41,7 @@ export function TableInputField(
 
   const tableColumnsTemplate = createMemo(
     () =>
-      sortVertexesByPosition(getSelectionOptions(graph, setGraph, `->Attr`, [props.meta])
+      sortVertexesByPosition(getSelectionOptions(graph, setGraph, '->Attr', [props.meta])
         .vertexes || []),
   );
 

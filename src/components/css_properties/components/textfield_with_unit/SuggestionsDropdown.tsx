@@ -28,7 +28,7 @@ export function SuggestionsDropdown(props: SuggestionsDropdownProps) {
               <For each={props.options}>
                 {(option) => (
                   <div // NOSONAR
-                    class={`flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
+                    class={'flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5'}
                     onClick={() => props.selectOption(option)}
                   >
                      {typeof option === "string" ? option : option.label}

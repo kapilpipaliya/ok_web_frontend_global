@@ -42,7 +42,6 @@ async function signupAdmin(request: APIEvent["request"]) {
       logsPort,
       labPort,
     );
-    console.log("FetchCSVData");
 
     await createRootFolder(tx);
     syncNodesMGCall({
@@ -55,7 +54,6 @@ async function signupAdmin(request: APIEvent["request"]) {
 
     await tx.commit();
     await session.close();
-    console.log("updateSession", createUserResult);
 
     // Update session data with user's email
     await updateSession(user);
@@ -63,8 +61,8 @@ async function signupAdmin(request: APIEvent["request"]) {
     const { password: _, ...P } = user.P;
 
     return {
-      P,
       id: user.id,
+      P,
     };
   } catch (error: any) {
     console.error("Server error:", error.message, error);
@@ -83,11 +81,9 @@ export async function POST({ request }: APIEvent) {
     request.headers.get("host")!,
     false,
   );
-  console.log("subdomainFromUrl", subdomainFromUrl);
 
   if (subdomainFromUrl === "super") {
     return signupAdmin(request);
-  } else {
-    return signupUser();
   }
+    return signupUser();
 }

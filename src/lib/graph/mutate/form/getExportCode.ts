@@ -109,10 +109,10 @@ export function getExportCode(
           getChildren(metaVertex, v, {
             ...klona(v),
             D: undefined,
+            id: undefined,
             IN: undefined,
             L: v.L[0],
             OUT: undefined,
-            id: undefined,
           }),
         );
         if (out.length > 0) {
@@ -133,9 +133,9 @@ export function getExportCode(
   return getChildren(meta, data, {
     ...klona(data),
     D: undefined,
+    id: undefined,
     IN: undefined,
     L: data.L[0],
     OUT: undefined,
-    id: undefined,
   });
 }

@@ -1,4 +1,4 @@
-import { type JSX, createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, type JSX } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 
@@ -10,7 +10,7 @@ export function ResizableContainer(
 ) {
   const [width, setWidth] = createSignal("");
   const [graph] = useGraph();
-  const [height, setHeight] = createSignal(`calc(100vh - ${graph.navBarHeight + 2}px)`);
+  const [_height, setHeight] = createSignal(`calc(100vh - ${graph.navBarHeight + 2}px)`);
   const DIMENSIONS = {
     desktop: { height: "1200px", width: "100%" },
     mobile: { height: "570px", width: "360px" },

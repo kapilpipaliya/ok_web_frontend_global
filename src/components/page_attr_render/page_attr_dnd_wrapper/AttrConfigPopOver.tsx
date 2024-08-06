@@ -1,5 +1,5 @@
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer";
-import { Match, Switch, createSelector } from "solid-js";
+import { createSelector, Match, Switch } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 

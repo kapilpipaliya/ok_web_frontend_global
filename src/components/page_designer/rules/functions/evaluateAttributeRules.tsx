@@ -28,8 +28,7 @@ export function evaluateAttributeRules(
       if (result) {
         return result;
       }
-    } catch (e) {
-      continue;
+    } catch (_e) {
     }
   }
   return false;

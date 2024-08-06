@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   type Component,
-  Show,
   createEffect,
   createSignal,
   onCleanup,
+  Show,
 } from "solid-js";
 
 import toast, { type Renderable } from "./solid-toast/src";
@@ -122,7 +122,7 @@ export function useToast() {
         const [life, setLife] = createSignal(100);
         const startTime = Date.now();
         createEffect(() => {
-          if (t.paused) return;
+          if (t.paused) { return; }
           const interval = setInterval(() => {
             const diff = Date.now() - startTime - t.pauseDuration;
             setLife(100 - (diff / duration) * 100);

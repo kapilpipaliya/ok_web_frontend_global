@@ -28,7 +28,7 @@ export function selectedValue(
     return meta.P.inward
       ? getParentVertexValue(graph, data, meta)
       : getSelectedVertexValue(graph, data, meta);
-  } catch (e) {
+  } catch (_e) {
     return [];
   }
 }

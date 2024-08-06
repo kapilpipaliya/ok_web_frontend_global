@@ -3,7 +3,7 @@
  * \todo Implement drag and drop from: Svelte-FileField-Upload-Component
  * https://github.com/vipero07/svelte-file-upload-component
  */
-import { type JSX, createSignal, splitProps } from "solid-js";
+import { createSignal, type JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { useToast } from "~/components/Toast";
@@ -44,14 +44,14 @@ export function FileField(props: Readonly<Properties>) {
 
   // FileField uploading method
   function UploadFile() {
-    function uploadFile(evt: ProgressEvent<EventTarget>) {
+    function uploadFile(_evt: ProgressEvent<EventTarget>) {
       if (xhr.responseText) {
         const data = JSON.parse(xhr.responseText);
         if (data.error) {
           setState({ error: `Upload failed! ${data.description}` });
         } else {
           showSuccessToast("Uploaded successfully!");
-          if (p.onchange) p.onchange(data.media);
+          if (p.onchange) { p.onchange(data.media); }
         }
       } else {
         setState({ error: `Upload failed: ${xhr.statusText}` });
@@ -83,7 +83,7 @@ export function FileField(props: Readonly<Properties>) {
       setSpeedText(
         `,Speed: ${speed.toFixed(1)}${units}, the remaining time: ${restTime}s`,
       );
-      if (byteSpeed === 0) setSpeedText("Upload cancelled");
+      if (byteSpeed === 0) { setSpeedText("Upload cancelled"); }
     }
 
     if (props.dom?.files) {

@@ -1,4 +1,4 @@
-import { For, Match, Switch, createSignal } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
 
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
@@ -16,7 +16,7 @@ export function FormElementTabs() {
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
   const Tabs = () => (
-    <div class={`bg:white p:4 position:sticky top:0`}>
+    <div class={'bg:white p:4 position:sticky top:0'}>
       <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128) f:0.875rem font-weight:500 mb:10 text-align:center">
         <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
           <For each={leftMenuTabs}>

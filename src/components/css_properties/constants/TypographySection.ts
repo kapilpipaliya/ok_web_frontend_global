@@ -5,9 +5,9 @@ import type {
   TextFieldOptionsField,
 } from "./FieldType";
 
+import { sizeTypes } from "./csseditor_constants";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
-import { sizeTypes } from "./csseditor_constants";
 
 export const TypographySection = {
   fontFamily: createSelectOptions(

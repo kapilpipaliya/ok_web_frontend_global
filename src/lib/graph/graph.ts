@@ -11,21 +11,21 @@ export type Id = string;
 export const IdAttr = "name";
 
 export interface Vertex {
+  id: Id;
   IN: { [key: string]: Id[] };
   L: string[];
   OUT: { [key: string]: Id[] };
   P: {
     [key: string]: any;
   };
-  id: Id;
 }
 
 export interface Edge {
   E: Id;
+  id: Id;
   P: { [key: string]: any };
   S: Id;
   T: string;
-  id: Id;
 }
 
 export type VertexMap = { [key: string]: Vertex };
@@ -52,8 +52,8 @@ export interface TransactionDetail {
 }
 
 export interface GraphInterface {
-  APP_BASE_URL: string;
   activeClickOutside: number;
+  APP_BASE_URL: string;
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   events: { [key: string]: any };
@@ -71,8 +71,8 @@ export interface GraphInterface {
   userRoles: Id[];
   userSetting: Vertex;
   userSettingId: Id;
-  vertexLabelIdMap: { [key: string]: Id[] };
   vertexes: VertexMap;
+  vertexLabelIdMap: { [key: string]: Id[] };
 }
 
 

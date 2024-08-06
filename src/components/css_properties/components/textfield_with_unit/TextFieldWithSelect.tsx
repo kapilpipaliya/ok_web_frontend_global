@@ -3,14 +3,14 @@ import { path } from "rambda";
 import { type Component, Match, Switch, } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
-import { useCssEditorProps } from "../../CSSEditorPropsContext";
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../../CssEditorContext";
 import { sizeTypes } from "../../constants/csseditor_constants";
+import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../../CssEditorContext";
+import { useCssEditorProps } from "../../CSSEditorPropsContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 import { CenterDiv } from "../CenterDiv";
 import { Container } from "../Container";
@@ -58,10 +58,10 @@ export const TextFieldWithSelect: Component = () => {
 
   function handleNumberInputChange(value: string) {
     const numericValue = Number.parseFloat(value);
-    if (isNaN(numericValue)) return;
+    if (Number.isNaN(numericValue)) { return; }
 
-    if (meta.inputProps?.min !== undefined && numericValue < meta.inputProps.min) return;
-    if (meta.inputProps?.max !== undefined && numericValue > meta.inputProps.max) return;
+    if (meta.inputProps?.min !== undefined && numericValue < meta.inputProps.min) { return; }
+    if (meta.inputProps?.max !== undefined && numericValue > meta.inputProps.max) { return; }
 
     changeValue(meta.unitOptions ? `${numericValue}${selectedOption()}` : `${numericValue}`);
   }
@@ -71,15 +71,15 @@ export const TextFieldWithSelect: Component = () => {
     if (!txnId) {
       return;
     }
-    if (!cssEditorProps?.meta || !cssEditorProps?.data) {
+    if (!(cssEditorProps?.meta && cssEditorProps?.data)) {
       return;
     }
     const selectedFileMetaVertex = {
+      id: "",
       IN: {},
       L: [],
       OUT: {},
       P: { type: getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name) },
-      id: "",
     } as Vertex;
 
     setSelectionValue(txnId, cssEditorProps.data, graph, setGraph, selectedFileMetaVertex);

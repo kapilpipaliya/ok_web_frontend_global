@@ -12,8 +12,8 @@
 export function isNumeric(n) {
   let isNum = false;
   if (typeof n === "number") {
-    isNum = !isNaN(n);
-    if (isNum && !isFinite(n)) {
+    isNum = !Number.isNaN(n);
+    if (isNum && !Number.isFinite(n)) {
       throw {
         code: "D1001",
         stack: new Error().stack,
@@ -152,7 +152,7 @@ export function isDeepEqual(lhs, rhs) {
         return false;
       }
       // must contain same values in same order
-      for (var ii = 0; ii < lhs.length; ii++) {
+      for (let ii = 0; ii < lhs.length; ii++) {
         if (!isDeepEqual(lhs[ii], rhs[ii])) {
           return false;
         }

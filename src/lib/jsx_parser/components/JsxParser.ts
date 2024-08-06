@@ -19,8 +19,8 @@ import { randomHash } from "~/lib/jsx_parser/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/helpers/resolvePath";
 
-type ParsedJSX = JSX.Element | boolean | string;
-type ParsedTree = ParsedJSX | ParsedJSX[] | null;
+type ParsedJSX = boolean | JSX.Element | string;
+type ParsedTree = null | ParsedJSX | ParsedJSX[];
 export type TProps = {
   allowUnknownElements?: boolean;
   autoCloseVoidElements?: boolean;
@@ -197,7 +197,7 @@ export default class JsxParser {
       setGraph,
       1000,
     );
-    if (rowId === -1) return;
+    if (rowId === -1) { return; }
     const parentVertex = graph.vertexes[rowId];
     if (isText) {
       setPropertyValueGlobal(
@@ -331,7 +331,7 @@ export default class JsxParser {
         });
         if (typeof value === "string" && childNodes.length > 1) {
           // Remove empty nodes from import code
-          if (value.trim() === "") return;
+          if (value.trim() === "") { return; }
           const componentVertex = findVertexByLabelAndUniqueId(
             graph,
             "Comp",
@@ -347,7 +347,7 @@ export default class JsxParser {
             setGraph,
             1000,
           );
-          if (rowId === -1) return;
+          if (rowId === -1) { return; }
           setPropertyValueGlobal(
             graph,
             setGraph,
@@ -361,8 +361,8 @@ export default class JsxParser {
         return value;
       });
       // Don't process if children length > 1
-      if (childNodes.length > 1) return;
-      if (!component && !canHaveWhitespace(name)) {
+      if (childNodes.length > 1) { return; }
+      if (!(component || canHaveWhitespace(name))) {
         children = children.filter(
           (child) => typeof child !== "string" || !/^\s*$/.test(child),
         );
@@ -404,7 +404,6 @@ export default class JsxParser {
         );
       }
     } else {
-      console.log("not handled", children);
     }
   };
   #parseExpression = (
@@ -414,9 +413,10 @@ export default class JsxParser {
     scope?: Scope,
   ): any => {
     switch (expression.type) {
-      case "JSXAttribute":
-        if (expression.value === null) return true;
+      case "JSXAttribute": {
+        if (expression.value === null) { return true; }
         return this.#parseExpression(graph, setGraph, expression.value, scope);
+      }
       case "JSXElement":
       case "JSXFragment":
         return this.#parseElement(graph, setGraph, expression, scope);
@@ -428,7 +428,7 @@ export default class JsxParser {
           scope,
         );
       case "JSXText": {
-        const key = this.props.disableKeyGeneration ? undefined : randomHash();
+        const _key = this.props.disableKeyGeneration ? undefined : randomHash();
         return expression.value;
       }
       // return this.props.disableFragments
@@ -438,7 +438,7 @@ export default class JsxParser {
         return expression.elements.map((ele) =>
           this.#parseExpression(graph, setGraph, ele, scope),
         ) as ParsedTree;
-      case "BinaryExpression":
+      case "BinaryExpression": {
         switch (expression.operator) {
           case "-":
             return (
@@ -447,7 +447,7 @@ export default class JsxParser {
             );
           case "!=":
             return (
-              this.#parseExpression(graph, setGraph, expression.left) !=
+              this.#parseExpression(graph, setGraph, expression.left) !==
               this.#parseExpression(graph, setGraph, expression.right)
             );
           case "!==":
@@ -492,7 +492,7 @@ export default class JsxParser {
             );
           case "==":
             return (
-              this.#parseExpression(graph, setGraph, expression.left) ==
+              this.#parseExpression(graph, setGraph, expression.left) ===
               this.#parseExpression(graph, setGraph, expression.right)
             );
           case "===":
@@ -512,6 +512,7 @@ export default class JsxParser {
             );
         }
         return undefined;
+      }
       case "CallExpression": {
         const parsedCallee = this.#parseExpression(
           graph,
@@ -538,17 +539,18 @@ export default class JsxParser {
           : this.#parseExpression(graph, setGraph, expression.alternate);
       case "ExpressionStatement":
         return this.#parseExpression(graph, setGraph, expression.expression);
-      case "Identifier":
+      case "Identifier": {
         if (scope && expression.name in scope) {
           return scope[expression.name];
         }
         return this.props.bindings?.[expression.name];
+      }
 
       case "Literal":
         return expression.value;
       case "LogicalExpression": {
         const left = this.#parseExpression(graph, setGraph, expression.left);
-        if (expression.operator === "||" && left) return left;
+        if (expression.operator === "||" && left) { return left; }
         if (
           (expression.operator === "&&" && left) ||
           (expression.operator === "||" && !left)
@@ -575,12 +577,12 @@ export default class JsxParser {
       case "TemplateLiteral":
         return [...expression.expressions, ...expression.quasis]
           .sort((a, b) => {
-            if (a.start < b.start) return -1;
+            if (a.start < b.start) { return -1; }
             return 1;
           })
           .map((item) => this.#parseExpression(graph, setGraph, item))
           .join("");
-      case "UnaryExpression":
+      case "UnaryExpression": {
         switch (expression.operator) {
           case "+":
             return expression.argument.value;
@@ -590,7 +592,8 @@ export default class JsxParser {
             return !expression.argument.value;
         }
         return undefined;
-      case "ArrowFunctionExpression":
+      }
+      case "ArrowFunctionExpression": {
         if (expression.async || expression.generator) {
           this.props.onError?.(
             new Error("Async and generator arrow functions are not supported."),
@@ -608,6 +611,7 @@ export default class JsxParser {
             functionScope,
           );
         };
+      }
     }
   };
 
@@ -630,8 +634,8 @@ export default class JsxParser {
       // @ts-ignore - AcornJsx doesn't have typescript typings
       parsed = parsed.body[0].expression.children || [];
     } catch (error) {
-      if (this.props.showWarnings) console.warn(error);
-      if (this.props.onError) this.props.onError(error);
+      if (this.props.showWarnings) { console.warn(error); }
+      if (this.props.onError) { this.props.onError(error); }
       if (this.props.renderError) {
         return this.props.renderError({ error: String(error) });
       }
@@ -676,7 +680,7 @@ export default class JsxParser {
         parent = value;
         return value[next];
       }, target);
-      if (typeof member === "function") return member.bind(parent);
+      if (typeof member === "function") { return member.bind(parent); }
 
       return member;
     } catch {
@@ -710,7 +714,7 @@ export default class JsxParser {
     this.ParsedChildren = this.#parseJSX(graph, setGraph, jsx, {
       parent: this.props.parent,
     });
-    const className = [
+    const _className = [
       ...new Set(["jsx-parser", ...String(this.props.className).split(" ")]),
     ]
       .filter(Boolean)

@@ -9,7 +9,7 @@ import { updateNodeProperties } from "~/cypher/mutate/sync/updateNodeProperties"
 
 export async function findOrCreateNodeAndUpdateProperties(
   // transferNode
-  sessionSource: Session,
+  _sessionSource: Session,
   sessionTarget: Session,
   node: Vertex,
   nodeType: string,

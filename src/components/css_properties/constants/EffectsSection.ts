@@ -7,9 +7,9 @@ import type {
   ToggleField,
 } from "./FieldType";
 
+import { sizeTypes } from "./csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";
 import { createGridOptions, } from "./FieldType";
-import { sizeTypes } from "./csseditor_constants";
 
 export const EffectsSection = {
   filter: {

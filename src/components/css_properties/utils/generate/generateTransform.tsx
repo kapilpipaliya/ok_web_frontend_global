@@ -3,7 +3,7 @@ export interface TransformAttributes {
   value: string;
 }
 
-export function generateTransform(transforms: Array<TransformAttributes>, isView?: boolean): string {
+export function generateTransform(transforms: TransformAttributes[], isView?: boolean): string {
   const separator = isView ? " " : "|";
   return transforms.map(transform => {
     const { type = '', value = '' } = transform;

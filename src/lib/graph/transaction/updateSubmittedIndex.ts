@@ -8,7 +8,7 @@ export function updateSubmittedIndex(
   txnId: number,
   graph: Store<GraphInterface>,
 ) {
-  if (!txnId || !graph.transactions.has(txnId)) return;
+  if (!(txnId && graph.transactions.has(txnId))) { return; }
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   existingTxnValue.submittedIndex = existingTxnValue.activeUndoIndex;
   existingTxnValue.revertSteps = [];

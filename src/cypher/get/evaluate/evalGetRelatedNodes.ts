@@ -1,6 +1,6 @@
 import type { TransactionPromise } from "neo4j-driver-core";
 
-import {type Session, int} from "neo4j-driver";
+import {int, type Session} from "neo4j-driver";
 
 import type {Vertex} from "~/lib/graph/graph";
 
@@ -17,13 +17,13 @@ export async function evalGetRelatedNodes(
   context: ContextType,
   relationType: "child" | "g" | "id" | "parent"
 ) {
-  if ((relationType === "child" || relationType === "parent") && (!vertexes || vertexes.length === 0)) return;
+  if ((relationType === "child" || relationType === "parent") && (!vertexes || vertexes.length === 0)) { return; }
 
   const session = await getSession(context);
 
   const { params, query } = buildQuery(edgeType, vertexes, relationType);
 
-  if (!query) return;
+  if (!query) { return; }
   try {
     const result = await runQuery(session, query, params, context.tx);
     if (params.allLabels) {
@@ -99,8 +99,8 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
       query += " RETURN n";
     }
 
-    if (searchParams.skip) query += ` SKIP ${searchParams.skip}`;
-    if (searchParams.limit) query += ` LIMIT ${searchParams.limit}`;
+    if (searchParams.skip) { query += ` SKIP ${searchParams.skip}`; }
+    if (searchParams.limit) { query += ` LIMIT ${searchParams.limit}`; }
   } else if (relationType === "id") {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
     params = { id: int(edgeType) };
@@ -113,7 +113,7 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
   return { params, query };
 }
 async function getSession(context: ContextType) {
-  if (context.tx) return null;
+  if (context.tx) { return null; }
   return context.session || getSessionForSubdomain();
 }
 
@@ -121,7 +121,7 @@ function getEdgeType(edgeType: string, vertexes: Vertex[]) {
   return edgeType.replaceAll("$0", vertexes[0].L[0]);
 }
 
-async function runQuery(session: Session | null, query: string, params: { [key: string]: any }, tx?: TransactionPromise) {
+async function runQuery(session: null | Session, query: string, params: { [key: string]: any }, tx?: TransactionPromise) {
   if (tx) {
     return await tx.run(query, params);
   }
@@ -136,7 +136,7 @@ function handleQueryError(action: string, vertexes: Vertex[], error: any) {
   throw error;
 }
 
-async function closeSession(session: Session | null, context: ContextType) {
+async function closeSession(session: null | Session, context: ContextType) {
   if (!context.session && session) {
     await session.close();
   }

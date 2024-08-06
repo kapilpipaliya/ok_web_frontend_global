@@ -1,12 +1,12 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import {
-  For,
-  Match,
-  Switch,
   createMemo,
   createUniqueId,
+  For,
+  Match,
   onCleanup,
+  Switch,
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -14,7 +14,7 @@ import { genericInputComponents } from "~/components/form/functions/genericInput
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
-import { type GraphInterface, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,
@@ -30,10 +30,10 @@ import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
-import { SelectPageField } from "./SelectPageField";
-import { UniqueNameField } from "./UniqueNameField";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
+import { SelectPageField } from "./SelectPageField";
+import { UniqueNameField } from "./UniqueNameField";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {

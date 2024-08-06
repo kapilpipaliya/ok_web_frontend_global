@@ -2,7 +2,7 @@
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
-import { IdAttr, type Vertex, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../../LayoutContext";
@@ -38,11 +38,10 @@ export function UniqueNameField(
           error: null,
         });
         return props.setValue(metaVertex, data);
-      } else {
+      }
         return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
           error: "Name is required",
         });
-      }
     }
     mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
       error: null,

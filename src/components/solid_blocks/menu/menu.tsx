@@ -1,13 +1,13 @@
 import {
   type Accessor,
-  type JSX,
-  Show,
   createContext,
   createEffect,
   createMemo,
   createSignal,
+  type JSX,
   onCleanup,
   onMount,
+  Show,
   splitProps,
   useContext,
 } from "solid-js";
@@ -233,7 +233,7 @@ export type MenuOptionProps = {
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
 export function MenuOption(props: Readonly<MenuOptionProps>) {
-  const [local, divProps] = splitProps(props, ["value", "onchange"]);
+  const [_local, divProps] = splitProps(props, ["value", "onchange"]);
   const [value, change, type] = useContext(MenuOptionsContext);
   const selectedValue = createMemo(() => value().includes(props.value));
   const clickHandler = createMemo(

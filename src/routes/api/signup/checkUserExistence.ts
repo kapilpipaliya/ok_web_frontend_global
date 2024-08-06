@@ -3,7 +3,7 @@ import type { TransactionPromise } from "neo4j-driver-core";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 
 export async function checkUserExistence(
-  tx: TransactionPromise,
+  _tx: TransactionPromise,
   username: string,
   email: string,
   subdomain: string,

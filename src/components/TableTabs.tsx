@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 
 import { LoaderNew } from "./LoaderSimple";
 

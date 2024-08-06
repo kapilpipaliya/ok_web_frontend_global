@@ -12,7 +12,7 @@ export function getSelectionOptions(
   setGraph: SetStoreFunction<GraphInterface>,
   collection: string,
   vertexes: Vertex[],
-  strict?: boolean,
+  _strict?: boolean,
 ): { error: boolean; vertexes?: any } {
   try {
     const value = evaluate(jsep(collection), {

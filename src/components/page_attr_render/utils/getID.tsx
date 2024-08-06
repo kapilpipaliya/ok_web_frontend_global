@@ -7,7 +7,7 @@ export function getID(item?: Vertex): string | undefined {
 }
 
 export function getId(
-  graph: Store<GraphInterface>,
+  _graph: Store<GraphInterface>,
   item?: Vertex,
 ): string | undefined {
   return getID(item) || "";

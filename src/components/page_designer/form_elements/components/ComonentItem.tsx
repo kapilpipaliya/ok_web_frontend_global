@@ -1,18 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
-import { type Id, type Vertex, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
+import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
-import { resetDragDropState } from "../../event_handler/resetDragDropState";
 
 export function ComonentItem(props: Readonly<{ child: Vertex }>) {
-  const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
-  const [isHovered, setIsHovered] = createSignal(false);
+  const [graph, _setGraph] = useGraph();
+  const [_layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
+  const [isHovered, _setIsHovered] = createSignal(false);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );

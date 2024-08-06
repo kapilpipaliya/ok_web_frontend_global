@@ -1,13 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, createMemo } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
 
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { Step } from "./Step";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
+import { Step } from "./Step";
 
 export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();

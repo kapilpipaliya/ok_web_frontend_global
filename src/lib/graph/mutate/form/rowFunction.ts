@@ -39,7 +39,7 @@ export function getSublistRows(
   meta: Vertex,
   vertex?: Vertex,
 ) {
-  if (!vertex) return [];
+  if (!vertex) { return []; }
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (
@@ -121,7 +121,7 @@ export function addNewRow(
     properties,
     meta.P.inward,
   );
-  if (isRealTime) commitTxn(txnId, graph);
+  if (isRealTime) { commitTxn(txnId, graph); }
   return newRowResult;
 }
 
@@ -131,7 +131,7 @@ export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
 
   if (!P.componentName) {
     const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-    if (componentName) P.componentName = componentName;
+    if (componentName) { P.componentName = componentName; }
   }
   return P;
 }
@@ -225,7 +225,7 @@ export function rowMetaInitialize(
 
       if (!P.componentName) {
         const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-        if (componentName) P.componentName = componentName;
+        if (componentName) { P.componentName = componentName; }
       }
       mergeVertexProperties(
         metaTxnId,

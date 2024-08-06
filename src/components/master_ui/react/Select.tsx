@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { type JSX, createMemo, splitProps } from "solid-js";
+import { createMemo, type JSX, splitProps } from "solid-js";
 
 import type { selectSizes } from "../core";
 

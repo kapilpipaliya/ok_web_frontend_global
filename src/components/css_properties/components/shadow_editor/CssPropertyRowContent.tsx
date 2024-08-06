@@ -2,9 +2,9 @@ import { type Accessor, type JSX, Match, type Setter, Switch } from "solid-js";
 
 import type { DataEditorField } from "../../constants/FieldType";
 
-import { type ShadowAttributes, generateBoxShadow } from "../../utils/generate/generateBoxShadow";
+import { generateBoxShadow, type ShadowAttributes } from "../../utils/generate/generateBoxShadow";
 import { generateFilter } from "../../utils/generate/generateFilter";
-import { type TextShadowAttributes, generateTextShadow } from "../../utils/generate/generateTextShadow";
+import { generateTextShadow, type TextShadowAttributes } from "../../utils/generate/generateTextShadow";
 import { generateTransform } from "../../utils/generate/generateTransform";
 import { generateTransition } from "../../utils/generate/generateTransition";
 

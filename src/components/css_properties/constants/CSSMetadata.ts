@@ -69,7 +69,7 @@ const filterValuePresetMap = new Map([
   ['url', 'url(||)'],
 ]);
 
-const valuePresets = new Map([
+const _valuePresets = new Map([
   ['filter', filterValuePresetMap],
   ['backdrop-filter', filterValuePresetMap],
   ['background', imageValuePresetMap],
@@ -101,7 +101,7 @@ const valuePresets = new Map([
   ],
 ]);
 
-const distanceProperties = new Set<string>([
+const _distanceProperties = new Set<string>([
   'background-position',
   'border-spacing',
   'bottom',
@@ -123,7 +123,7 @@ const distanceProperties = new Set<string>([
   'row-gap',
 ]);
 
-const bezierAwareProperties = new Set<string>([
+const _bezierAwareProperties = new Set<string>([
   'animation',
   'animation-timing-function',
   'transition',
@@ -134,10 +134,10 @@ const bezierAwareProperties = new Set<string>([
   
 ]);
 
-const fontAwareProperties =
+const _fontAwareProperties =
     new Set<string>(['font-size', 'line-height', 'font-weight', 'font-family', 'letter-spacing']);
 
-const colorAwareProperties = new Set<string>([
+const _colorAwareProperties = new Set<string>([
   'accent-color',
   'background',
   'background-color',
@@ -205,7 +205,7 @@ const colorAwareProperties = new Set<string>([
 ]);
 
 // In addition to `_colorAwareProperties`, the following properties contain CSS <angle> units.
-const angleAwareProperties = new Set<string>([
+const _angleAwareProperties = new Set<string>([
   
   'transform',
   
@@ -648,4 +648,4 @@ export const extraPropertyValues = {
 // Weight of CSS properties based on their usage from https://www.chromestatus.com/metrics/css/popularity
 
 // Common keywords to CSS properties
-const CommonKeywords = ['auto', 'none'];
+const _CommonKeywords = ['auto', 'none'];

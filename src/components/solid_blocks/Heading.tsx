@@ -9,7 +9,7 @@ export function Heading(
   } & JSX.HTMLAttributes<HTMLDivElement> &
     JSX.IntrinsicAttributes>,
 ) {
-  const [local, customProps] = splitProps(props, [
+  const [local, _customProps] = splitProps(props, [
     "heading",
     "subheading",
     "divider",

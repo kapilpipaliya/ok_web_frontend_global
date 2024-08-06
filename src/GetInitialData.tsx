@@ -1,4 +1,4 @@
-import { type JSX, Match, Switch, createSignal, onMount } from "solid-js";
+import { createSignal, type JSX, Match, onMount, Switch } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
@@ -13,7 +13,7 @@ export function GetInitialData(props: Readonly<{ children: JSX.Element }>) {
   onMount(async () => {
     try {
       await getInitialDataAndSetToGraph(graph);
-    } catch (error) {
+    } catch (_error) {
       setError("Failed to load initial data. Please try again.");
     } finally {
       setInitialDataLoading(false);
@@ -28,7 +28,7 @@ export function GetInitialData(props: Readonly<{ children: JSX.Element }>) {
       <Match when={error()}>
         <div>{error()}</div>
       </Match>
-      <Match when={!initialDataLoading() && !error()}>{props.children}</Match>
+      <Match when={!(initialDataLoading() || error())}>{props.children}</Match>
     </Switch>
   );
 }

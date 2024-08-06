@@ -18,8 +18,6 @@ export async function syncNodesMGCall(args: {
   const user = neo4j.driver(`bolt://localhost:${userport}`, undefined, {
     disableLosslessIntegers: true,
   });
-
-  console.log("Starting migration process...");
   const sessionSource = admin.session();
   const sessionTarget = user.session();
 
@@ -35,9 +33,7 @@ export async function syncNodesMGCall(args: {
       error: "Error migrating nodes.",
     };
   } finally {
-    console.log("Closing database sessions...");
     await sessionSource.close();
     await sessionTarget.close();
-    console.log("Database sessions closed.");
   }
 }

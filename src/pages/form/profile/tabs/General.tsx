@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { equals } from "rambda";
-import { Show, createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -18,7 +18,7 @@ type GeneralProps = {
 };
 
 export const GeneralSection = (props: Readonly<GeneralProps>) => {
-  const [graph, setGraph] = useGraph();
+  const [_graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
   const [selectedImage, setSelectedImage] = createSignal<File | null>(null);

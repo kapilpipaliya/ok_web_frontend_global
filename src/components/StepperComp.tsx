@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, createSignal } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 
 export const Stepper = () => {
   const [steps, setSteps] = createSignal([
@@ -95,7 +95,7 @@ export const Stepper = () => {
                 <span style="margin-right: 0.5rem; white-space: nowrap;">
                   {step.label}
                 </span>
-                <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);"></div>
+                <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);" />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -117,7 +117,7 @@ export const Stepper = () => {
                     e.stopPropagation();
                     addStepAfter(step.id);
                   }}
-                  style={`padding:5px 0px;cursor:pointer; color:rgb(37,99,235);`}
+                  style={'padding:5px 0px;cursor:pointer; color:rgb(37,99,235);'}
                   width={20}
                 />
               </Show>

@@ -7,7 +7,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
-  const [graph, setGraph] = useGraph();
+  const [_graph, _setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const [passwordData, setPasswordData] = createStore<{ [key: string]: any }>({
@@ -67,7 +67,7 @@ export const PasswordSection = (props: Readonly<{ profileData: any }>) => {
     }
     await showLoadingToast({
       loadMessage: "Updating Password...",
-      onSuccess: (value) => {
+      onSuccess: (_value) => {
         setPasswordData({
           confirmPassword: "",
           currentPassword: "",

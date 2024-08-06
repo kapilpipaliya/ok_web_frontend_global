@@ -10,7 +10,7 @@ import { sortChildren } from "./sortChildren";
 
 export function cloneLayoutAndChildren(
   layoutVertex: Vertex,
-  toExternalVertex: Vertex | undefined,
+  toExternalVertex: undefined | Vertex,
   externalTxnId: number | undefined,
   txnId: number,
   graph: GraphInterface,
@@ -34,7 +34,7 @@ export function cloneLayoutAndChildren(
     graph,
     setGraph,
   );
-  if (layoutRowId === -1) return;
+  if (layoutRowId === -1) { return; }
 
   fromVertex = graph.vertexes[layoutRowId];
 

@@ -1,6 +1,6 @@
 import type { createStore } from "solid-js/store";
 
-import { type JSX, createContext, useContext } from "solid-js";
+import { createContext, type JSX, useContext } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 

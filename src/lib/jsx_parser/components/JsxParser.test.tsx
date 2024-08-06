@@ -819,7 +819,6 @@ describe("JsxParser Component", () => {
     });
     test("passes bindings to children", () => {
       const logFn = () => {
-        console.log("Foo!");
       };
       const { component } = render(
         <JsxParser
@@ -865,7 +864,6 @@ describe("JsxParser Component", () => {
     });
     test("honors conditional rendering based on bound values", () => {
       const logFn = () => {
-        console.log("Foo!");
       };
       const { component } = render(
         <JsxParser
@@ -901,7 +899,6 @@ describe("JsxParser Component", () => {
     });
     test("allows use of bound functions in conditionals rendering", () => {
       const logFn = () => {
-        console.log("Foo!");
       };
       const { component } = render(
         <JsxParser

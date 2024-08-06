@@ -1,8 +1,8 @@
 import { type Accessor, createMemo } from "solid-js";
 
-import { useToast } from "~/components/Toast";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
+import { useToast } from "~/components/Toast";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { deleteStep } from "./deleteStep";
@@ -19,7 +19,7 @@ export function Step(
     getChildrenAttrs(graph, setGraph, layoutStore.formStore[0].formData),
   );
 
-  const handleDelete = (e: MouseEvent) => {
+  const handleDelete = (_e: MouseEvent) => {
     deleteStep(
       graph,
       setGraph,
@@ -32,8 +32,8 @@ export function Step(
     );
   };
 
-  const handleMoveUp = (e: MouseEvent) => {
-    if (props.index() > 0)
+  const handleMoveUp = (_e: MouseEvent) => {
+    if (props.index() > 0) {
       moveStep(
         graph,
         setGraph,
@@ -43,10 +43,11 @@ export function Step(
         props.index(),
         props.index() - 1,
       );
+    }
   };
 
-  const handleMoveDown = (e: MouseEvent) => {
-    if (props.index() < steps().length - 1)
+  const handleMoveDown = (_e: MouseEvent) => {
+    if (props.index() < steps().length - 1) {
       moveStep(
         graph,
         setGraph,
@@ -56,6 +57,7 @@ export function Step(
         props.index(),
         props.index() + 1,
       );
+    }
   };
 
   // const isActiveStep = () => layoutStore.activeStepId === props.step.id;
@@ -84,7 +86,7 @@ export function Step(
         <span style="margin-right: 0.5rem; white-space: nowrap;">
           {props.step.P.name}
         </span>
-        <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);"></div>
+        <div style="width:100%; height:1px; flex-grow:1; background-color:rgb(229,231,235);" />
       </button>
 
       <button

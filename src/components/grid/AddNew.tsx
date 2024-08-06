@@ -3,7 +3,7 @@ import { splitProps, } from "solid-js";
 import { IconButton, type IconButtonProps } from "../IconButton";
 
 export function AddNewButton(props: IconButtonProps) {
-  const [local, rest] = splitProps(props, ['children']);
+  const [_local, rest] = splitProps(props, ['children']);
 
   return (
     <IconButton

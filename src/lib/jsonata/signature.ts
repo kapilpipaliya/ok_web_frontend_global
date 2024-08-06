@@ -31,7 +31,7 @@ export function parseSignature(signature) {
   let param = {};
   let prevParam = param;
   while (position < signature.length) {
-    var symbol = signature.charAt(position);
+    let symbol = signature.charAt(position);
     if (symbol === ":") {
       // TODO figure out what to do with the return type
       // ignore it for now
@@ -70,46 +70,52 @@ export function parseSignature(signature) {
       case "n": // number
       case "b": // boolean
       case "l": // not so sure about expecting null?
-      case "o": // object
+      case "o": { // object
         param.regex = "[" + symbol + "m]";
         param.type = symbol;
         next();
         break;
-      case "a": // array
+      }
+      case "a": { // array
         //  normally treat any value as singleton array
         param.regex = "[asnblfom]";
         param.type = symbol;
         param.array = true;
         next();
         break;
-      case "f": // function
+      }
+      case "f": { // function
         param.regex = "f";
         param.type = symbol;
         next();
         break;
-      case "j": // any JSON type
+      }
+      case "j": { // any JSON type
         param.regex = "[asnblom]";
         param.type = symbol;
         next();
         break;
-      case "x": // any type
+      }
+      case "x": { // any type
         param.regex = "[asnblfom]";
         param.type = symbol;
         next();
         break;
-      case "-": // use context if param not supplied
+      }
+      case "-": { // use context if param not supplied
         prevParam.context = true;
         prevParam.contextRegex = new RegExp(prevParam.regex); // pre-compiled to test the context type at runtime
         prevParam.regex += "?";
         break;
+      }
       case "?": // optional param
       case "+": // one or more
         prevParam.regex += symbol;
         break;
-      case "(": // choice of types
+      case "(": { // choice of types
         // search forward for matching ')'
-        var endParen = findClosingBracket(signature, position, "(", ")");
-        var choice = signature.substring(position + 1, endParen);
+        const endParen = findClosingBracket(signature, position, "(", ")");
+        const choice = signature.substring(position + 1, endParen);
         if (choice.indexOf("<") === -1) {
           // no parameterized types, simple regex
           param.regex = "[" + choice + "m]";
@@ -126,6 +132,7 @@ export function parseSignature(signature) {
         position = endParen;
         next();
         break;
+      }
       case "<": // type parameter - can only be applied to 'a' and 'f'
         if (prevParam.type === "a" || prevParam.type === "f") {
           // search forward for matching '>'
@@ -154,14 +161,11 @@ export function parseSignature(signature) {
     } else {
       const type = typeof value;
       switch (type) {
-        case "string":
-          symbol = "s";
+        case "boolean":
+          symbol = "b";
           break;
         case "number":
           symbol = "n";
-          break;
-        case "boolean":
-          symbol = "b";
           break;
         case "object":
           if (value === null) {
@@ -172,7 +176,9 @@ export function parseSignature(signature) {
             symbol = "o";
           }
           break;
-        case "undefined":
+        case "string":
+          symbol = "s";
+          break;
         default:
           // any value can be undefined, but should be allowed to match
           symbol = "m"; // m for missing
