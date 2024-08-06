@@ -53,12 +53,10 @@ export function ComponentList() {
       const result = data();
       if (result?.error) {
         showErrorToast(result.error);
-      } else {
-        if (result?.graph) {
+      } else if (result?.graph) {
           setGraphData(graph, setGraph, result.graph);
           getTreeDataAndSetState();
         }
-      }
     }
   });
 
@@ -70,9 +68,7 @@ export function ComponentList() {
   }
   // Function to get icon by category
   const updateFilteredData = () => {
-    if (!searchQuery()) {
-      setFilteredData(defaultData);
-    } else {
+    if (searchQuery()) {
       const filteredData = defaultData
         .map((item) => {
           // Filter the children of each item based on the searchQuery
@@ -97,6 +93,8 @@ export function ComponentList() {
         .filter((item) => item.children && item.children.length > 0); // Filter out items with no matching children
 
       setFilteredData(filteredData);
+    } else {
+      setFilteredData(defaultData);
     }
   };
 

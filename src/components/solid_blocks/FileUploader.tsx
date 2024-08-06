@@ -78,9 +78,7 @@ export function FileUploader(props: FileUploaderProps) {
           localProps.onUploadSuccess(data);
           return;
         }
-        if (!props.data) {
-          setSelectedFiles(data.result);
-        } else {
+        if (props.data) {
           setSelectValueHelper(
             txnId,
             props.meta!,
@@ -91,6 +89,8 @@ export function FileUploader(props: FileUploaderProps) {
             graph,
             setGraph,
           );
+        } else {
+          setSelectedFiles(data.result);
         }
       }
     }

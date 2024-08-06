@@ -52,9 +52,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                   >
                     <div
                       class={`${
-                        !props.expandedSections().get(nav.P.name)
-                          ? "color:#37c"
-                          : ""
+                        props.expandedSections().get(nav.P.name)
+                          ? "" : "color:#37c"
                       } ${
                         location.pathname === nav.P.url
                           ? "bg:#E5EAFE font-weight:600"
@@ -79,9 +78,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                             style={{
                               "margin-top": "7px",
                               transform: `${
-                                !props.expandedSections().get(nav.P.name)
-                                  ? "rotate(0deg)"
-                                  : "rotate(180deg)"
+                                props.expandedSections().get(nav.P.name)
+                                  ? "rotate(180deg)" : "rotate(0deg)"
                               }`,
                               transition: "transform 0.2s linear",
                             }}

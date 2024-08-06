@@ -25,15 +25,13 @@ export function setParentValue(
 
   let valueArray = [] as Id[];
 
-  if (!Array.isArray(value)) {
-    if (value !== null && value !== undefined) {
+  if (Array.isArray(value)) {
+    valueArray = value;
+  } else if (value !== null && value !== undefined) {
       valueArray = [value];
     } else {
       valueArray = [];
     }
-  } else {
-    valueArray = value;
-  }
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that start with same vertex

@@ -58,9 +58,8 @@ export function SelectField(
       return lines.map((item) => {
         const [label, val] = item.split(",");
         if (val === undefined) {
-          return !props.meta.P.valueKey
-            ? label.trim()
-            : { id: label.trim(), label: label.trim() };
+          return props.meta.P.valueKey
+            ? { id: label.trim(), label: label.trim() } : label.trim();
         }
         return { id: val.trim(), label: label.trim() };
       });

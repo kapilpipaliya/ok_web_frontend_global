@@ -79,15 +79,13 @@ export function PageViewWrapper(
   });
 
   const authError = createMemo(() => {
-    if (!id()) {
-      if (!hasInsertPermission()) {
-        return `You are not authorized to insert ${props.pageVertexName}`;
-      }
-    } else {
+    if (id()) {
       if (!hasEditPermission() && !hasViewPermission()) {
         return `You are not authorized to edit or view ${props.pageVertexName}`;
       }
-    }
+    } else if (!hasInsertPermission()) {
+        return `You are not authorized to insert ${props.pageVertexName}`;
+      }
     return "";
   });
 

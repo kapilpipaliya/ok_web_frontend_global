@@ -489,7 +489,10 @@ export function replace(str, pattern, replacement, limit) {
               10,
             );
           }
-          if (!isNaN(index)) {
+          if (isNaN(index)) {
+            // not a capture group, treat the $ as literal
+            substitute += "$";
+          } else {
             if (regexMatch.groups.length > 0) {
               const submatch = regexMatch.groups[index - 1];
               if (typeof submatch !== "undefined") {
@@ -497,9 +500,6 @@ export function replace(str, pattern, replacement, limit) {
               }
             }
             position += index.toString().length;
-          } else {
-            // not a capture group, treat the $ as literal
-            substitute += "$";
           }
         }
         index = replacement.indexOf("$", position);
@@ -1690,15 +1690,15 @@ export function single(arr, func) {
       positiveResult = boolean(res);
     }
     if (positiveResult) {
-      if (!hasFoundMatch) {
-        result = entry;
-        hasFoundMatch = true;
-      } else {
+      if (hasFoundMatch) {
         throw {
           code: "D3138",
           index: i,
           stack: new Error().stack,
         };
+      } else {
+        result = entry;
+        hasFoundMatch = true;
       }
     }
   }

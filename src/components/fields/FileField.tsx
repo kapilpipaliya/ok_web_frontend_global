@@ -47,11 +47,11 @@ export function FileField(props: Readonly<Properties>) {
     function uploadFile(evt: ProgressEvent<EventTarget>) {
       if (xhr.responseText) {
         const data = JSON.parse(xhr.responseText);
-        if (!data.error) {
+        if (data.error) {
+          setState({ error: `Upload failed! ${data.description}` });
+        } else {
           showSuccessToast("Uploaded successfully!");
           if (p.onchange) p.onchange(data.media);
-        } else {
-          setState({ error: `Upload failed! ${data.description}` });
         }
       } else {
         setState({ error: `Upload failed: ${xhr.statusText}` });

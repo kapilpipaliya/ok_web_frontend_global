@@ -86,10 +86,10 @@ export function getExportCode(
               };
             }
 
-            if (!result.OUT[type]) {
-              result.OUT[type] = [pksResult];
-            } else {
+            if (result.OUT[type]) {
               result.OUT[type].push(pksResult);
+            } else {
+              result.OUT[type] = [pksResult];
             }
             // getChildren(metaVertex, v, pksResult);
           }
@@ -116,11 +116,13 @@ export function getExportCode(
           }),
         );
         if (out.length > 0) {
-          if (!result.OUT) {
+          if (result.OUT) {
+            result.OUT[type] = out;
+          } else {
             result.OUT = { [type]: out } as {
               [EdgeType: string]: { [primaryKey: string]: any }[];
             };
-          } else result.OUT[type] = out;
+          }
         }
       }
     }

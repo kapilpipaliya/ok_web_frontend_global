@@ -90,6 +90,7 @@
         "noSwitchDeclarations": "error",
         "noUndeclaredVariables": "error",
         "noUnnecessaryContinue": "error",
+        "noUnusedImports": "error",
         "noUnreachable": "error",
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
@@ -196,29 +197,7 @@
       },
       "nursery": {
         "noDuplicateJsonKeys": "off",
-        "noEmptyBlockStatements": "error",
-        "noEmptyTypeParameters": "error",
-        "noGlobalEval": "off",
-        "noGlobalAssign": "error",
-        "noInvalidUseBeforeDeclaration": "error",
-        "noMisleadingCharacterClass": "error",
-        "noNodejsModules": "off",
-        "noThenProperty": "warn",
-        "noUnusedImports": "error",
-        "noUnusedPrivateClassMembers": "error",
-        "noUselessLoneBlockStatements": "error",
-        "noUselessTernary": "error",
-        "useAwait": "error",
-        "useConsistentArrayType": "error",
-        "useExportType": "error",
-        "useFilenamingConvention": "off",
-        "useForOf": "warn",
-        "useGroupedTypeImport": "error",
-        "useImportRestrictions": "off",
-        "useImportType": "error",
-        "useNodejsImportProtocol": "warn",
-        "useNumberNamespace": "error",
-        "useShorthandFunctionType": "warn"
+        "useImportRestrictions": "off"
       }
     }
   },
@@ -249,7 +228,7 @@
       "quoteProperties": "asNeeded",
       "quoteStyle": "single",
       "semicolons": "always",
-      "trailingComma": "all"
+      "trailingCommas": "all"
     },
     "globals": [],
     "parser": {

@@ -38,7 +38,7 @@ export function Collapsible(
         style={{
           "background-color": state() ? "rgb(125 125 125)" : "#777",
           border: "none",
-          "border-radius": !state() ? "5px" : "5px 5px 0px 0px",
+          "border-radius": state() ? "5px 5px 0px 0px" : "5px",
           color: "white",
           cursor: "pointer",
           "font-size": "15px",

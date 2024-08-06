@@ -177,8 +177,7 @@ function evaluatePath(expr, input, environment) {
     // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
     if (ii === 0 && step.consarray) {
       resultSequence = evaluate(step, inputSequence, environment);
-    } else {
-      if (isTupleStream) {
+    } else if (isTupleStream) {
         tupleBindings = evaluateTupleStep(
           step,
           inputSequence,
@@ -193,7 +192,6 @@ function evaluatePath(expr, input, environment) {
           ii === expr.steps.length - 1,
         );
       }
-    }
 
     if (
       !isTupleStream &&
@@ -803,7 +801,7 @@ function evaluateComparisonExpression(lhs, rhs, op) {
     throw {
       code: "T2010",
       stack: new Error().stack,
-      value: !(ltype === "string" || ltype === "number") ? lhs : rhs,
+      value: (ltype === "string" || ltype === "number") ? rhs : lhs,
     };
   }
 
@@ -1254,7 +1252,7 @@ function evaluateSortExpression(expr, input, environment) {
           code: "T2008",
           position: expr.position,
           stack: new Error().stack,
-          value: !(atype === "string" || atype === "number") ? aa : bb,
+          value: (atype === "string" || atype === "number") ? bb : aa,
         };
       }
 

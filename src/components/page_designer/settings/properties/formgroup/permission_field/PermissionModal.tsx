@@ -48,10 +48,10 @@ export function PermissionModal(
   const [error, setError] = createSignal<null | string>(null);
 
   const onSubmit = () => {
-    if (!error()) {
-      props.onSubmit();
-    } else {
+    if (error()) {
       alert(error());
+    } else {
+      props.onSubmit();
     }
   };
 
@@ -81,9 +81,8 @@ export function PermissionModal(
                     class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem"
                     id="modal-title"
                   >
-                    {!props.selectedAttr
-                      ? "All Permissions"
-                      : `${props.selectedAttr.P.name} Permissions`}
+                    {props.selectedAttr
+                      ? `${props.selectedAttr.P.name} Permissions` : "All Permissions"}
                     :
                   </h3>
                   <div class="mt:0.5rem">

@@ -37,7 +37,15 @@ export function FormField(
   } as unknown as IFormContext);
   const [formData, setFormData] = formFieldStore;
 
-  if (!props.data?.id) {
+  if (props.data?.id) {
+    setFormData({
+      formData: props.data,
+      formMeta: props.meta,
+      groupByTabsAndGroup: {},
+      tabs: [],
+      txnId,
+    });
+  } else {
     const form = generateFormMetaAttributes(graph, () => { }, props.meta);
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
@@ -62,14 +70,6 @@ export function FormField(
       txnId,
     });
 
-  } else {
-    setFormData({
-      formData: props.data,
-      formMeta: props.meta,
-      groupByTabsAndGroup: {},
-      tabs: [],
-      txnId,
-    });
   }
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();

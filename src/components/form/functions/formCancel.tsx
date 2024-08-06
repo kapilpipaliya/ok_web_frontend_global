@@ -18,10 +18,10 @@ export function formCancel(closePopUp?: () => void) {
   return () => {
     revertTransaction(formStore!.txnId, graph);
     deleteTxnId(formStore!.txnId, graph);
-    if (!closePopUp) {
-      navigateToParentRoute();
-    } else {
+    if (closePopUp) {
       closePopUp();
+    } else {
+      navigateToParentRoute();
     }
   };
 }

@@ -64,10 +64,10 @@ export function RulesModal(
 
   const expression = createMemo(() => {
     let expr = '';
-    if (!props.selectedRule) {
-      expr = ''
-    } else {
+    if (props.selectedRule) {
       expr = getConditionsExpression(props.selectedRule!, { P: {} } as unknown as Vertex, graph, setGraph, true);
+    } else {
+      expr = ''
     }
 
     try {
@@ -80,10 +80,10 @@ export function RulesModal(
   });
 
   const onRulesSubmit = () => {
-    if (!error()) {
-      props.onSubmit();
-    } else {
+    if (error()) {
       alert(error());
+    } else {
+      props.onSubmit();
     }
   };
 
@@ -113,9 +113,8 @@ export function RulesModal(
                     class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem"
                     id="modal-title"
                   >
-                    {!props.selectedRule
-                      ? "All Rules"
-                      : `${props.selectedRule.P.name} Rules`}
+                    {props.selectedRule
+                      ? `${props.selectedRule.P.name} Rules` : "All Rules"}
                     :
                   </h3>
                   <div class="mt:0.5rem">

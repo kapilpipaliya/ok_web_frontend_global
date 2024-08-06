@@ -88,7 +88,7 @@ export function setGridHeaders(
     cell: (info) => {
       const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
-        <div class={`${!formNew.isInlineEditable ? 'py:0.25rem r:7' : ''} flex ai:center gap:10px jc:center`}>
+        <div class={`${formNew.isInlineEditable ? '' : 'py:0.25rem r:7'} flex ai:center gap:10px jc:center`}>
           <Show when={gridState.isNoPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
             <IconButton
               disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && (!gridState.hasEditPermission() && !gridState.hasViewPermission())}

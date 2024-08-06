@@ -54,7 +54,7 @@ export function TreeView(
                   "border-radius": "50%",
                   "font-size": "24px",
                   transform: `${
-                    !isExpanded() ? "rotate(0deg)" : "rotate(90deg)"
+                    isExpanded() ? "rotate(90deg)" : "rotate(0deg)"
                   }`,
                   transition: "transform 0.2s linear",
                 }}
@@ -68,10 +68,10 @@ export function TreeView(
     );
   };
 
-  if (!parentValues) {
-    parentValues = createSignal([props.meta.id]);
-  } else {
+  if (parentValues) {
     parentValues[1]((prev) => [...prev, props.meta.id]);
+  } else {
+    parentValues = createSignal([props.meta.id]);
   }
 
   return (

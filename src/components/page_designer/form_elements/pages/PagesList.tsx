@@ -73,13 +73,13 @@ export function PagesList(props: Readonly<{ coll: string }>) {
 
   // Update filtered data based on search query
   const updateFilteredData = () => {
-    if (!searchQuery()) {
-      setFilteredData(originalData);
-    } else {
+    if (searchQuery()) {
       const filtered = originalData.filter((item) =>
         item.name?.toLowerCase().includes(searchQuery().toLowerCase()),
       );
       setFilteredData(filtered);
+    } else {
+      setFilteredData(originalData);
     }
   };
 

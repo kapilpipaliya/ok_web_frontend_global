@@ -104,12 +104,12 @@ export function Sidebar() {
   const handleUrlChange = () => {
     const path = location.pathname;
 
-    if (!path.includes("/admin")) {
-      setGraph("isSideBarOpen", false);
-      setGraph("isSubSideBarOpen", false);
-    } else {
+    if (path.includes("/admin")) {
       setGraph("isSideBarOpen", true);
       setGraph("isSubSideBarOpen", true);
+    } else {
+      setGraph("isSideBarOpen", false);
+      setGraph("isSubSideBarOpen", false);
     }
   };
 
