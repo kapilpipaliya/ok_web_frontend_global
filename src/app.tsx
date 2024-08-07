@@ -10,7 +10,7 @@ import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { Toaster } from "./components/solid-toast/src";
-import { GraphContext, } from "./lib/graph/graph";
+import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {

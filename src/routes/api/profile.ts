@@ -96,9 +96,15 @@ const profile = async (payload: any, session: Session, _subdomain: string) => {
   // Update user profile
   let query = "MATCH (u:User) WHERE u.uId = $uId SET ";
   const updates = [];
-  if (email) { updates.push("u.email = $email"); }
-  if (username) { updates.push("u.username = $username"); }
-  if (profileImage) { updates.push("u.profileImage = $profileImage"); }
+  if (email) {
+    updates.push("u.email = $email");
+  }
+  if (username) {
+    updates.push("u.username = $username");
+  }
+  if (profileImage) {
+    updates.push("u.profileImage = $profileImage");
+  }
   query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
   const result = await session.run(query, {

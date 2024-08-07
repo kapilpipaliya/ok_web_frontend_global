@@ -23,11 +23,17 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   as?: string;
   children?: JSX.Element;
   data: Vertex;
-  meta: Vertex
+  meta: Vertex;
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
-  const [local, others] = splitProps(props, ['as', 'ref', 'data', 'meta', 'children']);
+  const [local, others] = splitProps(props, [
+    "as",
+    "ref",
+    "data",
+    "meta",
+    "children",
+  ]);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const [formStore] = useFormContext();
@@ -39,11 +45,11 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     const current = internalRef();
     if (current instanceof HTMLElement) {
       // This behavior is redundant for buttons
-      if (current.tagName !== 'BUTTON') {
-        useEventListener(current, 'keydown', e => {
+      if (current.tagName !== "BUTTON") {
+        useEventListener(current, "keydown", (e) => {
           switch (e.key) {
-            case 'Enter':
-            case ' ': {
+            case "Enter":
+            case " ": {
               current.click();
               break;
             }
@@ -75,7 +81,9 @@ export function ButtonField(props: Readonly<ButtonProps>) {
 
   const onReset = () => {
     const initialIndex = getNamedIndex(formStore!.txnId, "initial", graph);
-    if (initialIndex === undefined) { return; }
+    if (initialIndex === undefined) {
+      return;
+    }
     revertTransactionUpToIndex(formStore!.txnId, initialIndex, graph);
   };
   const extraProps = createMemo(() => {
@@ -99,7 +107,14 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
   return (
     <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
-      <Dynamic {...createARIADisabledState(() => props.disabled)} component={local.as ?? "button"} ref={setInternalRef} tabIndex={props.disabled ? -1 : 0} {...others} {...extraProps}>
+      <Dynamic
+        {...createARIADisabledState(() => props.disabled)}
+        component={local.as ?? "button"}
+        ref={setInternalRef}
+        tabIndex={props.disabled ? -1 : 0}
+        {...others}
+        {...extraProps}
+      >
         {local.data?.P?.[local.meta.P.name] ??
           local.meta.P.text ??
           local.meta.P.children}

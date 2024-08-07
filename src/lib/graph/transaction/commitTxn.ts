@@ -8,7 +8,9 @@ import type { TransactionValue } from "./TransactionType";
 import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "./TransactionType";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
-  if (!graph.transactions.has(txnId)) { return; }
+  if (!graph.transactions.has(txnId)) {
+    return;
+  }
   const txnValue = graph.transactions.get(txnId);
 
   const submittedIndex = txnValue?.submittedIndex ?? -1;
@@ -16,7 +18,9 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   const activeUndoIndex =
     txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
 
-  if (submittedIndex === activeUndoIndex) { return; }
+  if (submittedIndex === activeUndoIndex) {
+    return;
+  }
 
   let revertSteps: TransactionValue[] = [];
   let steps: TransactionValue[];

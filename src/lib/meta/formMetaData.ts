@@ -17,7 +17,7 @@ import { Dashboard } from "./page/Dashboard";
 import { FormCategory } from "./page/FormCategory";
 import { Page } from "./page/Page";
 
-const FormMetaDataAuth: { [key: string]: IFormMetaData; } = {
+const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
   Dashboard: Dashboard,
   Import: Import,
   Nav: Nav,
@@ -49,7 +49,6 @@ for (const key in FormMetaData) {
   // @ts-expect-error ignore
   FormMetaData[key].addActionButtons = true;
 }
-
 
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
   (x) => x.name === "Rule",

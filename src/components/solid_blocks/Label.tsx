@@ -18,9 +18,11 @@ interface LabeledFieldProps {
 }
 
 export function Label(
-  props: Readonly<JSX.HTMLAttributes<HTMLSpanElement> &
-    JSX.IntrinsicAttributes &
-    LabeledFieldProps>,
+  props: Readonly<
+    JSX.HTMLAttributes<HTMLSpanElement> &
+      JSX.IntrinsicAttributes &
+      LabeledFieldProps
+  >,
 ) {
   const [formStore] = useFormContext();
 
@@ -29,13 +31,21 @@ export function Label(
       ? formStore?.formMeta?.P.position || "top"
       : props.position,
   );
-  
+
   const generateLabelClass = () => {
     const styles: { [key: string]: string } = {};
-    if (position() === "top") { styles.mb = "5px"; }
-    if (position() === "right") { styles.ml = "5px"; }
-    if (position() === "left") { styles.mr = "5px"; }
-    if (position() === "bottom") { styles.mt = "5px"; }
+    if (position() === "top") {
+      styles.mb = "5px";
+    }
+    if (position() === "right") {
+      styles.ml = "5px";
+    }
+    if (position() === "left") {
+      styles.mr = "5px";
+    }
+    if (position() === "bottom") {
+      styles.mt = "5px";
+    }
     return Object.entries(styles)
       .map(([key, value]) => `${key}:${value}`)
       .join(" ");
@@ -49,21 +59,36 @@ export function Label(
   const resolvedChildren = children(() => local.children);
 
   // note: table should not be wrapped inside label
-  const component = createMemo(() => isFirstElementSupportedByLabel(resolvedChildren() as HTMLElement) ? "label" : "div");
+  const component = createMemo(() =>
+    isFirstElementSupportedByLabel(resolvedChildren() as HTMLElement)
+      ? "label"
+      : "div",
+  );
 
   return (
-    <Dynamic class={`inline-flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`} component={component()}>
+    <Dynamic
+      class={`inline-flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
+      component={component()}
+    >
       <Switch fallback={resolvedChildren()}>
-        <Match when={local.label && (position() === "top" || position() === "left")}>
+        <Match
+          when={local.label && (position() === "top" || position() === "left")}
+        >
           <span class={generateLabelClass()} {...restProps}>
-            {local.label}{local.required && <span class="color:red"> *</span>}
+            {local.label}
+            {local.required && <span class="color:red"> *</span>}
           </span>
           {resolvedChildren()}
         </Match>
-        <Match when={local.label && (position() === "bottom" || position() === "right")}>
+        <Match
+          when={
+            local.label && (position() === "bottom" || position() === "right")
+          }
+        >
           {resolvedChildren()}
           <span class={generateLabelClass()} {...restProps}>
-            {local.label}{local.required && <span class="color:red"> *</span>}
+            {local.label}
+            {local.required && <span class="color:red"> *</span>}
           </span>
         </Match>
       </Switch>
@@ -73,7 +98,9 @@ export function Label(
 
 // Other label component: https://github.com/radix-ui/primitives/blob/main/packages/react/label/src/Label.tsx
 
-export function isFirstElementSupportedByLabel(node: HTMLElement | HTMLElement[]): boolean {
+export function isFirstElementSupportedByLabel(
+  node: HTMLElement | HTMLElement[],
+): boolean {
   if (!node) {
     return false;
   }
@@ -82,10 +109,17 @@ export function isFirstElementSupportedByLabel(node: HTMLElement | HTMLElement[]
   if (!firstElement) {
     return false;
   }
-  if (typeof firstElement === 'string') {
+  if (typeof firstElement === "string") {
     return true;
   }
 
-  const supportedTags = ['input', 'select', 'textarea', 'output', 'meter', 'progress'];
+  const supportedTags = [
+    "input",
+    "select",
+    "textarea",
+    "output",
+    "meter",
+    "progress",
+  ];
   return supportedTags.includes(firstElement.tagName.toLowerCase());
 }

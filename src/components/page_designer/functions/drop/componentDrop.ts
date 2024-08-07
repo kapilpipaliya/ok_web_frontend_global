@@ -33,7 +33,9 @@ export function componentDrop(
 ) {
   const { showErrorToast } = useToast();
 
-  if (!fromVertex) { return -1; }
+  if (!fromVertex) {
+    return -1;
+  }
 
   const attrMetaVertex = createAttrMetaVertex(graph);
   const attrCompMetaVertex = createAttrCompMetaVertex(graph);

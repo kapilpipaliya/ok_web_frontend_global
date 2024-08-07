@@ -1,4 +1,3 @@
-
 import { type Accessor, createMemo, createSelector, For, Show } from "solid-js";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
@@ -22,7 +21,7 @@ export function LayoutTreeItem(
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
-  }>
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -33,7 +32,7 @@ export function LayoutTreeItem(
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
   const children = createMemo(() =>
-    getChildrenAttrs(graph, setGraph, props.metaVertex)
+    getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
 
   let startTime = 0;
@@ -57,7 +56,7 @@ export function LayoutTreeItem(
             props.toggleExpand(props.metaVertex.id);
           }
         }
-      }
+      },
     );
   };
 
@@ -90,14 +89,19 @@ export function LayoutTreeItem(
     e.stopPropagation();
     setLayoutStore("hoverId", -1);
   };
-  const isAfter = createMemo(() => isActiveTargetItem() && layoutStore.position === "after");
+  const isAfter = createMemo(
+    () => isActiveTargetItem() && layoutStore.position === "after",
+  );
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
     if (isActiveTargetItem()) {
       if (layoutStore.position !== "after") {
-        const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+        const boxShadowProps = getDnDBoxShadowArgs(
+          layoutStore.position,
+          "green-60",
+        );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
       }
     }
@@ -121,17 +125,19 @@ export function LayoutTreeItem(
         isHovered={isSelectedHoverId(props.metaVertex.id)}
         isSelected={isSelectedLayoutId(props.metaVertex.id)}
         onClick={handleClick}
-        onDragEnter={e => {
+        onDragEnter={(e) => {
           startTime = Date.now();
-          handleDragOverEvent(e)
+          handleDragOverEvent(e);
         }}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
-        onDragStart={(e) => handleDragStart(e, setLayoutStore, props.metaVertex)}
+        onDragStart={(e) =>
+          handleDragStart(e, setLayoutStore, props.metaVertex)
+        }
         onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}
         onmouseleave={handleMouseLeave}
-        ref={el => {
+        ref={(el) => {
           // @ts-expect-error ignore
           el.useCurrentPosition = true;
         }}
@@ -141,7 +147,9 @@ export function LayoutTreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
         />
-        <Show when={layoutStore.formStore[0].formData.id !== props.metaVertex.id}>
+        <Show
+          when={layoutStore.formStore[0].formData.id !== props.metaVertex.id}
+        >
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
       </TreeItemContainer>

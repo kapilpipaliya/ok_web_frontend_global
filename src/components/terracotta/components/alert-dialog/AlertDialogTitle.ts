@@ -1,40 +1,40 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import { useAlertDialogContext } from './AlertDialogContext';
-import { ALERT_DIALOG_TITLE_TAG } from './tags';
+} from "../../utils/state-props";
+import { useAlertDialogContext } from "./AlertDialogContext";
+import { ALERT_DIALOG_TITLE_TAG } from "./tags";
 
-export type AlertDialogTitleProps<T extends ValidConstructor = 'h2'> =
+export type AlertDialogTitleProps<T extends ValidConstructor = "h2"> =
   HeadlessPropsWithRef<T, DisclosureStateRenderProps>;
 
-export function AlertDialogTitle<T extends ValidConstructor = 'h2'>(
+export function AlertDialogTitle<T extends ValidConstructor = "h2">(
   props: AlertDialogTitleProps<T>,
 ): JSX.Element {
-  const context = useAlertDialogContext('AlertDialogTitle');
+  const context = useAlertDialogContext("AlertDialogTitle");
   const state = useDisclosureState();
 
   return createDynamic(
-    () => props.as || ('h2' as T),
+    () => props.as || ("h2" as T),
     mergeProps(
-      omitProps(props, ['as', 'children']),
+      omitProps(props, ["as", "children"]),
       ALERT_DIALOG_TITLE_TAG,
       {
         get children() {

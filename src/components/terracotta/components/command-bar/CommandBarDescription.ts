@@ -1,39 +1,39 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import { useCommandBarContext } from './CommandBarContext';
-import { COMMAND_BAR_DESCRIPTION_TAG } from './tags';
+} from "../../utils/state-props";
+import { useCommandBarContext } from "./CommandBarContext";
+import { COMMAND_BAR_DESCRIPTION_TAG } from "./tags";
 
-export type CommandBarDescriptionProps<T extends ValidConstructor = 'p'> =
+export type CommandBarDescriptionProps<T extends ValidConstructor = "p"> =
   HeadlessProps<T, DisclosureStateRenderProps>;
 
-export function CommandBarDescription<T extends ValidConstructor = 'p'>(
+export function CommandBarDescription<T extends ValidConstructor = "p">(
   props: CommandBarDescriptionProps<T>,
 ): JSX.Element {
-  const context = useCommandBarContext('CommandBarDescription');
+  const context = useCommandBarContext("CommandBarDescription");
   const state = useDisclosureState();
   return createDynamic(
-    () => props.as || ('p' as T),
+    () => props.as || ("p" as T),
     mergeProps(
-      omitProps(props, ['as', 'children']),
+      omitProps(props, ["as", "children"]),
       COMMAND_BAR_DESCRIPTION_TAG,
       {
         get children() {

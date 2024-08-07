@@ -1,6 +1,6 @@
-import { createContext, useContext } from 'solid-js';
+import { createContext, useContext } from "solid-js";
 
-import assert from '../../utils/assert';
+import assert from "../../utils/assert";
 
 interface DialogContextData {
   descriptionID: string;

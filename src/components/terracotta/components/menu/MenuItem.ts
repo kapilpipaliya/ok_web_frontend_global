@@ -1,44 +1,44 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { MenuChildProps } from './MenuChild';
+} from "../../utils/dynamic-prop";
+import type { MenuChildProps } from "./MenuChild";
 
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createARIADisabledState,
   createDisabledState,
-} from '../../utils/state-props';
-import { Button } from '../button';
-import { MenuChild } from './MenuChild';
-import { useMenuContext } from './MenuContext';
-import { MENU_ITEM_TAG } from './tags';
+} from "../../utils/state-props";
+import { Button } from "../button";
+import { MenuChild } from "./MenuChild";
+import { useMenuContext } from "./MenuContext";
+import { MENU_ITEM_TAG } from "./tags";
 
-export type MenuItemProps<T extends ValidConstructor = 'li'> =
+export type MenuItemProps<T extends ValidConstructor = "li"> =
   HeadlessPropsWithRef<T, MenuChildProps>;
 
-export function MenuItem<T extends ValidConstructor = 'li'>(
+export function MenuItem<T extends ValidConstructor = "li">(
   props: MenuItemProps<T>,
 ): JSX.Element {
-  const context = useMenuContext('MenuItem');
+  const context = useMenuContext("MenuItem");
 
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['as', 'disabled', 'ref', 'children']),
+      omitProps(props, ["as", "disabled", "ref", "children"]),
       MENU_ITEM_TAG,
       createOwnerAttribute(context.getId()),
       {
         get as() {
-          return props.as || ('li' as T);
+          return props.as || ("li" as T);
         },
-        role: 'menuitem',
+        role: "menuitem",
         tabindex: -1,
       },
       createDisabledState(() => props.disabled),

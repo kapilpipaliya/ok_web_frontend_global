@@ -9,9 +9,13 @@ export function getCompFallbackToString(
   attrVertex: undefined | Vertex,
   graph: Store<GraphInterface>,
 ): undefined | Vertex {
-  if (!attrVertex) { return; }
+  if (!attrVertex) {
+    return;
+  }
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
-  if (attrComp) { return attrComp; }
+  if (attrComp) {
+    return attrComp;
+  }
 
   const attrDataTypeVertex = getChildVertex(
     graph,

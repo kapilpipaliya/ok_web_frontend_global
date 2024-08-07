@@ -18,10 +18,11 @@ import { useComponentMeta, useCssState } from "../../CssEditorContext";
 import { useCssEditorProps } from "../../CSSEditorPropsContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 
-interface FilePickerButtonProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+interface FilePickerButtonProps
+  extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
   selectedValue: () => string;
-} 
+}
 export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
@@ -36,7 +37,14 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     if (!(cssEditorProps?.meta && cssEditorProps?.data)) {
       return [];
     }
-    return evaluate(jsep(`->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name)}`), { graph, setGraph, vertexes: [cssEditorProps.data] }) || [];
+    return (
+      evaluate(
+        jsep(
+          `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name)}`,
+        ),
+        { graph, setGraph, vertexes: [cssEditorProps.data] },
+      ) || []
+    );
   });
 
   const onFileSelected = () => {
@@ -60,16 +68,30 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       IN: {},
       L: [],
       OUT: {},
-      P: { type: getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name) },
+      P: {
+        type: getCssSelectedFileEdgeName(
+          cssEditorProps.data.L[0],
+          cssEditorProps.meta.P.name,
+          state() || "Default",
+          meta.name,
+        ),
+      },
     } as Vertex;
 
-    setSelectionValue(txnId, cssEditorProps.data, graph, setGraph, selectedFileMetaVertex, selectedFile.id);
+    setSelectionValue(
+      txnId,
+      cssEditorProps.data,
+      graph,
+      setGraph,
+      selectedFileMetaVertex,
+      selectedFile.id,
+    );
 
     const currentValue = props.selectedValue();
-    if (!currentValue.includes('$1')) {
+    if (!currentValue.includes("$1")) {
       const newValue = `url($1)${currentValue ?? ""}`;
-      const event = new Event('input', { bubbles: true });
-      Object.defineProperty(event, 'target', { value: { value: newValue } });
+      const event = new Event("input", { bubbles: true });
+      Object.defineProperty(event, "target", { value: { value: newValue } });
       props.handleChange(event);
     }
 
@@ -86,17 +108,16 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
         class={selectedFileVertex().length > 0 ? "color:green" : ""}
         icon={"solar:gallery-linear"}
         onClick={() => setOpenDialog(true)}
-        size={16} />
+        size={16}
+      />
       <CustomModal
         dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
         footer={() => (
           <div class="flex ai:center jc:center mt:auto">
             <div class="b:1.5px|solid|lightseagreen ml:auto r:5">
-              <button
-                class=""
-                onClick={onFileSelected}
-                type="button"
-              >Select</button>
+              <button class="" onClick={onFileSelected} type="button">
+                Select
+              </button>
             </div>
           </div>
         )}
@@ -105,7 +126,13 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
         title="File Manager"
       >
         <div>
-          <FileManager enableRowSelection={vertex => (vertex as unknown as Vertex).L[0] === "File"} fileId={selectedFileVertex()[0]?.id} setFileManagerStore={setFileManagerStore} />
+          <FileManager
+            enableRowSelection={(vertex) =>
+              (vertex as unknown as Vertex).L[0] === "File"
+            }
+            fileId={selectedFileVertex()[0]?.id}
+            setFileManagerStore={setFileManagerStore}
+          />
         </div>
       </CustomModal>
     </>

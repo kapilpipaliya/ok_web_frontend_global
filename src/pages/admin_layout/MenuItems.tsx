@@ -12,10 +12,14 @@ export interface MenuItemsProps {
 export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {
   const [graph] = useGraph();
   return (
-    <Show fallback={<UnauthenticatedMenu onClose={props.onClose} />} when={!!graph.member?.P?.email}>
+    <Show
+      fallback={<UnauthenticatedMenu onClose={props.onClose} />}
+      when={!!graph.member?.P?.email}
+    >
       <AuthenticatedMenu
         onClose={props.onClose}
-        signOutCall={props.signOutCall} />
+        signOutCall={props.signOutCall}
+      />
     </Show>
   );
 }

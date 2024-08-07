@@ -16,7 +16,7 @@ export async function addNodeEdges(
   superChildrenVertexes: Vertex[],
   type: string,
   outLabel: string,
-  inward: boolean
+  inward: boolean,
 ): Promise<Vertex[]> {
   // Find children with the same name in the target database; if not exists, create a node and edge.
   const userChildrenVertexes = await getChildrenOrParentVertex(
@@ -24,11 +24,11 @@ export async function addNodeEdges(
     parentVertex.id,
     type,
     outLabel,
-    inward
+    inward,
   );
 
   const results: Vertex[] = [];
-  const globalCollections = ["DataType", "Comp", "CompCategory",]; // "Nav", "Page"
+  const globalCollections = ["DataType", "Comp", "CompCategory"]; // "Nav", "Page"
 
   for (const superVertex of superChildrenVertexes) {
     const superProperties = { ...superVertex.P };
@@ -46,7 +46,7 @@ export async function addNodeEdges(
           props: superProperties,
         });
         result.records.forEach((v) =>
-          results.push(convertNodeToJson(v.get("a")))
+          results.push(convertNodeToJson(v.get("a"))),
         );
         isPropertyExist = true;
         break;
@@ -62,7 +62,7 @@ export async function addNodeEdges(
           sessionSource,
           sessionTarget,
           superVertex,
-          superVertex.L[0]
+          superVertex.L[0],
         );
         query = `
           MATCH (a), (b)
@@ -89,7 +89,7 @@ export async function addNodeEdges(
 
       const result = await sessionTarget.run(query, params);
       result.records.forEach((v) =>
-        results.push(convertNodeToJson(v.get("b")))
+        results.push(convertNodeToJson(v.get("b"))),
       );
     }
   }

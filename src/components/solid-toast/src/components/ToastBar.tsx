@@ -1,38 +1,51 @@
-import { type Component, createEffect, Match, Switch } from 'solid-js';
+import { type Component, createEffect, Match, Switch } from "solid-js";
 
-import { resolveValue, type ToastBarProps } from '../types';
-import { getToastYDirection as d, iconContainer, messageContainer, toastBarBase } from '../util';
-import { Error, Loader, Success } from './';
+import { resolveValue, type ToastBarProps } from "../types";
+import {
+  getToastYDirection as d,
+  iconContainer,
+  messageContainer,
+  toastBarBase,
+} from "../util";
+import { Error, Loader, Success } from "./";
 
 export const ToastBar: Component<ToastBarProps> = (props) => {
   let el: HTMLDivElement | undefined;
 
   createEffect(() => {
-    if (!el) { return; }
+    if (!el) {
+      return;
+    }
     const direction = d(props.toast, props.position);
     if (props.toast.visible) {
       el.animate(
         [
-          { opacity: 0.5, transform: `translate3d(0,${direction * -200}%,0) scale(.6)` },
-          { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' },
+          {
+            opacity: 0.5,
+            transform: `translate3d(0,${direction * -200}%,0) scale(.6)`,
+          },
+          { opacity: 1, transform: "translate3d(0,0,0) scale(1)" },
         ],
         {
           duration: 350,
-          easing: 'cubic-bezier(.21,1.02,.73,1)',
-          fill: 'forwards'
-        }
+          easing: "cubic-bezier(.21,1.02,.73,1)",
+          fill: "forwards",
+        },
       );
     } else {
       el.animate(
         [
-          { opacity: 1, transform: 'translate3d(0,0,-1px) scale(1)' },
-          { opacity: 0, transform: `translate3d(0,${direction * -150}%,-1px) scale(.4)` },
+          { opacity: 1, transform: "translate3d(0,0,-1px) scale(1)" },
+          {
+            opacity: 0,
+            transform: `translate3d(0,${direction * -150}%,-1px) scale(.4)`,
+          },
         ],
         {
           duration: 400,
-          easing: 'cubic-bezier(.06,.71,.55,1)',
-          fill: 'forwards'
-        }
+          easing: "cubic-bezier(.06,.71,.55,1)",
+          fill: "forwards",
+        },
       );
     }
   });
@@ -50,17 +63,17 @@ export const ToastBar: Component<ToastBarProps> = (props) => {
         <Match when={props.toast.icon}>
           <div style={iconContainer}>{props.toast.icon}</div>
         </Match>
-        <Match when={props.toast.type === 'loading'}>
+        <Match when={props.toast.type === "loading"}>
           <div style={iconContainer}>
             <Loader {...props.toast.iconTheme} />
           </div>
         </Match>
-        <Match when={props.toast.type === 'success'}>
+        <Match when={props.toast.type === "success"}>
           <div style={iconContainer}>
             <Success {...props.toast.iconTheme} />
           </div>
         </Match>
-        <Match when={props.toast.type === 'error'}>
+        <Match when={props.toast.type === "error"}>
           <div style={iconContainer}>
             <Error {...props.toast.iconTheme} />
           </div>

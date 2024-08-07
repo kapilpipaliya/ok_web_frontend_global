@@ -5,7 +5,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
-export function ParentButton(props: { item: Vertex; }) {
+export function ParentButton(props: { item: Vertex }) {
   const [graph, setGraph] = useGraph();
   const [, setLayoutStore] = useDesignerLayoutStore();
   return (
@@ -14,10 +14,18 @@ export function ParentButton(props: { item: Vertex; }) {
       icon="mdi:arrow-up"
       onClick={() => {
         const parentResult = getParentVertex(["Attr"], props.item, graph);
-        if (parentResult.error) { return; }
-        onLayoutItemClick(setLayoutStore, parentResult.vertex!.id, graph, setGraph);
+        if (parentResult.error) {
+          return;
+        }
+        onLayoutItemClick(
+          setLayoutStore,
+          parentResult.vertex!.id,
+          graph,
+          setGraph,
+        );
       }}
       size={20}
-      title="Parent" />
+      title="Parent"
+    />
   );
 }

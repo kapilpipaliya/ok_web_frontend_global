@@ -15,11 +15,11 @@ export function onClickAddComponent(
   toVertexId: Id | number,
 ) {
   let toVertex = graph.vertexes[toVertexId];
-  const componentName = getChildVertex(graph, ["$0Comp"], toVertex).vertex
+  const componentName = getChildVertex(graph, ["$0Comp"], toVertex).vertex;
   if (!componentName?.P.child) {
     toVertex = getParentVertex(["Attr"], toVertex, graph).vertex!;
   }
-  const toParentVertex =  getParentVertex(["Attr"], toVertex, graph).vertex;
+  const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
 
   handleComponentDrag(
     graph,

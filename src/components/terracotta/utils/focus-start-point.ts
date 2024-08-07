@@ -13,16 +13,16 @@ export function getFocusStartPoint(): HTMLElement | null | undefined {
 
 export function setFocusStartPoint(element?: HTMLElement | null): void {
   if (element) {
-    const tabindex = element.getAttribute('tabindex');
+    const tabindex = element.getAttribute("tabindex");
 
-    element.setAttribute('tabindex', '-1');
+    element.setAttribute("tabindex", "-1");
     element.focus();
     element.blur();
 
     if (tabindex) {
-      element.setAttribute('tabindex', tabindex);
+      element.setAttribute("tabindex", tabindex);
     } else {
-      element.removeAttribute('tabindex');
+      element.removeAttribute("tabindex");
     }
   }
 }

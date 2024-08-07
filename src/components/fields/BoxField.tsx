@@ -10,14 +10,27 @@ function getAttrs(meta: Vertex) {
 }
 
 export function BoxField(props: Readonly<GenericComponentProps>) {
-  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'children']);
+  const [local, others] = splitProps(props, [
+    "componentName",
+    "meta",
+    "data",
+    "setValue",
+    "value",
+    "isRealTime",
+    "isTableInside",
+    "setValue",
+    "txnId",
+    "children",
+  ]);
 
-  return <Dynamic
-  component={local.meta.P.as || "div"}
-  {...others}
-  {...getAttrs(local.meta)}
->
-  {local.meta.P.text}
-  {local.children}
-</Dynamic>
+  return (
+    <Dynamic
+      component={local.meta.P.as || "div"}
+      {...others}
+      {...getAttrs(local.meta)}
+    >
+      {local.meta.P.text}
+      {local.children}
+    </Dynamic>
+  );
 }

@@ -1,6 +1,3 @@
-
-
-
 export function fileDownloader(opt: {
   bom?: string;
   data: ArrayBuffer | ArrayBufferView | Blob | string;

@@ -1,6 +1,6 @@
-import getFocusableElements from './focus-query';
-import { DISABLED_NODE } from './namespace';
-import { focusVirtually } from './virtual-focus';
+import getFocusableElements from "./focus-query";
+import { DISABLED_NODE } from "./namespace";
+import { focusVirtually } from "./virtual-focus";
 
 const enum Direction {
   Next = 1,

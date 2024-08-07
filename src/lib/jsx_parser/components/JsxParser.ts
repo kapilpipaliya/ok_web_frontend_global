@@ -197,7 +197,9 @@ export default class JsxParser {
       setGraph,
       1000,
     );
-    if (rowId === -1) { return; }
+    if (rowId === -1) {
+      return;
+    }
     const parentVertex = graph.vertexes[rowId];
     if (isText) {
       setPropertyValueGlobal(
@@ -331,7 +333,9 @@ export default class JsxParser {
         });
         if (typeof value === "string" && childNodes.length > 1) {
           // Remove empty nodes from import code
-          if (value.trim() === "") { return; }
+          if (value.trim() === "") {
+            return;
+          }
           const componentVertex = findVertexByLabelAndUniqueId(
             graph,
             "Comp",
@@ -347,7 +351,9 @@ export default class JsxParser {
             setGraph,
             1000,
           );
-          if (rowId === -1) { return; }
+          if (rowId === -1) {
+            return;
+          }
           setPropertyValueGlobal(
             graph,
             setGraph,
@@ -361,7 +367,9 @@ export default class JsxParser {
         return value;
       });
       // Don't process if children length > 1
-      if (childNodes.length > 1) { return; }
+      if (childNodes.length > 1) {
+        return;
+      }
       if (!(component || canHaveWhitespace(name))) {
         children = children.filter(
           (child) => typeof child !== "string" || !/^\s*$/.test(child),
@@ -414,7 +422,9 @@ export default class JsxParser {
   ): any => {
     switch (expression.type) {
       case "JSXAttribute": {
-        if (expression.value === null) { return true; }
+        if (expression.value === null) {
+          return true;
+        }
         return this.#parseExpression(graph, setGraph, expression.value, scope);
       }
       case "JSXElement":
@@ -550,7 +560,9 @@ export default class JsxParser {
         return expression.value;
       case "LogicalExpression": {
         const left = this.#parseExpression(graph, setGraph, expression.left);
-        if (expression.operator === "||" && left) { return left; }
+        if (expression.operator === "||" && left) {
+          return left;
+        }
         if (
           (expression.operator === "&&" && left) ||
           (expression.operator === "||" && !left)
@@ -577,7 +589,9 @@ export default class JsxParser {
       case "TemplateLiteral":
         return [...expression.expressions, ...expression.quasis]
           .sort((a, b) => {
-            if (a.start < b.start) { return -1; }
+            if (a.start < b.start) {
+              return -1;
+            }
             return 1;
           })
           .map((item) => this.#parseExpression(graph, setGraph, item))
@@ -634,8 +648,12 @@ export default class JsxParser {
       // @ts-ignore - AcornJsx doesn't have typescript typings
       parsed = parsed.body[0].expression.children || [];
     } catch (error) {
-      if (this.props.showWarnings) { console.warn(error); }
-      if (this.props.onError) { this.props.onError(error); }
+      if (this.props.showWarnings) {
+        console.warn(error);
+      }
+      if (this.props.onError) {
+        this.props.onError(error);
+      }
       if (this.props.renderError) {
         return this.props.renderError({ error: String(error) });
       }
@@ -680,7 +698,9 @@ export default class JsxParser {
         parent = value;
         return value[next];
       }, target);
-      if (typeof member === "function") { return member.bind(parent); }
+      if (typeof member === "function") {
+        return member.bind(parent);
+      }
 
       return member;
     } catch {

@@ -14,24 +14,43 @@ export function getUrl(data: Vertex) {
   return `/api/file/download?fileId=${data.id}`;
 }
 
-export function cssStateToString(cssStore: CSSStore, meta: Vertex, data: Vertex, graph: GraphInterface) {
-  if (!cssStore) { return ""; }
+export function cssStateToString(
+  cssStore: CSSStore,
+  meta: Vertex,
+  data: Vertex,
+  graph: GraphInterface,
+) {
+  if (!cssStore) {
+    return "";
+  }
 
   return Object.entries(cssStore)
     .map(([state, value]) => {
-      if (!value || state === undefined) { return; }
+      if (!value || state === undefined) {
+        return;
+      }
       if (isObject(value)) {
         return Object.entries(value)
           .map(([key, val]) => {
-            const selector = state && state !== "undefined" ? `${state}` : ""
+            const selector = state && state !== "undefined" ? `${state}` : "";
             if (Array.isArray(val)) {
-              const stateValue = arrayToString(key,val);
+              const stateValue = arrayToString(key, val);
               return `${key}:${stateValue}${selector}`;
             }
             let stateValue = val.toString().replaceAll(" ", "|");
             if (stateValue.includes("$1")) {
-              const edgeName = getCssSelectedFileEdgeName(data.L[0], meta.P.name, selector || "Default", key);
-              const files = evaluate(jsep(`->${edgeName}`), { graph, setGraph: ()=>{}, vertexes: [data] }) || [];
+              const edgeName = getCssSelectedFileEdgeName(
+                data.L[0],
+                meta.P.name,
+                selector || "Default",
+                key,
+              );
+              const files =
+                evaluate(jsep(`->${edgeName}`), {
+                  graph,
+                  setGraph: () => {},
+                  vertexes: [data],
+                }) || [];
               if (files.length === 0) {
                 return "";
               }

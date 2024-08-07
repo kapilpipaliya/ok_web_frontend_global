@@ -6,13 +6,24 @@ import { Dynamic } from "solid-js/web";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { type GraphInterface, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  IdAttr,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
-import { PageRenderContextProvider, usePageRenderContext } from "../page_attr_render/PageRenderContext";
-import { getConfiguredPermissions, hasPermissions, } from "../page_attr_render/permissions";
+import {
+  PageRenderContextProvider,
+  usePageRenderContext,
+} from "../page_attr_render/PageRenderContext";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "../page_attr_render/permissions";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useToast } from "../Toast";
@@ -61,14 +72,16 @@ export function DynamicComponent(
   const [formStore] = useFormContext();
   const { showErrorToast } = useToast();
 
-  const componentName = () =>
-    props.componentName ?? props.meta.P.componentName;
+  const componentName = () => props.componentName ?? props.meta.P.componentName;
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
 
   const component = createMemo(() => getDynamicComponent(componentName()));
 
-  const [selectedProps, customMetaProps] = splitProps(props.meta.P, ["validation", "labelClass"]);
+  const [selectedProps, customMetaProps] = splitProps(props.meta.P, [
+    "validation",
+    "labelClass",
+  ]);
 
   // Should also use repeaterContext
   // const repeaterContext = useRepeaterVertexContext();
@@ -80,9 +93,10 @@ export function DynamicComponent(
       for (const edge of props.meta.OUT[edgeType]) {
         const endVertex = graph.vertexes[graph.edges[edge].E];
         if (endVertex.L[0] === "Rule") {
-          let propertyName = edgeType.replace(/^Attr/g, '');
+          let propertyName = edgeType.replace(/^Attr/g, "");
           // Lowercase the first letter
-          propertyName = propertyName.charAt(0).toLowerCase() + propertyName.slice(1);
+          propertyName =
+            propertyName.charAt(0).toLowerCase() + propertyName.slice(1);
           propertyRuleMap.set(propertyName, endVertex); // Save endVertex in the value
         }
       }
@@ -93,26 +107,46 @@ export function DynamicComponent(
   const parentRenderItems = usePageRenderContext();
   const [previewStore] = usePreviewContext();
 
-  const allConfiguredPermission = createLazyMemo(() => getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph));
+  const allConfiguredPermission = createLazyMemo(() =>
+    getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph),
+  );
   const hasInsertPermission = createLazyMemo(() => {
-    return hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph) ?? parentRenderItems?.[0]?.hasInsertPermission;
+    return (
+      hasPermissions(allConfiguredPermission(), "insert", graph, setGraph) ??
+      parentRenderItems?.[0]?.hasInsertPermission
+    );
   });
   const hasEditPermission = createLazyMemo(() => {
-    return hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph) ?? parentRenderItems?.[0]?.hasEditPermission;
+    return (
+      hasPermissions(allConfiguredPermission(), "edit", graph, setGraph) ??
+      parentRenderItems?.[0]?.hasEditPermission
+    );
   });
   const hasViewPermission = createLazyMemo(() => {
-    return hasPermissions(allConfiguredPermission(), 'view', graph, setGraph) ?? parentRenderItems?.[0]?.hasViewPermission;
+    return (
+      hasPermissions(allConfiguredPermission(), "view", graph, setGraph) ??
+      parentRenderItems?.[0]?.hasViewPermission
+    );
   });
   const hasDeletePermission = createLazyMemo(() => {
-    return hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph) ?? parentRenderItems?.[0]?.hasDeletePermission;
+    return (
+      hasPermissions(allConfiguredPermission(), "delete", graph, setGraph) ??
+      parentRenderItems?.[0]?.hasDeletePermission
+    );
   });
 
-  const isNoPermissionCheck = () => (!previewStore || props.isNoPermissionCheck || formStore?.formMeta?.P.isNoPermissionCheck || previewStore.isDesignMode);
-  const hasPermission = () => (hasInsertPermission() || hasViewPermission() || hasEditPermission());
-  const hasNoPermission = () => !((hasInsertPermission() || hasViewPermission() ) || hasEditPermission());
+  const isNoPermissionCheck = () =>
+    !previewStore ||
+    props.isNoPermissionCheck ||
+    formStore?.formMeta?.P.isNoPermissionCheck ||
+    previewStore.isDesignMode;
+  const hasPermission = () =>
+    hasInsertPermission() || hasViewPermission() || hasEditPermission();
+  const hasNoPermission = () =>
+    !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const isDisabledPermission = () => {
-    return (isNoPermissionCheck() ? undefined : hasPermission());
-  }
+    return isNoPermissionCheck() ? undefined : hasPermission();
+  };
 
   const setValue = (value: unknown) => {
     if (props.setValue) {
@@ -136,10 +170,11 @@ export function DynamicComponent(
           return;
         }
         if (existingValue === undefined && !hasInsertPermission()) {
-          showErrorToast("You do not have insert permission to set this value.");
+          showErrorToast(
+            "You do not have insert permission to set this value.",
+          );
           return;
         }
-
 
         // Additional checks, e.g., role-based or context-sensitive permissions
         /*if (!hasRolePermission('editor') || !isOwnerOfData(props.data)) {
@@ -152,16 +187,32 @@ export function DynamicComponent(
       // logAction('modify', props.meta.P.name, value, currentUser);
 
       // TODO: if only insert permission, and value is set dont display it.
-      setValueGlobal(graph, setGraph, props.txnId!, props.meta, props.data!, value, false);
+      setValueGlobal(
+        graph,
+        setGraph,
+        props.txnId!,
+        props.meta,
+        props.data!,
+        value,
+        false,
+      );
     }
   };
 
   const expressionProperties = createMemo(() => {
     const values = {
-      get hasDeletePermission() { return hasDeletePermission(); },
-      get hasEditPermission() { return hasEditPermission(); },
-      get hasInsertPermission() { return hasInsertPermission(); },
-      get hasViewPermission() { return hasViewPermission(); },
+      get hasDeletePermission() {
+        return hasDeletePermission();
+      },
+      get hasEditPermission() {
+        return hasEditPermission();
+      },
+      get hasInsertPermission() {
+        return hasInsertPermission();
+      },
+      get hasViewPermission() {
+        return hasViewPermission();
+      },
     } as Record<string, any>;
     for (const [property, rule] of extraRuleProperties().entries()) {
       if (property === "disabled" && previewStore.isDesignMode) {
@@ -172,12 +223,25 @@ export function DynamicComponent(
       }
       if (formStore?.formData && rule) {
         try {
-          values[property] = evaluateRule(rule, formStore.formData, graph, setGraph);
+          values[property] = evaluateRule(
+            rule,
+            formStore.formData,
+            graph,
+            setGraph,
+          );
           if (property.toLowerCase().endsWith("class")) {
-            values[property] = mergeCSS("", values[property], { P: { name: property } } as unknown as Vertex, props.meta, graph);
+            values[property] = mergeCSS(
+              "",
+              values[property],
+              { P: { name: property } } as unknown as Vertex,
+              props.meta,
+              graph,
+            );
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e) { /* empty */ }
+        } catch (_e) {
+          /* empty */
+        }
       }
     }
 
@@ -192,10 +256,16 @@ export function DynamicComponent(
       if (descriptor) {
         // Handle properties with getters
         if (descriptor.get) {
-          if (key.toLowerCase().endsWith('class')) {
+          if (key.toLowerCase().endsWith("class")) {
             const value = customMetaProps[key];
             if (value !== null) {
-              result[key] = mergeCSS("", value, { P: { name: key } } as unknown as Vertex, props.meta, graph);
+              result[key] = mergeCSS(
+                "",
+                value,
+                { P: { name: key } } as unknown as Vertex,
+                props.meta,
+                graph,
+              );
             }
           } else {
             Object.defineProperty(result, key, descriptor);
@@ -204,7 +274,15 @@ export function DynamicComponent(
           // Handle properties without getters
           const value = descriptor.value;
           if (value !== null) {
-            result[key] = key.toLowerCase().endsWith('class') ? mergeCSS("", value, { P: { name: key } } as unknown as Vertex, props.meta, graph) : value;
+            result[key] = key.toLowerCase().endsWith("class")
+              ? mergeCSS(
+                  "",
+                  value,
+                  { P: { name: key } } as unknown as Vertex,
+                  props.meta,
+                  graph,
+                )
+              : value;
           }
         }
       }
@@ -213,11 +291,19 @@ export function DynamicComponent(
     return result;
   });
   const repeterStore = createStore({
-    get hasDeletePermission() { return hasDeletePermission(); },
-    get hasEditPermission() { return hasEditPermission(); },
-    get hasInsertPermission() { return hasInsertPermission(); },
-    get hasViewPermission() { return hasViewPermission(); },
-    vertexes: [] as Vertex[]
+    get hasDeletePermission() {
+      return hasDeletePermission();
+    },
+    get hasEditPermission() {
+      return hasEditPermission();
+    },
+    get hasInsertPermission() {
+      return hasInsertPermission();
+    },
+    get hasViewPermission() {
+      return hasViewPermission();
+    },
+    vertexes: [] as Vertex[],
   });
   const Content = () => (
     <Dynamic
@@ -234,7 +320,15 @@ export function DynamicComponent(
       txnId={props.txnId}
       value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
       {...expressionProperties()}
-      disabled={isNoPermissionCheck() ? customMetaProps.disabled : (props.disabled ?? previewStore.isViewOnly ?? isDisabledPermission() ?? expressionProperties().disabled ?? customMetaProps.disabled)}
+      disabled={
+        isNoPermissionCheck()
+          ? customMetaProps.disabled
+          : props.disabled ??
+            previewStore.isViewOnly ??
+            isDisabledPermission() ??
+            expressionProperties().disabled ??
+            customMetaProps.disabled
+      }
     >
       <Show when={props.meta.id}>
         <PageAttrRender data={props.data} metaVertex={props.meta} />
@@ -262,10 +356,36 @@ export function DynamicComponent(
       <PageRenderContextProvider item={props.meta} store={repeterStore}>
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
-          <Match keyed when={!expressionProperties().hidden && component() && (isNoPermissionCheck() || !hasNoPermission())}>
+          <Match
+            keyed
+            when={
+              !expressionProperties().hidden &&
+              component() &&
+              (isNoPermissionCheck() || !hasNoPermission())
+            }
+          >
             <Switch>
-              <Match when={(props.isLabelWrap ?? true) && componentName() !== "Label" && (expressionProperties().label || props.meta.P.label)}>
-                <Label class={mergeCSS("", selectedProps.labelClass, { P: { name: 'labelClass' } } as unknown as Vertex, props.meta, graph)} label={expressionProperties().label || props.meta.P.label} required={props.meta.P.validation?.required || expressionProperties().required}>
+              <Match
+                when={
+                  (props.isLabelWrap ?? true) &&
+                  componentName() !== "Label" &&
+                  (expressionProperties().label || props.meta.P.label)
+                }
+              >
+                <Label
+                  class={mergeCSS(
+                    "",
+                    selectedProps.labelClass,
+                    { P: { name: "labelClass" } } as unknown as Vertex,
+                    props.meta,
+                    graph,
+                  )}
+                  label={expressionProperties().label || props.meta.P.label}
+                  required={
+                    props.meta.P.validation?.required ||
+                    expressionProperties().required
+                  }
+                >
                   <Content />
                 </Label>
               </Match>

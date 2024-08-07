@@ -15,24 +15,31 @@ import { IconButton } from "~/components/IconButton";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
-import { addNewRow, rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
+import {
+  addNewRow,
+  rowMetaInitialize,
+} from "~/lib/graph/mutate/form/rowFunction";
 
 import { useFormContext } from "../../form/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
-export const SortableRow = (props: Readonly<{
-  dragFromIndex: Accessor<null | number>;
-  dragToIndex: Accessor<null | number>;
-  handleDrop: (event: DragEvent) => void;
-  isNoPermissionCheck?: boolean;
-  isRealTime: boolean;
-  joinVertex: Vertex;
-  rowIndex: number;
-  setDragFromIndex: (index: number) => void;
-  setDragToIndex: (index: number) => void;
-  tableColumnsTemplate: Accessor<Vertex[]>;
-  txnId: number;
-} & GenericComponentProps>) => {
+export const SortableRow = (
+  props: Readonly<
+    {
+      dragFromIndex: Accessor<null | number>;
+      dragToIndex: Accessor<null | number>;
+      handleDrop: (event: DragEvent) => void;
+      isNoPermissionCheck?: boolean;
+      isRealTime: boolean;
+      joinVertex: Vertex;
+      rowIndex: number;
+      setDragFromIndex: (index: number) => void;
+      setDragToIndex: (index: number) => void;
+      tableColumnsTemplate: Accessor<Vertex[]>;
+      txnId: number;
+    } & GenericComponentProps
+  >,
+) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
   const [formStore] = useFormContext();
@@ -41,7 +48,13 @@ export const SortableRow = (props: Readonly<{
 
   createComputed(
     on(props.tableColumnsTemplate, (columns) => {
-      const metaTxnId = rowMetaInitialize(graph, setGraph, props.joinVertex, props.meta, columns);
+      const metaTxnId = rowMetaInitialize(
+        graph,
+        setGraph,
+        props.joinVertex,
+        props.meta,
+        columns,
+      );
       if (metaTxnId && formStore?.cleanUpConfig) {
         const config = formStore.cleanUpConfig();
         if (!config.rowMetaTxnIds) {
@@ -56,7 +69,9 @@ export const SortableRow = (props: Readonly<{
     }),
   );
 
-  const instResult = createMemo(() => getChildVertex(graph, ["AttrInst"], props.joinVertex).vertex);
+  const instResult = createMemo(
+    () => getChildVertex(graph, ["AttrInst"], props.joinVertex).vertex,
+  );
 
   const getMetaVertex = (columnId: Id) => {
     const instRes = instResult();
@@ -77,9 +92,18 @@ export const SortableRow = (props: Readonly<{
   const handleDragEnter = () => props.setDragToIndex(props.rowIndex);
   const handleDragOver = (event: DragEvent) => event.preventDefault();
   const handleDragStart = () => props.setDragFromIndex(props.rowIndex);
-  const handleDeleteRow = () => deleteRow(props.joinVertex, props.isRealTime, graph, setGraph, props.txnId);
+  const handleDeleteRow = () =>
+    deleteRow(props.joinVertex, props.isRealTime, graph, setGraph, props.txnId);
   const handleAddNewRow = () =>
-    addNewRow(props.txnId ?? 0, expandVertex()!, graph, setGraph, props.joinVertex, {}, props.isRealTime ?? false);
+    addNewRow(
+      props.txnId ?? 0,
+      expandVertex()!,
+      graph,
+      setGraph,
+      props.joinVertex,
+      {},
+      props.isRealTime ?? false,
+    );
   const toggleExpanded = () => setExpanded(!expanded());
 
   return (
@@ -89,7 +113,9 @@ export const SortableRow = (props: Readonly<{
         classList={{
           "background-color:#e0e0e0": props.rowIndex === props.dragFromIndex(),
           "background-color:#f0f0f0": props.rowIndex === props.dragToIndex(),
-          "background-color:white": props.rowIndex !== props.dragFromIndex() && props.rowIndex !== props.dragToIndex(),
+          "background-color:white":
+            props.rowIndex !== props.dragFromIndex() &&
+            props.rowIndex !== props.dragToIndex(),
           "border:1px|solid|#ddd": props.rowIndex !== props.dragToIndex(),
           "border:2px|solid|green": props.rowIndex === props.dragToIndex(),
         }}
@@ -101,13 +127,34 @@ export const SortableRow = (props: Readonly<{
       >
         <td>
           <div class="flex ai:center jc:center">
-            <IconButton class="cursor:grab" icon="material-symbols:drag-indicator" iconClass="transition:transform|2s|ease-in-out" size={20}/>
+            <IconButton
+              class="cursor:grab"
+              icon="material-symbols:drag-indicator"
+              iconClass="transition:transform|2s|ease-in-out"
+              size={20}
+            />
             <Show when={expandVertex()}>
-              <IconButton class="cursor:pointer" icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"} iconClass="transition:transform|2s|ease-in-out" onClick={toggleExpanded} size={20}/>
+              <IconButton
+                class="cursor:pointer"
+                icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}
+                iconClass="transition:transform|2s|ease-in-out"
+                onClick={toggleExpanded}
+                size={20}
+              />
             </Show>
-            <IconButton class="color:red cursor:pointer m:5px" icon="mingcute:delete-line" onClick={handleDeleteRow} size={20}/>
+            <IconButton
+              class="color:red cursor:pointer m:5px"
+              icon="mingcute:delete-line"
+              onClick={handleDeleteRow}
+              size={20}
+            />
             <Show when={expandVertex()}>
-              <IconButton class="color:green cursor:pointer" icon="icon-park-outline:plus" onClick={handleAddNewRow} size={20}/>
+              <IconButton
+                class="color:green cursor:pointer"
+                icon="icon-park-outline:plus"
+                onClick={handleAddNewRow}
+                size={20}
+              />
             </Show>
           </div>
           {/*<Show when={!disabled}>*/}

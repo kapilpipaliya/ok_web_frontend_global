@@ -1,58 +1,58 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createUniqueId, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createUniqueId, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DisclosureStateControlledOptions,
   DisclosureStateRenderProps,
   DisclosureStateUncontrolledOptions,
-} from '../../states/create-disclosure-state';
+} from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createDisclosureState,
   DisclosureStateProvider,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createARIADisabledState,
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import { DisclosureContext } from './DisclosureContext';
-import { DISCLOSURE_TAG } from './tags';
+} from "../../utils/state-props";
+import { DisclosureContext } from "./DisclosureContext";
+import { DISCLOSURE_TAG } from "./tags";
 
 export type DisclosureControlledBaseProps = Prettify<
   DisclosureStateControlledOptions & DisclosureStateRenderProps
 >;
 
-export type DisclosureControlledProps<T extends ValidConstructor = 'div'> =
+export type DisclosureControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DisclosureControlledBaseProps>;
 
 export type DisclosureUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
-export type DisclosureUncontrolledProps<T extends ValidConstructor = 'div'> =
+export type DisclosureUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DisclosureUncontrolledBaseProps>;
 
-export type DisclosureProps<T extends ValidConstructor = 'div'> =
+export type DisclosureProps<T extends ValidConstructor = "div"> =
   | DisclosureControlledProps<T>
   | DisclosureUncontrolledProps<T>;
 
-function isDisclosureUncontrolled<T extends ValidConstructor = 'div'>(
+function isDisclosureUncontrolled<T extends ValidConstructor = "div">(
   props: DisclosureProps<T>,
 ): props is DisclosureUncontrolledProps<T> {
-  return 'defaultOpen' in props;
+  return "defaultOpen" in props;
 }
 
-export function Disclosure<T extends ValidConstructor = 'div'>(
+export function Disclosure<T extends ValidConstructor = "div">(
   props: DisclosureProps<T>,
 ): JSX.Element {
   const ownerID = createUniqueId();
@@ -63,26 +63,26 @@ export function Disclosure<T extends ValidConstructor = 'div'>(
   return createComponent(DisclosureContext.Provider, {
     get children() {
       return createDynamic(
-        () => props.as || 'div',
+        () => props.as || "div",
         mergeProps(
           isDisclosureUncontrolled(props)
             ? omitProps(props, [
-                'as',
-                'children',
-                'defaultOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "defaultOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ])
             : omitProps(props, [
-                'as',
-                'children',
-                'isOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "isOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ]),
           DISCLOSURE_TAG,
           createDisabledState(() => state.disabled()),

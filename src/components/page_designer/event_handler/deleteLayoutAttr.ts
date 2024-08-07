@@ -6,16 +6,25 @@ import type { PageLayoutObject } from "~/components/page_designer/LayoutContext"
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
-import { allFormAttrsInPageFromLevel, getAllFieldsUsedInAllRules, getAllFieldsUsedInRootLevelSetting, isAttrUsedInRules } from "../functions/getChildrenAttrs";
+import {
+  allFormAttrsInPageFromLevel,
+  getAllFieldsUsedInAllRules,
+  getAllFieldsUsedInRootLevelSetting,
+  isAttrUsedInRules,
+} from "../functions/getChildrenAttrs";
 
 function validateLayoutDeletion(
   layoutStore: Store<PageLayoutObject>,
   setLayoutStore: SetStoreFunction<PageLayoutObject>,
   layoutVertex: Vertex,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ): boolean {
-  const usedAttrs = getAllFieldsUsedInAllRules(graph, setGraph, layoutStore.formStore[0].formData);
+  const usedAttrs = getAllFieldsUsedInAllRules(
+    graph,
+    setGraph,
+    layoutStore.formStore[0].formData,
+  );
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
   if (Object.keys(usedAttrsInRules).length > 0) {
@@ -23,14 +32,29 @@ function validateLayoutDeletion(
     return true;
   }
 
-  const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore[0].formData, layoutVertex, "->$0Unique->$0Key");
+  const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(
+    graph,
+    setGraph,
+    layoutStore.formStore[0].formData,
+    layoutVertex,
+    "->$0Unique->$0Key",
+  );
 
   if (usedAttrsInUniqueConstraints.length > 0) {
-    setLayoutStore("usedAttrsInUniqueConstraints", usedAttrsInUniqueConstraints);
+    setLayoutStore(
+      "usedAttrsInUniqueConstraints",
+      usedAttrsInUniqueConstraints,
+    );
     return true;
   }
 
-  const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(graph, setGraph, layoutStore.formStore[0].formData, layoutVertex, "->$0NameKey");
+  const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(
+    graph,
+    setGraph,
+    layoutStore.formStore[0].formData,
+    layoutVertex,
+    "->$0NameKey",
+  );
 
   if (usedAttrsInNameKeys.length > 0) {
     setLayoutStore("usedAttrsInNameKeys", usedAttrsInNameKeys);
@@ -38,10 +62,19 @@ function validateLayoutDeletion(
   }
 
   if (layoutStore.formStore[0].formData.L[0] === "Form") {
-    const childContainsFormAttr = allFormAttrsInPageFromLevel(graph, layoutVertex, "Form");
+    const childContainsFormAttr = allFormAttrsInPageFromLevel(
+      graph,
+      layoutVertex,
+      "Form",
+    );
 
     if (childContainsFormAttr.length > 0) {
-      const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(graph, layoutStore.formStore[0].formData, "Form", childContainsFormAttr);
+      const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(
+        graph,
+        layoutStore.formStore[0].formData,
+        "Form",
+        childContainsFormAttr,
+      );
 
       if (rootContainsFormAttrExcludingChild.length === 0) {
         setLayoutStore("shouldContainAtLeastOneForm", true);
@@ -63,7 +96,15 @@ export function deleteLayoutAttr(
   name: string,
   showSuccessToast: (message: string) => void,
 ) {
-  if (validateLayoutDeletion(layoutStore, setLayoutStore, layoutVertex, graph, setGraph)) {
+  if (
+    validateLayoutDeletion(
+      layoutStore,
+      setLayoutStore,
+      layoutVertex,
+      graph,
+      setGraph,
+    )
+  ) {
     return;
   }
 

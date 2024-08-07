@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -6,27 +6,27 @@ import {
   createRenderEffect,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   AutocompleteOptionStateOptions,
   AutocompleteOptionStateRenderProps,
-} from '../../states/create-autocomplete-option-state';
+} from "../../states/create-autocomplete-option-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge, Prettify } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge, Prettify } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
 import {
   AutocompleteOptionStateProvider,
   createAutocompleteOptionState,
-} from '../../states/create-autocomplete-option-state';
-import { useDisclosureState } from '../../states/create-disclosure-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+} from "../../states/create-autocomplete-option-state";
+import { useDisclosureState } from "../../states/create-disclosure-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createActiveState,
   createARIADisabledState,
@@ -34,12 +34,12 @@ import {
   createDisabledState,
   createMatchesState,
   createSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useVirtualFocus } from '../../utils/virtual-focus';
-import { Button } from '../button';
-import { useComboboxContext } from './ComboboxContext';
-import { COMBOBOX_OPTION_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useVirtualFocus } from "../../utils/virtual-focus";
+import { Button } from "../button";
+import { useComboboxContext } from "./ComboboxContext";
+import { COMBOBOX_OPTION_TAG } from "./tags";
 
 export type ComboboxOptionBaseProps<V> = Prettify<
   AutocompleteOptionStateOptions<V> & AutocompleteOptionStateRenderProps
@@ -47,16 +47,16 @@ export type ComboboxOptionBaseProps<V> = Prettify<
 
 export type ComboboxOptionProps<
   V,
-  T extends ValidConstructor = 'li',
+  T extends ValidConstructor = "li",
 > = HeadlessPropsWithRef<
   T,
   OmitAndMerge<ComboboxOptionBaseProps<V>, ButtonProps<T>>
 >;
 
-export function ComboboxOption<V, T extends ValidConstructor = 'li'>(
+export function ComboboxOption<V, T extends ValidConstructor = "li">(
   props: ComboboxOptionProps<V, T>,
 ): JSX.Element {
-  const context = useComboboxContext('ComboboxOptions');
+  const context = useComboboxContext("ComboboxOptions");
   const disclosure = useDisclosureState();
   const state = createAutocompleteOptionState(props);
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -83,7 +83,7 @@ export function ComboboxOption<V, T extends ValidConstructor = 'li'>(
     const current = internalRef();
 
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!state.disabled()) {
           state.select();
           focusOption();
@@ -92,15 +92,15 @@ export function ComboboxOption<V, T extends ValidConstructor = 'li'>(
           }
         }
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         if (!state.disabled()) {
           focusOption();
         }
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         state.blur();
       });
-      useVirtualFocus(el => {
+      useVirtualFocus((el) => {
         if (el === current) {
           focusOption();
         }
@@ -111,16 +111,16 @@ export function ComboboxOption<V, T extends ValidConstructor = 'li'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['as', 'children', 'disabled', 'value', 'ref']),
+      omitProps(props, ["as", "children", "disabled", "value", "ref"]),
       COMBOBOX_OPTION_TAG,
       createOwnerAttribute(context.controller.getId()),
       {
         get as() {
-          return props.as || ('li' as T);
+          return props.as || ("li" as T);
         },
         id,
         ref: setInternalRef,
-        role: 'option',
+        role: "option",
         tabindex: -1,
       },
       createDisabledState(() => state.disabled()),

@@ -22,8 +22,8 @@ export function DropdownMenu(
 
   const position = useFloating(reference, floating, {
     middleware: [
-      flip(),  // Automatically flip the dropdown if it doesn't fit
-      shift({ padding: 8 })  // Adjust the dropdown to stay within the viewport with a padding of 8px
+      flip(), // Automatically flip the dropdown if it doesn't fit
+      shift({ padding: 8 }), // Adjust the dropdown to stay within the viewport with a padding of 8px
     ],
     placement: props.placement ?? "bottom-start",
     strategy: "fixed",
@@ -42,7 +42,8 @@ export function DropdownMenu(
   });
 
   const [local, rest] = splitProps(props, ["ref", "parentRef", "class"]);
-  const borderClass = "border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) outline-offset:2px:focus outline:2px|solid|transparent transform-origin:top|right"
+  const borderClass =
+    "border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) outline-offset:2px:focus outline:2px|solid|transparent transform-origin:top|right";
   return (
     <Portal mount={document.body}>
       <div

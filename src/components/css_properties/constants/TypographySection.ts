@@ -60,7 +60,7 @@ export const TypographySection = {
     name: "font-weight",
     options: extraPropertyValues["font-weight"].values,
   } as SelectField,
-  letterSpacing:{
+  letterSpacing: {
     componentName: "textFieldOptions",
     isLabelOnTop: true,
     label: "Spacing",
@@ -85,7 +85,7 @@ export const TypographySection = {
       { label: "Normal", value: "normal" },
       { label: "Italic", value: "italic" },
       // { label: "Oblique", value: "oblique" }, // TODO: add support for degree: oblique 40deg;
-      ...CSSWideKeywords
+      ...CSSWideKeywords,
     ],
   } as SelectField,
   fontVariant: {
@@ -139,5 +139,4 @@ export const TypographySection = {
       { label: "LTR", value: "ltr" },
     ],
   } as SelectField,
-
 };

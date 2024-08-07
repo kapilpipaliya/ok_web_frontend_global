@@ -1,4 +1,3 @@
-
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { Vertex } from "~/lib/graph/graph";
 

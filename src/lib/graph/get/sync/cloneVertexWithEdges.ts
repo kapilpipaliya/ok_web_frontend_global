@@ -7,12 +7,24 @@ import type { GraphInterface, Vertex } from "../../graph";
 import { addNewEdge, newEdge } from "../../mutate/edge";
 import { addNewVertex, newVertex } from "../../mutate/vertex";
 
-export function cloneVertexWithEdges(txnId: number, vertex: Vertex, extraProperties: Record<string, any>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>): Vertex {
+export function cloneVertexWithEdges(
+  txnId: number,
+  vertex: Vertex,
+  extraProperties: Record<string, any>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+): Vertex {
   const vertexId = untrack(() => graph.newVertexId);
   untrack(() => {
-    addNewVertex(txnId, newVertex(vertexId, [...vertex.L], {
-      ...vertex.P, ...extraProperties
-    }), graph, setGraph);
+    addNewVertex(
+      txnId,
+      newVertex(vertexId, [...vertex.L], {
+        ...vertex.P,
+        ...extraProperties,
+      }),
+      graph,
+      setGraph,
+    );
 
     // for (const edgeType in vertex.IN) {
     //   for (const inEdgeType of vertex.IN[edgeType]) {
@@ -41,7 +53,6 @@ export function cloneVertexWithEdges(txnId: number, vertex: Vertex, extraPropert
         addNewEdge(txnId, edgeNew, graph, setGraph);
       }
     }
-  })
+  });
   return graph.vertexes[vertexId];
 }
-

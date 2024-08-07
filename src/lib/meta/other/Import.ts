@@ -22,7 +22,11 @@ export const Import = {
         //   collection: "Update Dynamically on meta based on first row",
         //  },
         // },
-        { componentName: "TextBox", displayName: "Attribute ID", name: "attrId" },
+        {
+          componentName: "TextBox",
+          displayName: "Attribute ID",
+          name: "attrId",
+        },
         {
           collection: "g:'Form'",
           componentName: "SelectBox",
@@ -44,7 +48,8 @@ export const Import = {
         },
         { componentName: "TextBox", displayName: "Edge Type", name: "edge" },
         {
-          collection: '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
+          collection:
+            '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
           componentName: "SelectBox",
           displayExpr: "key",
 

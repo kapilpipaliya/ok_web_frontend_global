@@ -1,11 +1,15 @@
-import { type Component, createMemo, onMount } from 'solid-js';
+import { type Component, createMemo, onMount } from "solid-js";
 
-import type { ToastContainerProps } from '../';
+import type { ToastContainerProps } from "../";
 
-import { defaultToastOptions, dispatch } from '../core';
-import { ActionType, resolveValue } from '../types';
-import { getToastWrapperStyles, getWrapperYAxisOffset, updateToastHeight } from '../util';
-import { ToastBar } from './ToastBar';
+import { defaultToastOptions, dispatch } from "../core";
+import { ActionType, resolveValue } from "../types";
+import {
+  getToastWrapperStyles,
+  getWrapperYAxisOffset,
+  updateToastHeight,
+} from "../util";
+import { ToastBar } from "./ToastBar";
 
 export const ToastContainer: Component<ToastContainerProps> = (props) => {
   const calculatePosition = () => {
@@ -27,7 +31,7 @@ export const ToastContainer: Component<ToastContainerProps> = (props) => {
 
   return (
     <div
-      class={props.toast.visible ? 'sldt-active' : ''}
+      class={props.toast.visible ? "sldt-active" : ""}
       onMouseEnter={() =>
         dispatch({
           time: Date.now(),
@@ -43,10 +47,13 @@ export const ToastContainer: Component<ToastContainerProps> = (props) => {
       ref={el}
       style={positionStyle()}
     >
-      {props.toast.type === 'custom' ? (
+      {props.toast.type === "custom" ? (
         resolveValue(props.toast.message, props.toast)
       ) : (
-        <ToastBar position={props.toast.position || defaultToastOptions.position} toast={props.toast} />
+        <ToastBar
+          position={props.toast.position || defaultToastOptions.position}
+          toast={props.toast}
+        />
       )}
     </div>
   );

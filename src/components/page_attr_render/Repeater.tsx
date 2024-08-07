@@ -14,7 +14,6 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { getInitialPageRenderStore } from "./PageRenderContext";
 
-
 export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
   const [graph, setGraph] = useGraph();
   const [options, setOptions] = createSignal([] as Vertex[]);
@@ -72,7 +71,7 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
           <RepeaterVertexContext.Provider
             value={[vertex, ...useRepeaterVertexContext()]}
           >
-              <PageAttrRender data={vertex} metaVertex={props.meta} />
+            <PageAttrRender data={vertex} metaVertex={props.meta} />
           </RepeaterVertexContext.Provider>
         )}
       </For>

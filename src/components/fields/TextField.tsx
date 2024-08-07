@@ -4,10 +4,23 @@ import { Dynamic } from "solid-js/web";
 import type { GenericComponentProps } from "./FieldType";
 
 export function TextField(props: Readonly<GenericComponentProps>) {
-    const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId', 'children']);
+  const [local, others] = splitProps(props, [
+    "componentName",
+    "meta",
+    "data",
+    "setValue",
+    "value",
+    "isRealTime",
+    "isTableInside",
+    "setValue",
+    "txnId",
+    "children",
+  ]);
 
-    return <Dynamic component={local.meta.P.as ?? "span"} {...others}>
-        {local.meta.P.text}
-        {local.children}
+  return (
+    <Dynamic component={local.meta.P.as ?? "span"} {...others}>
+      {local.meta.P.text}
+      {local.children}
     </Dynamic>
+  );
 }

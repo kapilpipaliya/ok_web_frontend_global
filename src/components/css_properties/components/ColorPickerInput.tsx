@@ -3,7 +3,12 @@ import { type JSX, Match, Switch } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
+import {
+  useComponentMeta,
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
@@ -12,13 +17,10 @@ export const ColorPickerInput = () => {
   const [cssDefault] = useCssDefaultEditor();
   const [state] = useCssState();
   const meta = useComponentMeta() as ColorPickerField;
-  const selectedValue = (): string =>
-    {
-      const projections = [state() || "", ...(meta.projections ?? []), meta.name];
-      return path(projections, cssState) ||
-        path(projections, cssDefault) ||
-        "";
-    };
+  const selectedValue = (): string => {
+    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    return path(projections, cssState) || path(projections, cssDefault) || "";
+  };
 
   const handleChange: JSX.InputEventHandlerUnion<
     HTMLInputElement,
@@ -28,11 +30,11 @@ export const ColorPickerInput = () => {
       meta.onChangeInput(event.target.value);
     }
     if (meta.isAddToClass ?? true) {
-      setCssState(state(), ...(meta.projections ?? []), { [meta.name]: event.target.value });
+      setCssState(state(), ...(meta.projections ?? []), {
+        [meta.name]: event.target.value,
+      });
     }
   };
-
-
 
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
@@ -51,8 +53,6 @@ export const ColorPickerInput = () => {
       />
     </div>
   );
-
-
 
   return (
     <Container>

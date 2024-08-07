@@ -1,6 +1,5 @@
-
 import { klona } from "klona";
-import { createSignal, } from "solid-js";
+import { createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
@@ -22,11 +21,11 @@ const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   );
   for (const attribute of metaAttribute.attributes!) {
     if (attribute.name === "scope") {
-       // TODO add button to display rules dialog.
+      // TODO add button to display rules dialog.
     }
   }
   return metaAttribute;
-}
+};
 
 export function PermissionModal(
   props: Readonly<{
@@ -41,9 +40,13 @@ export function PermissionModal(
   useActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
 
-  const prevTxnIndex = props.prevTxnIndex ?? getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+  const prevTxnIndex =
+    props.prevTxnIndex ??
+    getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
 
-  const { metaVertexId } = generateTableInputMeta(getMetaAttributes(props.selectedAttr));
+  const { metaVertexId } = generateTableInputMeta(
+    getMetaAttributes(props.selectedAttr),
+  );
 
   const [error, _setError] = createSignal<null | string>(null);
 
@@ -57,7 +60,11 @@ export function PermissionModal(
 
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpToIndex(layoutStore.formStore[0].txnId, prevTxnIndex, graph);
+      revertTransactionUpToIndex(
+        layoutStore.formStore[0].txnId,
+        prevTxnIndex,
+        graph,
+      );
     }
     props.closeModal();
   };
@@ -68,11 +75,13 @@ export function PermissionModal(
         aria-labelledby="Permissions Modal"
         aria-modal="true"
         class={`position:relative z:${zIndex}`}
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
       >
         <Overlay />
-        <div class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}>
+        <div
+          class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}
+        >
           <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
             <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:90vw@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
               <div>
@@ -82,7 +91,8 @@ export function PermissionModal(
                     id="modal-title"
                   >
                     {props.selectedAttr
-                      ? `${props.selectedAttr.P.name} Permissions` : "All Permissions"}
+                      ? `${props.selectedAttr.P.name} Permissions`
+                      : "All Permissions"}
                     :
                   </h3>
                   <div class="mt:0.5rem">
@@ -118,5 +128,3 @@ export function PermissionModal(
     </Portal>
   );
 }
-
-

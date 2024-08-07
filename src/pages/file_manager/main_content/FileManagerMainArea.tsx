@@ -14,7 +14,7 @@ import { parentDirectory } from "~/lib/meta/file/File";
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
 
-export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
+export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
 
@@ -37,7 +37,12 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
 
     while (currentItem) {
       breadcrumbItems.unshift(currentItem);
-      const parentVertex: Vertex[] = evaluate(jsep('->ParentFolder'), { graph, setGraph, vertexes: [currentItem] }) || [];
+      const parentVertex: Vertex[] =
+        evaluate(jsep("->ParentFolder"), {
+          graph,
+          setGraph,
+          vertexes: [currentItem],
+        }) || [];
       currentItem = parentVertex[0];
     }
 
@@ -58,8 +63,17 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
 
     const onUploadSuccess = async (data: any) => {
       const currentItem = fileManagerStore.selectedItem;
-      if (!currentItem) { return; }
-      const folder: Vertex = currentItem.L[0] === 'Folder' ? currentItem : evaluate(jsep('->ParentFolder'), { graph, setGraph, vertexes: [currentItem] })[0];
+      if (!currentItem) {
+        return;
+      }
+      const folder: Vertex =
+        currentItem.L[0] === "Folder"
+          ? currentItem
+          : evaluate(jsep("->ParentFolder"), {
+              graph,
+              setGraph,
+              vertexes: [currentItem],
+            })[0];
       const newFormTxnId = graph.newTxnId;
 
       const parentFolderMetaVertex = {
@@ -70,7 +84,14 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
         P: parentDirectory,
       } as Vertex;
 
-      setSelectionValue(newFormTxnId, data.result[0], graph, setGraph, parentFolderMetaVertex, folder.id);
+      setSelectionValue(
+        newFormTxnId,
+        data.result[0],
+        graph,
+        setGraph,
+        parentFolderMetaVertex,
+        folder.id,
+      );
 
       const commitData = commitTxn(newFormTxnId, graph);
 
@@ -83,7 +104,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
       showSuccessToast("File uploaded successfully");
 
       fileManagerStore.gridStore?.[0].fetchTableData();
-    }
+    };
     return (
       <div>
         <FileUploader onUploadSuccess={onUploadSuccess} />
@@ -97,8 +118,8 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
         <For each={breadcrumb()}>
           {(item, index) => (
             <button
-              class={`c:blue ${index() === 0 ? 'font-weight:600' : ''} cursor:pointer`}
-              onClick={() => setFileManagerStore('selectedItem', item)}
+              class={`c:blue ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`}
+              onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"
             >
               {item.P.name}
@@ -116,9 +137,12 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex; }>) {
             setFileManagerStore({
               get gridStore() {
                 return gridStore_;
-              }
+              },
             });
-          }} isShowPagination={false} tableId="File" />
+          }}
+          isShowPagination={false}
+          tableId="File"
+        />
       </div>
     </div>
   );

@@ -1,41 +1,41 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps, onCleanup } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps, onCleanup } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { AutocompleteStateRenderProps } from '../../states/create-autocomplete-state';
+import type { AutocompleteStateRenderProps } from "../../states/create-autocomplete-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   AutocompleteStateChild,
   useAutocompleteState,
-} from '../../states/create-autocomplete-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-autocomplete-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createDisabledState,
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useCommandContext } from './CommandContext';
-import { COMMAND_OPTIONS_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useCommandContext } from "./CommandContext";
+import { COMMAND_OPTIONS_TAG } from "./tags";
 
 export type CommandOptionsProps<
   V,
-  T extends ValidConstructor = 'ul',
+  T extends ValidConstructor = "ul",
 > = HeadlessPropsWithRef<T, AutocompleteStateRenderProps<V>>;
 
-export function CommandOptions<V, T extends ValidConstructor = 'ul'>(
+export function CommandOptions<V, T extends ValidConstructor = "ul">(
   props: CommandOptionsProps<V, T>,
 ): JSX.Element {
-  const context = useCommandContext('CommandOptions');
+  const context = useCommandContext("CommandOptions");
   const state = useAutocompleteState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -47,32 +47,32 @@ export function CommandOptions<V, T extends ValidConstructor = 'ul'>(
       onCleanup(() => {
         context.controller.clearRef();
       });
-      useEventListener(current, 'focusin', () => {
+      useEventListener(current, "focusin", () => {
         if (context.anchor) {
           context.anchor.focus();
         }
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         context.optionsHovering = true;
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         context.optionsHovering = false;
       });
     }
   });
 
   return createDynamic(
-    () => props.as || ('ul' as T),
+    () => props.as || ("ul" as T),
     mergeProps(
-      omitProps(props, ['as', 'children', 'ref']),
+      omitProps(props, ["as", "children", "ref"]),
       COMMAND_OPTIONS_TAG,
       {
-        'aria-multiselectable': context.multiple,
+        "aria-multiselectable": context.multiple,
         // TODO should Command support "horizontal"?
-        'aria-orientation': 'vertical',
+        "aria-orientation": "vertical",
         id: context.optionsID,
         ref: setInternalRef,
-        role: 'listbox',
+        role: "listbox",
         tabindex: -1,
       },
       createDisabledState(() => state.disabled()),

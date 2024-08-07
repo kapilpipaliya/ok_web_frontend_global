@@ -3,7 +3,12 @@ import jsep from "jsep";
 // https://github.com/donmccurdy/expression-eval
 import { path } from "rambda";
 
-import {evalGetChildren, evalGetParents, evalGlobalColl, evalVertexById} from "~/cypher/get/evaluate/evalFunctions";
+import {
+  evalGetChildren,
+  evalGetParents,
+  evalGlobalColl,
+  evalVertexById,
+} from "~/cypher/get/evaluate/evalFunctions";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 //import { eval as eval1} from 'expression-eval';
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
@@ -332,7 +337,9 @@ export function getChildrenUnaray(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) { return [vertex]; }
+    if (vertex) {
+      return [vertex];
+    }
     return [];
   }
   return binops["->"](context.vertexes, collection, context);
@@ -341,7 +348,9 @@ export function getChildrenUnarayAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) { return [vertex]; }
+    if (vertex) {
+      return [vertex];
+    }
     return [];
   }
   return binops["->_async"](context.vertexes, collection, context);
@@ -367,7 +376,9 @@ addBinaryOp(
   12,
   false,
   (vertexes, edgeType, context) => {
-    if (!vertexes) { return; }
+    if (!vertexes) {
+      return;
+    }
     if (!Array.isArray(vertexes)) {
       vertexes = [vertexes];
     }
@@ -408,7 +419,9 @@ export async function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) { return [vertex]; }
+    if (vertex) {
+      return [vertex];
+    }
     return [];
   }
   return binops["<-"](context.vertexes, collection, context);
@@ -418,7 +431,9 @@ export async function getPraentsAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
-    if (vertex) { return [vertex]; }
+    if (vertex) {
+      return [vertex];
+    }
     return [];
   }
   return binops["<-_async"](context.vertexes, collection, context);
@@ -437,7 +452,9 @@ addBinaryOp(
   12,
   false,
   (vertexes, edgeType, context) => {
-    if (!vertexes) { return; }
+    if (!vertexes) {
+      return;
+    }
     if (!Array.isArray(vertexes)) {
       vertexes = [vertexes];
     }

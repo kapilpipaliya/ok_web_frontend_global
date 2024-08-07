@@ -1,5 +1,3 @@
-
-
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -39,9 +37,9 @@ export function UniqueNameField(
         });
         return props.setValue(metaVertex, data);
       }
-        return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-          error: "Name is required",
-        });
+      return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+        error: "Name is required",
+      });
     }
     mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
       error: null,
@@ -62,9 +60,7 @@ export function UniqueNameField(
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={props.meta}
-          setValue={(data: string) =>
-            setUniqueNameValue(props.meta, data)
-          }
+          setValue={(data: string) => setUniqueNameValue(props.meta, data)}
           txnId={0}
         />
       </span>

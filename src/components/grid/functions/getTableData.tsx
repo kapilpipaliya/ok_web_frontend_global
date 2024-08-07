@@ -1,4 +1,3 @@
-
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
@@ -12,10 +11,7 @@ export async function getTableData(
   limit?: number,
 ) {
   try {
-    const { incoming, outgoing } = getEdgesFromRowsAttr(
-      form.attributes,
-      true,
-    );
+    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes, true);
     const expression = paginationExpression({
       coll: tableId,
       filter: "",

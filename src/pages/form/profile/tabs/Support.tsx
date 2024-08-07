@@ -9,7 +9,7 @@ import { ChipDropDown } from "~/components/Chip";
 import { CustomModal } from "~/components/CustomModal";
 import { DialogWithButtons } from "~/components/DeleteDialog";
 import { IconButton } from "~/components/IconButton";
-import {Table, TableBodyCell, TableHeadCell} from "~/components/SimpleTable";
+import { Table, TableBodyCell, TableHeadCell } from "~/components/SimpleTable";
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
@@ -154,41 +154,46 @@ export const SupportTicketSection = (
     const [openDialog, setOpenDialog] = createSignal(false);
     return (
       <>
-      <IconButton class="color:#37c" icon="bi:chat-text" onClick={() => setOpenDialog(true)} size={22} />
-      <CustomModal
-        dialogClass="min-w:30% r:10px p:0"
-        footer={() => (
-          <div class="flex ai:center jc:center">
-            <div class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%">
-              <input
-                class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
-                onInput={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage(props.id);
-                  }
-                }}
-                placeholder="Type message..."
-                type="text"
-                value={inputMessage()}
-              />
-              <div
-                class="flex background:#248A52 border-radius:10px border:none color:#fff cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
-                onClick={() => sendMessage(props.id)}
-              >
-                <Icon height={22} icon={"fluent:send-48-filled"} width={22} />
+        <IconButton
+          class="color:#37c"
+          icon="bi:chat-text"
+          onClick={() => setOpenDialog(true)}
+          size={22}
+        />
+        <CustomModal
+          dialogClass="min-w:30% r:10px p:0"
+          footer={() => (
+            <div class="flex ai:center jc:center">
+              <div class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%">
+                <input
+                  class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
+                  onInput={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage(props.id);
+                    }
+                  }}
+                  placeholder="Type message..."
+                  type="text"
+                  value={inputMessage()}
+                />
+                <div
+                  class="flex background:#248A52 border-radius:10px border:none color:#fff cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
+                  onClick={() => sendMessage(props.id)}
+                >
+                  <Icon height={22} icon={"fluent:send-48-filled"} width={22} />
+                </div>
               </div>
             </div>
+          )}
+          open={openDialog}
+          setOpen={setOpenDialog}
+          title="Chat With Support"
+        >
+          <div>
+            <Chat id={props.id} />
           </div>
-        )}
-        open={openDialog}
-        setOpen={setOpenDialog}
-        title="Chat With Support"
-      >
-        <div>
-          <Chat id={props.id} />
-        </div>
-      </CustomModal>
+        </CustomModal>
       </>
     );
   };
@@ -273,7 +278,11 @@ export const SupportTicketSection = (
                   <TableBodyCell>
                     <div class="flex ai:center jc:center">
                       <OpenDialog id={row.id} />
-                      <IconButton icon="fluent:delete-48-regular" onClick={() => setDeleteRowId(row.id)} title="Delete" />
+                      <IconButton
+                        icon="fluent:delete-48-regular"
+                        onClick={() => setDeleteRowId(row.id)}
+                        title="Delete"
+                      />
                       <DialogWithButtons
                         message={"Are you sure you want to delete this ticket?"}
                         onCancel={() => {

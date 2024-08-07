@@ -28,7 +28,9 @@ export function setGridHeaders(
 
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.componentName === "Table") { continue; }
+    if (attribute.componentName === "Table") {
+      continue;
+    }
     // @ts-ignore
     column.accessorKey = `P.${attribute.name}`;
     column.id = attribute.name;
@@ -36,9 +38,7 @@ export function setGridHeaders(
       return (
         <Switch>
           <Match
-            when={
-              attribute.componentName === "SelectBox" && !attribute.options
-            }
+            when={attribute.componentName === "SelectBox" && !attribute.options}
           >
             {getSelectNameValue({
               attribute: attribute,
@@ -75,7 +75,10 @@ export function setGridHeaders(
     };
     column.header = (_info) =>
       capitalizeFirstLetter(
-        attribute.label || attribute.title || attribute.displayName || attribute.name,
+        attribute.label ||
+          attribute.title ||
+          attribute.displayName ||
+          attribute.name,
       );
     column.footer = (_info) =>
       capitalizeFirstLetter(
@@ -88,10 +91,25 @@ export function setGridHeaders(
     cell: (info) => {
       const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
-        <div class={`${formNew.isInlineEditable ? '' : 'py:0.25rem r:7'} flex ai:center gap:10px jc:center`}>
-          <Show when={gridState.isNoPermissionCheck || (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission()))}>
+        <div
+          class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
+        >
+          <Show
+            when={
+              gridState.isNoPermissionCheck ||
+              (gridState.formMetaData() &&
+                (gridState.hasEditPermission() ||
+                  gridState.hasViewPermission()))
+            }
+          >
             <IconButton
-              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && (!(gridState.hasEditPermission() || gridState.hasViewPermission()))}
+              disabled={
+                !gridState.isNoPermissionCheck &&
+                !!gridState.formMetaData() &&
+                !(
+                  gridState.hasEditPermission() || gridState.hasViewPermission()
+                )
+              }
               icon="fluent:edit-12-regular"
               iconClass="color:#3477CC"
               onClick={() => {
@@ -105,7 +123,11 @@ export function setGridHeaders(
             />
             <Show when={isEditModalOpen()}>
               <QuickEditModal
-                disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && !gridState.hasEditPermission()}
+                disabled={
+                  !gridState.isNoPermissionCheck &&
+                  !!gridState.formMetaData() &&
+                  !gridState.hasEditPermission()
+                }
                 info={info}
                 onClose={setIsEditModelOpen}
                 tableId={tableId}
@@ -114,10 +136,17 @@ export function setGridHeaders(
           </Show>
 
           <Show
-            when={gridState.isNoPermissionCheck || (!!gridState.formMetaData() && gridState.hasDeletePermission())}
+            when={
+              gridState.isNoPermissionCheck ||
+              (!!gridState.formMetaData() && gridState.hasDeletePermission())
+            }
           >
             <IconButton
-              disabled={!gridState.isNoPermissionCheck && !!gridState.formMetaData() && !gridState.hasDeletePermission()}
+              disabled={
+                !gridState.isNoPermissionCheck &&
+                !!gridState.formMetaData() &&
+                !gridState.hasDeletePermission()
+              }
               icon="fluent:delete-12-regular"
               iconClass="color:rgb(255,0,0)"
               onClick={() => setDeleteRowId(info.row.original.id)}

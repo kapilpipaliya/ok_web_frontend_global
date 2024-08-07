@@ -16,9 +16,7 @@ import { getPageTitle } from "./getPageTitle";
 import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {
-  const pageDesignerStore = createStore(
-    getInitialDesignerLayoutStore(),
-  );
+  const pageDesignerStore = createStore(getInitialDesignerLayoutStore());
   const [layoutStore, setLayoutStore] = pageDesignerStore;
 
   const handleResize = () => {
@@ -33,7 +31,9 @@ export function PageDesignerWrapper(): JSX.Element {
   const debouncedHandleResize = debounce(handleResize, 200);
 
   onMount(() => {
-    if (isServer) { return; }
+    if (isServer) {
+      return;
+    }
     handleResize(); // Initial check
 
     makeEventListener(window, "resize", debouncedHandleResize);
@@ -41,9 +41,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
   return (
     <ZIndex>
-      <DesignerLayoutStoreContext.Provider
-        value={pageDesignerStore}
-      >
+      <DesignerLayoutStoreContext.Provider value={pageDesignerStore}>
         <Title>{getPageTitle(layoutStore.formStore[0]?.formData)}</Title>
         <HeaderRow />
         <div

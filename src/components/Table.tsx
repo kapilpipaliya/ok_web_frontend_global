@@ -1,13 +1,27 @@
 import type { ColumnDef, RowSelectionOptions } from "@tanstack/solid-table";
 
-import { createMemo, createSignal, For, type JSX, Match, Show, Switch, } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  For,
+  type JSX,
+  Match,
+  Show,
+  Switch,
+} from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { CardDetailRow, CardDetailsContainer } from "~/components/Card/CardDetails";
+import {
+  CardDetailRow,
+  CardDetailsContainer,
+} from "~/components/Card/CardDetails";
 import { CardHeader } from "~/components/Card/CardHeader";
 import { CardOptionsContainer } from "~/components/Card/CardOptions";
-import { CardContainer, CardHeaderContainer } from "~/components/Card/SimpleCard";
+import {
+  CardContainer,
+  CardHeaderContainer,
+} from "~/components/Card/SimpleCard";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/SimpleTable";
 
 import { CardGrid } from "./CardGrid";
@@ -18,13 +32,13 @@ type TableProps = {
   cardSize: number;
   data: Vertex[];
   defaultRowsPerPage?: number;
-  enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'];
-  enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'];
+  enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
+  enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
   headers: ColumnDef<any>[];
   isSearching: boolean;
   isShowLoadMore?: boolean;
   isShowPagination?: boolean;
-  layout: 'card' | 'table';
+  layout: "card" | "table";
   onLoadMore: (skip: number, limit: number) => void;
   rowsPerPageOptions?: number[];
   selectedRows: Vertex[];
@@ -39,7 +53,9 @@ const getValue = (header: any, row: Vertex) => {
 
 export function CommonTable(props: Readonly<TableProps>) {
   const [currentPage, setCurrentPage] = createSignal(0);
-  const [rowsPerPage, setRowsPerPage] = createSignal(props.defaultRowsPerPage ?? 10);
+  const [rowsPerPage, setRowsPerPage] = createSignal(
+    props.defaultRowsPerPage ?? 10,
+  );
 
   const totalPages = () => Math.ceil(props.totalItems / rowsPerPage());
   const displayedRows = () => {
@@ -60,12 +76,18 @@ export function CommonTable(props: Readonly<TableProps>) {
 
   const handleRowSelect = (row: Vertex) => {
     const selected = props.selectedRows;
-    const isSelected = selected.some(r => r.id === row.id);
+    const isSelected = selected.some((r) => r.id === row.id);
 
     if (isSelected) {
-      props.setSelectedRows(props.enableMultiRowSelection ? selected.filter(r => r.id !== row.id) : []);
+      props.setSelectedRows(
+        props.enableMultiRowSelection
+          ? selected.filter((r) => r.id !== row.id)
+          : [],
+      );
     } else {
-      props.setSelectedRows(props.enableMultiRowSelection ? [...selected, row] : [row]);
+      props.setSelectedRows(
+        props.enableMultiRowSelection ? [...selected, row] : [row],
+      );
     }
   };
 
@@ -77,32 +99,60 @@ export function CommonTable(props: Readonly<TableProps>) {
     }
   };
 
-  const allSelected = createMemo(() => displayedRows().every(row => props.selectedRows.some(r => r.id === row.id)));
-  const someSelected = createMemo(() => !allSelected() && displayedRows().some(row => props.selectedRows.some(r => r.id === row.id)));
+  const allSelected = createMemo(() =>
+    displayedRows().every((row) =>
+      props.selectedRows.some((r) => r.id === row.id),
+    ),
+  );
+  const someSelected = createMemo(
+    () =>
+      !allSelected() &&
+      displayedRows().some((row) =>
+        props.selectedRows.some((r) => r.id === row.id),
+      ),
+  );
 
   const FallBack = () => (
-    <div class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}>
+    <div
+      class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}
+    >
       No records to display
     </div>
   );
 
-  const hideHeaders = () => props.headers.filter(
-    (header) => !(["Actions", "name"].includes(header.header) || ["Actions", "name"].includes(header.name))
-  );
+  const hideHeaders = () =>
+    props.headers.filter(
+      (header) =>
+        !(
+          ["Actions", "name"].includes(header.header) ||
+          ["Actions", "name"].includes(header.name)
+        ),
+    );
 
   const isMultiRowSelectionEnabled = (row: Vertex) => {
-    return typeof props.enableMultiRowSelection === 'function' ? props.enableMultiRowSelection(row) : props.enableMultiRowSelection;
+    return typeof props.enableMultiRowSelection === "function"
+      ? props.enableMultiRowSelection(row)
+      : props.enableMultiRowSelection;
   };
 
   const isRowSelectionEnabled = (row: Vertex) => {
-    return typeof props.enableRowSelection === 'function' ? props.enableRowSelection(row) : props.enableRowSelection;
+    return typeof props.enableRowSelection === "function"
+      ? props.enableRowSelection(row)
+      : props.enableRowSelection;
   };
 
   return (
     <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) p:4|10 width:100%">
       <Switch>
-        <Match when={props.layout === 'table'}>
-          <Table headers={props.headers.length + (props.enableMultiRowSelection || props.enableRowSelection ? 1 : 0)}>
+        <Match when={props.layout === "table"}>
+          <Table
+            headers={
+              props.headers.length +
+              (props.enableMultiRowSelection || props.enableRowSelection
+                ? 1
+                : 0)
+            }
+          >
             <TableHead
               allSelected={allSelected()}
               enableMultiRowSelection={props.enableMultiRowSelection}
@@ -122,22 +172,37 @@ export function CommonTable(props: Readonly<TableProps>) {
             />
           </Table>
         </Match>
-        <Match when={props.layout === 'card'}>
+        <Match when={props.layout === "card"}>
           <CardGrid cardSize={props.cardSize}>
             <For each={displayedRows()} fallback={<FallBack />}>
               {(row) => (
                 <CardContainer>
                   <CardHeaderContainer>
                     <CardHeader title={row.P.name} />
-                    <Show when={isMultiRowSelectionEnabled(row) || isRowSelectionEnabled(row)}>
+                    <Show
+                      when={
+                        isMultiRowSelectionEnabled(row) ||
+                        isRowSelectionEnabled(row)
+                      }
+                    >
                       <input
-                        checked={props.selectedRows.some(r => r.id === row.id)}
+                        checked={props.selectedRows.some(
+                          (r) => r.id === row.id,
+                        )}
                         onChange={() => handleRowSelect(row)}
                         type="checkbox"
                       />
                     </Show>
-                    <Show when={props.headers.find((header) => header.header === "Actions")}>
-                      {header => <CardOptionsContainer><Content header={header()} row={row} /></CardOptionsContainer>}
+                    <Show
+                      when={props.headers.find(
+                        (header) => header.header === "Actions",
+                      )}
+                    >
+                      {(header) => (
+                        <CardOptionsContainer>
+                          <Content header={header()} row={row} />
+                        </CardOptionsContainer>
+                      )}
                     </Show>
                   </CardHeaderContainer>
                   <CardDetailsContainer>
@@ -179,13 +244,24 @@ export function CommonTable(props: Readonly<TableProps>) {
           !props.isSearching
         }
       >
-        <LoadMoreButton onClick={() => props.onLoadMore(props.data.length, rowsPerPage())} />
+        <LoadMoreButton
+          onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
+        />
       </Show>
     </div>
   );
 }
 
-function TableHead(props: Readonly<{ allSelected: boolean, enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'], enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'], headers: ColumnDef<any>[], onSelectAll: (checked: boolean) => void, someSelected: boolean }>) {
+function TableHead(
+  props: Readonly<{
+    allSelected: boolean;
+    enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
+    enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
+    headers: ColumnDef<any>[];
+    onSelectAll: (checked: boolean) => void;
+    someSelected: boolean;
+  }>,
+) {
   return (
     <>
       <Show when={props.enableMultiRowSelection || props.enableRowSelection}>
@@ -194,7 +270,9 @@ function TableHead(props: Readonly<{ allSelected: boolean, enableMultiRowSelecti
             <input
               checked={props.allSelected}
               indeterminate={props.someSelected && !props.allSelected}
-              onChange={(e) => props.onSelectAll((e.target as HTMLInputElement).checked)}
+              onChange={(e) =>
+                props.onSelectAll((e.target as HTMLInputElement).checked)
+              }
               type="checkbox"
             />
           </Show>
@@ -207,28 +285,50 @@ function TableHead(props: Readonly<{ allSelected: boolean, enableMultiRowSelecti
   );
 }
 
-const Content = (props: { header: ColumnDef<any>, row: Vertex }) => (
+const Content = (props: { header: ColumnDef<any>; row: Vertex }) =>
   props.header.cell?.({
     getValue: () => getValue(props.header, props.row),
     row: { original: props.row },
-  }) ?? null
-);
+  }) ?? null;
 
-function TableBody(props: Readonly<{ enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'], enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'], fallback: JSX.Element, headers: ColumnDef<any>[], onRowSelect: (row: Vertex) => void, rows: Vertex[], selectedRows: Vertex[] }>) {
+function TableBody(
+  props: Readonly<{
+    enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
+    enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
+    fallback: JSX.Element;
+    headers: ColumnDef<any>[];
+    onRowSelect: (row: Vertex) => void;
+    rows: Vertex[];
+    selectedRows: Vertex[];
+  }>,
+) {
   const isMultiRowSelectionEnabled = (row: Vertex) => {
-    return typeof props.enableMultiRowSelection === 'function' ? props.enableMultiRowSelection(row) : props.enableMultiRowSelection;
+    return typeof props.enableMultiRowSelection === "function"
+      ? props.enableMultiRowSelection(row)
+      : props.enableMultiRowSelection;
   };
 
   const isRowSelectionEnabled = (row: Vertex) => {
-    return typeof props.enableRowSelection === 'function' ? props.enableRowSelection(row) : props.enableRowSelection;
+    return typeof props.enableRowSelection === "function"
+      ? props.enableRowSelection(row)
+      : props.enableRowSelection;
   };
   return (
     <For each={props.rows} fallback={props.fallback}>
       {(row, index) => (
         <>
-          <Show when={props.enableMultiRowSelection || props.enableRowSelection}>
-            <TableBodyCell class={props.selectedRows.includes(row) ? 'bg:blue-20' : ''} index={index()}>
-              <Show when={isMultiRowSelectionEnabled(row) || isRowSelectionEnabled(row)}>
+          <Show
+            when={props.enableMultiRowSelection || props.enableRowSelection}
+          >
+            <TableBodyCell
+              class={props.selectedRows.includes(row) ? "bg:blue-20" : ""}
+              index={index()}
+            >
+              <Show
+                when={
+                  isMultiRowSelectionEnabled(row) || isRowSelectionEnabled(row)
+                }
+              >
                 <input
                   checked={props.selectedRows.includes(row)}
                   onChange={() => props.onRowSelect(row)}
@@ -239,7 +339,10 @@ function TableBody(props: Readonly<{ enableMultiRowSelection?: RowSelectionOptio
           </Show>
           <For each={props.headers}>
             {(header: any) => (
-              <TableBodyCell class={props.selectedRows.includes(row) ? 'bg:blue-20' : ''} index={index()}>
+              <TableBodyCell
+                class={props.selectedRows.includes(row) ? "bg:blue-20" : ""}
+                index={index()}
+              >
                 <Content header={header} row={row} />
               </TableBodyCell>
             )}
@@ -253,7 +356,10 @@ function TableBody(props: Readonly<{ enableMultiRowSelection?: RowSelectionOptio
 function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
   return (
     <div class="display:flex justify-content:end padding:5px|10px">
-      <button class="bg:blue-50 br:5px cursor:pointer p:10px text:white" onClick={props.onClick}>
+      <button
+        class="bg:blue-50 br:5px cursor:pointer p:10px text:white"
+        onClick={props.onClick}
+      >
         Load More
       </button>
     </div>

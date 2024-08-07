@@ -1,18 +1,18 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createEffect, mergeProps, untrack } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createEffect, mergeProps, untrack } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
-import { useAutocompleteState } from '../../states/create-autocomplete-state';
-import { useDisclosureState } from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createForwardRef } from '../../utils/dynamic-prop';
+import { useAutocompleteState } from "../../states/create-autocomplete-state";
+import { useDisclosureState } from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createARIAExpandedState,
@@ -21,18 +21,18 @@ import {
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { COMMAND_INPUT_TAG } from '../command/tags';
-import { useComboboxContext } from './ComboboxContext';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { COMMAND_INPUT_TAG } from "../command/tags";
+import { useComboboxContext } from "./ComboboxContext";
 
-export type ComboboxInputProps<T extends ValidConstructor = 'input'> =
+export type ComboboxInputProps<T extends ValidConstructor = "input"> =
   HeadlessPropsWithRef<T>;
 
-export function ComboboxInput<T extends ValidConstructor = 'input'>(
+export function ComboboxInput<T extends ValidConstructor = "input">(
   props: ComboboxInputProps<T>,
 ): JSX.Element {
-  const context = useComboboxContext('ComboboxInput');
+  const context = useComboboxContext("ComboboxInput");
   const autocompleteState = useAutocompleteState();
   const disclosureState = useDisclosureState();
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -46,21 +46,21 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
       context.anchor = current;
 
       if (current instanceof HTMLInputElement) {
-        useEventListener(current, 'input', () => {
+        useEventListener(current, "input", () => {
           if (!isDisabled()) {
             autocompleteState.setQuery(current.value);
           }
         });
       }
 
-      useEventListener(current, 'keydown', e => {
+      useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case 'Escape': {
+            case "Escape": {
               disclosureState.close();
               break;
             }
-            case 'ArrowUp': {
+            case "ArrowUp": {
               e.preventDefault();
               if (disclosureState.isOpen()) {
                 context.controller.setPrevChecked(true);
@@ -69,7 +69,7 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
               }
               break;
             }
-            case 'ArrowDown': {
+            case "ArrowDown": {
               e.preventDefault();
               if (disclosureState.isOpen()) {
                 context.controller.setNextChecked(true);
@@ -78,7 +78,7 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
               }
               break;
             }
-            case 'Enter': {
+            case "Enter": {
               e.preventDefault();
               if (disclosureState.isOpen()) {
                 context.selectedDescendant = context.activeDescendant;
@@ -90,12 +90,12 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
           }
         }
       });
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!isDisabled()) {
           disclosureState.toggle();
         }
       });
-      useEventListener(current, 'blur', e => {
+      useEventListener(current, "blur", (e) => {
         if (context.optionsHovering) {
           return;
         }
@@ -104,17 +104,17 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
           disclosureState.close();
         }
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         context.inputHovering = true;
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         context.inputHovering = false;
       });
     }
   });
 
   createEffect(() => {
-    if (autocompleteState.query() !== '') {
+    if (autocompleteState.query() !== "") {
       if (untrack(() => disclosureState.isOpen())) {
         context.controller.setFirstChecked();
       } else {
@@ -133,29 +133,29 @@ export function ComboboxInput<T extends ValidConstructor = 'input'>(
   });
 
   return createDynamic(
-    () => props.as || ('input' as T),
+    () => props.as || ("input" as T),
     mergeProps(
-      omitProps(props, ['as', 'ref']),
+      omitProps(props, ["as", "ref"]),
       {
-        get 'aria-activedescendant'() {
+        get "aria-activedescendant"() {
           return context.activeDescendant;
         },
-        'aria-controls': context.optionsID,
-        get 'aria-expanded'() {
+        "aria-controls": context.optionsID,
+        get "aria-expanded"() {
           return disclosureState.isOpen();
         },
         // Controls the options listbox
-        'aria-haspopup': 'listbox',
-        'aria-labelledby': context.labelID,
+        "aria-haspopup": "listbox",
+        "aria-labelledby": context.labelID,
 
         id: context.inputID,
         ref: setInternalRef,
-        role: 'combobox',
+        role: "combobox",
 
         // Guarantee it's interactive
         tabindex: 0,
         // Guarantee it's a text
-        type: 'text',
+        type: "text",
       },
       COMMAND_INPUT_TAG,
       createDisabledState(isDisabled),

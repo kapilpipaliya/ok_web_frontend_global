@@ -1,36 +1,36 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useContextMenuContext } from './ContextMenuContext';
-import { CONTEXT_MENU_OVERLAY_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useContextMenuContext } from "./ContextMenuContext";
+import { CONTEXT_MENU_OVERLAY_TAG } from "./tags";
 
-export type ContextMenuOverlayProps<T extends ValidConstructor = 'div'> =
+export type ContextMenuOverlayProps<T extends ValidConstructor = "div"> =
   HeadlessPropsWithRef<T, DisclosureStateRenderProps>;
 
-export function ContextMenuOverlay<T extends ValidConstructor = 'div'>(
+export function ContextMenuOverlay<T extends ValidConstructor = "div">(
   props: ContextMenuOverlayProps<T>,
 ): JSX.Element {
-  useContextMenuContext('ContextMenuOverlay');
+  useContextMenuContext("ContextMenuOverlay");
   const state = useDisclosureState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -38,16 +38,16 @@ export function ContextMenuOverlay<T extends ValidConstructor = 'div'>(
   createEffect(() => {
     const current = internalRef();
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         state.close();
       });
     }
   });
 
   return createDynamic(
-    () => props.as || ('div' as T),
+    () => props.as || ("div" as T),
     mergeProps(
-      omitProps(props, ['as', 'children', 'ref']),
+      omitProps(props, ["as", "children", "ref"]),
       CONTEXT_MENU_OVERLAY_TAG,
       {
         get children() {

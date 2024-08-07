@@ -27,7 +27,9 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
   return (
     <Show when={!props.isCollapsed()}>
       <nav
-        class={"@fade|.3s bg:ghostwhite min-h:100vh p:10|20 r:0|0|15|0 w:max-content"}
+        class={
+          "@fade|.3s bg:ghostwhite min-h:100vh p:10|20 r:0|0|15|0 w:max-content"
+        }
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
         <SearchBar
@@ -53,7 +55,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                     <div
                       class={`${
                         props.expandedSections().get(nav.P.name)
-                          ? "" : "color:#37c"
+                          ? ""
+                          : "color:#37c"
                       } ${
                         location.pathname === nav.P.url
                           ? "bg:#E5EAFE font-weight:600"
@@ -79,7 +82,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                               "margin-top": "7px",
                               transform: `${
                                 props.expandedSections().get(nav.P.name)
-                                  ? "rotate(180deg)" : "rotate(0deg)"
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)"
                               }`,
                               transition: "transform 0.2s linear",
                             }}

@@ -1,8 +1,8 @@
-import { createContext, createUniqueId, useContext } from 'solid-js';
+import { createContext, createUniqueId, useContext } from "solid-js";
 
-import assert from '../../utils/assert';
-import FocusNavigator from '../../utils/focus-navigator';
-import { MATCHES_NODE } from '../../utils/namespace';
+import assert from "../../utils/assert";
+import FocusNavigator from "../../utils/focus-navigator";
+import { MATCHES_NODE } from "../../utils/namespace";
 
 interface ComboboxContextData {
   activeDescendant: string | undefined;

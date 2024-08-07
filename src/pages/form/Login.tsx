@@ -62,14 +62,14 @@ export function Login() {
     if (passwordError) {
       showErrorToast(passwordError);
     } else {
-      setGraph('isLoadingPage', true);
+      setGraph("isLoadingPage", true);
       await showLoadingToast({
         loadMessage: "Logging In...",
         onError(_error) {
-          setGraph('isLoadingPage', false);
+          setGraph("isLoadingPage", false);
         },
         onSuccess: (value) => {
-          setGraph('isLoadingPage', false);
+          setGraph("isLoadingPage", false);
 
           if (value != null && value.id !== null) {
             navigate(`${graph.APP_BASE_URL}/Page`);

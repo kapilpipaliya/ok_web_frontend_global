@@ -1,7 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
-import type {
-  TextFieldOptionsField,
-} from "./FieldType";
+import type { TextFieldOptionsField } from "./FieldType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
@@ -25,7 +23,7 @@ export const FlexChild = {
       { icon: Icons.flex.expand, label: "expand", value: "1 1 0%" },
       { icon: Icons.flex.collapse, label: "collapse", value: "0 1 auto" },
       { icon: "customIcon", label: "Custom", value: "custom" },
-    ]
+    ],
   } as TextFieldOptionsField,
   order: {
     componentName: "textFieldOptions",
@@ -33,7 +31,13 @@ export const FlexChild = {
     name: "order",
     type: "number",
   } as TextFieldOptionsField,
-  alignSelf: createSelectOptions("align-self", "Align Self", [...extraPropertyValues["align-self"].values, ...CSSWideKeywords]),
-  justifySelf: createSelectOptions("justify-self", "Justify Self", [...extraPropertyValues["justify-self"].values, ...CSSWideKeywords]),
+  alignSelf: createSelectOptions("align-self", "Align Self", [
+    ...extraPropertyValues["align-self"].values,
+    ...CSSWideKeywords,
+  ]),
+  justifySelf: createSelectOptions("justify-self", "Justify Self", [
+    ...extraPropertyValues["justify-self"].values,
+    ...CSSWideKeywords,
+  ]),
   // not needed: place-self (as + js)
 };

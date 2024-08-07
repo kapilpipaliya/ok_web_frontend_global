@@ -1,7 +1,6 @@
-
 export function groupBy(
-  xs: { [key: string]: any; }[],
-  groupFn: (record: { [key: string]: any; }) => string
+  xs: { [key: string]: any }[],
+  groupFn: (record: { [key: string]: any }) => string,
 ) {
   return xs.reduce((acc, element) => {
     const key = groupFn(element);

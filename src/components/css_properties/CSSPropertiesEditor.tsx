@@ -47,7 +47,11 @@ function getOptions(cssState: CSSStore) {
 }
 
 export function CSSPropertiesEditor(
-  props: Readonly<{ data: Vertex, meta: Vertex, setValue?: (data: CSSStore) => void }>,
+  props: Readonly<{
+    data: Vertex;
+    meta: Vertex;
+    setValue?: (data: CSSStore) => void;
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const [state, setState] = useCssState();
@@ -81,7 +85,12 @@ export function CSSPropertiesEditor(
     if (!(props.meta && props.data)) {
       return;
     }
-    const edgesPrefixToRemove = getCssSelectedFileEdgeName(props.data.L[0], props.meta.P.name, currentState, "");
+    const edgesPrefixToRemove = getCssSelectedFileEdgeName(
+      props.data.L[0],
+      props.meta.P.name,
+      currentState,
+      "",
+    );
     for (const edgeName in props.data.OUT) {
       if (edgeName.startsWith(edgesPrefixToRemove)) {
         for (const edgeId of props.data.OUT[edgeName]) {
@@ -104,54 +113,57 @@ export function CSSPropertiesEditor(
     setCssState(reconcile({ "": {} }));
   };
 
-  return <>
-    <Show when={formStore?.formData?.L[0] === "Comp"}>
-      <span>Preview:</span><br />
-      <DynamicComponent
-        componentName={formStore!.formData.P.name}
-        data={formStore!.formData}
-        isNoPermissionCheck
-        meta={{ P: { class: props.data.P.value } } as unknown as Vertex}
-      /><br />
-    </Show>
-    {graph.isDevelopment ? JSON.stringify(cssState) : null}
-    <ResetButton onReset={resetCssState} />
-    <TextEditor
-      disabled={true}
-      onValueChange={handleCSSStateChange}
-      value={cssStateToString(cssState, props.meta, props.data, graph)}
-    />
-
-    Current State
-    <div class="flex" ref={buttonRef!}>
-      <MultiSelectField
-        onRemove={() => setState("")}
-        onSelect={(_, value) => setState(value as string)}
-        options={getOptions(cssState)}
-        placeholder="Select Current State"
-        selectedValues={getSelectedValues}
-        selectionLimit={1}
+  return (
+    <>
+      <Show when={formStore?.formData?.L[0] === "Comp"}>
+        <span>Preview:</span>
+        <br />
+        <DynamicComponent
+          componentName={formStore!.formData.P.name}
+          data={formStore!.formData}
+          isNoPermissionCheck
+          meta={{ P: { class: props.data.P.value } } as unknown as Vertex}
+        />
+        <br />
+      </Show>
+      {graph.isDevelopment ? JSON.stringify(cssState) : null}
+      <ResetButton onReset={resetCssState} />
+      <TextEditor
+        disabled={true}
+        onValueChange={handleCSSStateChange}
+        value={cssStateToString(cssState, props.meta, props.data, graph)}
       />
-      <Show when={Object.keys(cssState[state()] || {}).length > 0}>
-        <button onClick={removeState} title="Remove State">
-          <Icon height={21} icon="ic:round-remove" width={21} />
+      Current State
+      <div class="flex" ref={buttonRef!}>
+        <MultiSelectField
+          onRemove={() => setState("")}
+          onSelect={(_, value) => setState(value as string)}
+          options={getOptions(cssState)}
+          placeholder="Select Current State"
+          selectedValues={getSelectedValues}
+          selectionLimit={1}
+        />
+        <Show when={Object.keys(cssState[state()] || {}).length > 0}>
+          <button onClick={removeState} title="Remove State">
+            <Icon height={21} icon="ic:round-remove" width={21} />
+          </button>
+        </Show>
+        <button onClick={handleAddNewClick} title="Add New State">
+          <Icon height={21} icon="ic:round-add" width={21} />
         </button>
-      </Show>
-      <button onClick={handleAddNewClick} title="Add New State">
-        <Icon height={21} icon="ic:round-add" width={21} />
-      </button>
-      <Show when={showDropdown()}>
-        <ZIndex>
-          <DropdownMenu
-            class="r:5"
-            onClickOutside={() => setShowDropdown(false)}
-            parentRef={buttonRef!}
-          >
-            <AddNewCssState onClose={() => setShowDropdown(false)} />
-          </DropdownMenu>
-        </ZIndex>
-      </Show>
-    </div>
-    <StyleEditor />
-  </>
+        <Show when={showDropdown()}>
+          <ZIndex>
+            <DropdownMenu
+              class="r:5"
+              onClickOutside={() => setShowDropdown(false)}
+              parentRef={buttonRef!}
+            >
+              <AddNewCssState onClose={() => setShowDropdown(false)} />
+            </DropdownMenu>
+          </ZIndex>
+        </Show>
+      </div>
+      <StyleEditor />
+    </>
+  );
 }

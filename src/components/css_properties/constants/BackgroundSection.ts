@@ -13,9 +13,7 @@ export const BackgroundSection = {
     componentName: "textFieldOptions",
     label: "Background",
     name: "background",
-    options: [
-      ...CSSWideKeywords
-    ]
+    options: [...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundColor: {
     componentName: "colorPicker",
@@ -40,21 +38,14 @@ export const BackgroundSection = {
       "repeat-x",
       "repeat-y",
       "no-repeat",
-      ...CSSWideKeywords
-    ]
+      ...CSSWideKeywords,
+    ],
   } as TextFieldOptionsField,
   backgroundPosition: {
     componentName: "fieldWithCustomProperty",
     label: "Position",
     name: "background-position",
-    options: [
-      "top",
-      "bottom",
-      "left",
-      "right",
-      "center",
-      ...CSSWideKeywords
-    ],
+    options: ["top", "bottom", "left", "right", "center", ...CSSWideKeywords],
     customProperty: [
       { label: "Position X", name: "background-position-x" },
       { label: "Position Y", name: "background-position-y" },
@@ -66,58 +57,48 @@ export const BackgroundSection = {
     componentName: "textFieldOptions",
     label: "Size",
     name: "background-size",
-    options: [
-      "auto",
-      "cover",
-      "contain",
-      ...CSSWideKeywords
-    ]
+    options: ["auto", "cover", "contain", ...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundAttachment: {
     componentName: "textFieldOptions",
     label: "Attachment",
     name: "background-attachment",
-    options: [
-      "scroll",
-      "fixed",
-      "local",
-      ...CSSWideKeywords
-    ]
+    options: ["scroll", "fixed", "local", ...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundOrigin: createSelectOptions("background-origin", "Origin", [
     "border-box",
     "padding-box",
     "content-box",
-    ...CSSWideKeywords
+    ...CSSWideKeywords,
   ]),
   backgroundClip: createSelectOptions("clip-path", "Clip", [
     "border-box",
     "padding-box",
     "content-box",
     "text",
-    ...CSSWideKeywords
+    ...CSSWideKeywords,
   ]),
   backgroundBlendMode: {
     componentName: "textFieldOptions",
     label: "Blend Mode",
     name: "background-blend-mode",
     options: [
-      'normal',
-      'multiply',
-      'screen',
-      'overlay',
-      'darken',
-      'lighten',
-      'color-dodge',
-      'color-burn',
-      'hard-light',
-      'soft-light',
-      'difference',
-      'exclusion',
-      'hue',
-      'saturation',
-      'color',
-      'luminosity'
+      "normal",
+      "multiply",
+      "screen",
+      "overlay",
+      "darken",
+      "lighten",
+      "color-dodge",
+      "color-burn",
+      "hard-light",
+      "soft-light",
+      "difference",
+      "exclusion",
+      "hue",
+      "saturation",
+      "color",
+      "luminosity",
     ],
   } as TextFieldOptionsField,
 };

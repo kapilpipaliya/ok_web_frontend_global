@@ -24,7 +24,9 @@ export function RenderMainContent() {
     return `2,${layoutStore.isLeftOpen ? "30%|70%" : "70%|30%"}`;
   };
   return (
-    <div class={`grid gap:4px grid-template-columns:repeat(${getGridTemplateColumns()})`}>
+    <div
+      class={`grid gap:4px grid-template-columns:repeat(${getGridTemplateColumns()})`}
+    >
       <Show
         fallback={
           <ZIndex>
@@ -94,11 +96,17 @@ export function RenderMainContent() {
                 <PropertiesWrapper />
               </FormContext.Provider>
             </Show>
-
           </Drawer>
         </ZIndex>
       </Show>
-      <Show when={Object.keys(layoutStore.usedAttrsInRules).length > 0 || layoutStore.usedAttrsInUniqueConstraints.length > 0 || layoutStore.usedAttrsInNameKeys.length > 0 || layoutStore.shouldContainAtLeastOneForm}>
+      <Show
+        when={
+          Object.keys(layoutStore.usedAttrsInRules).length > 0 ||
+          layoutStore.usedAttrsInUniqueConstraints.length > 0 ||
+          layoutStore.usedAttrsInNameKeys.length > 0 ||
+          layoutStore.shouldContainAtLeastOneForm
+        }
+      >
         <ZIndex>
           <DeleteAttributeDialog />
         </ZIndex>

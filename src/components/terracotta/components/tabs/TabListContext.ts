@@ -1,7 +1,7 @@
-import { createContext, createUniqueId, useContext } from 'solid-js';
+import { createContext, createUniqueId, useContext } from "solid-js";
 
-import assert from '../../utils/assert';
-import FocusNavigator from '../../utils/focus-navigator';
+import assert from "../../utils/assert";
+import FocusNavigator from "../../utils/focus-navigator";
 
 export const TabListContext = createContext<FocusNavigator>();
 

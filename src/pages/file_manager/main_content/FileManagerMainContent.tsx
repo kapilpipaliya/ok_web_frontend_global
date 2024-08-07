@@ -13,15 +13,20 @@ export function FileManagerMainContent(props: Readonly<{ fileId?: string }>) {
   const params = useParams();
 
   onMount(async () => {
-    const data = await getFilesData(graph, setGraph, params.folderId, props.fileId);
+    const data = await getFilesData(
+      graph,
+      setGraph,
+      params.folderId,
+      props.fileId,
+    );
     // @ts-expect-error ignore
     if (!data.error && data.result.length > 0) {
       batch(() => {
         // @ts-expect-error ignore
-        setFileManagerStore('selectedItem', data.result[0]);
+        setFileManagerStore("selectedItem", data.result[0]);
         // @ts-expect-error ignore
-        setFileManagerStore('expandedKeys', [data.result[0].id]);
-      })
+        setFileManagerStore("expandedKeys", [data.result[0].id]);
+      });
     }
   });
 

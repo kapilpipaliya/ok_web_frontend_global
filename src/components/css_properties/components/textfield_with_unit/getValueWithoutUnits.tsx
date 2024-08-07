@@ -1,8 +1,12 @@
 import { sizeTypes } from "../../constants/csseditor_constants";
 
 export function getValueWithoutUnits(valueWithUnits: string): number | string {
-  if (!valueWithUnits) { return ""; }
+  if (!valueWithUnits) {
+    return "";
+  }
   const regexPattern = new RegExp(sizeTypes.join("|"), "g");
-  const numericValue = Number.parseFloat(valueWithUnits.replace(regexPattern, ""));
+  const numericValue = Number.parseFloat(
+    valueWithUnits.replace(regexPattern, ""),
+  );
   return Number.isNaN(numericValue) ? "" : numericValue;
 }

@@ -1,6 +1,10 @@
 import type { JSX } from "solid-js";
 
-export function CardDetails(props: { amount: string; lastInvoiceDate: string; status: string; }) {
+export function CardDetails(props: {
+  amount: string;
+  lastInvoiceDate: string;
+  status: string;
+}) {
   return (
     <CardDetailsContainer>
       <CardDetailRow label="Last invoice">
@@ -10,7 +14,7 @@ export function CardDetails(props: { amount: string; lastInvoiceDate: string; st
   );
 }
 
-export function CardDetailsContainer(props: { children: JSX.Element; }) {
+export function CardDetailsContainer(props: { children: JSX.Element }) {
   return (
     <dl class="lh:1.25rem bt:1|solid|gray-10>*+* f:0.875rem leading:1.5rem my:-0.75rem px:1.5rem py:1rem">
       {props.children}
@@ -18,7 +22,7 @@ export function CardDetailsContainer(props: { children: JSX.Element; }) {
   );
 }
 
-export function CardDetailRow(props: { children: JSX.Element; label: string; }) {
+export function CardDetailRow(props: { children: JSX.Element; label: string }) {
   return (
     <div class="flex gap-x:1rem justify-content:space-between py:0.75rem">
       <dt class="color:gray-50">{props.label}</dt>

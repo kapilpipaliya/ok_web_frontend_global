@@ -18,7 +18,9 @@ export function getInitialPreviewStore() {
 
 export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
 type PreviewStore = ReturnType<typeof createStore<PreviewStoreObject>>;
-export const PreviewContext = createContext<PreviewStore>(createStore(getInitialPreviewStore()));
+export const PreviewContext = createContext<PreviewStore>(
+  createStore(getInitialPreviewStore()),
+);
 
 export function usePreviewContext() {
   return useContext(PreviewContext);

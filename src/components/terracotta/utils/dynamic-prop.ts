@@ -1,8 +1,8 @@
-import type { JSX, Signal } from 'solid-js';
+import type { JSX, Signal } from "solid-js";
 
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal } from "solid-js";
 
-import type { OmitAndMerge } from './types';
+import type { OmitAndMerge } from "./types";
 
 export type ValidElements = keyof JSX.IntrinsicElements;
 export type ValidComponent<P> = (props: P) => JSX.Element;
@@ -60,7 +60,7 @@ export type HeadlessPropsWithRef<
 function isRefFunction<U extends ValidConstructor>(
   callback?: RefField<DynamicNode<U>>,
 ): callback is RefCallback<DynamicNode<U>> {
-  return typeof callback === 'function';
+  return typeof callback === "function";
 }
 
 // `props.ref` could have been used however it doesn't enforce
@@ -79,7 +79,7 @@ export function createForwardRef<U extends ValidConstructor>(
     // Technically Solid compiles refs on components into
     // a function, despite the fact that its type definition
     // says that it is either a function or the ref type
-    if (current && 'ref' in props && isRefFunction(props.ref)) {
+    if (current && "ref" in props && isRefFunction(props.ref)) {
       props.ref(current);
     }
   });

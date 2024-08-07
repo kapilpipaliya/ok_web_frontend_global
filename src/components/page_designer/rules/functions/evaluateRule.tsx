@@ -12,7 +12,7 @@ export function evaluateRule(
   rule: Vertex,
   formVertex: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ): boolean {
   const expr = getConditionsExpression(rule, formVertex, graph, setGraph);
   const parsedExpression = jsep(expr);

@@ -1,6 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
 
-
 import { defaultPixelSizeTypes } from "./csseditor_constants";
 import {
   type ColorPickerField,

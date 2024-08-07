@@ -30,7 +30,8 @@ export const Coll: IFormMetaData = {
           message: "This ID is already taken",
           type: "custom",
           validationCallback: (options: any) => {
-            const { formData } = (options.validator.context as IFormContext) ||
+            const { formData } =
+              (options.validator.context as IFormContext) ||
               ({} as IFormContext);
             const [graph, _setGraph] = useGraph();
             const val = options.value;
@@ -42,7 +43,7 @@ export const Coll: IFormMetaData = {
               "id",
               val,
               formData.id,
-              graph
+              graph,
             );
           },
         },
@@ -295,7 +296,8 @@ ${Object.keys(binopsInitial).join("\n")}`,
               name: "name",
             },
             {
-              componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+              componentName:
+                "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
               meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
               name: "value",
             },

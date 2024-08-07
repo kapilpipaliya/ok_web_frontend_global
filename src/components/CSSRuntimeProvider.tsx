@@ -48,57 +48,65 @@ export function CSSRuntimeProvider(
     return currentIdentifier === identifier;
   };
 
-  createEffect(on([() => JSON.stringify(props.config), () => props.root], async () => {
-    (async () => {
-      if (!(typeof window !== "undefined")) { return; }
-      if (!(await waitInitialized())) { return; }
-
-      const configModule = await props.config;
-      const resolvedConfig =
-        configModule?.config || configModule?.default || configModule;
-
-      const init = async () => {
-        initializing = true;
-
-        const currentRoot = props.root ?? document;
-        const existingCSSRuntime = (globalThis as any).runtimeCSSs.find(
-          (eachCSS: RuntimeCSS) => eachCSS.root === currentRoot,
-        );
-        if (existingCSSRuntime) {
-          setCSSRuntime((newRuntimeCSS = existingCSSRuntime));
-          isExternalRuntimeCSS = true;
-        } else {
-          setCSSRuntime(
-            (newRuntimeCSS = new RuntimeCSS(
-              props.root,
-              resolvedConfig,
-            ).observe()),
-          );
-          isExternalRuntimeCSS = false;
+  createEffect(
+    on([() => JSON.stringify(props.config), () => props.root], async () => {
+      (async () => {
+        if (!(typeof window !== "undefined")) {
+          return;
+        }
+        if (!(await waitInitialized())) {
+          return;
         }
 
-        initializing = false;
-      };
+        const configModule = await props.config;
+        const resolvedConfig =
+          configModule?.config || configModule?.default || configModule;
 
-      if (!newRuntimeCSS) {
-        await init();
-      } else if (
-        newRuntimeCSS.root !== props.root &&
-        (props.root || newRuntimeCSS.root !== document)
-      ) {
-        newRuntimeCSS.destroy();
-        await init();
-      } else {
-        newRuntimeCSS.refresh(resolvedConfig);
-      }
-    })();
-  }));
+        const init = async () => {
+          initializing = true;
+
+          const currentRoot = props.root ?? document;
+          const existingCSSRuntime = (globalThis as any).runtimeCSSs.find(
+            (eachCSS: RuntimeCSS) => eachCSS.root === currentRoot,
+          );
+          if (existingCSSRuntime) {
+            setCSSRuntime((newRuntimeCSS = existingCSSRuntime));
+            isExternalRuntimeCSS = true;
+          } else {
+            setCSSRuntime(
+              (newRuntimeCSS = new RuntimeCSS(
+                props.root,
+                resolvedConfig,
+              ).observe()),
+            );
+            isExternalRuntimeCSS = false;
+          }
+
+          initializing = false;
+        };
+
+        if (!newRuntimeCSS) {
+          await init();
+        } else if (
+          newRuntimeCSS.root !== props.root &&
+          (props.root || newRuntimeCSS.root !== document)
+        ) {
+          newRuntimeCSS.destroy();
+          await init();
+        } else {
+          newRuntimeCSS.refresh(resolvedConfig);
+        }
+      })();
+    }),
+  );
 
   createEffect(() => {
     onCleanup(() => {
       if (!isExternalRuntimeCSS) {
         (async () => {
-          if (!(await waitInitialized())) { return; }
+          if (!(await waitInitialized())) {
+            return;
+          }
 
           newRuntimeCSS?.destroy();
           newRuntimeCSS = undefined;

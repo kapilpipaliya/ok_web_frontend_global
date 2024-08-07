@@ -34,7 +34,9 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
   const { showErrorToast } = useToast();
 
-  const childrenAttrs = createMemo(() => getChildrenAttrs(graph, setGraph, props.item));
+  const childrenAttrs = createMemo(() =>
+    getChildrenAttrs(graph, setGraph, props.item),
+  );
   const resolvedChildren = children(() => props.children);
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -67,7 +69,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       childrenAttrs,
       graph,
       setGraph,
-      layoutStore.formStore[0].formData
+      layoutStore.formStore[0].formData,
     );
   };
 
@@ -78,7 +80,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       setLayoutStore,
       graph,
       setGraph,
-      showErrorToast
+      showErrorToast,
     );
     resetDragDropState(setLayoutStore);
   };
@@ -93,7 +95,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseOver={handleMouseEnter} // NOSONAR
-      ref={el => {
+      ref={(el) => {
         setReference(el);
         // @ts-expect-error ignore
         el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
@@ -110,8 +112,18 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
         {resolvedChildren()}
       </Show>
-      <Show when={isSelectedLayoutId(props.item.id) || isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
-        <AttrConfigPopOverWrapper isSelectedLayoutId={isSelectedLayoutId(props.item.id)} item={props.item} reference={reference} />
+      <Show
+        when={
+          isSelectedLayoutId(props.item.id) ||
+          isSelectedHoverId(props.item.id) ||
+          layoutStore.multiHighlight.includes(props.item.id)
+        }
+      >
+        <AttrConfigPopOverWrapper
+          isSelectedLayoutId={isSelectedLayoutId(props.item.id)}
+          item={props.item}
+          reference={reference}
+        />
       </Show>
       <Show keyed when={!layoutStore?.hiddenNodes.includes(props.item.id)}>
         <BorderOverlay item={props.item} reference={reference} />

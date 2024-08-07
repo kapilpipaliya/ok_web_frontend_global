@@ -4,7 +4,10 @@ import { type Session, types } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson, convertRelationshipToJson } from "~/cypher/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
@@ -17,14 +20,30 @@ async function getInitialData(args: { subdomain: string }) {
   const relationshipObj: Record<string, Edge> = {};
 
   const session = (await getDriver(args.subdomain)).session();
-  
+
   try {
-    await fetchFromMGAndSaveToArray(session, 'MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m', {}, nodeObj, relationshipObj);
-    await fetchFromMGAndSaveToArray(session, 'MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m', {}, nodeObj, relationshipObj);
+    await fetchFromMGAndSaveToArray(
+      session,
+      "MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+      {},
+      nodeObj,
+      relationshipObj,
+    );
+    await fetchFromMGAndSaveToArray(
+      session,
+      "MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+      {},
+      nodeObj,
+      relationshipObj,
+    );
 
     const form = FormMetaData.Comp;
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-    const result = await fetchDataFromMG({ expression: `g:'Comp'`, incoming, outgoing });
+    const result = await fetchDataFromMG({
+      expression: `g:'Comp'`,
+      incoming,
+      outgoing,
+    });
 
     if (result.graph) {
       Object.assign(nodeObj, result.graph.vertexes);

@@ -54,9 +54,9 @@ export function ComponentList() {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-          setGraphData(graph, setGraph, result.graph);
-          getTreeDataAndSetState();
-        }
+        setGraphData(graph, setGraph, result.graph);
+        getTreeDataAndSetState();
+      }
     }
   });
 
@@ -123,8 +123,18 @@ export function ComponentList() {
           >
             {(item) => (
               <>
-                <div class={"font-size:17px font-weight:600 margin-bottom:8px margin-top:8px"}>{item.P.label || item.P.name}</div>
-                <ul class={'display:grid gap:5px grid-template-columns:repeat(2,1fr) list-style-type:none'}>
+                <div
+                  class={
+                    "font-size:17px font-weight:600 margin-bottom:8px margin-top:8px"
+                  }
+                >
+                  {item.P.label || item.P.name}
+                </div>
+                <ul
+                  class={
+                    "display:grid gap:5px grid-template-columns:repeat(2,1fr) list-style-type:none"
+                  }
+                >
                   <For each={item.children}>
                     {(child) => <ComonentItem child={child} />}
                   </For>

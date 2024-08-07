@@ -2,7 +2,7 @@ import Docker from "dockerode";
 
 export async function removeDockerContainer(
   containerId: string,
-): Promise<{ error?: string, message?: string }> {
+): Promise<{ error?: string; message?: string }> {
   const docker = new Docker();
 
   try {

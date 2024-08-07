@@ -2,7 +2,9 @@ import { getBoundingRectChildren } from "./getBoundingRectChildren";
 
 export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   // @ts-expect-error ignore
-  const bounds = node.useCurrentPosition ? node.getBoundingClientRect() : getBoundingRectChildren(node);
+  const bounds = node.useCurrentPosition
+    ? node.getBoundingClientRect()
+    : getBoundingRectChildren(node);
 
   // Calculate the offset and dimensions
   const offsetY = e.clientY - bounds.top;

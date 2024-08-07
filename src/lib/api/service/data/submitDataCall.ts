@@ -13,7 +13,7 @@ export async function submitDataCall(
   data: any,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number
+  txnId: number,
 ) {
   const result = await postAPI(API.submitDataUrl, data);
   // @ts-expect-error ignore

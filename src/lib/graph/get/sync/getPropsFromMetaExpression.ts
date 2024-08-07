@@ -34,7 +34,9 @@ export function getPropsFromMetaExpression(
   data: Vertex,
 ) {
   const meta = metaVertex.P.meta;
-  if (!meta) { return {}; }
+  if (!meta) {
+    return {};
+  }
 
   const metaRows =
     getSelectionOptions(graph, setGraph, meta, [data]).vertexes || [];

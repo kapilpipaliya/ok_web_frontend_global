@@ -7,7 +7,13 @@ import type { CSSStore } from "../CssEditorContext";
 import { cssStateToString } from "./cssStateToString";
 import { parseAndApplyCssRules } from "./parseAndApplyCssRules";
 
-export function mergeCSS(input1: CSSStore | string, input2: CSSStore | string, meta: Vertex, data: Vertex, graph: GraphInterface) {
+export function mergeCSS(
+  input1: CSSStore | string,
+  input2: CSSStore | string,
+  meta: Vertex,
+  data: Vertex,
+  graph: GraphInterface,
+) {
   const css1 =
     typeof input1 === "string" ? parseAndApplyCssRules(input1) : input1;
   const css2 =

@@ -1,4 +1,3 @@
-
 // Need to fix Layout
 export const isPageDesignerPath = (path: string) => {
   const lowerPath = path.toLowerCase();

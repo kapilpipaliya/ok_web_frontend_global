@@ -134,7 +134,9 @@ const tokenizer = (path) => {
   };
 
   const next = (prefix) => {
-    if (position >= length) { return null; }
+    if (position >= length) {
+      return null;
+    }
     let currentChar = path.charAt(position);
     // skip whitespace
     while (position < length && " \t\n\r\v".indexOf(currentChar) > -1) {
@@ -267,12 +269,12 @@ const tokenizer = (path) => {
         position += match[0].length;
         return create("number", num);
       }
-        throw {
-          code: "S0102",
-          position: position,
-          stack: new Error().stack,
-          token: match[0],
-        };
+      throw {
+        code: "S0102",
+        position: position,
+        stack: new Error().stack,
+        token: match[0],
+      };
     }
     // test for quoted names (backticks)
     let name;
@@ -308,29 +310,29 @@ const tokenizer = (path) => {
           position = i;
           return create("variable", name);
         }
-          name = path.substring(position, i);
-          position = i;
-          switch (name) {
-            case "and":
-            case "in":
-            case "or":
-              return create("operator", name);
-            case "false":
-              return create("value", false);
-            case "null":
-              return create("value", null);
-            case "true":
-              return create("value", true);
-            default: {
-              if (position === length && name === "") {
-                // whitespace at end of input
-                return null;
-              }
-              return create("name", name);
+        name = path.substring(position, i);
+        position = i;
+        switch (name) {
+          case "and":
+          case "in":
+          case "or":
+            return create("operator", name);
+          case "false":
+            return create("value", false);
+          case "null":
+            return create("value", null);
+          case "true":
+            return create("value", true);
+          default: {
+            if (position === length && name === "") {
+              // whitespace at end of input
+              return null;
             }
+            return create("name", name);
           }
+        }
       }
-        i++;
+      i++;
     }
   };
 
@@ -380,8 +382,8 @@ export function parser(source, recover) {
         errors.push(err);
         return err;
       }
-        err.stack = new Error().stack;
-        throw err;
+      err.stack = new Error().stack;
+      throw err;
     },
   };
 
@@ -412,8 +414,8 @@ export function parser(source, recover) {
       node.type = "(error)";
       return node;
     }
-      err.stack = new Error().stack;
-      throw err;
+    err.stack = new Error().stack;
+    throw err;
   };
 
   const advance = (id, infix) => {
@@ -623,7 +625,9 @@ export function parser(source, recover) {
         } else {
           this.arguments.push(expression(0));
         }
-        if (node.id !== ",") { break; }
+        if (node.id !== ",") {
+          break;
+        }
         advance(",");
       }
     }
@@ -736,11 +740,11 @@ export function parser(source, recover) {
       advance("]");
       return left;
     }
-      this.lhs = left;
-      this.rhs = expression(operators["]"]);
-      this.type = "binary";
-      advance("]", true);
-      return this;
+    this.lhs = left;
+    this.rhs = expression(operators["]"]);
+    this.type = "binary";
+    advance("]", true);
+    return this;
   });
 
   // order-by
@@ -1450,8 +1454,8 @@ export function parser(source, recover) {
           errors.push(err);
           return { error: err, type: "error" };
         }
-          err.stack = new Error().stack;
-          throw err;
+        err.stack = new Error().stack;
+        throw err;
       }
     }
     if (expr.keepArray) {

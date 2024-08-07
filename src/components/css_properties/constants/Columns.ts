@@ -1,10 +1,8 @@
 /* eslint-disable perfectionist/sort-objects */
-import type {
-  TextFieldOptionsField,
-} from "./FieldType";
+import type { TextFieldOptionsField } from "./FieldType";
 
 import { sizeTypes } from "./csseditor_constants";
-import { CSSWideKeywords, } from "./CSSMetadata";
+import { CSSWideKeywords } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
 
 export const ColumnsSection = {
@@ -24,13 +22,89 @@ export const ColumnsSection = {
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
-  columnRule: {componentName: "textFieldOptions", label: "Column Rule", name: "column-rule", type: "text"} as TextFieldOptionsField,
-  columnRuleColor: {componentName: "textFieldOptions", label: "Column Rule Color", name: "column-rule-color", type: "text"} as TextFieldOptionsField,
-  columnRuleStyle: {componentName: "textFieldOptions", label: "Column Rule Style", name: "column-rule-style", type: "text"} as TextFieldOptionsField,
-  columnRuleWidth: {componentName: "textFieldOptions", label: "Column Rule Width", name: "column-rule-width", type: "text"} as TextFieldOptionsField, // thin, medium, thick, number value
-  columnFill: createSelectOptions("column-fill", "Column Fill", ['auto', 'balance', 'balance-all', ...CSSWideKeywords]),
-  columnSpan: createSelectOptions("column-span", "Column Span", ['all', 'none', ...CSSWideKeywords]),
-  breakBefore: createSelectOptions("break-before", "Break Before", ['auto', 'always', 'avoid', 'avoid-page', 'avoid-column', 'avoid-region', 'page', 'region', 'column', 'all', 'left', 'right', 'recto', 'verso', ...CSSWideKeywords]),
-  breakAfter: createSelectOptions("break-after", "Break After", ['auto', 'always', 'avoid', 'avoid-page', 'avoid-column', 'avoid-region', 'page', 'region', 'column', 'all', 'left', 'right', 'recto', 'verso', ...CSSWideKeywords]),
-  breakInside: createSelectOptions("break-inside", "Break Inside", ['auto', 'avoid', 'avoid-page', 'avoid-column', 'avoid-region', 'page', 'region', 'column', 'all', 'left', 'right', 'recto', 'verso', ...CSSWideKeywords]),
+  columnRule: {
+    componentName: "textFieldOptions",
+    label: "Column Rule",
+    name: "column-rule",
+    type: "text",
+  } as TextFieldOptionsField,
+  columnRuleColor: {
+    componentName: "textFieldOptions",
+    label: "Column Rule Color",
+    name: "column-rule-color",
+    type: "text",
+  } as TextFieldOptionsField,
+  columnRuleStyle: {
+    componentName: "textFieldOptions",
+    label: "Column Rule Style",
+    name: "column-rule-style",
+    type: "text",
+  } as TextFieldOptionsField,
+  columnRuleWidth: {
+    componentName: "textFieldOptions",
+    label: "Column Rule Width",
+    name: "column-rule-width",
+    type: "text",
+  } as TextFieldOptionsField, // thin, medium, thick, number value
+  columnFill: createSelectOptions("column-fill", "Column Fill", [
+    "auto",
+    "balance",
+    "balance-all",
+    ...CSSWideKeywords,
+  ]),
+  columnSpan: createSelectOptions("column-span", "Column Span", [
+    "all",
+    "none",
+    ...CSSWideKeywords,
+  ]),
+  breakBefore: createSelectOptions("break-before", "Break Before", [
+    "auto",
+    "always",
+    "avoid",
+    "avoid-page",
+    "avoid-column",
+    "avoid-region",
+    "page",
+    "region",
+    "column",
+    "all",
+    "left",
+    "right",
+    "recto",
+    "verso",
+    ...CSSWideKeywords,
+  ]),
+  breakAfter: createSelectOptions("break-after", "Break After", [
+    "auto",
+    "always",
+    "avoid",
+    "avoid-page",
+    "avoid-column",
+    "avoid-region",
+    "page",
+    "region",
+    "column",
+    "all",
+    "left",
+    "right",
+    "recto",
+    "verso",
+    ...CSSWideKeywords,
+  ]),
+  breakInside: createSelectOptions("break-inside", "Break Inside", [
+    "auto",
+    "avoid",
+    "avoid-page",
+    "avoid-column",
+    "avoid-region",
+    "page",
+    "region",
+    "column",
+    "all",
+    "left",
+    "right",
+    "recto",
+    "verso",
+    ...CSSWideKeywords,
+  ]),
 };

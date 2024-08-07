@@ -16,17 +16,20 @@ export function DeleteButton(props: {
     <IconButton
       class="cursor:pointer"
       icon="fluent:delete-20-regular"
-      onClick={() => deleteLayoutAttr(
-        layoutStore,
-        setLayoutStore,
-        props.item,
-        graph,
-        setGraph,
-        layoutStore.formStore[0].txnId,
-        props.componentName,
-        showSuccessToast
-      )}
+      onClick={() =>
+        deleteLayoutAttr(
+          layoutStore,
+          setLayoutStore,
+          props.item,
+          graph,
+          setGraph,
+          layoutStore.formStore[0].txnId,
+          props.componentName,
+          showSuccessToast,
+        )
+      }
       size={20}
-      title="Delete" />
+      title="Delete"
+    />
   );
 }

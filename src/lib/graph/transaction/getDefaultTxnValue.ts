@@ -8,6 +8,6 @@ export function getDefaultTxnValue() {
     revertSteps: [],
     steps: [],
     submittedIndex: -1,
-    undoStepIndexes: []
+    undoStepIndexes: [],
   } as TransactionDetail;
 }

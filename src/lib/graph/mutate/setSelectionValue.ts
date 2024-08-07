@@ -33,7 +33,9 @@ export function setSelectionValue(
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that end to same vertex
-    if (value.includes(graph.edges[edgeId].E)) { continue; }
+    if (value.includes(graph.edges[edgeId].E)) {
+      continue;
+    }
     const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
     if (deleteEdgeResult?.error) {
       showErrorToast(deleteEdgeResult.error.toString());

@@ -1,10 +1,10 @@
-import { batch, onMount, Show } from 'solid-js';
+import { batch, onMount, Show } from "solid-js";
 
-import { useGraph } from '~/lib/graph/graph';
+import { useGraph } from "~/lib/graph/graph";
 
-import { useFileManagerStore } from '../FileManagerContext';
-import { FileManagerTreeItem } from './FileManagerTreeItem';
-import { getFilesData } from './getFilesData';
+import { useFileManagerStore } from "../FileManagerContext";
+import { FileManagerTreeItem } from "./FileManagerTreeItem";
+import { getFilesData } from "./getFilesData";
 
 export function Sidebar() {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
@@ -16,10 +16,10 @@ export function Sidebar() {
     if (!data.error && data.result.length > 0) {
       batch(() => {
         // @ts-expect-error ignore
-        setFileManagerStore('root', data.result[0]);
+        setFileManagerStore("root", data.result[0]);
         // @ts-expect-error ignore
-        setFileManagerStore('expandedKeys', [data.result[0].id]);
-      })
+        setFileManagerStore("expandedKeys", [data.result[0].id]);
+      });
     }
   });
 

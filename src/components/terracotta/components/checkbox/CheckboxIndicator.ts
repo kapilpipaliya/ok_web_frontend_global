@@ -1,37 +1,37 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { CheckStateRenderProps } from '../../states/create-check-state';
+import type { CheckStateRenderProps } from "../../states/create-check-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { ButtonProps } from "../button";
 
 import {
   CheckStateChild,
   useCheckState,
-} from '../../states/create-check-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-check-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createCheckedState,
   createDisabledState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useCheckboxContext } from './CheckboxContext';
-import { CHECKBOX_INDICATOR } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useCheckboxContext } from "./CheckboxContext";
+import { CHECKBOX_INDICATOR } from "./tags";
 
-export type CheckboxIndicatorProps<T extends ValidConstructor = 'button'> =
+export type CheckboxIndicatorProps<T extends ValidConstructor = "button"> =
   HeadlessPropsWithRef<T, CheckStateRenderProps>;
 
-export function CheckboxIndicator<T extends ValidConstructor = 'button'>(
+export function CheckboxIndicator<T extends ValidConstructor = "button">(
   props: CheckboxIndicatorProps<T>,
 ): JSX.Element {
-  const context = useCheckboxContext('CheckboxIndicator');
+  const context = useCheckboxContext("CheckboxIndicator");
   const state = useCheckState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -39,7 +39,7 @@ export function CheckboxIndicator<T extends ValidConstructor = 'button'>(
   createEffect(() => {
     const current = internalRef();
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         state.toggle();
       });
     }
@@ -48,14 +48,14 @@ export function CheckboxIndicator<T extends ValidConstructor = 'button'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['children', 'ref']),
+      omitProps(props, ["children", "ref"]),
       CHECKBOX_INDICATOR,
       {
-        'aria-describedby': context.descriptionID,
-        'aria-labelledby': context.labelID,
+        "aria-describedby": context.descriptionID,
+        "aria-labelledby": context.labelID,
         id: context.indicatorID,
         ref: setInternalRef,
-        role: 'checkbox',
+        role: "checkbox",
       },
       createDisabledState(() => state.disabled()),
       createARIADisabledState(() => state.disabled()),

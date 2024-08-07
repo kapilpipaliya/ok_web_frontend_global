@@ -5,9 +5,7 @@ export function LoaderNew(
     <div
       class={`display:grid height:${props.loaderHeight ?? "100vh"} place-content:center`}
     >
-      <div class={`${props.class ?? ""}`} >
-        Loading
-      </div>
+      <div class={`${props.class ?? ""}`}>Loading</div>
     </div>
   );
 }

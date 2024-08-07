@@ -1,6 +1,6 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { children, createMemo } from 'solid-js';
+import { children, createMemo } from "solid-js";
 
 // An `unmountable` is a kind of component
 // where one can decide if it should conditionally
@@ -9,7 +9,7 @@ import { children, createMemo } from 'solid-js';
 // as some implementations may allow users to use various
 // ways to hide the element (e.g. opacity, display, visibility)
 export interface UnmountableProps {
-  unmount?: 'offscreen' | boolean;
+  unmount?: "offscreen" | boolean;
 }
 
 export function createUnmountable(
@@ -21,7 +21,7 @@ export function createUnmountable(
   return createMemo(() => {
     const currentMode = mode();
 
-    if (currentMode === 'offscreen') {
+    if (currentMode === "offscreen") {
       const condition = createMemo(() => shouldMount());
       const current = children(() => render());
       return createMemo(() => condition() && current);

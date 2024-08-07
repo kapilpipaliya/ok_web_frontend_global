@@ -21,10 +21,12 @@ export function addStepAfter(
     layoutStore.formStore[0].txnId,
     graph,
     setGraph,
-    "Step"
+    "Step",
   );
 
-  if (layoutRowId === -1) { return; }
+  if (layoutRowId === -1) {
+    return;
+  }
 
   const fromVertex = graph.vertexes[layoutRowId];
 

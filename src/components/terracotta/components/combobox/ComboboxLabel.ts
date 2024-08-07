@@ -1,41 +1,41 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
-import { useAutocompleteState } from '../../states/create-autocomplete-state';
-import { useDisclosureState } from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+import { useAutocompleteState } from "../../states/create-autocomplete-state";
+import { useDisclosureState } from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createDisabledState,
   createExpandedState,
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import { useComboboxContext } from './ComboboxContext';
-import { COMBOBOX_LABEL_TAG } from './tags';
+} from "../../utils/state-props";
+import { useComboboxContext } from "./ComboboxContext";
+import { COMBOBOX_LABEL_TAG } from "./tags";
 
-export type ComboboxLabelProps<T extends ValidConstructor = 'label'> =
+export type ComboboxLabelProps<T extends ValidConstructor = "label"> =
   HeadlessProps<T>;
 
-export function ComboboxLabel<T extends ValidConstructor = 'label'>(
+export function ComboboxLabel<T extends ValidConstructor = "label">(
   props: ComboboxLabelProps<T>,
 ): JSX.Element {
-  const context = useComboboxContext('ComboboxLabel');
+  const context = useComboboxContext("ComboboxLabel");
   const autocompleteState = useAutocompleteState();
   const disclosureState = useDisclosureState();
 
   return createDynamic(
-    () => props.as || ('label' as T),
+    () => props.as || ("label" as T),
     mergeProps(
-      omitProps(props, ['as']),
+      omitProps(props, ["as"]),
       COMBOBOX_LABEL_TAG,
       {
         id: context.labelID,

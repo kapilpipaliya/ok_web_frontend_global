@@ -1,5 +1,3 @@
-
-
 import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/Toast";
@@ -8,7 +6,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import type { GridState, } from "../DataGridContext";
+import type { GridState } from "../DataGridContext";
 
 export function useDeleteRowConfirm(gridState: GridState) {
   const [graph, setGraph] = useGraph();
@@ -24,7 +22,12 @@ export function useDeleteRowConfirm(gridState: GridState) {
       return;
     }
     const txnId = graph.newTxnId;
-    const deleteResult = deleteVertex(txnId, gridState.deleteRowId, graph, setGraph);
+    const deleteResult = deleteVertex(
+      txnId,
+      gridState.deleteRowId,
+      graph,
+      setGraph,
+    );
     if (deleteResult?.error) {
       showErrorToast(deleteResult?.error.toString());
       return;

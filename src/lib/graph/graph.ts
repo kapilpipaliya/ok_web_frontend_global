@@ -2,9 +2,7 @@ import type { createStore } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
-import type {
-  TransactionValue,
-} from "~/lib/graph/transaction/TransactionType";
+import type { TransactionValue } from "~/lib/graph/transaction/TransactionType";
 
 export type Id = string;
 
@@ -67,7 +65,7 @@ export interface GraphInterface {
   navigationData?: AnyObject[];
   newTxnId: number;
   newVertexId: Id;
-  saveUserSetting: (properties: {[key: string]: any}) => void;
+  saveUserSetting: (properties: { [key: string]: any }) => void;
   transactions: Map<number, TransactionDetail>;
   userRoles: Id[];
   userSetting: Vertex;
@@ -81,10 +79,8 @@ export interface GraphInterface {
   // language: "en" as string,
 }
 
-
-export const GraphContext = createContext<
-  ReturnType<typeof createStore<GraphInterface>>
->();
+export const GraphContext =
+  createContext<ReturnType<typeof createStore<GraphInterface>>>();
 
 export function useGraph() {
   const graphStore = useContext(GraphContext)!;

@@ -1,25 +1,24 @@
-import {
-  type Accessor,
-  For, Show
-} from "solid-js";
+import { type Accessor, For, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "./IconButton";
 
-export function TableActions(props: Readonly<{
-  currentPage: Accessor<number>;
-  data: Vertex[];
-  displayedRows: Accessor<Vertex[]>;
-  handleFirstPage: () => void;
-  handleLastPage: () => void;
-  handleNextPage: () => void;
-  handlePreviousPage: () => void;
-  handleRowsPerPageChange: (e: Event) => void;
-  rowsPerPage: Accessor<number>;
-  rowsPerPageOptions?: number[];
-  totalPages: Accessor<number>;
-}>) {
+export function TableActions(
+  props: Readonly<{
+    currentPage: Accessor<number>;
+    data: Vertex[];
+    displayedRows: Accessor<Vertex[]>;
+    handleFirstPage: () => void;
+    handleLastPage: () => void;
+    handleNextPage: () => void;
+    handlePreviousPage: () => void;
+    handleRowsPerPageChange: (e: Event) => void;
+    rowsPerPage: Accessor<number>;
+    rowsPerPageOptions?: number[];
+    totalPages: Accessor<number>;
+  }>,
+) {
   return (
     <Show when={props.displayedRows().length > 0}>
       <div class="align-items:center display:flex justify-content:space-between padding:.5rem|1rem">
@@ -39,7 +38,7 @@ export function TableActions(props: Readonly<{
         <div class="font-weight:500 margin-right:1rem">
           <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
             (props.currentPage() + 1) * props.rowsPerPage(),
-            props.data.length
+            props.data.length,
           )} of ${props.data.length}`}</span>
         </div>
         <div class="flex gap:10px">
@@ -53,7 +52,8 @@ export function TableActions(props: Readonly<{
             icon="icon-park-outline:go-start"
             onClick={props.handleFirstPage}
             size={22}
-            title="Move first" />
+            title="Move first"
+          />
           <IconButton
             class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
@@ -64,7 +64,8 @@ export function TableActions(props: Readonly<{
             icon="icon-park-outline:left"
             onClick={props.handlePreviousPage}
             size={22}
-            title="Previous" />
+            title="Previous"
+          />
           <IconButton
             class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
@@ -75,7 +76,8 @@ export function TableActions(props: Readonly<{
             icon="icon-park-outline:right"
             onClick={props.handleNextPage}
             size={22}
-            title="Next" />
+            title="Next"
+          />
           <IconButton
             class="bg:#d3d3d345:hover jc:center p:4 r:50%"
             classList={{
@@ -86,7 +88,8 @@ export function TableActions(props: Readonly<{
             icon="icon-park-outline:go-end"
             onClick={props.handleLastPage}
             size={22}
-            title="Move last" />
+            title="Move last"
+          />
         </div>
       </div>
     </Show>

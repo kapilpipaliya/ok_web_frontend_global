@@ -2,8 +2,12 @@ import { autoUpdate } from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
 import {
   type Accessor,
-  createEffect, createMemo, createSelector,
-  createSignal, on, Show
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  on,
+  Show,
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
@@ -16,7 +20,9 @@ import { getBoundingRectChildren } from "~/components/page_designer/functions/ge
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
-export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null>; }>) {
+export function BorderOverlay(
+  props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
+) {
   const [layoutStore] = useDesignerLayoutStore();
   const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
   const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
@@ -27,7 +33,10 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
     let boxShadow = "";
 
     if (isActiveTargetItem()) {
-      const boxShadowProps = getDnDBoxShadowArgs(layoutStore.position, "green-60");
+      const boxShadowProps = getDnDBoxShadowArgs(
+        layoutStore.position,
+        "green-60",
+      );
       boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
     }
 
@@ -37,7 +46,6 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
       boxShadow += " b:1px|solid|blue-80";
     }
 
-
     return boxShadow;
   });
 
@@ -45,13 +53,15 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
     const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
     const ref = props.reference();
-    if (!ref) { return; }
+    if (!ref) {
+      return;
+    }
 
     const [store, setStore] = createStore({
       maxHeight: 0,
       maxWidth: 0,
       x: 0,
-      y: 0
+      y: 0,
     });
     // const updateInitial = () => {
     //   const rect = getBoundingRectChildren(props.reference()!);
@@ -67,7 +77,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
     const position = useFloating(props.reference, floating, {
       placement: "bottom-start",
       strategy: "fixed",
-      whileElementsMounted: autoUpdate
+      whileElementsMounted: autoUpdate,
     });
 
     const updatePos = () => {
@@ -76,9 +86,9 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
         maxHeight: rect.height + 2,
         maxWidth: rect.width + 2,
         x: (position.x ?? 0) - 1,
-        y: (position.y ?? 0) - rect.height - 1
+        y: (position.y ?? 0) - rect.height - 1,
       });
-    }
+    };
 
     createEffect(on([() => position.x, () => position.y], updatePos));
 
@@ -93,7 +103,7 @@ export function BorderOverlay(props: Readonly<{ item: Vertex; reference: Accesso
             "pointer-events": "none",
             position: "fixed",
             top: `${store.y}px`,
-            width: `${store.maxWidth}px`
+            width: `${store.maxWidth}px`,
           }}
         />
       </Portal>

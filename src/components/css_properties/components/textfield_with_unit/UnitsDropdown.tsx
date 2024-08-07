@@ -1,33 +1,27 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  type Accessor,
-  createSignal,
-  For,
-  Show
-} from "solid-js";
+import { type Accessor, createSignal, For, Show } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
-interface DropDownProps { 
-  isDropdownOpen: () => boolean; 
-  meta: TextFieldOptionsField; 
+interface DropDownProps {
+  isDropdownOpen: () => boolean;
+  meta: TextFieldOptionsField;
   reference: Accessor<HTMLElement | null>;
-  selectedOption: () => string; 
-  selectOption: (option: string) => void; 
-  setIsDropdownOpen: (isOpen: boolean) => void; 
+  selectedOption: () => string;
+  selectOption: (option: string) => void;
+  setIsDropdownOpen: (isOpen: boolean) => void;
   toggleDropdown: (event: MouseEvent) => void;
 }
-
 
 export function UnitsDropdown(props: DropDownProps) {
   const [searchTerm, setSearchTerm] = createSignal("");
 
   const filteredOptions = () => {
-    return props.meta.unitOptions?.filter(option =>
-      option.toLowerCase().includes(searchTerm().toLowerCase())
+    return props.meta.unitOptions?.filter((option) =>
+      option.toLowerCase().includes(searchTerm().toLowerCase()),
     );
   };
 
@@ -41,7 +35,10 @@ export function UnitsDropdown(props: DropDownProps) {
       </span>
       <Show when={props.isDropdownOpen()}>
         <ZIndex>
-          <DropdownMenu onClickOutside={() => props.setIsDropdownOpen(false)} parentRef={props.reference()!}>
+          <DropdownMenu
+            onClickOutside={() => props.setIsDropdownOpen(false)}
+            parentRef={props.reference()!}
+          >
             <div class={"w:full"}>
               <input
                 class="mb:5 p:5 w:full"
@@ -53,9 +50,11 @@ export function UnitsDropdown(props: DropDownProps) {
               <For each={filteredOptions()}>
                 {(option) => (
                   <div // NOSONAR
-                    class={`${props.selectedOption?.() === option
-                      ? "bg:rgb(229,234,253) font-weight:medium"
-                      : "bg:transparent"} flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
+                    class={`${
+                      props.selectedOption?.() === option
+                        ? "bg:rgb(229,234,253) font-weight:medium"
+                        : "bg:transparent"
+                    } flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
                     onClick={() => props.selectOption(option)}
                   >
                     {option}

@@ -53,7 +53,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
         {
           body: formData,
           method: "POST",
-        }
+        },
       );
       const result = await res.json();
 
@@ -62,7 +62,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
         updatedData.profileImage = result.newFilename;
       }
     }
-    
+
     const payload = {
       panel: "profile",
       uId: props.profileData.uId,
@@ -74,7 +74,10 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
   };
 
   const onClickSave = async () => {
-    if (equals(props.profileData, props.originalProfileData) && !selectedImage()) {
+    if (
+      equals(props.profileData, props.originalProfileData) &&
+      !selectedImage()
+    ) {
       showErrorToast("No changes to save");
       return;
     }
@@ -126,7 +129,9 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
 
   const handleAvatarClick = () => {
     if (isEdit()) {
-      const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+      const fileInput = document.getElementById(
+        "fileInput",
+      ) as HTMLInputElement;
       fileInput?.click();
     }
   };
@@ -166,9 +171,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             <div style="font-size: 22px; font-weight: 600;">
               {props.profileData.username}
             </div>
-            <div style="font-size: 18px;">
-              {props.profileData.email}
-            </div>
+            <div style="font-size: 18px;">{props.profileData.email}</div>
           </div>
         </div>
         <div class="grid@>lg gap:10 grid-template-columns:repeat(2,50%) justify-self:center p:10">
@@ -193,7 +196,9 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             />
           </div>
           <div>
-            <span class="color:dimgrey font-weight:500 font:15">Email Address</span>
+            <span class="color:dimgrey font-weight:500 font:15">
+              Email Address
+            </span>
             <input
               disabled={!isEdit()}
               name="email"

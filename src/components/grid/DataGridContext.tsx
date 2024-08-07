@@ -13,9 +13,16 @@ export function getInitialGridState(graph: GraphInterface) {
     cardSize: graph.vertexes[graph.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
     error: null as null | string,
-    fetchTableData: (() => {}) as (skip?: number, limit?: number, isLoadMore?: boolean) => Promise<{
-      error: string;
-  } | ServerResult>,
+    fetchTableData: (() => {}) as (
+      skip?: number,
+      limit?: number,
+      isLoadMore?: boolean,
+    ) => Promise<
+      | {
+          error: string;
+        }
+      | ServerResult
+    >,
     filteredData: [] as Vertex[],
     formId: null as Id | null,
     formMetaData: (() => null) as Accessor<IFormMetaData | null>,
@@ -27,9 +34,11 @@ export function getInitialGridState(graph: GraphInterface) {
     isNoPermissionCheck: false,
     isSearching: false,
     isShowLoadMore: true,
-    layout: (graph.vertexes[graph.userSettingId]?.P.layout || 'table') as 'card' | 'table',
+    layout: (graph.vertexes[graph.userSettingId]?.P.layout || "table") as
+      | "card"
+      | "table",
     metaVertex: null as null | Vertex,
-    search: '',
+    search: "",
     selectedRows: [] as Vertex[],
     tableId: null as null | string,
     tableStore: {
@@ -42,10 +51,11 @@ export type DataGridState = ReturnType<typeof getInitialGridState>;
 export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
 export const DataGridStoreContext = createContext<DataGridStore>();
 
-
 const DataGridContext = createContext<DataGridStore>();
 
-export function DataGridProvider(props: Readonly<{ children: JSX.Element; value: DataGridStore; }>) {
+export function DataGridProvider(
+  props: Readonly<{ children: JSX.Element; value: DataGridStore }>,
+) {
   return (
     <DataGridContext.Provider value={props.value}>
       {props.children}

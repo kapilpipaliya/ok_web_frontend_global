@@ -29,7 +29,7 @@ export async function retryTransaction(
         }
       } else {
         console.error("Failed to handle mutation object:", error);
-        await tx.rollback(); 
+        await tx.rollback();
         throw error;
       }
     } finally {

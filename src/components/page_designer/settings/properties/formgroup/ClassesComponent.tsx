@@ -22,7 +22,9 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
   const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
-  const classVertices = props.metaAttributes.filter(vertex => vertex.P.name.endsWith("Class"));
+  const classVertices = props.metaAttributes.filter((vertex) =>
+    vertex.P.name.endsWith("Class"),
+  );
   const metaClasses = [
     graph.vertexes[props.vertexIds.class],
     ...(isFormField ? [graph.vertexes[props.vertexIds.labelClass]] : []),
@@ -38,13 +40,17 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
         displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'"
         onTabClick={handleTabClick}
         selectedIndex={selectedIndex()}
-        tabs={metaClasses as unknown as { name: string; }[]} />
+        tabs={metaClasses as unknown as { name: string }[]}
+      />
       <Show keyed when={selectedIndex() + 1}>
         <CSSPropertiesEditorWrapper
           data={props.selectedLayout}
           meta={metaClasses[selectedIndex()]}
-          setValue={(data) => props.setValue(metaClasses[selectedIndex()], data)}
-          txnId={props.txnId} />
+          setValue={(data) =>
+            props.setValue(metaClasses[selectedIndex()], data)
+          }
+          txnId={props.txnId}
+        />
       </Show>
     </>
   );

@@ -9,7 +9,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 export function getParentVertex(
   path: string[],
   currentVertex: Vertex,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): {
   error: boolean;
   vertex?: Vertex;

@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,15 +7,15 @@ import {
   createMemo,
   createSignal,
   useContext,
-} from 'solid-js';
-import { usePrefersDark } from 'solid-use/media-query';
-import usePageVisibility from 'solid-use/page-visibility';
+} from "solid-js";
+import { usePrefersDark } from "solid-use/media-query";
+import usePageVisibility from "solid-use/page-visibility";
 
-import assert from '../../utils/assert';
-import useEventListener from '../../utils/use-event-listener';
+import assert from "../../utils/assert";
+import useEventListener from "../../utils/use-event-listener";
 
-export type NativeColorScheme = 'dark' | 'light';
-export type ColorScheme = 'system' | NativeColorScheme;
+export type NativeColorScheme = "dark" | "light";
+export type ColorScheme = "system" | NativeColorScheme;
 
 export interface ColorSchemeProviderControlledProps {
   children?: JSX.Element;
@@ -41,7 +41,7 @@ interface ColorSchemeContextData {
 
 const ColorSchemeContext = createContext<ColorSchemeContextData>();
 
-const STORAGE_KEY = 'theme-preference';
+const STORAGE_KEY = "theme-preference";
 
 export function ColorSchemeProvider(
   props: ColorSchemeProviderProps,
@@ -49,7 +49,7 @@ export function ColorSchemeProvider(
   let get: Accessor<ColorScheme>;
   let set: (scheme: ColorScheme) => void;
 
-  if ('initialValue' in props) {
+  if ("initialValue" in props) {
     const [scheme, setScheme] = createSignal<ColorScheme>(props.initialValue);
     get = scheme;
     set = (value): void => {
@@ -71,7 +71,7 @@ export function ColorSchemeProvider(
   const isVisible = usePageVisibility();
 
   const shouldToggle = createMemo(
-    () => (get() === 'system' && prefersDark()) || get() === 'dark',
+    () => (get() === "system" && prefersDark()) || get() === "dark",
   );
 
   // Since storage events only work for other windows
@@ -85,11 +85,11 @@ export function ColorSchemeProvider(
       if (value) {
         set(value as ColorScheme);
       } else {
-        set('system');
+        set("system");
       }
     };
     onChange();
-    useEventListener(window, 'storage', onChange, false);
+    useEventListener(window, "storage", onChange, false);
   });
 
   // Sync storage when signal changes
@@ -99,7 +99,7 @@ export function ColorSchemeProvider(
 
   // Sync document class
   createEffect(() => {
-    document.documentElement.classList.toggle('dark', shouldToggle());
+    document.documentElement.classList.toggle("dark", shouldToggle());
   });
 
   return createComponent(ColorSchemeContext.Provider, {
@@ -108,10 +108,10 @@ export function ColorSchemeProvider(
     },
     value: {
       get native() {
-        return prefersDark() ? 'dark' : 'light';
+        return prefersDark() ? "dark" : "light";
       },
       get preferred() {
-        return shouldToggle() ? 'dark' : 'light';
+        return shouldToggle() ? "dark" : "light";
       },
       setValue(val) {
         set(val);
@@ -125,7 +125,7 @@ export function ColorSchemeProvider(
 
 function useColorSchemeContext(): ColorSchemeContextData {
   const ctx = useContext(ColorSchemeContext);
-  assert(ctx, new Error('Missing <ColorSchemeProvider>'));
+  assert(ctx, new Error("Missing <ColorSchemeProvider>"));
   return ctx;
 }
 

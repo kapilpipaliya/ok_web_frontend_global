@@ -5,11 +5,17 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 // Component to display the default value
 
-export function DefaultValue(props: Readonly<{ joinVertex: Vertex; metaVertex: Vertex; }>) {
+export function DefaultValue(
+  props: Readonly<{ joinVertex: Vertex; metaVertex: Vertex }>,
+) {
   const [graph, setGraph] = useGraph();
   return (
     <Show when={props.metaVertex.P.defaultValue}>
-      {getSelectionOptions(graph, setGraph, props.metaVertex.P.defaultValue, [props.joinVertex]).vertexes}
+      {
+        getSelectionOptions(graph, setGraph, props.metaVertex.P.defaultValue, [
+          props.joinVertex,
+        ]).vertexes
+      }
     </Show>
   );
 }

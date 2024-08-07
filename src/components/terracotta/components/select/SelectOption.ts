@@ -1,36 +1,36 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   SelectOptionStateOptions,
   SelectOptionStateRenderProps,
-} from '../../states/create-select-option-state';
+} from "../../states/create-select-option-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge, Prettify } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge, Prettify } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
 import {
   createSelectOptionState,
   SelectOptionStateProvider,
-} from '../../states/create-select-option-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+} from "../../states/create-select-option-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createActiveState,
   createARIADisabledState,
   createARIASelectedState,
   createDisabledState,
   createSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useSelectContext } from './SelectContext';
-import { SELECT_OPTION_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useSelectContext } from "./SelectContext";
+import { SELECT_OPTION_TAG } from "./tags";
 
 export type SelectOptionBaseProps<V> = Prettify<
   SelectOptionStateOptions<V> & SelectOptionStateRenderProps
@@ -38,37 +38,37 @@ export type SelectOptionBaseProps<V> = Prettify<
 
 export type SelectOptionProps<
   V,
-  T extends ValidConstructor = 'li',
+  T extends ValidConstructor = "li",
 > = HeadlessPropsWithRef<
   T,
   OmitAndMerge<SelectOptionBaseProps<V>, ButtonProps<T>>
 >;
 
-export function SelectOption<V, T extends ValidConstructor = 'li'>(
+export function SelectOption<V, T extends ValidConstructor = "li">(
   props: SelectOptionProps<V, T>,
 ): JSX.Element {
-  const context = useSelectContext('SelectOption');
+  const context = useSelectContext("SelectOption");
   const [internalRef, setInternalRef] = createForwardRef(props);
   const state = createSelectOptionState(props);
 
   createEffect(() => {
     const current = internalRef();
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         state.select();
       });
-      useEventListener(current, 'focus', () => {
+      useEventListener(current, "focus", () => {
         state.focus();
       });
-      useEventListener(current, 'blur', () => {
+      useEventListener(current, "blur", () => {
         state.blur();
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         if (!state.disabled()) {
           current.focus();
         }
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         if (!state.disabled()) {
           current.blur();
         }
@@ -79,15 +79,15 @@ export function SelectOption<V, T extends ValidConstructor = 'li'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['as', 'children', 'value', 'ref']),
+      omitProps(props, ["as", "children", "value", "ref"]),
       SELECT_OPTION_TAG,
       createOwnerAttribute(context.controller.getId()),
       {
         get as() {
-          return props.as || ('li' as T);
+          return props.as || ("li" as T);
         },
         ref: setInternalRef,
-        role: 'option',
+        role: "option",
         get tabindex() {
           return state.isActive() ? 0 : -1;
         },

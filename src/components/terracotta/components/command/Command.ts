@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,8 +7,8 @@ import {
   createSignal,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   AutocompleteStateRenderProps,
@@ -16,32 +16,32 @@ import type {
   MultipleAutocompleteStateUncontrolledOptions,
   SingleAutocompleteStateControlledOptions,
   SingleAutocompleteStateUncontrolledOptions,
-} from '../../states/create-autocomplete-state';
+} from "../../states/create-autocomplete-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   AutocompleteStateProvider,
   createMultipleAutocompleteState,
   createSingleAutocompleteState,
-} from '../../states/create-autocomplete-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-autocomplete-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createARIADisabledState,
   createDisabledState,
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
+} from "../../utils/state-props";
 import {
   CommandContext,
   createCommandOptionFocusNavigator,
-} from './CommandContext';
-import { COMMAND_TAG } from './tags';
+} from "./CommandContext";
+import { COMMAND_TAG } from "./tags";
 
 export interface CommandBaseProps {
   horizontal?: boolean;
@@ -55,7 +55,7 @@ export type SingleCommandControlledBaseProps<V> = Prettify<
 
 export type SingleCommandControlledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessProps<T, SingleCommandControlledBaseProps<V>>;
 
 export type SingleCommandUncontrolledBaseProps<V> = Prettify<
@@ -66,10 +66,10 @@ export type SingleCommandUncontrolledBaseProps<V> = Prettify<
 
 export type SingleCommandUncontrolledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessProps<T, SingleCommandUncontrolledBaseProps<V>>;
 
-export type SingleCommandProps<V, T extends ValidConstructor = 'div'> =
+export type SingleCommandProps<V, T extends ValidConstructor = "div"> =
   | SingleCommandControlledProps<V, T>
   | SingleCommandUncontrolledProps<V, T>;
 
@@ -81,7 +81,7 @@ export type MultipleCommandControlledBaseProps<V> = Prettify<
 
 export type MultipleCommandControlledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessProps<T, MultipleCommandControlledBaseProps<V>>;
 
 export type MultipleCommandUncontrolledBaseProps<V> = Prettify<
@@ -92,32 +92,32 @@ export type MultipleCommandUncontrolledBaseProps<V> = Prettify<
 
 export type MultipleCommandUncontrolledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessProps<T, MultipleCommandUncontrolledBaseProps<V>>;
 
-export type MultipleCommandProps<V, T extends ValidConstructor = 'div'> =
+export type MultipleCommandProps<V, T extends ValidConstructor = "div"> =
   | MultipleCommandControlledProps<V, T>
   | MultipleCommandUncontrolledProps<V, T>;
 
-export type CommandProps<V, T extends ValidConstructor = 'div'> =
+export type CommandProps<V, T extends ValidConstructor = "div"> =
   | MultipleCommandProps<V, T>
   | SingleCommandProps<V, T>;
 
-function isCommandMultiple<V, T extends ValidConstructor = 'div'>(
+function isCommandMultiple<V, T extends ValidConstructor = "div">(
   props: CommandProps<V, T>,
 ): props is MultipleCommandProps<V, T> {
   return !!props.multiple;
 }
 
-function isCommandUncontrolled<V, T extends ValidConstructor = 'div'>(
+function isCommandUncontrolled<V, T extends ValidConstructor = "div">(
   props: CommandProps<V, T>,
 ): props is
   | MultipleCommandUncontrolledProps<V, T>
   | SingleCommandUncontrolledProps<V, T> {
-  return 'defaultValue' in props;
+  return "defaultValue" in props;
 }
 
-export function Command<V, T extends ValidConstructor = 'div'>(
+export function Command<V, T extends ValidConstructor = "div">(
   props: CommandProps<V, T>,
 ): JSX.Element {
   return createMemo(() => {
@@ -145,34 +145,34 @@ export function Command<V, T extends ValidConstructor = 'div'>(
     return createComponent(CommandContext.Provider, {
       get children() {
         return createDynamic(
-          () => props.as || 'div',
+          () => props.as || "div",
           mergeProps(
             isCommandUncontrolled(props)
               ? omitProps(props, [
-                  'as',
-                  'by',
-                  'children',
-                  'defaultValue',
-                  'disabled',
-                  'horizontal',
-                  'multiple',
-                  'onChange',
-                  'toggleable',
+                  "as",
+                  "by",
+                  "children",
+                  "defaultValue",
+                  "disabled",
+                  "horizontal",
+                  "multiple",
+                  "onChange",
+                  "toggleable",
                 ])
               : omitProps(props, [
-                  'as',
-                  'by',
-                  'children',
-                  'value',
-                  'disabled',
-                  'horizontal',
-                  'multiple',
-                  'onChange',
-                  'toggleable',
+                  "as",
+                  "by",
+                  "children",
+                  "value",
+                  "disabled",
+                  "horizontal",
+                  "multiple",
+                  "onChange",
+                  "toggleable",
                 ]),
             COMMAND_TAG,
             {
-              'aria-labelledby': labelID,
+              "aria-labelledby": labelID,
               id: controller.getId(),
             },
             createDisabledState(() => state.disabled()),

@@ -1,6 +1,9 @@
 import type { Record } from "neo4j-driver";
 
-import { convertNodeToJson, convertRelationshipToJson } from "~/cypher/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/cypher/convertNodeToJson";
 
 import type { ContextType } from "../../types/ContextType";
 
@@ -11,8 +14,12 @@ export function processResult(
   typeLabel?: string,
   _inward?: boolean,
 ) {
-  const vertices = records.map((record) => convertNodeToJson(record.get(nodeLabel)));
-  const relationships = typeLabel ? records.map((record) => convertRelationshipToJson(record.get(typeLabel))) : [];
+  const vertices = records.map((record) =>
+    convertNodeToJson(record.get(nodeLabel)),
+  );
+  const relationships = typeLabel
+    ? records.map((record) => convertRelationshipToJson(record.get(typeLabel)))
+    : [];
 
   if (context.nodes) {
     for (const vertex of vertices) {
@@ -31,7 +38,9 @@ export function processResult(
 }
 
 function updateNodeRelations(context: ContextType, relationship: any) {
-  if (!context.nodes) { return; }
+  if (!context.nodes) {
+    return;
+  }
 
   if (context.nodes[relationship.S]) {
     if (!context.nodes[relationship.S].OUT[relationship.T]) {

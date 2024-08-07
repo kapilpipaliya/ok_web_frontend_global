@@ -1,4 +1,3 @@
-
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
@@ -32,13 +31,16 @@ export function UndoRedoIcons() {
         {(item) => (
           <IconButton
             class={`${
-              item.disabled() ? 'cursor:not-allowed opacity:.5' : 'hover:color:#000'
+              item.disabled()
+                ? "cursor:not-allowed opacity:.5"
+                : "hover:color:#000"
             } flex ai:center b:1px|solid|lightgrey bg:white color:grey jc:center p:6 r:7`}
             icon={item.icon}
             onClick={item.onClick}
             size={22}
             title={item.tooltip}
-          />)}
+          />
+        )}
       </For>
     </div>
   );

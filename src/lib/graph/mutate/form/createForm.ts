@@ -32,7 +32,9 @@ export function createForm(
   if (addNewVertexResult.error) {
     return addNewVertexResult;
   }
-  if (isRealTime) { commitTxn(txnId, graph); }
+  if (isRealTime) {
+    commitTxn(txnId, graph);
+  }
   const vertex = graph.vertexes[newVertexObj.id];
   return {
     error: false,

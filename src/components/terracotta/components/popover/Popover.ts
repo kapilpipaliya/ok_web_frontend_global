@@ -1,64 +1,64 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
   createEffect,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DisclosureStateControlledOptions,
   DisclosureStateRenderProps,
   DisclosureStateUncontrolledOptions,
-} from '../../states/create-disclosure-state';
+} from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createDisclosureState,
   DisclosureStateProvider,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createARIADisabledState,
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useFocusStartPoint from '../../utils/use-focus-start-point';
-import { PopoverContext } from './PopoverContext';
-import { POPOVER_TAG } from './tags';
+} from "../../utils/state-props";
+import useFocusStartPoint from "../../utils/use-focus-start-point";
+import { PopoverContext } from "./PopoverContext";
+import { POPOVER_TAG } from "./tags";
 
 export type PopoverControlledBaseProps = Prettify<
   DisclosureStateControlledOptions & DisclosureStateRenderProps
 >;
 
-export type PopoverControlledProps<T extends ValidConstructor = 'div'> =
+export type PopoverControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, PopoverControlledBaseProps>;
 
 export type PopoverUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
-export type PopoverUncontrolledProps<T extends ValidConstructor = 'div'> =
+export type PopoverUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, PopoverUncontrolledBaseProps>;
 
-export type PopoverProps<T extends ValidConstructor = 'div'> =
+export type PopoverProps<T extends ValidConstructor = "div"> =
   | PopoverControlledProps<T>
   | PopoverUncontrolledProps<T>;
 
-function isPopoverUncontrolled<T extends ValidConstructor = 'div'>(
+function isPopoverUncontrolled<T extends ValidConstructor = "div">(
   props: PopoverProps<T>,
 ): props is PopoverUncontrolledProps<T> {
-  return 'defaultOpen' in props;
+  return "defaultOpen" in props;
 }
 
-export function Popover<T extends ValidConstructor = 'div'>(
+export function Popover<T extends ValidConstructor = "div">(
   props: PopoverProps<T>,
 ): JSX.Element {
   const ownerID = createUniqueId();
@@ -80,26 +80,26 @@ export function Popover<T extends ValidConstructor = 'div'>(
   return createComponent(PopoverContext.Provider, {
     get children() {
       return createDynamic(
-        () => props.as || ('div' as T),
+        () => props.as || ("div" as T),
         mergeProps(
           isPopoverUncontrolled(props)
             ? omitProps(props, [
-                'as',
-                'children',
-                'defaultOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "defaultOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ])
             : omitProps(props, [
-                'as',
-                'children',
-                'isOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "isOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ]),
           POPOVER_TAG,
           createDisabledState(() => state.disabled()),

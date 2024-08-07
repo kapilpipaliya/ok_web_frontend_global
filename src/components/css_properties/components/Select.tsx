@@ -8,7 +8,12 @@ import { ZIndex } from "~/components/ZIndex";
 
 import type { SelectField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
+import {
+  useComponentMeta,
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
@@ -44,7 +49,9 @@ export const Select = () => {
         [meta.name]: option.value || option,
       });
     }
-    if (meta.onChangeInput) { meta.onChangeInput(meta.name, option.value || option); }
+    if (meta.onChangeInput) {
+      meta.onChangeInput(meta.name, option.value || option);
+    }
     setIsActive(false);
   };
 
@@ -91,12 +98,16 @@ export const Select = () => {
         />
         <Show when={isActive()}>
           <ZIndex>
-            <DropdownMenu onClickOutside={() => setIsActive(false)} parentRef={reference()!}>
+            <DropdownMenu
+              onClickOutside={() => setIsActive(false)}
+              parentRef={reference()!}
+            >
               <DropdownList
                 options={meta.options}
                 selectedValue={selectedValue()}
                 selectOption={selectOption}
-              /></DropdownMenu>
+              />
+            </DropdownMenu>
           </ZIndex>
         </Show>
       </div>
@@ -128,8 +139,12 @@ const DropdownButton = (props: DropdownButtonProps) => (
       class="select-button"
       role="combobox"
     >
-      <span class={`selected-value ${!props.selectedValue && "color:lightgray"}`}>
-        {props.selectedValue ? formatString(props.selectedValue) : 'Select Value'}
+      <span
+        class={`selected-value ${!props.selectedValue && "color:lightgray"}`}
+      >
+        {props.selectedValue
+          ? formatString(props.selectedValue)
+          : "Select Value"}
       </span>
       <span class="arrow" />
     </button>

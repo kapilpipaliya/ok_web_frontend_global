@@ -11,21 +11,26 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useFileManagerStore } from "../FileManagerContext";  // Import QuickEditModal
+import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
 
-
-export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () => void, metaVertex: Vertex }>) {
+export function FileManagerConfigIcons(
+  props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,
+) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, _setFileManagerStore] = useFileManagerStore();
-  const isSelectedItemId = createSelector(() => fileManagerStore.selectedItem?.id);
-  const isHoveredItemId = createSelector(() => fileManagerStore.treeItemHoverId);
+  const isSelectedItemId = createSelector(
+    () => fileManagerStore.selectedItem?.id,
+  );
+  const isHoveredItemId = createSelector(
+    () => fileManagerStore.treeItemHoverId,
+  );
   const { showErrorToast, showSuccessToast } = useToast();
   const [isEditModalOpen, setIsEditModalOpen] = createSignal(false);
 
   const [state, setState] = createStore({
     buttonRef: null as HTMLElement | null,
-    dialogAction: (_name: string) => { },
+    dialogAction: (_name: string) => {},
     dialogLabel: "",
     dialogPlaceholder: "",
     dialogTitle: "",
@@ -76,10 +81,15 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
     // TODO: on new File add display full modal to insert file metaData or upload a file component
   };
 
-  const handleRenameItem = (_name: string) => {
-  };
+  const handleRenameItem = (_name: string) => {};
 
-  const openDialog = (title: string, label: string, placeholder: string, action: (name: string) => void, ref: HTMLElement) => {
+  const openDialog = (
+    title: string,
+    label: string,
+    placeholder: string,
+    action: (name: string) => void,
+    ref: HTMLElement,
+  ) => {
     setState({
       buttonRef: ref,
       dialogAction: action,
@@ -92,14 +102,23 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
 
   return (
     <div class="flex ai:center">
-      <Show when={state.showDialog || isSelectedItemId(props.metaVertex.id) || isHoveredItemId(props.metaVertex.id)}>
+      <Show
+        when={
+          state.showDialog ||
+          isSelectedItemId(props.metaVertex.id) ||
+          isHoveredItemId(props.metaVertex.id)
+        }
+      >
         <Show when={props.metaVertex.L[0] === "File"}>
           <IconButton
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="ic:round-download"
             iconClass="transition:0.5s|ease-in-out"
             onClick={() => {
-              window.open(`/api/file/download?fileId=${props.metaVertex.id}`, '_blank');
+              window.open(
+                `/api/file/download?fileId=${props.metaVertex.id}`,
+                "_blank",
+              );
             }}
             size={18}
             title="Download"
@@ -117,7 +136,15 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mdi:folder-plus"
           iconClass="transition:0.5s|ease-in-out"
-          onClick={(e) => openDialog("Add New Directory", "Enter Directory Name", "Enter directory name", handleCreateNewDirectory, e.currentTarget)}
+          onClick={(e) =>
+            openDialog(
+              "Add New Directory",
+              "Enter Directory Name",
+              "Enter directory name",
+              handleCreateNewDirectory,
+              e.currentTarget,
+            )
+          }
           size={18}
           title="Create New Directory"
         />
@@ -125,7 +152,15 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mdi:file-plus"
           iconClass="transition:0.5s|ease-in-out"
-          onClick={(e) => openDialog("Add New File", "Enter File Name", "Enter file name", handleCreateNewFile, e.currentTarget)}
+          onClick={(e) =>
+            openDialog(
+              "Add New File",
+              "Enter File Name",
+              "Enter file name",
+              handleCreateNewFile,
+              e.currentTarget,
+            )
+          }
           size={18}
           title="Create New File"
         />
@@ -134,7 +169,15 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="mdi:rename-box"
             iconClass="transition:0.5s|ease-in-out"
-            onClick={(e) => openDialog(`Rename ${props.metaVertex.L[0]}`, `Enter ${props.metaVertex.L[0]} Name`, "Enter new name", handleRenameItem, e.currentTarget)}
+            onClick={(e) =>
+              openDialog(
+                `Rename ${props.metaVertex.L[0]}`,
+                `Enter ${props.metaVertex.L[0]} Name`,
+                "Enter new name",
+                handleRenameItem,
+                e.currentTarget,
+              )
+            }
             size={18}
             title="Rename"
           />
@@ -142,8 +185,7 @@ export function FileManagerConfigIcons(props: Readonly<{ getChildrenItems?: () =
             class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="mdi:delete"
             iconClass="transition:0.5s|ease-in-out"
-            onClick={() => {
-            }}
+            onClick={() => {}}
             size={18}
             title="Delete"
           />

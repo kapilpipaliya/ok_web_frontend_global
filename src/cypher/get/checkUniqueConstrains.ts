@@ -19,7 +19,9 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   }
 
   if (label === "Form" && isReservedKeyword(name)) {
-    return { error: `The name "${name}" is a reserved word and cannot be used` };
+    return {
+      error: `The name "${name}" is a reserved word and cannot be used`,
+    };
   }
 
   try {
@@ -27,14 +29,25 @@ export async function checkUniqueConstrains(vertex: Vertex) {
       return { error: "Provided name already exists" };
     }
 
-    const uniqueConstrains = await evalAsync(jsep(`g:'Form[${label}]->$0Unique'`), {});
+    const uniqueConstrains = await evalAsync(
+      jsep(`g:'Form[${label}]->$0Unique'`),
+      {},
+    );
     for (const uniqueConstraintVertex of uniqueConstrains) {
-      const keys = await evalAsync(jsep('->$0Key'), { vertexes: [uniqueConstraintVertex] });
+      const keys = await evalAsync(jsep("->$0Key"), {
+        vertexes: [uniqueConstraintVertex],
+      });
       if (keys.length > 0) {
-        const uniqueConstraintExists = await doesUniqueConstraintExist(session, label, id, keys, vertex);
+        const uniqueConstraintExists = await doesUniqueConstraintExist(
+          session,
+          label,
+          id,
+          keys,
+          vertex,
+        );
         if (uniqueConstraintExists) {
           return {
-            error: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`
+            error: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`,
           };
         }
       }
@@ -48,16 +61,27 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   }
 }
 
-async function doesNameExist(session: any, label: string, name: string, id?: string) {
-  const query = `MATCH (v:${label}) WHERE v.name = $name ${id ? 'AND v.elementId != $id' : ''} RETURN v`;
+async function doesNameExist(
+  session: any,
+  label: string,
+  name: string,
+  id?: string,
+) {
+  const query = `MATCH (v:${label}) WHERE v.name = $name ${id ? "AND v.elementId != $id" : ""} RETURN v`;
   const params = id ? { id, name } : { name };
   const result = await session.run(query, params);
   return result.records.length > 0;
 }
 
-async function doesUniqueConstraintExist(session: any, label: string, id: string | undefined, keys: Vertex[], vertex: Vertex) {
+async function doesUniqueConstraintExist(
+  session: any,
+  label: string,
+  id: string | undefined,
+  keys: Vertex[],
+  vertex: Vertex,
+) {
   const params: Record<string, any> = { id };
-  let query = `MATCH (v:${label}) WHERE ${id ? 'v.elementId != $id AND ' : ''}`;
+  let query = `MATCH (v:${label}) WHERE ${id ? "v.elementId != $id AND " : ""}`;
 
   for (const key of keys) {
     query += `v.${key.P.name} = $${key.P.name} AND `;
@@ -66,7 +90,7 @@ async function doesUniqueConstraintExist(session: any, label: string, id: string
 
   query = query.slice(0, -5); // Remove the last ' AND '
   query += " RETURN v";
-  
+
   const result = await session.run(query, params);
   return result.records.length > 0;
 }

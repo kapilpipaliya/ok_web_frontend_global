@@ -9,7 +9,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 export function getChildVertex(
   graph: Store<GraphInterface>,
   path: string[],
-  currentVertex: Vertex
+  currentVertex: Vertex,
 ): {
   error: boolean;
   vertex?: Vertex;
@@ -38,7 +38,7 @@ export function getChildVertex(
     type = type.replace("$0", currentVertex.L[0]);
   }
   const vertexes = (currentVertex.OUT[type] || []).map(
-    (edgeId) => graph.vertexes[graph.edges[edgeId].E]
+    (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 
   if (filter) {

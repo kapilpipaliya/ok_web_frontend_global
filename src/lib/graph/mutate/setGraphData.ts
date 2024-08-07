@@ -2,7 +2,14 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { Edge, EdgeMap, GraphInterface, Id, Vertex, VertexMap } from "~/lib/graph/graph";
+import type {
+  Edge,
+  EdgeMap,
+  GraphInterface,
+  Id,
+  Vertex,
+  VertexMap,
+} from "~/lib/graph/graph";
 
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
@@ -12,9 +19,11 @@ export function updateVertex(
   vertexData: Vertex,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  skipExisting: boolean
+  skipExisting: boolean,
 ) {
-  if (skipExisting && graph.vertexes[vertexId]) { return; }
+  if (skipExisting && graph.vertexes[vertexId]) {
+    return;
+  }
 
   setGraph("vertexes", vertexId, (prev) => {
     if (prev) {
@@ -39,9 +48,11 @@ function updateEdge(
   edge: Edge,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  skipExisting: boolean
+  skipExisting: boolean,
 ) {
-  if (skipExisting && graph.edges[edgeId]) { return; }
+  if (skipExisting && graph.edges[edgeId]) {
+    return;
+  }
 
   setGraph("edges", edgeId, edge);
 
@@ -49,7 +60,7 @@ function updateEdge(
     setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
       Array.isArray(out_edges)
         ? [...new Set([...out_edges, edge.id])]
-        : [edge.id]
+        : [edge.id],
     );
   }
 
@@ -57,7 +68,7 @@ function updateEdge(
     setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
       Array.isArray(in_edges)
         ? [...new Set([...in_edges, edge.id])]
-        : [edge.id]
+        : [edge.id],
     );
   }
 }
@@ -66,7 +77,7 @@ function handleDeletions(
   deletedEdges: string[] | undefined,
   deletedVertexes: string[] | undefined,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   for (const edgeId of deletedEdges || []) {
     deleteEdge(0, edgeId, graph, setGraph);
@@ -88,11 +99,17 @@ export function setGraphData(
     vertexes: VertexMap;
     vertexLabelIdMap?: { [key: string]: Id[] };
   },
-  skipExisting = false
+  skipExisting = false,
 ) {
   batch(() => {
     for (const vertexId in args.vertexes) {
-      updateVertex(vertexId, args.vertexes[vertexId], graph, setGraph, skipExisting);
+      updateVertex(
+        vertexId,
+        args.vertexes[vertexId],
+        graph,
+        setGraph,
+        skipExisting,
+      );
     }
 
     for (const edgeId in args.edges) {

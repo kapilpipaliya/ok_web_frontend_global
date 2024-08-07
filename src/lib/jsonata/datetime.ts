@@ -250,8 +250,7 @@ function lettersToDecimal(letters, aChar) {
   let decimal = 0;
   for (let i = 0; i < letters.length; i++) {
     decimal +=
-      (letters.charCodeAt(letters.length - i - 1) - aCode + 1) *
-      26 ** i;
+      (letters.charCodeAt(letters.length - i - 1) - aCode + 1) * 26 ** i;
   }
   return decimal;
 }
@@ -647,8 +646,8 @@ function analyseDateTimePicture(picture) {
           if (typeof wm === "undefined" || wm === "*") {
             return undefined;
           }
-            // TODO validate wm is an unsigned int
-            return Number.parseInt(wm);
+          // TODO validate wm is an unsigned int
+          return Number.parseInt(wm);
         };
         if (dash === -1) {
           min = widthMod;
@@ -821,7 +820,8 @@ const getDateTimeFragment = (date, component) => {
       componentValue = (today - firstJan) / millisInADay + 1;
       break;
     }
-    case "F": { // day of week
+    case "F": {
+      // day of week
       componentValue = date.getUTCDay();
       if (componentValue === 0) {
         // ISO 8601 defines days 1-7: Mon-Sun
@@ -921,7 +921,8 @@ const getDateTimeFragment = (date, component) => {
     case "H": // hour in day (24 hours)
       componentValue = date.getUTCHours();
       break;
-    case "h": { // hour in half-day (12 hours)
+    case "h": {
+      // hour in half-day (12 hours)
       componentValue = date.getUTCHours();
       componentValue %= 12;
       if (componentValue === 0) {
@@ -1497,7 +1498,7 @@ export function toMillis(timestamp, picture) {
 
     return Date.parse(timestamp);
   }
-    return parseDateTime.call(this, timestamp, picture);
+  return parseDateTime.call(this, timestamp, picture);
 }
 
 /**

@@ -38,7 +38,7 @@ export async function fetchDataFromMG(
 async function processIncomingOutgoingExpressions(
   expression: NestedExpression,
   mainResult: Vertex[],
-  context: ContextType
+  context: ContextType,
 ) {
   if (expression.incoming && mainResult && mainResult.length > 0) {
     for (const exp of expression.incoming) {

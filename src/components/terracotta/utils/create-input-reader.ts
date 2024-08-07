@@ -1,4 +1,4 @@
-import { createSignal, onCleanup } from 'solid-js';
+import { createSignal, onCleanup } from "solid-js";
 
 const INPUT_READER_DEBOUNCE_TIMEOUT = 250;
 
@@ -13,11 +13,11 @@ export default function createInputReader(
     }
   });
 
-  const [signal, setSignal] = createSignal<string>('');
+  const [signal, setSignal] = createSignal<string>("");
 
   return [
     signal,
-    value => {
+    (value) => {
       if (timeout) {
         clearTimeout(timeout);
       }

@@ -104,7 +104,12 @@ export function SelectPermField(
     };
     return (
       <>
-        <IconButton icon="ic:round-add" onClick={handleAddNewClick} size={21} title="Add New Rule" />
+        <IconButton
+          icon="ic:round-add"
+          onClick={handleAddNewClick}
+          size={21}
+          title="Add New Rule"
+        />
         <Show when={showDropdown()}>
           <ZIndex>
             <DropdownMenu

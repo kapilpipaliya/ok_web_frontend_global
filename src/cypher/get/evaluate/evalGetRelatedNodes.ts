@@ -1,35 +1,48 @@
 import type { TransactionPromise } from "neo4j-driver-core";
 
-import {int, type Session} from "neo4j-driver";
+import { int, type Session } from "neo4j-driver";
 
-import type {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
-import {calculateFilter} from "~/lib/graph/get/sync/calculateFilter";
+import { calculateFilter } from "~/lib/graph/get/sync/calculateFilter";
 
-import type {ContextType} from "../../types/ContextType";
+import type { ContextType } from "../../types/ContextType";
 
-import {getSessionForSubdomain} from "../getSessionForSubdomain";
-import {processResult} from "./processResult";
+import { getSessionForSubdomain } from "../getSessionForSubdomain";
+import { processResult } from "./processResult";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],
   edgeType: string,
   context: ContextType,
-  relationType: "child" | "g" | "id" | "parent"
+  relationType: "child" | "g" | "id" | "parent",
 ) {
-  if ((relationType === "child" || relationType === "parent") && (!vertexes || vertexes.length === 0)) { return; }
+  if (
+    (relationType === "child" || relationType === "parent") &&
+    (!vertexes || vertexes.length === 0)
+  ) {
+    return;
+  }
 
   const session = await getSession(context);
 
   const { params, query } = buildQuery(edgeType, vertexes, relationType);
 
-  if (!query) { return; }
+  if (!query) {
+    return;
+  }
   try {
     const result = await runQuery(session, query, params, context.tx);
     if (params.allLabels) {
       return result.records.map((record) => record.get(0)[0]);
     }
-    return processResult(result.records, context, "n", relationType === "parent" || relationType === "child" ? "r" : "", relationType === "parent");
+    return processResult(
+      result.records,
+      context,
+      "n",
+      relationType === "parent" || relationType === "child" ? "r" : "",
+      relationType === "parent",
+    );
   } catch (error) {
     handleQueryError(relationType, vertexes, error);
   } finally {
@@ -37,9 +50,13 @@ export async function evalGetRelatedNodes(
   }
 }
 
-function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" | "g" | "id" | "parent") {
+function buildQuery(
+  edgeType: string,
+  vertexes: Vertex[],
+  relationType: "child" | "g" | "id" | "parent",
+) {
   const ids = vertexes.map((v) => int(v.id));
-  let query = '';
+  let query = "";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: { [key: string]: any } | undefined;
 
@@ -89,7 +106,7 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
     }
     if (label === "ALL_LABELS") {
       query = "MATCH (n) RETURN DISTINCT labels(n)";
-      params = {allLabels: true};
+      params = { allLabels: true };
     } else {
       query = `MATCH (n:${label})`;
       if (searchParams.filter) {
@@ -99,8 +116,12 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
       query += " RETURN n";
     }
 
-    if (searchParams.skip) { query += ` SKIP ${searchParams.skip}`; }
-    if (searchParams.limit) { query += ` LIMIT ${searchParams.limit}`; }
+    if (searchParams.skip) {
+      query += ` SKIP ${searchParams.skip}`;
+    }
+    if (searchParams.limit) {
+      query += ` LIMIT ${searchParams.limit}`;
+    }
   } else if (relationType === "id") {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
     params = { id: int(edgeType) };
@@ -113,7 +134,9 @@ function buildQuery(edgeType: string, vertexes: Vertex[], relationType: "child" 
   return { params, query };
 }
 async function getSession(context: ContextType) {
-  if (context.tx) { return null; }
+  if (context.tx) {
+    return null;
+  }
   return context.session || getSessionForSubdomain();
 }
 
@@ -121,7 +144,12 @@ function getEdgeType(edgeType: string, vertexes: Vertex[]) {
   return edgeType.replaceAll("$0", vertexes[0].L[0]);
 }
 
-async function runQuery(session: null | Session, query: string, params: { [key: string]: any }, tx?: TransactionPromise) {
+async function runQuery(
+  session: null | Session,
+  query: string,
+  params: { [key: string]: any },
+  tx?: TransactionPromise,
+) {
   if (tx) {
     return await tx.run(query, params);
   }
@@ -131,7 +159,7 @@ async function runQuery(session: null | Session, query: string, params: { [key: 
 function handleQueryError(action: string, vertexes: Vertex[], error: any) {
   console.error(
     `Error fetching ${action} for vertex ${vertexes.map((v) => v.id).join(", ")}:`,
-    error
+    error,
   );
   throw error;
 }
@@ -141,4 +169,3 @@ async function closeSession(session: null | Session, context: ContextType) {
     await session.close();
   }
 }
-

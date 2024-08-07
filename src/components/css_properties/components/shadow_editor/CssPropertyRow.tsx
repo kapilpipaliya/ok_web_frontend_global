@@ -10,7 +10,7 @@ export interface CssPropertyRowProps {
   deleteOption: (index: number) => void;
   index: Accessor<number>;
   label: string;
-  meta: DataEditorField
+  meta: DataEditorField;
   option: { [key: string]: any };
 }
 
@@ -22,24 +22,27 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
         <Icon
           class="cursor:pointer mr:8"
           icon="icon-park-outline:more-one"
-          onClick={() => openMenu[1](true)} />
+          onClick={() => openMenu[1](true)}
+        />
         <CssPropertyRowContent
           index={props.index}
           label={props.label}
           meta={props.meta}
           openPopup={openMenu[1]}
-          option={props.option} />
+          option={props.option}
+        />
         <Icon
           class="cursor:pointer fg:red mr:8"
           icon="mdi:close"
-          onClick={() => props.deleteOption(props.index())} />
-
+          onClick={() => props.deleteOption(props.index())}
+        />
       </div>
       <CssPropertyRowSettings
         meta={props.meta}
         openMenu={openMenu}
-          option={props.option}
-          rowIndex={props.index()} />
+        option={props.option}
+        rowIndex={props.index()}
+      />
     </>
   );
 }

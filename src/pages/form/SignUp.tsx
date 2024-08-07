@@ -42,14 +42,14 @@ export function SignUp() {
     } else if (passwordError) {
       showErrorToast(passwordError); // Show the error message if validation fails
     } else {
-      setGraph('isLoadingPage', true);
+      setGraph("isLoadingPage", true);
       await showLoadingToast({
         loadMessage: "Registering User...",
         onError: (_v) => {
-          setGraph('isLoadingPage', false);
+          setGraph("isLoadingPage", false);
         },
         onSuccess: (value) => {
-          setGraph('isLoadingPage', false);
+          setGraph("isLoadingPage", false);
           if (value != null && value.id !== null) {
             navigate(`${graph.APP_BASE_URL}/Page`);
           }

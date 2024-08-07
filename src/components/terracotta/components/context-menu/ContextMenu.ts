@@ -1,64 +1,64 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
   createEffect,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DisclosureStateControlledOptions,
   DisclosureStateRenderProps,
   DisclosureStateUncontrolledOptions,
-} from '../../states/create-disclosure-state';
+} from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createDisclosureState,
   DisclosureStateProvider,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createARIADisabledState,
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useFocusStartPoint from '../../utils/use-focus-start-point';
-import { ContextMenuContext } from './ContextMenuContext';
-import { CONTEXT_MENU_TAG } from './tags';
+} from "../../utils/state-props";
+import useFocusStartPoint from "../../utils/use-focus-start-point";
+import { ContextMenuContext } from "./ContextMenuContext";
+import { CONTEXT_MENU_TAG } from "./tags";
 
 export type ContextMenuControlledBaseProps = Prettify<
   DisclosureStateControlledOptions & DisclosureStateRenderProps
 >;
 
-export type ContextMenuControlledProps<T extends ValidConstructor = 'div'> =
+export type ContextMenuControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, ContextMenuControlledBaseProps>;
 
 export type ContextMenuUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
-export type ContextMenuUncontrolledProps<T extends ValidConstructor = 'div'> =
+export type ContextMenuUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, ContextMenuUncontrolledBaseProps>;
 
-export type ContextMenuProps<T extends ValidConstructor = 'div'> =
+export type ContextMenuProps<T extends ValidConstructor = "div"> =
   | ContextMenuControlledProps<T>
   | ContextMenuUncontrolledProps<T>;
 
-function isContextMenuUncontrolled<T extends ValidConstructor = 'div'>(
+function isContextMenuUncontrolled<T extends ValidConstructor = "div">(
   props: ContextMenuProps<T>,
 ): props is ContextMenuUncontrolledProps<T> {
-  return 'defaultOpen' in props;
+  return "defaultOpen" in props;
 }
 
-export function ContextMenu<T extends ValidConstructor = 'div'>(
+export function ContextMenu<T extends ValidConstructor = "div">(
   props: ContextMenuProps<T>,
 ): JSX.Element {
   const ownerID = createUniqueId();
@@ -80,26 +80,26 @@ export function ContextMenu<T extends ValidConstructor = 'div'>(
   return createComponent(ContextMenuContext.Provider, {
     get children() {
       return createDynamic(
-        () => props.as || ('div' as T),
+        () => props.as || ("div" as T),
         mergeProps(
           isContextMenuUncontrolled(props)
             ? omitProps(props, [
-                'as',
-                'children',
-                'defaultOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "defaultOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ])
             : omitProps(props, [
-                'as',
-                'children',
-                'isOpen',
-                'disabled',
-                'onChange',
-                'onClose',
-                'onOpen',
+                "as",
+                "children",
+                "isOpen",
+                "disabled",
+                "onChange",
+                "onClose",
+                "onOpen",
               ]),
           CONTEXT_MENU_TAG,
           createDisabledState(() => state.disabled()),

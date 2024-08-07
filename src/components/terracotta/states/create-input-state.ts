@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -6,9 +6,9 @@ import {
   createMemo,
   createSignal,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
+import assert from "../utils/assert";
 
 export interface InputStateControlledOptions {
   disabled?: string;
@@ -38,7 +38,7 @@ export function createInputState(
   let signal: Accessor<string | undefined>;
   let setSignal: (value: string | undefined) => void;
 
-  if ('defaultValue' in options) {
+  if ("defaultValue" in options) {
     const [input, setInput] = createSignal<string | undefined>(
       options.defaultValue,
     );
@@ -89,7 +89,7 @@ export function InputStateProvider(
   return createComponent(InputStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -100,7 +100,7 @@ export function InputStateProvider(
 
 export function useInputState(): InputStateProperties {
   const ctx = useContext(InputStateContext);
-  assert(ctx, new Error('Missing <InputStateProvider>'));
+  assert(ctx, new Error("Missing <InputStateProvider>"));
   return ctx;
 }
 
@@ -108,7 +108,7 @@ export function InputStateChild(props: InputStateRenderProps): JSX.Element {
   const state = useInputState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

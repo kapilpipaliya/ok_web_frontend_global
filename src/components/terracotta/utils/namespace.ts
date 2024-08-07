@@ -1,4 +1,4 @@
-export const DATA_SET_NAMESPACE = 'tc';
+export const DATA_SET_NAMESPACE = "tc";
 
 export const TYPE_ATTRIBUTE = `${DATA_SET_NAMESPACE}-type` as const;
 

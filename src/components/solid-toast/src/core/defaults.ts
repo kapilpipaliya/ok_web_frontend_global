@@ -1,6 +1,6 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import type { ToasterProps, ToastOptions, ToastTimeouts } from '../types';
+import type { ToasterProps, ToastOptions, ToastTimeouts } from "../types";
 
 export const defaultTimeouts: ToastTimeouts = {
   blank: 4000,
@@ -12,35 +12,35 @@ export const defaultTimeouts: ToastTimeouts = {
 
 export const defaultToastOptions: Required<ToastOptions> = {
   ariaProps: {
-    'aria-live': 'polite',
-    role: 'status',
+    "aria-live": "polite",
+    role: "status",
   },
-  className: '',
+  className: "",
   duration: 3000,
-  icon: '',
+  icon: "",
   iconTheme: {},
-  id: '',
-  position: 'top-right',
+  id: "",
+  position: "top-right",
   style: {},
   unmountDelay: 500,
 };
 
 export const defaultToasterOptions: ToasterProps = {
-  containerClassName: '',
+  containerClassName: "",
   containerStyle: {},
   gutter: 8,
-  position: 'top-right',
+  position: "top-right",
   toastOptions: defaultToastOptions,
 };
 
-const defaultContainerPadding = '16px';
+const defaultContainerPadding = "16px";
 
 export const defaultContainerStyle: JSX.CSSProperties = {
   bottom: defaultContainerPadding,
   left: defaultContainerPadding,
-  'pointer-events': 'none',
-  position: 'fixed',
+  "pointer-events": "none",
+  position: "fixed",
   right: defaultContainerPadding,
   top: defaultContainerPadding,
-  'z-index': 9999,
+  "z-index": 9999,
 };

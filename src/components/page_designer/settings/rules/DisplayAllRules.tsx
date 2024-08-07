@@ -21,7 +21,8 @@ export function DisplayAllRules() {
         <ZIndex>
           <RulesModal
             closeModal={() => setShowRuleSettings(false)}
-            onSubmit={() => setShowRuleSettings(false)} />
+            onSubmit={() => setShowRuleSettings(false)}
+          />
         </ZIndex>
       </Show>
     </>

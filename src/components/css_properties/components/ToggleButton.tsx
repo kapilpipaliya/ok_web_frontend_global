@@ -1,9 +1,14 @@
 import { path } from "rambda";
-import { For, Match, Switch, } from "solid-js";
+import { For, Match, Switch } from "solid-js";
 
 import type { ToggleField } from "../constants/FieldType";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
+import {
+  useComponentMeta,
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { CenterDiv } from "./CenterDiv";
 import { IconifyIcon } from "./IconifyIcon";
 import { LabelWrapper } from "./LabelWrapper";
@@ -13,13 +18,10 @@ export const ToggleButton = () => {
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
-  const selectedValue = () =>
-    {
-      const projections = [state() || "", ...(meta.projections ?? []), meta.name];
-      return path(projections, cssState) ||
-        path(projections, cssDefault) ||
-        "";
-    };
+  const selectedValue = () => {
+    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    return path(projections, cssState) || path(projections, cssDefault) || "";
+  };
   const isSelected = (option: any) => selectedValue() === option.value;
 
   const Content = () => (
@@ -39,8 +41,7 @@ export const ToggleButton = () => {
                  r:${
                    meta.options.indexOf(option) === 0
                      ? "5|0|0|5"
-                     : meta.options.indexOf(option) ===
-                         meta.options.length - 1
+                     : meta.options.indexOf(option) === meta.options.length - 1
                        ? "0|5|5|0"
                        : "0"
                  }
@@ -50,15 +51,13 @@ export const ToggleButton = () => {
                   meta.onChangeInput(option.value);
                 }
                 if (meta.isAddToClass ?? true) {
-                  setCssState(state(), ...(meta.projections ?? []), { [meta.name]: option.value });
+                  setCssState(state(), ...(meta.projections ?? []), {
+                    [meta.name]: option.value,
+                  });
                 }
               }}
             >
-              {option.icon ? (
-                <IconifyIcon icon={option.key} />
-              ) : (
-                option.key
-              )}
+              {option.icon ? <IconifyIcon icon={option.key} /> : option.key}
             </div>
           );
         }}
@@ -70,13 +69,13 @@ export const ToggleButton = () => {
     <Switch>
       <Match when={meta.isLabelOnTop}>
         <div class={"w:full"}>
-          <LabelWrapper/>
+          <LabelWrapper />
           <Content />
         </div>
       </Match>
       <Match when={meta.label}>
         <CenterDiv>
-        <LabelWrapper/>
+          <LabelWrapper />
           <Content />
         </CenterDiv>
       </Match>

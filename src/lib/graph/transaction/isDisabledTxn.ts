@@ -9,13 +9,13 @@ export function isDisabledTxn(
   graph: Store<GraphInterface>,
 ): boolean {
   const txn = graph.transactions.get(txnId);
-  if (!txn) { return true; }
+  if (!txn) {
+    return true;
+  }
   const lastIndex = getLastTxnIndex(txnId, graph);
   return (
     txn.steps.length === 0 ||
     txn.activeUndoIndex === txn.preventUndoBeforeIndex ||
-    (txn.submittedIndex > 0
-      ? txn.submittedIndex === lastIndex
-      : false)
+    (txn.submittedIndex > 0 ? txn.submittedIndex === lastIndex : false)
   );
 }

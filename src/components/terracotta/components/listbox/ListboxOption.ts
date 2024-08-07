@@ -1,38 +1,38 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createRenderEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createRenderEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   SelectOptionStateOptions,
   SelectOptionStateRenderProps,
-} from '../../states/create-select-option-state';
+} from "../../states/create-select-option-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge, Prettify } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge, Prettify } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
-import { useDisclosureState } from '../../states/create-disclosure-state';
+import { useDisclosureState } from "../../states/create-disclosure-state";
 import {
   createSelectOptionState,
   SelectOptionStateProvider,
-} from '../../states/create-select-option-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+} from "../../states/create-select-option-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createActiveState,
   createARIADisabledState,
   createARIASelectedState,
   createDisabledState,
   createSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useListboxContext } from './ListboxContext';
-import { useListboxOptionsContext } from './ListboxOptionsContext';
-import { LISTBOX_OPTION_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useListboxContext } from "./ListboxContext";
+import { useListboxOptionsContext } from "./ListboxOptionsContext";
+import { LISTBOX_OPTION_TAG } from "./tags";
 
 export type ListboxOptionBaseProps<V> = Prettify<
   SelectOptionStateOptions<V> & SelectOptionStateRenderProps
@@ -40,17 +40,17 @@ export type ListboxOptionBaseProps<V> = Prettify<
 
 export type ListboxOptionProps<
   V,
-  T extends ValidConstructor = 'li',
+  T extends ValidConstructor = "li",
 > = HeadlessPropsWithRef<
   T,
   OmitAndMerge<ListboxOptionBaseProps<V>, ButtonProps<T>>
 >;
 
-export function ListboxOption<V, T extends ValidConstructor = 'li'>(
+export function ListboxOption<V, T extends ValidConstructor = "li">(
   props: ListboxOptionProps<V, T>,
 ): JSX.Element {
-  const rootContext = useListboxContext('ListboxOptions');
-  const context = useListboxOptionsContext('ListboxOptions');
+  const rootContext = useListboxContext("ListboxOptions");
+  const context = useListboxOptionsContext("ListboxOptions");
   const disclosure = useDisclosureState();
   const state = createSelectOptionState(props);
 
@@ -62,7 +62,7 @@ export function ListboxOption<V, T extends ValidConstructor = 'li'>(
     const current = internalRef();
 
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!state.disabled()) {
           state.select();
           if (!rootContext.multiple) {
@@ -70,18 +70,18 @@ export function ListboxOption<V, T extends ValidConstructor = 'li'>(
           }
         }
       });
-      useEventListener(current, 'focus', () => {
+      useEventListener(current, "focus", () => {
         state.focus();
       });
-      useEventListener(current, 'blur', () => {
+      useEventListener(current, "blur", () => {
         state.blur();
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         if (!state.disabled()) {
           current.focus();
         }
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         if (!state.disabled()) {
           state.blur();
         }
@@ -92,15 +92,15 @@ export function ListboxOption<V, T extends ValidConstructor = 'li'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['as', 'children', 'disabled', 'value', 'ref']),
+      omitProps(props, ["as", "children", "disabled", "value", "ref"]),
       LISTBOX_OPTION_TAG,
       createOwnerAttribute(context.getId()),
       {
         get as() {
-          return props.as || ('li' as T);
+          return props.as || ("li" as T);
         },
         ref: setInternalRef,
-        role: 'option',
+        role: "option",
         tabindex: -1,
       },
       createDisabledState(() => state.disabled()),

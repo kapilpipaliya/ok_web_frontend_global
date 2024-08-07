@@ -7,7 +7,9 @@ export function UploadVideo() {
 
   const handleUpload = async (event: any) => {
     const file = event.target.files[0];
-    if (!file) { return; }
+    if (!file) {
+      return;
+    }
 
     const formData = new FormData();
     formData.append("video", file);

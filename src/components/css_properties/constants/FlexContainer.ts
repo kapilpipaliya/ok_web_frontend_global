@@ -1,7 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
-import type {
-  TextFieldOptionsField,
-} from "./FieldType";
+import type { TextFieldOptionsField } from "./FieldType";
 
 import { defaultPixelSizeTypes } from "./csseditor_constants";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
@@ -29,22 +27,38 @@ export const gapFields = {
     type: "number",
     unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
-}
+};
 export const FlexContainer = {
   flexDirection: createSelectOptions("flex-direction", "Flex Direction", [
-    "row","row-reverse","column","column-reverse",...CSSWideKeywords
+    "row",
+    "row-reverse",
+    "column",
+    "column-reverse",
+    ...CSSWideKeywords,
   ]),
-  alignItems: createSelectOptions("align-items", "Align items", [...extraPropertyValues["align-items"].values, ...CSSWideKeywords]),
-  justifyContent: createSelectOptions("justify-content", "Justify content",  [...extraPropertyValues["justify-content"].values, ...CSSWideKeywords]),
-  justifyItems: createSelectOptions("justify-items", "Justify items",  [...extraPropertyValues["justify-items"].values, ...CSSWideKeywords]),
+  alignItems: createSelectOptions("align-items", "Align items", [
+    ...extraPropertyValues["align-items"].values,
+    ...CSSWideKeywords,
+  ]),
+  justifyContent: createSelectOptions("justify-content", "Justify content", [
+    ...extraPropertyValues["justify-content"].values,
+    ...CSSWideKeywords,
+  ]),
+  justifyItems: createSelectOptions("justify-items", "Justify items", [
+    ...extraPropertyValues["justify-items"].values,
+    ...CSSWideKeywords,
+  ]),
   // not needed: place-items (ai + ji)
 
   flexWrap: createSelectOptions("flex-wrap", "Flex wrap", [
     { label: "No Wrap", value: "nowrap" },
     { label: "Wrap", value: "wrap" },
     { label: "Reverse Wrap", value: "wrap-reverse" },
-    ...CSSWideKeywords
+    ...CSSWideKeywords,
   ]),
-  alignContent: createSelectOptions("align-content", "Align Content", [...extraPropertyValues["align-content"].values, ...CSSWideKeywords]),
- ...gapFields
+  alignContent: createSelectOptions("align-content", "Align Content", [
+    ...extraPropertyValues["align-content"].values,
+    ...CSSWideKeywords,
+  ]),
+  ...gapFields,
 };

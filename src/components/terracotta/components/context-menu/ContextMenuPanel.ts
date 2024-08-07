@@ -1,45 +1,45 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
-import type { UnmountableProps } from '../../utils/create-unmountable';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
+import type { UnmountableProps } from "../../utils/create-unmountable";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createUnmountable } from '../../utils/create-unmountable';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { focusFirst, lockFocus } from '../../utils/focus-navigation';
-import getFocusableElements from '../../utils/focus-query';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createUnmountable } from "../../utils/create-unmountable";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { focusFirst, lockFocus } from "../../utils/focus-navigation";
+import getFocusableElements from "../../utils/focus-query";
 import {
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useContextMenuContext } from './ContextMenuContext';
-import { CONTEXT_MENU_PANEL_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useContextMenuContext } from "./ContextMenuContext";
+import { CONTEXT_MENU_PANEL_TAG } from "./tags";
 
 export type ContextMenuPanelBaseProps = Prettify<
   DisclosureStateRenderProps & UnmountableProps
 >;
 
-export type ContextMenuPanelProps<T extends ValidConstructor = 'div'> =
+export type ContextMenuPanelProps<T extends ValidConstructor = "div"> =
   HeadlessPropsWithRef<T, ContextMenuPanelBaseProps>;
 
-export function ContextMenuPanel<T extends ValidConstructor = 'div'>(
+export function ContextMenuPanel<T extends ValidConstructor = "div">(
   props: ContextMenuPanelProps<T>,
 ): JSX.Element {
-  const context = useContextMenuContext('ContextMenuPanel');
+  const context = useContextMenuContext("ContextMenuPanel");
   const state = useDisclosureState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -49,15 +49,15 @@ export function ContextMenuPanel<T extends ValidConstructor = 'div'>(
     if (current instanceof HTMLElement) {
       if (state.isOpen()) {
         focusFirst(getFocusableElements(current), false);
-        useEventListener(current, 'keydown', e => {
+        useEventListener(current, "keydown", (e) => {
           if (!props.disabled) {
             switch (e.key) {
-              case 'Tab': {
+              case "Tab": {
                 e.preventDefault();
                 lockFocus(current, e.shiftKey, false);
                 break;
               }
-              case 'Escape': {
+              case "Escape": {
                 state.close();
                 break;
               }
@@ -66,7 +66,7 @@ export function ContextMenuPanel<T extends ValidConstructor = 'div'>(
             }
           }
         });
-        useEventListener(document, 'click', e => {
+        useEventListener(document, "click", (e) => {
           if (!current.contains(e.target as Node)) {
             state.close();
           }
@@ -80,9 +80,9 @@ export function ContextMenuPanel<T extends ValidConstructor = 'div'>(
     () => state.isOpen(),
     () =>
       createDynamic(
-        () => props.as || ('div' as T),
+        () => props.as || ("div" as T),
         mergeProps(
-          omitProps(props, ['as', 'unmount', 'children', 'ref']),
+          omitProps(props, ["as", "unmount", "children", "ref"]),
           CONTEXT_MENU_PANEL_TAG,
           {
             get children() {

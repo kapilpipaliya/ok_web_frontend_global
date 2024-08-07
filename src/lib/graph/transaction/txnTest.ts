@@ -25,17 +25,23 @@ export function getExistingOrDefaultTxnValue(txnId: number) {
 }
 
 export function undoAllowed(txnId: number): boolean {
-  if (!(txnId && transactions.has(txnId))) { return false; }
+  if (!(txnId && transactions.has(txnId))) {
+    return false;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
-  if (txnValue.steps.length <= 1) { return false; }
+  if (txnValue.steps.length <= 1) {
+    return false;
+  }
 
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
   return activeUndoIndex > 0;
 }
 
 export function redoAllowed(txnId: number): boolean {
-  if (!(txnId && transactions.has(txnId))) { return false; }
+  if (!(txnId && transactions.has(txnId))) {
+    return false;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -44,7 +50,9 @@ export function redoAllowed(txnId: number): boolean {
 }
 
 export function undo(txnId: number) {
-  if (!undoAllowed(txnId)) { return; }
+  if (!undoAllowed(txnId)) {
+    return;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -72,7 +80,9 @@ export function undo(txnId: number) {
 }
 
 export function redo(txnId: number) {
-  if (!redoAllowed(txnId)) { return; }
+  if (!redoAllowed(txnId)) {
+    return;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -119,7 +129,9 @@ export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue,
 ) {
-  if (!txnId) { return; }
+  if (!txnId) {
+    return;
+  }
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
 

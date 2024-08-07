@@ -217,7 +217,7 @@
   "javascript": {
     "formatter": {
       "enabled": true,
-      "arrowParentheses": "asNeeded",
+      "arrowParentheses": "always",
       "bracketSameLine": false,
       "bracketSpacing": true,
       "indentWidth": 2,
@@ -226,7 +226,7 @@
       "lineEnding": "lf",
       "lineWidth": 80,
       "quoteProperties": "asNeeded",
-      "quoteStyle": "single",
+      "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "all"
     },

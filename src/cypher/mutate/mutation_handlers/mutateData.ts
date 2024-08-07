@@ -6,10 +6,7 @@ import { fillOldIdToNewIdMap } from "./fillOldIdToNewIdMap";
 import { handleMutationObject } from "./handleMutationObject";
 import { mutateArgsValidation } from "./validation/mutateArgsValidation";
 
-export async function mutateData(
-  args: MutationArgs,
-  tx: TransactionPromise,
-) {
+export async function mutateData(args: MutationArgs, tx: TransactionPromise) {
   const clientToServerVertexIdMap = new Map<number, number>();
   const clientToServerEdgeIdMap = new Map<number, number>();
 

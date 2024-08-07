@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { createSignal, type JSX, Show, } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
@@ -20,8 +20,8 @@ export function DropdownMenuDisplay(): JSX.Element {
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
 
-
-  const profileImage = graph.member?.P?.profileImage ||
+  const profileImage =
+    graph.member?.P?.profileImage ||
     "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png";
 
   return (
@@ -31,7 +31,8 @@ export function DropdownMenuDisplay(): JSX.Element {
         id="dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl}
-        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${profileImage})`} />
+        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${profileImage})`}
+      />
       <Show when={isOpen()}>
         <ZIndex>
           <DropdownMenu
@@ -43,9 +44,7 @@ export function DropdownMenuDisplay(): JSX.Element {
             <ul class="list-style-type:none m:0 p:0 position:relative">
               <ProfileHeader profileImage={profileImage} />
               <hr class="color:rgb(223,223,223)" />
-              <MenuItems
-                onClose={handleClose}
-                signOutCall={signOutCall} />
+              <MenuItems onClose={handleClose} signOutCall={signOutCall} />
             </ul>
           </DropdownMenu>
         </ZIndex>

@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,12 +7,12 @@ import {
   createSignal,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import type { Ref } from '../utils/types';
+import type { Ref } from "../utils/types";
 
-import assert from '../utils/assert';
-import isEqual from '../utils/is-equal';
+import assert from "../utils/assert";
+import isEqual from "../utils/is-equal";
 
 export interface SelectStateProperties<T> {
   blur(): void;
@@ -57,7 +57,7 @@ export function createSingleSelectState<T>(
 
   const equals = options.by || isEqual;
 
-  if ('defaultValue' in options) {
+  if ("defaultValue" in options) {
     const [selected, setSelected] = createSignal<T | undefined>(
       options.defaultValue,
     );
@@ -150,7 +150,7 @@ export function createMultipleSelectState<T>(
 
   const equals = options.by || isEqual;
 
-  if ('defaultValue' in options) {
+  if ("defaultValue" in options) {
     const [selected, setSelected] = createSignal<T[]>(options.defaultValue);
     selectedValues = selected;
     setSelectedValues = (value): void => {
@@ -249,7 +249,7 @@ export function SelectStateProvider<T>(
   return createComponent(SelectStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -260,7 +260,7 @@ export function SelectStateProvider<T>(
 
 export function useSelectState<T>(): SelectStateProperties<T> {
   const ctx = useContext(SelectStateContext);
-  assert(ctx, new Error('Missing <SelectStateProvider>'));
+  assert(ctx, new Error("Missing <SelectStateProvider>"));
   return ctx;
 }
 
@@ -270,7 +270,7 @@ export function SelectStateChild<T>(
   const state = useSelectState<T>();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

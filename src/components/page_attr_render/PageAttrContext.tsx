@@ -1,4 +1,3 @@
-
 import { createContext, useContext } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";

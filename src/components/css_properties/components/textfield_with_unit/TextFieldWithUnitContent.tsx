@@ -23,10 +23,14 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
-  const [startValue, setStartValue] = createWritableMemo<number | string>(() => props.selectedValue());
-  const [selectedUnitOption, setSelectedUnitOption] = createSignal(props.determineSelectedOption());
+  const [startValue, setStartValue] = createWritableMemo<number | string>(() =>
+    props.selectedValue(),
+  );
+  const [selectedUnitOption, setSelectedUnitOption] = createSignal(
+    props.determineSelectedOption(),
+  );
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
-  
+
   // State used to display text options
   const [_inputValue, setInputValue] = createSignal("");
   const [isAnotherDropdownOpen, setIsAnotherDropdownOpen] = createSignal(false);
@@ -88,11 +92,13 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
       let matchingOptions: OptionType;
       if (typeof props.meta.options[0] === "string") {
         matchingOptions = (props.meta.options as string[]).filter((option) =>
-          option.toLowerCase().includes(value.toLowerCase())
+          option.toLowerCase().includes(value.toLowerCase()),
         );
       } else {
-        matchingOptions = (props.meta.options as { label: string; value: string }[]).filter((option) =>
-          option.value.toLowerCase().includes(value.toLowerCase())
+        matchingOptions = (
+          props.meta.options as { label: string; value: string }[]
+        ).filter((option) =>
+          option.value.toLowerCase().includes(value.toLowerCase()),
         );
       }
       setFilteredOptions(matchingOptions);
@@ -101,7 +107,9 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   };
 
   const handleInputFocus = () => {
-    if (startValue()) { return; }
+    if (startValue()) {
+      return;
+    }
     setIsAnotherDropdownOpen(true);
     if (props.meta.options) {
       setFilteredOptions(props.meta.options);
@@ -127,9 +135,17 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
             {props.meta.leftIcon}
           </Show>
         </Show>
-        <InputField handleChange={handleInputChange} meta={props.meta} onFocus={handleInputFocus} selectedValue={props.selectedValue}/>
+        <InputField
+          handleChange={handleInputChange}
+          meta={props.meta}
+          onFocus={handleInputFocus}
+          selectedValue={props.selectedValue}
+        />
         <Show when={props.meta.showFilePicker}>
-          <FilePickerButton handleChange={handleInputChange} selectedValue={props.selectedValue}/>
+          <FilePickerButton
+            handleChange={handleInputChange}
+            selectedValue={props.selectedValue}
+          />
         </Show>
       </div>
       <UnitsDropdown

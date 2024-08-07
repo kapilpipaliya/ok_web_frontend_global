@@ -9,7 +9,7 @@ export async function getChildrenOrParentVertex(
   id: string,
   edgeType: string,
   endLabel: string,
-  inward: boolean
+  inward: boolean,
 ): Promise<any[]> {
   try {
     const query = inward

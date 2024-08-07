@@ -5,7 +5,7 @@ import { onCleanup } from "solid-js";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
-import {DynamicComponent} from "~/components/form/DynamicComponent";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
@@ -14,10 +14,16 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { type PageLayoutObject, useDesignerLayoutStore } from "../../LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../LayoutContext";
 import { PROPERTIES } from "./constant";
 
-function initializeMetaVertex(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+function initializeMetaVertex(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   const metaVertexId = graph.newVertexId;
   const metaTxnId = graph.newTxnId;
 
@@ -29,13 +35,16 @@ function initializeMetaVertex(graph: GraphInterface, setGraph: SetStoreFunction<
       type: "Attr",
     }),
     graph,
-    setGraph
+    setGraph,
   );
 
   return { metaTxnId, metaVertexId };
 }
 
-function createFieldAttributes(graph: GraphInterface, layoutStore: PageLayoutObject): FieldAttribute[] {
+function createFieldAttributes(
+  graph: GraphInterface,
+  layoutStore: PageLayoutObject,
+): FieldAttribute[] {
   return [
     {
       collection: "g:'ALL_LABELS'",
@@ -61,7 +70,12 @@ function createFieldAttributes(graph: GraphInterface, layoutStore: PageLayoutObj
   ];
 }
 
-function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStore: PageLayoutObject, collMetaVertex: Vertex[]) {
+function handleCollectionChange(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  layoutStore: PageLayoutObject,
+  collMetaVertex: Vertex[],
+) {
   return (value: string) => {
     setValueGlobal(
       graph,
@@ -70,7 +84,7 @@ function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunctio
       collMetaVertex[0],
       graph.vertexes[layoutStore.selectedId],
       value,
-      false
+      false,
     );
     setSelectionValue(
       layoutStore.formStore[0].txnId,
@@ -78,7 +92,7 @@ function handleCollectionChange(graph: GraphInterface, setGraph: SetStoreFunctio
       graph,
       setGraph,
       collMetaVertex[1],
-      undefined
+      undefined,
     );
   };
 }
@@ -90,15 +104,28 @@ export function CollAndData() {
   const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
   const attributes = createFieldAttributes(graph, layoutStore);
 
-  addMetaVertexes(graph, setGraph, metaTxnId, graph.vertexes[metaVertexId], attributes);
+  addMetaVertexes(
+    graph,
+    setGraph,
+    metaTxnId,
+    graph.vertexes[metaVertexId],
+    attributes,
+  );
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = getSelectionOptions(graph, setGraph, "->Attr", [metaVertex]);
-  const onCollectionChange = handleCollectionChange(graph, setGraph, layoutStore, collMetaVertex.vertexes);
+  const collMetaVertex = getSelectionOptions(graph, setGraph, "->Attr", [
+    metaVertex,
+  ]);
+  const onCollectionChange = handleCollectionChange(
+    graph,
+    setGraph,
+    layoutStore,
+    collMetaVertex.vertexes,
+  );
 
   return (
     <>

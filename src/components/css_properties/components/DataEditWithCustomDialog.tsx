@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { path } from "rambda";
-import {
-  For,
-} from "solid-js";
+import { For } from "solid-js";
 
 import type { DataEditorField } from "../constants/FieldType";
 import type { ShadowAttributes } from "../utils/generate/generateBoxShadow";
@@ -11,7 +9,12 @@ import type { TextShadowAttributes } from "../utils/generate/generateTextShadow"
 import type { TransformAttributes } from "../utils/generate/generateTransform";
 import type { TransitionAttributes } from "../utils/generate/generateTransition";
 
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../CssEditorContext";
+import {
+  useComponentMeta,
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { LabelWrapper } from "./LabelWrapper";
 import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 
@@ -21,23 +24,28 @@ export const DataEditWithCustomDialog = () => {
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
 
-  const selectedValue = (): FilterAttributes[] | ShadowAttributes[] | TextShadowAttributes[] | TransformAttributes[] | TransitionAttributes[] =>
-    {
-      const projections = [state() || "", ...(meta.projections ?? []), meta.name];
-      return path(projections, cssState) ||
-        path(projections, cssDefault) ||
-        []
-    };
-
-  const addOption = () => {
-    setCssState(state(), ...(meta.projections ?? []), { [meta.name]: [...selectedValue(), {}] });
+  const selectedValue = ():
+    | FilterAttributes[]
+    | ShadowAttributes[]
+    | TextShadowAttributes[]
+    | TransformAttributes[]
+    | TransitionAttributes[] => {
+    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    return path(projections, cssState) || path(projections, cssDefault) || [];
   };
 
+  const addOption = () => {
+    setCssState(state(), ...(meta.projections ?? []), {
+      [meta.name]: [...selectedValue(), {}],
+    });
+  };
 
   const deleteOption = (index: number) => {
     const currentOptions = [...selectedValue()];
     currentOptions.splice(index, 1);
-    setCssState(state(), ...(meta.projections ?? []), { [meta.name]: currentOptions });
+    setCssState(state(), ...(meta.projections ?? []), {
+      [meta.name]: currentOptions,
+    });
   };
 
   return (

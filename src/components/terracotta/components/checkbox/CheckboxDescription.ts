@@ -1,39 +1,39 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { CheckStateRenderProps } from '../../states/create-check-state';
+import type { CheckStateRenderProps } from "../../states/create-check-state";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   CheckStateChild,
   useCheckState,
-} from '../../states/create-check-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-check-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createCheckedState,
   createDisabledState,
-} from '../../utils/state-props';
-import { useCheckboxContext } from './CheckboxContext';
-import { CHECKBOX_DESCRIPTION } from './tags';
+} from "../../utils/state-props";
+import { useCheckboxContext } from "./CheckboxContext";
+import { CHECKBOX_DESCRIPTION } from "./tags";
 
-export type CheckboxDescriptionProps<T extends ValidConstructor = 'p'> =
+export type CheckboxDescriptionProps<T extends ValidConstructor = "p"> =
   HeadlessProps<T, CheckStateRenderProps>;
 
-export function CheckboxDescription<T extends ValidConstructor = 'p'>(
+export function CheckboxDescription<T extends ValidConstructor = "p">(
   props: CheckboxDescriptionProps<T>,
 ): JSX.Element {
-  const context = useCheckboxContext('CheckboxDescription');
+  const context = useCheckboxContext("CheckboxDescription");
   const state = useCheckState();
   return createDynamic(
-    () => props.as || ('p' as T),
+    () => props.as || ("p" as T),
     mergeProps(
-      omitProps(props, ['as', 'children']),
+      omitProps(props, ["as", "children"]),
       CHECKBOX_DESCRIPTION,
       {
         get children() {

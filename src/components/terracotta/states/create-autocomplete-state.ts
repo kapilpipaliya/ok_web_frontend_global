@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,13 +7,13 @@ import {
   createSignal,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import type { Ref } from '../utils/types';
+import type { Ref } from "../utils/types";
 
-import assert from '../utils/assert';
-import createInputReader from '../utils/create-input-reader';
-import isEqual from '../utils/is-equal';
+import assert from "../utils/assert";
+import createInputReader from "../utils/create-input-reader";
+import isEqual from "../utils/is-equal";
 
 export interface AutocompleteStateProperties<T> {
   blur(): void;
@@ -64,7 +64,7 @@ export function createSingleAutocompleteState<T>(
 
   const equals = options.by || isEqual;
 
-  if ('defaultValue' in options) {
+  if ("defaultValue" in options) {
     const [selected, setSelected] = createSignal<T | undefined>(
       options.defaultValue,
     );
@@ -173,7 +173,7 @@ export function createMultipleAutocompleteState<T>(
 
   const equals = options.by || isEqual;
 
-  if ('defaultValue' in options) {
+  if ("defaultValue" in options) {
     const [selected, setSelected] = createSignal<T[]>(options.defaultValue);
     selectedValues = selected;
     setSelectedValues = (value): void => {
@@ -288,7 +288,7 @@ export function AutocompleteStateProvider<T>(
   return createComponent(AutocompleteStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -299,7 +299,7 @@ export function AutocompleteStateProvider<T>(
 
 export function useAutocompleteState<T>(): AutocompleteStateProperties<T> {
   const ctx = useContext(AutocompleteStateContext);
-  assert(ctx, new Error('Missing <AutocompleteStateProvider>'));
+  assert(ctx, new Error("Missing <AutocompleteStateProvider>"));
   return ctx;
 }
 
@@ -309,7 +309,7 @@ export function AutocompleteStateChild<T>(
   const state = useAutocompleteState<T>();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

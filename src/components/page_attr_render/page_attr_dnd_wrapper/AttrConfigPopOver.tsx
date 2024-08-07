@@ -18,12 +18,17 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
 
   return (
     <div ref={popoverRef}>
-      <div classList={{ 'hidden': !visible() }} >
+      <div classList={{ hidden: !visible() }}>
         <Switch>
           <Match when={isSelectedLayoutId(props.item.id)}>
             <SelectedAttrConfigPopOver item={props.item} />
           </Match>
-          <Match when={isSelectedHoverId(props.item.id) || layoutStore.multiHighlight.includes(props.item.id)}>
+          <Match
+            when={
+              isSelectedHoverId(props.item.id) ||
+              layoutStore.multiHighlight.includes(props.item.id)
+            }
+          >
             <HoverAttrConfigPopOver item={props.item} />
           </Match>
         </Switch>

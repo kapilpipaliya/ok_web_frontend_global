@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,21 +7,21 @@ import {
   createSignal,
   mergeProps,
   useContext,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { UnmountableProps } from '../../utils/create-unmountable';
+import type { UnmountableProps } from "../../utils/create-unmountable";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
-import assert from '../../utils/assert';
-import createDynamic from '../../utils/create-dynamic';
-import { createUnmountable } from '../../utils/create-unmountable';
-import { createForwardRef } from '../../utils/dynamic-prop';
+import assert from "../../utils/assert";
+import createDynamic from "../../utils/create-dynamic";
+import { createUnmountable } from "../../utils/create-unmountable";
+import { createForwardRef } from "../../utils/dynamic-prop";
 
 export interface TransitionRootBaseProps {
   show: boolean;
@@ -57,10 +57,10 @@ function createTransitionCounter(): TransitionCounter {
     },
     // Reactive set
     register(): void {
-      setSize(c => c + 1);
+      setSize((c) => c + 1);
     },
     unregister(): void {
-      setSize(c => c - 1);
+      setSize((c) => c - 1);
     },
   };
 }
@@ -81,36 +81,36 @@ export interface TransitionBaseChildProps extends UnmountableProps {
 }
 
 function getClassList(classes?: string): string[] {
-  return classes ? classes.split(' ') : [];
+  return classes ? classes.split(" ") : [];
 }
 
 function addClassList(ref: HTMLElement, classes: string[]): void {
-  const filtered = classes.filter(value => value);
+  const filtered = classes.filter((value) => value);
   if (filtered.length) {
     ref.classList.add(...filtered);
   }
 }
 function removeClassList(ref: HTMLElement, classes: string[]): void {
-  const filtered = classes.filter(value => value);
+  const filtered = classes.filter((value) => value);
   if (filtered.length) {
     ref.classList.remove(...filtered);
   }
 }
 
-export type TransitionChildProps<T extends ValidConstructor = 'div'> =
+export type TransitionChildProps<T extends ValidConstructor = "div"> =
   HeadlessPropsWithRef<T, TransitionBaseChildProps>;
 
 type TransitionStates =
-  | 'enter-from'
-  | 'enter-to'
-  | 'entered'
-  | 'leave-from'
-  | 'leave-to';
+  | "enter-from"
+  | "enter-to"
+  | "entered"
+  | "leave-from"
+  | "leave-to";
 
-export function TransitionChild<T extends ValidConstructor = 'div'>(
+export function TransitionChild<T extends ValidConstructor = "div">(
   props: TransitionChildProps<T>,
 ): JSX.Element {
-  const values = useTransitionRootContext('TransitionChild');
+  const values = useTransitionRootContext("TransitionChild");
   // Transitions pending on parent
   const transitionParent = useContext(TransitionCounterContext);
   // Transitions pending underneath element
@@ -132,7 +132,7 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
         const endTransition = (): void => {
           removeClassList(element, enter);
           removeClassList(element, enterTo);
-          setState('entered');
+          setState("entered");
           addClassList(element, entered);
           if (props.afterEnter) {
             props.afterEnter();
@@ -142,18 +142,18 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
         if (props.beforeEnter) {
           props.beforeEnter();
         }
-        setState('enter-from');
+        setState("enter-from");
         addClassList(element, enter);
         addClassList(element, enterFrom);
 
         requestAnimationFrame(() => {
           removeClassList(element, enterFrom);
-          setState('enter-to');
+          setState("enter-to");
           addClassList(element, enterTo);
-          element.addEventListener('transitionend', endTransition, {
+          element.addEventListener("transitionend", endTransition, {
             once: true,
           });
-          element.addEventListener('animationend', endTransition, {
+          element.addEventListener("animationend", endTransition, {
             once: true,
           });
         });
@@ -170,12 +170,12 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
         transitionParent.register();
       }
       removeClassList(element, entered);
-      setState('leave-from');
+      setState("leave-from");
       addClassList(element, leave);
       addClassList(element, leaveFrom);
       requestAnimationFrame(() => {
         removeClassList(element, leaveFrom);
-        setState('leave-to');
+        setState("leave-to");
         addClassList(element, leaveTo);
       });
       const endTransition = (): void => {
@@ -189,8 +189,8 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
           props.afterLeave();
         }
       };
-      element.addEventListener('transitionend', endTransition, { once: true });
-      element.addEventListener('animationend', endTransition, { once: true });
+      element.addEventListener("transitionend", endTransition, { once: true });
+      element.addEventListener("animationend", endTransition, { once: true });
     }
   }
 
@@ -216,28 +216,28 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
     get children() {
       return createUnmountable(props, visible, () =>
         createDynamic(
-          () => props.as || ('div' as T),
+          () => props.as || ("div" as T),
           mergeProps(
             omitProps(props, [
-              'as',
-              'enter',
-              'enterFrom',
-              'enterTo',
-              'leave',
-              'leaveFrom',
-              'leaveTo',
-              'unmount',
-              'afterEnter',
-              'afterLeave',
-              'appear',
-              'beforeEnter',
-              'beforeLeave',
-              'entered',
-              'ref',
+              "as",
+              "enter",
+              "enterFrom",
+              "enterTo",
+              "leave",
+              "leaveFrom",
+              "leaveTo",
+              "unmount",
+              "afterEnter",
+              "afterLeave",
+              "appear",
+              "beforeEnter",
+              "beforeLeave",
+              "entered",
+              "ref",
             ]),
             {
               ref: setRef,
-              get 'tc-transition'() {
+              get "tc-transition"() {
                 return state();
               },
             },
@@ -249,18 +249,18 @@ export function TransitionChild<T extends ValidConstructor = 'div'>(
   });
 }
 
-export type TransitionProps<T extends ValidConstructor = 'div'> = Prettify<
+export type TransitionProps<T extends ValidConstructor = "div"> = Prettify<
   TransitionChildProps<T> & TransitionRootBaseProps
 >;
 
-export function Transition<T extends ValidConstructor = 'div'>(
+export function Transition<T extends ValidConstructor = "div">(
   props: TransitionProps<T>,
 ): JSX.Element {
   return createComponent(TransitionRootContext.Provider, {
     get children() {
       return createComponent(
         TransitionChild,
-        omitProps(props, ['show']) as TransitionChildProps<T>,
+        omitProps(props, ["show"]) as TransitionChildProps<T>,
       );
     },
     value: props,

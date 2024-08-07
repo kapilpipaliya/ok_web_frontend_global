@@ -1,7 +1,7 @@
 import { onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import {DynamicComponent} from "~/components/form/DynamicComponent";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";

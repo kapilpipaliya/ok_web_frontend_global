@@ -3,10 +3,15 @@ export interface FilterAttributes {
   value: string;
 }
 
-export function generateFilter(filters: FilterAttributes[], isView?: boolean): string {
+export function generateFilter(
+  filters: FilterAttributes[],
+  isView?: boolean,
+): string {
   const separator = isView ? " " : "|";
-  return filters.map(filter => {
-    const { type = '', value = '' } = filter;
-    return `${type}(${value})`;
-  }).join(separator);
+  return filters
+    .map((filter) => {
+      const { type = "", value = "" } = filter;
+      return `${type}(${value})`;
+    })
+    .join(separator);
 }

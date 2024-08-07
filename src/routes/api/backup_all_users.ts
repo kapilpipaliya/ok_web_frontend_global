@@ -26,9 +26,15 @@ export async function saveGraphToCypherQL() {
       const relationship = record.get("r");
       const relatedNode = record.get("m");
 
-      if (node) { nodes.add(node); }
-      if (relationship) { relationships.add(relationship); }
-      if (relatedNode) { nodes.add(relatedNode); }
+      if (node) {
+        nodes.add(node);
+      }
+      if (relationship) {
+        relationships.add(relationship);
+      }
+      if (relatedNode) {
+        nodes.add(relatedNode);
+      }
     });
 
     const timestamp = format(new Date(), "yyyyMMddHHmmss");

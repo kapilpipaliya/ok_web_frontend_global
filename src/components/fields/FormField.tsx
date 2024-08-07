@@ -1,13 +1,10 @@
-
 import { onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import {
-  generateFormMetaAttributes,
-} from "~/components/page_designer/functions/getChildrenAttrs";
+import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
@@ -15,13 +12,14 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { FormContext, type IFormContext } from "../form/FormContext";
 
-
 export function FormField(
-  props: Readonly<{
-    // For Root Level Forms we use Parent vertex label as form name
-    label?: string;
-    submitButton?: any;
-  } & GenericComponentProps>,
+  props: Readonly<
+    {
+      // For Root Level Forms we use Parent vertex label as form name
+      label?: string;
+      submitButton?: any;
+    } & GenericComponentProps
+  >,
 ) {
   const [graph, setGraph] = useGraph();
   const [previewStore] = usePreviewContext();
@@ -46,7 +44,7 @@ export function FormField(
       txnId,
     });
   } else {
-    const form = generateFormMetaAttributes(graph, () => { }, props.meta);
+    const form = generateFormMetaAttributes(graph, () => {}, props.meta);
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
         acc[attr.name] = attr.defaultValue;
@@ -58,10 +56,14 @@ export function FormField(
       graph,
       setGraph,
       txnId,
-      props.label ?? previewStore.previewMeta?.P[IdAttr] ?? props.meta.P[IdAttr],
+      props.label ??
+        previewStore.previewMeta?.P[IdAttr] ??
+        props.meta.P[IdAttr],
       defaultValues,
     );
-    if (createResult.error) { return createResult.error; }
+    if (createResult.error) {
+      return createResult.error;
+    }
     setFormData({
       formData: createResult.vertex!,
       formMeta: props.meta,
@@ -69,7 +71,6 @@ export function FormField(
       tabs: [],
       txnId,
     });
-
   }
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();

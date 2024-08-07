@@ -1,10 +1,8 @@
-
-
-
-
 import { IconButton } from "~/components/IconButton";
 
-export function IncrementButton(props: Readonly<{ downIncrement: (event: MouseEvent) => void; }>) {
+export function IncrementButton(
+  props: Readonly<{ downIncrement: (event: MouseEvent) => void }>,
+) {
   return (
     <IconButton
       class="bg:transparent border:none cursor:ns-resize"
@@ -14,4 +12,3 @@ export function IncrementButton(props: Readonly<{ downIncrement: (event: MouseEv
     />
   );
 }
-

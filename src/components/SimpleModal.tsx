@@ -2,7 +2,6 @@ import { createContext, type JSX, Show, useContext } from "solid-js";
 
 import { useZIndex } from "~/components/ZIndex";
 
-
 interface SimpleWithDismissButtonProps {
   children?: JSX.Element;
   closeButtonText?: string;
@@ -14,7 +13,9 @@ interface SimpleWithDismissButtonProps {
   title: string;
 }
 const ModalContext = createContext<SimpleWithDismissButtonProps>();
-export function SimpleWithDismissButton(props: Readonly<SimpleWithDismissButtonProps>) {
+export function SimpleWithDismissButton(
+  props: Readonly<SimpleWithDismissButtonProps>,
+) {
   const zIndex = useZIndex();
   return (
     <ModalContext.Provider value={props}>
@@ -40,7 +41,9 @@ function Backdrop() {
 function ModalContent() {
   const zIndex = useZIndex();
   return (
-    <div class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}>
+    <div
+      class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}
+    >
       <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
         <ModalPanel />
       </div>
@@ -69,8 +72,19 @@ function DismissButton() {
         type="button"
       >
         <span class="sr-only">Close</span>
-        <svg aria-hidden="true" class="h:1.5rem w:1.5rem" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+        <svg
+          aria-hidden="true"
+          class="h:1.5rem w:1.5rem"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M6 18L18 6M6 6l12 12"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </div>
@@ -82,20 +96,37 @@ function ModalHeader() {
   return (
     <div class="flex@sm align-items:flex-start@sm">
       <div class="flex align-items:center bg:rgb(254,226,226) border-radius:9999px flex-shrink:0 h:3rem h:2.5rem@sm justify-content:center mx:auto mx:0@sm w:3rem w:2.5rem@sm">
-        <svg aria-hidden="true" class="color:rgb(220,38,38) h:1.5rem w:1.5rem" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round" />
+        <svg
+          aria-hidden="true"
+          class="color:rgb(220,38,38) h:1.5rem w:1.5rem"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </div>
       <div class="ml:1rem@sm mt:0.75rem margin-top:0@sm text-align:center text-align:left@sm">
-        <h3 class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem" id="modal-title">{props.title}</h3>
+        <h3
+          class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem"
+          id="modal-title"
+        >
+          {props.title}
+        </h3>
         <div class="mt:0.5rem">
-          <p class="lh:1.25rem color:rgb(107,114,128) f:0.875rem">{props.description}</p>
+          <p class="lh:1.25rem color:rgb(107,114,128) f:0.875rem">
+            {props.description}
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
 
 function ModalBody() {
   const props = useContext(ModalContext)!;

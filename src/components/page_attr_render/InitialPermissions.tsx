@@ -1,4 +1,3 @@
-
 export const InitialPermissions = {
   hasDeletePermission: false as boolean | null | undefined,
   hasEditPermission: false as boolean | null | undefined,

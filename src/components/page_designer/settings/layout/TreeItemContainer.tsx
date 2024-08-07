@@ -1,6 +1,7 @@
 import { createMemo, type JSX, splitProps } from "solid-js";
 
-export interface TreeItemContainerProps extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface TreeItemContainerProps
+  extends JSX.HTMLAttributes<HTMLDivElement> {
   children: JSX.Element;
   class?: string;
   hasChildren: boolean;
@@ -10,14 +11,21 @@ export interface TreeItemContainerProps extends JSX.HTMLAttributes<HTMLDivElemen
 }
 
 export function TreeItemContainer(props: TreeItemContainerProps) {
-  const [local, others] = splitProps(props, ['class', 'hasChildren', 'isDragOver', 'isHovered', 'isSelected']);
+  const [local, others] = splitProps(props, [
+    "class",
+    "hasChildren",
+    "isDragOver",
+    "isHovered",
+    "isSelected",
+  ]);
 
   const divClasses = createMemo(() => ({
     "align-items:center": true,
     "bg:#F2EDED": local.isHovered,
     "bg:rgb(197,221,255)": local.isSelected,
     // little dark shadow on top, little lite shadow on bottom
-    "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px": !local.isDragOver && local.hasChildren,
+    "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px":
+      !local.isDragOver && local.hasChildren,
     "display:flex": true,
     "font-size:14px": true,
     "font-weight:bold": local.hasChildren,
@@ -29,7 +37,5 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     "w:100%": true,
   }));
 
-  return (
-    <div classList={divClasses()} {...others} />
-  );
+  return <div classList={divClasses()} {...others} />;
 }

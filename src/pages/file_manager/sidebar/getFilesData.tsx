@@ -1,12 +1,17 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface, } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-export async function getFilesData(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, rootId?: string, fileId?: string) {
+export async function getFilesData(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  rootId?: string,
+  fileId?: string,
+) {
   let expression;
   if (!(rootId || fileId)) {
     expression = `g:'Folder[root]'`;

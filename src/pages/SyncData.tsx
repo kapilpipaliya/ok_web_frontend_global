@@ -21,7 +21,7 @@ export function SyncData() {
   const [selectedUsers, setSelectedUsers] = createSignal([] as Vertex[]);
 
   fetchDataFromMG({
-    expression: `g:'User'`
+    expression: `g:'User'`,
   }).then((res: any) => {
     setUsers(res.result || []);
   });
@@ -326,7 +326,10 @@ export function SyncData() {
       target: { closest: (arg0: string) => any };
     }) => {
       if (
-        !(event.target.closest("#dropdownAction") ||event.target.closest("#dropdownActionButton"))
+        !(
+          event.target.closest("#dropdownAction") ||
+          event.target.closest("#dropdownActionButton")
+        )
       ) {
         setShowModal(false);
       }

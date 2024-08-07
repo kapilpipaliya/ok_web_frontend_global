@@ -1,9 +1,10 @@
- 
 import type { FieldWithCustomProperty } from "./FieldType";
 
 import { sizeTypes } from "./csseditor_constants";
 
-export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty } = {
+export const MarginAndPaddingSection: {
+  [key: string]: FieldWithCustomProperty;
+} = {
   margin: {
     componentName: "fieldWithCustomProperty",
     customProperty: [
@@ -20,7 +21,7 @@ export const MarginAndPaddingSection: { [key: string]: FieldWithCustomProperty }
     options: sizeTypes,
     type: "number",
   },
- 
+
   padding: {
     componentName: "fieldWithCustomProperty",
     customProperty: [

@@ -46,9 +46,7 @@ export function formSubmit(closePopUp?: () => void) {
 
       const name = formStore!.formData!.P.name;
 
-      const res = await checkUniqueConstrains(
-        formStore!.formData!,
-      );
+      const res = await checkUniqueConstrains(formStore!.formData!);
 
       if (res.error) {
         showErrorToast(res.message);
@@ -65,7 +63,12 @@ export function formSubmit(closePopUp?: () => void) {
             navigateToParentRoute();
           }
         },
-        promise: submitDataCall({ ...data, name }, graph, setGraph, formStore!.txnId),
+        promise: submitDataCall(
+          { ...data, name },
+          graph,
+          setGraph,
+          formStore!.txnId,
+        ),
         successMessage: `${label} Saved Successfully`,
       });
     }

@@ -1,5 +1,3 @@
- 
- 
 import type { FieldWithCustomProperty } from "./FieldType";
 
 import { defaultPixelSizeTypes, sizeTypes } from "./csseditor_constants";

@@ -2,9 +2,15 @@ import { type Accessor, type JSX, Match, type Setter, Switch } from "solid-js";
 
 import type { DataEditorField } from "../../constants/FieldType";
 
-import { generateBoxShadow, type ShadowAttributes } from "../../utils/generate/generateBoxShadow";
+import {
+  generateBoxShadow,
+  type ShadowAttributes,
+} from "../../utils/generate/generateBoxShadow";
 import { generateFilter } from "../../utils/generate/generateFilter";
-import { generateTextShadow, type TextShadowAttributes } from "../../utils/generate/generateTextShadow";
+import {
+  generateTextShadow,
+  type TextShadowAttributes,
+} from "../../utils/generate/generateTextShadow";
 import { generateTransform } from "../../utils/generate/generateTransform";
 import { generateTransition } from "../../utils/generate/generateTransition";
 
@@ -17,9 +23,11 @@ export interface CssPropertyRowContentProps {
   option: { [key: string]: any };
 }
 
-  export function CssPropertyRowContent(props: Readonly<CssPropertyRowContentProps>) {
+export function CssPropertyRowContent(
+  props: Readonly<CssPropertyRowContentProps>,
+) {
   const handleButtonClick = () => {
-    props.openPopup(v => !v);
+    props.openPopup((v) => !v);
   };
 
   return (
@@ -29,14 +37,21 @@ export interface CssPropertyRowContentProps {
           label={generateBoxShadow([props.option as ShadowAttributes], true)}
           onClick={handleButtonClick}
         />
-        <RenderPreview class={`box-shadow:${generateBoxShadow([props.option as ShadowAttributes])}`} />
+        <RenderPreview
+          class={`box-shadow:${generateBoxShadow([props.option as ShadowAttributes])}`}
+        />
       </Match>
       <Match when={props.meta.name === "text-shadow"}>
         <RenderButton
-          label={generateTextShadow([props.option as TextShadowAttributes], true)}
+          label={generateTextShadow(
+            [props.option as TextShadowAttributes],
+            true,
+          )}
           onClick={handleButtonClick}
         />
-        <RenderPreview class={`text-shadow:${generateTextShadow([props.option as TextShadowAttributes])}`} />
+        <RenderPreview
+          class={`text-shadow:${generateTextShadow([props.option as TextShadowAttributes])}`}
+        />
       </Match>
       <Match when={props.meta.name === "filter"}>
         <RenderButton

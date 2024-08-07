@@ -10,7 +10,7 @@ export function TreeItemExpandButton(
     isCollapsed: boolean;
     metaVertexId: Id;
     toggleExpand: (itemId: Id) => void;
-  }>
+  }>,
 ) {
   return (
     <Show when={props.hasChildren}>
@@ -29,8 +29,7 @@ export function TreeItemExpandButton(
           props.toggleExpand(props.metaVertexId);
         }}
         size="1em"
-      >
-      </IconButton>
+      ></IconButton>
     </Show>
   );
 }

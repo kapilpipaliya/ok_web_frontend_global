@@ -48,5 +48,7 @@ export function setValueGlobal(
     onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
   });
 
-  if (isRealTime) { commitTxn(txnId, graph); }
+  if (isRealTime) {
+    commitTxn(txnId, graph);
+  }
 }

@@ -2,7 +2,10 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
 import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
-import { useCssEditor, useCssState } from "~/components/css_properties/CssEditorContext";
+import {
+  useCssEditor,
+  useCssState,
+} from "~/components/css_properties/CssEditorContext";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 
@@ -50,7 +53,7 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
               onSelect={(value) => {
                 setSelectedAllState(value);
                 const joinedState = selectedAllState()
-                // @ts-expect-error ignore
+                  // @ts-expect-error ignore
                   .map((option) => option.selector)
                   .join("");
                 if (!stateName().includes(joinedState)) {

@@ -25,9 +25,10 @@ export function getChildrenAttrs(
   if (!child) {
     return [];
   }
-  return sortVertexesByPosition(evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [child] }) || []);
+  return sortVertexesByPosition(
+    evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [child] }) || [],
+  );
 }
-
 
 // todo: write test for this function
 export function generateFormMetaAttributes(
@@ -45,7 +46,8 @@ export function generateFormMetaAttributes(
     parentComponent: string,
   ): FieldAttribute[] {
     const children = getChildrenAttrs(graph, setGraph, vertex);
-    const componentName = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P.name;
+    const componentName = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P
+      .name;
 
     if (
       vertex !== rootVertex &&
@@ -57,7 +59,8 @@ export function generateFormMetaAttributes(
         ...vertex.P,
         attributes:
           componentName === "DynamicTable" && !ignoreTable
-            ? generateFormMetaAttributes(graph, setGraph, vertex, ignoreTable).attributes
+            ? generateFormMetaAttributes(graph, setGraph, vertex, ignoreTable)
+                .attributes
             : undefined,
         componentName: componentName,
         name: vertex.P.name,
@@ -174,7 +177,7 @@ export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
   for (const ruleId in ruleToIDMap) {
     const idArrays = ruleToIDMap[ruleId];
 
-    idArrays.forEach(id => {
+    idArrays.forEach((id) => {
       if (!idToRuleMap[id]) {
         idToRuleMap[id] = [];
       }
@@ -193,26 +196,40 @@ export function getAllFieldsUsedInAllRules(
   if (!formVertex) {
     return {};
   }
-  const rules = evaluate(jsep("->Rule"), { graph, setGraph, vertexes: [formVertex] }) || [];
+  const rules =
+    evaluate(jsep("->Rule"), { graph, setGraph, vertexes: [formVertex] }) || [];
   const ruleToIDMap: RuleToIDMap = {};
   rules.forEach((rule: Vertex) => {
     ruleToIDMap[rule.id] = (
-      evaluate(jsep("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)"), { graph, setGraph, vertexes: [rule] }) || []
+      evaluate(jsep("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)"), {
+        graph,
+        setGraph,
+        vertexes: [rule],
+      }) || []
     ).map((vertex: Vertex) => vertex.id);
   });
   return convertToIdToRuleMap(ruleToIDMap);
 }
 
-export function isAttrUsedInRules(attrVertex: Vertex, usedAttrsInRules: IDToRuleMap, graph: GraphInterface): IDToRuleMap {
+export function isAttrUsedInRules(
+  attrVertex: Vertex,
+  usedAttrsInRules: IDToRuleMap,
+  graph: GraphInterface,
+): IDToRuleMap {
   const result: IDToRuleMap = {};
 
-  function collectUsedAttrs(vertex: Vertex, usedAttrsInRules: IDToRuleMap, graph: GraphInterface, result: IDToRuleMap) {
+  function collectUsedAttrs(
+    vertex: Vertex,
+    usedAttrsInRules: IDToRuleMap,
+    graph: GraphInterface,
+    result: IDToRuleMap,
+  ) {
     if (usedAttrsInRules[vertex.id]) {
       result[vertex.id] = usedAttrsInRules[vertex.id];
     }
 
     const children = getChildrenAttrs(graph, {}, vertex);
-    children.forEach(child => {
+    children.forEach((child) => {
       collectUsedAttrs(child, usedAttrsInRules, graph, result);
     });
   }
@@ -226,9 +243,11 @@ export function getAllFieldsUsedInRootLevelSetting(
   setGraph: SetStoreFunction<GraphInterface>,
   formVertex: Vertex,
   layoutVertex: Vertex,
-  projection: string
+  projection: string,
 ): Id[] {
-  const allUniqueKeys = evaluate(jsep(projection), { graph, setGraph, vertexes: [formVertex] }) || [];
+  const allUniqueKeys =
+    evaluate(jsep(projection), { graph, setGraph, vertexes: [formVertex] }) ||
+    [];
   const allUniqueKeyIds = allUniqueKeys.map((key: Vertex) => key.id);
 
   const fieldsUsedInUniqueConstraints = [] as Id[];
@@ -241,29 +260,32 @@ export function getAllFieldsUsedInRootLevelSetting(
   }
   collectUniqueConstraints(layoutVertex);
 
-  return fieldsUsedInUniqueConstraints
+  return fieldsUsedInUniqueConstraints;
 }
-
 
 export function allFormAttrsInPageFromLevel(
   graph: Store<GraphInterface>,
   parent: Vertex,
   componentLabel: string,
-  excludeVertices: Id[] = []
-): Id[] { 
+  excludeVertices: Id[] = [],
+): Id[] {
   const verticesWithFormAttr: Id[] = [];
 
   function collectFormProperties(vertex: Vertex): void {
     if (excludeVertices.includes(vertex.id)) {
       return;
     }
-    const compLabel = evaluate(jsep("->$0Comp"), { graph, vertexes: [vertex] })?.[0]?.P.name;
+    const compLabel = evaluate(jsep("->$0Comp"), {
+      graph,
+      vertexes: [vertex],
+    })?.[0]?.P.name;
 
     if (compLabel === componentLabel) {
       verticesWithFormAttr.push(vertex.id);
     }
 
-    const children = evaluate(jsep("->Attr"), { graph, vertexes: [vertex] }) || [];
+    const children =
+      evaluate(jsep("->Attr"), { graph, vertexes: [vertex] }) || [];
     for (const child of children) {
       collectFormProperties(child);
     }

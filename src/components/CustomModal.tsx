@@ -1,4 +1,10 @@
-import { type Accessor, createSignal, type JSX, type Setter, Show } from "solid-js";
+import {
+  type Accessor,
+  createSignal,
+  type JSX,
+  type Setter,
+  Show,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
@@ -21,7 +27,10 @@ interface CustomModalProps {
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
   const zIndex = useZIndex();
-  const [open, setOpen] = (props.open && props.setOpen) ? [props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>] : createSignal(false);
+  const [open, setOpen] =
+    props.open && props.setOpen
+      ? ([props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>])
+      : createSignal(false);
 
   const modalContainerClass = `position:fixed top:0 left:0 width:100% height:100% display:flex jc:center ai:center z-index:${zIndex} background-color:rgba(0,0,0,0.5)`;
   const modalClass = "position:relative background-color:white";
@@ -46,7 +55,12 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
             {props.title}
           </Show>
           <Show when={props.closeButton !== false}>
-            <button class="bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5" onClick={() => setOpen(false)} title="Close" type="button">
+            <button
+              class="bg:lightgrey:hover float:right p:0|5|0|5 r:5|5|5|5"
+              onClick={() => setOpen(false)}
+              title="Close"
+              type="button"
+            >
               ✕
             </button>
           </Show>
@@ -54,7 +68,12 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       );
     };
     return (
-      <div aria-modal="true" class={`${modalClass} ${props.dialogClass ?? ""} r:10`} ref={setFloating} role="dialog">
+      <div
+        aria-modal="true"
+        class={`${modalClass} ${props.dialogClass ?? ""} r:10`}
+        ref={setFloating}
+        role="dialog"
+      >
         <Header />
         <hr class="fg:lightgrey" />
         <div class={`${props.bodyClass ?? ""} overflow:auto p:3`}>

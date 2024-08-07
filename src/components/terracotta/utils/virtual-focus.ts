@@ -1,4 +1,4 @@
-import { onCleanup } from 'solid-js';
+import { onCleanup } from "solid-js";
 
 type FocusListener = (el: HTMLElement) => void;
 

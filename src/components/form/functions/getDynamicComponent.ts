@@ -1,4 +1,3 @@
-
 import { SelectField } from "~/components/fields/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { Repeater } from "~/components/page_attr_render/Repeater";
@@ -46,7 +45,7 @@ export function getDynamicComponent(component: string) {
       return FileUploader;
 
     case "Form":
-      return FormField
+      return FormField;
 
     case "Image":
       return ImageField;

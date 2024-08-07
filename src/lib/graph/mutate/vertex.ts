@@ -97,25 +97,29 @@ export function replaceVertexProperties(
     txnId,
     {
       data,
-      redo: () =>
-        {
-          const actualVertexId2 =
+      redo: () => {
+        const actualVertexId2 =
           vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-          return replaceVertexProperties(0, actualVertexId2, graph, setGraph, data.P);
-        },
+        return replaceVertexProperties(
+          0,
+          actualVertexId2,
+          graph,
+          setGraph,
+          data.P,
+        );
+      },
       replace: () => updateVertex(data),
-      revert: () =>
-        {
-          const actualVertexId2 =
+      revert: () => {
+        const actualVertexId2 =
           vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-          return replaceVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            originalProperties
-          );
-        },
+        return replaceVertexProperties(
+          0,
+          actualVertexId2,
+          graph,
+          setGraph,
+          originalProperties,
+        );
+      },
     },
     graph,
   );
@@ -224,7 +228,7 @@ export function deleteVertex(
     );
     return { error: "Vertex Children Exist When deleting vertex" };
   }
-  
+
   for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
     const attrInstEdge = graph.edges[attrInstEdgeId];
     if (attrInstEdge) {

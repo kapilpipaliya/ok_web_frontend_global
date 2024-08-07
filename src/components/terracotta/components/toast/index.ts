@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -9,21 +9,21 @@ import {
   mergeProps,
   onCleanup,
   useContext,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
-import assert from '../../utils/assert';
-import createDynamic from '../../utils/create-dynamic';
-import { createTag } from '../../utils/namespace';
+import assert from "../../utils/assert";
+import createDynamic from "../../utils/create-dynamic";
+import { createTag } from "../../utils/namespace";
 
-const TOAST_TAG = createTag('toast');
-const TOASTER_TAG = createTag('toaster');
+const TOAST_TAG = createTag("toast");
+const TOASTER_TAG = createTag("toaster");
 
 interface ToastContextData {
   ownerID: string;
@@ -40,25 +40,25 @@ function useToastContext(componentName: string): ToastContextData {
   return context;
 }
 
-export type ToastProps<T extends ValidConstructor = 'div'> = HeadlessProps<T>;
+export type ToastProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
 
-export function Toast<T extends ValidConstructor = 'div'>(
+export function Toast<T extends ValidConstructor = "div">(
   props: ToastProps<T>,
 ): JSX.Element {
-  useToastContext('Toast');
+  useToastContext("Toast");
 
   return createDynamic(
-    () => props.as || ('div' as T),
-    mergeProps(omitProps(props, ['as']), TOAST_TAG, {
-      'aria-live': 'polite',
-      role: 'status',
+    () => props.as || ("div" as T),
+    mergeProps(omitProps(props, ["as"]), TOAST_TAG, {
+      "aria-live": "polite",
+      role: "status",
     }) as DynamicProps<T>,
   );
 }
 
-export type ToasterProps<T extends ValidConstructor = 'div'> = HeadlessProps<T>;
+export type ToasterProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
 
-export function Toaster<T extends ValidConstructor = 'div'>(
+export function Toaster<T extends ValidConstructor = "div">(
   props: ToasterProps<T>,
 ): JSX.Element {
   const ownerID = createUniqueId();
@@ -66,8 +66,8 @@ export function Toaster<T extends ValidConstructor = 'div'>(
   return createComponent(ToastContext.Provider, {
     get children() {
       return createDynamic(
-        () => props.as || ('div' as T),
-        mergeProps(omitProps(props, ['as']), TOASTER_TAG) as DynamicProps<T>,
+        () => props.as || ("div" as T),
+        mergeProps(omitProps(props, ["as"]), TOASTER_TAG) as DynamicProps<T>,
       );
     },
     value: {
@@ -126,7 +126,7 @@ export class ToasterStore<T> {
   }
 
   remove(id: string): void {
-    this.queue = this.queue.filter(item => item.id !== id);
+    this.queue = this.queue.filter((item) => item.id !== id);
     this.notify();
   }
 

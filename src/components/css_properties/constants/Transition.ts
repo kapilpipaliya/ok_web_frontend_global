@@ -1,9 +1,4 @@
- 
-
-import type {
-  DataEditorField,
-  TextFieldOptionsField,
-} from "./FieldType";
+import type { DataEditorField, TextFieldOptionsField } from "./FieldType";
 
 import { timesTypes } from "./csseditor_constants";
 import { createGridOptions } from "./FieldType";

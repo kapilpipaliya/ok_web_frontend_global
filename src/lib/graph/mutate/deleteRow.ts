@@ -16,8 +16,6 @@ export function deleteRow(
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
 ) {
-
-
   batch(() => {
     if (isRealTime) {
       txnId = graph.newTxnId;
@@ -50,7 +48,11 @@ export function deleteRow(
 
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id, graph, setGraph);
-    if (deleteResult.error) { alert(deleteResult.error.toString()); }
-    if (isRealTime) { commitTxn(txnId, graph); }
+    if (deleteResult.error) {
+      alert(deleteResult.error.toString());
+    }
+    if (isRealTime) {
+      commitTxn(txnId, graph);
+    }
   });
 }

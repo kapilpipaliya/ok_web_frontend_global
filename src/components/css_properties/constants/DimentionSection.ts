@@ -1,4 +1,3 @@
-
 import { sizeTypes } from "./csseditor_constants";
 import { createGridOptions, type TextFieldOptionsField } from "./FieldType";
 

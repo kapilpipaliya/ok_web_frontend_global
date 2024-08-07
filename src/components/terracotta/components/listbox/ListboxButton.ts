@@ -1,22 +1,22 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import { useSelectState } from '../../states/create-select-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-disclosure-state";
+import { useSelectState } from "../../states/create-select-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createARIAExpandedState,
@@ -24,22 +24,22 @@ import {
   createExpandedState,
   createHasActiveState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useListboxContext } from './ListboxContext';
-import { LISTBOX_BUTTON_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useListboxContext } from "./ListboxContext";
+import { LISTBOX_BUTTON_TAG } from "./tags";
 
-export type ListboxButtonProps<T extends ValidConstructor = 'button'> =
+export type ListboxButtonProps<T extends ValidConstructor = "button"> =
   HeadlessPropsWithRef<
     T,
     OmitAndMerge<DisclosureStateRenderProps, ButtonProps<T>>
   >;
 
-export function ListboxButton<T extends ValidConstructor = 'button'>(
+export function ListboxButton<T extends ValidConstructor = "button">(
   props: ListboxButtonProps<T>,
 ): JSX.Element {
-  const context = useListboxContext('ListboxButton');
+  const context = useListboxContext("ListboxButton");
   const disclosureState = useDisclosureState();
   const selectState = useSelectState();
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -52,16 +52,16 @@ export function ListboxButton<T extends ValidConstructor = 'button'>(
     if (current instanceof HTMLElement) {
       context.anchor = current;
 
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!isDisabled()) {
           disclosureState.toggle();
         }
       });
-      useEventListener(current, 'keydown', e => {
+      useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case 'ArrowUp':
-            case 'ArrowDown': {
+            case "ArrowUp":
+            case "ArrowDown": {
               e.preventDefault();
               disclosureState.toggle();
               break;
@@ -69,10 +69,10 @@ export function ListboxButton<T extends ValidConstructor = 'button'>(
           }
         }
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         context.buttonHovering = true;
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         context.buttonHovering = false;
       });
     }
@@ -81,11 +81,11 @@ export function ListboxButton<T extends ValidConstructor = 'button'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['children', 'ref']),
+      omitProps(props, ["children", "ref"]),
       LISTBOX_BUTTON_TAG,
       {
-        'aria-controls': context.optionsID,
-        'aria-haspopup': 'listbox',
+        "aria-controls": context.optionsID,
+        "aria-haspopup": "listbox",
         id: context.buttonID,
         ref: setInternalRef,
       },

@@ -1,4 +1,3 @@
-
 import { createMemo } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
@@ -13,7 +12,8 @@ export function SaveIconButton() {
 
   const onSubmit = formSubmit();
   const isDisabled = createMemo(
-    () => !!formStore?.[0]?.txnId && isDisabledTxn(formStore?.[0]?.txnId, graph),
+    () =>
+      !!formStore?.[0]?.txnId && isDisabledTxn(formStore?.[0]?.txnId, graph),
   );
 
   return (

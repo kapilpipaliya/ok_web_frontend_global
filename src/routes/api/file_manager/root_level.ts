@@ -13,37 +13,41 @@ export async function GET({ request }: APIEvent) {
     // directories without a parent directory
     // and their immediate files
     const directoriesResult = await neo4jSession.run(
-      'MATCH (d:Folder) ' +
-      'WHERE NOT (d)<-[:ParentFolder]-(:Folder) ' +
-      'OPTIONAL MATCH (d)-[:ParentFolder]->(f:File) ' +
-      'RETURN d, collect(f) as files'
+      "MATCH (d:Folder) " +
+        "WHERE NOT (d)<-[:ParentFolder]-(:Folder) " +
+        "OPTIONAL MATCH (d)-[:ParentFolder]->(f:File) " +
+        "RETURN d, collect(f) as files",
     );
 
     // root-level files (files that are not connected to any directory)
     const filesResult = await neo4jSession.run(
-      'MATCH (f:File) ' +
-      'WHERE NOT (f)-[:ParentFolder]->(:Folder) ' +
-      'RETURN f'
+      "MATCH (f:File) " +
+        "WHERE NOT (f)-[:ParentFolder]->(:Folder) " +
+        "RETURN f",
     );
 
     const context = {
       nodes: {} as { [key: string]: any },
       relationships: {} as { [key: string]: any },
     };
-    processResult(directoriesResult.records, context, 'd');
+    processResult(directoriesResult.records, context, "d");
     for (const record of directoriesResult.records) {
-      const vertices = record.get('files').map((file: Node) => convertNodeToJson(file));
+      const vertices = record
+        .get("files")
+        .map((file: Node) => convertNodeToJson(file));
       if (context.nodes) {
         for (const vertex of vertices) {
           context.nodes[vertex.id] = vertex;
         }
       }
     }
-    const rootFiles = processResult(filesResult.records, context, 'f');
+    const rootFiles = processResult(filesResult.records, context, "f");
 
-    const rootDirectories = directoriesResult.records.map(record => ({
-      directory: context.nodes[record.get('d').elementId],
-      files: record.get('files').map((file: Node) => context.nodes[file.elementId])
+    const rootDirectories = directoriesResult.records.map((record) => ({
+      directory: context.nodes[record.get("d").elementId],
+      files: record
+        .get("files")
+        .map((file: Node) => context.nodes[file.elementId]),
     }));
 
     return {
@@ -52,11 +56,16 @@ export async function GET({ request }: APIEvent) {
         vertexes: context.nodes!,
       },
       rootDirectories,
-      rootFiles
+      rootFiles,
     };
   } catch (error: unknown) {
-    return new Response(error instanceof Error ? error.message : "Unknown error", { status: 500 });
+    return new Response(
+      error instanceof Error ? error.message : "Unknown error",
+      { status: 500 },
+    );
   } finally {
-    if (neo4jSession) { neo4jSession.close(); }
+    if (neo4jSession) {
+      neo4jSession.close();
+    }
   }
 }

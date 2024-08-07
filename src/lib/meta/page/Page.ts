@@ -9,14 +9,14 @@ import { pageAttr } from "./pageAttr";
 export const Page: IFormMetaData = {
   attributes: [
     {
-      class: 'p:8 w:100%',
+      class: "p:8 w:100%",
       componentName: "TextBox",
 
       name: "title",
       onchange: '{"new": ["name","id"]}',
     },
     {
-      class: 'p:8 w:100%',
+      class: "p:8 w:100%",
       componentName: "TextBox",
       name: "name",
       validation: { required: true },
@@ -31,7 +31,8 @@ export const Page: IFormMetaData = {
           message: "This ID is already taken",
           type: "custom",
           validationCallback: (options: any) => {
-            const { formData } = (options.validator.context as IFormContext) ||
+            const { formData } =
+              (options.validator.context as IFormContext) ||
               ({} as IFormContext);
             const [graph, _setGraph] = useGraph();
             const val = options.value;
@@ -40,13 +41,13 @@ export const Page: IFormMetaData = {
               "id",
               val,
               formData.id,
-              graph
+              graph,
             );
           },
         },
       ],
     },
-    { class: 'p:8 w:100%',componentName: "TextArea", name: "description" },
+    { class: "p:8 w:100%", componentName: "TextArea", name: "description" },
     {
       collection: "g:'Dashboard'",
       componentName: "TagBox",
@@ -83,7 +84,7 @@ export const Page: IFormMetaData = {
       collection: "->$0Perm",
       componentName: "TagBox",
       name: "globalPerm",
-    }
+    },
   ],
   name: "Page",
   title: "Page",

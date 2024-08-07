@@ -1,42 +1,42 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
   createEffect,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   SelectOptionStateOptions,
   SelectOptionStateRenderProps,
-} from '../../states/create-select-option-state';
+} from "../../states/create-select-option-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createSelectOptionState,
   SelectOptionStateProvider,
-} from '../../states/create-select-option-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+} from "../../states/create-select-option-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createActiveState,
   createARIACheckedState,
   createARIADisabledState,
   createCheckedState,
   createDisabledState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { RadioGroupContext } from './RadioGroupContext';
-import { useRadioGroupRootContext } from './RadioGroupRootContext';
-import { RADIO_GROUP_OPTION_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { RadioGroupContext } from "./RadioGroupContext";
+import { useRadioGroupRootContext } from "./RadioGroupRootContext";
+import { RADIO_GROUP_OPTION_TAG } from "./tags";
 
 export type RadioGroupOptionBaseProps<V> = Prettify<
   SelectOptionStateOptions<V> & SelectOptionStateRenderProps
@@ -44,13 +44,13 @@ export type RadioGroupOptionBaseProps<V> = Prettify<
 
 export type RadioGroupOptionProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, RadioGroupOptionBaseProps<V>>;
 
-export function RadioGroupOption<V, T extends ValidConstructor = 'div'>(
+export function RadioGroupOption<V, T extends ValidConstructor = "div">(
   props: RadioGroupOptionProps<V, T>,
 ): JSX.Element {
-  const context = useRadioGroupRootContext('RadioGroupOption');
+  const context = useRadioGroupRootContext("RadioGroupOption");
 
   const descriptionID = createUniqueId();
   const labelID = createUniqueId();
@@ -61,14 +61,14 @@ export function RadioGroupOption<V, T extends ValidConstructor = 'div'>(
   createEffect(() => {
     const current = internalRef();
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         state.select();
       });
-      useEventListener(current, 'focus', () => {
+      useEventListener(current, "focus", () => {
         state.focus();
         state.select();
       });
-      useEventListener(current, 'blur', () => {
+      useEventListener(current, "blur", () => {
         state.blur();
       });
     }
@@ -79,17 +79,17 @@ export function RadioGroupOption<V, T extends ValidConstructor = 'div'>(
       return createComponent(
         Button,
         mergeProps(
-          omitProps(props, ['as', 'children', 'value', 'disabled', 'ref']),
+          omitProps(props, ["as", "children", "value", "disabled", "ref"]),
           RADIO_GROUP_OPTION_TAG,
           createOwnerAttribute(context.getId()),
           {
-            'aria-describedby': descriptionID,
-            'aria-labelledby': labelID,
+            "aria-describedby": descriptionID,
+            "aria-labelledby": labelID,
             get as() {
-              return props.as || ('div' as T);
+              return props.as || ("div" as T);
             },
             ref: setInternalRef,
-            role: 'radio',
+            role: "radio",
             get tabindex() {
               const selected = state.isSelected();
               return state.disabled() || !selected ? -1 : 0;

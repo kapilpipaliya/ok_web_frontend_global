@@ -8,7 +8,9 @@ export function redoAllowed(
   txnId: number,
   graph: Store<GraphInterface>,
 ): boolean {
-  if (!(txnId && graph.transactions.has(txnId))) { return false; }
+  if (!(txnId && graph.transactions.has(txnId))) {
+    return false;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -17,7 +19,9 @@ export function redoAllowed(
 }
 
 export function redo(txnId: number, graph: Store<GraphInterface>) {
-  if (!redoAllowed(txnId, graph)) { return; }
+  if (!redoAllowed(txnId, graph)) {
+    return;
+  }
 
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -41,7 +45,6 @@ export function redo(txnId: number, graph: Store<GraphInterface>) {
         step.redo();
       }
     });
-
 
   graph.transactions.set(txnId, txnValue);
 }

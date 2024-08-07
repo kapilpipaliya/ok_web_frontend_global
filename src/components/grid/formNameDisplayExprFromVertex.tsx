@@ -11,7 +11,9 @@ export function formNameDisplayExprFromVertex(
   graph: Store<GraphInterface>,
   collection?: string,
 ) {
-  if (!collection) { return; }
+  if (!collection) {
+    return;
+  }
   const collectionVertex = findVertexByLabelAndUniqueId(
     graph,
     "Form",
@@ -20,7 +22,9 @@ export function formNameDisplayExprFromVertex(
   );
   if (collectionVertex) {
     const nameKeys = getNameKeyForCollection(graph, collectionVertex);
-    if (nameKeys.length === 0) { return; }
+    if (nameKeys.length === 0) {
+      return;
+    }
     return nameKeys.length === 1
       ? `::'P.${nameKeys[0]}'`
       : nameKeys.map((name) => `(::'P.${name}')`).join("+(' ')");

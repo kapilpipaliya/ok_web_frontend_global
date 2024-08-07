@@ -1,8 +1,8 @@
 import { autofocus } from "@solid-primitives/autofocus";
-import { type Accessor, Show, } from "solid-js";
+import { type Accessor, Show } from "solid-js";
 // prevents from being tree-shaken by TS
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-autofocus
+autofocus;
 
 import { CustomModal } from "./CustomModal";
 
@@ -39,11 +39,7 @@ export function DialogWithButtons(
             Cancel
           </button>
           <Show when={props.hasPermission ?? true}>
-            <button
-              class="mr:10px"
-              onClick={handleConfirm}
-              type="button"
-            >
+            <button class="mr:10px" onClick={handleConfirm} type="button">
               Confirm
             </button>
           </Show>
@@ -60,9 +56,7 @@ export function DialogWithButtons(
         }
         when={props.hasPermission ?? true}
       >
-        <p class="p:10px|0px">
-          {props.message}
-        </p>
+        <p class="p:10px|0px">{props.message}</p>
       </Show>
     </CustomModal>
   );

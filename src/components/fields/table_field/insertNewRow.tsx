@@ -29,7 +29,7 @@ export function insertNewRow(
       setGraph,
       data,
       properties,
-      isRealTime ?? false
+      isRealTime ?? false,
     ),
   );
   if (!result?.error) {

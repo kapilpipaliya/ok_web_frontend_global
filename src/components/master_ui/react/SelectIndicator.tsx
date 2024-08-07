@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import { type JSX, splitProps } from "solid-js";
 
-const SelectIndicator = (props: Readonly<JSX.SvgSVGAttributes<SVGSVGElement>>) => {
+const SelectIndicator = (
+  props: Readonly<JSX.SvgSVGAttributes<SVGSVGElement>>,
+) => {
   const [local, others] = splitProps(props, ["class"]);
   return (
     <svg

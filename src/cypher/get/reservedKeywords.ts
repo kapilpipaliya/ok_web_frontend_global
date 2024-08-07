@@ -18,15 +18,9 @@ export const reservedKeywords = {
     "START",
     "UNION",
     "UNWIND",
-    "WITH"
+    "WITH",
   ],
-  subclauses: [
-    "LIMIT",
-    "ORDER",
-    "SKIP",
-    "WHERE",
-    "YIELD"
-  ],
+  subclauses: ["LIMIT", "ORDER", "SKIP", "WHERE", "YIELD"],
   modifiers: [
     "ASC",
     "ASCENDING",
@@ -35,17 +29,9 @@ export const reservedKeywords = {
     "CSV",
     "DESC",
     "DESCENDING",
-    "ON"
+    "ON",
   ],
-  expressions: [
-    "ALL",
-    "CASE",
-    "COUNT",
-    "ELSE",
-    "END",
-    "WHEN",
-    "THEN"
-  ],
+  expressions: ["ALL", "CASE", "COUNT", "ELSE", "END", "WHEN", "THEN"],
   operators: [
     "AND",
     "AS",
@@ -56,7 +42,7 @@ export const reservedKeywords = {
     "NOT",
     "OR",
     "STARTS",
-    "XOR"
+    "XOR",
   ],
   schema: [
     "CONSTRAINT",
@@ -66,19 +52,10 @@ export const reservedKeywords = {
     "INDEX",
     "NODE",
     "KEY",
-    "UNIQUE"
+    "UNIQUE",
   ],
-  hints: [
-    "USING",
-    "JOIN",
-    "SCAN",
-    "SEEK"
-  ],
-  literals: [
-    "false",
-    "null",
-    "true"
-  ],
+  hints: ["USING", "JOIN", "SCAN", "SEEK"],
+  literals: ["false", "null", "true"],
   reservedForFutureUse: [
     "ADD",
     "DO",
@@ -86,21 +63,20 @@ export const reservedKeywords = {
     "MANDATORY",
     "OF",
     "REQUIRE",
-    "SCALAR"
+    "SCALAR",
   ],
-  added: [
-    "name",
-    "id",
-    "type",
-    "label"
-  ],
-  added2: Object.keys(FormMetaData)
-};export function isReservedKeyword(name: string) {
+  added: ["name", "id", "type", "label"],
+  added2: Object.keys(FormMetaData),
+};
+export function isReservedKeyword(name: string) {
   for (const category in reservedKeywords) {
-    if (reservedKeywords[category as keyof typeof reservedKeywords].includes(name.toUpperCase())) {
+    if (
+      reservedKeywords[category as keyof typeof reservedKeywords].includes(
+        name.toUpperCase(),
+      )
+    ) {
       return true;
     }
   }
   return false;
 }
-

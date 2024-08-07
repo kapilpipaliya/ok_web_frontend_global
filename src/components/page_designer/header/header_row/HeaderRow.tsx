@@ -13,7 +13,6 @@ import { RightToggleButton } from "../right/RightToggleButton";
 import { SaveIconButton } from "../right/SaveIconButton";
 import { DebugInfo } from "./DebugInfo";
 
-
 export function HeaderRow() {
   const [layoutStore] = useDesignerLayoutStore();
   return (

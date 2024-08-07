@@ -283,7 +283,9 @@ export type MenuOptionGroupProps = (
 ) &
   Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
-export function MenuOptionGroup(props: Readonly<MenuOptionGroupProps>): JSX.Element {
+export function MenuOptionGroup(
+  props: Readonly<MenuOptionGroupProps>,
+): JSX.Element {
   const [local, divProps] = splitProps(props, [
     "title",
     "value",

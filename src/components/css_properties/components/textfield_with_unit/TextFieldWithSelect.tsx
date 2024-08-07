@@ -1,6 +1,6 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { path } from "rambda";
-import { type Component, Match, Switch, } from "solid-js";
+import { type Component, Match, Switch } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -9,7 +9,12 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import type { TextFieldOptionsField } from "../../constants/FieldType";
 
 import { sizeTypes } from "../../constants/csseditor_constants";
-import { useComponentMeta, useCssDefaultEditor, useCssEditor, useCssState } from "../../CssEditorContext";
+import {
+  useComponentMeta,
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../../CssEditorContext";
 import { useCssEditorProps } from "../../CSSEditorPropsContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 import { CenterDiv } from "../CenterDiv";
@@ -32,10 +37,16 @@ export const TextFieldWithSelect: Component = () => {
     return path(projections, cssState) || path(projections, cssDefault) || "";
   };
 
-  const [selectedOption, setSelectedOption] = createWritableMemo(() => determineSelectedOption());
+  const [selectedOption, setSelectedOption] = createWritableMemo(() =>
+    determineSelectedOption(),
+  );
 
   function determineSelectedOption(): string {
-    return sizeTypes.find((unit) => selectedValue().includes(unit)) ?? meta.unitOptions?.[0] ?? "";
+    return (
+      sizeTypes.find((unit) => selectedValue().includes(unit)) ??
+      meta.unitOptions?.[0] ??
+      ""
+    );
   }
 
   function changeValue(value: string) {
@@ -58,12 +69,28 @@ export const TextFieldWithSelect: Component = () => {
 
   function handleNumberInputChange(value: string) {
     const numericValue = Number.parseFloat(value);
-    if (Number.isNaN(numericValue)) { return; }
+    if (Number.isNaN(numericValue)) {
+      return;
+    }
 
-    if (meta.inputProps?.min !== undefined && numericValue < meta.inputProps.min) { return; }
-    if (meta.inputProps?.max !== undefined && numericValue > meta.inputProps.max) { return; }
+    if (
+      meta.inputProps?.min !== undefined &&
+      numericValue < meta.inputProps.min
+    ) {
+      return;
+    }
+    if (
+      meta.inputProps?.max !== undefined &&
+      numericValue > meta.inputProps.max
+    ) {
+      return;
+    }
 
-    changeValue(meta.unitOptions ? `${numericValue}${selectedOption()}` : `${numericValue}`);
+    changeValue(
+      meta.unitOptions
+        ? `${numericValue}${selectedOption()}`
+        : `${numericValue}`,
+    );
   }
 
   const clearFileSelection = () => {
@@ -79,10 +106,23 @@ export const TextFieldWithSelect: Component = () => {
       IN: {},
       L: [],
       OUT: {},
-      P: { type: getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name) },
+      P: {
+        type: getCssSelectedFileEdgeName(
+          cssEditorProps.data.L[0],
+          cssEditorProps.meta.P.name,
+          state() || "Default",
+          meta.name,
+        ),
+      },
     } as Vertex;
 
-    setSelectionValue(txnId, cssEditorProps.data, graph, setGraph, selectedFileMetaVertex);
+    setSelectionValue(
+      txnId,
+      cssEditorProps.data,
+      graph,
+      setGraph,
+      selectedFileMetaVertex,
+    );
   };
 
   const resetValue = () => {

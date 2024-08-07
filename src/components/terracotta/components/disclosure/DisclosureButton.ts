@@ -1,43 +1,43 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createEffect, mergeProps } from 'solid-js';
-import { createComponent } from 'solid-js/web';
-import { omitProps } from 'solid-use/props';
+import { createEffect, mergeProps } from "solid-js";
+import { createComponent } from "solid-js/web";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-disclosure-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createARIAExpandedState,
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useDisclosureContext } from './DisclosureContext';
-import { DISCLOSURE_BUTTON_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useDisclosureContext } from "./DisclosureContext";
+import { DISCLOSURE_BUTTON_TAG } from "./tags";
 
-export type DisclosureButtonProps<T extends ValidConstructor = 'button'> =
+export type DisclosureButtonProps<T extends ValidConstructor = "button"> =
   HeadlessPropsWithRef<
     T,
     OmitAndMerge<DisclosureStateRenderProps, ButtonProps<T>>
   >;
 
-export function DisclosureButton<T extends ValidConstructor = 'button'>(
+export function DisclosureButton<T extends ValidConstructor = "button">(
   props: DisclosureButtonProps<T>,
 ): JSX.Element {
-  const context = useDisclosureContext('DisclosureButton');
+  const context = useDisclosureContext("DisclosureButton");
   const state = useDisclosureState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -48,7 +48,7 @@ export function DisclosureButton<T extends ValidConstructor = 'button'>(
   createEffect(() => {
     const current = internalRef();
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!isDisabled()) {
           state.toggle();
         }
@@ -59,10 +59,10 @@ export function DisclosureButton<T extends ValidConstructor = 'button'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['children', 'ref']),
+      omitProps(props, ["children", "ref"]),
       DISCLOSURE_BUTTON_TAG,
       {
-        get 'aria-controls'() {
+        get "aria-controls"() {
           return state.isOpen() && context.panelID;
         },
         id: context.buttonID,

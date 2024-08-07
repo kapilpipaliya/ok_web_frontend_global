@@ -1,12 +1,12 @@
-import type {ContextType} from "~/cypher/types/ContextType";
-import type {Vertex} from "~/lib/graph/graph";
+import type { ContextType } from "~/cypher/types/ContextType";
+import type { Vertex } from "~/lib/graph/graph";
 
-import {evalGetRelatedNodes} from "~/cypher/get/evaluate/evalGetRelatedNodes";
+import { evalGetRelatedNodes } from "~/cypher/get/evaluate/evalGetRelatedNodes";
 
 export async function evalGetChildren(
   vertexes: Vertex[],
   edgeType: string,
-  context: ContextType = {}
+  context: ContextType = {},
 ) {
   "use server";
   return await evalGetRelatedNodes(vertexes, edgeType, context, "child");
@@ -15,7 +15,7 @@ export async function evalGetChildren(
 export async function evalGetParents(
   vertexes: Vertex[],
   edgeType: string,
-  context: ContextType = {}
+  context: ContextType = {},
 ) {
   "use server";
   return await evalGetRelatedNodes(vertexes, edgeType, context, "parent");
@@ -23,7 +23,7 @@ export async function evalGetParents(
 
 export async function evalGlobalColl(
   edgeType: string,
-  context: ContextType = {}
+  context: ContextType = {},
 ) {
   "use server";
   return await evalGetRelatedNodes([], edgeType, context, "g");

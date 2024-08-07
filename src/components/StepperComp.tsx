@@ -83,14 +83,12 @@ export const Stepper = () => {
                 style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${currentStep() === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
               >
                 <span style="display:flex; align-items:center;">
-            
-                    <span
-                      style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${currentStep() === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
-                      title={step.label}
-                    >
-                      {step.icon}
-                    </span>
-
+                  <span
+                    style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${currentStep() === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+                    title={step.label}
+                  >
+                    {step.icon}
+                  </span>
                 </span>
                 <span style="margin-right: 0.5rem; white-space: nowrap;">
                   {step.label}
@@ -117,7 +115,9 @@ export const Stepper = () => {
                     e.stopPropagation();
                     addStepAfter(step.id);
                   }}
-                  style={'padding:5px 0px;cursor:pointer; color:rgb(37,99,235);'}
+                  style={
+                    "padding:5px 0px;cursor:pointer; color:rgb(37,99,235);"
+                  }
                   width={20}
                 />
               </Show>

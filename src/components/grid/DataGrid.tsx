@@ -1,7 +1,18 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import { useNavigate } from "@solidjs/router";
-import { type Accessor, createEffect, createMemo, createSignal, Match, on, onMount, Show, Switch } from "solid-js";
+import {
+  type Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  Match,
+  on,
+  onMount,
+  Show,
+  Switch,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -18,18 +29,29 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { getConfiguredPermissions, hasPermissions } from "../page_attr_render/permissions";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
-import { DataGridProvider, type DataGridState, type DataGridStore, getInitialGridState } from "./DataGridContext";
+import {
+  DataGridProvider,
+  type DataGridState,
+  type DataGridStore,
+  getInitialGridState,
+} from "./DataGridContext";
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
 import { setGridHeaders } from "./SetGridHeaders";
 
 interface DataGridProps {
-  CustomAddNewButton?: (props: { disabled: boolean; onClick: () => void }) => JSX.Element;
-  enableMultiRowSelection?: RowSelectionOptions<Vertex>['enableMultiRowSelection'];
-  enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'];
+  CustomAddNewButton?: (props: {
+    disabled: boolean;
+    onClick: () => void;
+  }) => JSX.Element;
+  enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
+  enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
   getTableData?: typeof defaultGetTableData;
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
@@ -42,19 +64,63 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   const gridStore = createStore<DataGridState>(getInitialGridState(graph));
   const [gridState, setGridState] = gridStore;
-  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
+  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(
+    null,
+  );
 
-  const allConfiguredPermission = createMemo(() => getConfiguredPermissions(graph.userRoles, gridState.metaVertex, graph, setGraph));
-  const hasInsertPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'insert', graph, setGraph));
-  const hasEditPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'edit', graph, setGraph));
-  const hasDeletePermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'delete', graph, setGraph));
-  const hasViewPermission = createMemo(() => formMetaData() && hasPermissions(allConfiguredPermission(), 'view', graph, setGraph));
+  const allConfiguredPermission = createMemo(() =>
+    getConfiguredPermissions(
+      graph.userRoles,
+      gridState.metaVertex,
+      graph,
+      setGraph,
+    ),
+  );
+  const hasInsertPermission = createMemo(
+    () =>
+      formMetaData() &&
+      hasPermissions(allConfiguredPermission(), "insert", graph, setGraph),
+  );
+  const hasEditPermission = createMemo(
+    () =>
+      formMetaData() &&
+      hasPermissions(allConfiguredPermission(), "edit", graph, setGraph),
+  );
+  const hasDeletePermission = createMemo(
+    () =>
+      formMetaData() &&
+      hasPermissions(allConfiguredPermission(), "delete", graph, setGraph),
+  );
+  const hasViewPermission = createMemo(
+    () =>
+      formMetaData() &&
+      hasPermissions(allConfiguredPermission(), "view", graph, setGraph),
+  );
 
-  setGridState({ allConfiguredPermission: allConfiguredPermission, formMetaData: formMetaData, hasDeletePermission: hasDeletePermission, hasEditPermission: hasEditPermission, hasInsertPermission: hasInsertPermission, hasViewPermission: hasViewPermission, get tableId() { return props.tableId } });
+  setGridState({
+    allConfiguredPermission: allConfiguredPermission,
+    formMetaData: formMetaData,
+    hasDeletePermission: hasDeletePermission,
+    hasEditPermission: hasEditPermission,
+    hasInsertPermission: hasInsertPermission,
+    hasViewPermission: hasViewPermission,
+    get tableId() {
+      return props.tableId;
+    },
+  });
 
-  createEffect(on([() => gridState.cardSize, () => gridState.layout], () => {
-    graph.saveUserSetting({ cardSize: gridState.cardSize, layout: gridState.layout });
-  }, { defer: true }));
+  createEffect(
+    on(
+      [() => gridState.cardSize, () => gridState.layout],
+      () => {
+        graph.saveUserSetting({
+          cardSize: gridState.cardSize,
+          layout: gridState.layout,
+        });
+      },
+      { defer: true },
+    ),
+  );
 
   if (!props.tableId) {
     setGridState("error", "No tableId provided");
@@ -83,17 +149,19 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         incoming,
         outgoing,
       });
-      if (!(data && isValidResponse(data) ) || data.error || data.result.length === 0) {
+      if (
+        !(data && isValidResponse(data)) ||
+        data.error ||
+        data.result.length === 0
+      ) {
         setGridState("error", `No ${props.tableId} configured`);
         return;
       }
       metaDtaInitialize(data);
     }
-    form = gridState.metaVertex ? generateFormMetaAttributes(
-      graph,
-      setGraph,
-      gridState.metaVertex
-    ) : FormMetaData[props.tableId];
+    form = gridState.metaVertex
+      ? generateFormMetaAttributes(graph, setGraph, gridState.metaVertex)
+      : FormMetaData[props.tableId];
     setFormMetaData(form);
 
     setGridState("isNoPermissionCheck", !gridState.metaVertex);
@@ -107,7 +175,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       return;
     }
     await fetchTableData();
-    setGridState({fetchTableData});
+    setGridState({ fetchTableData });
     props.initializeGridStoreParent?.(gridStore);
   });
 
@@ -127,9 +195,18 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     }
   };
 
-  async function fetchTableData(skip?: number, limit?: number, isLoadMore?: boolean) {
+  async function fetchTableData(
+    skip?: number,
+    limit?: number,
+    isLoadMore?: boolean,
+  ) {
     setGridState("isLoading", true);
-    const data = await (props.getTableData || defaultGetTableData)(formMetaData()!, props.tableId, skip, limit);
+    const data = await (props.getTableData || defaultGetTableData)(
+      formMetaData()!,
+      props.tableId,
+      skip,
+      limit,
+    );
     if (data.error) {
       setGridState("error", data.error);
     } else {
@@ -144,9 +221,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setGridState("isShowLoadMore", vertexCount >= 10);
     setGraphData(graph, setGraph, data.graph);
     const resultData = data.result;
-    const nodes: Vertex[] = isLoadMore && gridState.tableStore.data
-      ? [...gridState.tableStore.data, ...resultData]
-      : resultData;
+    const nodes: Vertex[] =
+      isLoadMore && gridState.tableStore.data
+        ? [...gridState.tableStore.data, ...resultData]
+        : resultData;
     graph.events?.setTitle?.(formMetaData()!.title);
     const tableColumns = setGridHeaders(
       gridState,
@@ -166,6 +244,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   return (
     <DataGridProvider value={gridStore}>
+      <RealTimeCodeEditor />
       <Switch>
         <Match when={gridState.isLoading}>
           <LoaderNew loaderHeight="55vh" />
@@ -196,7 +275,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             onLoadMore={(skip, limit) => fetchTableData(skip, limit, true)}
             rowsPerPageOptions={[5, 10, 15]}
             selectedRows={gridState.selectedRows}
-            setSelectedRows={(rows: Vertex[]) => setGridState("selectedRows", rows)}
+            setSelectedRows={(rows: Vertex[]) =>
+              setGridState("selectedRows", rows)
+            }
             totalItems={gridState.filteredData.length}
           />
           <Show when={gridState.deleteRowId}>
@@ -204,7 +285,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
               message="Are you sure you want to delete this item?"
               onCancel={() => setGridState("deleteRowId", null)}
               onConfirm={onDelete}
-              open={(() => gridState.deleteRowId) as unknown as Accessor<boolean>}
+              open={
+                (() => gridState.deleteRowId) as unknown as Accessor<boolean>
+              }
               setOpen={() => setGridState("deleteRowId", null)}
               title="Delete Item"
             />

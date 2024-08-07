@@ -34,7 +34,9 @@ export function cloneLayoutAndChildren(
     graph,
     setGraph,
   );
-  if (layoutRowId === -1) { return; }
+  if (layoutRowId === -1) {
+    return;
+  }
 
   fromVertex = graph.vertexes[layoutRowId];
 

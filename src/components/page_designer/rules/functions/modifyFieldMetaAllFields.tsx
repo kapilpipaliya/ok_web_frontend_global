@@ -6,11 +6,22 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 
-export function modifyFieldMetaAllFields(attribute: FieldAttribute, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStore: PageLayoutObject, ignoreTable?: boolean) {
+export function modifyFieldMetaAllFields(
+  attribute: FieldAttribute,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  layoutStore: PageLayoutObject,
+  ignoreTable?: boolean,
+) {
   attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
   attribute.valueKey = "id";
   attribute.childrenKey = "attributes";
-  attribute.options = () => generateFormMetaAttributes(graph, setGraph, layoutStore.formStore[0].formData, ignoreTable)
-    .attributes;
+  attribute.options = () =>
+    generateFormMetaAttributes(
+      graph,
+      setGraph,
+      layoutStore.formStore[0].formData,
+      ignoreTable,
+    ).attributes;
   return attribute;
 }

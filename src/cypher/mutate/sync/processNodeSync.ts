@@ -16,8 +16,11 @@ export async function processNodeSync(
   expression: NestedExpression,
   vertexes: Vertex[],
   inward: boolean,
-  createdVertex?: Vertex
-): Promise<{ graph: { edges: EdgeMap; vertexes: VertexMap }; result: Vertex[] }> {
+  createdVertex?: Vertex,
+): Promise<{
+  graph: { edges: EdgeMap; vertexes: VertexMap };
+  result: Vertex[];
+}> {
   const context = {
     nodes: {} as VertexMap,
     relationships: {} as EdgeMap,
@@ -29,7 +32,10 @@ export async function processNodeSync(
   const mainResult = await evalAsync(jsep(expression.expression), context);
 
   if (!mainResult || mainResult.length === 0) {
-    return { graph: { edges: context.relationships, vertexes: context.nodes }, result: mainResult };
+    return {
+      graph: { edges: context.relationships, vertexes: context.nodes },
+      result: mainResult,
+    };
   }
 
   let children: Vertex[] = [];
@@ -44,7 +50,7 @@ export async function processNodeSync(
         mainResult,
         edgeType,
         outLabel,
-        inward
+        inward,
       );
     }
   }
@@ -56,7 +62,7 @@ export async function processNodeSync(
         sessionSource,
         sessionTarget,
         vertex,
-        vertex.L[0]
+        vertex.L[0],
       ));
 
     if (expression.incoming && expression.incoming.length > 0) {
@@ -67,7 +73,7 @@ export async function processNodeSync(
           exp,
           [vertex],
           true,
-          newCreatedVertex
+          newCreatedVertex,
         );
       }
     }
@@ -80,7 +86,7 @@ export async function processNodeSync(
           exp,
           [vertex],
           false,
-          newCreatedVertex
+          newCreatedVertex,
         );
       }
     }

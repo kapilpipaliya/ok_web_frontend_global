@@ -1,4 +1,3 @@
-
 import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show, splitProps } from "solid-js";
 
@@ -10,7 +9,13 @@ import { useGraph } from "~/lib/graph/graph";
 function NavToggleBtn(props: Readonly<{ toggleSidebar: () => void }>) {
   const [graph] = useGraph();
   return (
-    <IconButton  icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"} iconClass={`${graph.isSideBarOpen ? "rotate(180deg)" : "rotate(0deg)"} transition:transform|.3s|ease-in-out`} onClick={props.toggleSidebar} size={24} type="button"/>
+    <IconButton
+      icon={graph.isSideBarOpen ? "mdi:close" : "mdi:menu"}
+      iconClass={`${graph.isSideBarOpen ? "rotate(180deg)" : "rotate(0deg)"} transition:transform|.3s|ease-in-out`}
+      onClick={props.toggleSidebar}
+      size={24}
+      type="button"
+    />
   );
 }
 

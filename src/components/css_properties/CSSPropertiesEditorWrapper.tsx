@@ -62,10 +62,23 @@ export function CSSPropertiesEditorWrapper(
   return (
     <MultiProvider
       values={[
-        [CssEditorContext, [cssState, onCSSStateChange as SetStoreFunction<CSSStore>]],
+        [
+          CssEditorContext,
+          [cssState, onCSSStateChange as SetStoreFunction<CSSStore>],
+        ],
         [CssDefaultEditorContext, [cssDefaultState, setCssDefaultCssState]],
         [CssStateContext, [state, setState]],
-        [CssEditorPropsProvider, {get data() {return props.data}, get meta() {return props.meta}}],
+        [
+          CssEditorPropsProvider,
+          {
+            get data() {
+              return props.data;
+            },
+            get meta() {
+              return props.meta;
+            },
+          },
+        ],
       ]}
     >
       <CSSPropertiesEditor

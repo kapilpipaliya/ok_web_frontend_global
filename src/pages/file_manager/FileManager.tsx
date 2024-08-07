@@ -1,18 +1,26 @@
-import type { RowSelectionOptions } from '@tanstack/solid-table';
+import type { RowSelectionOptions } from "@tanstack/solid-table";
 
-import type { Vertex } from '~/lib/graph/graph';
+import type { Vertex } from "~/lib/graph/graph";
 
-import { type FileManagerObject, FileManagerStoreProvider } from './FileManagerContext';
-import { FileManagerMainContent } from './main_content/FileManagerMainContent';
-import { Sidebar } from './sidebar/FileManagerSideBar';
+import {
+  type FileManagerObject,
+  FileManagerStoreProvider,
+} from "./FileManagerContext";
+import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
+import { Sidebar } from "./sidebar/FileManagerSideBar";
 
-export default function FileManager(props: Readonly<{
-  enableRowSelection?: RowSelectionOptions<Vertex>['enableRowSelection'],
-  fileId?: string;
-  setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
-}>) {
+export default function FileManager(
+  props: Readonly<{
+    enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
+    fileId?: string;
+    setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
+  }>,
+) {
   return (
-    <FileManagerStoreProvider enableRowSelection={props.enableRowSelection} setFileManagerStore={props.setFileManagerStore}>
+    <FileManagerStoreProvider
+      enableRowSelection={props.enableRowSelection}
+      setFileManagerStore={props.setFileManagerStore}
+    >
       <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
         <Sidebar />
         <FileManagerMainContent fileId={props.fileId} />
@@ -49,4 +57,3 @@ export default function FileManager(props: Readonly<{
 // Implement a file preview feature to allow users to view the contents of a file before downloading it.
 
 // Implement a file sharing feature to allow users to share files with others.
-

@@ -9,8 +9,10 @@ export function FormElementsWrapper() {
   const [graph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
-    <aside class={"rel"} classList={{
-        "hidden": !layoutStore.isLeftOpen
+    <aside
+      class={"rel"}
+      classList={{
+        hidden: !layoutStore.isLeftOpen,
       }}
     >
       <ZIndex>
@@ -19,9 +21,7 @@ export function FormElementsWrapper() {
         />
       </ZIndex>
       <div
-        class={
-          `scrollbar-color:lightgrey flex {scrollbar-width:thin} border:1px|solid|lightgrey flex:column h:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`
-        }
+        class={`scrollbar-color:lightgrey flex {scrollbar-width:thin} border:1px|solid|lightgrey flex:column h:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`}
       >
         <FormElementTabs />
       </div>

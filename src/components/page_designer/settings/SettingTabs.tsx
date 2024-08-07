@@ -24,7 +24,10 @@ export function SettingTabs() {
     if (layoutStore.formStore[0]?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
-    if (layoutStore.formStore[0]?.formData?.L[0] === "Form" || layoutStore.formStore[0]?.formData?.L[0] === "Page") {
+    if (
+      layoutStore.formStore[0]?.formData?.L[0] === "Form" ||
+      layoutStore.formStore[0]?.formData?.L[0] === "Page"
+    ) {
       baseTabs.push("Rules", "Permission", "SEO");
     }
     return baseTabs;
@@ -32,7 +35,6 @@ export function SettingTabs() {
 
   const Tabs = () => (
     <div class="bg:white position:sticky top:0">
-
       <Icon
         class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
@@ -70,14 +72,16 @@ export function SettingTabs() {
   return (
     <>
       <Tabs />
-      <div class="p:5" classList={{ "display:none": selectedTab() !== "settings" }}>
+      <div
+        class="p:5"
+        classList={{ "display:none": selectedTab() !== "settings" }}
+      >
         <FormConfig />
         <Show when={layoutStore.formStore[0]}>
           <FormContext.Provider value={layoutStore.formStore}>
             <FormStatusWrapper />
           </FormContext.Provider>
         </Show>
-
       </div>
 
       <Show when={layoutStore.formStore[0]}>
@@ -91,7 +95,10 @@ export function SettingTabs() {
               {/* <PrimaryKey /> */}
               <NameKey />
               <Divider class="mt:10" />
-              <HeaderWithDescription description="Add unique constrains to your form to ensure that no duplicate data is submitted." title="Unique Constrains" />
+              <HeaderWithDescription
+                description="Add unique constrains to your form to ensure that no duplicate data is submitted."
+                title="Unique Constrains"
+              />
               <UniqueConstrains />
             </Show>
           </Show>
@@ -109,7 +116,6 @@ export function SettingTabs() {
     </>
   );
 }
-
 
 interface DividerProps {
   borderColor?: string;

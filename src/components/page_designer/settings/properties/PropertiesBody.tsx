@@ -31,7 +31,9 @@ export function PropertiesBody() {
 
   const selectedComponentProperties = () => {
     const selectedComp = graph.vertexes[layoutStore.selectedComponent];
-    if (!selectedComp) { return { error: true }; }
+    if (!selectedComp) {
+      return { error: true };
+    }
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
 

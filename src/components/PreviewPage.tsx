@@ -1,9 +1,8 @@
-
 import { createSignal, For, type JSX } from "solid-js";
 
 import { IconButton } from "./IconButton";
 
-const PreviewPage = (props: Readonly<{children: JSX.Element}>) => {
+const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
   const [view, setView] = createSignal("Desktop");
 
   const _handleViewChange = (newView: string) => {
@@ -32,7 +31,6 @@ const PreviewPage = (props: Readonly<{children: JSX.Element}>) => {
               size={22}
               title={viewData.value}
             />
-
           )}
         </For>
       </div>

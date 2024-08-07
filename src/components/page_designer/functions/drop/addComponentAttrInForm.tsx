@@ -13,7 +13,7 @@ export function addComponentAttrInPage(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   componentName: string,
-  properties: Record<string, any> = {}
+  properties: Record<string, any> = {},
 ) {
   const formCompVertex = findVertexByLabelAndUniqueId(
     graph,
@@ -32,6 +32,6 @@ export function addComponentAttrInPage(
     graph,
     setGraph,
     undefined,
-    properties
+    properties,
   );
 }

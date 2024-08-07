@@ -1,5 +1,12 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { createEffect, createSignal, type JSX, Match, splitProps, Switch } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  type JSX,
+  Match,
+  splitProps,
+  Switch,
+} from "solid-js";
 
 import { getSelectedVertexValue } from "~/lib/graph/get/sync/getSelectedVertexValue";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -20,42 +27,51 @@ export type FileUploaderProps = {
 
 async function uploadFile(file: File, apiUrl: string) {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
 
   try {
     const response = await fetch(apiUrl, {
       body: formData,
-      method: 'POST',
+      method: "POST",
     });
 
     if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
+      throw new Error("Network response was not ok " + response.statusText);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('There was a problem with the file upload:', error);
+    console.error("There was a problem with the file upload:", error);
     throw error;
   }
 }
 
 export function FileUploader(props: FileUploaderProps) {
   const [graph, setGraph] = useGraph();
-  const [localProps, others] = splitProps(props, ["setValue", "meta", "data", "label", "media", "onUploadSuccess"]);
+  const [localProps, others] = splitProps(props, [
+    "setValue",
+    "meta",
+    "data",
+    "label",
+    "media",
+    "onUploadSuccess",
+  ]);
   const [file, setFile] = createSignal<File | null>(null);
   const [fullBoxMedia, setFullBoxMedia] = createSignal("");
   let inputRef: HTMLInputElement | undefined;
 
-  const [_selectedFiles, setSelectedFiles] = createWritableMemo(() => getSelectedVertexValue(graph, props.data, props.meta));
+  const [_selectedFiles, setSelectedFiles] = createWritableMemo(() =>
+    getSelectedVertexValue(graph, props.data, props.meta),
+  );
 
   const handleFileUpload = async (file: File) => {
     if (file) {
       try {
-        return await uploadFile(file, '/api/file/upload');
+        return await uploadFile(file, "/api/file/upload");
       } catch (error) {
         // Handle the error case
-        console.error('Upload error:', error);
+        console.error("Upload error:", error);
       }
     }
   };

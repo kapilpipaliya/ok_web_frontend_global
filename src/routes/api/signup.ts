@@ -85,5 +85,5 @@ export async function POST({ request }: APIEvent) {
   if (subdomainFromUrl === "super") {
     return signupAdmin(request);
   }
-    return signupUser();
+  return signupUser();
 }

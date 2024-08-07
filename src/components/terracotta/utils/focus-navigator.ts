@@ -1,4 +1,4 @@
-import assert from './assert';
+import assert from "./assert";
 import {
   focusFirst,
   focusLast,
@@ -6,15 +6,15 @@ import {
   focusNext,
   focusNode,
   focusPrev,
-} from './focus-navigation';
-import { DATA_SET_NAMESPACE, DISABLED_NODE } from './namespace';
+} from "./focus-navigation";
+import { DATA_SET_NAMESPACE, DISABLED_NODE } from "./namespace";
 
 const OWNER = `${DATA_SET_NAMESPACE}-owner` as const;
 
 function queryNodes<T extends Element>(
   el: T,
   ownerID: string,
-  condition = '',
+  condition = "",
 ): NodeListOf<HTMLElement> {
   // We only query nodes that are:
   // - owned by the root component via ownerID
@@ -52,12 +52,12 @@ export default class FocusNavigator {
   constructor(ownerID: string, options: Partial<FocusNavigatorOptions> = {}) {
     this.ownerID = ownerID;
     this.options = {
-      base: options.base ?? '',
+      base: options.base ?? "",
       virtual: options.virtual ?? false,
     };
   }
 
-  private query(ref: HTMLElement, condition = ''): NodeListOf<HTMLElement> {
+  private query(ref: HTMLElement, condition = ""): NodeListOf<HTMLElement> {
     return queryNodes(ref, this.ownerID, `${this.options.base}${condition}`);
   }
 
@@ -77,7 +77,7 @@ export default class FocusNavigator {
     this.current = node;
   }
 
-  setFirstChecked(condition = ''): void {
+  setFirstChecked(condition = ""): void {
     if (this.internalRef instanceof HTMLElement) {
       const current = focusFirst(
         this.query(this.internalRef, condition),
@@ -102,7 +102,7 @@ export default class FocusNavigator {
     }
   }
 
-  setLastChecked(condition = ''): void {
+  setLastChecked(condition = ""): void {
     if (this.internalRef instanceof HTMLElement) {
       const current = focusLast(
         this.query(this.internalRef, condition),
@@ -116,7 +116,7 @@ export default class FocusNavigator {
 
   setNextChecked(loop: boolean): void {
     if (this.internalRef instanceof HTMLElement) {
-      assert(this.current, new Error('missing current ref'));
+      assert(this.current, new Error("missing current ref"));
       const current = focusNext(
         this.query(this.internalRef),
         this.current,
@@ -131,7 +131,7 @@ export default class FocusNavigator {
 
   setPrevChecked(loop: boolean): void {
     if (this.internalRef instanceof HTMLElement) {
-      assert(this.current, new Error('missing current ref'));
+      assert(this.current, new Error("missing current ref"));
       const current = focusPrev(
         this.query(this.internalRef),
         this.current,

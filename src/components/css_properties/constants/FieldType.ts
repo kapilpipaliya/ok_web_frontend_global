@@ -1,4 +1,4 @@
-import type { JSXElement, } from "solid-js";
+import type { JSXElement } from "solid-js";
 
 export type CustomProperty = {
   label: string;
@@ -12,7 +12,7 @@ interface CSSField extends Field {
   hashName?: string;
   info?: string;
   name: string;
-  projections?: []
+  projections?: [];
 }
 
 export interface FieldWithCustomProperty extends CSSField {
@@ -45,7 +45,7 @@ export interface GridField extends CSSField {
   padding: string;
 }
 
- export interface AnotherOption {
+export interface AnotherOption {
   icon?: string;
   label: string;
   value: string;
@@ -54,7 +54,7 @@ export type OptionType = AnotherOption[] | string[];
 
 export interface TextFieldOptionsField extends CSSField {
   componentName: "textFieldOptions";
-  inputProps?: any
+  inputProps?: any;
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
@@ -184,7 +184,7 @@ export const createGridOptions = (
 export function createSelectOptions(
   name: string,
   label: string,
-  options: ({ label: string; value: string }|string)[] | string[],
+  options: ({ label: string; value: string } | string)[] | string[],
   isLabelOnTop = false,
 ): SelectField {
   return {

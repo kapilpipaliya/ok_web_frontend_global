@@ -62,7 +62,10 @@ export function SaveAsTemplateMenu(
   };
 
   const saveAsTemplate = async (name: string) => {
-    const res = await checkUniqueConstrains({ L: ["TemplatePage"], P: { name } } as unknown as Vertex);
+    const res = await checkUniqueConstrains({
+      L: ["TemplatePage"],
+      P: { name },
+    } as unknown as Vertex);
     if (res.error) {
       setError(res.message);
       return;
@@ -75,21 +78,34 @@ export function SaveAsTemplateMenu(
   });
 
   return (
-    <DropdownMenu class="padding:0.50rem" onMouseLeave={props.onMouseLeave} parentRef={props.parentRef}>
-      <h3 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">Save As Template</h3>
+    <DropdownMenu
+      class="padding:0.50rem"
+      onMouseLeave={props.onMouseLeave}
+      parentRef={props.parentRef}
+    >
+      <h3 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
+        Save As Template
+      </h3>
 
       <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
-        <p>Template name must be unique. If the name already exists, you will be prompted to change it.</p>
+        <p>
+          Template name must be unique. If the name already exists, you will be
+          prompted to change it.
+        </p>
       </div>
 
       <div>
-        <label class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem" for="templateName">
+        <label
+          class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
+          for="templateName"
+        >
           Template Name
         </label>
         <div class="mt:2">
           <input
             class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
-            id="templateName" onChange={(e) => setTemplateName(e.target.value)}
+            id="templateName"
+            onChange={(e) => setTemplateName(e.target.value)}
             placeholder="New Template Name"
             ref={nameInputRef!}
             type="text"
@@ -111,7 +127,6 @@ export function SaveAsTemplateMenu(
           Save
         </button>
       </div>
-
     </DropdownMenu>
   );
 }

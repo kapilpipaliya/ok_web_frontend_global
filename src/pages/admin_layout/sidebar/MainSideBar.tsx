@@ -53,7 +53,8 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
           height={19}
           icon={
             props.isCollapsed()
-              ? "mingcute:arrows-right-line" : "mingcute:arrows-left-line"
+              ? "mingcute:arrows-right-line"
+              : "mingcute:arrows-left-line"
           }
           onClick={props.toggleCollapse}
           style={{

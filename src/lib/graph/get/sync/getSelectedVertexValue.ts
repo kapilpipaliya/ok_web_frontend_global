@@ -9,7 +9,9 @@ export function getSelectedVertexValue(
   vertex: Vertex,
   meta: Vertex,
 ) {
-  if (!vertex?.L) { return []; }
+  if (!vertex?.L) {
+    return [];
+  }
   const type = getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }

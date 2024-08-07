@@ -50,7 +50,8 @@ export async function handleDropAtPosition(
       formData,
       position,
     );
-  }if (PageDesignerLabels.includes(fromVertex.L[0])) {
+  }
+  if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return await handlePageDrag(
       graph,
       setGraph,
@@ -61,7 +62,8 @@ export async function handleDropAtPosition(
       formData,
       position,
     );
-  }if (
+  }
+  if (
     position !== "center" &&
     fromParentVertex.vertex?.id === toParentVertex?.id
   ) {

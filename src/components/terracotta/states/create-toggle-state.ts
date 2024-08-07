@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,9 +7,9 @@ import {
   createSignal,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
+import assert from "../utils/assert";
 
 export interface ToggleStateControlledOptions {
   disabled?: boolean;
@@ -46,7 +46,7 @@ export function createToggleState(
 
   // Type branding
   // Toggle if state is uncontrolled
-  if ('defaultPressed' in options) {
+  if ("defaultPressed" in options) {
     // Uncontrolled toggle means the toggle
     // manages its own state.
     const [isOpen, setIsOpen] = createSignal<boolean>(options.defaultPressed);
@@ -113,7 +113,7 @@ export function ToggleStateProvider(
   return createComponent(ToggleStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -124,7 +124,7 @@ export function ToggleStateProvider(
 
 export function useToggleState(): ToggleStateProperties {
   const ctx = useContext(ToggleStateContext);
-  assert(ctx, new Error('Missing <ToggleStateProvider>'));
+  assert(ctx, new Error("Missing <ToggleStateProvider>"));
   return ctx;
 }
 
@@ -132,7 +132,7 @@ export function ToggleStateChild(props: ToggleStateRenderProps): JSX.Element {
   const state = useToggleState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

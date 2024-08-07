@@ -1,19 +1,30 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-export type ToastType = 'blank' | 'custom' | 'error' | 'loading' | 'success';
-export type ToastPosition = 'bottom-center' | 'bottom-left' | 'bottom-right' | 'top-center' | 'top-left' | 'top-right';
+export type ToastType = "blank" | "custom" | "error" | "loading" | "success";
+export type ToastPosition =
+  | "bottom-center"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-center"
+  | "top-left"
+  | "top-right";
 
 export type Renderable = JSX.Element | null | string;
 
 export type ValueFunction<TValue, TArg> = (arg: TArg) => TValue;
-export type ValueOrFunction<TValue, TArg> = TValue | ValueFunction<TValue, TArg>;
+export type ValueOrFunction<TValue, TArg> =
+  | TValue
+  | ValueFunction<TValue, TArg>;
 
 const isFunction = <TValue, TArg>(
-  valOrFunction: ValueOrFunction<TValue, TArg>
-): valOrFunction is ValueFunction<TValue, TArg> => typeof valOrFunction === 'function';
+  valOrFunction: ValueOrFunction<TValue, TArg>,
+): valOrFunction is ValueFunction<TValue, TArg> =>
+  typeof valOrFunction === "function";
 
-export const resolveValue = <TValue, TArg>(valOrFunction: ValueOrFunction<TValue, TArg>, arg: TArg): TValue =>
-  isFunction(valOrFunction) ? valOrFunction(arg) : valOrFunction;
+export const resolveValue = <TValue, TArg>(
+  valOrFunction: ValueOrFunction<TValue, TArg>,
+  arg: TArg,
+): TValue => (isFunction(valOrFunction) ? valOrFunction(arg) : valOrFunction);
 
 export interface IconTheme {
   primary?: string;
@@ -22,8 +33,8 @@ export interface IconTheme {
 
 export interface Toast {
   ariaProps: {
-    'aria-live': 'assertive' | 'off' | 'polite';
-    role: 'alert' | 'status';
+    "aria-live": "assertive" | "off" | "polite";
+    role: "alert" | "status";
   };
   className?: string;
   createdAt: number;
@@ -50,7 +61,15 @@ export interface Toast {
 export type ToastOptions = Partial<
   Pick<
     Toast,
-    'ariaProps' | 'className' | 'duration' | 'icon' | 'iconTheme' | 'id' | 'position' | 'style' | 'unmountDelay'
+    | "ariaProps"
+    | "className"
+    | "duration"
+    | "icon"
+    | "iconTheme"
+    | "id"
+    | "position"
+    | "style"
+    | "unmountDelay"
   >
 >;
 

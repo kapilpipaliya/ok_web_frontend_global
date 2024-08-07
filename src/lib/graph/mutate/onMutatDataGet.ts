@@ -17,7 +17,7 @@ function handleInsertVertex(
   oldId: string,
   newId: string,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   vertexOldIdToNewIdMap.set(oldId, newId);
   updateVertexId(oldId, newId, graph, setGraph);
@@ -27,7 +27,7 @@ function handleInsertEdge(
   oldId: string,
   newId: string,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   edgeOldIdToNewIdMap.set(oldId, newId);
   updateEdgeId(oldId, newId, graph, setGraph);
@@ -36,7 +36,7 @@ function handleInsertEdge(
 function handleDeleteVertex(
   error: boolean,
   message: string,
-  showErrorToast: (msg: string) => void
+  showErrorToast: (msg: string) => void,
 ) {
   if (error) {
     showErrorToast(message);
@@ -59,7 +59,7 @@ export function onMutatDataGet(
         | "replaceEdgeStart"]?: any;
     }[];
     txnId: number;
-  }
+  },
 ) {
   const { showErrorToast } = useToast();
   batch(() => {
@@ -72,7 +72,7 @@ export function onMutatDataGet(
           txnObject.insert[0],
           txnObject.insert[1],
           graph,
-          setGraph
+          setGraph,
         );
       }
       if (txnObject.insertEdge) {
@@ -80,14 +80,14 @@ export function onMutatDataGet(
           txnObject.insertEdge[0],
           txnObject.insertEdge[1],
           graph,
-          setGraph
+          setGraph,
         );
       }
       if (txnObject.deleteVertex) {
         handleDeleteVertex(
           txnObject.deleteVertex.error,
           txnObject.deleteVertex.message,
-          showErrorToast
+          showErrorToast,
         );
       }
       // TODO: handle other cases for replace, replaceEdge, deleteEdge, replaceEdgeStart, replaceEdgeEnd

@@ -1,8 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  createSignal,
-  type Setter, Show
-} from "solid-js";
+import { createSignal, type Setter, Show } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
 import { Drawer } from "~/components/Drawer";
@@ -11,12 +8,18 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 // Component for handling the CSS Editor
-export function CssEditor(props: Readonly<{ joinVertex: Vertex; metaVertex: Vertex; txnId: number; }>) {
+export function CssEditor(
+  props: Readonly<{ joinVertex: Vertex; metaVertex: Vertex; txnId: number }>,
+) {
   const [graph, setGraph] = useGraph();
   const [showCssEditor, setShowCssEditor] = createSignal(false);
   return (
     <>
-      <button class="b:1px|solid|lightgrey p:6 r:6" onClick={() => setShowCssEditor(true)} type="button">
+      <button
+        class="b:1px|solid|lightgrey p:6 r:6"
+        onClick={() => setShowCssEditor(true)}
+        type="button"
+      >
         <Icon height={20} icon="fluent:text-edit-style-20-filled" width={20} />
       </button>
       <Show when={showCssEditor()}>
@@ -38,10 +41,11 @@ export function CssEditor(props: Readonly<{ joinVertex: Vertex; metaVertex: Vert
                   props.metaVertex,
                   props.joinVertex,
                   data,
-                  false
+                  false,
                 );
               }}
-              txnId={props.txnId} />
+              txnId={props.txnId}
+            />
           </Drawer>
         </ZIndex>
       </Show>

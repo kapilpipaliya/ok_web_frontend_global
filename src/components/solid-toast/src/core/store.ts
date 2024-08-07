@@ -1,6 +1,6 @@
-import { createStore, produce as p } from 'solid-js/store';
+import { createStore, produce as p } from "solid-js/store";
 
-import { type Action, ActionType, type State, type Toast } from '../types';
+import { type Action, ActionType, type State, type Toast } from "../types";
 
 const [store, setStore] = createStore<State>({
   pausedAt: undefined,
@@ -9,12 +9,17 @@ const [store, setStore] = createStore<State>({
 
 export const createTimers = () => {
   const { pausedAt, toasts } = store;
-  if (pausedAt) { return; }
+  if (pausedAt) {
+    return;
+  }
   const now = Date.now();
   const timers = toasts.map((toast) => {
-    if (toast.duration === Number.POSITIVE_INFINITY) { return; }
+    if (toast.duration === Number.POSITIVE_INFINITY) {
+      return;
+    }
 
-    const durationLeft = (toast.duration || 0) + toast.pauseDuration - (now - toast.createdAt);
+    const durationLeft =
+      (toast.duration || 0) + toast.pauseDuration - (now - toast.createdAt);
 
     if (durationLeft <= 0) {
       if (toast.visible) {
@@ -37,10 +42,12 @@ export const createTimers = () => {
   return timers;
 };
 
-const removalQueue = new Map<Toast['id'], ReturnType<typeof setTimeout>>();
+const removalQueue = new Map<Toast["id"], ReturnType<typeof setTimeout>>();
 
 const scheduleRemoval = (toastId: string, unmountDelay: number) => {
-  if (removalQueue.has(toastId)) { return; }
+  if (removalQueue.has(toastId)) {
+    return;
+  }
 
   const timeout = setTimeout(() => {
     removalQueue.delete(toastId);
@@ -56,13 +63,15 @@ const scheduleRemoval = (toastId: string, unmountDelay: number) => {
 const unscheduleRemoval = (toastId: string) => {
   const timeout = removalQueue.get(toastId);
   removalQueue.delete(toastId);
-  if (timeout) { clearTimeout(timeout); }
+  if (timeout) {
+    clearTimeout(timeout);
+  }
 };
 
 export const dispatch = (action: Action) => {
   switch (action.type) {
     case ActionType.ADD_TOAST:
-      setStore('toasts', (t) => {
+      setStore("toasts", (t) => {
         const toasts = t as Toast[];
         return [action.toast, ...toasts];
       });
@@ -73,20 +82,22 @@ export const dispatch = (action: Action) => {
 
       if (toastId) {
         const toastToRemove = toasts.find((t) => t.id === toastId);
-        if (toastToRemove) { scheduleRemoval(toastId, toastToRemove.unmountDelay); }
+        if (toastToRemove) {
+          scheduleRemoval(toastId, toastToRemove.unmountDelay);
+        }
         setStore(
-          'toasts',
+          "toasts",
           (t) => t.id === toastId,
-          p((t) => (t.visible = false))
+          p((t) => (t.visible = false)),
         );
       } else {
         toasts.forEach((t) => {
           scheduleRemoval(t.id, t.unmountDelay);
         });
         setStore(
-          'toasts',
+          "toasts",
           (t) => t.id !== undefined,
-          p((t) => (t.visible = false))
+          p((t) => (t.visible = false)),
         );
       }
 
@@ -94,10 +105,10 @@ export const dispatch = (action: Action) => {
     }
     case ActionType.REMOVE_TOAST: {
       if (!action.toastId) {
-        setStore('toasts', []);
+        setStore("toasts", []);
         break;
       }
-      setStore('toasts', (t) => {
+      setStore("toasts", (t) => {
         const toasts = t as Toast[];
         return toasts.filter((t) => t.id !== action.toastId);
       });
@@ -109,7 +120,7 @@ export const dispatch = (action: Action) => {
       }
 
       setStore(
-        'toasts',
+        "toasts",
         (t) => t.id === action.toast.id,
         (t) => {
           const toast = t as Toast;
@@ -117,7 +128,7 @@ export const dispatch = (action: Action) => {
             ...toast,
             ...action.toast,
           };
-        }
+        },
       );
       break;
     }
@@ -127,12 +138,14 @@ export const dispatch = (action: Action) => {
         : dispatch({ toast: action.toast, type: ActionType.ADD_TOAST });
       break;
     case ActionType.START_PAUSE:
-      setStore(p((s) => {
-        s.pausedAt = Date.now();
-        s.toasts.forEach((t) => {
-          t.paused = true;
-        });
-      }));
+      setStore(
+        p((s) => {
+          s.pausedAt = Date.now();
+          s.toasts.forEach((t) => {
+            t.paused = true;
+          });
+        }),
+      );
       break;
     case ActionType.END_PAUSE: {
       const pauseInterval = action.time - (store.pausedAt || 0);
@@ -143,7 +156,7 @@ export const dispatch = (action: Action) => {
             t.pauseDuration += pauseInterval;
             t.paused = false;
           });
-        })
+        }),
       );
       break;
     }

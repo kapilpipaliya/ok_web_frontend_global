@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,27 +7,27 @@ import {
   onCleanup,
   onMount,
   untrack,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { AutocompleteStateRenderProps } from '../../states/create-autocomplete-state';
-import type { UnmountableProps } from '../../utils/create-unmountable';
+import type { AutocompleteStateRenderProps } from "../../states/create-autocomplete-state";
+import type { UnmountableProps } from "../../utils/create-unmountable";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   AutocompleteStateChild,
   useAutocompleteState,
-} from '../../states/create-autocomplete-state';
-import { useDisclosureState } from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createUnmountable } from '../../utils/create-unmountable';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { SELECTED_NODE } from '../../utils/namespace';
+} from "../../states/create-autocomplete-state";
+import { useDisclosureState } from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createUnmountable } from "../../utils/create-unmountable";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { SELECTED_NODE } from "../../utils/namespace";
 import {
   createARIADisabledState,
   createDisabledState,
@@ -35,10 +35,10 @@ import {
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useComboboxContext } from './ComboboxContext';
-import { COMBOBOX_OPTIONS_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useComboboxContext } from "./ComboboxContext";
+import { COMBOBOX_OPTIONS_TAG } from "./tags";
 
 export type ComboboxOptionsBaseProps<V> = Prettify<
   AutocompleteStateRenderProps<V> & UnmountableProps
@@ -46,13 +46,13 @@ export type ComboboxOptionsBaseProps<V> = Prettify<
 
 export type ComboboxOptionsProps<
   V,
-  T extends ValidConstructor = 'ul',
+  T extends ValidConstructor = "ul",
 > = HeadlessPropsWithRef<T, ComboboxOptionsBaseProps<V>>;
 
-export function ComboboxOptions<V, T extends ValidConstructor = 'ul'>(
+export function ComboboxOptions<V, T extends ValidConstructor = "ul">(
   props: ComboboxOptionsProps<V, T>,
 ): JSX.Element {
-  const context = useComboboxContext('ComboboxOptions');
+  const context = useComboboxContext("ComboboxOptions");
   const autocompleteState = useAutocompleteState();
   const disclosureState = useDisclosureState();
 
@@ -66,15 +66,15 @@ export function ComboboxOptions<V, T extends ValidConstructor = 'ul'>(
         context.controller.clearRef();
       });
 
-      useEventListener(current, 'focusin', () => {
+      useEventListener(current, "focusin", () => {
         if (context.anchor) {
           context.anchor.focus();
         }
       });
-      useEventListener(current, 'mouseenter', () => {
+      useEventListener(current, "mouseenter", () => {
         context.optionsHovering = true;
       });
-      useEventListener(current, 'mouseleave', () => {
+      useEventListener(current, "mouseleave", () => {
         context.optionsHovering = false;
       });
     }
@@ -103,17 +103,17 @@ export function ComboboxOptions<V, T extends ValidConstructor = 'ul'>(
     () => disclosureState.isOpen(),
     () =>
       createDynamic(
-        () => props.as || ('ul' as T),
+        () => props.as || ("ul" as T),
         mergeProps(
-          omitProps(props, ['as', 'children', 'ref']),
+          omitProps(props, ["as", "children", "ref"]),
           COMBOBOX_OPTIONS_TAG,
           {
-            'aria-multiselectable': context.multiple,
+            "aria-multiselectable": context.multiple,
             // TODO should Combobox support "horizontal"?
-            'aria-orientation': 'vertical',
+            "aria-orientation": "vertical",
             id: context.optionsID,
             ref: setInternalRef,
-            role: 'listbox',
+            role: "listbox",
             tabindex: -1,
           },
           createDisabledState(() => autocompleteState.disabled()),

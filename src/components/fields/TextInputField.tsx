@@ -1,50 +1,66 @@
-import { type Component, createMemo, Match, Show, splitProps, Switch } from 'solid-js';
+import {
+  type Component,
+  createMemo,
+  Match,
+  Show,
+  splitProps,
+  Switch,
+} from "solid-js";
 
-import type { GenericComponentProps } from './FieldType';
+import type { GenericComponentProps } from "./FieldType";
 
 export const TextInputField: Component<GenericComponentProps> = (props) => {
-  const [local, others] = splitProps(props, ['componentName', 'meta', 'data', 'setValue', 'value', 'isRealTime', 'isTableInside', 'setValue', 'txnId',
-  // @ts-expect-error ignore
-  'onchange'
+  const [local, others] = splitProps(props, [
+    "componentName",
+    "meta",
+    "data",
+    "setValue",
+    "value",
+    "isRealTime",
+    "isTableInside",
+    "setValue",
+    "txnId",
+    // @ts-expect-error ignore
+    "onchange",
   ]);
 
   const inputTypes = {
-    button: 'button',
-    checkbox: 'checkbox',
-    color: 'color',
-    date: 'date',
-    'datetime-local': 'datetime-local',
-    email: 'email',
-    file: 'file',
-    image: 'image',
-    month: 'month',
-    number: 'number',
-    password: 'password',
-    radio: 'radio',
-    range: 'range',
-    reset: 'reset',
-    search: 'search',
-    submit: 'submit',
-    tel: 'tel',
-    text: 'text',
-    time: 'time',
-    url: 'url',
-    week: 'week',
+    button: "button",
+    checkbox: "checkbox",
+    color: "color",
+    date: "date",
+    "datetime-local": "datetime-local",
+    email: "email",
+    file: "file",
+    image: "image",
+    month: "month",
+    number: "number",
+    password: "password",
+    radio: "radio",
+    range: "range",
+    reset: "reset",
+    search: "search",
+    submit: "submit",
+    tel: "tel",
+    text: "text",
+    time: "time",
+    url: "url",
+    week: "week",
   };
 
   const determineInputType = createMemo(() => {
-    const name = local.componentName?.toLowerCase() ?? '';
+    const name = local.componentName?.toLowerCase() ?? "";
     for (const key in inputTypes) {
       if (name.includes(key)) {
         return inputTypes[key as keyof typeof inputTypes];
       }
     }
-    return 'text';
+    return "text";
   });
 
   const handleChange = (event: Event) => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    if (target.type === 'checkbox') {
+    if (target.type === "checkbox") {
       local.setValue?.((target as HTMLInputElement).checked);
     } else {
       local.setValue?.(target.value);
@@ -60,14 +76,29 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
   return (
     <>
       <Switch>
-        <Match when={/area|html/i.test(local.componentName ?? '')}>
-          <textarea {...others} onChange={handleChange} rows={props.meta?.P.rows ?? 4} value={local.value}/>
+        <Match when={/area|html/i.test(local.componentName ?? "")}>
+          <textarea
+            {...others}
+            onChange={handleChange}
+            rows={props.meta?.P.rows ?? 4}
+            value={local.value}
+          />
         </Match>
-        <Match when={determineInputType() === 'checkbox'}>
-          <input type="checkbox" {...others} checked={local.value} onChange={handleChange} />
+        <Match when={determineInputType() === "checkbox"}>
+          <input
+            type="checkbox"
+            {...others}
+            checked={local.value}
+            onChange={handleChange}
+          />
         </Match>
         <Match when={true}>
-          <input type={determineInputType()} {...others} onChange={handleChange} value={local.value} />
+          <input
+            type={determineInputType()}
+            {...others}
+            onChange={handleChange}
+            value={local.value}
+          />
         </Match>
       </Switch>
       <DisplayError />

@@ -31,7 +31,7 @@ export function getSublistRowsForType(
 ) {
   return (
     getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
-  ).sort((a:Vertex, b: Vertex) => a.P.pos - b.P.pos);
+  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
 export function getSublistRows(
@@ -39,7 +39,9 @@ export function getSublistRows(
   meta: Vertex,
   vertex?: Vertex,
 ) {
-  if (!vertex) { return []; }
+  if (!vertex) {
+    return [];
+  }
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (
@@ -108,7 +110,9 @@ export function addNewRow(
   if (isRealTime) {
     txnId = graph.newTxnId;
   }
-  const type = meta.P.inward ? getInEdge(meta, parentVertex) : getToEdge(meta, parentVertex);
+  const type = meta.P.inward
+    ? getInEdge(meta, parentVertex)
+    : getToEdge(meta, parentVertex);
   const label = meta.P.label;
 
   const newRowResult = newRow(
@@ -121,7 +125,9 @@ export function addNewRow(
     properties,
     meta.P.inward,
   );
-  if (isRealTime) { commitTxn(txnId, graph); }
+  if (isRealTime) {
+    commitTxn(txnId, graph);
+  }
   return newRowResult;
 }
 
@@ -131,7 +137,9 @@ export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
 
   if (!P.componentName) {
     const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-    if (componentName) { P.componentName = componentName; }
+    if (componentName) {
+      P.componentName = componentName;
+    }
   }
   return P;
 }
@@ -224,8 +232,12 @@ export function rowMetaInitialize(
       P.templateId = attrColumn.id;
 
       if (!P.componentName) {
-        const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-        if (componentName) { P.componentName = componentName; }
+        const componentName = getCompFallbackToString(attrColumn, graph)?.P[
+          IdAttr
+        ];
+        if (componentName) {
+          P.componentName = componentName;
+        }
       }
       mergeVertexProperties(
         metaTxnId,

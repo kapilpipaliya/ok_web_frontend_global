@@ -190,7 +190,7 @@ export function substringBefore(str, chars) {
   if (pos > -1) {
     return str.substr(0, pos);
   }
-    return str;
+  return str;
 }
 
 /**
@@ -209,7 +209,7 @@ export function substringAfter(str, chars) {
   if (pos > -1) {
     return str.substr(pos + chars.length);
   }
-    return str;
+  return str;
 }
 
 /**
@@ -1203,7 +1203,7 @@ export function formatNumber(value, picture, options) {
           if (digit >= "0" && digit <= "9") {
             return decimalDigitFamily[digit.charCodeAt(0) - 48];
           }
-            return digit;
+          return digit;
         })
         .join("");
     }
@@ -1229,8 +1229,7 @@ export function formatNumber(value, picture, options) {
     pic.minimumFactionalPartSize - (stringValue.length - decimalPos - 1);
   stringValue =
     (padLeft > 0 ? new Array(padLeft + 1).join(zero_digit) : "") + stringValue;
-  stringValue +=
-    (padRight > 0 ? new Array(padRight + 1).join(zero_digit) : "");
+  stringValue += padRight > 0 ? new Array(padRight + 1).join(zero_digit) : "";
   decimalPos = stringValue.indexOf(decimal_separator);
   // bullet 10:
   if (pic.regularGrouping > 0) {
@@ -1340,8 +1339,7 @@ export function number(arg) {
     typeof arg === "string" &&
     /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) &&
     !Number.isNaN(Number.parseFloat(arg)) &&
-    Number.
-    isFinite(arg)
+    Number.isFinite(arg)
   ) {
     result = Number.parseFloat(arg);
   } else if (
@@ -1698,8 +1696,8 @@ export function single(arr, func) {
           stack: new Error().stack,
         };
       }
-        result = entry;
-        hasFoundMatch = true;
+      result = entry;
+      hasFoundMatch = true;
     }
   }
 
@@ -1873,7 +1871,7 @@ export function exists(arg) {
   if (typeof arg === "undefined") {
     return false;
   }
-    return true;
+  return true;
 }
 
 /**
@@ -2097,12 +2095,12 @@ export function sort(arr, comparator) {
     if (!Array.isArray(array) || array.length <= 1) {
       return array;
     }
-      const middle = Math.floor(array.length / 2);
-      let left = array.slice(0, middle);
-      let right = array.slice(middle);
-      left = msort(left);
-      right = msort(right);
-      return merge(left, right);
+    const middle = Math.floor(array.length / 2);
+    let left = array.slice(0, middle);
+    let right = array.slice(middle);
+    left = msort(left);
+    right = msort(right);
+    return merge(left, right);
   };
 
   const result = msort(arr);

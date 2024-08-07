@@ -58,13 +58,15 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
     props.setValue(props.meta, values);
   };
 
-  const RuleInput = (inputProps: Readonly<{
-    label: string;
-    onChange: (e: any) => void;
-    rule: string;
-    type: string;
-    value: any;
-  }>) => (
+  const RuleInput = (
+    inputProps: Readonly<{
+      label: string;
+      onChange: (e: any) => void;
+      rule: string;
+      type: string;
+      value: any;
+    }>,
+  ) => (
     <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
       <label class="f:15 flex:.5">{inputProps.label}</label>
       <input

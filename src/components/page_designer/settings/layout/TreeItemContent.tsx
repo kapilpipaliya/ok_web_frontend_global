@@ -7,21 +7,22 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { nameExpr } from "../utils/nameExpr";
-import {TreeItemExpandButton} from "./TreeItemExpandButton";
+import { TreeItemExpandButton } from "./TreeItemExpandButton";
 
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
-  }>
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const children = createMemo(() =>
-    getChildrenAttrs(graph, setGraph, props.metaVertex)
+    getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
   const getComponent = () =>
-    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
+    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P
+      .name as string;
 
   return (
     <div
@@ -39,7 +40,8 @@ export function TreeItemContent(
       <Icon
         height={17}
         icon={
-          iconMap[getComponent() as keyof typeof iconMap] ?? "material-symbols:widgets-outline-rounded"
+          iconMap[getComponent() as keyof typeof iconMap] ??
+          "material-symbols:widgets-outline-rounded"
         }
         width={17}
       />

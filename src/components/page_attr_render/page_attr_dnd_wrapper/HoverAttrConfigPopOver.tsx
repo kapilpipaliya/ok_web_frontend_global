@@ -17,7 +17,10 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
       <div
         class={`flex ai:center bg:rgb(37,99,235) bottom:100% color:white p:0.25rem position:absolute r:5px|5px|0px|0px right:0 z:${zIndex}`}
       >
-        <Icon class="flex" icon={iconMap[getComponentName() as keyof typeof iconMap]} />
+        <Icon
+          class="flex"
+          icon={iconMap[getComponentName() as keyof typeof iconMap]}
+        />
         <ComponentName componentName={getComponentName()} />
       </div>
     </span>

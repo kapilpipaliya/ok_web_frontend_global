@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,9 +7,9 @@ import {
   createSignal,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
+import assert from "../utils/assert";
 
 export interface CheckStateControlledOptions {
   checked: boolean | undefined;
@@ -47,7 +47,7 @@ export function createCheckState(
 
   // Type branding
   // Check if state is uncontrolled
-  if ('defaultChecked' in options) {
+  if ("defaultChecked" in options) {
     // Uncontrolled toggle means the toggle
     // manages its own state.
     const [isOpen, setIsOpen] = createSignal<boolean | undefined>(
@@ -121,7 +121,7 @@ export function CheckStateProvider(
   return createComponent(CheckStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -132,7 +132,7 @@ export function CheckStateProvider(
 
 export function useCheckState(): CheckStateProperties {
   const ctx = useContext(CheckStateContext);
-  assert(ctx, new Error('Missing <CheckStateProvider>'));
+  assert(ctx, new Error("Missing <CheckStateProvider>"));
   return ctx;
 }
 
@@ -140,7 +140,7 @@ export function CheckStateChild(props: CheckStateRenderProps): JSX.Element {
   const state = useCheckState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

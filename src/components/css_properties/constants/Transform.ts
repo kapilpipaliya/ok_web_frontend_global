@@ -1,12 +1,10 @@
- 
-
 import type {
   DataEditorField,
   FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "./FieldType";
 
-import { sizeTypes, } from "./csseditor_constants";
+import { sizeTypes } from "./csseditor_constants";
 import { createGridOptions } from "./FieldType";
 
 export const Transform = {

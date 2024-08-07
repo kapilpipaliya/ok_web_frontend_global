@@ -1,4 +1,3 @@
-
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { RulesModal } from "~/components/page_designer/rules/RulesModal";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
@@ -39,8 +38,18 @@ export function SelectRuleField(props: SelectRuleFieldProps) {
         <Label meta={props.meta} />
       </span>
       <div class="flex f:15 flex:1">
-        <SelectRelation data={props.selectedLayout} meta={meta} txnId={props.txnId} />
-        <AddNewRelationButton component={AddNewRule} meta={meta} selectedLayout={props.selectedLayout} title="Add New Rule" txnId={props.txnId} />
+        <SelectRelation
+          data={props.selectedLayout}
+          meta={meta}
+          txnId={props.txnId}
+        />
+        <AddNewRelationButton
+          component={AddNewRule}
+          meta={meta}
+          selectedLayout={props.selectedLayout}
+          title="Add New Rule"
+          txnId={props.txnId}
+        />
         {/* <DisplayAllRules /> */}
       </div>
     </div>

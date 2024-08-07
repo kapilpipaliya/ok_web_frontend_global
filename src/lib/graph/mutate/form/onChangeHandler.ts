@@ -18,7 +18,9 @@ export function onChangeHandler(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (!changedFieldAttribute.P.onchange) { return; }
+  if (!changedFieldAttribute.P.onchange) {
+    return;
+  }
   const isNew = typeof formVertex.id === "number" && formVertex.id < 0;
   try {
     let args = JSON.parse(changedFieldAttribute.P.onchange);
@@ -45,21 +47,27 @@ export function onChangeHandler(
     }
     let value = args[1];
 
-    if (value === null) { value = undefined; }
+    if (value === null) {
+      value = undefined;
+    }
     if (value === "label") {
       value = getLabel(vertex.P[changedFieldAttribute.P[IdAttr]]);
     }
     if (value === "id") {
       value = getId(vertex.P[changedFieldAttribute.P[IdAttr]]);
     }
-    if (value === "clear") { value = null; }
-    if (attribute.P.componentName === "Select" || attribute.P.componentName === "Tag") {
+    if (value === "clear") {
+      value = null;
+    }
+    if (
+      attribute.P.componentName === "Select" ||
+      attribute.P.componentName === "Tag"
+    ) {
       setSelectionValue(txnId, vertex, graph, setGraph, attribute, value);
     } else {
       mergeVertexProperties(txnId, vertex.id, graph, setGraph, {
         [attribute.P[IdAttr]]: value,
       });
     }
-  } catch (_e) {
-  }
+  } catch (_e) {}
 }

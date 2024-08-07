@@ -1,5 +1,3 @@
-
-
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
@@ -19,12 +17,10 @@ export function SelectPageField(
   let buttonRef: HTMLInputElement;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
-
     return (
       <div class="flex ai:center gap:4">
         <span>{option.P.name}</span>
         <IconButton
-
           icon={"mingcute:settings-5-line"}
           iconClass={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
@@ -33,7 +29,6 @@ export function SelectPageField(
           }}
           size={22}
         />
-
       </div>
     );
   };
@@ -41,7 +36,7 @@ export function SelectPageField(
   const meta = {
     P: {
       class: "flex:1",
-      collection:  `g:'ThankYouPage'`,
+      collection: `g:'ThankYouPage'`,
       componentName: "SelectBox",
       displayName: props.meta.P.displayName,
       name: props.meta.P.name,
@@ -64,15 +59,15 @@ export function SelectPageField(
 
   const AddNewPageButton = () => {
     const handleAddNewClick = () => {
-      window.open('/admin/ThankYouPage/new', "_blank");
+      window.open("/admin/ThankYouPage/new", "_blank");
     };
     return (
       <IconButton
-          icon="ic:round-add"
-          onClick={handleAddNewClick}
-          size={21}
-          title="Add New Rule"
-        />
+        icon="ic:round-add"
+        onClick={handleAddNewClick}
+        size={21}
+        title="Add New Rule"
+      />
     );
   };
 
@@ -87,7 +82,6 @@ export function SelectPageField(
       <div class="flex f:15 flex:1" ref={buttonRef!}>
         <SelectThankYouPage />
         <AddNewPageButton />
-
       </div>
     </div>
   );

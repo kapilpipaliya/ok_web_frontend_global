@@ -9,12 +9,18 @@ import { ZIndex } from "~/components/ZIndex";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
 
-export function AttrConfigPopOverWrapper(props: Readonly<{ isSelectedLayoutId: boolean; item: Vertex; reference: Accessor<HTMLElement | null>; }>) {
+export function AttrConfigPopOverWrapper(
+  props: Readonly<{
+    isSelectedLayoutId: boolean;
+    item: Vertex;
+    reference: Accessor<HTMLElement | null>;
+  }>,
+) {
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const position = useFloating(props.reference, floating, {
     placement: props.isSelectedLayoutId ? "top-start" : "top-start",
     strategy: "fixed",
-    whileElementsMounted: autoUpdate
+    whileElementsMounted: autoUpdate,
   });
   return (
     <ZIndex>
@@ -25,7 +31,7 @@ export function AttrConfigPopOverWrapper(props: Readonly<{ isSelectedLayoutId: b
           style={{
             left: `${position.x ?? 0}px`,
             position: position.strategy,
-            top: `${position.y ?? 0}px`
+            top: `${position.y ?? 0}px`,
           }}
         >
           <AttrConfigPopOver item={props.item} />

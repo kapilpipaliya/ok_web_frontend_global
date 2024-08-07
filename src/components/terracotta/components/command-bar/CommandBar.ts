@@ -1,41 +1,41 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
   createEffect,
   createUniqueId,
   mergeProps,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DisclosureStateControlledOptions,
   DisclosureStateRenderProps,
   DisclosureStateUncontrolledOptions,
-} from '../../states/create-disclosure-state';
-import type { UnmountableProps } from '../../utils/create-unmountable';
+} from "../../states/create-disclosure-state";
+import type { UnmountableProps } from "../../utils/create-unmountable";
 import type {
   DynamicProps,
   HeadlessProps,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createDisclosureState,
   DisclosureStateProvider,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createUnmountable } from '../../utils/create-unmountable';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createUnmountable } from "../../utils/create-unmountable";
 import {
   createARIADisabledState,
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import useFocusStartPoint from '../../utils/use-focus-start-point';
-import { CommandBarContext } from './CommandBarContext';
-import { COMMAND_BAR_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import useFocusStartPoint from "../../utils/use-focus-start-point";
+import { CommandBarContext } from "./CommandBarContext";
+import { COMMAND_BAR_TAG } from "./tags";
 
 export type CommandBarControlledBaseProps = Prettify<
   DisclosureStateControlledOptions &
@@ -43,7 +43,7 @@ export type CommandBarControlledBaseProps = Prettify<
     UnmountableProps
 >;
 
-export type CommandBarControlledProps<T extends ValidConstructor = 'div'> =
+export type CommandBarControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CommandBarControlledBaseProps>;
 
 export type CommandBarUncontrolledBaseProps = Prettify<
@@ -52,20 +52,20 @@ export type CommandBarUncontrolledBaseProps = Prettify<
     UnmountableProps
 >;
 
-export type CommandBarUncontrolledProps<T extends ValidConstructor = 'div'> =
+export type CommandBarUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CommandBarUncontrolledBaseProps>;
 
-export type CommandBarProps<T extends ValidConstructor = 'div'> =
+export type CommandBarProps<T extends ValidConstructor = "div"> =
   | CommandBarControlledProps<T>
   | CommandBarUncontrolledProps<T>;
 
-function isCommandBarUncontrolled<T extends ValidConstructor = 'div'>(
+function isCommandBarUncontrolled<T extends ValidConstructor = "div">(
   props: CommandBarProps<T>,
 ): props is CommandBarUncontrolledProps<T> {
-  return 'defaultOpen' in props;
+  return "defaultOpen" in props;
 }
 
-export function CommandBar<T extends ValidConstructor = 'div'>(
+export function CommandBar<T extends ValidConstructor = "div">(
   props: CommandBarProps<T>,
 ): JSX.Element {
   const ownerID = createUniqueId();
@@ -85,8 +85,8 @@ export function CommandBar<T extends ValidConstructor = 'div'>(
   });
 
   createEffect(() => {
-    useEventListener(window, 'keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k' && !e.defaultPrevented) {
+    useEventListener(window, "keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k" && !e.defaultPrevented) {
         e.preventDefault();
         state.open();
       }
@@ -100,35 +100,35 @@ export function CommandBar<T extends ValidConstructor = 'div'>(
         () => state.isOpen(),
         () =>
           createDynamic(
-            () => props.as || ('div' as T),
+            () => props.as || ("div" as T),
             mergeProps(
               isCommandBarUncontrolled(props)
                 ? omitProps(props, [
-                    'as',
-                    'children',
-                    'defaultOpen',
-                    'disabled',
-                    'onChange',
-                    'onClose',
-                    'onOpen',
-                    'unmount',
+                    "as",
+                    "children",
+                    "defaultOpen",
+                    "disabled",
+                    "onChange",
+                    "onClose",
+                    "onOpen",
+                    "unmount",
                   ])
                 : omitProps(props, [
-                    'as',
-                    'children',
-                    'isOpen',
-                    'disabled',
-                    'onChange',
-                    'onClose',
-                    'onOpen',
-                    'unmount',
+                    "as",
+                    "children",
+                    "isOpen",
+                    "disabled",
+                    "onChange",
+                    "onClose",
+                    "onOpen",
+                    "unmount",
                   ]),
               {
-                'aria-describedby': descriptionID,
-                'aria-labelledby': titleID,
-                'aria-modal': true,
+                "aria-describedby": descriptionID,
+                "aria-labelledby": titleID,
+                "aria-modal": true,
                 id: ownerID,
-                role: 'dialog',
+                role: "dialog",
               },
               COMMAND_BAR_TAG,
               createDisabledState(() => state.disabled()),

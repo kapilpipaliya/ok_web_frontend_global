@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -6,10 +6,10 @@ import {
   createMemo,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
-import { useSelectState } from './create-select-state';
+import assert from "../utils/assert";
+import { useSelectState } from "./create-select-state";
 
 export interface SelectOptionStateOptions<T> {
   disabled?: boolean;
@@ -71,7 +71,7 @@ export function SelectOptionStateProvider(
   return createComponent(SelectOptionStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -82,7 +82,7 @@ export function SelectOptionStateProvider(
 
 export function useSelectOptionState(): SelectOptionStateProperties {
   const ctx = useContext(SelectOptionStateContext);
-  assert(ctx, new Error('Missing <SelectOptionStateProvider>'));
+  assert(ctx, new Error("Missing <SelectOptionStateProvider>"));
   return ctx;
 }
 
@@ -92,7 +92,7 @@ export function SelectOptionStateChild(
   const state = useSelectOptionState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

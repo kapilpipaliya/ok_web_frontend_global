@@ -4,4 +4,3 @@ export function getId(input: string) {
   // TODO: letter make pascalCase letter
   return input;
 } // ts-belt
-

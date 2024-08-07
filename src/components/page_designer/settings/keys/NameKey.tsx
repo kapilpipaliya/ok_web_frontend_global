@@ -18,7 +18,17 @@ export function NameKey() {
           data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
-          meta={{ P: modifyFieldMetaAllFields({ name: "nameKey" } as FieldAttribute , graph, setGraph, layoutStore, true)} as unknown as Vertex}
+          meta={
+            {
+              P: modifyFieldMetaAllFields(
+                { name: "nameKey" } as FieldAttribute,
+                graph,
+                setGraph,
+                layoutStore,
+                true,
+              ),
+            } as unknown as Vertex
+          }
           txnId={layoutStore.formStore[0].txnId}
         />
       </span>

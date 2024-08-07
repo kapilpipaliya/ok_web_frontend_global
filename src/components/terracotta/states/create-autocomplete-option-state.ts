@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -6,10 +6,10 @@ import {
   createMemo,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
-import { useAutocompleteState } from './create-autocomplete-state';
+import assert from "../utils/assert";
+import { useAutocompleteState } from "./create-autocomplete-state";
 
 export interface AutocompleteOptionStateOptions<T> {
   disabled?: boolean;
@@ -74,7 +74,7 @@ export function AutocompleteOptionStateProvider(
   return createComponent(AutocompleteOptionStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -85,7 +85,7 @@ export function AutocompleteOptionStateProvider(
 
 export function useAutocompleteOptionState(): AutocompleteOptionStateProperties {
   const ctx = useContext(AutocompleteOptionStateContext);
-  assert(ctx, new Error('Missing <AutocompleteOptionStateProvider>'));
+  assert(ctx, new Error("Missing <AutocompleteOptionStateProvider>"));
   return ctx;
 }
 
@@ -95,7 +95,7 @@ export function AutocompleteOptionStateChild(
   const state = useAutocompleteOptionState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

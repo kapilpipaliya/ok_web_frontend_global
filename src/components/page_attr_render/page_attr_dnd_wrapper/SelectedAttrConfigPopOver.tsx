@@ -1,9 +1,8 @@
-
 import { IconButton } from "~/components/IconButton";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { useZIndex } from "~/components/ZIndex";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
-import { useGraph, type Vertex, } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { ComponentName } from "./ComponentName";
@@ -17,7 +16,9 @@ interface SelectedAttrConfigPopOverProps {
   item: Vertex;
 }
 
-export function SelectedAttrConfigPopOver(props: SelectedAttrConfigPopOverProps) {
+export function SelectedAttrConfigPopOver(
+  props: SelectedAttrConfigPopOverProps,
+) {
   const zIndex = useZIndex();
   const [, setLayoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
@@ -33,7 +34,7 @@ export function SelectedAttrConfigPopOver(props: SelectedAttrConfigPopOverProps)
           class="cursor:grab"
           draggable={true}
           icon="material-symbols:drag-indicator"
-          onClick={() => { }}
+          onClick={() => {}}
           onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
           size={20}
           title="Move"
@@ -43,10 +44,7 @@ export function SelectedAttrConfigPopOver(props: SelectedAttrConfigPopOverProps)
         <ParentButton item={props.item} />
         <DuplicateButton item={props.item} />
         <SaveAsTemplateButton item={props.item} size={20} />
-        <DeleteButton
-          componentName={getComponentName()}
-          item={props.item}
-        />
+        <DeleteButton componentName={getComponentName()} item={props.item} />
       </div>
     </span>
   );

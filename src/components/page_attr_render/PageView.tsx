@@ -3,10 +3,16 @@ import { createStore } from "solid-js/store";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { PreviewContext, type PreviewStoreObject } from "~/components/page_designer/PreviewContext";
+import {
+  PreviewContext,
+  type PreviewStoreObject,
+} from "~/components/page_designer/PreviewContext";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { RepeaterVertexContext, useRepeaterVertexContext } from "./PageAttrContext";
+import {
+  RepeaterVertexContext,
+  useRepeaterVertexContext,
+} from "./PageAttrContext";
 
 export function PageView(
   props: Readonly<{
@@ -26,23 +32,45 @@ export function PageView(
   const _dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
   const isViewOnlyForm = createMemo(() => {
-    if (!(props.id || props.hasInsertPermission)) { return true; }
+    if (!(props.id || props.hasInsertPermission)) {
+      return true;
+    }
     if (props.id && !props.hasEditPermission) {
       return props.hasViewPermission;
     }
   });
 
   const previewStore = createStore<PreviewStoreObject>({
-    get hasDeletePermission() { return props.hasDeletePermission; },
-    get hasEditPermission() { return props.hasEditPermission; },
-    get hasInsertPermission() { return props.hasInsertPermission; },
-    get hasViewPermission() { return props.hasViewPermission; },
-    get id() { return props.id; },
-    get isDesignMode() { return props.isDesignMode; },
-    get isNoPermissionCheck() { return props.isNoPermissionCheck; },
-    get isViewOnly() { return isViewOnlyForm(); },
-    get previewData() { return props.data; },
-    get previewMeta() { return props.metaVertex; },
+    get hasDeletePermission() {
+      return props.hasDeletePermission;
+    },
+    get hasEditPermission() {
+      return props.hasEditPermission;
+    },
+    get hasInsertPermission() {
+      return props.hasInsertPermission;
+    },
+    get hasViewPermission() {
+      return props.hasViewPermission;
+    },
+    get id() {
+      return props.id;
+    },
+    get isDesignMode() {
+      return props.isDesignMode;
+    },
+    get isNoPermissionCheck() {
+      return props.isNoPermissionCheck;
+    },
+    get isViewOnly() {
+      return isViewOnlyForm();
+    },
+    get previewData() {
+      return props.data;
+    },
+    get previewMeta() {
+      return props.metaVertex;
+    },
   });
 
   return (
@@ -51,15 +79,21 @@ export function PageView(
         <Match when={true}>
           <PreviewContext.Provider value={previewStore}>
             <RepeaterVertexContext.Provider
-              value={props.data ? [props.data, ...useRepeaterVertexContext()] : useRepeaterVertexContext()}
+              value={
+                props.data
+                  ? [props.data, ...useRepeaterVertexContext()]
+                  : useRepeaterVertexContext()
+              }
             >
-              <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+              <PageAttrRender
+                data={props.data}
+                metaVertex={props.metaVertex!}
+              />
             </RepeaterVertexContext.Provider>
           </PreviewContext.Provider>
         </Match>
       </Switch>
     </Show>
-
   );
 }
 

@@ -23,14 +23,17 @@ export function getConditionsExpression(
   rule: Vertex,
   formVertex: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,isTest?: boolean
+  setGraph: SetStoreFunction<GraphInterface>,
+  isTest?: boolean,
 ) {
   const conditionRows = evaluate(jsep("->RuleCond"), {
     graph,
     setGraph,
     vertexes: [rule],
   });
-  if (!conditionRows) {return ""}
+  if (!conditionRows) {
+    return "";
+  }
   const getFieldValue = (fieldName: string, condition: Vertex) => {
     const evaluatedFieldName = evaluate(jsep(fieldName), {
       graph,
@@ -38,16 +41,23 @@ export function getConditionsExpression(
       vertexes: [condition],
     })?.[0]?.P.name;
     if (evaluatedFieldName) {
-      return getTextValue(formVertex.P[evaluatedFieldName]) ?? (isTest ? `"${evaluatedFieldName}"` : 0);
+      return (
+        getTextValue(formVertex.P[evaluatedFieldName]) ??
+        (isTest ? `"${evaluatedFieldName}"` : 0)
+      );
     }
     return "";
   };
 
   return conditionRows.reduce((expression: string, condition: Vertex) => {
     expression += condition.P.leftParen || "";
-    expression += getTextValue(condition.P.leftValue) || getFieldValue("->$0LeftField", condition);
+    expression +=
+      getTextValue(condition.P.leftValue) ||
+      getFieldValue("->$0LeftField", condition);
     expression += condition.P.operator || "";
-    expression += getTextValue(condition.P.rightValue) || getFieldValue("->$0RightField", condition);
+    expression +=
+      getTextValue(condition.P.rightValue) ||
+      getFieldValue("->$0RightField", condition);
     expression += condition.P.rightParen || "";
     if (condition.P.andOr) {
       if (condition.P.andOr === "AND") {
@@ -59,4 +69,3 @@ export function getConditionsExpression(
     return expression;
   }, "");
 }
-

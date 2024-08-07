@@ -56,7 +56,9 @@ export function MultiSelectField(
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
   const getOptionValue = (option: Option) => {
-    if (!isObject(option)) { return option; }
+    if (!isObject(option)) {
+      return option;
+    }
     if (props.optionValueKey) {
       return option[props.optionValueKey as keyof Option];
     }
@@ -69,7 +71,7 @@ export function MultiSelectField(
       if (props.displayValueKey.includes("::")) {
         return evaluate(jsep(props.displayValueKey), option);
       }
-        return option[props.displayValueKey as keyof Option];
+      return option[props.displayValueKey as keyof Option];
     }
     // @ts-expect-error ignore
     return isObject(option) ? option.label : option;
@@ -110,12 +112,12 @@ export function MultiSelectField(
           option[childrenKey] = originalOptions;
           return true;
         }
-          // Otherwise, filter the children
-          // @ts-expect-error ignore
-          option[childrenKey] = filteredChildren;
-          // Include the parent if it matches or any children match
-          // @ts-expect-error ignore
-          return matches || option[childrenKey].length > 0;
+        // Otherwise, filter the children
+        // @ts-expect-error ignore
+        option[childrenKey] = filteredChildren;
+        // Include the parent if it matches or any children match
+        // @ts-expect-error ignore
+        return matches || option[childrenKey].length > 0;
       }
 
       // Return true if the parent matches and there are no children
@@ -221,9 +223,12 @@ export function MultiSelectField(
                   p.option[childrenKey()].length === 0) &&
                 handleSelectChange(p.option)
               }
-            >              {props.renderLabel
-              ? props.renderLabel(p.option, false)
-              : getOptionLabel(p.option)}</div>
+            >
+              {" "}
+              {props.renderLabel
+                ? props.renderLabel(p.option, false)
+                : getOptionLabel(p.option)}
+            </div>
           }
           // @ts-expect-error ignore
           when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
@@ -237,7 +242,7 @@ export function MultiSelectField(
                 ),
               }}
               onClick={() => toggleExpandOption(p.option)}
-                          >
+            >
               <Icon
                 icon={
                   isExpanded()

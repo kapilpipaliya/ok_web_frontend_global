@@ -1,12 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import {
-  createUniqueId,
-  For,
-  Match,
-  onCleanup,
-  Switch,
-} from "solid-js";
+import { createUniqueId, For, Match, onCleanup, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type GraphInterface, useGraph } from "~/lib/graph/graph";
@@ -45,7 +39,7 @@ export function SEOFormGroupProperties() {
         return (
           <div>
             <div
-              class={'flex ai:center gap:2 justify-content:space-between mt:6'}
+              class={"flex ai:center gap:2 justify-content:space-between mt:6"}
             >
               <span class="f:15 flex:.5">
                 <Label meta={metaVertex} />
@@ -63,7 +57,6 @@ export function SEOFormGroupProperties() {
                     />
                   </Match>
                 </Switch>
-
               </span>
             </div>
           </div>
@@ -80,15 +73,53 @@ function createVertexIds() {
   };
 }
 
-function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>,) {
-  addNewVertex(0, newVertex(vertexIds.seoTitle, ["MetaTemp"], createVertexMeta("SEO Title", "seoTitle", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.seoDescription, ["MetaTemp"], createVertexMeta("SEO Description", "seoDescription", { class: PROPERTIES.Css.TextBox, componentName: "TextArea" })), graph, setGraph);
+function createVertices(
+  vertexIds: ReturnType<typeof createVertexIds>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.seoTitle,
+      ["MetaTemp"],
+      createVertexMeta("SEO Title", "seoTitle", {
+        class: PROPERTIES.Css.TextBox,
+        componentName: "TextBox",
+      }),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.seoDescription,
+      ["MetaTemp"],
+      createVertexMeta("SEO Description", "seoDescription", {
+        class: PROPERTIES.Css.TextBox,
+        componentName: "TextArea",
+      }),
+    ),
+    graph,
+    setGraph,
+  );
 }
 
-function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
+function createVertexMeta(
+  displayName: string,
+  name: string,
+  other: Record<string, any> = {},
+) {
   return { displayName, name, ...other };
 }
 
-function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
+function cleanupVertices(
+  vertexIds: ReturnType<typeof createVertexIds>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  Object.values(vertexIds).forEach((id) =>
+    deleteVertex(0, id, graph, setGraph),
+  );
 }

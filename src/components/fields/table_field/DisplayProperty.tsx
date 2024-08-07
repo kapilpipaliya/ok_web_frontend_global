@@ -1,13 +1,15 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { toTitle } from "case-switcher-js";
 import {
-  type Accessor, createComputed,
+  type Accessor,
+  createComputed,
   createMemo,
   getOwner,
   Match,
-  on, runWithOwner,
+  on,
+  runWithOwner,
   Show,
-  Switch
+  Switch,
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -43,16 +45,18 @@ export const getComponentClass = (componentName: string) => {
 };
 
 // Component to display individual properties
-export function DisplayProperty(props: Readonly<{
-  column: Vertex;
-  disabled: Accessor<boolean>;
-  getMetaVertex: (columnId: Id) => Vertex;
-  isNoPermissionCheck?: boolean;
-  isRealTime: boolean;
-  joinVertex: Vertex;
-  setValue?: (data: any) => void;
-  txnId: number;
-}>) {
+export function DisplayProperty(
+  props: Readonly<{
+    column: Vertex;
+    disabled: Accessor<boolean>;
+    getMetaVertex: (columnId: Id) => Vertex;
+    isNoPermissionCheck?: boolean;
+    isRealTime: boolean;
+    joinVertex: Vertex;
+    setValue?: (data: any) => void;
+    txnId: number;
+  }>,
+) {
   // if there is no parent FormContext, it should still work.
   const [formStore] = useFormContext();
   const [graph, setGraph] = useGraph();
@@ -64,12 +68,13 @@ export function DisplayProperty(props: Readonly<{
     // TODO: when meta changed realtime its not updating.
     createComputed(
       on(
-        () => getPropsFromMetaExpression(
-          graph,
-          setGraph,
-          metaVertex(),
-          props.joinVertex
-        ),
+        () =>
+          getPropsFromMetaExpression(
+            graph,
+            setGraph,
+            metaVertex(),
+            props.joinVertex,
+          ),
         async (v) => {
           if (metaVertex().P.meta) {
             let metaData;
@@ -81,24 +86,20 @@ export function DisplayProperty(props: Readonly<{
                 metaVertex(),
                 [props.joinVertex],
                 mutationData,
-                10
+                10,
               );
             } else {
               metaData = v;
             }
-            const metaDataVal = removeUndefinedProperties(
-              metaData,
-              false,
-              10
-            );
+            const metaDataVal = removeUndefinedProperties(metaData, false, 10);
 
             const newMetaData = Object.assign(
               // when componentName is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
               getColumnProps(
                 graph.vertexes[metaVertex().P.templateId] ?? { P: {} },
-                graph
+                graph,
               ),
-              metaDataVal
+              metaDataVal,
             );
 
             replaceVertexProperties(
@@ -106,26 +107,28 @@ export function DisplayProperty(props: Readonly<{
               metaVertex().id,
               graph,
               setGraph,
-              newMetaData
+              newMetaData,
             );
           }
-        }
-      )
+        },
+      ),
     );
   }
-  const [componentName, setComponentName] = createWritableMemo(() => getComponent(props.column.id)
+  const [componentName, setComponentName] = createWritableMemo(() =>
+    getComponent(props.column.id),
   );
   function getComponent(columnId: Id) {
     const columnMetaVertex = props.getMetaVertex(columnId);
     if (columnMetaVertex.P.componentName.includes("-")) {
       createComputed(
         on(
-          () => getSelectionOptions(
-            graph,
-            setGraph,
-            columnMetaVertex.P.componentName,
-            [props.joinVertex]
-          ).vertexes,
+          () =>
+            getSelectionOptions(
+              graph,
+              setGraph,
+              columnMetaVertex.P.componentName,
+              [props.joinVertex],
+            ).vertexes,
           async (vertexes) => {
             let componentName = "";
             if (formStore?.txnId) {
@@ -136,10 +139,9 @@ export function DisplayProperty(props: Readonly<{
                 [props.joinVertex],
                 columnMetaVertex.P.componentName,
                 mutationData,
-                10
+                10,
               );
-              if (isValidResponse(res) &&
-                typeof res.result === "string") {
+              if (isValidResponse(res) && typeof res.result === "string") {
                 componentName = res.result;
               }
             } else {
@@ -153,14 +155,13 @@ export function DisplayProperty(props: Readonly<{
                 setComponentName(componentName);
               });
             });
-          }
-        )
+          },
+        ),
       );
     } else {
       return columnMetaVertex.P.componentName;
     }
   }
-
 
   const Content = () => (
     <>
@@ -174,10 +175,17 @@ export function DisplayProperty(props: Readonly<{
         isRealTime={props.isRealTime}
         isTableInside={false}
         // When we have a Table we pass original Table Meta Vertex
-        meta={componentName() === "DynamicTable" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
+        meta={
+          componentName() === "DynamicTable"
+            ? graph.vertexes[metaVertex().P.templateId]
+            : metaVertex()
+        }
         setValue={props.setValue}
-        title={toTitle(props.column.P.displayName || props.column.P[IdAttr] || "")}
-        txnId={props.txnId} />
+        title={toTitle(
+          props.column.P.displayName || props.column.P[IdAttr] || "",
+        )}
+        txnId={props.txnId}
+      />
     </>
   );
 
@@ -185,41 +193,57 @@ export function DisplayProperty(props: Readonly<{
     <Switch>
       <Match when={metaVertex().P.hidden}>
         <td class="align-content:center">
-          <div class={`${getComponentClass(componentName())} flex ai:center jc:center`}>
+          <div
+            class={`${getComponentClass(componentName())} flex ai:center jc:center`}
+          >
             <DefaultValue
               joinVertex={props.joinVertex}
-              metaVertex={metaVertex()} />
+              metaVertex={metaVertex()}
+            />
           </div>
         </td>
       </Match>
-      <Match when={metaVertex().P.name === 'value' && ((props.joinVertex?.P.name ?? '').endsWith('Class') || (props.joinVertex?.P.name ?? '') === 'class')}>
+      <Match
+        when={
+          metaVertex().P.name === "value" &&
+          ((props.joinVertex?.P.name ?? "").endsWith("Class") ||
+            (props.joinVertex?.P.name ?? "") === "class")
+        }
+      >
         <td class="align-content:center">
           <div class="flex ai:center jc:center">
             <CssEditor
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
-              txnId={props.txnId} />
+              txnId={props.txnId}
+            />
           </div>
         </td>
       </Match>
       <Match when={componentName() === "DynamicTable"}>
         <td class="align-content:center">
           <Show when={!props.disabled()}>
-            <div class={`${getComponentClass(componentName())} flex ai:center jc:center`}>
+            <div
+              class={`${getComponentClass(componentName())} flex ai:center jc:center`}
+            >
               <DefaultValue
                 joinVertex={props.joinVertex}
-                metaVertex={metaVertex()} />
+                metaVertex={metaVertex()}
+              />
               <Content />
             </div>
           </Show>
         </td>
       </Match>
       <Match when={true}>
-        <td class={`${getComponentClass(componentName())} align-content:center padding:1px`}>
+        <td
+          class={`${getComponentClass(componentName())} align-content:center padding:1px`}
+        >
           <div class="align-items:center">
             <DefaultValue
               joinVertex={props.joinVertex}
-              metaVertex={metaVertex()} />
+              metaVertex={metaVertex()}
+            />
             <Content />
           </div>
         </td>

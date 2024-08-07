@@ -9,7 +9,7 @@ import type {
 
 import { sizeTypes } from "./csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";
-import { createGridOptions, } from "./FieldType";
+import { createGridOptions } from "./FieldType";
 
 export const EffectsSection = {
   filter: {
@@ -74,8 +74,6 @@ export const EffectsSection = {
     name: "backdrop-filter",
   } as DataEditorField,
 
-  
-
   backfaceVisibility: {
     componentName: "toggleButton",
     isLabelOnTop: true,
@@ -87,7 +85,6 @@ export const EffectsSection = {
     ],
   } as ToggleField,
 
-
   perspective: {
     componentName: "textFieldOptions",
     isLabelOnTop: true,
@@ -96,5 +93,4 @@ export const EffectsSection = {
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
-
 };

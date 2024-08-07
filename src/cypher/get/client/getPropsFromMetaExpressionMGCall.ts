@@ -11,7 +11,7 @@ export async function getPropsFromMetaExpressionMGCall(
   metaVertex: Vertex,
   data: Vertex[],
   mutationData?: any,
-  maxRetries = 10
+  maxRetries = 10,
 ): Promise<{ [key: string]: any }> {
   "use server";
   try {
@@ -23,19 +23,28 @@ export async function getPropsFromMetaExpressionMGCall(
         }
       }
 
-      const metaRows = await getSelectionOptionsBase(data, metaVertex.P.meta, tx);
+      const metaRows = await getSelectionOptionsBase(
+        data,
+        metaVertex.P.meta,
+        tx,
+      );
       const metaRowsResult = (metaRows.result as Vertex[]) || [];
       return await getComponentPropertiesMGCall(metaRowsResult, tx);
     }, maxRetries);
   } catch (error) {
-    console.error("Error in getPropsFromMetaExpressionMGCall:", error, metaVertex, data);
+    console.error(
+      "Error in getPropsFromMetaExpressionMGCall:",
+      error,
+      metaVertex,
+      data,
+    );
     return {};
   }
 }
 
 async function getComponentPropertiesMGCall(
   metaRows: Vertex[],
-  tx: TransactionPromise
+  tx: TransactionPromise,
 ): Promise<{ [key: string]: any }> {
   const metaData: { [key: string]: any } = {};
 
@@ -43,7 +52,7 @@ async function getComponentPropertiesMGCall(
     const result = await getSelectionOptionsBase(
       [curr],
       "->$0Name::'P.name'||::'P.name'",
-      tx
+      tx,
     );
     const key = result.result; // ->$0Name:P.name||:P.name
     if (key && curr.P.value !== undefined) {

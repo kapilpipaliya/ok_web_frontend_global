@@ -55,15 +55,14 @@ export function PreviewButton() {
 
   return (
     <>
-
-        <IconButton
-          class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
-          icon="ph:eye"
-          onClick={handleButtonClick}
-          size={22}
-          title="Preview"
-          type="button"
-        />
+      <IconButton
+        class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
+        icon="ph:eye"
+        onClick={handleButtonClick}
+        size={22}
+        title="Preview"
+        type="button"
+      />
 
       <Show when={isModalOpen()}>
         <ZIndex>

@@ -24,7 +24,10 @@ import {
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { type PageLayoutObject, useDesignerLayoutStore } from "../../../LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../../LayoutContext";
 import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
@@ -63,7 +66,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   createVertices(vertexIds, graph, setGraph);
 
   const metaTxnId = graph.newTxnId;
-  const propAttributes = createMemo(() => createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph));
+  const propAttributes = createMemo(() =>
+    createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
+  );
 
   onCleanup(() => revertTransaction(metaTxnId, graph));
   onCleanup(() => cleanupVertices(vertexIds, graph, setGraph));
@@ -78,7 +83,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           setValue={props.setValue}
         />
       </div>
-      <For each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}>
+      <For
+        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
+      >
         {(meta) => (
           <PropertyField
             meta={meta}
@@ -117,49 +124,197 @@ export function createVertexIds() {
   };
 }
 
-function createVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  addNewVertex(0, newVertex(vertexIds.name, ["MetaTemp"], createVertexMeta("Unique Name", "name", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.label, ["MetaTemp"], createVertexMeta("Label", "label", { class: PROPERTIES.Css.TextBox, componentName: "TextBox" })), graph, setGraph);
+function createVertices(
+  vertexIds: ReturnType<typeof createVertexIds>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.name,
+      ["MetaTemp"],
+      createVertexMeta("Unique Name", "name", {
+        class: PROPERTIES.Css.TextBox,
+        componentName: "TextBox",
+      }),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.label,
+      ["MetaTemp"],
+      createVertexMeta("Label", "label", {
+        class: PROPERTIES.Css.TextBox,
+        componentName: "TextBox",
+      }),
+    ),
+    graph,
+    setGraph,
+  );
   // Todo: make this display proper options.
-  addNewVertex(0, newVertex(vertexIds.labelPosition, ["MetaTemp"], createVertexMeta("Label Position", "labelPosition", { componentName: "SelectBox" })), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.perm, ["MetaTemp"], createVertexMeta("Permission", "perm")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.calculatedValue, ["MetaTemp"], createVertexMeta("Calculated Value Expr", "calculatedValue")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.class, ["MetaTemp"], createVertexMeta("Class", "class")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.labelClass, ["MetaTemp"], createVertexMeta("Label Class", "labelClass")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.defaultValue, ["MetaTemp"], createVertexMeta("Default Value", "defaultValue")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.required, ["MetaTemp"], createVertexMeta("Required Expr", "required")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.hidden, ["MetaTemp"], createVertexMeta("Hidden Expr", "hidden")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.disabled, ["MetaTemp"], createVertexMeta("Disabled Expr", "disabled")), graph, setGraph);
-  addNewVertex(0, newVertex(vertexIds.thankYouPage, ["MetaTemp"], createVertexMeta("Thank You Page", "thankYouPage")), graph, setGraph);
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.labelPosition,
+      ["MetaTemp"],
+      createVertexMeta("Label Position", "labelPosition", {
+        componentName: "SelectBox",
+      }),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.perm,
+      ["MetaTemp"],
+      createVertexMeta("Permission", "perm"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.calculatedValue,
+      ["MetaTemp"],
+      createVertexMeta("Calculated Value Expr", "calculatedValue"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.class,
+      ["MetaTemp"],
+      createVertexMeta("Class", "class"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.labelClass,
+      ["MetaTemp"],
+      createVertexMeta("Label Class", "labelClass"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.defaultValue,
+      ["MetaTemp"],
+      createVertexMeta("Default Value", "defaultValue"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.required,
+      ["MetaTemp"],
+      createVertexMeta("Required Expr", "required"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.hidden,
+      ["MetaTemp"],
+      createVertexMeta("Hidden Expr", "hidden"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.disabled,
+      ["MetaTemp"],
+      createVertexMeta("Disabled Expr", "disabled"),
+    ),
+    graph,
+    setGraph,
+  );
+  addNewVertex(
+    0,
+    newVertex(
+      vertexIds.thankYouPage,
+      ["MetaTemp"],
+      createVertexMeta("Thank You Page", "thankYouPage"),
+    ),
+    graph,
+    setGraph,
+  );
 }
 
-function createVertexMeta(displayName: string, name: string, other: Record<string, any> = {}) {
+function createVertexMeta(
+  displayName: string,
+  name: string,
+  other: Record<string, any> = {},
+) {
   return { displayName, name, ...other };
 }
 
-function createPropAttributes(metaAttributes: Vertex[], txnId: number, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  return metaAttributes.map(vertex => {
+function createPropAttributes(
+  metaAttributes: Vertex[],
+  txnId: number,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  return metaAttributes.map((vertex) => {
     const form = FormMetaData.Comp;
-    const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
-    const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
-    return cloneVertexWithEdges(txnId, vertex, {
-      componentName: valueAttribute.componentName,
-      meta: valueAttribute.meta,
-    }, graph, setGraph);
+    const propAttribute = form.attributes.find((attr) => attr.name === "Prop")!;
+    const valueAttribute = propAttribute.attributes!.find(
+      (attr) => attr.name === "value",
+    )!;
+    return cloneVertexWithEdges(
+      txnId,
+      vertex,
+      {
+        componentName: valueAttribute.componentName,
+        meta: valueAttribute.meta,
+      },
+      graph,
+      setGraph,
+    );
   });
 }
 
-function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, layoutStore: PageLayoutObject) {
-  const otherVertices = vertices.filter(vertex => !Object.keys(vertexIds).includes(vertex.P.name));
+function moveClassToLast(
+  vertices: Vertex[],
+  vertexIds: ReturnType<typeof createVertexIds>,
+  graph: GraphInterface,
+  layoutStore: PageLayoutObject,
+) {
+  const otherVertices = vertices.filter(
+    (vertex) => !Object.keys(vertexIds).includes(vertex.P.name),
+  );
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
   const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
-  const nonCssVertices = otherVertices.filter(vertex => !vertex.P.name.endsWith("Class"));
+  const nonCssVertices = otherVertices.filter(
+    (vertex) => !vertex.P.name.endsWith("Class"),
+  );
 
   return [
     graph.vertexes[vertexIds.name],
-    ...(isForm && componentName === "Form" ? [graph.vertexes[vertexIds.thankYouPage]] : []),
+    ...(isForm && componentName === "Form"
+      ? [graph.vertexes[vertexIds.thankYouPage]]
+      : []),
     graph.vertexes[vertexIds.label],
     graph.vertexes[vertexIds.labelPosition],
     graph.vertexes[vertexIds.perm],
@@ -173,8 +328,14 @@ function moveClassToLast(vertices: Vertex[], vertexIds: ReturnType<typeof create
   ];
 }
 
-function cleanupVertices(vertexIds: ReturnType<typeof createVertexIds>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  Object.values(vertexIds).forEach(id => deleteVertex(0, id, graph, setGraph));
+function cleanupVertices(
+  vertexIds: ReturnType<typeof createVertexIds>,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  Object.values(vertexIds).forEach((id) =>
+    deleteVertex(0, id, graph, setGraph),
+  );
 }
 
 interface PropertyFieldProps {
@@ -188,9 +349,22 @@ interface PropertyFieldProps {
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
-  const componentName = createMemo(() => getComponentForCollRow(props.meta, props.meta, graph, setGraph));
-  const metaProps = getPropsFromMetaExpression(graph, setGraph, props.meta, props.meta);
-  mergeVertexProperties(props.metaTxnId, props.meta.id, graph, setGraph, metaProps);
+  const componentName = createMemo(() =>
+    getComponentForCollRow(props.meta, props.meta, graph, setGraph),
+  );
+  const metaProps = getPropsFromMetaExpression(
+    graph,
+    setGraph,
+    props.meta,
+    props.meta,
+  );
+  mergeVertexProperties(
+    props.metaTxnId,
+    props.meta.id,
+    graph,
+    setGraph,
+    metaProps,
+  );
 
   return (
     <div>
@@ -211,7 +385,14 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             txnId={props.txnId}
           />
         </Match>
-        <Match when={props.meta.P.name === "required" || props.meta.P.name === "hidden" || props.meta.P.name === "disabled" || props.meta.P.name === "calculatedValue"}>
+        <Match
+          when={
+            props.meta.P.name === "required" ||
+            props.meta.P.name === "hidden" ||
+            props.meta.P.name === "disabled" ||
+            props.meta.P.name === "calculatedValue"
+          }
+        >
           <SelectRuleField
             meta={props.meta}
             selectedLayout={props.selectedLayout}
@@ -258,6 +439,3 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
     </div>
   );
 }
-
-
-

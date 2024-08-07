@@ -2,9 +2,18 @@ import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
-import type { ButtonGroupField, FieldWithCustomProperty, GenericField } from "../constants/FieldType";
+import type {
+  ButtonGroupField,
+  FieldWithCustomProperty,
+  GenericField,
+} from "../constants/FieldType";
 
-import { ComponentMetaContext, useComponentMeta, useCssEditor, useCssState } from "../CssEditorContext";
+import {
+  ComponentMetaContext,
+  useComponentMeta,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = () => {
@@ -30,40 +39,46 @@ export const FieldWithCustomBox = () => {
     <div>
       <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
         <DynamicCSSComponent
-          value={{
-            ...meta,
-            componentName: meta.mainFieldType ?? "textFieldOptions",
-            type: meta.type ?? "text"
-          } as GenericField}
+          value={
+            {
+              ...meta,
+              componentName: meta.mainFieldType ?? "textFieldOptions",
+              type: meta.type ?? "text",
+            } as GenericField
+          }
         />
-        <ComponentMetaContext.Provider value={{
-          componentName: "buttonGroups",
-          isAddToClass: false,
-          isLabelOnTop: false,
-          label: "",
-          name: meta.name,
-          onChangeInput: () => {
-            if (optionType() === "all") {
-              setOptionType("custom");
-            } else {
-              setOptionType("all");
-            }
-          },
-          options: [
+        <ComponentMetaContext.Provider
+          value={
             {
-              icon: true,
-              key: "allCustom",
-              tooltip: "All",
-              value: "all",
-            },
-            {
-              icon: true,
-              key: "customIcon",
-              tooltip: "Custom",
-              value: "custom",
-            },
-          ],
-        } as ButtonGroupField}>
+              componentName: "buttonGroups",
+              isAddToClass: false,
+              isLabelOnTop: false,
+              label: "",
+              name: meta.name,
+              onChangeInput: () => {
+                if (optionType() === "all") {
+                  setOptionType("custom");
+                } else {
+                  setOptionType("all");
+                }
+              },
+              options: [
+                {
+                  icon: true,
+                  key: "allCustom",
+                  tooltip: "All",
+                  value: "all",
+                },
+                {
+                  icon: true,
+                  key: "customIcon",
+                  tooltip: "Custom",
+                  value: "custom",
+                },
+              ],
+            } as ButtonGroupField
+          }
+        >
           <ButtonGroups />
         </ComponentMetaContext.Provider>
       </div>
@@ -75,12 +90,14 @@ export const FieldWithCustomBox = () => {
             {(item) => {
               return (
                 <DynamicCSSComponent
-                  value={{
-                    ...meta,
-                    componentName: meta.mainFieldType ?? "textFieldOptions",
-                    type: meta.type ?? "text",
-                    ...item
-                  } as GenericField}
+                  value={
+                    {
+                      ...meta,
+                      componentName: meta.mainFieldType ?? "textFieldOptions",
+                      type: meta.type ?? "text",
+                      ...item,
+                    } as GenericField
+                  }
                 />
               );
             }}

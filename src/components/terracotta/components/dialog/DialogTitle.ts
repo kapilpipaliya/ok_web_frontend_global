@@ -1,39 +1,39 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { DisclosureStateRenderProps } from '../../states/create-disclosure-state';
+import type { DisclosureStateRenderProps } from "../../states/create-disclosure-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
 import {
   DisclosureStateChild,
   useDisclosureState,
-} from '../../states/create-disclosure-state';
-import createDynamic from '../../utils/create-dynamic';
+} from "../../states/create-disclosure-state";
+import createDynamic from "../../utils/create-dynamic";
 import {
   createDisabledState,
   createExpandedState,
-} from '../../utils/state-props';
-import { useDialogContext } from './DialogContext';
-import { DIALOG_TITLE_TAG } from './tags';
+} from "../../utils/state-props";
+import { useDialogContext } from "./DialogContext";
+import { DIALOG_TITLE_TAG } from "./tags";
 
-export type DialogTitleProps<T extends ValidConstructor = 'h2'> =
+export type DialogTitleProps<T extends ValidConstructor = "h2"> =
   HeadlessPropsWithRef<T, DisclosureStateRenderProps>;
 
-export function DialogTitle<T extends ValidConstructor = 'h2'>(
+export function DialogTitle<T extends ValidConstructor = "h2">(
   props: DialogTitleProps<T>,
 ): JSX.Element {
-  const context = useDialogContext('DialogTitle');
+  const context = useDialogContext("DialogTitle");
   const state = useDisclosureState();
   return createDynamic(
-    () => props.as || ('h2' as T),
+    () => props.as || ("h2" as T),
     mergeProps(
-      omitProps(props, ['as', 'children']),
+      omitProps(props, ["as", "children"]),
       DIALOG_TITLE_TAG,
       {
         get children() {

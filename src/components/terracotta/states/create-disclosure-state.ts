@@ -1,4 +1,4 @@
-import type { Accessor, JSX } from 'solid-js';
+import type { Accessor, JSX } from "solid-js";
 
 import {
   createComponent,
@@ -7,9 +7,9 @@ import {
   createSignal,
   untrack,
   useContext,
-} from 'solid-js';
+} from "solid-js";
 
-import assert from '../utils/assert';
+import assert from "../utils/assert";
 
 export interface DisclosureStateControlledOptions {
   disabled?: boolean;
@@ -45,7 +45,7 @@ export function createDisclosureState(
   let signal: Accessor<boolean>;
   let setSignal: (value: boolean) => void;
 
-  if ('defaultOpen' in options) {
+  if ("defaultOpen" in options) {
     const [isOpen, setIsOpen] = createSignal(options.defaultOpen);
     signal = isOpen;
     setSignal = (value): void => {
@@ -122,7 +122,7 @@ export function DisclosureStateProvider(
   return createComponent(DisclosureStateContext.Provider, {
     get children() {
       const current = props.children;
-      if (typeof current === 'function') {
+      if (typeof current === "function") {
         return current(props.state);
       }
       return current;
@@ -133,7 +133,7 @@ export function DisclosureStateProvider(
 
 export function useDisclosureState(): DisclosureStateProperties {
   const ctx = useContext(DisclosureStateContext);
-  assert(ctx, new Error('Missing <DisclosureStateProvider>'));
+  assert(ctx, new Error("Missing <DisclosureStateProvider>"));
   return ctx;
 }
 
@@ -143,7 +143,7 @@ export function DisclosureStateChild(
   const state = useDisclosureState();
   return createMemo(() => {
     const current = props.children;
-    if (typeof current === 'function' && current.length === 1) {
+    if (typeof current === "function" && current.length === 1) {
       return createMemo(() => current(state));
     }
     return current;

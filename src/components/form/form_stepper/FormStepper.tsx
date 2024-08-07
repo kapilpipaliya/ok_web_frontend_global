@@ -18,12 +18,26 @@ export function FormStepper() {
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {
     e.stopPropagation();
-    addStepBefore(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formStore[0].formData, step);
+    addStepBefore(
+      graph,
+      setGraph,
+      layoutStore,
+      setLayoutStore,
+      layoutStore.formStore[0].formData,
+      step,
+    );
   };
 
   const handleAddStepAfter = (e: MouseEvent, step: Vertex) => {
     e.stopPropagation();
-    addStepAfter(graph, setGraph, layoutStore, setLayoutStore, layoutStore.formStore[0].formData, step);
+    addStepAfter(
+      graph,
+      setGraph,
+      layoutStore,
+      setLayoutStore,
+      layoutStore.formStore[0].formData,
+      step,
+    );
   };
 
   return (

@@ -29,20 +29,23 @@ import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
 
 export function TableInputField(
-  props: Readonly<{
-    isNoPermissionCheck?: boolean;
-    isRealTime?: boolean;
-    isTableInside?: boolean;
-    txnId?: number;
-  } & GenericComponentProps>,
+  props: Readonly<
+    {
+      isNoPermissionCheck?: boolean;
+      isRealTime?: boolean;
+      isTableInside?: boolean;
+      txnId?: number;
+    } & GenericComponentProps
+  >,
 ) {
   const [graph, setGraph] = useGraph();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
-  const tableColumnsTemplate = createMemo(
-    () =>
-      sortVertexesByPosition(getSelectionOptions(graph, setGraph, '->Attr', [props.meta])
-        .vertexes || []),
+  const tableColumnsTemplate = createMemo(() =>
+    sortVertexesByPosition(
+      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes ||
+        [],
+    ),
   );
 
   const [parentItems] = usePageRenderContext();
@@ -139,12 +142,15 @@ export function TableInputField(
                         >
                           <th class="font-weight:medium jc:center p:0px|10px">
                             {toTitle(
-                              attribute.P.label || attribute.P.displayName ||
+                              attribute.P.label ||
+                                attribute.P.displayName ||
                                 attribute.P[IdAttr] ||
                                 "",
                             )}
                             {/* Add Proper Validation check */}
-                            {attribute.P.validation?.required && <span class="color:red"> *</span>}
+                            {attribute.P.validation?.required && (
+                              <span class="color:red"> *</span>
+                            )}
                           </th>
                         </Match>
                         <Match when={true}>

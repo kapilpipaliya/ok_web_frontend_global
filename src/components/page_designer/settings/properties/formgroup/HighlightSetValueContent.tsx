@@ -1,4 +1,3 @@
-
 import { type Accessor, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";

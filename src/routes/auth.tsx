@@ -3,32 +3,10 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { createSignal, onMount, Show } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
+import { GetInitialData } from "~/GetInitialData";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 import { useGraph } from "~/lib/graph/graph";
 
 export default function AuthLayout(props: Readonly<RouteSectionProps>) {
-  // const navigate = useNavigate();
-
-  const [initialDataLoading, setInitialDataLoading] = createSignal(true);
-  const graph = useGraph();
-
-  onMount(async () => {
-    const data = await getInitialDataAndSetToGraph(graph);
-    if (data) {
-      setInitialDataLoading(false);
-    }
-  });
-
-  // getAPI(API.getUserUrl).then((data) => {
-  //   const user = data.user;
-  //   if (user?.id) {
-  //     navigate(`${graph.APP_BASE_URL}`);
-  //   }
-  // });
-
-  return (
-    <Show fallback={<LoaderNew />} when={!initialDataLoading()}>
-      {props.children}
-    </Show>
-  );
+  return <GetInitialData>{props.children}</GetInitialData>;
 }

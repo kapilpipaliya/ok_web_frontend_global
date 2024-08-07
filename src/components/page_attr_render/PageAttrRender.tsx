@@ -2,9 +2,7 @@ import { toTitle } from "case-switcher-js";
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import {
-  useRepeaterVertexContext,
-} from "~/components/page_attr_render/PageAttrContext";
+import { useRepeaterVertexContext } from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
@@ -31,25 +29,33 @@ export function PageAttrRender(
       {(item, _index) => {
         const componentName = createMemo(
           () =>
-            item.P.componentName || getCompFallbackToString(item, graph)?.P[IdAttr],
+            item.P.componentName ||
+            getCompFallbackToString(item, graph)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
-          return getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 1), graph)?.P[
-            IdAttr
-          ];
+          return getCompFallbackToString(
+            getLastItem(parentItems?.vertexes || [], 1),
+            graph,
+          )?.P[IdAttr];
         });
         // TODO: Is This Parent Vertex is ok?
         // Need Repetitive parent checks?
         // @ts-ignore
         const _parentData = () => {
-          return getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1));
+          return getDataVertex(
+            graph,
+            getLastItem(parentItems?.vertexes || [], 1),
+          );
         };
 
         const Content = () => {
           const getData = createMemo(() => {
-            const data = getSelectionOptions(graph, setGraph, item.P.data ?? "->$0Data", [
-              ...useRepeaterVertexContext(),
-            ]).vertexes;
+            const data = getSelectionOptions(
+              graph,
+              setGraph,
+              item.P.data ?? "->$0Data",
+              [...useRepeaterVertexContext()],
+            ).vertexes;
             if (!data || data.length === 0) {
               return props.data;
             }
@@ -64,12 +70,11 @@ export function PageAttrRender(
               // setValue={props.setValue}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
-              txnId={formStore?.txnId} />
+              txnId={formStore?.txnId}
+            />
           );
         };
-        const PageComponentWithPreview = () => (
-          <Content />
-        );
+        const PageComponentWithPreview = () => <Content />;
         // currently context is not reactive, but we are assuming it will work.
         return (
           <Switch>
@@ -110,7 +115,10 @@ export function PageAttrRender(
               </li>
             </Match>
             <Match when={true}>
-              <Show fallback={<PageComponentWithPreview />} when={previewStore.isDesignMode}>
+              <Show
+                fallback={<PageComponentWithPreview />}
+                when={previewStore.isDesignMode}
+              >
                 <PageAttrDnDWrapper item={item}>
                   <Content />
                 </PageAttrDnDWrapper>

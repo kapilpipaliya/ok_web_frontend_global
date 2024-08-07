@@ -36,7 +36,11 @@ export function handleDragOverAndSetDropPosition(
   if (position === "before" || position === "left") {
     activeItem = layoutVertex.id;
   } else if (position === "after" || position === "right") {
-    if (isDesignMode || typeof collapsedKeys !== "function" || collapsedKeys().includes(layoutVertex.id)) {
+    if (
+      isDesignMode ||
+      typeof collapsedKeys !== "function" ||
+      collapsedKeys().includes(layoutVertex.id)
+    ) {
       // collapsed state
       activeItem = layoutVertex.id;
     } else {

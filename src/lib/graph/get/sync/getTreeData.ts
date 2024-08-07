@@ -29,7 +29,9 @@ export function getTreeData(
     vertexes: Vertex[],
   ): NavItem[] => {
     const result: NavItem[] = [];
-    if (!levels.collection) { return result; }
+    if (!levels.collection) {
+      return result;
+    }
     const children = evaluate(jsep(levels.collection), {
       graph,
       setGraph,

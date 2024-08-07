@@ -12,7 +12,9 @@ export async function transferNodeTypes(
   for (const nodeType of nodesToTransfer) {
     const form = FormMetaData[nodeType];
 
-    if (!form) { return "Error"; }
+    if (!form) {
+      return "Error";
+    }
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
     const _result = await processNodeSync(

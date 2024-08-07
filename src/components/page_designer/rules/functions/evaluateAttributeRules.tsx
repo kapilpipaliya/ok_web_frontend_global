@@ -8,19 +8,19 @@ import { evaluate } from "~/lib/expression_eval";
 
 import { evaluateRule } from "./evaluateRule";
 
-
 export function evaluateAttributeRules(
   attribute: Vertex,
   formVertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  conditionType: string
+  conditionType: string,
 ): boolean {
-  const rules = evaluate(jsep(`->$0${conditionType}`), {
-    graph,
-    setGraph,
-    vertexes: [attribute],
-  }) ?? [];
+  const rules =
+    evaluate(jsep(`->$0${conditionType}`), {
+      graph,
+      setGraph,
+      vertexes: [attribute],
+    }) ?? [];
 
   for (const rule of rules) {
     try {
@@ -28,8 +28,7 @@ export function evaluateAttributeRules(
       if (result) {
         return result;
       }
-    } catch (_e) {
-    }
+    } catch (_e) {}
   }
   return false;
 }

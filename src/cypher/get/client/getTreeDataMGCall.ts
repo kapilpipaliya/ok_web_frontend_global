@@ -22,7 +22,7 @@ interface TreeOptions {
 export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
-  options: TreeOptions = {}
+  options: TreeOptions = {},
 ) {
   "use server";
   const nodes: { [key: string]: Vertex } = {};
@@ -32,9 +32,11 @@ export async function getTreeDataMGCall(
   try {
     const getChildren = async (
       levels: { [key: string]: any },
-      vertexes: Vertex[]
+      vertexes: Vertex[],
     ): Promise<TreeNode[]> => {
-      if (!levels.collection) { return []; }
+      if (!levels.collection) {
+        return [];
+      }
 
       const children = await evalAsync(jsep(levels.collection), {
         nodes,
@@ -45,7 +47,9 @@ export async function getTreeDataMGCall(
 
       const childNodes: TreeNode[] = [];
       // Using await Promise.all close the session first, so used for...of
-      for (const child of (children || []).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos)) {
+      for (const child of (children || []).sort(
+        (a: Vertex, b: Vertex) => a.P.pos - b.P.pos,
+      )) {
         const name =
           levels?.nameExpr?.(child) ||
           options?.nameExpr?.(child) ||

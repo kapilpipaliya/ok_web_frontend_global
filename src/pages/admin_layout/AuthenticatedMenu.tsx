@@ -10,20 +10,29 @@ export interface AuthenticatedMenuProps {
   signOutCall: () => Promise<void>;
 }
 
-
-export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.Element {
+export function AuthenticatedMenu(
+  props: Readonly<AuthenticatedMenuProps>,
+): JSX.Element {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showLoadingToast } = useToast();
   return (
     <>
       <li class="m:5|10 mt:5px">
-        <A class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none" href={`${graph.APP_BASE_URL}/setting`} onclick={props.onClose}>
+        <A
+          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
+          href={`${graph.APP_BASE_URL}/setting`}
+          onclick={props.onClose}
+        >
           Account Setting
         </A>
       </li>
       <li class="m:5|10 mt:5px">
-        <A class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none" href="/contact-us" onclick={props.onClose}>
+        <A
+          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
+          href="/contact-us"
+          onclick={props.onClose}
+        >
           Help
         </A>
       </li>
@@ -33,7 +42,7 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
           class="flex ai:center color:#333 cursor:default p:10px|7px r:5|5|5|5 text-decoration:none"
           onclick={async () => {
             props.onClose();
-            setGraph('isLoadingPage', true);
+            setGraph("isLoadingPage", true);
             await showLoadingToast({
               loadMessage: "Logging Out...",
               onSuccess: (value) => {
@@ -44,7 +53,7 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
               promise: props.signOutCall(),
               successMessage: "Log Out Successfully",
             });
-            setGraph('isLoadingPage', false);
+            setGraph("isLoadingPage", false);
           }}
         >
           Sign Out

@@ -1,36 +1,36 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
+} from "../../utils/dynamic-prop";
 
-import { useAutocompleteState } from '../../states/create-autocomplete-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { SELECTED_NODE } from '../../utils/namespace';
+import { useAutocompleteState } from "../../states/create-autocomplete-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { SELECTED_NODE } from "../../utils/namespace";
 import {
   createARIADisabledState,
   createDisabledState,
   createHasActiveState,
   createHasQueryState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { useCommandContext } from './CommandContext';
-import { COMMAND_INPUT_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { useCommandContext } from "./CommandContext";
+import { COMMAND_INPUT_TAG } from "./tags";
 
-export type CommandInputProps<T extends ValidConstructor = 'input'> =
+export type CommandInputProps<T extends ValidConstructor = "input"> =
   HeadlessPropsWithRef<T>;
 
-export function CommandInput<T extends ValidConstructor = 'input'>(
+export function CommandInput<T extends ValidConstructor = "input">(
   props: CommandInputProps<T>,
 ): JSX.Element {
-  const context = useCommandContext('CommandInput');
+  const context = useCommandContext("CommandInput");
   const state = useAutocompleteState();
   const [internalRef, setInternalRef] = createForwardRef(props);
 
@@ -43,26 +43,26 @@ export function CommandInput<T extends ValidConstructor = 'input'>(
       context.anchor = current;
 
       if (current instanceof HTMLInputElement) {
-        useEventListener(current, 'input', () => {
+        useEventListener(current, "input", () => {
           if (!isDisabled()) {
             state.setQuery(current.value);
           }
         });
       }
-      useEventListener(current, 'keydown', e => {
+      useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case 'ArrowUp': {
+            case "ArrowUp": {
               e.preventDefault();
               context.controller.setPrevChecked(true);
               break;
             }
-            case 'ArrowDown': {
+            case "ArrowDown": {
               e.preventDefault();
               context.controller.setNextChecked(true);
               break;
             }
-            case 'Enter': {
+            case "Enter": {
               e.preventDefault();
               context.selectedDescendant = context.activeDescendant;
               break;
@@ -70,7 +70,7 @@ export function CommandInput<T extends ValidConstructor = 'input'>(
           }
         }
       });
-      useEventListener(current, 'focus', () => {
+      useEventListener(current, "focus", () => {
         if (context.activeDescendant) {
           const ref = document.getElementById(context.activeDescendant);
           if (ref) {
@@ -82,7 +82,7 @@ export function CommandInput<T extends ValidConstructor = 'input'>(
           context.controller.setFirstChecked();
         }
       });
-      useEventListener(current, 'blur', () => {
+      useEventListener(current, "blur", () => {
         if (!context.optionsHovering) {
           state.blur();
         }
@@ -91,7 +91,7 @@ export function CommandInput<T extends ValidConstructor = 'input'>(
   });
 
   createEffect(() => {
-    if (state.query() !== '') {
+    if (state.query() !== "") {
       context.controller.setFirstChecked();
     }
   });
@@ -106,27 +106,27 @@ export function CommandInput<T extends ValidConstructor = 'input'>(
   });
 
   return createDynamic(
-    () => props.as || ('input' as T),
+    () => props.as || ("input" as T),
     mergeProps(
-      omitProps(props, ['as', 'ref']),
+      omitProps(props, ["as", "ref"]),
       {
-        get 'aria-activedescendant'() {
+        get "aria-activedescendant"() {
           return context.activeDescendant;
         },
         // Controls the options listbox
-        'aria-controls': context.optionsID,
+        "aria-controls": context.optionsID,
         // we set this to true
-        'aria-expanded': true,
+        "aria-expanded": true,
         id: context.inputID,
         ref: setInternalRef,
 
-        role: 'combobox',
+        role: "combobox",
         // Since combobox roles have aria-expanded=false
         // as default but Command has a visible listbox
         // Guarantee it's interactive
         tabindex: 0,
         // Guarantee it's a text
-        type: 'text',
+        type: "text",
       },
       COMMAND_INPUT_TAG,
       createDisabledState(isDisabled),

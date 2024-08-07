@@ -36,10 +36,10 @@ export function AddNewRelationButton(props: AddNewRelationButtonProps) {
           type,
           {},
           props.selectedLayout.id,
-          rowVertex.id
+          rowVertex.id,
         ),
         graph,
-        setGraph
+        setGraph,
       );
       if (insertEdgeResult.error) {
         console.error(insertEdgeResult.error);
@@ -50,7 +50,13 @@ export function AddNewRelationButton(props: AddNewRelationButtonProps) {
 
   return (
     <>
-      <IconButton icon="ic:round-add" onClick={handleAddNewClick} ref={setReference} size={21} title={props.title} />
+      <IconButton
+        icon="ic:round-add"
+        onClick={handleAddNewClick}
+        ref={setReference}
+        size={21}
+        title={props.title}
+      />
       <Show when={showDropdown()}>
         <ZIndex>
           <DropdownMenu

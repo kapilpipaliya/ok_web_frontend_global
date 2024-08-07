@@ -8,7 +8,10 @@ import { Select } from "~/components/css_properties/components/Select";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
 import { ZIndex } from "~/components/ZIndex";
 
-import type { GenericField, TextFieldOptionsField, } from "../constants/FieldType";
+import type {
+  GenericField,
+  TextFieldOptionsField,
+} from "../constants/FieldType";
 
 import { ComponentMetaContext } from "../CssEditorContext";
 import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
@@ -39,17 +42,32 @@ export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
         </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.componentName === "textFieldOptions"}>
-        <ComponentMetaContext.Provider value={{ ...(props.value as TextFieldOptionsField), showInside: true }}>
+        <ComponentMetaContext.Provider
+          value={{
+            ...(props.value as TextFieldOptionsField),
+            showInside: true,
+          }}
+        >
           <TextFieldWithSelect />
         </ComponentMetaContext.Provider>
       </Match>
       <Match when={props.value.componentName === "grid"}>
-        <div  
+        <div
           class={`grid ai:${props.value.align || "center"} gap:${props.value.gap || 10} grid-template-cols:${props.value["grid-template-columns"]} p:${props.value.padding || 0}`}
         >
           <For each={props.value.children}>
             {(item) => {
-              return <DynamicCSSComponent value={{ ...(item), projections: [...(props.value.projections || []), ...(item.projections || [])] }} />;
+              return (
+                <DynamicCSSComponent
+                  value={{
+                    ...item,
+                    projections: [
+                      ...(props.value.projections || []),
+                      ...(item.projections || []),
+                    ],
+                  }}
+                />
+              );
             }}
           </For>
         </div>

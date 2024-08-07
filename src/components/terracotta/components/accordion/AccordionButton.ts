@@ -1,22 +1,22 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { createComponent, createEffect, mergeProps } from 'solid-js';
-import { omitProps } from 'solid-use/props';
+import { createComponent, createEffect, mergeProps } from "solid-js";
+import { omitProps } from "solid-use/props";
 
-import type { SelectOptionStateRenderProps } from '../../states/create-select-option-state';
+import type { SelectOptionStateRenderProps } from "../../states/create-select-option-state";
 import type {
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { OmitAndMerge } from '../../utils/types';
-import type { ButtonProps } from '../button';
+} from "../../utils/dynamic-prop";
+import type { OmitAndMerge } from "../../utils/types";
+import type { ButtonProps } from "../button";
 
 import {
   SelectOptionStateChild,
   useSelectOptionState,
-} from '../../states/create-select-option-state';
-import { createForwardRef } from '../../utils/dynamic-prop';
-import { createOwnerAttribute } from '../../utils/focus-navigator';
+} from "../../states/create-select-option-state";
+import { createForwardRef } from "../../utils/dynamic-prop";
+import { createOwnerAttribute } from "../../utils/focus-navigator";
 import {
   createActiveState,
   createARIADisabledState,
@@ -24,24 +24,24 @@ import {
   createDisabledState,
   createExpandedState,
   createSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { Button } from '../button';
-import { useAccordionContext } from './AccordionContext';
-import { useAccordionItemContext } from './AccordionItemContext';
-import { ACCORDION_BUTTON_TAG } from './tags';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { Button } from "../button";
+import { useAccordionContext } from "./AccordionContext";
+import { useAccordionItemContext } from "./AccordionItemContext";
+import { ACCORDION_BUTTON_TAG } from "./tags";
 
-export type AccordionButtonProps<T extends ValidConstructor = 'button'> =
+export type AccordionButtonProps<T extends ValidConstructor = "button"> =
   HeadlessPropsWithRef<
     T,
     OmitAndMerge<SelectOptionStateRenderProps, ButtonProps<T>>
   >;
 
-export function AccordionButton<T extends ValidConstructor = 'button'>(
+export function AccordionButton<T extends ValidConstructor = "button">(
   props: AccordionButtonProps<T>,
 ): JSX.Element {
-  const rootContext = useAccordionContext('AccordionButton');
-  const itemContext = useAccordionItemContext('AccordionButton');
+  const rootContext = useAccordionContext("AccordionButton");
+  const itemContext = useAccordionItemContext("AccordionButton");
   const state = useSelectOptionState();
 
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -53,17 +53,17 @@ export function AccordionButton<T extends ValidConstructor = 'button'>(
     const current = internalRef();
 
     if (current instanceof HTMLElement) {
-      useEventListener(current, 'click', () => {
+      useEventListener(current, "click", () => {
         if (!isDisabled()) {
           state.select();
         }
       });
-      useEventListener(current, 'focus', () => {
+      useEventListener(current, "focus", () => {
         if (!isDisabled()) {
           state.focus();
         }
       });
-      useEventListener(current, 'blur', () => {
+      useEventListener(current, "blur", () => {
         if (!isDisabled()) {
           state.blur();
         }
@@ -74,10 +74,10 @@ export function AccordionButton<T extends ValidConstructor = 'button'>(
   return createComponent(
     Button,
     mergeProps(
-      omitProps(props, ['children', 'ref', 'disabled']),
+      omitProps(props, ["children", "ref", "disabled"]),
       ACCORDION_BUTTON_TAG,
       {
-        get 'aria-controls'() {
+        get "aria-controls"() {
           return state.isSelected() && itemContext.panelID;
         },
         id: itemContext.buttonID,

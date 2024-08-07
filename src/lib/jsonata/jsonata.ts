@@ -178,20 +178,20 @@ function evaluatePath(expr, input, environment) {
     if (ii === 0 && step.consarray) {
       resultSequence = evaluate(step, inputSequence, environment);
     } else if (isTupleStream) {
-        tupleBindings = evaluateTupleStep(
-          step,
-          inputSequence,
-          tupleBindings,
-          environment,
-        );
-      } else {
-        resultSequence = evaluateStep(
-          step,
-          inputSequence,
-          environment,
-          ii === expr.steps.length - 1,
-        );
-      }
+      tupleBindings = evaluateTupleStep(
+        step,
+        inputSequence,
+        tupleBindings,
+        environment,
+      );
+    } else {
+      resultSequence = evaluateStep(
+        step,
+        inputSequence,
+        environment,
+        ii === expr.steps.length - 1,
+      );
+    }
 
     if (
       !isTupleStream &&
@@ -803,7 +803,7 @@ function evaluateComparisonExpression(lhs, rhs, op) {
     throw {
       code: "T2010",
       stack: new Error().stack,
-      value: (ltype === "string" || ltype === "number") ? rhs : lhs,
+      value: ltype === "string" || ltype === "number" ? rhs : lhs,
     };
   }
 
@@ -928,7 +928,7 @@ function evaluateStringConcat(lhs, rhs) {
 function evaluateGroupExpression(expr, input, environment) {
   const result = {};
   const groups = {};
-  const reduce = !!(input?.tupleStream );
+  const reduce = !!input?.tupleStream;
   // group the input sequence by 'key' expression
   if (!Array.isArray(input)) {
     input = createSequence(input);
@@ -1154,17 +1154,17 @@ function evaluateRegex(expr) {
         if (re.lastIndex >= str.length) {
           return undefined;
         }
-          const next = closure(str, re.lastIndex);
-          if (next && next.match === "") {
-            // matches zero length string; this will never progress
-            throw {
-              code: "D1004",
-              position: expr.position,
-              stack: new Error().stack,
-              value: expr.value.source,
-            };
-          }
-          return next;
+        const next = closure(str, re.lastIndex);
+        if (next && next.match === "") {
+          // matches zero length string; this will never progress
+          throw {
+            code: "D1004",
+            position: expr.position,
+            stack: new Error().stack,
+            value: expr.value.source,
+          };
+        }
+        return next;
       };
     }
 
@@ -1246,13 +1246,16 @@ function evaluateSortExpression(expr, input, environment) {
 
       // if aa or bb are not string or numeric values, then throw an error
       if (
-        !((atype === "string" || atype === "number") &&(btype === "string" || btype === "number"))
+        !(
+          (atype === "string" || atype === "number") &&
+          (btype === "string" || btype === "number")
+        )
       ) {
         throw {
           code: "T2008",
           position: expr.position,
           stack: new Error().stack,
-          value: (atype === "string" || atype === "number") ? bb : aa,
+          value: atype === "string" || atype === "number" ? bb : aa,
         };
       }
 
@@ -1269,7 +1272,8 @@ function evaluateSortExpression(expr, input, environment) {
       if (aa === bb) {
         // both the same - move on to next term
         continue;
-      }if (aa < bb) {
+      }
+      if (aa < bb) {
         comp = -1;
       } else {
         comp = 1;

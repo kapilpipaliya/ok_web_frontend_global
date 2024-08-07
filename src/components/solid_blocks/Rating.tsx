@@ -2,8 +2,10 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal, For, type JSX } from "solid-js";
 
 export function StarRating(
-  props: Readonly<{ etc: any; heading?: string } & JSX.HTMLAttributes<HTMLDivElement> &
-    JSX.IntrinsicAttributes>,
+  props: Readonly<
+    { etc: any; heading?: string } & JSX.HTMLAttributes<HTMLDivElement> &
+      JSX.IntrinsicAttributes
+  >,
 ) {
   const [rating, setRating] = createSignal(0);
   const [hover, setHover] = createSignal(0);

@@ -19,8 +19,8 @@ export function newEdge(
   startVertexId: Id,
   endVertexId: Id,
 ): Edge {
-  !startVertexId && console.error('edge startId should not be empty');
-  !endVertexId && console.error('edge endId should not be empty');
+  !startVertexId && console.error("edge startId should not be empty");
+  !endVertexId && console.error("edge endId should not be empty");
   return {
     E: endVertexId,
     id: edgeId,

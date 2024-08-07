@@ -9,18 +9,20 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { selectedValue } from "../../fields/utils/selectedValue";
 import { formNameDisplayExprFromVertex } from "../formNameDisplayExprFromVertex";
 
-export function getTagValue(props: Readonly<{
-  attribute: FieldAttribute;
-  graph: GraphInterface;
-  info: CellContext<any, any>;
-  setGraph: SetStoreFunction<GraphInterface>;
-}>) {
+export function getTagValue(
+  props: Readonly<{
+    attribute: FieldAttribute;
+    graph: GraphInterface;
+    info: CellContext<any, any>;
+    setGraph: SetStoreFunction<GraphInterface>;
+  }>,
+) {
   const vertex = selectedValue(
     {
       P: props.attribute,
     } as unknown as Vertex,
     props.info.row.original,
-    props.graph
+    props.graph,
   );
   if (vertex) {
     const textArray = [];
@@ -29,11 +31,12 @@ export function getTagValue(props: Readonly<{
         props.graph,
         props.setGraph,
         props.attribute.displayExpr ||
-        formNameDisplayExprFromVertex(
-          props.graph,
-          props.attribute.collection,
-        ) || `::'P.${IdAttr}'`,
-        [props.graph.vertexes[v]]
+          formNameDisplayExprFromVertex(
+            props.graph,
+            props.attribute.collection,
+          ) ||
+          `::'P.${IdAttr}'`,
+        [props.graph.vertexes[v]],
       ).vertexes;
       textArray.push(text);
     }

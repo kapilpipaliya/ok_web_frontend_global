@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
 import {
   createComponent,
@@ -6,40 +6,40 @@ import {
   createUniqueId,
   mergeProps,
   onCleanup,
-} from 'solid-js';
-import { omitProps } from 'solid-use/props';
+} from "solid-js";
+import { omitProps } from "solid-use/props";
 
 import type {
   SelectStateRenderProps,
   SingleSelectStateControlledOptions,
   SingleSelectStateUncontrolledOptions,
-} from '../../states/create-select-state';
+} from "../../states/create-select-state";
 import type {
   DynamicProps,
   HeadlessPropsWithRef,
   ValidConstructor,
-} from '../../utils/dynamic-prop';
-import type { Prettify } from '../../utils/types';
+} from "../../utils/dynamic-prop";
+import type { Prettify } from "../../utils/types";
 
 import {
   createSingleSelectState,
   SelectStateProvider,
-} from '../../states/create-select-state';
-import createDynamic from '../../utils/create-dynamic';
-import { createForwardRef } from '../../utils/dynamic-prop';
+} from "../../states/create-select-state";
+import createDynamic from "../../utils/create-dynamic";
+import { createForwardRef } from "../../utils/dynamic-prop";
 import {
   createARIADisabledState,
   createDisabledState,
   createHasActiveState,
   createHasSelectedState,
-} from '../../utils/state-props';
-import useEventListener from '../../utils/use-event-listener';
-import { RadioGroupContext } from './RadioGroupContext';
+} from "../../utils/state-props";
+import useEventListener from "../../utils/use-event-listener";
+import { RadioGroupContext } from "./RadioGroupContext";
 import {
   createRadioGroupOptionFocusNavigator,
   RadioGroupRootContext,
-} from './RadioGroupRootContext';
-import { RADIO_GROUP_TAG } from './tags';
+} from "./RadioGroupRootContext";
+import { RADIO_GROUP_TAG } from "./tags";
 
 export type RadioGroupControlledBaseProps<V> = Prettify<
   SelectStateRenderProps<V> & SingleSelectStateControlledOptions<V>
@@ -47,7 +47,7 @@ export type RadioGroupControlledBaseProps<V> = Prettify<
 
 export type RadioGroupControlledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, RadioGroupControlledBaseProps<V>>;
 
 export type RadioGroupUncontrolledBaseProps<V> = Prettify<
@@ -56,20 +56,20 @@ export type RadioGroupUncontrolledBaseProps<V> = Prettify<
 
 export type RadioGroupUncontrolledProps<
   V,
-  T extends ValidConstructor = 'div',
+  T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, RadioGroupUncontrolledBaseProps<V>>;
 
-export type RadioGroupProps<V, T extends ValidConstructor = 'div'> =
+export type RadioGroupProps<V, T extends ValidConstructor = "div"> =
   | RadioGroupControlledProps<V, T>
   | RadioGroupUncontrolledProps<V, T>;
 
-function isRadioGroupUncontrolled<V, T extends ValidConstructor = 'div'>(
+function isRadioGroupUncontrolled<V, T extends ValidConstructor = "div">(
   props: RadioGroupProps<V, T>,
 ): props is RadioGroupUncontrolledProps<V, T> {
-  return 'defaultValue' in props;
+  return "defaultValue" in props;
 }
 
-export function RadioGroup<V, T extends ValidConstructor = 'div'>(
+export function RadioGroup<V, T extends ValidConstructor = "div">(
   props: RadioGroupProps<V, T>,
 ): JSX.Element {
   const controller = createRadioGroupOptionFocusNavigator();
@@ -86,17 +86,17 @@ export function RadioGroup<V, T extends ValidConstructor = 'div'>(
       onCleanup(() => {
         controller.clearRef();
       });
-      useEventListener(current, 'keydown', e => {
+      useEventListener(current, "keydown", (e) => {
         if (!state.disabled()) {
           switch (e.key) {
-            case 'ArrowLeft':
-            case 'ArrowUp': {
+            case "ArrowLeft":
+            case "ArrowUp": {
               e.preventDefault();
               controller.setPrevChecked(true);
               break;
             }
-            case 'ArrowRight':
-            case 'ArrowDown': {
+            case "ArrowRight":
+            case "ArrowDown": {
               e.preventDefault();
               controller.setNextChecked(true);
               break;
@@ -104,7 +104,7 @@ export function RadioGroup<V, T extends ValidConstructor = 'div'>(
           }
         }
       });
-      useEventListener(current, 'focusin', e => {
+      useEventListener(current, "focusin", (e) => {
         if (e.target && e.target !== current) {
           controller.setCurrent(e.target as HTMLElement);
         }
@@ -117,37 +117,37 @@ export function RadioGroup<V, T extends ValidConstructor = 'div'>(
       return createComponent(RadioGroupContext.Provider, {
         get children() {
           return createDynamic(
-            () => props.as || ('div' as T),
+            () => props.as || ("div" as T),
             mergeProps(
               isRadioGroupUncontrolled(props)
                 ? omitProps(props, [
-                    'as',
-                    'by',
-                    'children',
-                    'defaultValue',
-                    'disabled',
-                    'multiple',
-                    'onChange',
-                    'ref',
-                    'toggleable',
+                    "as",
+                    "by",
+                    "children",
+                    "defaultValue",
+                    "disabled",
+                    "multiple",
+                    "onChange",
+                    "ref",
+                    "toggleable",
                   ])
                 : omitProps(props, [
-                    'as',
-                    'by',
-                    'children',
-                    'value',
-                    'disabled',
-                    'multiple',
-                    'onChange',
-                    'ref',
-                    'toggleable',
+                    "as",
+                    "by",
+                    "children",
+                    "value",
+                    "disabled",
+                    "multiple",
+                    "onChange",
+                    "ref",
+                    "toggleable",
                   ]),
               RADIO_GROUP_TAG,
               {
-                'aria-describedby': descriptionID,
-                'aria-labelledby': labelID,
+                "aria-describedby": descriptionID,
+                "aria-labelledby": labelID,
                 ref: setRef,
-                role: 'radiogroup',
+                role: "radiogroup",
               },
               createDisabledState(() => state.disabled()),
               createARIADisabledState(() => state.disabled()),

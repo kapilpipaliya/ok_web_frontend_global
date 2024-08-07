@@ -26,7 +26,8 @@ export const Nav = {
           message: "This ID is already taken",
           type: "custom",
           validationCallback: (options: any) => {
-            const { formData } = (options.validator.context as IFormContext) ||
+            const { formData } =
+              (options.validator.context as IFormContext) ||
               ({} as IFormContext);
             const [graph, _setGraph] = useGraph();
 
@@ -36,7 +37,7 @@ export const Nav = {
               "id",
               val,
               formData.id,
-              graph
+              graph,
             );
           },
         },

@@ -1,4 +1,3 @@
-
 import { createSelector, Show } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
@@ -20,15 +19,21 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
 
   const toggleHidden = (itemId: Id) => {
     setLayoutStore("hiddenNodes", (prev) =>
-      prev.includes(itemId) ? prev.filter((item) => item !== itemId) : [...prev, itemId]
+      prev.includes(itemId)
+        ? prev.filter((item) => item !== itemId)
+        : [...prev, itemId],
     );
   };
 
-  const getComponent = () => getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name as string;
+  const getComponent = () =>
+    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P
+      .name as string;
 
   const HideShowIcon = () => {
-    const isHiddenAttr = () => layoutStore.hiddenNodes.includes(props.metaVertex.id);
-    const icon = () => (isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline");
+    const isHiddenAttr = () =>
+      layoutStore.hiddenNodes.includes(props.metaVertex.id);
+    const icon = () =>
+      isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline";
     const tooltipContent = () => (isHiddenAttr() ? "Show" : "Hide");
 
     return (
@@ -45,13 +50,21 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
 
   return (
     <div class="flex ai:center">
-      <Show when={isSelectedLayoutId(props.metaVertex.id) || isSelectedHoverId(props.metaVertex.id)}>
+      <Show
+        when={
+          isSelectedLayoutId(props.metaVertex.id) ||
+          isSelectedHoverId(props.metaVertex.id)
+        }
+      >
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mingcute:settings-5-line"
           iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
-            setLayoutStore("showPropertiesDrawer", !layoutStore.showPropertiesDrawer);
+            setLayoutStore(
+              "showPropertiesDrawer",
+              !layoutStore.showPropertiesDrawer,
+            );
           }}
           size={18}
           title="Properties"
@@ -78,14 +91,17 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               layoutStore.formStore[0].txnId,
               graph,
               setGraph,
-              layoutStore.formStore[0].formData
+              layoutStore.formStore[0].formData,
             );
           }}
           size={18}
           title="Duplicate"
         />
-
-        <SaveAsTemplateButton class="mr:5px opacity:.5 opacity:1:hover" item={props.metaVertex} size={20}/>
+        <SaveAsTemplateButton
+          class="mr:5px opacity:.5 opacity:1:hover"
+          item={props.metaVertex}
+          size={20}
+        />
         <HideShowIcon />
         <IconButton
           class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
@@ -100,13 +116,12 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               setGraph,
               layoutStore.formStore[0].txnId,
               getComponent(),
-              showSuccessToast
+              showSuccessToast,
             );
           }}
           size={18}
           title="Delete"
         />
-
         &nbsp;
       </Show>
       {/* </Show> */}

@@ -20,7 +20,12 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         type="button"
       >
         <span class="sr-only">Open options</span>
-        <svg aria-hidden="true" class="h:1.25rem w:1.25rem" fill="currentColor" viewBox="0 0 20 20">
+        <svg
+          aria-hidden="true"
+          class="h:1.25rem w:1.25rem"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
           <path d="M3 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM8.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM15.5 8.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
         </svg>
       </button>
@@ -45,7 +50,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
                 role="menuitem"
                 tabindex="-1"
               >
-                {option.label}<span class="sr-only">, {props.title}</span>
+                {option.label}
+                <span class="sr-only">, {props.title}</span>
               </a>
             )}
           </For>
@@ -55,10 +61,6 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
   );
 }
 
-export function CardOptionsContainer(props: { children: JSX.Element; }) {
-  return (
-    <div class="ml:auto position:relative">
-      {props.children}
-    </div>
-  );
+export function CardOptionsContainer(props: { children: JSX.Element }) {
+  return <div class="ml:auto position:relative">{props.children}</div>;
 }

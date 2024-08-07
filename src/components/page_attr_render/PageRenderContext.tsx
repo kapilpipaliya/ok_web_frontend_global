@@ -20,9 +20,13 @@ export const PageRenderContext = createContext<PageRenderStore>();
 export function usePageRenderContext() {
   return useContext(PageRenderContext) || [];
 }
-export const PageRenderContextProvider = (props: { children: JSX.Element; item: Vertex; store: PageRenderStore; }) => {
+export const PageRenderContextProvider = (props: {
+  children: JSX.Element;
+  item: Vertex;
+  store: PageRenderStore;
+}) => {
   const parentItems = usePageRenderContext();
-  props.store[1]('vertexes', [...(parentItems[0]?.vertexes || []), props.item]);
+  props.store[1]("vertexes", [...(parentItems[0]?.vertexes || []), props.item]);
 
   return (
     <PageRenderContext.Provider value={props.store}>

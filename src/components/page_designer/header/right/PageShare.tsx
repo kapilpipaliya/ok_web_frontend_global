@@ -13,7 +13,9 @@ export function ShareSection() {
   const [error, setError] = createSignal("");
 
   createEffect(() => {
-    if (access() === "everyone") { setEmail(""); }
+    if (access() === "everyone") {
+      setEmail("");
+    }
   });
 
   const getLink = () => {
@@ -27,7 +29,7 @@ export function ShareSection() {
         return "";
       }
 
-      if (!(P?.name)) {
+      if (!P?.name) {
         setError(`Please configure ${L[0]} Name first.`);
         return "";
       }
@@ -45,7 +47,9 @@ export function ShareSection() {
 
   const previewLink = () => {
     const url = getLink();
-    if (url) { window.open(url, "_blank"); }
+    if (url) {
+      window.open(url, "_blank");
+    }
   };
 
   const handleAccessChange = (accessType: string) => setAccess(accessType);
@@ -109,9 +113,7 @@ export function ShareSection() {
       </div>
       <div class="flex">
         {["🌐", "💬", "✉️", "🔗"].map((icon) => (
-          <button class="cursor:pointer mr:10px">
-            {icon}
-          </button>
+          <button class="cursor:pointer mr:10px">{icon}</button>
         ))}
       </div>
     </div>

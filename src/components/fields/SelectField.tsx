@@ -28,12 +28,14 @@ import { setSelectValueHelper } from "./utils/setSelectValueHelper";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
-  props: Readonly<{
-    componentName: string;
-    isRealTime?: boolean;
-    title: string;
-    txnId?: number;
-  } & GenericComponentProps>,
+  props: Readonly<
+    {
+      componentName: string;
+      isRealTime?: boolean;
+      title: string;
+      txnId?: number;
+    } & GenericComponentProps
+  >,
 ) {
   const [graph, setGraph] = useGraph();
   const formStore = useFormContext();
@@ -59,12 +61,15 @@ export function SelectField(
         const [label, val] = item.split(",");
         if (val === undefined) {
           return props.meta.P.valueKey
-            ? { id: label.trim(), label: label.trim() } : label.trim();
+            ? { id: label.trim(), label: label.trim() }
+            : label.trim();
         }
         return { id: val.trim(), label: label.trim() };
       });
     }
-    if (Array.isArray(options)) { return options; }
+    if (Array.isArray(options)) {
+      return options;
+    }
     return options ? [options] : [];
   };
 
@@ -128,7 +133,9 @@ export function SelectField(
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {
       batch(() => {
-        if (!value) { return; }
+        if (!value) {
+          return;
+        }
         let txnId = props.txnId ?? 0;
         if (props.isRealTime) {
           txnId = graph.newTxnId;
@@ -139,8 +146,8 @@ export function SelectField(
             parsedValue = null;
           } else if (getComponent() === "SelectBox") {
             parsedValue = isObject(value[0])
-              // @ts-expect-error ignore
-              ? value[0][props.meta.P.valueKey || "id"]
+              ? // @ts-expect-error ignore
+                value[0][props.meta.P.valueKey || "id"]
               : value[0];
           } else {
             parsedValue = value;
@@ -176,7 +183,9 @@ export function SelectField(
           graph,
           setGraph,
         );
-        if (props.isRealTime) { commitTxn(txnId, graph); }
+        if (props.isRealTime) {
+          commitTxn(txnId, graph);
+        }
       });
     });
   };
@@ -220,25 +229,24 @@ export function SelectField(
         selectedValues={() => {
           if (isStaticOptions(props.meta)) {
             const value = props.data?.P[props.meta.P[IdAttr]];
-            if (!value) { return []; }
-            if (
-              !Array.isArray(value) &&
-              getComponent() === "SelectBox"
-            ) {
+            if (!value) {
+              return [];
+            }
+            if (!Array.isArray(value) && getComponent() === "SelectBox") {
               const option = options().find(
                 (option) =>
-                  (value?.[props.meta.P.valueKey ?? 'id'] || value) ===
-                  (option?.[props.meta.P.valueKey ?? 'id'] || option),
+                  (value?.[props.meta.P.valueKey ?? "id"] || value) ===
+                  (option?.[props.meta.P.valueKey ?? "id"] || option),
               );
-              return option ? [option] : [{label: value, value}];
+              return option ? [option] : [{ label: value, value }];
             }
             return ensureArray(value);
           }
-            return selectedValue(props.meta, props.data as Vertex, graph).map(
-              (id) => {
-                return graph.vertexes[id];
-              },
-            );
+          return selectedValue(props.meta, props.data as Vertex, graph).map(
+            (id) => {
+              return graph.vertexes[id];
+            },
+          );
         }}
         selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
       />

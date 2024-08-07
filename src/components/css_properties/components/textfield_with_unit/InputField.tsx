@@ -8,7 +8,7 @@ interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
   meta: TextFieldOptionsField;
   selectedValue: () => string;
-} 
+}
 
 export function InputField(props: Readonly<InputFieldProps>) {
   const [local, others] = splitProps(props, [
@@ -20,12 +20,18 @@ export function InputField(props: Readonly<InputFieldProps>) {
 
   const InnerInput = () => (
     <input
-      class={`${local.class ?? ""} ${local.meta.showInside ? 'outline:none p:5' : ''} f:14 w:100%`}
+      class={`${local.class ?? ""} ${local.meta.showInside ? "outline:none p:5" : ""} f:14 w:100%`}
       onInput={local.handleChange}
-      placeholder={local.meta.type === "number" ? "0" : local.meta.placeholder ?? ""}
+      placeholder={
+        local.meta.type === "number" ? "0" : local.meta.placeholder ?? ""
+      }
       step="any"
       type={local.meta.type || "text"}
-      value={local.meta.type === "number" ? getValueWithoutUnits(local.selectedValue()) : local.selectedValue()}
+      value={
+        local.meta.type === "number"
+          ? getValueWithoutUnits(local.selectedValue())
+          : local.selectedValue()
+      }
       {...local.meta.inputProps}
       {...others}
     />

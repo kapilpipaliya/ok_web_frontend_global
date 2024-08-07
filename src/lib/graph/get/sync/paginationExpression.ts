@@ -15,8 +15,12 @@ export function paginationExpression(params: {
     dynamicString += `g:'${params.coll}`;
     const options = [] as string[];
 
-    if (params.filter) { options.push(params.filter); }
-    if (params.skip) { options.push(`skip=${params.skip}`); }
+    if (params.filter) {
+      options.push(params.filter);
+    }
+    if (params.skip) {
+      options.push(`skip=${params.skip}`);
+    }
     if (params.limit && params.limit !== 0) {
       options.push(`limit=${params.limit}`);
     }
