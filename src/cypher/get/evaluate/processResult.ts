@@ -17,9 +17,19 @@ export function processResult(
   const vertices = records.map((record) =>
     convertNodeToJson(record.get(nodeLabel)),
   );
-  const relationships = typeLabel
-    ? records.map((record) => convertRelationshipToJson(record.get(typeLabel)))
-    : [];
+  const relationships = [];
+  if (typeLabel) {
+    for (const record of records) {
+      const relationshipData = record.get(typeLabel);
+      if (Array.isArray(relationshipData)) {
+        for (const relationship of relationshipData) {
+          relationships.push(convertRelationshipToJson(relationship));
+        }
+      } else {
+        relationships.push(convertRelationshipToJson(relationshipData));
+      }
+    }
+  }
 
   if (context.nodes) {
     for (const vertex of vertices) {

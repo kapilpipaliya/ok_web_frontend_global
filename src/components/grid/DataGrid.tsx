@@ -244,7 +244,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   return (
     <DataGridProvider value={gridStore}>
-      <RealTimeCodeEditor />
       <Switch>
         <Match when={gridState.isLoading}>
           <LoaderNew loaderHeight="55vh" />

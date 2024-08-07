@@ -1,13 +1,19 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
+import { batch, onMount } from "solid-js";
+
 import type { Vertex } from "~/lib/graph/graph";
 
+import { useGraph } from "~/lib/graph/graph";
+
 import {
-  type FileManagerObject,
+  FileManagerObject,
   FileManagerStoreProvider,
+  useFileManagerStore,
 } from "./FileManagerContext";
 import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
 import { Sidebar } from "./sidebar/FileManagerSideBar";
+import { getFilesData } from "./sidebar/getFilesData";
 
 export default function FileManager(
   props: Readonly<{
@@ -19,11 +25,12 @@ export default function FileManager(
   return (
     <FileManagerStoreProvider
       enableRowSelection={props.enableRowSelection}
+      fileId={props.fileId}
       setFileManagerStore={props.setFileManagerStore}
     >
       <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
         <Sidebar />
-        <FileManagerMainContent fileId={props.fileId} />
+        <FileManagerMainContent />
       </div>
     </FileManagerStoreProvider>
   );

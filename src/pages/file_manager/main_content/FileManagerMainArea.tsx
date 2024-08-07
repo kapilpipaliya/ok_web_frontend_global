@@ -1,5 +1,5 @@
 import jsep from "jsep";
-import { createEffect, createSignal, For } from "solid-js";
+import { createEffect, createMemo, createSignal, For } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
@@ -19,7 +19,6 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
 
   const [_children, setChildren] = createSignal<Vertex[]>([]);
-  const [breadcrumb, setBreadcrumb] = createSignal<Vertex[]>([]);
 
   const fetchChildren = async (item: Vertex) => {
     const data = await getFilesData(graph, setGraph, item.id);
@@ -31,9 +30,9 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
     return data;
   };
 
-  const fetchBreadcrumb = async (item: Vertex) => {
+  const breadcrumb =  createMemo(() => {
     const breadcrumbItems: Vertex[] = [];
-    let currentItem: null | Vertex = item;
+    let currentItem: null | Vertex = props.item;
 
     while (currentItem) {
       breadcrumbItems.unshift(currentItem);
@@ -46,14 +45,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
       currentItem = parentVertex[0];
     }
 
-    setBreadcrumb(breadcrumbItems);
-  };
+    return breadcrumbItems;
+  });
 
   createEffect(() => {
     fetchChildren(props.item);
-  });
-  createEffect(() => {
-    fetchBreadcrumb(props.item);
   });
 
   function AddNewFileButton() {

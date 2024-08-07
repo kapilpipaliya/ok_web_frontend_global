@@ -9,16 +9,34 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 export async function getFilesData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  rootId?: string,
+  folderId: string,
+) {
+  const expression = `id:'${folderId}'<-ParentFolder`;
+
+  const result = await fetchDataFromMG({ expression });
+
+  if (!isValidResponse(result)) {
+    // @ts-expect-error ignore
+    return { error: result.error || "Error When Loading Data" };
+  }
+  setGraphData(graph, setGraph, result.graph);
+
+  return result;
+}
+
+
+export async function getRootData(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  folderId?: string,
   fileId?: string,
 ) {
   let expression;
-  if (!(rootId || fileId)) {
+  if (!(folderId || fileId)) {
     expression = `g:'Folder[root]'`;
-  } else if (rootId) {
-    expression = `id:'${rootId}'<-ParentFolder`;
-  } else if (fileId) {
-    expression = `id:'${fileId}'->ParentFolder`;
+  } else {
+    // -> operator not return current vertex
+    expression = `id:'${folderId || fileId}'->'ParentFolder*'`;
   }
   if (!expression) {
     return { error: "Invalid expression" };
