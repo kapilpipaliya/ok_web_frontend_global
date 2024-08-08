@@ -24,7 +24,6 @@ export async function getFilesData(
   return result;
 }
 
-
 export async function getRootData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -32,11 +31,11 @@ export async function getRootData(
   fileId?: string,
 ) {
   let expression;
-  if (!(folderId || fileId)) {
-    expression = `g:'Folder[root]'`;
-  } else {
+  if ((folderId || fileId)) {
     // -> operator not return current vertex
     expression = `id:'${folderId || fileId}'->'ParentFolder*'`;
+  } else {
+    expression = `g:'Folder[root]'`;
   }
   if (!expression) {
     return { error: "Invalid expression" };

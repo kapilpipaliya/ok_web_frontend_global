@@ -225,8 +225,7 @@ export function PageViewWrapper(
     }
     if (
       !isNoPermissionCheck() &&
-      (!formStore.formMetaData ||
-        !(hasInsertPermission() || hasEditPermission() || hasViewPermission()))
+      (!(formStore.formMetaData &&(hasInsertPermission() || hasEditPermission() || hasViewPermission())))
     ) {
       return;
     }

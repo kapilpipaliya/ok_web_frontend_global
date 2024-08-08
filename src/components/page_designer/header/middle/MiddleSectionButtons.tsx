@@ -28,7 +28,7 @@ export const MiddleSectionButtons = () => {
           }
           size={22}
           title={section}
-        ></IconButton>
+        />
       )}
     </For>
   );

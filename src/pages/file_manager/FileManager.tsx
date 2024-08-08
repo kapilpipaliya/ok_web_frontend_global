@@ -1,19 +1,13 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
-import { batch, onMount } from "solid-js";
-
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useGraph } from "~/lib/graph/graph";
-
 import {
-  FileManagerObject,
+  type FileManagerObject,
   FileManagerStoreProvider,
-  useFileManagerStore,
 } from "./FileManagerContext";
 import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
 import { Sidebar } from "./sidebar/FileManagerSideBar";
-import { getFilesData } from "./sidebar/getFilesData";
 
 export default function FileManager(
   props: Readonly<{

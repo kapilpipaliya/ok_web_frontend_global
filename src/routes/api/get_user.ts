@@ -1,7 +1,6 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Session } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { findUserByEmail } from "./user/findUserByEmail";
@@ -13,12 +12,9 @@ export async function GET({ request }: APIEvent) {
     neo4jSession = await getSessionForSubdomain(request);
 
     const email = await getUserEmailFromSession();
-    const { roles, user, userSetting } = await findUserByEmail(
-      neo4jSession,
-      email,
-    );
+    const response = await findUserByEmail(neo4jSession, email);
 
-    if (!user) {
+    if (!response.user) {
       return new Response(
         JSON.stringify({
           error: `Not Authorized: No user found with email or username ${email}`,
@@ -27,17 +23,7 @@ export async function GET({ request }: APIEvent) {
       );
     }
 
-    const userVertex = convertNodeToJson(user);
-    delete userVertex.P.password;
-
-    const response: any = { user: userVertex };
-
-    if (userSetting) {
-      response.userSetting = convertNodeToJson(userSetting);
-    }
-    if (roles.length > 0) {
-      response.roles = roles.map((role) => convertNodeToJson(role));
-    }
+    delete response.user.P.password;
 
     return new Response(JSON.stringify(response), { status: 200 });
   } catch (error: unknown) {

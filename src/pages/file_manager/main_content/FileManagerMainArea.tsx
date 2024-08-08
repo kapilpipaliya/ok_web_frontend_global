@@ -30,7 +30,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
     return data;
   };
 
-  const breadcrumb =  createMemo(() => {
+  const breadcrumb = createMemo(() => {
     const breadcrumbItems: Vertex[] = [];
     let currentItem: null | Vertex = props.item;
 

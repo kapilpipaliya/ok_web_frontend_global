@@ -2,9 +2,9 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { int, type Session } from "neo4j-driver";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
-import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import { getSubDomain } from "~/server/getSubDomain";
 
@@ -68,29 +68,23 @@ const profile = async (payload: any, session: Session, _subdomain: string) => {
   }
 
   // Check if email and username already exists
-  if (
-    email &&
-    !(
-      await findVertexesMGCall({
-        attribute: "email",
-        label: "User",
-        value: email,
-      })
-    ).error
-  ) {
-    return { error: "Email address already exists", status: 500 };
+  if (email) {
+    const emailExists = await session.run(
+      "MATCH (u:User {email: $email}) RETURN u;",
+      { email },
+    );
+    if (emailExists.records.length > 0) {
+      return { error: "Email address already exists", status: 500 };
+    }
   }
-  if (
-    username &&
-    !(
-      await findVertexesMGCall({
-        attribute: "username",
-        label: "User",
-        value: username,
-      })
-    ).error
-  ) {
-    return { error: "Username already exists", status: 500 };
+  if (username) {
+    const usernameExists = await session.run(
+      "MATCH (u:User {username: $username}) RETURN u;",
+      { username },
+    );
+    if (usernameExists.records.length > 0) {
+      return { error: "Username already exists", status: 500 };
+    }
   }
 
   // Update user profile
@@ -258,10 +252,11 @@ const supportTicket = async (
         return data;*/
       }
       case "get": {
-        const result = await findVertexesMGCall({ id: parentVertexId });
+        const query = "MATCH (v) WHERE id(v) = $id RETURN v";
+        const result = await session.run(query, { id: parentVertexId });
 
         const messagesResult = await getSelectionOptionsMGCall(
-          [result.vertexes!],
+          [convertNodeToJson(result.records[0].get("v"))],
           "->SupportUser",
           undefined,
           10,

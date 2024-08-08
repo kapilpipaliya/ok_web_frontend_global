@@ -29,7 +29,7 @@ export function TreeItemExpandButton(
           props.toggleExpand(props.metaVertexId);
         }}
         size="1em"
-      ></IconButton>
+      />
     </Show>
   );
 }

@@ -1,9 +1,7 @@
-import type { TransactionPromise } from "neo4j-driver-core";
-
-import { findVertexesMGCall } from "~/cypher/get/findVertex";
+import type { Session, TransactionPromise } from "neo4j-driver-core";
 
 export async function checkUserExistence(
-  _tx: TransactionPromise,
+  txOrSession: Session | TransactionPromise,
   username: string,
   email: string,
   subdomain: string,
@@ -13,7 +11,9 @@ export async function checkUserExistence(
     attribute: string,
     value: string,
   ) => {
-    return !(await findVertexesMGCall({ attribute, label, value })).error;
+    const query = `MATCH (n:${label} {${attribute}: $value}) RETURN n LIMIT 1`;
+    const result = await txOrSession.run(query, { value });
+    return result.records.length > 0;
   };
 
   if (subdomain && (await checkIfExists("User", "subdomain", subdomain))) {

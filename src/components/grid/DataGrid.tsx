@@ -6,7 +6,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  JSX,
+  type JSX,
   Match,
   on,
   onMount,

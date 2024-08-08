@@ -1,15 +1,15 @@
-import type { Node } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 import type { TransactionPromise } from "neo4j-driver-core";
 
 import { v4 as uuidv4 } from "uuid";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInDB(
-  tx: TransactionPromise,
+  superTx: TransactionPromise,
   username: string,
   email: string,
-  subdomainFromUrl: string,
   password: string,
   subdomain: string,
   driverPort: number,
@@ -17,56 +17,47 @@ export async function createUserInDB(
   labPort: number,
 ) {
   const uId = uuidv4();
-  let _user;
-  // Create user in a Main database without password
+
   const createUserQuery = `CREATE (u:User {
             username: $username,
             uId:$uId,
             email: $email,
-            password: $password,
             subdomain: $subdomain,
             driverPort: $driverPort,
             logsPort: $logsPort,
             labPort: $labPort,
             profileImage: ''
         }) SET u.createdAt = localDateTime() RETURN u;`;
-  const createUserResult = await tx.run(createUserQuery, {
+
+  const createUserParams = {
     driverPort,
     email,
     labPort,
     logsPort,
-    password: subdomainFromUrl === "super" ? null : password,
+    password,
     subdomain,
     uId,
     username,
-  });
+  };
 
-  if (subdomainFromUrl === "super") {
-    // Add user in a User database with password
-    const session2 = (await getDriverWithPort(driverPort)).session();
-    const createUserQuery2 = `CREATE (u:User {
+  const createUserResult = await superTx.run(createUserQuery, createUserParams);
+  const session2 = (await getDriverWithPort(driverPort)).session();
+  await createUserInUserDB(session2, createUserParams);
+  session2.close();
+  return convertNodeToJson(createUserResult.records[0].get("u"));
+}
+
+export async function createUserInUserDB(
+  session: Session,
+  params: { [key: string]: any },
+) {
+  const createUserQuery2 = `CREATE (u:User {
                 username: $username,
                 uId:$uId,
                 email: $email,
                 password: $password,
-                subdomain: $subdomain,
-                driverPort: $driverPort,
-                logsPort: $logsPort,
-                labPort: $labPort,
                 profileImage: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
-    await session2.run(createUserQuery2, {
-      driverPort,
-      email,
-      labPort,
-      logsPort,
-      password,
-      subdomain,
-      uId,
-      username,
-    });
-    session2.close();
-  }
-
-  return createUserResult.records[0].get("u") as Node;
+  const createUserResult = await session.run(createUserQuery2, params);
+  return convertNodeToJson(createUserResult.records[0].get("u"));
 }

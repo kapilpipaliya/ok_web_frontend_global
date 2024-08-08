@@ -14,14 +14,14 @@ export async function waitForDockerCreate(
     [logsPort]: "7444",
   });
 
-  const _driver = await connectToNeo4jWithRetry(
+  const driver = await connectToNeo4jWithRetry(
     `bolt://localhost:${driverPort}`,
     "",
     "",
     20,
   );
   // Remember to close the driver when done
-  // driver.close();
+  driver.close();
 
   await new Promise((resolve, _reject) => setTimeout(resolve, 1000));
 }

@@ -1,14 +1,14 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
+import { useParams } from "@solidjs/router";
 import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { DataGridStore } from "~/components/grid/DataGridContext";
+
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { getFilesData, getRootData } from "./sidebar/getFilesData";
-import { useParams } from "@solidjs/router";
-import jsep from "jsep";
-import { evaluate } from "~/lib/expression_eval";
+
+import { getRootData } from "./sidebar/getFilesData";
 
 const getInitialFileManagerStore = () => {
   return {
@@ -58,19 +58,25 @@ export function FileManagerStoreProvider(
       if (!rootData.error && rootData.result.length > 0) {
         batch(() => {
           // @ts-expect-error ignore
-          fileManagerStore[1]("expandedKeys", rootData.result.map(v=>v.id));
+          fileManagerStore[1](
+            "expandedKeys",
+            rootData.result.map((v) => v.id),
+          );
           // @ts-expect-error ignore
-          fileManagerStore[1]("root", { ...rootData.result[rootData.result.length - 1] });
+          fileManagerStore[1]("root", {
+            ...rootData.result[rootData.result.length - 1],
+          });
           if (params.folderId) {
             // when folderId is provided, we want to select the same folder
-            fileManagerStore[1]("selectedItem", { ...graph.vertexes[params.folderId] });
+            fileManagerStore[1]("selectedItem", {
+              ...graph.vertexes[params.folderId],
+            });
           } else {
             // @ts-expect-error ignore
             fileManagerStore[1]("selectedItem", { ...rootData.result[0] });
           }
         });
       }
-
     } else {
       const rootData = await getRootData(graph, setGraph);
       // @ts-expect-error ignore

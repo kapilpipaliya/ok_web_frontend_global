@@ -15,6 +15,7 @@ interface CSSField extends Field {
   projections?: [];
 }
 
+// field with all and custom property
 export interface FieldWithCustomProperty extends CSSField {
   align?: string;
   componentName: "fieldWithCustomProperty";
@@ -52,6 +53,7 @@ export interface AnotherOption {
 }
 export type OptionType = AnotherOption[] | string[];
 
+// text field with unit options
 export interface TextFieldOptionsField extends CSSField {
   componentName: "textFieldOptions";
   inputProps?: any;
@@ -77,6 +79,7 @@ export interface ToggleField extends CSSField {
   options: { icon?: boolean; key: string; value: string }[];
 }
 
+// box-shadow
 export interface DataEditorField extends CSSField {
   children: {
     [key: string]: GenericField;

@@ -29,7 +29,10 @@ export async function processNodeSync(
     vertexes,
   };
 
-  const mainResult = await evalAsync(jsep(expression.expression), context);
+  const mainResult: Vertex[] = await evalAsync(
+    jsep(expression.expression),
+    context,
+  );
 
   if (!mainResult || mainResult.length === 0) {
     return {
@@ -38,20 +41,36 @@ export async function processNodeSync(
     };
   }
 
-  let children: Vertex[] = [];
+  const children: Vertex[] = [];
   if (createdVertex) {
-    const edgeType = Object.values(context.relationships)[0]?.T;
-    const outLabel = mainResult[0]?.L[0];
-    if (edgeType && outLabel) {
-      children = await addNodeEdges(
-        sessionSource,
-        sessionTarget,
-        createdVertex,
-        mainResult,
-        edgeType,
-        outLabel,
-        inward,
-      );
+    const relationshipMap = new Map<string, Vertex[]>();
+
+    for (const [, relationship] of Object.entries(context.relationships)) {
+      const edgeType = relationship.T;
+      if (!relationshipMap.has(edgeType)) {
+        relationshipMap.set(
+          edgeType,
+          inward
+            ? mainResult.filter((vertex) => vertex.id === relationship.S)
+            : mainResult.filter((vertex) => vertex.id === relationship.E),
+        );
+      }
+    }
+
+    for (const [edgeType, vertexResults] of relationshipMap.entries()) {
+      const outLabel = vertexResults[0]?.L[0];
+      if (outLabel) {
+        const newChildren = await addNodeEdges(
+          sessionSource,
+          sessionTarget,
+          createdVertex,
+          vertexResults,
+          edgeType,
+          outLabel,
+          inward,
+        );
+        children.push(...newChildren);
+      }
     }
   }
 

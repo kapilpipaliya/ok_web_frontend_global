@@ -2,7 +2,7 @@ import { getRequestURL } from "vinxi/http";
 
 import { getHttpsSession } from "./getHttpsSession";
 
-export async function getSubDomain(host: string, _isAuthCheck = true) {
+export async function getSubDomain(host: string) {
   const url = getRequestURL();
   const _path = url.pathname;
   const _httpSession = await getHttpsSession();

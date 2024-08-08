@@ -1,30 +1,25 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import type { Node } from "neo4j-driver";
 
+import type { Vertex } from "~/lib/graph/graph";
+
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
-import { getHttpsSession } from "~/server/getHttpsSession";
 import { getSubDomain } from "~/server/getSubDomain";
+
+import { updateSession } from "./signup/updateSession";
 
 // Main POST function
 export async function POST({ request }: APIEvent) {
   const { email, password } = await request.json();
   try {
-    const subdomain = await getSubDomain(request.headers.get("host")!, false);
+    const subdomain = await getSubDomain(request.headers.get("host")!);
 
     const user = await authenticateUser(email, password, subdomain);
 
-    const httpSession = await getHttpsSession();
-    await httpSession.update((oldData) => ({
-      ...oldData,
-      email: user.properties.email,
-      subdomain,
-    }));
+    await updateSession(user);
 
-    const { password: _, ...properties } = user.properties;
-    return {
-      id: user.elementId,
-      properties,
-    };
+    delete user.P.password;
+    return user;
   } catch (error: any) {
     console.error("Server error Failed to login:", error);
     return new Response(error.message, { status: 500 });
@@ -48,7 +43,7 @@ async function authenticateUser(
       throw new Error("Not Authorized Email or Username!!!");
     }
 
-    const user = result.records[0].get("u");
+    const user = convertNodeToJson(result.records[0].get("u"));
 
     if (subdomain === "super") {
       return await authenticateSuperUser(user, email, password);
@@ -60,8 +55,8 @@ async function authenticateUser(
 }
 
 // Function to authenticate regular user
-function authenticateRegularUser(user: Node, password: string) {
-  if (user.properties.password !== password) {
+function authenticateRegularUser(user: Vertex, password: string) {
+  if (user.P.password !== password) {
     throw new Error("Not Authorized Email or Username!");
   }
 
@@ -74,14 +69,14 @@ async function authenticateSuperUser(
   email: string,
   password: string,
 ) {
-  const session = (
+  const userDbSession = (
     await getDriverWithPort(user.properties.driverPort)
   ).session();
 
   try {
     const query =
       "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
-    const result = await session.run(query, { email });
+    const result = await userDbSession.run(query, { email });
     const res = result.records[0].get("u");
 
     if (result.records.length === 0) {
@@ -89,10 +84,10 @@ async function authenticateSuperUser(
     }
 
     if (res.properties.password === password) {
-      return result.records[0].get("u") as Node;
+      return convertNodeToJson(result.records[0].get("u"));
     }
     throw new Error("Not Authorized Email or Username!!!!!!");
   } finally {
-    await session.close();
+    await userDbSession.close();
   }
 }

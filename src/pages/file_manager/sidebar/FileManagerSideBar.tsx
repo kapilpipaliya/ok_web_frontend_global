@@ -7,7 +7,6 @@ export function Sidebar() {
   const [fileManagerStore] = useFileManagerStore();
   return (
     <div>
-
       <Show when={fileManagerStore.root}>
         <FileManagerTreeItem item={fileManagerStore.root!} />
       </Show>
