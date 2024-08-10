@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { HTTPEvent } from "vinxi/runtime/http-types";
 
+import { Session } from "neo4j-driver";
 import fs from "node:fs/promises";
 import { getQuery } from "vinxi/http";
 
@@ -13,7 +14,6 @@ import {
 export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
   const query = getQuery(event);
   const fileId = query.fileId;
-  const neo4jSession = await getSessionForSubdomain(request);
 
   if (!fileId) {
     return new Response(JSON.stringify({ error: "File ID is required" }), {
@@ -22,10 +22,17 @@ export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
     });
   }
 
-  const fileMetadata = await getFileMetadataFromNeo4j(
-    neo4jSession,
-    fileId as string,
-  );
+  const neo4jSession = await getSessionForSubdomain(request);
+
+  try {
+    return await deleteFile(fileId as string, neo4jSession);
+  } finally {
+    await neo4jSession.close();
+  }
+}
+
+async function deleteFile(fileId: string, neo4jSession: Session) {
+  const fileMetadata = await getFileMetadataFromNeo4j(neo4jSession, fileId);
 
   if (!fileMetadata) {
     return new Response(JSON.stringify({ error: "File not found" }), {
@@ -38,7 +45,7 @@ export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
     const filePath = fileMetadata.P.filepath;
     await fs.unlink(filePath); // Delete the file from the disk
 
-    await deleteFileMetadataFromNeo4j(neo4jSession, fileId as string);
+    await deleteFileMetadataFromNeo4j(neo4jSession, fileId);
 
     return new Response(
       JSON.stringify({ message: "File deleted successfully" }),

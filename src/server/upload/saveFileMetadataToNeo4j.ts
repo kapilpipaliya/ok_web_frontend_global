@@ -13,8 +13,6 @@ export async function saveFileMetadataToNeo4j(
   } catch (error) {
     console.error("Error saving file metadata to Neo4j:", error);
     throw error;
-  } finally {
-    await session.close();
   }
 }
 
@@ -29,8 +27,6 @@ export async function getFileMetadataFromNeo4j(
   } catch (error) {
     console.error("Error retrieving file metadata from Neo4j:", error);
     throw error;
-  } finally {
-    await session.close();
   }
 }
 
@@ -44,7 +40,5 @@ export async function deleteFileMetadataFromNeo4j(
   } catch (error) {
     console.error("Error deleting file metadata from Neo4j:", error);
     throw error;
-  } finally {
-    await session.close();
   }
 }
