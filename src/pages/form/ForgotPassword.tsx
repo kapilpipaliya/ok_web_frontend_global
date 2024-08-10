@@ -1,13 +1,87 @@
 import { Icon } from "@iconify-icon/solid";
 import { A } from "@solidjs/router";
-import { createSignal, Match, Show, Switch } from "solid-js";
+import { createSignal, type JSX, Match, Show, Switch } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/sendEmail";
 
-export function ForgotPassword() {
+// Reusable Input Field Component
+interface InputFieldProps {
+  label: string;
+  maxLength?: number;
+  onInput: (value: string) => void;
+  onToggle?: () => void;
+  placeholder: string;
+  showToggle?: boolean;
+  toggleValue?: boolean;
+  type: string;
+  value: string;
+}
+
+function InputField(props: Readonly<InputFieldProps>): JSX.Element {
+  return (
+    <div class="rel" style={{ margin: "10px 0" }}>
+      <label class="f:14" style={{ display: "block", "margin-bottom": "5px" }}>
+        {props.label}
+      </label>
+      <input
+        maxLength={props.maxLength}
+        onInput={(e) => props.onInput(e.currentTarget.value)}
+        placeholder={props.placeholder}
+        required
+        style={{
+          border: "1px solid #ccc",
+          "border-radius": "4px",
+          padding: "8px",
+          width: "100%",
+        }}
+        type={props.type}
+        value={props.value}
+      />
+      {props.showToggle && props.onToggle && (
+        <Icon
+          aria-label="Toggle password visibility"
+          class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
+          icon={props.toggleValue ? "iconamoon:eye-light" : "iconamoon:eye-off"}
+          onClick={props.onToggle}
+        />
+      )}
+    </div>
+  );
+}
+
+// Reusable Form Component
+interface FormProps {
+  children: JSX.Element;
+  description: string;
+  onSubmit: (event: Event) => void;
+  title: string;
+}
+
+function Form(props: Readonly<FormProps>): JSX.Element {
+  return (
+    <form
+      class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+      onSubmit={props.onSubmit}
+      style={{
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
+        display: "grid",
+        "max-width": "600px",
+        padding: "20px 30px",
+      }}
+    >
+      <div class="flex f:20 font-weight:bold jc:left mb:5">{props.title}</div>
+      <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
+        {props.description}
+      </div>
+      {props.children}
+    </form>
+  );
+}
+
+export function ForgotPassword(): JSX.Element {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
   const [otp, setOtp] = createSignal("");
@@ -21,7 +95,7 @@ export function ForgotPassword() {
   const handleEmailSubmit = async (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-    const _data = await sendEmail(username(), "Reset Password");
+    await sendEmail(username(), "Reset Password");
     setIsLoading(false);
     setStage(1);
   };
@@ -40,16 +114,15 @@ export function ForgotPassword() {
       return; // Stop the form submission
     }
 
-    // Validate the new password
     if (!validatePassword(newPassword())) {
       showErrorToast(
-        "Password must be at least 6 characters long and include at least one letter and one number and one uppercase.",
+        "Password must be at least 6 characters long and include at least one letter, one number, and one uppercase letter."
       );
-      return; // Stop the form submission
+      return;
     }
+
     setIsLoading(true);
-    // Reset password
-    // On success:
+    // Reset password logic here
     setIsLoading(false);
     showErrorToast("Password has been reset successfully.");
     // Optionally redirect to login or inform the user
@@ -83,239 +156,139 @@ export function ForgotPassword() {
             <div>Loading</div>
           </div>
         </Match>
-        <Match when={true}>
+        <Match when={!isLoading()}>
           <Show when={stage() === 0}>
-            <form
-              class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+            <Form
+              description="Provide the email address associated with your account. We will send you a link to reset your password."
               onSubmit={handleEmailSubmit}
-              style={{
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-                display: "grid",
-                "max-width": "600px",
-                padding: "20px 30px",
-              }}
+              title="Forgot Password"
             >
-              <div class="flex f:20 font-weight:bold jc:left mb:5">
-                Forgot Password
-              </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-                Provide the email address associated with your account. We will
-                send you a link to reset your password.
-              </div>
-              <div style={{ margin: "10px 0" }}>
-                <label
-                  class="f:14"
-                  for="username"
-                  style={{ display: "block", "margin-bottom": "5px" }}
-                >
-                  Email Address
-                </label>
-                <input
-                  name="email"
-                  onInput={(e) => setUsername(e.target.value)}
+              <>
+                <InputField
+                  label="Email Address"
+                  onInput={setUsername}
                   placeholder="Your email"
-                  required
-                  style={{
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                    padding: "8px",
-                    width: "100%",
-                  }}
                   type="text"
                   value={username()}
                 />
-              </div>
-              <button
-                style={{
-                  background: "rgb(226,65,74)",
-                  border: "none",
-                  "border-radius": "4px",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: "10px",
-                  width: "100%",
-                }}
-                type="submit"
-              >
-                Confirm
-              </button>
-              <div class="flex f:15 justify-content:center mt:20">
-                <span>
-                  Return to&nbsp;
-                  <A href={"/auth/login"}>
-                    <u class="text-fill:black font:bolder">Log In</u>
-                  </A>
-                </span>
-              </div>
-            </form>
-          </Show>
-          <Show when={stage() === 1}>
-            <form
-              class="@fade|.5s bg:white mb:5rem r:10 w:50vw@<md w:70vw@<xs w:40vw@lg w:28vw@>xl"
-              onSubmit={handleOtpSubmit}
-              style={{
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-                display: "grid",
-                "max-width": "600px",
-                padding: "20px 30px",
-              }}
-            >
-              <div class="flex f:20 font-weight:bold jc:left mb:5">
-                OTP Verification
-              </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-                We have sent an OTP to your email. Please enter it below to
-                proceed.
-              </div>
-              <div style={{ margin: "10px 0" }}>
-                <label
-                  class="f:14"
-                  for="username"
-                  style={{ display: "block", "margin-bottom": "5px" }}
-                >
-                  One Time Password (OTP)
-                </label>
-                <input
-                  maxlength={6}
-                  onInput={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6 digit code"
-                  required
+                <button
                   style={{
-                    border: "1px solid #ccc",
+                    background: "rgb(226,65,74)",
+                    border: "none",
                     "border-radius": "4px",
-                    padding: "8px",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "10px",
                     width: "100%",
                   }}
+                  type="submit"
+                >
+                  Confirm
+                </button>
+                <div class="flex f:15 justify-content:center mt:20">
+                  <span>
+                    Return to&nbsp;
+                    <A href={"/auth/login"}>
+                      <u class="text-fill:black font:bolder">Log In</u>
+                    </A>
+                  </span>
+                </div>
+              </>
+            </Form>
+          </Show>
+
+          <Show when={stage() === 1}>
+            <Form
+              description="We have sent an OTP to your email. Please enter it below to proceed."
+              onSubmit={handleOtpSubmit}
+              title="OTP Verification"
+            >
+              <>
+                <InputField
+                  label="One Time Password (OTP)"
+                  maxLength={6}
+                  onInput={setOtp}
+                  placeholder="Enter 6 digit code"
+                  type="text"
                   value={otp()}
                 />
-              </div>
-              <button
-                style={{
-                  background: "rgb(226,65,74)",
-                  border: "none",
-                  "border-radius": "4px",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: "10px",
-                  width: "100%",
-                }}
-                type="submit"
-              >
-                Submit
-              </button>
-              <div class="flex f:15 justify-content:center mt:20">
-                <span>
+                <button
+                  style={{
+                    background: "rgb(226,65,74)",
+                    border: "none",
+                    "border-radius": "4px",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "10px",
+                    width: "100%",
+                  }}
+                  type="submit"
+                >
+                  Submit
+                </button>
+                <div class="flex f:15 justify-content:center mt:20">
+                  <span>
+                    Return to&nbsp;
+                    <A href={"/auth/login"}>
+                      <u class="text-fill:black font:bolder">Log In</u>
+                    </A>
+                  </span>
+                </div>
+              </>
+            </Form>
+          </Show>
+
+          <Show when={stage() === 2}>
+            <Form
+              description="Below you can enter your new password."
+              onSubmit={handlePasswordResetSubmit}
+              title="Reset Password"
+            >
+              <>
+                <InputField
+                  label="New Password"
+                  onInput={setNewPassword}
+                  onToggle={() => setNewShowPassword(!showNewPassword())}
+                  placeholder="New Password"
+                  showToggle={true}
+                  toggleValue={showNewPassword()}
+                  type={showNewPassword() ? "text" : "password"}
+                  value={newPassword()}
+                />
+                <InputField
+                  label="Confirm Password"
+                  onInput={setConfirmPassword}
+                  onToggle={() =>
+                    setConfirmShowPassword(!showConfirmPassword())
+                  }
+                  placeholder="Confirm Password"
+                  showToggle={true}
+                  toggleValue={showConfirmPassword()}
+                  type={showConfirmPassword() ? "text" : "password"}
+                  value={confirmPassword()}
+                />
+                <button
+                  style={{
+                    background: "rgb(226,65,74)",
+                    border: "none",
+                    "border-radius": "4px",
+                    color: "white",
+                    cursor: "pointer",
+                    padding: "10px",
+                    width: "100%",
+                  }}
+                  type="submit"
+                >
+                  Confirm
+                </button>
+                <div class="flex f:15 mt:20" style={{ "text-align": "center" }}>
                   Return to&nbsp;
                   <A href={"/auth/login"}>
                     <u class="text-fill:black font:bolder">Log In</u>
                   </A>
-                </span>
-              </div>
-            </form>
-          </Show>
-          <Show when={stage() === 2}>
-            <form
-              class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
-              onSubmit={handlePasswordResetSubmit}
-              style={{
-                "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-                display: "grid",
-                "max-width": "600px",
-                padding: "20px 30px",
-              }}
-            >
-              <div class="flex f:20 font-weight:bold jc:left mb:5">
-                Reset Password
-              </div>
-              <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-                Below you can enter your new password.
-              </div>
-              <div class="rel" style={{ margin: "10px 0" }}>
-                <label
-                  class="f:14"
-                  for="username"
-                  style={{ display: "block", "margin-bottom": "5px" }}
-                >
-                  New Password
-                </label>
-                <input
-                  onInput={(e) => setNewPassword(e.target.value)}
-                  placeholder="New Password"
-                  required
-                  style={{
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                    padding: "8px",
-                    width: "100%",
-                  }}
-                  type={`${showNewPassword() ? "text" : "password"}`}
-                  value={newPassword()}
-                />
-                <Icon
-                  aria-label="Toggle password visibility"
-                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
-                  icon={`${
-                    showNewPassword()
-                      ? "iconamoon:eye-light"
-                      : "iconamoon:eye-off"
-                  }`}
-                  onClick={() => setNewShowPassword(!showNewPassword())}
-                />
-              </div>
-              <div class="rel" style={{ margin: "10px 0" }}>
-                <label
-                  class="f:14"
-                  for="username"
-                  style={{ display: "block", "margin-bottom": "5px" }}
-                >
-                  Confirm Password
-                </label>
-                <input
-                  onInput={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm Password"
-                  required
-                  style={{
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                    padding: "8px",
-                    width: "100%",
-                  }}
-                  type={`${showConfirmPassword() ? "text" : "password"}`}
-                  value={confirmPassword()}
-                />
-                <Icon
-                  aria-label="Toggle password visibility"
-                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
-                  icon={`${
-                    showConfirmPassword()
-                      ? "iconamoon:eye-light"
-                      : "iconamoon:eye-off"
-                  }`}
-                  onClick={() => setConfirmShowPassword(!showConfirmPassword())}
-                />
-              </div>
-
-              <button
-                style={{
-                  background: "rgb(226,65,74)",
-                  border: "none",
-                  "border-radius": "4px",
-                  color: "white",
-                  cursor: "pointer",
-                  padding: "10px",
-                  width: "100%",
-                }}
-                type="submit"
-              >
-                Confirm
-              </button>
-              <div class="flex f:15 mt:20" style={{ "text-align": "center" }}>
-                Return to&nbsp;
-                <A href={"/auth/login"}>
-                  <u class="text-fill:black font:bolder">Log In</u>
-                </A>
-              </div>
-            </form>
+                </div>
+              </>
+            </Form>
           </Show>
         </Match>
       </Switch>

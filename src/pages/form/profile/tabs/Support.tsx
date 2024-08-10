@@ -17,14 +17,14 @@ import { deleteSupportTicketCall } from "~/lib/api/service/support/deleteSupport
 import { getChatsSupportCall } from "~/lib/api/service/support/getChatsSupportCall";
 import { sendChatsSupportCall } from "~/lib/api/service/support/sendChatsSupportCall";
 
-export const SupportTicketSection = (
-  props: Readonly<{
-    contactList: any;
-    setContactList: SetStoreFunction<any>;
-    setIsMainScreenLoad: SetStoreFunction<boolean>;
-  }>,
-) => {
-  const [messages, setMessages] = createSignal<any>([]);
+interface SupportTicketSectionProps {
+  contactList: any[];
+  setContactList: SetStoreFunction<any[]>;
+  setIsMainScreenLoad: SetStoreFunction<boolean>;
+}
+
+export const SupportTicketSection = (props: Readonly<SupportTicketSectionProps>): JSX.Element => {
+  const [messages, setMessages] = createSignal<any[]>([]);
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal<null | string>(null);
@@ -37,15 +37,14 @@ export const SupportTicketSection = (
         timestamp: new Date().toLocaleTimeString(),
       };
 
-      await sendChatsSupportCall(parentVertexId, newMessage)
-        .then((_e) => {
-          setMessages([...messages()!, newMessage]);
-          setInputMessage("");
-          setTimeout(fakeReply, 1000);
-        })
-        .catch((_e) => {
-          showErrorToast("Issue in sending message. Please try again later");
-        });
+      try {
+        await sendChatsSupportCall(parentVertexId, newMessage);
+        setMessages([...messages(), newMessage]);
+        setInputMessage("");
+        setTimeout(fakeReply, 1000);
+      } catch {
+        showErrorToast("Issue in sending message. Please try again later");
+      }
     }
   };
 
@@ -63,10 +62,10 @@ export const SupportTicketSection = (
       text: replies[randomIndex],
       timestamp: new Date().toLocaleTimeString(),
     };
-    setMessages([...messages()!, reply]);
+    setMessages([...messages(), reply]);
   };
 
-  const Chat = (props: Readonly<{ id: number }>) => {
+  const Chat = (props: Readonly<{ id: number }>): JSX.Element => {
     let messageContainer: HTMLDivElement;
 
     const getMessages = async () => {
@@ -74,7 +73,7 @@ export const SupportTicketSection = (
       setMessages(
         message.vertexes.length > 0
           ? message.vertexes.map((v: any) => v.properties)
-          : [],
+          : []
       );
       scrollToBottom();
     };
@@ -92,8 +91,9 @@ export const SupportTicketSection = (
         fallback={
           <div class="text-align:center">
             <img
+              alt="No messages yet"
               class="h:30vh"
-              src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
+              src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg"
             />
             <div class="font-weight:600 text-align:center">No messages yet</div>
           </div>
@@ -109,39 +109,37 @@ export const SupportTicketSection = (
           >
             <For each={messages()}>
               {(msg: any) => (
-                <>
-                  <div class="rel @fade|.5s mb:10 mt:10">
-                    <div
-                      class="border-radius:5px margin-bottom:5px padding:5px"
-                      classList={{
-                        "color:#fff": true,
-                        "float:left text-align:left background:rgb(29|92|194|/|76%)":
-                          !msg.personal,
-                        "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)":
-                          msg.personal,
-                      }}
-                    >
-                      {msg.text}
-                    </div>
-                    <div
-                      classList={{
-                        "abs bottom:-10 font-size:8px": true,
-                        "left:0": !msg.personal,
-                        "right:0": msg.personal,
-                      }}
-                    >
-                      {msg.timestamp}
-                    </div>
-                    <div
-                      class="font-size:8px transform:skew(298deg,22deg) width:10px"
-                      classList={{
-                        abs: true,
-                        "left:0 bg:#5783d2 h:7px bottom:8px": !msg.personal,
-                        "right:0 bg:#267e70 h:7px bottom:7px": msg.personal,
-                      }}
-                    />
+                <div class="rel @fade|.5s mb:10 mt:10">
+                  <div
+                    class="border-radius:5px margin-bottom:5px padding:5px"
+                    classList={{
+                      "color:#fff": true,
+                      "float:left text-align:left background:rgb(29|92|194|/|76%)":
+                        !msg.personal,
+                      "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)":
+                        msg.personal,
+                    }}
+                  >
+                    {msg.text}
                   </div>
-                </>
+                  <div
+                    classList={{
+                      "abs bottom:-10 font-size:8px": true,
+                      "left:0": !msg.personal,
+                      "right:0": msg.personal,
+                    }}
+                  >
+                    {msg.timestamp}
+                  </div>
+                  <div
+                    class="font-size:8px transform:skew(298deg,22deg) width:10px"
+                    classList={{
+                      abs: true,
+                      "left:0 bg:#5783d2 h:7px bottom:8px": !msg.personal,
+                      "right:0 bg:#267e70 h:7px bottom:7px": msg.personal,
+                    }}
+                  />
+                </div>
               )}
             </For>
           </div>
@@ -150,8 +148,9 @@ export const SupportTicketSection = (
     );
   };
 
-  const OpenDialog = (props: Readonly<{ id: string }>) => {
+  const OpenDialog = (props: Readonly<{ id: string }>): JSX.Element => {
     const [openDialog, setOpenDialog] = createSignal(false);
+
     return (
       <>
         <IconButton
@@ -167,7 +166,7 @@ export const SupportTicketSection = (
               <div class="b:1.5px|solid|lightseagreen position:relative r:5 width:100%">
                 <input
                   class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
-                  onInput={(e) => setInputMessage(e.target.value)}
+                  onInput={(e) => setInputMessage(e.currentTarget.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       sendMessage(props.id);
@@ -202,7 +201,7 @@ export const SupportTicketSection = (
     props.setIsMainScreenLoad(true);
     await showLoadingToast({
       loadMessage: "Deleting Ticket...",
-      onSuccess: (_value) => {
+      onSuccess: () => {
         const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
@@ -246,10 +245,10 @@ export const SupportTicketSection = (
       </div>
       <div class="m:0|15">
         <Table headers={6}>
-          <For each={["id", "Name", "Subject", "Message", "Status", "Actions"]}>
-            {(header) => {
-              return <TableHeadCell>{header}</TableHeadCell>;
-            }}
+          <For each={["ID", "Name", "Subject", "Message", "Status", "Actions"]}>
+            {(header) => (
+              <TableHeadCell>{header}</TableHeadCell>
+            )}
           </For>
 
           <For
@@ -260,46 +259,38 @@ export const SupportTicketSection = (
               </div>
             }
           >
-            {(row: any, _index) => {
-              return (
-                <div>
-                  <TableBodyCell>{row.id}</TableBodyCell>
-                  <TableBodyCell>{row.name}</TableBodyCell>
-                  <TableBodyCell>{row.subject}</TableBodyCell>
-                  <TableBodyCell>{row.message}</TableBodyCell>
-                  <TableBodyCell>
-                    <ChipDropDown
-                      onChanged={(e) => {
-                        changeStatus(row.id, e);
-                      }}
-                      selectedItem={row.status}
+            {(row: any) => (
+              <div>
+                <TableBodyCell>{row.id}</TableBodyCell>
+                <TableBodyCell>{row.name}</TableBodyCell>
+                <TableBodyCell>{row.subject}</TableBodyCell>
+                <TableBodyCell>{row.message}</TableBodyCell>
+                <TableBodyCell>
+                  <ChipDropDown
+                    onChanged={(status) => changeStatus(row.id, status)}
+                    selectedItem={row.status}
+                  />
+                </TableBodyCell>
+                <TableBodyCell>
+                  <div class="flex ai:center jc:center">
+                    <OpenDialog id={row.id} />
+                    <IconButton
+                      icon="fluent:delete-48-regular"
+                      onClick={() => setDeleteRowId(row.id)}
+                      title="Delete"
                     />
-                  </TableBodyCell>
-                  <TableBodyCell>
-                    <div class="flex ai:center jc:center">
-                      <OpenDialog id={row.id} />
-                      <IconButton
-                        icon="fluent:delete-48-regular"
-                        onClick={() => setDeleteRowId(row.id)}
-                        title="Delete"
-                      />
-                      <DialogWithButtons
-                        message={"Are you sure you want to delete this ticket?"}
-                        onCancel={() => {
-                          setDeleteRowId(null);
-                        }}
-                        onConfirm={() => {
-                          deleteContact(row.id);
-                        }}
-                        open={() => deleteRowId() === row.id}
-                        setOpen={setDeleteRowId}
-                        title={"Delete Support Ticket"}
-                      />
-                    </div>
-                  </TableBodyCell>
-                </div>
-              );
-            }}
+                    <DialogWithButtons
+                      message={"Are you sure you want to delete this ticket?"}
+                      onCancel={() => setDeleteRowId(null)}
+                      onConfirm={() => deleteContact(row.id)}
+                      open={() => deleteRowId() === row.id}
+                      setOpen={setDeleteRowId}
+                      title={"Delete Support Ticket"}
+                    />
+                  </div>
+                </TableBodyCell>
+              </div>
+            )}
           </For>
         </Table>
       </div>

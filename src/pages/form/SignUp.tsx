@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { createSignal } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
@@ -10,7 +10,7 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
 
-export function SignUp() {
+export function SignUp(): JSX.Element {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -32,20 +32,23 @@ export function SignUp() {
   const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
 
-    const usernameError = validateUsername(formData().username);
-    const emailError = validateEmail(formData().email);
-    const passwordError = validatePassword(formData().password);
+    const { email, password, username } = formData();
+
+    const usernameError = validateUsername(username);
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
+
     if (usernameError) {
-      showErrorToast(usernameError); // Show the error message if validation fails
+      showErrorToast(usernameError);
     } else if (emailError) {
-      showErrorToast(emailError); // Show the error message if validation fails
+      showErrorToast(emailError);
     } else if (passwordError) {
-      showErrorToast(passwordError); // Show the error message if validation fails
+      showErrorToast(passwordError);
     } else {
       setGraph("isLoadingPage", true);
       await showLoadingToast({
         loadMessage: "Registering User...",
-        onError: (_v) => {
+        onError: () => {
           setGraph("isLoadingPage", false);
         },
         onSuccess: (value) => {
@@ -91,7 +94,7 @@ export function SignUp() {
         }}
       >
         <img
-          alt="logo"
+          alt="register vector"
           class="d:none@<md w:25rem"
           src={"../../public/graphics/register_vector.png"}
         />
@@ -101,121 +104,40 @@ export function SignUp() {
             Let's Bright up your future!
           </div>
           <div class="grid gap:0|10 grid-template-columns:1fr|50%">
-            {" "}
-            <div class="m:10|0|0|0">
-              <label
-                class="f:14"
-                for="subdomain"
-                style={{ display: "block", "margin-bottom": "5px" }}
-              >
-                Sub Domain
-              </label>
-              <input
-                name="subdomain"
-                onInput={(e) =>
-                  setFormData({ ...formData(), subdomain: e.target.value })
-                }
-                placeholder="Enter SubDomain"
-                required
-                style={{
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                  padding: "8px",
-                  width: "100%",
-                }}
-                type="text"
-                value={formData().subdomain}
-              />
-            </div>
-            <div class="m:10|0|0|0">
-              <label
-                class="f:14"
-                for="username"
-                style={{ display: "block", "margin-bottom": "5px" }}
-              >
-                Username
-              </label>
-              <input
-                name="username"
-                onInput={(e) =>
-                  setFormData({ ...formData(), username: e.target.value })
-                }
-                placeholder="Enter Name"
-                required
-                style={{
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                  padding: "8px",
-                  width: "100%",
-                }}
-                type="text"
-                value={formData().username}
-              />
-            </div>
-            <div class="m:10|0|0|0">
-              <label
-                class="f:14"
-                for="username"
-                style={{ display: "block", "margin-bottom": "5px" }}
-              >
-                Email Address
-              </label>
-              <input
-                name="email"
-                onInput={(e) =>
-                  setFormData({ ...formData(), email: e.target.value })
-                }
-                placeholder="Enter Email"
-                required
-                style={{
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                  padding: "8px",
-                  width: "100%",
-                }}
-                type="text"
-                value={formData().email}
-              />
-            </div>
-            <div class="m:10|0|10|0">
-              <label
-                class="f:14"
-                for="password"
-                style={{ display: "block", "margin-bottom": "5px" }}
-              >
-                Password
-              </label>
-              <div class="rel">
-                <input
-                  name="password"
-                  onInput={(e) =>
-                    setFormData({ ...formData(), password: e.target.value })
-                  }
-                  placeholder="Enter Password"
-                  required
-                  style={{
-                    border: "1px solid #ccc",
-                    "border-radius": "4px",
-                    padding: "8px",
-                    width: "100%",
-                  }}
-                  type={`${showPassword() ? "text" : "password"}`}
-                  value={formData().password}
-                />
-                <Icon
-                  aria-label="Toggle password visibility"
-                  class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
-                  icon={`${
-                    showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
-                  }`}
-                  onClick={togglePasswordVisibility}
-                />
-              </div>
-            </div>
+            <InputField
+              label="Sub Domain"
+              name="subdomain"
+              onInput={(e) => setFormData({ ...formData(), subdomain: e.target.value })}
+              placeholder="Enter SubDomain"
+              value={formData().subdomain}
+            />
+            <InputField
+              label="Username"
+              name="username"
+              onInput={(e) => setFormData({ ...formData(), username: e.target.value })}
+              placeholder="Enter Name"
+              value={formData().username}
+            />
+            <InputField
+              label="Email Address"
+              name="email"
+              onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+              placeholder="Enter Email"
+              value={formData().email}
+            />
+            <PasswordField
+              label="Password"
+              name="password"
+              onInput={(e) => setFormData({ ...formData(), password: e.target.value })}
+              placeholder="Enter Password"
+              showPassword={showPassword()}
+              togglePasswordVisibility={togglePasswordVisibility}
+              value={formData().password}
+            />
           </div>
 
           <button
-            onclick={handleSubmit}
+            onClick={handleSubmit}
             style={{
               background: "rgb(226,65,74)",
               border: "none",
@@ -240,3 +162,73 @@ export function SignUp() {
     </div>
   );
 }
+
+interface InputFieldProps {
+  label: string;
+  name: string;
+  onInput: (e: { currentTarget: HTMLInputElement } & Event) => void;
+  placeholder: string;
+  value: string;
+}
+
+const InputField = (props: InputFieldProps): JSX.Element => (
+  <div class="m:10|0|0|0">
+    <label class="f:14" for={props.name} style={{ display: "block", marginBottom: "5px" }}>
+      {props.label}
+    </label>
+    <input
+      name={props.name}
+      onInput={props.onInput}
+      placeholder={props.placeholder}
+      required
+      style={{
+        border: "1px solid #ccc",
+        'border-radius': "4px",
+        padding: "8px",
+        width: "100%",
+      }}
+      type="text"
+      value={props.value}
+    />
+  </div>
+);
+
+interface PasswordFieldProps {
+  label: string;
+  name: string;
+  onInput: (e: { currentTarget: HTMLInputElement } & Event) => void;
+  placeholder: string;
+  showPassword: boolean;
+  togglePasswordVisibility: () => void;
+  value: string;
+}
+
+const PasswordField = (props: PasswordFieldProps): JSX.Element => (
+  <div class="m:10|0|10|0">
+    <label class="f:14" for={props.name} style={{ display: "block", marginBottom: "5px" }}>
+      {props.label}
+    </label>
+    <div class="rel">
+      <input
+        name={props.name}
+        onInput={props.onInput}
+        placeholder={props.placeholder}
+        required
+        style={{
+          border: "1px solid #ccc",
+          "border-radius": "4px",
+          padding: "8px",
+          width: "100%",
+        }}
+        type={props.showPassword ? "text" : "password"}
+        value={props.value}
+      />
+      <Icon
+        aria-label="Toggle password visibility"
+        class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
+        icon={props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}
+        onClick={props.togglePasswordVisibility}
+      />
+    </div>
+  </div>
+);

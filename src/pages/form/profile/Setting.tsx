@@ -1,6 +1,7 @@
 import {
   type Accessor,
   createSignal,
+  type JSX,
   Match,
   type Setter,
   Show,
@@ -21,17 +22,25 @@ import { PasswordSection } from "./tabs/Password";
 import { CurrentPlan, PricingPlans } from "./tabs/Pricing";
 import { SupportTicketSection } from "./tabs/Support";
 
-export function Settings() {
-  const [selectedTab, setSelectedTab] = createSignal("General");
-  const [isMainScreenLoad, setIsMainScreenLoad] = createSignal(false);
-  const [plans, setPlans] = createSignal([]);
-  const [contactList, setContactList] = createSignal<any>([]);
-  const [originalProfileData, setOriginalProfileData] = createStore<{
-    [key: string]: any;
-  }>({}); // Track original data
+interface ProfileData {
+  [key: string]: any;
+  country: string;
+  email: string;
+  id: string;
+  profileImage: string;
+  uId: string;
+  username: string;
+}
+
+export function Settings(): JSX.Element {
+  const [selectedTab, setSelectedTab] = createSignal<string>("General");
+  const [isMainScreenLoad, setIsMainScreenLoad] = createSignal<boolean>(false);
+  const [plans, setPlans] = createSignal<any[]>([]);
+  const [contactList, setContactList] = createSignal<any[]>([]);
+  const [originalProfileData, setOriginalProfileData] = createStore<ProfileData>({});
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
-  const [profileData, setProfileData] = createStore<{ [key: string]: any }>({
+  const [profileData, setProfileData] = createStore<ProfileData>({
     country: "United States",
     email: "",
     id: "",
@@ -45,10 +54,10 @@ export function Settings() {
     { name: "Settings" },
   ];
 
-  getAPI(API.getUserUrl)
-    .then((data: { [key: string]: any }) => {
+  const loadUserData = async () => {
+    try {
+      const data = await getAPI(API.getUserUrl);
       const user = data.user;
-      setIsMainScreenLoad(true);
       setProfileData({
         country: "United States",
         email: user.P.email,
@@ -62,45 +71,43 @@ export function Settings() {
 
       loadContactData();
       setOriginalProfileData(profileData); // Set original data
-    })
-    .catch((err) => {
-      showErrorToast(err.message);
+      setIsMainScreenLoad(true);
+    } catch (err) {
+      showErrorToast((err as Error).message);
       setIsMainScreenLoad(false);
-    });
+    }
+  };
 
   const loadContactData = async () => {
-    untrack(() => {
-      postAPI(API.profileUrl, {
-        action: "getTicktes",
-        email: profileData.email,
-        panel: "supportTicket",
-      }).then((value: any) => {
-        if (value.contact.length > 0) {
-          setContactList(value.contact);
-        } else {
-          setContactList([]);
-        }
+    untrack(async () => {
+      try {
+        const value = await postAPI(API.profileUrl, {
+          action: "getTicktes",
+          email: profileData.email,
+          panel: "supportTicket",
+        });
+
+        setContactList(value.contact.length > 0 ? value.contact : []);
+      } finally {
         setIsMainScreenLoad(false);
-      });
+      }
     });
   };
 
   const loadPlans = async () => {
     setIsMainScreenLoad(true);
-    untrack(() => {
-      postAPI(API.profileUrl, {
-        panel: "pricing",
-      }).then((value: any) => {
-        if (value.plans.length > 0) {
-          setPlans(value.plans);
-        } else {
-          setPlans([]);
-        }
+    untrack(async () => {
+      try {
+        const value = await postAPI(API.profileUrl, { panel: "pricing" });
+        setPlans(value.plans.length > 0 ? value.plans : []);
+      } finally {
         setIsMainScreenLoad(false);
-      });
+      }
     });
   };
 
+  // Load user data and plans when the component mounts
+  loadUserData();
   loadPlans();
 
   return (
@@ -108,10 +115,7 @@ export function Settings() {
       <Breadcrumb breadcrumb={breadcrumbData} title="Account Setting" />
       <TabSection selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
 
-      <Show
-        fallback={<LoaderNew loaderHeight="50vh" />}
-        when={!isMainScreenLoad()}
-      >
+      <Show fallback={<LoaderNew loaderHeight="50vh" />} when={!isMainScreenLoad()}>
         <Switch>
           <Match when={selectedTab() === "General"}>
             <GeneralSection
@@ -140,78 +144,38 @@ export function Settings() {
     </>
   );
 }
-const TabSection = (
-  props: Readonly<{
-    selectedTab: Accessor<string>;
-    setSelectedTab: Setter<string>;
-  }>,
-) => {
+
+interface TabSectionProps {
+  selectedTab: Accessor<string>;
+  setSelectedTab: Setter<string>;
+}
+
+const TabSection = (props: TabSectionProps): JSX.Element => {
+  const tabs = ["General", "Pricing", "Password", "Support"];
+
   return (
     <div class="border:1px|solid|lightgrey box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border display:flex f:14px flex:wrap min-w:max position:relative px:4px py:2px r:0.3rem">
-      <label
-        class="flex:1 text:center"
-        onClick={() => props.setSelectedTab("General")}
-      >
-        <input
-          checked={props.selectedTab() === "General"}
-          class="hidden"
-          name="radio"
-          type="radio"
-        />
-        <span
-          class={`${props.selectedTab() === "General" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+      {tabs.map((tab) => (
+        <label
+          class="flex:1 text:center"
+          key={tab}
+          onClick={() => props.setSelectedTab(tab)}
         >
-          General
-        </span>
-      </label>
-      <label
-        class="flex:1 text:center"
-        onClick={() => props.setSelectedTab("Pricing")}
-      >
-        <input
-          checked={props.selectedTab() === "Pricing"}
-          class="hidden"
-          name="radio"
-          type="radio"
-        />
-        <span
-          class={`${props.selectedTab() === "Pricing" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
-        >
-          Pricing
-        </span>
-      </label>
-      <label
-        class="flex:1 text:center"
-        onClick={() => props.setSelectedTab("Password")}
-      >
-        <input
-          checked={props.selectedTab() === "Password"}
-          class="hidden"
-          name="radio"
-          type="radio"
-        />
-        <span
-          class={`${props.selectedTab() === "Password" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
-        >
-          Password
-        </span>
-      </label>
-      <label
-        class="flex:1 text:center"
-        onClick={() => props.setSelectedTab("Support")}
-      >
-        <input
-          checked={props.selectedTab() === "Support"}
-          class="hidden"
-          name="radio"
-          type="radio"
-        />
-        <span
-          class={`${props.selectedTab() === "Support" ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
-        >
-          Support
-        </span>
-      </label>
+          <input
+            checked={props.selectedTab() === tab}
+            class="hidden"
+            name="radio"
+            type="radio"
+          />
+          <span
+            class={`${
+              props.selectedTab() === tab ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""
+            } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+          >
+            {tab}
+          </span>
+        </label>
+      ))}
     </div>
   );
 };

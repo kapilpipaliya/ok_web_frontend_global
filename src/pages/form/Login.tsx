@@ -1,3 +1,5 @@
+import type { JSX } from "solid-js";
+
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { createSignal, onMount, Show } from "solid-js";
@@ -11,7 +13,186 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
 
-export function Login() {
+// Utility Functions
+function validateFormData(email: string, password: string): boolean {
+  const { showErrorToast } = useToast();
+
+  if (email.includes("@")) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      showErrorToast("Please enter a valid email address or username");
+      return false;
+    }
+  } else {
+    const usernameError = validateUsername(email);
+    if (usernameError) {
+      showErrorToast("Please enter a valid email address or username");
+      return false;
+    }
+  }
+
+  const passwordError = validatePassword(password);
+  if (passwordError) {
+    showErrorToast(passwordError);
+    return false;
+  }
+
+  return true;
+}
+
+// PasswordInput Component
+interface PasswordInputProps {
+  onChange: (value: string) => void;
+  value: string;
+}
+
+function PasswordInput(props: PasswordInputProps): JSX.Element {
+  const [showPassword, setShowPassword] = createSignal(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword());
+  };
+
+  return (
+    <div class="rel">
+      <input
+        autocomplete="password"
+        name="password"
+        onInput={(e) => props.onChange(e.currentTarget.value)}
+        placeholder="Your Password"
+        required
+        style={{
+          border: "1px solid #ccc",
+          "border-radius": "4px",
+          padding: "8px",
+          width: "100%",
+        }}
+        type={`${showPassword() ? "text" : "password"}`}
+        value={props.value}
+      />
+      <Icon
+        aria-label="Toggle password visibility"
+        class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
+        icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+        onClick={togglePasswordVisibility}
+      />
+    </div>
+  );
+}
+
+// LoginForm Component
+interface LoginFormProps {
+  formData: any;
+  onSubmit: (event: MouseEvent) => void;
+  setFormData: (data: any) => void;
+}
+
+function LoginForm(props: LoginFormProps): JSX.Element {
+  return (
+    <form
+      class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
+      style={{
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
+        display: "flex",
+        padding: "20px 30px",
+      }}
+    >
+      <img
+        alt="logo"
+        class="d:none@<md"
+        src={"../../public/graphics/login_vector.jpg"}
+        style={{ width: "25rem" }}
+      />
+      <div class="grid align-content:center m:0|30@lg mt:25 w:100%@<md">
+        <div class="flex f:20 font-weight:bold jc:left mb:5">Log In</div>
+        <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
+          You Will be Redirected to Home Page
+        </div>
+        <label
+          class="f:14"
+          for="username"
+          style={{ display: "block", "margin-bottom": "5px" }}
+        >
+          Email Address or Username
+        </label>
+        <input
+          autocomplete="email"
+          name="email"
+          onInput={(e) =>
+            props.setFormData({ ...props.formData(), email: e.currentTarget.value })
+          }
+          placeholder="Your email or username"
+          required
+          style={{
+            border: "1px solid #ccc",
+            "border-radius": "4px",
+            padding: "8px",
+            width: "100%",
+          }}
+          type="text"
+          value={props.formData().email}
+        />
+        <label
+          class="f:14 mt:5"
+          for="password"
+          style={{ display: "block", "margin-bottom": "5px" }}
+        >
+          Password
+        </label>
+        <PasswordInput
+          onChange={(value) => props.setFormData({ ...props.formData(), password: value })}
+          value={props.formData().password}
+        />
+        <div
+          style={{
+            "align-items": "center",
+            display: "flex",
+            "justify-content": "space-between",
+            margin: "10px 0",
+          }}
+        >
+          <label class="f:14">
+            <input type="checkbox" />
+            &nbsp;Remember me
+          </label>
+          <a
+            class="f:14"
+            href="/auth/forgotPassword"
+            style={{ color: "#069", "text-decoration": "none" }}
+          >
+            Forgot Password?
+          </a>
+        </div>
+        <button
+          onClick={props.onSubmit}
+          style={{
+            background: "rgb(226,65,74)",
+            border: "none",
+            "border-radius": "4px",
+            color: "white",
+            cursor: "pointer",
+            padding: "10px",
+            width: "100%",
+          }}
+          type="button"
+        >
+          Log In
+        </button>
+        <div class="flex f:15 justify-content:center mt:20">
+          <span>
+            Don't have an account?{" "}
+            <A href={"/auth/signup"}>
+              <u class="text-fill:black font:bolder">Sign Up</u>
+            </A>
+          </span>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+// Main Login Component
+export function Login(): JSX.Element {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -27,8 +208,8 @@ export function Login() {
     const data = await postAPI("/api/get_subdomain_Info", {});
     setFormData({
       ...formData(),
-      profileImage: data.profileImage,
-      username: data.username,
+      profileImage: data.P.profileImage,
+      username: data.P.username,
     });
   };
 
@@ -36,49 +217,25 @@ export function Login() {
     getAll();
   });
 
-  const [showPassword, setShowPassword] = createSignal(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword());
-  };
-
   const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
-    if (formData().email.includes("@")) {
-      const emailError = validateEmail(formData().email);
-      if (emailError) {
-        showErrorToast("Please enter a valid email address or username");
-        return;
-      }
-    } else {
-      const usernameError = validateUsername(formData().email);
-      if (usernameError) {
-        showErrorToast("Please enter a valid email address or username");
-        return;
-      }
-    }
+    if (!validateFormData(formData().email, formData().password)) { return; }
 
-    const passwordError = validatePassword(formData().password);
-    if (passwordError) {
-      showErrorToast(passwordError);
-    } else {
-      setGraph("isLoadingPage", true);
-      await showLoadingToast({
-        loadMessage: "Logging In...",
-        onError(_error) {
-          setGraph("isLoadingPage", false);
-        },
-        onSuccess: (value) => {
-          setGraph("isLoadingPage", false);
-
-          if (value != null && value.id !== null) {
-            navigate(`${graph.APP_BASE_URL}/Page`);
-          }
-        },
-        promise: signInCall(formData),
-        successMessage: "Logged In Successfully",
-      });
-    }
+    setGraph("isLoadingPage", true);
+    await showLoadingToast({
+      loadMessage: "Logging In...",
+      onError(_error) {
+        setGraph("isLoadingPage", false);
+      },
+      onSuccess: (value) => {
+        setGraph("isLoadingPage", false);
+        if (value != null && value.id !== null) {
+          navigate(`${graph.APP_BASE_URL}/Page`);
+        }
+      },
+      promise: signInCall(formData),
+      successMessage: "Logged In Successfully",
+    });
   };
 
   return (
@@ -124,128 +281,11 @@ export function Login() {
           </div>
         </div>
       </Show>
-      <form
-        class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
-        style={{
-          "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-          display: "flex",
-          padding: "20px 30px",
-        }}
-      >
-        <img
-          alt="logo"
-          class="d:none@<md"
-          src={"../../public/graphics/login_vector.jpg"}
-          style={{ width: "25rem" }}
-        />
-        <div class="grid align-content:center m:0|30@lg mt:25 w:100%@<md">
-          <div class="flex f:20 font-weight:bold jc:left mb:5">Log In</div>
-          <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-            You Will be Redirected to Home Page
-          </div>
-          <label
-            class="f:14"
-            for="username"
-            style={{ display: "block", "margin-bottom": "5px" }}
-          >
-            Email Address or Username
-          </label>
-          <input
-            autocomplete="email"
-            name="email"
-            onInput={(e) =>
-              setFormData({ ...formData(), email: e.target.value })
-            }
-            placeholder="Your email or username"
-            required
-            style={{
-              border: "1px solid #ccc",
-              "border-radius": "4px",
-              padding: "8px",
-              width: "100%",
-            }}
-            type="text"
-            value={formData().email}
-          />
-          <label
-            class="f:14 mt:5"
-            for="password"
-            style={{ display: "block", "margin-bottom": "5px" }}
-          >
-            Password
-          </label>
-          <div class="rel">
-            <input
-              autocomplete="password"
-              name="password"
-              onInput={(e) =>
-                setFormData({ ...formData(), password: e.target.value })
-              }
-              placeholder="Your Password"
-              required
-              style={{
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-                padding: "8px",
-                width: "100%",
-              }}
-              type={`${showPassword() ? "text" : "password"}`}
-              value={formData().password}
-            />
-            <Icon
-              aria-label="Toggle password visibility"
-              class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
-              icon={`${
-                showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
-              }`}
-              onClick={togglePasswordVisibility}
-            />
-          </div>
-          <div
-            style={{
-              "align-items": "center",
-              display: "flex",
-              "justify-content": "space-between",
-              margin: "10px 0",
-            }}
-          >
-            <label class="f:14">
-              <input type="checkbox" />
-              &nbsp;Remember me
-            </label>
-            <a
-              class="f:14"
-              href="/auth/forgotPassword"
-              style={{ color: "#069", "text-decoration": "none" }}
-            >
-              Forgot Password?
-            </a>
-          </div>
-          <button
-            onClick={handleSubmit}
-            style={{
-              background: "rgb(226,65,74)",
-              border: "none",
-              "border-radius": "4px",
-              color: "white",
-              cursor: "pointer",
-              padding: "10px",
-              width: "100%",
-            }}
-            type="button"
-          >
-            Log In
-          </button>
-          <div class="flex f:15 justify-content:center mt:20">
-            <span>
-              Don't have an account?{" "}
-              <A href={"/auth/signup"}>
-                <u class="text-fill:black font:bolder">Sign Up</u>
-              </A>
-            </span>
-          </div>
-        </div>
-      </form>
+      <LoginForm
+        formData={formData}
+        onSubmit={handleSubmit}
+        setFormData={setFormData}
+      />
     </div>
   );
 }

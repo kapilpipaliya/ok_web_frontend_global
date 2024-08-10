@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { equals } from "rambda";
-import { createSignal, Show } from "solid-js";
+import { createSignal, type JSX, Show } from "solid-js";
 
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -17,7 +17,7 @@ type GeneralProps = {
   setProfileData: SetStoreFunction<{ [key: string]: any }>;
 };
 
-export const GeneralSection = (props: Readonly<GeneralProps>) => {
+export const GeneralSection = (props: Readonly<GeneralProps>): JSX.Element => {
   const [_graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
@@ -74,10 +74,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
   };
 
   const onClickSave = async () => {
-    if (
-      equals(props.profileData, props.originalProfileData) &&
-      !selectedImage()
-    ) {
+    if (equals(props.profileData, props.originalProfileData) && !selectedImage()) {
       showErrorToast("No changes to save");
       return;
     }
@@ -93,7 +90,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
     }
 
     if (!validateEmail(props.profileData.email)) {
-      showErrorToast("Please enter valid email");
+      showErrorToast("Please enter a valid email");
       return;
     }
 
@@ -118,7 +115,6 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             uId: user.P.uId,
             username: user.P.username.toLowerCase(),
           });
-          // loadContactData();
           props.setOriginalProfileData(props.profileData);
           setGraph("member", data);
         }
@@ -129,9 +125,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
 
   const handleAvatarClick = () => {
     if (isEdit()) {
-      const fileInput = document.getElementById(
-        "fileInput",
-      ) as HTMLInputElement;
+      const fileInput = document.getElementById("fileInput") as HTMLInputElement;
       fileInput?.click();
     }
   };
@@ -150,7 +144,6 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             style={{ display: "none" }}
             type="file"
           />
-
           <div class="circle-avatar" onClick={handleAvatarClick}>
             <img
               alt="Avatar"
@@ -196,9 +189,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             />
           </div>
           <div>
-            <span class="color:dimgrey font-weight:500 font:15">
-              Email Address
-            </span>
+            <span class="color:dimgrey font-weight:500 font:15">Email Address</span>
             <input
               disabled={!isEdit()}
               name="email"
@@ -234,21 +225,23 @@ export const GeneralSection = (props: Readonly<GeneralProps>) => {
             }
             when={isEdit()}
           >
-            <button
-              class="bg:#5b7dff border:1px|solid|#5b7dff color:white cursor:pointer m:15|0 p:5|10 r:4"
-              onClick={() => {
-                props.setProfileData(props.originalProfileData);
-                setIsEdit(false);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
-              onClick={onClickSave}
-            >
-              Save Changes
-            </button>
+            <>
+              <button
+                class="bg:#5b7dff border:1px|solid|#5b7dff color:white cursor:pointer m:15|0 p:5|10 r:4"
+                onClick={() => {
+                  props.setProfileData(props.originalProfileData);
+                  setIsEdit(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
+                onClick={onClickSave}
+              >
+                Save Changes
+              </button>
+            </>
           </Show>
         </div>
         {/* <div class="p:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">
