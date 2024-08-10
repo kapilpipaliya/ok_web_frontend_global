@@ -3,8 +3,8 @@ import type { Session } from "neo4j-driver";
 
 import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
-import { findUserByEmail } from "./user/findUserByEmail";
-import { getUserEmailFromSession } from "./user/getUserEmailFromSession";
+import { getUserEmailFromSession } from "./getUserEmailFromSession";
+import { findUserByEmail } from "../../cypher/mutate/user/findUserByEmail";
 
 export async function GET({ request }: APIEvent) {
   let neo4jSession: Session | undefined;

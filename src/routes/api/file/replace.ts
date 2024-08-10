@@ -6,13 +6,13 @@ import { readMultipartFormData } from "vinxi/http";
 
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { calculateChecksum } from "~/routes/api/upload/calculateChecksum";
-import { ensureDirectoryExists } from "~/routes/api/upload/ensureDirectoryExists";
+import { calculateChecksum } from "~/server/upload/calculateChecksum";
+import { ensureDirectoryExists } from "~/server/upload/ensureDirectoryExists";
 import {
   getFileMetadataFromNeo4j,
   saveFileMetadataToNeo4j,
-} from "~/routes/api/upload/saveFileMetadataToNeo4j";
-import { saveFileToDisk } from "~/routes/api/upload/saveFileToDisk";
+} from "~/server/upload/saveFileMetadataToNeo4j";
+import { saveFileToDisk } from "~/server/upload/saveFileToDisk";
 import { getSubDomain } from "~/server/getSubDomain";
 
 export async function PUT({ request }: APIEvent, event: HTTPEvent) {

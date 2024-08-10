@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import { getQuery } from "vinxi/http";
 
 import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { getFileMetadataFromNeo4j } from "~/routes/api/upload/saveFileMetadataToNeo4j";
+import { getFileMetadataFromNeo4j } from "~/server/upload/saveFileMetadataToNeo4j";
 
 export async function GET({ request }: APIEvent, event: HTTPEvent) {
   const query = getQuery(event);

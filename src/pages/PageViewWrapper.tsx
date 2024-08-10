@@ -67,7 +67,6 @@ export function PageViewWrapper(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-
   const pageFormStore = createStore(getInitialFormStore(graph));
   const [formStore, setFormStore] = pageFormStore;
 
@@ -82,76 +81,44 @@ export function PageViewWrapper(
     props.dataId === "new" ? undefined : props.dataId,
   );
   const [previewStore] = usePreviewContext();
-  const isNoPermissionCheck = createMemo(
-    () =>
-      props.isNoPermissionCheck ||
-      formStore.formMetaData?.isNoPermissionCheck ||
-      previewStore.isNoPermissionCheck,
+
+  const isNoPermissionCheck = createMemo(() =>
+    props.isNoPermissionCheck ||
+    formStore.formMetaData?.isNoPermissionCheck ||
+    previewStore.isNoPermissionCheck,
   );
   const allConfiguredPermission = createMemo(() =>
-    getConfiguredPermissions(
-      graph.userRoles,
-      formStore.formMeta,
-      graph,
-      setGraph,
-    ),
+    getConfiguredPermissions(graph.userRoles, formStore.formMeta, graph, setGraph),
   );
-  const hasInsertPermission = createMemo(
-    () =>
-      formStore.formMetaData &&
-      (isNoPermissionCheck() ||
-        (!id() &&
-          hasPermissions(
-            allConfiguredPermission(),
-            "insert",
-            graph,
-            setGraph,
-          ))),
-  );
-  const hasEditPermission = createMemo(
-    () =>
-      formStore.formMetaData &&
-      (isNoPermissionCheck() ||
-        (!!id() &&
-          hasPermissions(allConfiguredPermission(), "edit", graph, setGraph))),
-  );
-  const hasViewPermission = createMemo(
-    () =>
-      formStore.formMetaData &&
-      (isNoPermissionCheck() ||
-        hasPermissions(allConfiguredPermission(), "view", graph, setGraph)),
-  );
-  const hasDeletePermission = createMemo(
-    () =>
-      formStore.formMetaData &&
-      (isNoPermissionCheck() ||
-        hasPermissions(allConfiguredPermission(), "delete", graph, setGraph)),
-  );
+  
+  const permissions = {
+    delete: createMemo(() => checkPermission("delete")),
+    edit: createMemo(() => checkPermission("edit")),
+    insert: createMemo(() => checkPermission("insert")),
+    view: createMemo(() => checkPermission("view")),
+  };
+
+  function checkPermission(action: string) {
+    if (!formStore.formMetaData) return false;
+    return (
+      isNoPermissionCheck() ||
+      (action === "insert" && !id() && hasPermissions(allConfiguredPermission(), action, graph, setGraph)) ||
+      (!!id() && hasPermissions(allConfiguredPermission(), action, graph, setGraph))
+    );
+  }
 
   setFormStore({
-    get hasDeletePermission() {
-      return hasDeletePermission();
-    },
-    get hasEditPermission() {
-      return hasEditPermission();
-    },
-    get hasInsertPermission() {
-      return hasInsertPermission();
-    },
-    get hasViewPermission() {
-      return hasViewPermission();
-    },
-    get isNoPermissionCheck() {
-      return isNoPermissionCheck();
-    },
+    get hasDeletePermission() { return permissions.delete(); },
+    get hasEditPermission() { return permissions.edit(); },
+    get hasInsertPermission() { return permissions.insert(); },
+    get hasViewPermission() { return permissions.view(); },
+    get isNoPermissionCheck() { return isNoPermissionCheck(); },
   });
 
   const authError = createMemo(() => {
-    if (id()) {
-      if (!(hasEditPermission() || hasViewPermission())) {
-        return `You are not authorized to edit or view ${props.pageVertexName}`;
-      }
-    } else if (!hasInsertPermission()) {
+    if (id() && !(permissions.edit() || permissions.view())) {
+      return `You are not authorized to edit or view ${props.pageVertexName}`;
+    } else if (!id() && !permissions.insert()) {
       return `You are not authorized to insert ${props.pageVertexName}`;
     }
     return "";
@@ -219,36 +186,30 @@ export function PageViewWrapper(
 
     setFormStore("isPreview", props.pageId === "preview");
   }
+
+  function hasRequiredPermissions() {
+    return (
+      formStore.formMetaData &&
+      (permissions.insert() || permissions.edit() || permissions.view())
+    );
+  }
+
   async function loadData() {
-    if (!id()) {
-      return;
-    }
-    if (
-      !isNoPermissionCheck() &&
-      (!(formStore.formMetaData &&(hasInsertPermission() || hasEditPermission() || hasViewPermission())))
-    ) {
-      return;
-    }
+    if (!id() || !isNoPermissionCheck() && !hasRequiredPermissions()) return;
     try {
       const { incoming, outgoing } = getEdgesFromRowsAttr(
-        formStore.formMetaData.attributes,
-        false,
-      );
-
-      const data = await fetchDataFromMG({
-        expression: `id:'${id()}'`,
-        incoming,
-        outgoing,
-      });
+        formStore.formMetaData!.attributes, false);
+      const data = await fetchDataFromMG({ expression: `id:'${id()}'`, incoming, outgoing });
+      
       if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} found`);
         return;
       }
+      
       setGraphData(graph, setGraph, data.graph);
       setFormStore("formData", data.result[0]);
     } catch (e: any) {
-      console.error("error", e);
-      setFormStore("error", `Error When Loading Form3: ${e.message}`);
+      setFormStore("error", `Error When Loading Form: ${e.message}`);
     }
   }
   onMount(async () => {
@@ -280,21 +241,15 @@ export function PageViewWrapper(
         setGraph,
       );
       if (addNewVertexResult.error) {
-        setFormStore(
-          "error",
-          addNewVertexResult.error && "Error when creating new vertex",
-        );
+        setFormStore("error", "Error when creating new vertex");
         return;
       }
       setFormStore("formData", graph.vertexes[newVertexObj.id]);
     }
+
     if (!id() && formStore.formData?.L[0] === "Form") {
       const layoutId = addFormInitialComponent(
-        formStore.formData,
-        graph,
-        formStore.txnId,
-        setGraph,
-      );
+        formStore.formData, graph, formStore.txnId, setGraph);
       if (layoutId === -1) {
         setFormStore("error", "Adding component to layout failed");
         return;
@@ -356,10 +311,10 @@ export function PageViewWrapper(
   const Content = () => (
     <PageView
       data={formStore.formData}
-      hasDeletePermission={hasDeletePermission()}
-      hasEditPermission={hasEditPermission()}
-      hasInsertPermission={hasInsertPermission()}
-      hasViewPermission={hasViewPermission()}
+      hasDeletePermission={permissions.delete()}
+      hasEditPermission={permissions.edit()}
+      hasInsertPermission={permissions.insert()}
+      hasViewPermission={permissions.view()}
       id={id()}
       metaVertex={formStore.formMeta}
     />

@@ -15,13 +15,13 @@ import type { Vertex } from "~/lib/graph/graph";
 import {
   CardDetailRow,
   CardDetailsContainer,
-} from "~/components/Card/CardDetails";
-import { CardHeader } from "~/components/Card/CardHeader";
-import { CardOptionsContainer } from "~/components/Card/CardOptions";
+} from "~/components/card/CardDetails";
+import { CardHeader } from "~/components/card/CardHeader";
+import { CardOptionsContainer } from "~/components/card/CardOptions";
 import {
   CardContainer,
   CardHeaderContainer,
-} from "~/components/Card/SimpleCard";
+} from "~/components/card/SimpleCard";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/SimpleTable";
 
 import { CardGrid } from "./CardGrid";

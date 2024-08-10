@@ -21,7 +21,7 @@ export async function waitForDockerCreate(
     20,
   );
   // Remember to close the driver when done
-  driver.close();
+  await driver.close();
 
   await new Promise((resolve, _reject) => setTimeout(resolve, 1000));
 }

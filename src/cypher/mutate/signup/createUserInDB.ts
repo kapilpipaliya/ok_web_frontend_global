@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+
 import type { TransactionPromise } from "neo4j-driver-core";
 
 import { v4 as uuidv4 } from "uuid";
@@ -25,8 +25,7 @@ export async function createUserInDB(
             subdomain: $subdomain,
             driverPort: $driverPort,
             logsPort: $logsPort,
-            labPort: $labPort,
-            profileImage: ''
+            labPort: $labPort
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
@@ -48,16 +47,16 @@ export async function createUserInDB(
 }
 
 export async function createUserInUserDB(
-  session: Session,
+  tx: TransactionPromise,
   params: { [key: string]: any },
 ) {
   const createUserQuery2 = `CREATE (u:User {
-                username: $username,
+                username: 'superadmin',
                 uId:$uId,
                 email: $email,
                 password: $password,
-                profileImage: ''
+                avatar: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
-  const createUserResult = await session.run(createUserQuery2, params);
+  const createUserResult = await tx.run(createUserQuery2, params);
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

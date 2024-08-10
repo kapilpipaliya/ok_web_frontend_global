@@ -6,7 +6,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
 
-import { updateSession } from "./signup/updateSession";
+import { updateSession } from "../../cypher/mutate/signup/updateSession";
 
 // Main POST function
 export async function POST({ request }: APIEvent) {

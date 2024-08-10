@@ -8,7 +8,7 @@ import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import {
   deleteFileMetadataFromNeo4j,
   getFileMetadataFromNeo4j,
-} from "~/routes/api/upload/saveFileMetadataToNeo4j";
+} from "~/server/upload/saveFileMetadataToNeo4j";
 
 export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
   const query = getQuery(event);
