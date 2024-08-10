@@ -9,6 +9,7 @@ import { checkUserExistence } from "./checkUserExistence";
 import { createRootFolder } from "./createRootFolder";
 import { createUserInDB } from "./createUserInDB";
 import { getNewPortsForUser } from "./getNewPortsForUser";
+import { insertDataTypes } from "./insertDataTypes";
 import { updatePortForNewUser } from "./updatePortForNewUser";
 import { waitForDockerCreate } from "./waitForDockerCreate";
 
@@ -37,8 +38,9 @@ export async function signupAdmin(tx: TransactionPromise, data: SignupRequestDat
   
     await createRootFolder(tx);
   
+    await insertDataTypes(tx);
     syncNodesMGCall({
-      nodesToTransfer: ["DataType", "CompCategory", "Comp"], //  "Nav"
+      nodesToTransfer: ["CompCategory", "Comp", "DataType"], //  "Nav"
       userport: driverPort,
     });
   

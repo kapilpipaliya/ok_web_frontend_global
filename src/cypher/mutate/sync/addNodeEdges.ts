@@ -9,6 +9,8 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { findOrCreateNodeAndUpdateProperties } from "~/cypher/mutate/sync/findOrCreateNodeAndUpdateProperties";
 import { getChildrenOrParentVertex } from "~/cypher/mutate/sync/getChildrenOrParentVertex";
 
+import { globalCollections } from "./constants/globalCollections";
+
 export async function addNodeEdges(
   sessionSource: Session,
   sessionTarget: Session,
@@ -28,64 +30,59 @@ export async function addNodeEdges(
   );
 
   const results: Vertex[] = [];
-  const globalCollections = ["DataType", "Comp", "CompCategory"]; // "Nav", "Page"
 
   for (const superVertex of superChildrenVertexes) {
-    const superProperties = { ...superVertex.P };
-    let isPropertyExist = false;
+    const existingChild = userChildrenVertexes.find(
+      (childVertex) => superVertex.P.name === childVertex.P.name,
+    );
 
-    for (const childVertex of userChildrenVertexes) {
-      if (superProperties.name === childVertex.P.name) {
-        const query = `
-          MATCH (a) WHERE id(a) = $childId
-          SET a += $props, a.updatedAt = localDateTime()
-          RETURN a;
-        `;
-        const result = await sessionTarget.run(query, {
-          childId: int(childVertex.id),
-          props: superProperties,
-        });
-        result.records.forEach((v) =>
-          results.push(convertNodeToJson(v.get("a"))),
-        );
-        isPropertyExist = true;
-        break;
-      }
-    }
+    if (existingChild) {
+      const query = `
+        MATCH (a) WHERE id(a) = $childId
+        SET a += $props, a.updatedAt = localDateTime()
+        RETURN a;
+      `;
+      const result = await sessionTarget.run(query, {
+        childId: int(existingChild.id),
+        props: superVertex.P,
+      });
+      result.records.forEach((v) =>
+        results.push(convertNodeToJson(v.get("a"))),
+      );
+    } else {
+      const isGlobalCollection = globalCollections.includes(superVertex.L[0]);
+      const targetNode = isGlobalCollection
+        ? await findOrCreateNodeAndUpdateProperties(
+            sessionSource,
+            sessionTarget,
+            superVertex,
+            superVertex.L[0],
+          )
+        : null;
 
-    if (!isPropertyExist) {
-      let query: string;
-      let params: Record<string, any>;
-
-      if (globalCollections.includes(superVertex.L[0])) {
-        const targetNode = await findOrCreateNodeAndUpdateProperties(
-          sessionSource,
-          sessionTarget,
-          superVertex,
-          superVertex.L[0],
-        );
-        query = `
+      const query = isGlobalCollection
+        ? `
           MATCH (a), (b)
           WHERE id(a) = $parentNodeId AND id(b) = $targetNodeId
           CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b)
           RETURN b;
-        `;
-        params = {
-          parentNodeId: int(parentVertex.id),
-          targetNodeId: int(targetNode.id),
-        };
-      } else {
-        query = `
+        `
+        : `
           MATCH (a) WHERE id(a) = $parentNodeId
           CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b:${superVertex.L[0]})
           SET b = $props, b.createdAt = localDateTime()
           RETURN b;
         `;
-        params = {
-          parentNodeId: int(parentVertex.id),
-          props: superProperties,
-        };
-      }
+
+      const params = isGlobalCollection
+        ? {
+            parentNodeId: int(parentVertex.id),
+            targetNodeId: int(targetNode!.id),
+          }
+        : {
+            parentNodeId: int(parentVertex.id),
+            props: superVertex.P,
+          };
 
       const result = await sessionTarget.run(query, params);
       result.records.forEach((v) =>
