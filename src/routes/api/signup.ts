@@ -9,8 +9,6 @@ import type { SignupRequestData } from "../../cypher/mutate/signup/SignupRequest
 import { signupAdmin } from "../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../cypher/mutate/signup/signupUser";
 
-
-
 async function handleSignup(request: APIEvent["request"], subdomain: string) {
   const data: SignupRequestData = await request.json();
 

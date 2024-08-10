@@ -99,7 +99,7 @@ export function PageViewWrapper(
   };
 
   function checkPermission(action: string) {
-    if (!formStore.formMetaData) return false;
+    if (!formStore.formMetaData) { return false; }
     return (
       isNoPermissionCheck() ||
       (action === "insert" && !id() && hasPermissions(allConfiguredPermission(), action, graph, setGraph)) ||
@@ -118,7 +118,7 @@ export function PageViewWrapper(
   const authError = createMemo(() => {
     if (id() && !(permissions.edit() || permissions.view())) {
       return `You are not authorized to edit or view ${props.pageVertexName}`;
-    } else if (!id() && !permissions.insert()) {
+    }if (!(id() || permissions.insert())) {
       return `You are not authorized to insert ${props.pageVertexName}`;
     }
     return "";
@@ -195,7 +195,7 @@ export function PageViewWrapper(
   }
 
   async function loadData() {
-    if (!id() || !isNoPermissionCheck() && !hasRequiredPermissions()) return;
+    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) { return; }
     try {
       const { incoming, outgoing } = getEdgesFromRowsAttr(
         formStore.formMetaData!.attributes, false);

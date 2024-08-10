@@ -3,8 +3,8 @@ import type { Node, Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { createUserSetting } from "~/routes/api/user/createUserSetting";
 import { getOrCreateGlobalTheme } from "~/cypher/mutate/user/getOrCreateGlobalTheme";
+import { createUserSetting } from "~/routes/api/user/createUserSetting";
 
 interface UserResult {
   globalTheme: null | Vertex;
