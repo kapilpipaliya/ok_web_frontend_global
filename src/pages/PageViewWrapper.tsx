@@ -207,7 +207,7 @@ export function PageViewWrapper(
       }
       
       setGraphData(graph, setGraph, data.graph);
-      setFormStore("formData", data.result[0]);
+      setFormStore({get formData() { return graph.vertexes[data.result[0].id]; }})
     } catch (e: any) {
       setFormStore("error", `Error When Loading Form: ${e.message}`);
     }
@@ -244,7 +244,7 @@ export function PageViewWrapper(
         setFormStore("error", "Error when creating new vertex");
         return;
       }
-      setFormStore("formData", graph.vertexes[newVertexObj.id]);
+      setFormStore({get formData() { return graph.vertexes[newVertexObj.id]; }})
     }
 
     if (!id() && formStore.formData?.L[0] === "Form") {

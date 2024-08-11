@@ -29,6 +29,7 @@ export function selectedValue(
       ? getParentVertexValue(graph, data, meta)
       : getSelectedVertexValue(graph, data, meta);
   } catch (_e) {
+    console.error("Error getting selected value", _e);
     return [];
   }
 }

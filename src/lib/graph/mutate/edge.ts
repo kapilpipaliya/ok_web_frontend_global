@@ -1,4 +1,3 @@
-import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { batch } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
@@ -29,6 +28,7 @@ export function newEdge(
     T: type,
   };
 }
+
 function updateEdge(edge: Edge) {
   const edge2 = klona(edge);
   edge2.id = edgeOldIdToNewIdMap.get(edge.id) || edge.id;
@@ -184,15 +184,10 @@ export function replaceEdgeStart(
   }
   batch(() => {
     setGraph("edges", actualEdgeId, "S", actualNewStartVertexId);
-    // @ts-expect-error
-    setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) =>
-      Array.isArray(v)
-        ? pipe(
-            v.filter((e) => e !== actualEdgeId),
-            (f) => (f.length ? f : undefined),
-          )
-        : v,
-    );
+    setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) => {
+      const filteredV = Array.isArray(v) ? v.filter((e) => e !== actualEdgeId) : v;
+      return filteredV.length ? filteredV : undefined;
+    });
     setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v: any) =>
       Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
     );
@@ -227,7 +222,8 @@ export function replaceEdgeStart(
     txnDetailIndex: getLastTxnIndex(txnId, graph),
   };
 }
-//private
+
+// private
 export function replaceEdgeEnd(
   txnId: number,
   edgeId: Id,
@@ -249,15 +245,10 @@ export function replaceEdgeEnd(
   }
   batch(() => {
     setGraph("edges", actualEdgeId, "E", actualNewEndVertexId);
-    // @ts-expect-error
-    setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) =>
-      Array.isArray(v)
-        ? pipe(
-            v.filter((e) => e !== actualEdgeId),
-            (f) => (f.length ? f : undefined),
-          )
-        : v,
-    );
+    setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) => {
+      const filteredV = Array.isArray(v) ? v.filter((e) => e !== actualEdgeId) : v;
+      return filteredV.length ? filteredV : undefined;
+    });
     setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v: any) =>
       Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
     );
@@ -310,25 +301,14 @@ export function deleteEdge(
   const edge = updateEdge(graph.edges[actualEdgeId]);
   batch(() => {
     const type = edge.T;
-    // @ts-expect-error ignore
-    setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) =>
-      Array.isArray(ids) && ids.includes(actualEdgeId)
-        ? pipe(
-            ids.filter((id_) => id_ !== actualEdgeId),
-            (newIds) => (newIds.length ? newIds : undefined),
-          )
-        : ids,
-    );
-    // @ts-expect-error ignore
-    setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) =>
-      Array.isArray(ids) && ids.includes(actualEdgeId)
-        ? pipe(
-            ids.filter((id_) => id_ !== actualEdgeId),
-            (newIds) => (newIds.length ? newIds : undefined),
-          )
-        : ids,
-    );
-    // @ts-expect-error ignore
+    setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) => {
+      const filteredIds = Array.isArray(ids) ? ids.filter((id_) => id_ !== actualEdgeId) : ids;
+      return filteredIds.length ? filteredIds : undefined;
+    });
+    setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) => {
+      const filteredIds = Array.isArray(ids) ? ids.filter((id_) => id_ !== actualEdgeId) : ids;
+      return filteredIds.length ? filteredIds : undefined;
+    });
     setGraph("edges", actualEdgeId, undefined);
   });
 
