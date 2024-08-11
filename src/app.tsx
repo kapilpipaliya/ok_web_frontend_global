@@ -3,8 +3,8 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { createSignal, Show, Suspense } from "solid-js";
 
+import "~/base.css";
 import { configureState } from "~/configureState";
-import "~/css/base.css";
 import { Sidebar } from "~/pages/admin_layout/sidebar/SidebarLayout";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";

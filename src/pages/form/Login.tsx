@@ -87,7 +87,8 @@ interface LoginFormProps {
   setFormData: (data: any) => void;
 }
 
-function LoginForm(props: LoginFormProps): JSX.Element {
+function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
+  const subTitle = "";
   return (
     <form
       class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
@@ -106,7 +107,7 @@ function LoginForm(props: LoginFormProps): JSX.Element {
       <div class="grid align-content:center m:0|30@lg mt:25 w:100%@<md">
         <div class="flex f:20 font-weight:bold jc:left mb:5">Log In</div>
         <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-          You Will be Redirected to Home Page
+          {subTitle}
         </div>
         <label
           class="f:14"
@@ -208,8 +209,10 @@ export function Login(): JSX.Element {
     const data = await postAPI("/api/get_subdomain_Info", {});
     setFormData({
       ...formData(),
-      profileImage: data.P.profileImage,
-      username: data.P.username,
+      // TODO: rename profileImage to companyLogo
+      profileImage: data.P?.profileImage,
+      // TODO: why set username?
+      username: data.P?.username,
     });
   };
 

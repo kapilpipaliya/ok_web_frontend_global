@@ -7,17 +7,19 @@ export async function getSubDomain(host: string) {
   const _path = url.pathname;
   const _httpSession = await getHttpsSession();
 
-  // if (
-  //   isAuthCheck &&
-  //   !httpSession.data?.email &&
-  //   !path.includes("/api/signup")
-  // ) {
-  //   throw new Error("Not Authorized");
-  // }
+  // Remove the port number if present
+  const hostWithoutPort = host.split(":")[0];
+
+  // Check if the host is an IP address
+  const isIPAddress = /^\d{1,3}(\.\d{1,3}){3}$/.test(hostWithoutPort);
+
+  if (isIPAddress) {
+    return "super"; // Return default 'super' when accessed via IP
+  }
 
   // Assuming the URL is something like `subdomain.example.com`
   // Split the host by '.' and check the length
-  const parts = host.split(".");
+  const parts = hostWithoutPort.split(".");
 
   // Determine if a subdomain exists (assuming your domain is example.com)
   let subdomain;
@@ -26,6 +28,7 @@ export async function getSubDomain(host: string) {
   } else {
     subdomain = "super"; // Default to 'super' if no subdomain is found
   }
+
   if (subdomain === "www") {
     return "super";
   }

@@ -37,7 +37,7 @@ export async function getDriver(
     if (res.records.length > 0) {
       port = res.records[0].get("n")?.properties.driverPort;
     } else {
-      throw new Error("Subdomain Not Found!");
+      throw new Error(`Subdomain ${subdomain} Not Found!`);
     }
     await session.close();
   }

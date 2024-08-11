@@ -70,21 +70,20 @@ async function authenticateSuperUser(
   password: string,
 ) {
   const userDbSession = (
-    await getDriverWithPort(user.properties.driverPort)
+    await getDriverWithPort(user.P.driverPort)
   ).session();
 
   try {
     const query =
-      "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
-    const result = await userDbSession.run(query, { email });
-    const res = result.records[0].get("u");
+      "MATCH (u:User) WHERE u.email = $email RETURN u";
+    const userDbResult = await userDbSession.run(query, { email });
 
-    if (result.records.length === 0) {
+    if (userDbResult.records.length === 0) {
       throw new Error("Not Authorized Email or Username!!!!");
     }
-
-    if (res.properties.password === password) {
-      return convertNodeToJson(result.records[0].get("u"));
+    const res = convertNodeToJson(userDbResult.records[0].get("u"));
+    if (res.P.password === password) {
+      return res;
     }
     throw new Error("Not Authorized Email or Username!!!!!!");
   } finally {

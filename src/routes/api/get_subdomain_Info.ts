@@ -10,7 +10,7 @@ export async function POST({ request }: APIEvent) {
 
   if (subdomain === "super") {
     await session.close();
-    return { success: true };
+    return { success: true};
   }
 
   return await getSubDomainInfo(subdomain, session);

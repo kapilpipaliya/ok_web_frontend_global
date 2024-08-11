@@ -4,7 +4,8 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getOrCreateGlobalTheme } from "~/cypher/mutate/user/getOrCreateGlobalTheme";
-import { createUserSetting } from "~/routes/api/user/createUserSetting";
+
+import { createUserSetting } from "./createUserSetting";
 
 interface UserResult {
   globalTheme: null | Vertex;
