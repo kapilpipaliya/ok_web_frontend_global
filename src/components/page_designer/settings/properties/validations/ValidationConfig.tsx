@@ -9,7 +9,7 @@ interface ValidationProps {
   componentMeta: Vertex;
   data: Vertex;
   meta: Vertex;
-  setValue(meta: Vertex, data: any): void;
+  onChange(meta: Vertex, data: any): void;
 }
 
 export const validations = {
@@ -55,7 +55,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       "regex",
       values.regex.filter((_, i) => i !== index),
     );
-    props.setValue(props.meta, values);
+    props.onChange(props.meta, values);
   };
 
   const RuleInput = (
@@ -74,7 +74,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
         class="border:1px|solid|#ccc f:15 flex:1 p:2"
         onChange={(e) => {
           inputProps.onChange(e);
-          props.setValue(props.meta, values);
+          props.onChange(props.meta, values);
         }}
         type={inputProps.type}
         value={inputProps.value}

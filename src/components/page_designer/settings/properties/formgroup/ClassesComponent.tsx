@@ -10,9 +10,9 @@ import type { createVertexIds } from "./FormGroupProperties";
 
 interface ClassesComponentProps {
   metaAttributes: Vertex[];
-  selectedLayout: Vertex;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setValue: (meta: Vertex, data: any) => void;
+  onChange: (meta: Vertex, data: any) => void;
+  selectedLayout: Vertex;
   txnId: number;
   vertexIds: ReturnType<typeof createVertexIds>;
 }
@@ -46,8 +46,8 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
         <CSSPropertiesEditorWrapper
           data={props.selectedLayout}
           meta={metaClasses[selectedIndex()]}
-          setValue={(data) =>
-            props.setValue(metaClasses[selectedIndex()], data)
+          onChange={(data) =>
+            props.onChange(metaClasses[selectedIndex()], data)
           }
           txnId={props.txnId}
         />

@@ -79,7 +79,7 @@ export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
               disabled={false}
               isNoPermissionCheck={true}
               meta={graph.vertexes[metaVertexId]}
-              setValue={(data: any) =>
+              onChange={(data: any) =>
                 setGraph("vertexes", dataVertexId, "P", { jsx: data })
               }
               title={"Write HTML"}

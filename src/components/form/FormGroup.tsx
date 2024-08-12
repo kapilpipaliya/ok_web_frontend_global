@@ -50,7 +50,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
             isRealTime={false}
             isTableInside={true}
             meta={metaVertex}
-            // setValue={props.setValue}
+            // onChange={props.onChange}
             title={toTitle(
               metaVertex.P.displayName ||
                 metaVertex.P[IdAttr] ||

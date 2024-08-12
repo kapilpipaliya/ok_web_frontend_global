@@ -9,11 +9,10 @@ export function PageField(props: Readonly<GenericComponentProps>) {
     "componentName",
     "meta",
     "data",
-    "setValue",
+    "onChange",
     "value",
     "isRealTime",
     "isTableInside",
-    "setValue",
     "txnId",
     "children",
   ]);

@@ -152,8 +152,8 @@ export function SelectField(
           } else {
             parsedValue = value;
           }
-          props.setValue
-            ? props.setValue(parsedValue)
+          props.onChange
+            ? props.onChange(parsedValue)
             : setValueGlobal(
                 graph,
                 setGraph,

@@ -6,8 +6,8 @@ import { useDesignerLayoutStore } from "../../../LayoutContext";
 export function DefaultValueContent(
   props: Readonly<{
     meta: Vertex;
+    onChange: (meta: Vertex, data: any) => void;
     selectedLayout: Vertex;
-    setValue: (meta: Vertex, data: any) => void;
     txnId: number;
   }>,
 ) {
@@ -21,7 +21,7 @@ export function DefaultValueContent(
       isNoPermissionCheck={true}
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}
-      setValue={(data) => props.setValue(props.meta, data)}
+      onChange={(data) => props.onChange(props.meta, data)}
       txnId={props.txnId}
     />
   );

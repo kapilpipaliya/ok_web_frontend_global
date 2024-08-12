@@ -15,7 +15,6 @@ import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransa
 import { useFormContext } from "../form/FormContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
-import { createARIADisabledState } from "../terracotta/utils/state-props";
 import useEventListener from "../terracotta/utils/use-event-listener";
 import { useToast } from "../Toast";
 

@@ -1,6 +1,6 @@
 import { capitalizeFirstLetter } from "./capitalizeFirstLetter";
 
-//'setValue(component,null)'
+//'onChange(component,null)'
 
 export function getLabel(input: string) {
   input = input.replaceAll(" ", "");

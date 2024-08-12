@@ -50,7 +50,7 @@ export function CSSPropertiesEditor(
   props: Readonly<{
     data: Vertex;
     meta: Vertex;
-    setValue?: (data: CSSStore) => void;
+    onChange?: (data: CSSStore) => void;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -70,7 +70,7 @@ export function CSSPropertiesEditor(
 
   const handleCSSStateChange = (valueString: string) => {
     setCssState(reconcile(parseAndApplyCssRules(valueString)));
-    props.setValue?.(JSON.parse(JSON.stringify(cssState)));
+    props.onChange?.(JSON.parse(JSON.stringify(cssState)));
   };
 
   const handleAddNewClick = () => {

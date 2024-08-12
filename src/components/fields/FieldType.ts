@@ -10,7 +10,7 @@ export interface GenericComponentProps {
   isRealTime?: boolean;
   isTableInside?: boolean;
   meta: Vertex;
-  setValue?(data: any): void;
+  onChange?(data: any): void;
   title?: string;
   txnId: number;
   value?: any;

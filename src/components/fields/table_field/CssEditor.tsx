@@ -33,7 +33,7 @@ export function CssEditor(
             <CSSPropertiesEditorWrapper
               data={props.joinVertex}
               meta={props.metaVertex}
-              setValue={(data) => {
+              onChange={(data) => {
                 setValueGlobal(
                   graph,
                   setGraph,

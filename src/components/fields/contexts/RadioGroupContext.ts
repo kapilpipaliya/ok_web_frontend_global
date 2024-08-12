@@ -4,8 +4,8 @@ import { createContext, useContext } from "solid-js";
 
 export interface RadioGroupStoreObject {
   isSelected: (value: string) => boolean;
+  onChange: (value: string) => void;
   radioGroupRootId: string;
-  setValue: (value: string) => void;
   value: string;
 };
 type RadioGroupStore = ReturnType<typeof createStore<RadioGroupStoreObject>>;

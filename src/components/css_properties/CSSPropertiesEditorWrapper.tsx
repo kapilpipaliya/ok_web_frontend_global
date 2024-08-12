@@ -23,7 +23,7 @@ export function CSSPropertiesEditorWrapper(
     disabled?: boolean;
     isRealTime?: boolean;
     meta: Vertex;
-    setValue?: (data: CSSStore) => void;
+    onChange?: (data: CSSStore) => void;
     title?: string;
     txnId?: number;
   }>,
@@ -56,7 +56,7 @@ export function CSSPropertiesEditorWrapper(
   ) => {
     // @ts-expect-error imporoper type error
     setCssState(...args);
-    props.setValue?.(JSON.parse(JSON.stringify(cssState)));
+    props.onChange?.(JSON.parse(JSON.stringify(cssState)));
   };
 
   return (
@@ -84,7 +84,7 @@ export function CSSPropertiesEditorWrapper(
       <CSSPropertiesEditor
         data={props.data!}
         meta={props.meta}
-        setValue={props.setValue}
+        onChange={props.onChange}
       />
     </MultiProvider>
   );

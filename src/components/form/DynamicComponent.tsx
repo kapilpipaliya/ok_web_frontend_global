@@ -63,7 +63,7 @@ export function DynamicComponent(
     isRealTime?: boolean;
     isTableInside?: boolean;
     meta: Vertex;
-    setValue?: (data: any) => void;
+    onChange?: (data: any) => void;
     title?: string;
     txnId?: number;
   }>,
@@ -148,9 +148,9 @@ export function DynamicComponent(
     return isNoPermissionCheck() ? undefined : hasPermission();
   };
 
-  const setValue = (value: unknown) => {
-    if (props.setValue) {
-      props.setValue(value);
+  const onChange = (value: unknown) => {
+    if (props.onChange) {
+      props.onChange(value);
     } else {
       const existingValue = props.data?.P[props.meta.P.name];
       // Check if the user has the appropriate permissions for the specific field
@@ -315,7 +315,7 @@ export function DynamicComponent(
       isRealTime={props.isRealTime}
       isTableInside={props.isTableInside}
       meta={props.meta}
-      setValue={componentName() !== "DynamicTable" ? setValue : undefined}
+      onChange={componentName() !== "DynamicTable" ? onChange : undefined}
       title={props.title ?? ""}
       txnId={props.txnId}
       value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}

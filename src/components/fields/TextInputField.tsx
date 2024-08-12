@@ -14,11 +14,10 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
     "componentName",
     "meta",
     "data",
-    "setValue",
+    "onChange",
     "value",
     "isRealTime",
     "isTableInside",
-    "setValue",
     "txnId",
     // @ts-expect-error ignore
     "onchange",
@@ -59,7 +58,7 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
 
   const handleChange = (event: Event) => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    local.setValue?.(target.value);
+    local.onChange?.(target.value);
   };
 
   const DisplayError = () => (

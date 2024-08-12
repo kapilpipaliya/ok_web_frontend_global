@@ -47,8 +47,8 @@ export function PropertiesBody() {
       <CollAndData />
       <FormGroupProperties
         metaAttributes={selectedComponentProperties().vertexes ?? []}
+        onChange={setPropertyValue}
         selectedLayout={graph.vertexes[layoutStore.selectedId]}
-        setValue={setPropertyValue}
         txnId={layoutStore.formStore[0].txnId}
       />
       <ZIndex>

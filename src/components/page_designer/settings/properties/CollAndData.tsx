@@ -155,7 +155,7 @@ export function CollAndData() {
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![0]}
-        setValue={onCollectionChange}
+        onChange={onCollectionChange}
         title={"Select Collection"}
         txnId={layoutStore.formStore[0].txnId}
       />

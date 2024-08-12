@@ -9,8 +9,8 @@ import { Label } from "./Label";
 export function UniqueNameField(
   props: Readonly<{
     meta: Vertex;
+    onChange: (meta: Vertex, data: any) => void;
     selectedLayout: Vertex;
-    setValue: (meta: Vertex, data: any) => void;
     txnId: number;
   }>,
 ) {
@@ -35,7 +35,7 @@ export function UniqueNameField(
         mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
           error: null,
         });
-        return props.setValue(metaVertex, data);
+        return props.onChange(metaVertex, data);
       }
       return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
         error: "Name is required",
@@ -44,7 +44,7 @@ export function UniqueNameField(
     mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
       error: null,
     });
-    return props.setValue(metaVertex, data);
+    return props.onChange(metaVertex, data);
   }
   return (
     <div
@@ -60,7 +60,7 @@ export function UniqueNameField(
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={props.meta}
-          setValue={(data: string) => setUniqueNameValue(props.meta, data)}
+          onChange={(data: string) => setUniqueNameValue(props.meta, data)}
           txnId={0}
         />
       </span>

@@ -53,7 +53,7 @@ export function DisplayProperty(
     isNoPermissionCheck?: boolean;
     isRealTime: boolean;
     joinVertex: Vertex;
-    setValue?: (data: any) => void;
+    onChange?: (data: any) => void;
     txnId: number;
   }>,
 ) {
@@ -180,7 +180,7 @@ export function DisplayProperty(
             ? graph.vertexes[metaVertex().P.templateId]
             : metaVertex()
         }
-        setValue={props.setValue}
+        onChange={props.onChange}
         title={toTitle(
           props.column.P.displayName || props.column.P[IdAttr] || "",
         )}

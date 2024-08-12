@@ -9,11 +9,10 @@ export function BoxField(props: Readonly<GenericComponentProps>) {
     "componentName",
     "meta",
     "data",
-    "setValue",
+    "onChange",
     "value",
     "isRealTime",
     "isTableInside",
-    "setValue",
     "txnId",
     "children",
   ]);
@@ -23,7 +22,6 @@ export function BoxField(props: Readonly<GenericComponentProps>) {
       component={local.meta.P.as || "div"}
       {...others}
     >
-      {local.meta.P.text}
       {local.children}
     </Dynamic>
   );

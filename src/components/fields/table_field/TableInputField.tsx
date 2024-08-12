@@ -176,10 +176,10 @@ export function TableInputField(
                       isRealTime={props.isRealTime ?? false}
                       joinVertex={vertex}
                       meta={props.meta}
+                      onChange={props.onChange}
                       rowIndex={index()}
                       setDragFromIndex={setDragFromIndex}
                       setDragToIndex={setDragToIndex}
-                      setValue={props.setValue}
                       tableColumnsTemplate={tableColumnsTemplate}
                       txnId={props.txnId ?? 0}
                     />

@@ -11,8 +11,8 @@ export function HighlightSetValueContent(
   props: Readonly<{
     componentName: Accessor<string>;
     meta: Vertex;
+    onChange: (meta: Vertex, data: any) => void;
     selectedLayout: Vertex;
-    setValue: (meta: Vertex, data: any) => void;
     txnId: number;
   }>,
 ) {
@@ -28,8 +28,8 @@ export function HighlightSetValueContent(
           <Match when={props.meta.P.name === "defaultValue"}>
             <DefaultValueContent
               meta={props.meta}
+              onChange={props.onChange}
               selectedLayout={props.selectedLayout}
-              setValue={props.setValue}
               txnId={props.txnId}
             />
           </Match>
@@ -40,7 +40,7 @@ export function HighlightSetValueContent(
               isNoPermissionCheck={true}
               isRealTime={false}
               meta={props.meta}
-              setValue={(data) => props.setValue(props.meta, data)}
+              onChange={(data) => props.onChange(props.meta, data)}
               txnId={props.txnId}
             />
           </Match>
@@ -56,7 +56,7 @@ export function HighlightSetValueContent(
                           collection: `ids:'${props.selectedLayout.id}'->Rule`
                         },
                       } as unknown as Vertex}
-                      setValue={(attr, vertex, data) => 0}
+                      onChange={(attr, vertex, data) => 0}
                     /> */}
       </span>
       <Show
@@ -69,7 +69,7 @@ export function HighlightSetValueContent(
           data-testid="clearIcon"
           icon="mdi:close"
           iconClass="color:#ff0000 cursor:pointer"
-          onClick={() => props.setValue(props.meta, null)}
+          onClick={() => props.onChange(props.meta, null)}
           size={24}
         />
       </Show>

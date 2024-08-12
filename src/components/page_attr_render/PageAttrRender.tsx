@@ -67,7 +67,7 @@ export function PageAttrRender(
               componentName={componentName()}
               // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
               data={getData()}
-              // setValue={props.setValue}
+              // onChange={props.onChange}
               meta={item}
               title={toTitle(getId(graph, item) ?? "")}
               txnId={formStore?.txnId}

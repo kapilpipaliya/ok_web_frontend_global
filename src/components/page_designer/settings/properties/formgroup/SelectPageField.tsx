@@ -8,8 +8,8 @@ import { Label } from "./Label";
 export function SelectPageField(
   props: Readonly<{
     meta: Vertex;
+    onChange: (meta: Vertex, data: any) => void;
     selectedLayout: Vertex;
-    setValue: (meta: Vertex, data: any) => void;
     txnId: number;
   }>,
 ) {

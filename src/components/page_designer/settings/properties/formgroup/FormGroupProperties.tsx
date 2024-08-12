@@ -51,9 +51,9 @@ function modifyMetaVertexExpr(meta: Vertex) {
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
-  selectedLayout: Vertex;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setValue(meta: Vertex, data: any): void;
+  onChange(meta: Vertex, data: any): void;
+  selectedLayout: Vertex;
   txnId: number;
 }
 
@@ -80,7 +80,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           componentMeta={graph.vertexes[layoutStore.selectedComponent]}
           data={props.selectedLayout}
           meta={{ P: { name: "validation" } } as unknown as Vertex}
-          setValue={props.setValue}
+          onChange={props.onChange}
         />
       </div>
       <For
@@ -90,16 +90,16 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           <PropertyField
             meta={meta}
             metaTxnId={metaTxnId}
+            onChange={props.onChange}
             selectedLayout={props.selectedLayout}
-            setValue={props.setValue}
             txnId={props.txnId}
           />
         )}
       </For>
       <ClassesComponent
         metaAttributes={props.metaAttributes}
+        onChange={props.onChange}
         selectedLayout={props.selectedLayout}
-        setValue={props.setValue}
         txnId={props.txnId}
         vertexIds={vertexIds}
       />
@@ -341,9 +341,9 @@ function cleanupVertices(
 interface PropertyFieldProps {
   meta: Vertex;
   metaTxnId: number;
-  selectedLayout: Vertex;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setValue: (meta: Vertex, data: any) => void;
+  onChange: (meta: Vertex, data: any) => void;
+  selectedLayout: Vertex;
   txnId: number;
 }
 
@@ -372,16 +372,16 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         <Match when={props.meta.P.name === "name"}>
           <UniqueNameField
             meta={props.meta}
+            onChange={props.onChange}
             selectedLayout={props.selectedLayout}
-            setValue={props.setValue}
             txnId={props.txnId}
           />
         </Match>
         <Match when={props.meta.P.name === "thankYouPage"}>
           <SelectPageField
             meta={props.meta}
+            onChange={props.onChange}
             selectedLayout={props.selectedLayout}
-            setValue={props.setValue}
             txnId={props.txnId}
           />
         </Match>
@@ -417,7 +417,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             isNoPermissionCheck={true}
             isRealTime={false}
             meta={props.meta}
-            setValue={(data) => props.setValue(props.meta, data)}
+            onChange={(data) => props.onChange(props.meta, data)}
             txnId={props.txnId}
           />
         </Match>
@@ -425,8 +425,8 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
           <HighlightSetValueContent
             componentName={componentName}
             meta={props.meta}
+            onChange={props.onChange}
             selectedLayout={props.selectedLayout}
-            setValue={props.setValue}
             txnId={props.txnId}
           />
           <SelectRuleField
