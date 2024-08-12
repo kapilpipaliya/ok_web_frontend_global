@@ -1,8 +1,8 @@
 import type { JSX } from "solid-js";
 
+import { Button } from "@kobalte/core/button";
 import { useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, Show, splitProps } from "solid-js";
-import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -28,7 +28,6 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export function ButtonField(props: Readonly<ButtonProps>) {
   const [local, others] = splitProps(props, [
-    "as",
     "ref",
     "data",
     "meta",
@@ -60,7 +59,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, props.meta, formStore!.formData!)) {
+    if (isAnyFieldInvalid(graph, setGraph, props.meta, formStore!.formData)) {
       return;
     }
     const data = commitTxn(formStore!.txnId, graph);
@@ -107,11 +106,9 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
   return (
     <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
-      <Dynamic
-        {...createARIADisabledState(() => props.disabled)}
-        component={local.as ?? "button"}
+      {/* @ts-expect-error children is not a valid prop */}
+      <Button
         ref={setInternalRef}
-        tabIndex={props.disabled ? -1 : 0}
         {...others}
         {...extraProps}
       >
@@ -119,7 +116,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
           local.meta.P.text ??
           local.meta.P.children}
         {local.children}
-      </Dynamic>
+      </Button>
     </Show>
   );
 }

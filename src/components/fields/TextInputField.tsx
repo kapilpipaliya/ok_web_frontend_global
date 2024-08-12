@@ -26,7 +26,6 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
 
   const inputTypes = {
     button: "button",
-    checkbox: "checkbox",
     color: "color",
     date: "date",
     "datetime-local": "datetime-local",
@@ -60,11 +59,7 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
 
   const handleChange = (event: Event) => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    if (target.type === "checkbox") {
-      local.setValue?.((target as HTMLInputElement).checked);
-    } else {
-      local.setValue?.(target.value);
-    }
+    local.setValue?.(target.value);
   };
 
   const DisplayError = () => (
@@ -82,14 +77,6 @@ export const TextInputField: Component<GenericComponentProps> = (props) => {
             onChange={handleChange}
             rows={props.meta?.P.rows ?? 4}
             value={local.value}
-          />
-        </Match>
-        <Match when={determineInputType() === "checkbox"}>
-          <input
-            type="checkbox"
-            {...others}
-            checked={local.value}
-            onChange={handleChange}
           />
         </Match>
         <Match when={true}>

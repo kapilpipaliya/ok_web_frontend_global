@@ -38,16 +38,13 @@ import { Repeater } from "~/components/page_attr_render/Repeater";
 import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
-import { ImageField } from "../../fields/ImageField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { TextInputField } from "../../fields/TextInputField";
-import { UrlField } from "../../fields/UrlField";
 import { Signature } from "../../SignatureBox";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 
 export const componentsMap: Record<string, any> = {
-  A: UrlField,
   Accordion: Accordion,
   AccordionContent: Accordion.Content,
   AccordionHeader: Accordion.Header,
@@ -66,7 +63,7 @@ export const componentsMap: Record<string, any> = {
   BreadcrumbLink: Breadcrumbs.Link,
   BreadcrumbSeparator: Breadcrumbs.Separator,
   Button: ButtonField,
-  CheckBox: Checkbox,
+  CheckBox: TextInputField,
   CheckboxControl: Checkbox.Control,
   CheckboxDescription: Checkbox.Description,
   CheckboxErrorMessage: Checkbox.ErrorMessage,
@@ -145,7 +142,7 @@ export const componentsMap: Record<string, any> = {
   HoverCardPortal: HoverCard.Portal,
   HoverCardTrigger: HoverCard.Trigger,
   HtmlEditor: TextInputField,
-  Image: ImageField,
+  Image: Image,
   ImageFallback: Image.Fallback,
   ImageImg: Image.Img,
   ImageUploader: TextInputField,

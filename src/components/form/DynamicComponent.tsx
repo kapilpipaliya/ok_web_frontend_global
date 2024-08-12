@@ -331,6 +331,7 @@ export function DynamicComponent(
       }
     >
       <Show when={props.meta.id}>
+        {props.meta.P.text}
         <PageAttrRender data={props.data} metaVertex={props.meta} />
       </Show>
     </Dynamic>
