@@ -305,9 +305,19 @@ export function DynamicComponent(
     },
     vertexes: [] as Vertex[],
   });
+  const isCheckbox = () => {
+    return componentName() === "Checkbox" || componentName() === "Switch" || componentName() === "MenubarCheckboxItem";
+  }
+  const DisplayError = () => (
+    <Show when={props.meta.P.error}>
+      <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
+    </Show>
+  );
+
   const Content = () => (
-    <Dynamic
+    <><Dynamic
       {...deNullifyAndMergeCSS()}
+      checked={isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined}
       component={component()}
       componentName={componentName()}
       data={props.data}
@@ -318,7 +328,7 @@ export function DynamicComponent(
       onChange={componentName() !== "DynamicTable" ? onChange : undefined}
       title={props.title ?? ""}
       txnId={props.txnId}
-      value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
+      value={!isCheckbox() ? ifNotNull(props.data?.P[props.meta.P[IdAttr]]) : undefined}
       {...expressionProperties()}
       disabled={
         isNoPermissionCheck()
@@ -335,6 +345,8 @@ export function DynamicComponent(
         <PageAttrRender data={props.data} metaVertex={props.meta} />
       </Show>
     </Dynamic>
+    <DisplayError />
+    </>
   );
 
   return (
@@ -400,6 +412,49 @@ export function DynamicComponent(
     </>
   );
 }
+const inputTypes = {
+  color: "color",
+  date: "date",
+  "datetime-local": "datetime-local",
+  email: "email",
+  file: "file",
+  image: "image",
+  month: "month",
+  number: "number",
+  password: "password",
+  radio: "radio",
+  range: "range",
+  reset: "reset",
+  search: "search",
+  tel: "tel",
+  text: "text",
+  time: "time",
+  url: "url",
+  week: "week",
+};
+/*
+        <Match when={componentName() === "SelectBox"}>
+          <MultiSelectField
+            disable={props.disabled}
+            displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
+            onRemove={(value: any) => handleChange(value)}
+            onSelect={(value: any) => handleChange(value)}
+            optionValueKey="id"
+            options={props.meta?.P.options ?? []}
+            selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
+            selectionLimit={1}
+          />
+          <DisplayError />
+        </Match>
+        <Match when={componentName() === "RadioGroup"}>
+          <RadioGroup disabled={props.disabled}>
+            <PageAttrRender data={props.data} metaVertex={props.meta} />
+          </RadioGroup>
+          <DisplayError />
+        </Match>
+        
+        */
+
 
 /*
   <Match when={componentName() === "TabContainer"}>

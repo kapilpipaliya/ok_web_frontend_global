@@ -24,7 +24,7 @@ import { Skeleton } from "@kobalte/core/skeleton";
 import { Slider } from "@kobalte/core/slider";
 import { Switch } from "@kobalte/core/switch";
 import { Tabs } from "@kobalte/core/tabs";
-import { TextField as KobalteTextField } from "@kobalte/core/text-field";
+import { TextField as KobalteTextField, TextArea } from "@kobalte/core/text-field";
 import { Toast } from "@kobalte/core/toast";
 import { ToggleButton } from "@kobalte/core/toggle-button";
 import { ToggleGroup } from "@kobalte/core/toggle-group";
@@ -40,7 +40,6 @@ import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
-import { TextInputField } from "../../fields/TextInputField";
 import { Signature } from "../../SignatureBox";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 
@@ -264,8 +263,8 @@ export const componentsMap: Record<string, any> = {
   TagBox: SelectField,
   TemplatePage: PageField,
   Text: TextField,
-  TextArea: TextInputField,
-  TextBox: TextInputField,
+  TextArea: TextArea,
+  TextBox: KobalteTextField,
   TextField: KobalteTextField,
   ThankYouPage: PageField,
   Toast: Toast,

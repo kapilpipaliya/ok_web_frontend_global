@@ -31,6 +31,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     "data",
     "meta",
     "children",
+    "onChange"
   ]);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
