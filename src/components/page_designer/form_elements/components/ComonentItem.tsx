@@ -55,22 +55,22 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
         setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
         setSelectedComponents(new Set<Vertex>());
       }}
-      // onMouseEnter={() => setIsHovered(true)}
-      // onMouseLeave={() => setIsHovered(false)}
-      // ondblclick={() => {
-      //   setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
-      //   onClickAddComponent(
-      //     graph,
-      //     setGraph,
-      //     layoutStore.formData.txnId,
-      //     layoutStore.draggedVertices[0],
-      //     layoutStore.formData.formData || {},
-      //     layoutStore.selectedId !== -1
-      //       ? layoutStore.selectedId
-      //       : layoutStore.formData.formData.id,
-      //   );
-      //   setLayoutStore("draggedVertices", []);
-      // }}
+    // onMouseEnter={() => setIsHovered(true)}
+    // onMouseLeave={() => setIsHovered(false)}
+    // ondblclick={() => {
+    //   setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
+    //   onClickAddComponent(
+    //     graph,
+    //     setGraph,
+    //     layoutStore.formData.txnId,
+    //     layoutStore.draggedVertices[0],
+    //     layoutStore.formData.formData || {},
+    //     layoutStore.selectedId !== -1
+    //       ? layoutStore.selectedId
+    //       : layoutStore.formData.formData.id,
+    //   );
+    //   setLayoutStore("draggedVertices", []);
+    // }}
     >
       <Show when={isHovered()}>
         <OpenComponentSettings
@@ -96,7 +96,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
         <Icon
           height={24}
           icon={
-            iconMap[props.child?.P.name] ??
+            iconMap[props.child?.P.name as keyof typeof iconMap] ??
             "material-symbols:widgets-outline-rounded"
           }
           width={24}

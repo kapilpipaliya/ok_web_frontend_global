@@ -62,7 +62,7 @@ export const componentsMap: Record<string, any> = {
   BreadcrumbLink: Breadcrumbs.Link,
   BreadcrumbSeparator: Breadcrumbs.Separator,
   Button: ButtonField,
-  CheckBox: TextInputField,
+  CheckBox: Checkbox,
   CheckboxControl: Checkbox.Control,
   CheckboxDescription: Checkbox.Description,
   CheckboxErrorMessage: Checkbox.ErrorMessage,
@@ -72,7 +72,7 @@ export const componentsMap: Record<string, any> = {
   Collapsible: Collapsible,
   CollapsibleContent: Collapsible.Content,
   CollapsibleTrigger: Collapsible.Trigger,
-  ColorBox: TextInputField,
+  ColorBox: KobalteTextField,
   Combobox: Combobox,
   ComboboxArrow: Combobox.Arrow,
   ComboboxContent: Combobox.Content,
@@ -187,7 +187,7 @@ export const componentsMap: Record<string, any> = {
   NavigationMenuSubTrigger: NavigationMenu.SubTrigger,
   NavigationMenuTrigger: NavigationMenu.Trigger,
   NavigationMenuViewport: NavigationMenu.Viewport,
-  NumberBox: TextInputField,
+  NumberBox: NumberField,
   NumberField: NumberField,
   NumberFieldDecrementTrigger: NumberField.DecrementTrigger,
   NumberFieldDescription: NumberField.Description,
@@ -289,50 +289,50 @@ export function getDynamicComponent(component: string) {
   return componentsMap[component] || BoxField;
 }
 
-   // case "Tabs":
-    //   return Tabs;
+// case "Tabs":
+//   return Tabs;
 
-    // case "Table":
-    //   return Table;
+// case "Table":
+//   return Table;
 
-    // case "TableHeader":
-    //   return TableHeadCell;
+// case "TableHeader":
+//   return TableHeadCell;
 
-    // case "TableRow":
-    //   return TableBodyCell;
+// case "TableRow":
+//   return TableBodyCell;
 
-    // case "Collapsible":
-    //   return Collapsible;
+// case "Collapsible":
+//   return Collapsible;
 
-    // case "Avatar":
-    //   return Avatar;
+// case "Avatar":
+//   return Avatar;
 
-    // case "Select":
-    //   return Select; // check is it correct
+// case "Select":
+//   return Select; // check is it correct
 
-    // case "TreeViewItem":
-    //   return TreeView;
+// case "TreeViewItem":
+//   return TreeView;
 
-    // case "TreeViewChild":
-    //   return PageAttrRender;
+// case "TreeViewChild":
+//   return PageAttrRender;
 
-    // case "Accordion":
-    //   return Accordion;
+// case "Accordion":
+//   return Accordion;
 
-    // case "Breadcrumb":
-    // return Breadcrumbs;
+// case "Breadcrumb":
+// return Breadcrumbs;
 
-    // case "Divider":
-    //   return "hr"; // Assuming you have a Divider component
+// case "Divider":
+//   return "hr"; // Assuming you have a Divider component
 
-    // case "Heading":
-    //   return Heading;
+// case "Heading":
+//   return Heading;
 
-    // case "Rating":
-    //   return StarRating;
+// case "Rating":
+//   return StarRating;
 
-    // case "Label":
-    //   return Label;
+// case "Label":
+//   return Label;
 
-    // case "Icon":
-    //   return Icon;
+// case "Icon":
+//   return Icon;
