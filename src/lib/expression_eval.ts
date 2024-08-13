@@ -15,8 +15,8 @@ import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { jsonata } from "~/lib/jsonata/jsonata";
 
 import { isObject } from "./data_structure/object/isObject";
-import { calculateFilter } from "./graph/get/sync/calculateFilter";
 import { getTextValue } from "./graph/get/sync/getTextValue";
+import { getLabelFilterSkipLimit } from "~/cypher/get/evaluate/getLabelFilterSkipLimit";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -461,10 +461,8 @@ addBinaryOp(
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {
-      const { filter, isMultiple, type } = calculateFilter(
-        edgeType.replace("$0", currentVertex.L[0]),
-      );
-
+      const type = edgeType.replace("$0", currentVertex.L[0]),
+      
       const edgeIds = currentVertex.IN[type];
       if (!edgeIds) {
         continue;
@@ -506,14 +504,22 @@ addUnaryOp("json:", (string) => {
 addUnaryOp(
   "g:",
   (edgeType, context) => {
-    const { filter, isMultiple, type } = calculateFilter(edgeType);
+    const { filter, label, limit, skip } = getLabelFilterSkipLimit(edgeType, context);
 
-    if (filter) {
-      const vertexIds = findVertexIdsByLabel(context.graph, type);
+    if (filter && Object.keys(filter).length > 0) {
+      const vertexIds = findVertexIdsByLabel(context.graph, label);
       const filteredVertexes = [];
       for (const vertexId of vertexIds) {
-        if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
-          filteredVertexes.push(context.graph.vertexes[vertexId]);
+        const vertex = context.graph.vertexes[vertexId];
+        let matchesFilter = true;
+        for (const key in filter) {
+          if (vertex.P[key] !== filter[key]) {
+            matchesFilter = false;
+            break;
+          }
+        }
+        if (matchesFilter) {
+          filteredVertexes.push(vertex);
         }
       }
       return filteredVertexes;

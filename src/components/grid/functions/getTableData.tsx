@@ -2,7 +2,6 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 export async function getTableData(
   form: IFormMetaData,
@@ -12,18 +11,21 @@ export async function getTableData(
 ) {
   try {
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes, true);
-    const expression = paginationExpression({
-      coll: tableId,
-      filter: "",
-      limit: limit,
-      skip: skip,
-    });
 
     const result = await fetchDataFromMG({
-      expression,
+      expression: `g:'${tableId}[$1]'`,
       incoming,
       outgoing,
-    });
+    }, {
+      $1: {
+        filter: "",
+        limit: limit,
+        skip: skip,
+      },
+      nodes: {} as { [key: string]: any },
+      relationships: {} as { [key: string]: any },
+      vertexes: undefined as any,
+  });
     return result;
   } catch (e: any) {
     console.error("error", e);

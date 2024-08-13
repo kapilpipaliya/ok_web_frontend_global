@@ -4,12 +4,11 @@ import { int, type Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { calculateFilter } from "~/lib/graph/get/sync/calculateFilter";
-
 import type { ContextType } from "../../types/ContextType";
 
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
 import { processResult } from "./processResult";
+import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],
@@ -26,7 +25,7 @@ export async function evalGetRelatedNodes(
 
   const session = await getSession(context);
 
-  const { params, query } = buildQuery(edgeType, vertexes, relationType);
+  const { params, query } = buildQuery(edgeType, vertexes, relationType, context);
 
   if (!query) {
     return;
@@ -54,11 +53,11 @@ function buildQuery(
   edgeType: string,
   vertexes: Vertex[],
   relationType: "child" | "g" | "id" | "parent",
+  context: ContextType,
 ) {
   const ids = vertexes.map((v) => int(v.id));
   let query = "";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let params: { [key: string]: any } | undefined;
+  let params: { [key: string]: unknown } | undefined;
 
   if (relationType === "child") {
     const type = getEdgeType(edgeType, vertexes);
@@ -99,8 +98,7 @@ function buildQuery(
       `;
     }
   } else if (relationType === "g") {
-    const searchParams = calculateFilter(edgeType);
-    const label = searchParams.type ?? edgeType;
+    let label = edgeType;
     if (!label) {
       return { error: "label must be provided." };
     }
@@ -108,19 +106,26 @@ function buildQuery(
       query = "MATCH (n) RETURN DISTINCT labels(n)";
       params = { allLabels: true };
     } else {
-      query = `MATCH (n:${label})`;
-      if (searchParams.filter) {
-        query += " WHERE n.name = $name";
-        params = { name: searchParams.filter };
-      }
-      query += " RETURN n";
-    }
+      const { filter, label: newLabel, limit, skip } = getLabelFilterSkipLimit(label, context);
+      if (newLabel) {
+          query = `MATCH (n:${newLabel})`;
+          if (filter) {
+            const filterKeys = Object.keys(filter);
+            const filterConditions = filterKeys.map(key => `n.${key} = $${key}`).join(" AND ");
+            query += ` WHERE ${filterConditions}`;
+            params = filter;
+          }
+          if (skip) {
+            query += ` SKIP ${skip}`;
+          }
+          if (limit) {
+            query += ` LIMIT ${limit}`;
+          }
+          query += " RETURN n";
+        } else {
+          params = { name: name };
+        }
 
-    if (searchParams.skip) {
-      query += ` SKIP ${searchParams.skip}`;
-    }
-    if (searchParams.limit) {
-      query += ` LIMIT ${searchParams.limit}`;
     }
   } else if (relationType === "id") {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
@@ -133,6 +138,7 @@ function buildQuery(
 
   return { params, query };
 }
+
 async function getSession(context: ContextType) {
   if (context.tx) {
     return null;
@@ -147,7 +153,7 @@ function getEdgeType(edgeType: string, vertexes: Vertex[]) {
 async function runQuery(
   session: null | Session,
   query: string,
-  params: { [key: string]: any },
+  params: { [key: string]: unknown },
   tx?: TransactionPromise,
 ) {
   if (tx) {
@@ -156,7 +162,7 @@ async function runQuery(
   return await session!.run(query, params);
 }
 
-function handleQueryError(action: string, vertexes: Vertex[], error: any) {
+function handleQueryError(action: string, vertexes: Vertex[], error: unknown) {
   console.error(
     `Error fetching ${action} for vertex ${vertexes.map((v) => v.id).join(", ")}:`,
     error,
