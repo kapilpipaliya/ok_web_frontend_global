@@ -25,7 +25,7 @@ export function GridWrapper(props: Readonly<AbstractGridProps>) {
         child: { child: { collection: "->NavAttr" }, collection: "->NavAttr" },
         collection: "->NavAttr",
       },
-      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
+      collection: `g:'Nav[Navigation]'`,
     });
     return data?.[0]?.children || [];
   }

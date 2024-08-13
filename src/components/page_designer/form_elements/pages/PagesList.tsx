@@ -12,7 +12,6 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { getTreeData, type NavItem } from "~/lib/graph/get/sync/getTreeData";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
@@ -37,7 +36,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   }> {
     try {
       const data = await getTreeDataMGCall({
-        collection: paginationExpression({ coll: props.coll }),
+        collection: `g:'${props.coll}'`,
       });
       return { data: data, graph: data.graph };
     } catch (error: any) {
@@ -62,7 +61,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
         setGraphData(graph, setGraph, result.graph);
 
         const data2 = getTreeData(graph, setGraph, {
-          collection: paginationExpression({ coll: props.coll }),
+          collection: `g:'${props.coll}'`,
         }).filter((item) => item.id !== layoutStore.formStore[0].formData.id);
         originalData = data2;
         setFilteredData(data2);

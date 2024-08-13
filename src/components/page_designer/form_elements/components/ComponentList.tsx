@@ -11,7 +11,6 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { getTreeData } from "~/lib/graph/get/sync/getTreeData";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
@@ -27,7 +26,7 @@ export function ComponentList() {
   let defaultData = [] as any[];
   const componentTreeMetaData = {
     child: { collection: "->CompCategoryComp" },
-    collection: paginationExpression({ coll: "CompCategory" }),
+    collection: `g:'CompCategory'`,
   };
   // Fetch data function
   async function fetchData(): Promise<{

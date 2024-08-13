@@ -3,7 +3,6 @@ import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
@@ -125,7 +124,7 @@ export function Sidebar() {
         child: { child: { collection: "->NavAttr" }, collection: "->NavAttr" },
         collection: "->NavAttr",
       },
-      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
+      collection: "g:'Nav[Navigation]'",
     });
 
     return data;

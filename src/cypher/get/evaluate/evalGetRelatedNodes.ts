@@ -169,3 +169,42 @@ async function closeSession(session: null | Session, context: ContextType) {
     await session.close();
   }
 }
+
+
+// typed-neo4j/src/db.ts
+/*async function find<T extends Record<string, unknown>, V extends keyof VertexSchema>(
+  label: V,
+  props: V extends keyof VertexSchema
+    ? Partial<VertexSchema[V]>
+    : T = {} as V extends keyof VertexSchema ? Partial<VertexSchema[V]> : T,
+  config: {
+    limit?: number;
+    skip?: number;
+    order?: { [key in keyof T]?: "asc" | "desc" };
+  } = {},
+): Promise<(Vertex & (V extends keyof VertexSchema ? VertexSchema[V] : T))[]> {
+  const keys = Object.keys(props);
+  props = convert.neo4j(props);
+
+  const results = await this.run(
+    `MATCH (n:${String(label)} { ${keys
+      .map((key) => `${key}: $${key}`)
+      .join(", ")} }) RETURN n ${
+      config.order
+        ? `ORDER BY ${Object.entries(config.order)
+            .map(([key, order]) => `n.${key} ${order}`)
+            .join(", ")}`
+        : ""
+    } ${config.limit ? `LIMIT ${config.limit}` : ""} ${
+      config.skip ? `SKIP ${config.skip}` : ""
+    }`,
+    props,
+  );
+
+  const items: Node[] = results.records.map((record) => record.get("n"));
+
+  return items.map((item) => ({
+    $id: item.elementId,
+    ...item.properties,
+  })) as (Vertex & (V extends keyof VertexSchema ? VertexSchema[V] : T))[];
+}*/

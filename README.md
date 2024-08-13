@@ -122,3 +122,6 @@ https://github.com/YizYah/neo-forte
 for parsing date:
 https://www.npmjs.com/package/@qualitech/qneo4j-helper
 
+
+use for cypher query:
+neogma
