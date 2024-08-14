@@ -42,7 +42,6 @@ export async function getInitialData(args: { subdomain: string; }) {
       Object.assign(relationshipObj, result.graph.edges);
     }
   } catch (error: any) {
-    console.log(error.message);
     return { error: error.message };
   } finally {
     await session.close(); // Ensure the session is always closed

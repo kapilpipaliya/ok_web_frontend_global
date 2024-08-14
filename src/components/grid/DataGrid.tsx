@@ -208,10 +208,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       skip,
       limit,
     );
-    if (!isValidResponse(data)) {
-      setGridState("error", getErrorMessage(data));
-    } else {
+    if (isValidResponse(data)) {
       onTableDataGet(data, isLoadMore);
+    } else {
+      setGridState("error", getErrorMessage(data));
     }
     setGridState("isLoading", false);
     return data;

@@ -1,6 +1,6 @@
-import { Transaction } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
 
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 export async function handleInsert(
   insert: Vertex | Vertex[],

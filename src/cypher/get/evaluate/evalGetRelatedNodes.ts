@@ -4,12 +4,13 @@ import { int, type Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { isObject } from "~/lib/data_structure/object/isObject";
+
 import type { ContextType } from "../../types/ContextType";
 
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
-import { processResult } from "./processResult";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
-import { isObject } from "~/lib/data_structure/object/isObject";
+import { processResult } from "./processResult";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],

@@ -116,7 +116,6 @@ export function createVertexIds() {
     hidden: `hiddenVertex${createUniqueId()}`,
     label: `labelVertex${createUniqueId()}`,
     labelClass: `labelClassVertex${createUniqueId()}`,
-    labelPosition: `labelPositionVertex${createUniqueId()}`,
     name: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
@@ -132,8 +131,6 @@ function createVertices(
   const vertices = [
     { class: PROPERTIES.Css.TextBox, componentName: "TextBox", displayName: "Unique Name", id: vertexIds.name, name: "name" },
     { class: PROPERTIES.Css.TextBox, componentName: "TextBox", displayName: "Label", id: vertexIds.label, name: "label" },
-     // Todo: make this display proper options.
-    { componentName: "SelectBox", displayName: "Label Position", id: vertexIds.labelPosition, name: "labelPosition" },
     { displayName: "Permission", id: vertexIds.perm, name: "perm" },
     { displayName: "Calculated Value Expr", id: vertexIds.calculatedValue, name: "calculatedValue" },
     { displayName: "Class", id: vertexIds.class, name: "class" },
@@ -212,7 +209,6 @@ function moveClassToLast(
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
     graph.vertexes[vertexIds.label],
-    graph.vertexes[vertexIds.labelPosition],
     graph.vertexes[vertexIds.perm],
     // Default value can be only entered when it is in Form Builder
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),

@@ -330,7 +330,7 @@ export function DynamicComponent(
           onChange={componentName() !== "DynamicTable" ? onChange : undefined}
           title={props.title ?? ""}
           txnId={props.txnId}
-          value={!isCheckbox() ? ifNotNull(props.data?.P[props.meta.P[IdAttr]]) : undefined}
+          value={isCheckbox() ? undefined : ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
           {...expressionProperties()}
           disabled={
             isNoPermissionCheck()
@@ -415,7 +415,7 @@ export function DynamicComponent(
     </>
   );
 }
-const inputTypes = {
+const _inputTypes = {
   color: "color",
   date: "date",
   "datetime-local": "datetime-local",

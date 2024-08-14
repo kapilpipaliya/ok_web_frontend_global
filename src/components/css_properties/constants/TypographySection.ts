@@ -28,11 +28,9 @@ export const TypographySection = {
       "Trebuchet MS",
       "Verdana",
     ],
-    true,
   ),
   fontSize: {
     componentName: "textFieldOptions",
-    isLabelOnTop: true,
     label: "Size",
     name: "font-size",
     unitOptions: sizeTypes,
@@ -41,7 +39,6 @@ export const TypographySection = {
 
   lineHeight: {
     componentName: "textFieldOptions",
-    isLabelOnTop: true,
     label: "Line height",
     name: "line-height",
     unitOptions: sizeTypes,
@@ -49,20 +46,17 @@ export const TypographySection = {
   } as TextFieldOptionsField,
   colorPicker: {
     componentName: "colorPicker",
-    isLabelOnTop: true,
     label: "Color",
     name: "color",
   } as ColorPickerField,
   fontWeight: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Weight",
     name: "font-weight",
     options: extraPropertyValues["font-weight"].values,
   } as SelectField,
   letterSpacing: {
     componentName: "textFieldOptions",
-    isLabelOnTop: true,
     label: "Spacing",
     name: "letter-spacing",
     unitOptions: sizeTypes,
@@ -70,7 +64,6 @@ export const TypographySection = {
   } as TextFieldOptionsField,
   textIndent: {
     componentName: "textFieldOptions",
-    isLabelOnTop: true,
     label: "Indent",
     name: "text-indent",
     unitOptions: sizeTypes,
@@ -78,7 +71,6 @@ export const TypographySection = {
   } as TextFieldOptionsField,
   fontStyle: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Style",
     name: "font-style",
     options: [
@@ -90,28 +82,24 @@ export const TypographySection = {
   } as SelectField,
   fontVariant: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Variant",
     name: "font-variant",
     options: extraPropertyValues["font-variant"].values,
   } as SelectField,
   textDecoration: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Decoration",
     name: "text-decoration",
     options: extraPropertyValues["text-decoration"].values,
   } as SelectField,
   textTransform: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Transform",
     name: "text-transform",
     options: ["none", "capitalize", "uppercase", "lowercase"],
   } as SelectField,
   textAlign: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Align",
     name: "text-align",
     options: ["left", "center", "right", "justify"],
@@ -121,17 +109,14 @@ export const TypographySection = {
     "white-space",
     "White space",
     extraPropertyValues["white-space"].values,
-    true,
   ),
   wordBreak: createSelectOptions(
     "word-break",
     "Word break",
     ["normal", "break-all", "keep-all", "break-word", ...CSSWideKeywords],
-    true,
   ),
   direction: {
     componentName: "select",
-    isLabelOnTop: true,
     label: "Direction",
     name: "direction",
     options: [

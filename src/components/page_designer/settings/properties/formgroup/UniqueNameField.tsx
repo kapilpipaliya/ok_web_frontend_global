@@ -53,9 +53,9 @@ export function UniqueNameField(
       <span class="f:15 flex:.5">
         <Label meta={props.meta} />
       </span>
-      <span class="f:15 flex:1">
+      <span class="f:15 flex:1">22
         <DynamicComponent
-          componentName={"TextBox"}
+          componentName={"JundaoInput"}
           data={props.selectedLayout}
           isNoPermissionCheck={true}
           isRealTime={false}
