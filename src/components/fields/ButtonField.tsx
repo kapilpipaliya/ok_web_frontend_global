@@ -1,10 +1,10 @@
 import type { JSX } from "solid-js";
 
-import { Button } from "@kobalte/core/button";
 import { useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, Show, splitProps } from "solid-js";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { Button } from "~/kobalte/packages/core/src/button";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";

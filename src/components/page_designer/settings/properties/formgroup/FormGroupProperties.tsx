@@ -139,8 +139,9 @@ function createVertices(
     {
       attributes: [
         {
+          class: "w:full",
           componentName: "TextFieldInput",
-          name: "",
+          name: ""
         },
       ],
       id: vertexIds.name,

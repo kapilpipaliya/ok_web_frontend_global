@@ -10,7 +10,16 @@ export const Comp: IFormMetaData = {
       name: "category",
       parentLabel: "CompCategory",
     },
-    { componentName: "TextField", name: "name" },
+    {
+      attributes: [
+        {
+          componentName: "TextFieldInput",
+          name: "",
+        },
+      ],
+      componentName: "TextField",
+      name: "name",
+    },
     { componentName: "TextField", name: "label" },
     {
       childLabel: "Child",
