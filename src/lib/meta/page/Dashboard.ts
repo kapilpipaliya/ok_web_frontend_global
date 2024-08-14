@@ -1,6 +1,6 @@
 export const Dashboard = {
   attributes: [
-    { componentName: "TextBox", name: "name" },
+    { componentName: "TextField", name: "name" },
     { componentName: "TextArea", name: "description" },
   ],
   isInlineEditable: true,

@@ -34,7 +34,7 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
           Enter States
           <div class="items-center flex h:100%">
             <textarea
-              class={`${PROPERTIES.Css.TextBox} h:100%`}
+              class={`${PROPERTIES.Css.TextField} h:100%`}
               onInput={(e) => setStateName(e.target.value)}
               placeholder="Enter State Name"
               ref={inputRef!}

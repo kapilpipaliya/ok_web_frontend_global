@@ -84,8 +84,8 @@ function createVertices(
       vertexIds.seoTitle,
       ["MetaTemp"],
       createVertexMeta("SEO Title", "seoTitle", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
       }),
     ),
     graph,
@@ -97,7 +97,7 @@ function createVertices(
       vertexIds.seoDescription,
       ["MetaTemp"],
       createVertexMeta("SEO Description", "seoDescription", {
-        class: PROPERTIES.Css.TextBox,
+        class: PROPERTIES.Css.TextField,
         componentName: "TextArea",
       }),
     ),

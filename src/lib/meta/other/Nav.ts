@@ -7,13 +7,13 @@ import { useGraph } from "../../graph/graph";
 export const Nav = {
   attributes: [
     {
-      componentName: "TextBox",
+      componentName: "TextField",
       name: "title",
 
       onchange: '{"new": ["name","id"]}',
     },
     {
-      componentName: "TextBox",
+      componentName: "TextField",
       name: "name",
 
       validationRules: [
@@ -47,7 +47,7 @@ export const Nav = {
     {
       attributes: [
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           displayName: "ID",
           name: "name",
         },
@@ -74,7 +74,7 @@ Url`,
           name: "Form",
         },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "url",
         },
         {
@@ -105,7 +105,7 @@ Url`,
         {
           attributes: [
             {
-              componentName: "TextBox",
+              componentName: "TextField",
               displayName: "ID",
               name: "name",
             },
@@ -132,7 +132,7 @@ Url`,
               name: "Form",
             },
             {
-              componentName: "TextBox",
+              componentName: "TextField",
               name: "url",
             },
             {
@@ -163,7 +163,7 @@ Url`,
             {
               attributes: [
                 {
-                  componentName: "TextBox",
+                  componentName: "TextField",
                   displayName: "ID",
                   name: "name",
                 },
@@ -190,7 +190,7 @@ Url`,
                   name: "Form",
                 },
                 {
-                  componentName: "TextBox",
+                  componentName: "TextField",
                   name: "url",
                 },
                 {
@@ -221,7 +221,7 @@ Url`,
                 {
                   attributes: [
                     {
-                      componentName: "TextBox",
+                      componentName: "TextField",
                       displayName: "ID",
                       name: "name",
                     },
@@ -248,7 +248,7 @@ Url`,
                       name: "Form",
                     },
                     {
-                      componentName: "TextBox",
+                      componentName: "TextField",
                       name: "url",
                     },
                     {

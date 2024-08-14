@@ -145,7 +145,7 @@ function createVertices(
       ],
       id: vertexIds.name,
       P: {
-        class: PROPERTIES.Css.TextBox,
+        class: PROPERTIES.Css.TextField,
         componentName: "TextField",
         displayName: "Unique Name",
         name: "name",
@@ -154,8 +154,8 @@ function createVertices(
     {
       id: vertexIds.label,
       P: {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
         displayName: "Label",
         name: "label",
       },

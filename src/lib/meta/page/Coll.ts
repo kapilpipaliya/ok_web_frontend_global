@@ -11,13 +11,13 @@ import { collectionAttr } from "./collectionAttr";
 export const Coll: IFormMetaData = {
   attributes: [
     {
-      componentName: "TextBox",
+      componentName: "TextField",
       name: "title",
 
       onchange: '{"new": ["name","id"]}',
     },
     {
-      componentName: "TextBox",
+      componentName: "TextField",
       name: "name",
 
       validationRules: [
@@ -108,11 +108,11 @@ export const Coll: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "name",
         },
         // {
-        //   componentName: "TextBox",
+        //   componentName: "TextField",
         //   name: "label",
         // },
         {
@@ -133,7 +133,7 @@ export const Coll: IFormMetaData = {
               // collection: "g:'DataType'",
             },
             // {
-            //   componentName: "TextBox",
+            //   componentName: "TextField",
             //   displayName: "Value",
             //   name: "leftValue",
             // },
@@ -151,7 +151,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
               // collection: "g:'DataType'",
             },
             /*{
-              componentName: "TextBox",
+              componentName: "TextField",
               displayName: "Value",
               name: "rightValue",
             },
@@ -223,14 +223,14 @@ ${Object.keys(binopsInitial).join("\n")}`,
                     },
                     {
                       name: "displayName",
-                      componentName: "TextBox",
+                      componentName: "TextField",
                       
                         onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
                       
                     },
                     {
                       name: "name",
-                      componentName: "TextBox",
+                      componentName: "TextField",
                     },
                     {
                       name: "tab",
@@ -279,11 +279,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
           name: "coll",
         },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "displayName",
         },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "fieldDefaults",
         },
         {
@@ -314,7 +314,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
     {
       attributes: [
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "name",
           validation: { required: true },
         },
@@ -329,7 +329,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
           name: "perm",
         },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           name: "scope",
         },
       ],

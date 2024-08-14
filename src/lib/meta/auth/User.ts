@@ -1,8 +1,8 @@
 export const User = {
   attributes: [
-    { componentName: "TextBox", name: "name" },
-    { componentName: "TextBox", name: "email" },
-    { componentName: "TextBox", name: "pass" },
+    { componentName: "TextField", name: "name" },
+    { componentName: "TextField", name: "email" },
+    { componentName: "TextField", name: "pass" },
     {
       collection: "g:'Role'",
       componentName: "TagBox",

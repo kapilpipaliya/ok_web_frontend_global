@@ -6,14 +6,14 @@ export const Import = {
       name: "csv",
       width: 600,
     },
-    { componentName: "TextBox", name: "label" },
+    { componentName: "TextField", name: "label" },
     { componentName: "CheckBox", name: "dry" },
-    { componentName: "TextBox", name: "lookup" },
-    { componentName: "TextBox", name: "lookupId" },
-    { componentName: "TextBox", name: "lookupChild" },
+    { componentName: "TextField", name: "lookup" },
+    { componentName: "TextField", name: "lookupId" },
+    { componentName: "TextField", name: "lookupChild" },
     {
       attributes: [
-        { componentName: "TextBox", name: "column" },
+        { componentName: "TextField", name: "column" },
         // {
         //  name: "column",
         //  componentName: "SelectBox",
@@ -23,7 +23,7 @@ export const Import = {
         //  },
         // },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           displayName: "Attribute ID",
           name: "attrId",
         },
@@ -36,17 +36,17 @@ export const Import = {
           name: "coll",
         },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           displayName: "Lookup Label",
           name: "collLabel",
         },
         { componentName: "CheckBox", name: "inward" },
         {
-          componentName: "TextBox",
+          componentName: "TextField",
           displayName: "Lookup Collection ID",
           name: "collId",
         },
-        { componentName: "TextBox", displayName: "Edge Type", name: "edge" },
+        { componentName: "TextField", displayName: "Edge Type", name: "edge" },
         {
           collection:
             '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',

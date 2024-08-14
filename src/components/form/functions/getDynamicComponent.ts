@@ -296,7 +296,6 @@ export const componentsMap: Record<string, any> = {
   TemplatePage: PageField,
   Text: TextField,
   TextArea: TextArea,
-  TextBox: KobalteTextField,
   TextField: KobalteTextField,
   TextFieldDescription: KobalteTextField.Description,
   TextFieldErrorMessage: KobalteTextField.ErrorMessage,

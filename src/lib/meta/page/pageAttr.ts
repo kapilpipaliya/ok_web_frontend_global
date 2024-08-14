@@ -17,7 +17,7 @@ export const pageAttr = [
     name: "data",
   },
   {
-    componentName: "TextBox",
+    componentName: "TextField",
     displayName: "ID",
     name: "name",
   },

@@ -231,8 +231,8 @@ function createVertices(
       vertexIds.formStatus,
       ["MetaTemp"],
       createVertexMeta("Form Status", "formStatus", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
       }),
     ),
     graph,
@@ -244,7 +244,7 @@ function createVertices(
       vertexIds.expirationDate,
       ["MetaTemp"],
       createVertexMeta("Expiration Date", "expirationDate", {
-        class: PROPERTIES.Css.TextBox,
+        class: PROPERTIES.Css.TextField,
         componentName: "DatePicker",
       }),
     ),
@@ -257,7 +257,7 @@ function createVertices(
       vertexIds.expirationTime,
       ["MetaTemp"],
       createVertexMeta("Expiration Time", "expirationTime", {
-        class: PROPERTIES.Css.TextBox,
+        class: PROPERTIES.Css.TextField,
         componentName: "TimePicker",
       }),
     ),
@@ -270,8 +270,8 @@ function createVertices(
       vertexIds.submissionLimit,
       ["MetaTemp"],
       createVertexMeta("Submission Limit", "submissionLimit", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
       }),
     ),
     graph,
@@ -283,8 +283,8 @@ function createVertices(
       vertexIds.warningMessage,
       ["MetaTemp"],
       createVertexMeta("Warning Message", "warningMessage", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
       }),
     ),
     graph,

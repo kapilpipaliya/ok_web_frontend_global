@@ -34,7 +34,7 @@ export function CommonAddComponent(
           {props.label}
           <div class="items-center flex ">
             <input
-              class={`${PROPERTIES.Css.TextBox} h:100%`}
+              class={`${PROPERTIES.Css.TextField} h:100%`}
               onInput={(e) => setStateName(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={props.placeholder}

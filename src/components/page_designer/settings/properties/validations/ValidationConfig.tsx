@@ -19,7 +19,7 @@ export const validations = {
   RadioButton: "required",
   RadioButtonGroup: "required",
   TextArea: "required|minLength|maxLength|regex",
-  TextBox: "required|email|minLength|maxLength|regex",
+  TextField: "required|email|minLength|maxLength|regex",
 };
 
 export interface ValidationConfigType {

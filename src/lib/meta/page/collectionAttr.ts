@@ -2,13 +2,13 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export const collectionAttr = [
   {
-    componentName: "TextBox",
+    componentName: "TextField",
     name: "displayName",
 
     onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
   },
   {
-    componentName: "TextBox",
+    componentName: "TextField",
     displayName: "ID",
     name: "name",
   },
@@ -89,7 +89,7 @@ export const collectionAttr = [
             name: "perm",
           },
           {
-            componentName: "TextBox",
+            componentName: "TextField",
             name: "scope",
           },
         ],

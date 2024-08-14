@@ -1,5 +1,5 @@
 export const Perm = {
-  attributes: [{ componentName: "TextBox", name: "name" }],
+  attributes: [{ componentName: "TextField", name: "name" }],
   isInlineEditable: true,
   name: "Perm",
   title: "Perm",

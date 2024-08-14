@@ -10,14 +10,14 @@ export const Page: IFormMetaData = {
   attributes: [
     {
       class: "p:8 w:100%",
-      componentName: "TextBox",
+      componentName: "TextField",
 
       name: "title",
       onchange: '{"new": ["name","id"]}',
     },
     {
       class: "p:8 w:100%",
-      componentName: "TextBox",
+      componentName: "TextField",
       name: "name",
       validation: { required: true },
 

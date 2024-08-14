@@ -63,8 +63,8 @@ function createFieldAttributes(
       name: "data",
     },
     {
-      class: PROPERTIES.Css.TextBox,
-      componentName: "TextBox",
+      class: PROPERTIES.Css.TextField,
+      componentName: "TextField",
       name: "data",
     },
   ];
@@ -133,7 +133,7 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
           <DynamicComponent
-            componentName={"TextBox"}
+            componentName={"TextField"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
             isNoPermissionCheck={true}

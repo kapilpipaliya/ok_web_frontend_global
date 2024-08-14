@@ -40,7 +40,7 @@ export const iconMap = {
   TagBox: "radix-icons:dropdown-menu",
   Text: "ci:text",
   TextArea: "bi:textarea",
-  TextBox: "ph:textbox",
+  TextField: "ph:textbox",
   TextInput: "streamline:input-box",
   TreeView: "ph:tree-view-light",
   TreeViewChild: "carbon:tree-view-alt",
