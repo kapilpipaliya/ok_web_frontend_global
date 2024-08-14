@@ -30,6 +30,7 @@ import { ToggleButton } from "@kobalte/core/toggle-button";
 import { ToggleGroup } from "@kobalte/core/toggle-group";
 import { Tooltip } from "@kobalte/core/tooltip";
 
+import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
@@ -58,6 +59,7 @@ export const componentsMap: Record<string, any> = {
   AlertDialogPortal: AlertDialog.Portal,
   AlertDialogTitle: AlertDialog.Title,
   AlertDialogTrigger: AlertDialog.Trigger,
+  Box: BoxField,
   Breadcrumb: Breadcrumbs,
   BreadcrumbLink: Breadcrumbs.Link,
   BreadcrumbSeparator: Breadcrumbs.Separator,
@@ -245,7 +247,6 @@ export const componentsMap: Record<string, any> = {
   ProgressLabel: Progress.Label,
   ProgressTrack: Progress.Track,
   ProgressValueLabel: Progress.ValueLabel,
-  RadioGroup: RadioGroupField,
   // RadioGroupDescription: RadioGroup.Description,
   // RadioGroupErrorMessage: RadioGroup.ErrorMessage,
   // RadioGroupItem: RadioGroup.Item,
@@ -254,6 +255,7 @@ export const componentsMap: Record<string, any> = {
   // RadioGroupItemIndicator: RadioGroup.ItemIndicator,
   // RadioGroupItemInput: RadioGroup.ItemInput,
   // RadioGroupItemLabel: RadioGroup.ItemLabel,
+  RadioGroup: RadioGroupField,
   // RadioGroupLabel: RadioGroup.Label,
   Repeater: Repeater,
   Select: Select,
@@ -319,9 +321,7 @@ export const componentsMap: Record<string, any> = {
 };
 
 export function getDynamicComponent(component: string) {
-
-
-  return componentsMap[component] || BoxField;
+  return componentsMap[component] || NotFoundComponent;
 }
 
 // case "Tabs":

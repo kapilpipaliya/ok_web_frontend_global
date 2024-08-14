@@ -313,7 +313,11 @@ export function DynamicComponent(
       <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
     </Show>
   );
-
+  const noOnChangePassedComponent = () => {
+    const name = componentName();
+    const specialComponents = ["TextFieldTextArea", "TextFieldInput", "DynamicTable"];
+    return specialComponents.includes(name);
+  }
   const Content = () => (
     <>
       <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
@@ -327,7 +331,7 @@ export function DynamicComponent(
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
           meta={props.meta}
-          onChange={componentName() !== "DynamicTable" ? onChange : undefined}
+          onChange={noOnChangePassedComponent() ? undefined : onChange}
           title={props.title ?? ""}
           txnId={props.txnId}
           value={isCheckbox() ? undefined : ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
@@ -381,7 +385,7 @@ export function DynamicComponent(
             }
           >
             <Switch>
-              <Match
+              {/* <Match
                 when={
                   (props.isLabelWrap ?? true) &&
                   componentName() !== "Label" &&
@@ -404,7 +408,7 @@ export function DynamicComponent(
                 >
                   <Content />
                 </Label>
-              </Match>
+              </Match> */}
               <Match when={true}>
                 <Content />
               </Match>

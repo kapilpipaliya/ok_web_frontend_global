@@ -28,23 +28,25 @@ export function UniqueNameField(
             data,
           )
         ) {
-          return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+          mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
             error: "Name is not unique",
           });
+        } else {
+          mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+            error: null,
+          });
         }
+      } else {
         mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-          error: null,
+          error: "Name is required",
         });
-        return props.onChange(metaVertex, data);
       }
-      return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-        error: "Name is required",
+    } else {
+      mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+        error: null,
       });
     }
-    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-      error: null,
-    });
-    return props.onChange(metaVertex, data);
+    props.onChange(metaVertex, data);
   }
   return (
     <div
@@ -53,9 +55,8 @@ export function UniqueNameField(
       <span class="f:15 flex:.5">
         <Label meta={props.meta} />
       </span>
-      <span class="f:15 flex:1">22
+      <span class="f:15 flex:1">
         <DynamicComponent
-          componentName={"JundaoInput"}
           data={props.selectedLayout}
           isNoPermissionCheck={true}
           isRealTime={false}

@@ -15,6 +15,7 @@ import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges"
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
   deleteVertex,
@@ -23,6 +24,7 @@ import {
 } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import {
   type PageLayoutObject,
@@ -37,8 +39,6 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -64,9 +64,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
   const vertexIds = createVertexIds();
 
-  createVertices(vertexIds, graph, setGraph);
-
+  
   const metaTxnId = graph.newTxnId;
+  createVertices(vertexIds, metaTxnId, graph, setGraph);
   const propAttributes = createMemo(() =>
     createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph)
   );
@@ -133,10 +133,16 @@ function createVertices(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>
 ) {
-  const vertices: (Omit<Vertex, "IN" | "L" | "OUT"> & {
+  const vertices: ({
     attributes?: FieldAttribute[];
-  })[] = [
+  } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
+      attributes: [
+        {
+          componentName: "TextFieldInput",
+          name: "",
+        },
+      ],
       id: vertexIds.name,
       P: {
         class: PROPERTIES.Css.TextBox,
@@ -144,12 +150,6 @@ function createVertices(
         displayName: "Unique Name",
         name: "name",
       },
-      attributes: [
-        {
-          name: "",
-          componentName: "TextFieldInput",
-        },
-      ],
     },
     {
       id: vertexIds.label,
@@ -203,7 +203,7 @@ function createVertices(
   ];
 
   vertices.forEach((vertex) => {
-    const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex);
+    const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
     addNewVertex(txnId, newVertexInstance, graph, setGraph);
     if (vertex.attributes) {
       addMetaVertexes(
