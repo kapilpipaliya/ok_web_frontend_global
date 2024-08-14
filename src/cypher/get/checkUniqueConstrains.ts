@@ -2,6 +2,8 @@ import jsep from "jsep";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { evalAsync } from "~/lib/expression_eval";
 
 import { getSessionForSubdomain } from "./getSessionForSubdomain";
@@ -30,9 +32,12 @@ export async function checkUniqueConstrains(vertex: Vertex) {
     }
 
     const uniqueConstrains = await evalAsync(
-      jsep(`g:'Form[${label}]->$0Unique'`),
+      jsep(`g:'Form[${label}]'->$0Unique`),
       {},
     );
+    if (!Array.isArray(uniqueConstrains)) {
+      return { error: false };
+    }
     for (const uniqueConstraintVertex of uniqueConstrains) {
       const keys = await evalAsync(jsep("->$0Key"), {
         vertexes: [uniqueConstraintVertex],
