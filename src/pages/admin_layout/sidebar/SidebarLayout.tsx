@@ -3,6 +3,7 @@ import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
@@ -139,7 +140,7 @@ export function Sidebar() {
 
   onMount(async () => {
     const data = await getNavData();
-    if (data) {
+    if (isValidResponse(data)) {
       setGraphData(graph, setGraph, data.graph);
       setNavData(data.children[0].children);
       setSearchData(data.children[0].children);

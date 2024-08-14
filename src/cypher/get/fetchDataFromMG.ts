@@ -30,7 +30,7 @@ export async function fetchDataFromMG(
       result: mainResult,
     };
   } catch (error: any) {
-    console.error("Error in fetchDataFromMG:", error);
+    console.error("Error in fetchDataFromMG:", expression.expression, error);
     return { error: error.message };
   }
 }

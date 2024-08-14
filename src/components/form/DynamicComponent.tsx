@@ -1,5 +1,5 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { createMemo, Match, Show, splitProps, Switch } from "solid-js";
+import { createMemo, ErrorBoundary, Match, Show, splitProps, Switch } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
@@ -276,12 +276,12 @@ export function DynamicComponent(
           if (value !== null) {
             result[key] = key.toLowerCase().endsWith("class")
               ? mergeCSS(
-                  "",
-                  value,
-                  { P: { name: key } } as unknown as Vertex,
-                  props.meta,
-                  graph,
-                )
+                "",
+                value,
+                { P: { name: key } } as unknown as Vertex,
+                props.meta,
+                graph,
+              )
               : value;
           }
         }
@@ -315,37 +315,40 @@ export function DynamicComponent(
   );
 
   const Content = () => (
-    <><Dynamic
-      {...deNullifyAndMergeCSS()}
-      checked={isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined}
-      component={component()}
-      componentName={componentName()}
-      data={props.data}
-      isNoPermissionCheck={isNoPermissionCheck()}
-      isRealTime={props.isRealTime}
-      isTableInside={props.isTableInside}
-      meta={props.meta}
-      onChange={componentName() !== "DynamicTable" ? onChange : undefined}
-      title={props.title ?? ""}
-      txnId={props.txnId}
-      value={!isCheckbox() ? ifNotNull(props.data?.P[props.meta.P[IdAttr]]) : undefined}
-      {...expressionProperties()}
-      disabled={
-        isNoPermissionCheck()
-          ? customMetaProps.disabled
-          : props.disabled ??
-            previewStore.isViewOnly ??
-            isDisabledPermission() ??
-            expressionProperties().disabled ??
-            customMetaProps.disabled
-      }
-    >
-      <Show when={props.meta.id}>
-        {props.meta.P.text}
-        <PageAttrRender data={props.data} metaVertex={props.meta} />
-      </Show>
-    </Dynamic>
-    <DisplayError />
+    <>
+      <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
+        <Dynamic
+          {...deNullifyAndMergeCSS()}
+          checked={isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined}
+          component={component()}
+          componentName={componentName()}
+          data={props.data}
+          isNoPermissionCheck={isNoPermissionCheck()}
+          isRealTime={props.isRealTime}
+          isTableInside={props.isTableInside}
+          meta={props.meta}
+          onChange={componentName() !== "DynamicTable" ? onChange : undefined}
+          title={props.title ?? ""}
+          txnId={props.txnId}
+          value={!isCheckbox() ? ifNotNull(props.data?.P[props.meta.P[IdAttr]]) : undefined}
+          {...expressionProperties()}
+          disabled={
+            isNoPermissionCheck()
+              ? customMetaProps.disabled
+              : props.disabled ??
+              previewStore.isViewOnly ??
+              isDisabledPermission() ??
+              expressionProperties().disabled ??
+              customMetaProps.disabled
+          }
+        >
+          <Show when={props.meta.id}>
+            {props.meta.P.text}
+            <PageAttrRender data={props.data} metaVertex={props.meta} />
+          </Show>
+        </Dynamic>
+      </ErrorBoundary>
+      <DisplayError />
     </>
   );
 

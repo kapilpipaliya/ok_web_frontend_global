@@ -22,6 +22,7 @@ import { DialogWithButtons } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { CommonTable } from "~/components/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
@@ -207,8 +208,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       skip,
       limit,
     );
-    if (data.error) {
-      setGridState("error", data.error);
+    if (!isValidResponse(data)) {
+      setGridState("error", getErrorMessage(data));
     } else {
       onTableDataGet(data, isLoadMore);
     }

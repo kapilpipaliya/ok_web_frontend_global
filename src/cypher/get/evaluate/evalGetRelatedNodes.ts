@@ -9,6 +9,7 @@ import type { ContextType } from "../../types/ContextType";
 import { getSessionForSubdomain } from "../getSessionForSubdomain";
 import { processResult } from "./processResult";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],
@@ -43,7 +44,12 @@ export async function evalGetRelatedNodes(
       relationType === "parent",
     );
   } catch (error) {
-    handleQueryError(relationType, vertexes, error);
+    console.error(
+      `Error fetching ${relationType} for vertex ${vertexes.map((v) => v.id).join(", ")}:`,
+      query,
+      error,
+    );
+    throw error;
   } finally {
     await closeSession(session, context);
   }
@@ -98,7 +104,7 @@ function buildQuery(
       `;
     }
   } else if (relationType === "g") {
-    let label = edgeType;
+    const label = edgeType;
     if (!label) {
       return { error: "label must be provided." };
     }
@@ -109,7 +115,7 @@ function buildQuery(
       const { filter, label: newLabel, limit, skip } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
           query = `MATCH (n:${newLabel})`;
-          if (filter) {
+          if (isObject(filter) && Object.keys(filter).length > 0) {
             const filterKeys = Object.keys(filter);
             const filterConditions = filterKeys.map(key => `n.${key} = $${key}`).join(" AND ");
             query += ` WHERE ${filterConditions}`;
@@ -160,14 +166,6 @@ async function runQuery(
     return await tx.run(query, params);
   }
   return await session!.run(query, params);
-}
-
-function handleQueryError(action: string, vertexes: Vertex[], error: unknown) {
-  console.error(
-    `Error fetching ${action} for vertex ${vertexes.map((v) => v.id).join(", ")}:`,
-    error,
-  );
-  throw error;
 }
 
 async function closeSession(session: null | Session, context: ContextType) {

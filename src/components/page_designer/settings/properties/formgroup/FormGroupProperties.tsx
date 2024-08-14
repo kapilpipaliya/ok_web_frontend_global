@@ -51,7 +51,6 @@ function modifyMetaVertexExpr(meta: Vertex) {
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange(meta: Vertex, data: any): void;
   selectedLayout: Vertex;
   txnId: number;
@@ -70,8 +69,10 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
 
-  onCleanup(() => revertTransaction(metaTxnId, graph));
-  onCleanup(() => cleanupVertices(vertexIds, graph, setGraph));
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph);
+    cleanupVertices(vertexIds, graph, setGraph);
+  });
 
   return (
     <>
@@ -83,9 +84,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           onChange={props.onChange}
         />
       </div>
-      <For
-        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
-      >
+      <For each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}>
         {(meta) => (
           <PropertyField
             meta={meta}
@@ -113,6 +112,7 @@ export function createVertexIds() {
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
+    errorClass: `errorClassVertex${createUniqueId()}`,
     hidden: `hiddenVertex${createUniqueId()}`,
     label: `labelVertex${createUniqueId()}`,
     labelClass: `labelClassVertex${createUniqueId()}`,
@@ -129,135 +129,31 @@ function createVertices(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.name,
-      ["MetaTemp"],
-      createVertexMeta("Unique Name", "name", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.label,
-      ["MetaTemp"],
-      createVertexMeta("Label", "label", {
-        class: PROPERTIES.Css.TextBox,
-        componentName: "TextBox",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  // Todo: make this display proper options.
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.labelPosition,
-      ["MetaTemp"],
-      createVertexMeta("Label Position", "labelPosition", {
-        componentName: "SelectBox",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.perm,
-      ["MetaTemp"],
-      createVertexMeta("Permission", "perm"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.calculatedValue,
-      ["MetaTemp"],
-      createVertexMeta("Calculated Value Expr", "calculatedValue"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.class,
-      ["MetaTemp"],
-      createVertexMeta("Class", "class"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.labelClass,
-      ["MetaTemp"],
-      createVertexMeta("Label Class", "labelClass"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.defaultValue,
-      ["MetaTemp"],
-      createVertexMeta("Default Value", "defaultValue"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.required,
-      ["MetaTemp"],
-      createVertexMeta("Required Expr", "required"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.hidden,
-      ["MetaTemp"],
-      createVertexMeta("Hidden Expr", "hidden"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.disabled,
-      ["MetaTemp"],
-      createVertexMeta("Disabled Expr", "disabled"),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.thankYouPage,
-      ["MetaTemp"],
-      createVertexMeta("Thank You Page", "thankYouPage"),
-    ),
-    graph,
-    setGraph,
-  );
+  const vertices = [
+    { class: PROPERTIES.Css.TextBox, componentName: "TextBox", displayName: "Unique Name", id: vertexIds.name, name: "name" },
+    { class: PROPERTIES.Css.TextBox, componentName: "TextBox", displayName: "Label", id: vertexIds.label, name: "label" },
+     // Todo: make this display proper options.
+    { componentName: "SelectBox", displayName: "Label Position", id: vertexIds.labelPosition, name: "labelPosition" },
+    { displayName: "Permission", id: vertexIds.perm, name: "perm" },
+    { displayName: "Calculated Value Expr", id: vertexIds.calculatedValue, name: "calculatedValue" },
+    { displayName: "Class", id: vertexIds.class, name: "class" },
+    { displayName: "Label Class", id: vertexIds.labelClass, name: "labelClass" },
+    { displayName: "Error Class", id: vertexIds.errorClass, name: "errorClass" },
+    { displayName: "Default Value", id: vertexIds.defaultValue, name: "defaultValue" },
+    { displayName: "Required Expr", id: vertexIds.required, name: "required" },
+    { displayName: "Hidden Expr", id: vertexIds.hidden, name: "hidden" },
+    { displayName: "Disabled Expr", id: vertexIds.disabled, name: "disabled" },
+    { displayName: "Thank You Page", id: vertexIds.thankYouPage, name: "thankYouPage" },
+  ];
+
+  vertices.forEach(vertex => {
+    addNewVertex(
+      0,
+      newVertex(vertex.id, ["MetaTemp"], createVertexMeta(vertex.displayName, vertex.name, vertex)),
+      graph,
+      setGraph,
+    );
+  });
 }
 
 function createVertexMeta(
@@ -341,7 +237,6 @@ function cleanupVertices(
 interface PropertyFieldProps {
   meta: Vertex;
   metaTxnId: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange: (meta: Vertex, data: any) => void;
   selectedLayout: Vertex;
   txnId: number;
@@ -399,7 +294,6 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             txnId={props.txnId}
           />
         </Match>
-
         <Match when={props.meta.P.name === "perm"}>
           <SelectPermissionField
             meta={props.meta}

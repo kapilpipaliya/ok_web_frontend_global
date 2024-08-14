@@ -6,10 +6,14 @@ import { types } from "neo4j-driver";
 // typed-neo4j/src/convert.ts
 export const convert = {
 	/** Convert Neo4j types to JS types */
+  // need to handle all types as server cant send class to client and gives error
 	js: (value: any): any => {
 		if (value instanceof types.DateTime) {
-			return value.toStandardDate();
+			return value.toStandardDate().toISOString();
 		}
+    if (value instanceof types.LocalDateTime) {
+      return value.toStandardDate().toISOString();
+    }
 		if (value instanceof types.Integer) {
 			return value.toBigInt();
 		}
