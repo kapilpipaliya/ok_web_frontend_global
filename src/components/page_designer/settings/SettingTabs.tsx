@@ -17,10 +17,10 @@ import { FormStatusWrapper } from "./status/FormStatusWrapper";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [selectedTab, setSelectedTab] = createSignal("layout");
+  const [selectedTab, setSelectedTab] = createSignal("layers");
 
   const tabs = createMemo(() => {
-    const baseTabs = ["layout", "settings"];
+    const baseTabs = ["layers", "settings"];
     if (layoutStore.formStore[0]?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
@@ -86,7 +86,7 @@ export function SettingTabs() {
 
       <Show when={layoutStore.formStore[0]}>
         <FormContext.Provider value={layoutStore.formStore}>
-          <div classList={{ "display:none": selectedTab() !== "layout" }}>
+          <div classList={{ "display:none": selectedTab() !== "layers" }}>
             <LayoutTree />
           </div>
 
