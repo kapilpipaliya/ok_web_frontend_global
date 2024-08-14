@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
 
-import { type GraphInterface, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
 import {
   addNewVertex,
   deleteVertex,
@@ -11,6 +11,10 @@ import {
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "../properties/constant";
+import { textFieldInputMeta } from "~/components/constants/textFieldInput";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
@@ -18,7 +22,8 @@ export function FormStatus() {
 
   const vertexIds = createVertexIds();
 
-  createVertices(vertexIds, graph, setGraph);
+  const metaTxnId = graph.newTxnId;
+  createVertices(vertexIds, metaTxnId, graph, setGraph);
 
   const [formStatus, setFormStatus] = createSignal(
     "Disable on specific date or at submission limit",
@@ -41,7 +46,7 @@ export function FormStatus() {
   }
 
   onCleanup(() => {
-    cleanupVertices(vertexIds, graph, setGraph);
+    revertTransaction(metaTxnId, graph);
   });
 
   return (
@@ -219,93 +224,82 @@ function createVertexIds() {
     warningMessage: `warningMessageVertex${createUniqueId()}`,
   };
 }
-
 function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
+  txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>
 ) {
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.formStatus,
-      ["MetaTemp"],
-      createVertexMeta("Form Status", "formStatus", {
+  const vertices: ({
+    attributes?: FieldAttribute[];
+  } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
+    {
+      attributes: [
+        textFieldInputMeta
+      ],
+      id: vertexIds.formStatus,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TextField",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.expirationDate,
-      ["MetaTemp"],
-      createVertexMeta("Expiration Date", "expirationDate", {
+        displayName: "Form Status",
+        name: "formStatus",
+      },
+    },
+    {
+      id: vertexIds.expirationDate,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "DatePicker",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.expirationTime,
-      ["MetaTemp"],
-      createVertexMeta("Expiration Time", "expirationTime", {
+        displayName: "Expiration Date",
+        name: "expirationDate",
+      },
+    },
+    {
+      id: vertexIds.expirationTime,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TimePicker",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.submissionLimit,
-      ["MetaTemp"],
-      createVertexMeta("Submission Limit", "submissionLimit", {
+        displayName: "Expiration Time",
+        name: "expirationTime",
+      },
+    },
+    {
+      attributes: [
+        textFieldInputMeta
+      ],
+      id: vertexIds.submissionLimit,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TextField",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.warningMessage,
-      ["MetaTemp"],
-      createVertexMeta("Warning Message", "warningMessage", {
+        displayName: "Submission Limit",
+        name: "submissionLimit",
+      },
+    },
+    {
+      attributes: [
+        textFieldInputMeta
+      ],
+      id: vertexIds.warningMessage,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TextField",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-}
+        displayName: "Warning Message",
+        name: "warningMessage",
+      },
+    },
+  ];
 
-function createVertexMeta(
-  displayName: string,
-  name: string,
-  other: Record<string, any> = {},
-) {
-  return { displayName, name, ...other };
-}
-
-function cleanupVertices(
-  vertexIds: ReturnType<typeof createVertexIds>,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  Object.values(vertexIds).forEach((id) =>
-    deleteVertex(0, id, graph, setGraph),
-  );
+  vertices.forEach((vertex) => {
+    const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
+    addNewVertex(txnId, newVertexInstance, graph, setGraph);
+    if (vertex.attributes) {
+      addMetaVertexes(
+        graph,
+        setGraph,
+        txnId,
+        graph.vertexes[vertex.id],
+        vertex.attributes
+      );
+    }
+  });
 }

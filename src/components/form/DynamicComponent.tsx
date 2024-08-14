@@ -320,7 +320,10 @@ export function DynamicComponent(
   }
   const Content = () => (
     <>
-      <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
+      <ErrorBoundary fallback={(err) => {
+        console.error(err);
+        return <div>Error: {err.message}</div>;
+      }}>
         <Dynamic
           {...deNullifyAndMergeCSS()}
           checked={isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined}

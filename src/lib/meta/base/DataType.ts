@@ -1,9 +1,10 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 
 export const DataType: IFormMetaData = {
   attributes: [
-    { componentName: "TextField", name: "name" },
-    { componentName: "TextField", name: "label" },
+    { componentName: "TextField", name: "name", attributes: [textFieldInputMeta] },
+    { componentName: "TextField", name: "label", attributes: [textFieldInputMeta] },
     {
       collection: "g:'Comp'",
       componentName: "SelectBox",

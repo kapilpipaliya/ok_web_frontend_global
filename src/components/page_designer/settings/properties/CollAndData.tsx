@@ -4,6 +4,7 @@ import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -54,7 +55,6 @@ function createFieldAttributes(
       saveValue: true,
     },
     {
-      // collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
       collection: () =>
         graph.vertexes[layoutStore.selectedId]?.P?.collection
           ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'`
@@ -63,9 +63,12 @@ function createFieldAttributes(
       name: "data",
     },
     {
+      attributes: [
+        textFieldInputMeta
+      ],
       class: PROPERTIES.Css.TextField,
       componentName: "TextField",
-      name: "data",
+      name: "data"
     },
   ];
 }
@@ -133,7 +136,6 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
           <DynamicComponent
-            componentName={"TextField"}
             data={graph.vertexes[layoutStore.selectedId]}
             disabled={false}
             isNoPermissionCheck={true}

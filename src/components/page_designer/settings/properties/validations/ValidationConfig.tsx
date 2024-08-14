@@ -18,7 +18,6 @@ export const validations = {
   DropDown: "required|minLength|maxLength|regex",
   RadioButton: "required",
   RadioButtonGroup: "required",
-  TextArea: "required|minLength|maxLength|regex",
   TextField: "required|email|minLength|maxLength|regex",
 };
 

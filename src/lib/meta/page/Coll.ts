@@ -7,19 +7,25 @@ import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
 import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
+
 
 export const Coll: IFormMetaData = {
   attributes: [
     {
       componentName: "TextField",
       name: "title",
-
+      attributes: [
+        textFieldInputMeta
+      ],
       onchange: '{"new": ["name","id"]}',
     },
     {
       componentName: "TextField",
       name: "name",
-
+      attributes: [
+        textFieldInputMeta
+      ],
       validationRules: [
         {
           message: "ID is required",
@@ -69,7 +75,13 @@ export const Coll: IFormMetaData = {
       name: "dashboard",
       parentLabel: "Dashboard",
     },
-    { componentName: "TextArea", name: "description" },
+    { 
+      componentName: "TextField", 
+      name: "description",
+      attributes: [
+        textFieldTextAreaMeta
+      ]
+    },
     { componentName: "CheckBox", name: "public" },
     { componentName: "CheckBox", name: "isInlineEditable" },
     // { name: "supportCustomFields", componentName: "CheckBox" },
@@ -110,6 +122,9 @@ export const Coll: IFormMetaData = {
         {
           componentName: "TextField",
           name: "name",
+          attributes: [
+            textFieldInputMeta
+          ]
         },
         // {
         //   componentName: "TextField",
@@ -281,10 +296,16 @@ ${Object.keys(binopsInitial).join("\n")}`,
         {
           componentName: "TextField",
           name: "displayName",
+          attributes: [
+            textFieldInputMeta
+          ]
         },
         {
           componentName: "TextField",
           name: "fieldDefaults",
+          attributes: [
+            textFieldInputMeta
+          ]
         },
         {
           attributes: [
@@ -316,6 +337,9 @@ ${Object.keys(binopsInitial).join("\n")}`,
         {
           componentName: "TextField",
           name: "name",
+          attributes: [
+            textFieldInputMeta
+          ],
           validation: { required: true },
         },
         {
@@ -331,6 +355,9 @@ ${Object.keys(binopsInitial).join("\n")}`,
         {
           componentName: "TextField",
           name: "scope",
+          attributes: [
+            textFieldInputMeta
+          ]
         },
       ],
       componentName: "DynamicTable",

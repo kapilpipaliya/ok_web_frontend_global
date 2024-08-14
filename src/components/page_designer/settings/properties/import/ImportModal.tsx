@@ -74,7 +74,7 @@ export function ImportModal(props: Readonly<{ toggleModal: () => void }>) {
           </div>
           <div class={"mt:1rem"}>
             <DynamicComponent
-              componentName="TextArea"
+              componentName="TextField"
               data={graph.vertexes[dataVertexId]}
               disabled={false}
               isNoPermissionCheck={true}

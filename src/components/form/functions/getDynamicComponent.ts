@@ -29,7 +29,7 @@ import { Skeleton } from "~/kobalte/packages/core/src/skeleton";
 import { Slider } from "~/kobalte/packages/core/src/slider";
 import { Switch } from "~/kobalte/packages/core/src/switch";
 import { Tabs } from "~/kobalte/packages/core/src/tabs";
-import { TextField as KobalteTextField, TextArea } from "~/kobalte/packages/core/src/text-field";
+import { TextField as KobalteTextField } from "~/kobalte/packages/core/src/text-field";
 import { Toast } from "~/kobalte/packages/core/src/toast";
 import { ToggleButton } from "~/kobalte/packages/core/src/toggle-button";
 import { ToggleGroup } from "~/kobalte/packages/core/src/toggle-group";
@@ -294,7 +294,6 @@ export const componentsMap: Record<string, any> = {
   TagBox: SelectField,
   TemplatePage: PageField,
   Text: TextField,
-  TextArea: TextArea,
   TextField: KobalteTextField,
   TextFieldDescription: KobalteTextField.Description,
   TextFieldErrorMessage: KobalteTextField.ErrorMessage,

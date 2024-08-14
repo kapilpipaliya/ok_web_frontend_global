@@ -1,5 +1,5 @@
-import type { IFormContext } from "~/components/form/FormContext";
-
+import type { FormContext } from "~/components/form/FormContext";
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { useGraph } from "../../graph/graph";
@@ -9,13 +9,17 @@ export const Nav = {
     {
       componentName: "TextField",
       name: "title",
-
+      attributes: [
+        textFieldInputMeta
+      ],
       onchange: '{"new": ["name","id"]}',
     },
     {
       componentName: "TextField",
       name: "name",
-
+      attributes: [
+        textFieldInputMeta
+      ],
       validationRules: [
         {
           message: "ID is required",
@@ -43,17 +47,29 @@ export const Nav = {
         },
       ],
     },
-    { componentName: "TextArea", name: "description" },
+    { 
+      componentName: "TextField", 
+      name: "description",
+      attributes: [
+        textFieldTextAreaMeta
+      ]
+    },
     {
       attributes: [
         {
           componentName: "TextField",
           displayName: "ID",
           name: "name",
+          attributes: [
+            textFieldInputMeta
+          ],
         },
         {
-          componentName: "TextArea",
+          componentName: "TextField",
           name: "definition",
+          attributes: [
+            textFieldTextAreaMeta
+          ]
         },
         {
           componentName: "CheckBox",
@@ -76,6 +92,9 @@ Url`,
         {
           componentName: "TextField",
           name: "url",
+          attributes: [
+            textFieldInputMeta
+          ],
         },
         {
           attributes: [
@@ -108,10 +127,16 @@ Url`,
               componentName: "TextField",
               displayName: "ID",
               name: "name",
+              attributes: [
+                textFieldInputMeta
+              ],
             },
             {
-              componentName: "TextArea",
+              componentName: "TextField",
               name: "definition",
+              attributes: [
+                textFieldTextAreaMeta
+              ]
             },
             {
               componentName: "CheckBox",
@@ -134,6 +159,9 @@ Url`,
             {
               componentName: "TextField",
               name: "url",
+              attributes: [
+                textFieldInputMeta
+              ],
             },
             {
               attributes: [
@@ -166,10 +194,16 @@ Url`,
                   componentName: "TextField",
                   displayName: "ID",
                   name: "name",
+                  attributes: [
+                    textFieldInputMeta
+                  ],
                 },
                 {
-                  componentName: "TextArea",
+                  componentName: "TextField",
                   name: "definition",
+                  attributes: [
+                    textFieldTextAreaMeta
+                  ]
                 },
                 {
                   componentName: "CheckBox",
@@ -192,6 +226,9 @@ Url`,
                 {
                   componentName: "TextField",
                   name: "url",
+                  attributes: [
+                    textFieldInputMeta
+                  ],
                 },
                 {
                   attributes: [
@@ -224,10 +261,16 @@ Url`,
                       componentName: "TextField",
                       displayName: "ID",
                       name: "name",
+                      attributes: [
+                        textFieldInputMeta
+                      ],
                     },
                     {
-                      componentName: "TextArea",
+                      componentName: "TextField",
                       name: "definition",
+                      attributes: [
+                        textFieldTextAreaMeta
+                      ]
                     },
                     {
                       componentName: "CheckBox",
@@ -250,6 +293,9 @@ Url`,
                     {
                       componentName: "TextField",
                       name: "url",
+                      attributes: [
+                        textFieldInputMeta
+                      ],
                     },
                     {
                       attributes: [

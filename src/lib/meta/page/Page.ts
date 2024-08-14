@@ -1,6 +1,7 @@
 import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { useGraph } from "../../graph/graph";
@@ -9,13 +10,18 @@ import { pageAttr } from "./pageAttr";
 export const Page: IFormMetaData = {
   attributes: [
     {
+      attributes: [
+        textFieldInputMeta
+      ],
       class: "p:8 w:100%",
       componentName: "TextField",
-
       name: "title",
-      onchange: '{"new": ["name","id"]}',
+      // onchange: '{"new": ["name","id"]}', // TODO: Fix this, it's not working with kobalte
     },
     {
+      attributes: [
+        textFieldInputMeta
+      ],
       class: "p:8 w:100%",
       componentName: "TextField",
       name: "name",
@@ -47,7 +53,7 @@ export const Page: IFormMetaData = {
         },
       ],
     },
-    { class: "p:8 w:100%", componentName: "TextArea", name: "description" },
+    { attributes: [textFieldTextAreaMeta], class: "p:8 w:100%", componentName: "TextField", name: "description" },
     {
       collection: "g:'Dashboard'",
       componentName: "TagBox",

@@ -1,20 +1,29 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 
 export const collectionAttr = [
   {
     componentName: "TextField",
     name: "displayName",
-
+    attributes: [
+      textFieldInputMeta
+    ],
     onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
   },
   {
     componentName: "TextField",
     displayName: "ID",
     name: "name",
+    attributes: [
+      textFieldInputMeta
+    ],
   },
   {
-    componentName: "TextArea",
+    componentName: "TextField",
     name: "definition",
+    attributes: [
+      textFieldTextAreaMeta
+    ],
   },
   {
     collection: "g:'DataType'",
@@ -91,6 +100,9 @@ export const collectionAttr = [
           {
             componentName: "TextField",
             name: "scope",
+            attributes: [
+              textFieldInputMeta
+            ],
           },
         ],
         componentName: "DynamicTable",

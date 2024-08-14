@@ -1,12 +1,22 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 
 export const SignUp: IFormMetaData = {
   attributes: [
-    { componentName: "TextField", name: "email" },
+    {
+      componentName: "TextField",
+      name: "email",
+      attributes: [
+        textFieldInputMeta
+      ]
+    },
     {
       componentName: "TextField",
       mode: "password",
       name: "pass",
+      attributes: [
+        textFieldInputMeta
+      ]
     },
   ],
   isRealTime: true,

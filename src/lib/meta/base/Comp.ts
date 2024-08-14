@@ -1,5 +1,7 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
+
 export const Comp: IFormMetaData = {
   attributes: [
     {
@@ -12,15 +14,18 @@ export const Comp: IFormMetaData = {
     },
     {
       attributes: [
-        {
-          componentName: "TextFieldInput",
-          name: "",
-        },
+        textFieldInputMeta
       ],
       componentName: "TextField",
-      name: "name",
+      name: "name"
     },
-    { componentName: "TextField", name: "label" },
+    { 
+      attributes: [
+        textFieldInputMeta
+      ], 
+      componentName: "TextField",
+      name: "label"
+    },
     {
       childLabel: "Child",
       collection: "g:'Comp'",
@@ -50,17 +55,29 @@ export const Comp: IFormMetaData = {
     //   displayName: "Hidden",
     //   name: "hide",
     // },
-    { componentName: "TextArea", name: "description" },
+    { 
+      attributes: [
+        textFieldTextAreaMeta
+      ],
+      componentName: "TextField", 
+      name: "description" 
+    },
     // TODO: add validation, duplicate row with same name is not allowed.
     {
       attributes: [
         {
+          attributes: [
+            textFieldInputMeta
+          ],
           componentName: "TextField",
-          name: "name",
+          name: "name"
         },
         {
+          attributes: [
+            textFieldInputMeta
+          ],
           componentName: "TextField",
-          name: "label",
+          name: "label"
         },
         {
           componentName: "CheckBox",
@@ -109,7 +126,10 @@ export const Comp: IFormMetaData = {
           // componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
         },
         {
-          componentName: "TextArea",
+          attributes: [
+            textFieldTextAreaMeta
+          ],
+          componentName: "TextField",
           name: "description",
 
           // autoResizeEnabled: true,
@@ -134,15 +154,24 @@ export const Comp: IFormMetaData = {
     {
       attributes: [
         {
+          attributes: [
+            textFieldInputMeta
+          ],
           componentName: "TextField",
-          name: "name",
+          name: "name"
         },
         {
+          attributes: [
+            textFieldInputMeta
+          ],
           componentName: "TextField",
-          name: "label",
+          name: "label"
         },
         {
-          componentName: "TextArea",
+          attributes: [
+            textFieldTextAreaMeta
+          ],
+          componentName: "TextField",
           name: "description",
 
           // autoResizeEnabled: true,

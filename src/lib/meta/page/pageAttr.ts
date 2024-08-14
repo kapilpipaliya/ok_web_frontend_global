@@ -1,4 +1,5 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 
 export const pageAttr = [
   {
@@ -20,6 +21,9 @@ export const pageAttr = [
     componentName: "TextField",
     displayName: "ID",
     name: "name",
+    attributes: [
+      textFieldInputMeta
+    ],
   },
   // to load initial data
   {

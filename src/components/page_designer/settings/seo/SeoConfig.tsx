@@ -2,13 +2,16 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createUniqueId, For, Match, onCleanup, Switch } from "solid-js";
 
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { type GraphInterface, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
-  deleteVertex,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "../properties/constant";
@@ -20,7 +23,11 @@ export function SEOFormGroupProperties() {
 
   const vertexIds = createVertexIds();
 
-  createVertices(vertexIds, graph, setGraph);
+  const metaTxnId = graph.newTxnId;
+  createVertices(vertexIds, metaTxnId, graph, setGraph);
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph);
+  });
 
   function metaAttributes() {
     return [
@@ -28,10 +35,6 @@ export function SEOFormGroupProperties() {
       graph.vertexes[vertexIds.seoDescription],
     ];
   }
-
-  onCleanup(() => {
-    cleanupVertices(vertexIds, graph, setGraph);
-  });
 
   return (
     <For each={metaAttributes()}>
@@ -48,7 +51,6 @@ export function SEOFormGroupProperties() {
                 <Switch>
                   <Match when={true}>
                     <DynamicComponent
-                      componentName={metaVertex.P.componentName}
                       data={layoutStore.formStore[0].formData}
                       isNoPermissionCheck={true}
                       isRealTime={false}
@@ -75,51 +77,50 @@ function createVertexIds() {
 
 function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
+  txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>
 ) {
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.seoTitle,
-      ["MetaTemp"],
-      createVertexMeta("SEO Title", "seoTitle", {
+  const vertices: ({
+    attributes?: FieldAttribute[];
+  } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
+    {
+      attributes: [
+        textFieldInputMeta
+      ],
+      id: vertexIds.seoTitle,
+      P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TextField",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-  addNewVertex(
-    0,
-    newVertex(
-      vertexIds.seoDescription,
-      ["MetaTemp"],
-      createVertexMeta("SEO Description", "seoDescription", {
+        displayName: "SEO Title",
+        name: "seoTitle",
+      },
+    },
+    {
+      attributes: [
+        textFieldTextAreaMeta
+      ],
+      id: vertexIds.seoDescription,
+      P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextArea",
-      }),
-    ),
-    graph,
-    setGraph,
-  );
-}
+        componentName: "TextField",
+        displayName: "SEO Description",
+        name: "seoDescription",
+      },
+    },
+  ];
 
-function createVertexMeta(
-  displayName: string,
-  name: string,
-  other: Record<string, any> = {},
-) {
-  return { displayName, name, ...other };
-}
-
-function cleanupVertices(
-  vertexIds: ReturnType<typeof createVertexIds>,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  Object.values(vertexIds).forEach((id) =>
-    deleteVertex(0, id, graph, setGraph),
-  );
+  vertices.forEach((vertex) => {
+    const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
+    addNewVertex(txnId, newVertexInstance, graph, setGraph);
+    if (vertex.attributes) {
+      addMetaVertexes(
+        graph,
+        setGraph,
+        txnId,
+        graph.vertexes[vertex.id],
+        vertex.attributes
+      );
+    }
+  });
 }

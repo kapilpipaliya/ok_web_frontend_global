@@ -26,6 +26,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { textFieldInputMeta } from "../../../../constants/textFieldInput";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
@@ -73,7 +74,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
-    cleanupVertices(vertexIds, graph, setGraph);
   });
 
   return (
@@ -138,11 +138,7 @@ function createVertices(
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
       attributes: [
-        {
-          class: "w:full",
-          componentName: "TextFieldInput",
-          name: ""
-        },
+        textFieldInputMeta
       ],
       id: vertexIds.name,
       P: {
@@ -153,6 +149,9 @@ function createVertices(
       },
     },
     {
+      attributes: [
+        textFieldInputMeta
+      ],
       id: vertexIds.label,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -275,16 +274,6 @@ function moveClassToLast(
     graph.vertexes[vertexIds.disabled],
     ...nonCssVertices,
   ];
-}
-
-function cleanupVertices(
-  vertexIds: ReturnType<typeof createVertexIds>,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
-) {
-  Object.values(vertexIds).forEach((id) =>
-    deleteVertex(0, id, graph, setGraph)
-  );
 }
 
 interface PropertyFieldProps {

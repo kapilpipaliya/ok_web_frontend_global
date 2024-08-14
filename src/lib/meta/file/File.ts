@@ -2,6 +2,7 @@ import type {
   FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 
 export const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.
@@ -16,7 +17,7 @@ export const parentDirectory: FieldAttribute = {
 export const File: IFormMetaData = {
   attributes: [
     // The name of the file as it was uploaded, including the file extension (e.g., document.pdf).
-    { componentName: "TextField", displayName: "File Name", name: "name" },
+    { componentName: "TextField", displayName: "File Name", name: "name", attributes: [textFieldInputMeta] },
     // The size of the file in bytes, kilobytes, megabytes, etc.
     {
       componentName: "NumberBox",
@@ -30,6 +31,7 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "File Type",
       name: "fileType",
+      attributes: [textFieldInputMeta]
     },
     // The date and time when the file was uploaded. This can help track the age of files and manage storage space.
     {
@@ -44,6 +46,7 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "Uploader",
       name: "uploader",
+      attributes: [textFieldInputMeta]
     },
     // The location of the file in your storage system, which could be a file path (for on-premises storage) or a URL (for cloud storage).
     {
@@ -51,12 +54,16 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "File Path",
       name: "filePath",
+      attributes: [textFieldInputMeta]
     },
     // A brief description or notes about the file, which can provide context or additional details.
     {
-      componentName: "TextArea",
+      componentName: "TextField",
       displayName: "Description",
       name: "description",
+      attributes: [
+        textFieldTextAreaMeta
+      ]
     },
     // A checksum or hash value (e.g., MD5, SHA-256) for verifying the file's integrity. This can ensure the file hasn't been altered or corrupted.
     {
@@ -64,6 +71,7 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "Checksum",
       name: "checksum",
+      attributes: [textFieldInputMeta]
     },
     // Tags or categories assigned to the file, which can help in organizing and searching files.
     {
@@ -85,6 +93,7 @@ export const File: IFormMetaData = {
       disabled: true,
       displayName: "Thumbnail URL",
       name: "thumbnailUrl",
+      attributes: [textFieldInputMeta]
     },
     // If applicable, an expiration date for temporary files, after which they may be automatically deleted.
     {
@@ -102,7 +111,7 @@ export const File: IFormMetaData = {
 export const Folder: IFormMetaData = {
   attributes: [
     // The name of the directory.
-    { componentName: "TextField", displayName: "Directory Name", name: "name" },
+    { componentName: "TextField", displayName: "Directory Name", name: "name", attributes: [textFieldInputMeta] },
     // The date and time when the directory was created.
     {
       componentName: "DateBox",
@@ -116,6 +125,7 @@ export const Folder: IFormMetaData = {
       disabled: true,
       displayName: "Creator",
       name: "creator",
+      attributes: [textFieldInputMeta]
     },
     // The location of the directory in your storage system.
     {
@@ -123,12 +133,16 @@ export const Folder: IFormMetaData = {
       disabled: true,
       displayName: "Directory Path",
       name: "directoryPath",
+      attributes: [textFieldInputMeta]
     },
     // A brief description or notes about the directory.
     {
-      componentName: "TextArea",
+      componentName: "TextField",
       displayName: "Description",
       name: "description",
+      attributes: [
+        textFieldTextAreaMeta
+      ]
     },
     // Tags or categories assigned to the directory.
     { componentName: "TagBox", displayName: "Tags", name: "fileTag" },
@@ -149,12 +163,15 @@ export const Folder: IFormMetaData = {
 export const FileTag: IFormMetaData = {
   attributes: [
     // The name of the tag.
-    { componentName: "TextField", displayName: "Tag Name", name: "name" },
+    { componentName: "TextField", displayName: "Tag Name", name: "name", attributes: [textFieldInputMeta] },
     // A brief description or notes about the tag.
     {
-      componentName: "TextArea",
+      componentName: "TextField",
       displayName: "Description",
       name: "description",
+      attributes: [
+        textFieldTextAreaMeta
+      ]
     },
     // The date and time when the tag was created.
     {
@@ -169,6 +186,7 @@ export const FileTag: IFormMetaData = {
       disabled: true,
       displayName: "Creator",
       name: "creator",
+      attributes: [textFieldInputMeta]
     },
   ],
   isInlineEditable: false,
