@@ -320,7 +320,6 @@ export function PageViewWrapper(
       hasInsertPermission={permissions.insert()}
       hasViewPermission={permissions.view()}
       id={id()}
-      isDesignMode={true}
       isNoPermissionCheck={isNoPermissionCheck()}
       metaVertex={formStore.formMeta}
     />

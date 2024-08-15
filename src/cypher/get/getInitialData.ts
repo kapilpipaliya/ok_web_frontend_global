@@ -29,18 +29,8 @@ export async function getInitialData(args: { subdomain: string; }) {
       relationshipObj
     );
 
-    const form = FormMetaData.Comp;
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-    const result = await fetchDataFromMG({
-      expression: `g:'Comp'`,
-      incoming,
-      outgoing,
-    });
-
-    if (result.graph) {
-      Object.assign(nodeObj, result.graph.vertexes);
-      Object.assign(relationshipObj, result.graph.edges);
-    }
+    await fetchAndSaveFormMetaData('Comp', nodeObj, relationshipObj);
+    await fetchAndSaveFormMetaData('CompExample', nodeObj, relationshipObj);
   } catch (error: any) {
     return { error: error.message };
   } finally {
@@ -52,4 +42,20 @@ export async function getInitialData(args: { subdomain: string; }) {
     timestamp: new Date().getTime(),
     vertexes: nodeObj,
   };
+}
+
+async function fetchAndSaveFormMetaData(formName: string, nodeObj: Record<string, Vertex>, relationshipObj: Record<string, Edge>) {
+  const form = FormMetaData[formName];
+  const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+  const result = await fetchDataFromMG({
+    expression: `g:'${formName}'`,
+    incoming,
+    outgoing,
+  });
+
+  if (result.graph) {
+    // TODO: modify so it not break existing edges and vertexes
+    Object.assign(nodeObj, result.graph.vertexes);
+    Object.assign(relationshipObj, result.graph.edges);
+  }
 }

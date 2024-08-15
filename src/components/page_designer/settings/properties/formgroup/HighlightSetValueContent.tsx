@@ -1,8 +1,11 @@
-import { type Accessor, Match, Show, Switch } from "solid-js";
+import jsep from "jsep";
+import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/IconButton";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { evaluate } from "~/lib/expression_eval";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";
@@ -16,6 +19,12 @@ export function HighlightSetValueContent(
     txnId: number;
   }>,
 ) {
+  const [graph, setGraph] = useGraph();
+  const componentExample = createMemo(
+    () =>
+      evaluate(jsep("->$0CompExample"), { graph, setGraph, vertexes: [props.meta] }) || [],
+  );
+
   return (
     <div
       class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
@@ -33,6 +42,9 @@ export function HighlightSetValueContent(
               txnId={props.txnId}
             />
           </Match>
+          <Match when={componentExample().length > 0}>
+              <PageAttrRender data={props.selectedLayout} metaVertex={componentExample()[0]} />
+            </Match>
           <Match when={true}>
             <DynamicComponent
               componentName={props.componentName()}

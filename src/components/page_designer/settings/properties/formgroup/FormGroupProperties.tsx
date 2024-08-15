@@ -134,71 +134,71 @@ function createVertices(
   const vertices: ({
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
-    {
-      attributes: [
-        textFieldInputMeta
-      ],
-      id: vertexIds.name,
-      P: {
-        class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
-        displayName: "Unique Name",
-        name: "name",
+      {
+        attributes: [
+          textFieldInputMeta
+        ],
+        id: vertexIds.name,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextField",
+          displayName: "Unique Name",
+          name: "name",
+        },
       },
-    },
-    {
-      attributes: [
-        textFieldInputMeta
-      ],
-      id: vertexIds.label,
-      P: {
-        class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
-        displayName: "Label",
-        name: "label",
+      {
+        attributes: [
+          textFieldInputMeta
+        ],
+        id: vertexIds.label,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextField",
+          displayName: "Label",
+          name: "label",
+        },
       },
-    },
-    {
-      id: vertexIds.perm,
-      P: { displayName: "Permission", name: "perm" },
-    },
-    {
-      id: vertexIds.calculatedValue,
-      P: { displayName: "Calculated Value Expr", name: "calculatedValue" },
-    },
-    {
-      id: vertexIds.class,
-      P: { displayName: "Class", name: "class" },
-    },
-    {
-      id: vertexIds.labelClass,
-      P: { displayName: "Label Class", name: "labelClass" },
-    },
-    {
-      id: vertexIds.errorClass,
-      P: { displayName: "Error Class", name: "errorClass" },
-    },
-    {
-      id: vertexIds.defaultValue,
-      P: { displayName: "Default Value", name: "defaultValue" },
-    },
-    {
-      id: vertexIds.required,
-      P: { displayName: "Required Expr", name: "required" },
-    },
-    {
-      id: vertexIds.hidden,
-      P: { displayName: "Hidden Expr", name: "hidden" },
-    },
-    {
-      id: vertexIds.disabled,
-      P: { displayName: "Disabled Expr", name: "disabled" },
-    },
-    {
-      id: vertexIds.thankYouPage,
-      P: { displayName: "Thank You Page", name: "thankYouPage" },
-    },
-  ];
+      {
+        id: vertexIds.perm,
+        P: { displayName: "Permission", name: "perm" },
+      },
+      {
+        id: vertexIds.calculatedValue,
+        P: { displayName: "Calculated Value Expr", name: "calculatedValue" },
+      },
+      {
+        id: vertexIds.class,
+        P: { displayName: "Class", name: "class" },
+      },
+      {
+        id: vertexIds.labelClass,
+        P: { displayName: "Label Class", name: "labelClass" },
+      },
+      {
+        id: vertexIds.errorClass,
+        P: { displayName: "Error Class", name: "errorClass" },
+      },
+      {
+        id: vertexIds.defaultValue,
+        P: { displayName: "Default Value", name: "defaultValue" },
+      },
+      {
+        id: vertexIds.required,
+        P: { displayName: "Required Expr", name: "required" },
+      },
+      {
+        id: vertexIds.hidden,
+        P: { displayName: "Hidden Expr", name: "hidden" },
+      },
+      {
+        id: vertexIds.disabled,
+        P: { displayName: "Disabled Expr", name: "disabled" },
+      },
+      {
+        id: vertexIds.thankYouPage,
+        P: { displayName: "Thank You Page", name: "thankYouPage" },
+      },
+    ];
 
   vertices.forEach((vertex) => {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
