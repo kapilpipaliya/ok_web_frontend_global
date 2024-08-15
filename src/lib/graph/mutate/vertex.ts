@@ -236,7 +236,8 @@ export function deleteVertex(
     return { error: "Vertex Children Exist When deleting vertex" };
   }
 
-  for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
+  // this should be handled by TableInput Wrapper component
+  /*for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
     const attrInstEdge = graph.edges[attrInstEdgeId];
     if (attrInstEdge) {
       const endVertex = graph.vertexes[attrInstEdge.E];
@@ -256,7 +257,7 @@ export function deleteVertex(
         deleteVertex(0, attrInstEdge.E, graph, setGraph);
       }
     }
-  }
+  }*/
 
   const data = klona(vertex);
   batch(() => {

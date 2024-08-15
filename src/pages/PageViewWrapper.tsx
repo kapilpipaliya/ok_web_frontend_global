@@ -293,6 +293,7 @@ export function PageViewWrapper(
     for (const rowMetaTxnId of (pageFormStore[0].cleanUpConfig().rowMetaTxnIds || []).reverse()) {
       revertTransaction(rowMetaTxnId, graph);
     }
+    pageFormStore[0].cleanUpConfig().rowMetaTxnIds = [];
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {

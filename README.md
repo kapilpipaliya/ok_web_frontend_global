@@ -133,3 +133,4 @@ good tailwind components:
 https://blocks.tremor.so
 
 TODO: rename PreviewContext to ExecutionContext
+remove isDesignMode variable

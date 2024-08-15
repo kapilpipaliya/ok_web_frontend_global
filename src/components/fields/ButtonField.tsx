@@ -83,7 +83,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     if (initialIndex === undefined) {
       return;
     }
-    revertTransactionUpToIndex(formStore!.txnId, initialIndex, graph);
+    revertTransactionUpToIndex(formStore!.txnId, initialIndex - 1, graph);
   };
   const extraProps = createMemo(() => {
     return {

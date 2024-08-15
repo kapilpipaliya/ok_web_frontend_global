@@ -62,7 +62,7 @@ export function PermissionModal(
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
         layoutStore.formStore[0].txnId,
-        prevTxnIndex,
+        prevTxnIndex - 1,
         graph,
       );
     }

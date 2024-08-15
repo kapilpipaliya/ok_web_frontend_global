@@ -1,14 +1,16 @@
 import jsep from "jsep";
 import { klona } from "klona";
-import { createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
+import { FormStoreObject, useFormContext } from "~/components/form/FormContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useZIndex } from "~/components/ZIndex";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -41,6 +43,17 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
   return metaAttribute;
 };
 
+const cleanupRowMetaTxnIds = (graph: GraphInterface, formStore?: FormStoreObject, excludeIds?: number[]) => {
+  if (formStore) {
+    for (const rowMetaTxnId of (formStore.cleanUpConfig().rowMetaTxnIds || []).reverse()) {
+      if (!excludeIds || !excludeIds.includes(rowMetaTxnId)) {
+        revertTransaction(rowMetaTxnId, graph);
+      }
+    }
+    formStore.cleanUpConfig().rowMetaTxnIds = excludeIds || [];
+  }
+};
+
 export function RulesModal(
   props: Readonly<{
     closeModal: () => void;
@@ -52,11 +65,12 @@ export function RulesModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   useActiveClickOutside(graph, setGraph);
-  const [layoutStore] = useDesignerLayoutStore();
+  const [formStore] = useFormContext();
+  const excludeIds = [...(formStore?.cleanUpConfig().rowMetaTxnIds || [])];
 
   const prevTxnIndex =
     props.prevTxnIndex ??
-    getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+    getLastTxnIndex(formStore!.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedRule),
@@ -95,16 +109,24 @@ export function RulesModal(
     }
   };
 
+  let revertChanges = false;
   const onRulesCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpToIndex(
-        layoutStore.formStore[0].txnId,
-        prevTxnIndex,
-        graph,
-      );
+      revertChanges = true;
     }
     props.closeModal();
   };
+  
+  onCleanup(() => {
+    cleanupRowMetaTxnIds(graph, formStore, excludeIds);
+    if (revertChanges) {
+      revertTransactionUpToIndex(
+        formStore!.txnId,
+        prevTxnIndex - 1,
+        graph,
+      );
+    }
+  });
 
   return (
     <Portal>
@@ -137,12 +159,12 @@ export function RulesModal(
                       data={
                         props.selectedRule
                           ? props.selectedRule
-                          : layoutStore.formStore[0].formData
+                          : formStore!.formData
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={layoutStore.formStore[0].txnId}
+                      txnId={formStore!.txnId}
                     />
                   </div>
                 </div>
