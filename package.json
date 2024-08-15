@@ -48,6 +48,7 @@
     "bcryptjs": "^2.4.3",
     "case-switcher-js": "^1.1.10",
     "clsx": "^2.1.1",
+    "corvu": "^0.7.1",
     "csvtojson": "^2.0.10",
     "debounce": "^2.1.0",
     "dockerode": "^4.0.2",

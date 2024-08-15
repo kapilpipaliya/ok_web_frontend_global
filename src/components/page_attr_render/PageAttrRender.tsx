@@ -74,7 +74,7 @@ export function PageAttrRender(
             />
           );
         };
-        const PageComponentWithPreview = () => <Content />;
+
         // currently context is not reactive, but we are assuming it will work.
         return (
           <Switch>
@@ -105,7 +105,7 @@ export function PageAttrRender(
             <Match when={parentComponent() === "TreeViewChild"}>
               <li>
                 <Show
-                  fallback={<PageComponentWithPreview />}
+                  fallback={<Content />}
                   when={previewStore.isDesignMode}
                 >
                   <PageAttrDnDWrapper item={item}>
@@ -116,7 +116,7 @@ export function PageAttrRender(
             </Match>
             <Match when={true}>
               <Show
-                fallback={<PageComponentWithPreview />}
+                fallback={<Content />}
                 when={previewStore.isDesignMode}
               >
                 <PageAttrDnDWrapper item={item}>

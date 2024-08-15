@@ -138,7 +138,7 @@ export function DynamicComponent(
     !previewStore ||
     props.isNoPermissionCheck ||
     formStore?.formMeta?.P.isNoPermissionCheck ||
-    previewStore.isDesignMode;
+    previewStore.isDesignMode || previewStore.isNoPermissionCheck;
   const hasPermission = () =>
     hasInsertPermission() || hasViewPermission() || hasEditPermission();
   const hasNoPermission = () =>

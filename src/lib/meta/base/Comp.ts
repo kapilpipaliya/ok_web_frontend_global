@@ -94,8 +94,13 @@ export const Comp: IFormMetaData = {
           collection: "->$0DataType->$0Comp",
           componentName: "SelectBox",
           displayName: "Component",
-
           name: "Comp",
+        },
+        {
+          collection: "g:'CompExample'",
+          componentName: "SelectBox",
+          displayName: "Comp Example",
+          name: "CompExample",
         },
         {
           attributes: [

@@ -84,6 +84,25 @@ FormMetaData.Form = {
   name: "Form",
   title: "Form",
 };
+
+FormMetaData.CompExample = {
+  attributes: [
+    ...FormMetaData.Page.attributes,
+    // TODO: Fix this. It will select Parent Comp.
+    {
+      collection: "g:'Comp'",
+      componentName: "SelectBox",
+      displayName: "Comp",
+      // inward: true,
+      name: "parent",
+      parentLabel: "Comp",
+    },
+    rulesMetaAttribute!,
+  ],
+  name: "CompExample",
+  title: "Comp Example",
+};
+
 FormMetaData.ThankYouPage = {
   attributes: [...FormMetaData.Page.attributes],
   name: "ThankYouPage",

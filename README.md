@@ -125,3 +125,11 @@ https://www.npmjs.com/package/@qualitech/qneo4j-helper
 
 use for cypher query:
 neogma
+
+good form:
+https://modularforms.dev/solid/guides/introduction
+
+good tailwind components:
+https://blocks.tremor.so
+
+TODO: rename PreviewContext to ExecutionContext

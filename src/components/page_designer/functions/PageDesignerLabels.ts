@@ -4,4 +4,5 @@ export const PageDesignerLabels = [
   "ThankYouPage",
   "ErrorPage",
   "TemplatePage",
+  "CompExample",
 ];
