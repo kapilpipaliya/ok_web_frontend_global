@@ -25,7 +25,6 @@ import {
   hasPermissions,
 } from "../page_attr_render/permissions";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
-import { Label } from "../solid_blocks/Label";
 import { useToast } from "../Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
@@ -78,7 +77,7 @@ export function DynamicComponent(
 
   const component = createMemo(() => getDynamicComponent(componentName()));
 
-  const [selectedProps, customMetaProps] = splitProps(props.meta.P, [
+  const [_selectedProps, customMetaProps] = splitProps(props.meta.P, [
     "validation",
     "labelClass",
   ]);

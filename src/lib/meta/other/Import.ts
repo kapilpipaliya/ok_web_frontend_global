@@ -3,22 +3,22 @@ import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constant
 export const Import = {
   attributes: [
     {
+      attributes: [
+        textFieldTextAreaMeta
+      ],
       componentName: "TextField",
       height: 500,
       name: "csv",
-      width: 600,
-      attributes: [
-        textFieldTextAreaMeta
-      ]
+      width: 600
     },
-    { componentName: "TextField", name: "label", attributes: [textFieldInputMeta] },
+    { attributes: [textFieldInputMeta], componentName: "TextField", name: "label" },
     { componentName: "CheckBox", name: "dry" },
-    { componentName: "TextField", name: "lookup", attributes: [textFieldInputMeta] },
-    { componentName: "TextField", name: "lookupId", attributes: [textFieldInputMeta] },
-    { componentName: "TextField", name: "lookupChild", attributes: [textFieldInputMeta] },
+    { attributes: [textFieldInputMeta], componentName: "TextField", name: "lookup" },
+    { attributes: [textFieldInputMeta], componentName: "TextField", name: "lookupId" },
+    { attributes: [textFieldInputMeta], componentName: "TextField", name: "lookupChild" },
     {
       attributes: [
-        { componentName: "TextField", name: "column", attributes: [textFieldInputMeta] },
+        { attributes: [textFieldInputMeta], componentName: "TextField", name: "column" },
         // {
         //  name: "column",
         //  componentName: "SelectBox",
@@ -28,10 +28,10 @@ export const Import = {
         //  },
         // },
         {
+          attributes: [textFieldInputMeta],
           componentName: "TextField",
           displayName: "Attribute ID",
-          name: "attrId",
-          attributes: [textFieldInputMeta]
+          name: "attrId"
         },
         {
           collection: "g:'Form'",
@@ -42,19 +42,19 @@ export const Import = {
           name: "coll",
         },
         {
+          attributes: [textFieldInputMeta],
           componentName: "TextField",
           displayName: "Lookup Label",
-          name: "collLabel",
-          attributes: [textFieldInputMeta]
+          name: "collLabel"
         },
         { componentName: "CheckBox", name: "inward" },
         {
+          attributes: [textFieldInputMeta],
           componentName: "TextField",
           displayName: "Lookup Collection ID",
-          name: "collId",
-          attributes: [textFieldInputMeta]
+          name: "collId"
         },
-        { componentName: "TextField", displayName: "Edge Type", name: "edge", attributes: [textFieldInputMeta] },
+        { attributes: [textFieldInputMeta], componentName: "TextField", displayName: "Edge Type", name: "edge" },
         {
           collection:
             '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
@@ -66,7 +66,7 @@ export const Import = {
           saveValue: true,
         },
         { componentName: "CheckBox", name: "skip" },
-        { componentName: "TextField", name: "skipRow", attributes: [textFieldTextAreaMeta] },
+        { attributes: [textFieldTextAreaMeta], componentName: "TextField", name: "skipRow" },
       ],
       componentName: "DynamicTable",
       name: "meta",

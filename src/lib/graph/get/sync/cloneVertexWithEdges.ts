@@ -26,6 +26,7 @@ export function cloneVertexWithEdges(
       setGraph,
     );
 
+    //
     // for (const edgeType in vertex.IN) {
     //   for (const inEdgeType of vertex.IN[edgeType]) {
     //     const inEdge = graph.edges[inEdgeType];

@@ -11,7 +11,7 @@ import { processChildrenAttrs } from "~/components/page_designer/functions/drop/
 import { useToast } from "~/components/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
-import { addNewRow } from "../../../../lib/graph/mutate/form/rowFunction";
+import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";
 import { getUniqueName } from "../getChildrenAttrs";
 import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";

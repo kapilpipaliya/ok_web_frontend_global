@@ -9,6 +9,8 @@ import {
   Switch,
 } from "solid-js";
 
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
@@ -18,13 +20,11 @@ import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
-  deleteVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { textFieldInputMeta } from "../../../../constants/textFieldInput";
 import {
@@ -64,8 +64,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [layoutStore] = useDesignerLayoutStore();
 
   const vertexIds = createVertexIds();
-
-  
   const metaTxnId = graph.newTxnId;
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const propAttributes = createMemo(() =>

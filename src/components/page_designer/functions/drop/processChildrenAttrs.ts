@@ -9,7 +9,7 @@ import {
   getChildrenAttrs,
   getUniqueName,
 } from "~/components/page_designer/functions/getChildrenAttrs";
-import { addNewRow } from "~/lib/graph/mutate/form/rowFunction";
+import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 export function getRowProps(

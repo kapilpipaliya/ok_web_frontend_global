@@ -1,31 +1,31 @@
 import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
+import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
 import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
-import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 
 
 export const Coll: IFormMetaData = {
   attributes: [
     {
-      componentName: "TextField",
-      name: "title",
       attributes: [
         textFieldInputMeta
       ],
+      componentName: "TextField",
+      name: "title",
       onchange: '{"new": ["name","id"]}',
     },
     {
-      componentName: "TextField",
-      name: "name",
       attributes: [
         textFieldInputMeta
       ],
+      componentName: "TextField",
+      name: "name",
       validationRules: [
         {
           message: "ID is required",
@@ -76,11 +76,11 @@ export const Coll: IFormMetaData = {
       parentLabel: "Dashboard",
     },
     { 
-      componentName: "TextField", 
-      name: "description",
       attributes: [
         textFieldTextAreaMeta
-      ]
+      ], 
+      componentName: "TextField",
+      name: "description"
     },
     { componentName: "CheckBox", name: "public" },
     { componentName: "CheckBox", name: "isInlineEditable" },
@@ -120,11 +120,11 @@ export const Coll: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "TextField",
-          name: "name",
           attributes: [
             textFieldInputMeta
-          ]
+          ],
+          componentName: "TextField",
+          name: "name"
         },
         // {
         //   componentName: "TextField",
@@ -294,18 +294,18 @@ ${Object.keys(binopsInitial).join("\n")}`,
           name: "coll",
         },
         {
-          componentName: "TextField",
-          name: "displayName",
           attributes: [
             textFieldInputMeta
-          ]
+          ],
+          componentName: "TextField",
+          name: "displayName"
         },
         {
-          componentName: "TextField",
-          name: "fieldDefaults",
           attributes: [
             textFieldInputMeta
-          ]
+          ],
+          componentName: "TextField",
+          name: "fieldDefaults"
         },
         {
           attributes: [
@@ -335,11 +335,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
     {
       attributes: [
         {
-          componentName: "TextField",
-          name: "name",
           attributes: [
             textFieldInputMeta
           ],
+          componentName: "TextField",
+          name: "name",
           validation: { required: true },
         },
         {
@@ -353,11 +353,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
           name: "perm",
         },
         {
-          componentName: "TextField",
-          name: "scope",
           attributes: [
             textFieldInputMeta
-          ]
+          ],
+          componentName: "TextField",
+          name: "scope"
         },
       ],
       componentName: "DynamicTable",

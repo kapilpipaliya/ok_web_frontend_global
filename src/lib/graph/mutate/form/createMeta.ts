@@ -15,7 +15,7 @@ import type { GraphInterface, Vertex } from "../../graph";
 
 import { revertTransaction } from "../../transaction/revertTransaction";
 import { addNewVertex, newVertex } from "../vertex";
-import { newRow } from "./rowFunction";
+import { newRow } from "./addNewRow";
 
 export function addMetaVertexes(
   graph: Store<GraphInterface>,

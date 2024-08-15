@@ -2,8 +2,8 @@ import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constant
 
 export const Dashboard = {
   attributes: [
-    { componentName: "TextField", name: "name", attributes: [textFieldInputMeta] },
-    { componentName: "TextField", name: "description", attributes: [textFieldTextAreaMeta] },
+    { attributes: [textFieldInputMeta], componentName: "TextField", name: "name" },
+    { attributes: [textFieldTextAreaMeta], componentName: "TextField", name: "description" },
   ],
   isInlineEditable: true,
   name: "Dashboard",

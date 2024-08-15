@@ -4,7 +4,7 @@ import { getOwner, runWithOwner } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addNewRow } from "~/lib/graph/mutate/form/rowFunction";
+import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 export function insertNewRow(

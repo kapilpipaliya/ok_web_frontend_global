@@ -2,16 +2,17 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createUniqueId, For, Match, onCleanup, Switch } from "solid-js";
 
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+
 import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { type GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { PROPERTIES } from "../properties/constant";

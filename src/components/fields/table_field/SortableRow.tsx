@@ -15,13 +15,12 @@ import { IconButton } from "~/components/IconButton";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
-import {
-  addNewRow,
-  rowMetaInitialize,
-} from "~/lib/graph/mutate/form/rowFunction";
+import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
+import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 
 import { useFormContext } from "../../form/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
+
 
 export const SortableRow = (
   props: Readonly<
@@ -47,13 +46,13 @@ export const SortableRow = (
   const [disabled] = createSignal(false);
 
   createComputed(
-    on(props.tableColumnsTemplate, (columns) => {
+    on(props.tableColumnsTemplate, (tableColumnsTemplate) => {
       const metaTxnId = rowMetaInitialize(
         graph,
         setGraph,
         props.joinVertex,
         props.meta,
-        columns,
+        tableColumnsTemplate,
       );
       if (metaTxnId && formStore?.cleanUpConfig) {
         const config = formStore.cleanUpConfig();
