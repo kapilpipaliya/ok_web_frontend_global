@@ -20,7 +20,9 @@ export function rowMetaInitialize(
   tableColumnsTemplate: Vertex[]
 ) {
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
-  const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
+  // when we delete the row, revertTransaction will not work, so used new metaTxnId.
+  //const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
+  const metaTxnId = graph.newTxnId;
   const rows = rowMetaAttrInst.error ? {} : klona(rowMetaAttrInst.vertex?.P.rows);
 
   if (rowMetaAttrInst.error) {

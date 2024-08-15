@@ -22,7 +22,7 @@ import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { getSublistRows } from "~/lib/graph/mutate/form/rowFunction";
+import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { insertNewRow } from "./insertNewRow";

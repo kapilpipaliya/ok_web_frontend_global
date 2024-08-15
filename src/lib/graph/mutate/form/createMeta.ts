@@ -70,14 +70,12 @@ export function addMetaVertexes(
 }
 export function createMeta(
   form: IFormMetaData,
+  metaTxnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): { error: string; txnId?: number; vertex?: Vertex } {
   const { attributes, ...custom } = form;
-
   // save attributes to vertexes
-  const metaTxnId = graph.newTxnId;
-
   const metaMainVertex = newVertex(graph.newVertexId, ["Temp"], custom);
   const { error } = addNewVertex(metaTxnId, metaMainVertex, graph, setGraph);
   if (error) {
@@ -87,12 +85,6 @@ export function createMeta(
   const metaVertex = graph.vertexes[metaMainVertex.id];
 
   addMetaVertexes(graph, setGraph, metaTxnId, metaVertex, attributes);
-  onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
-  });
-  onCleanup(() => {
-    // TODO: Remove all the meta
-  });
 
   return { error: "", txnId: metaTxnId, vertex: metaVertex };
 }

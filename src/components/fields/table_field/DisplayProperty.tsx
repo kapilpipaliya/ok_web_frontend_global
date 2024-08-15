@@ -21,7 +21,7 @@ import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMet
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { type Id, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { getColumnProps } from "~/lib/graph/mutate/form/rowFunction";
+import { getColumnProps } from "~/lib/graph/mutate/form/addNewRow";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 

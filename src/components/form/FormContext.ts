@@ -8,9 +8,10 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { InitialPermissions } from "../page_attr_render/InitialPermissions";
 
 export function getInitialFormStore(graph: GraphInterface) {
+  const cleanUpConfigInitial = { rowMetaTxnIds: [] as number[] };
   return {
     ...InitialPermissions,
-    cleanUpConfig: () => ({ rowMetaTxnIds: [] as number[] }),
+    cleanUpConfig: () => cleanUpConfigInitial,
     count: 1,
     discardPopup: false,
     error: undefined as string | undefined,

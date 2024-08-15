@@ -76,7 +76,7 @@ export function PageViewWrapper(
     },
   });
   let onConfirmExit: () => void;
-
+  const metaTxnId = graph.newTxnId;
   const id = createMemo(() =>
     props.dataId === "new" ? undefined : props.dataId,
   );
@@ -176,7 +176,7 @@ export function PageViewWrapper(
       return;
     }
     if (!formStore.formMeta) {
-      const metaVertexResult = untrack(() => createMeta(form, graph, setGraph));
+      const metaVertexResult = untrack(() => createMeta(form, metaTxnId, graph, setGraph));
 
       if (metaVertexResult.error) {
         return { error: "Meta Vertex Error" };
@@ -281,13 +281,16 @@ export function PageViewWrapper(
       { defer: true },
     ),
   );
-
-  const cleanUpConfig = {};
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph);
+  });
+  onCleanup(() => {
+    // TODO: Remove all the meta
+  });
   onCleanup(() => {
     // @ts-expect-error ignore
     // setLayoutStore?.("formData", undefined);
-
-    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
+    for (const rowMetaTxnId of (pageFormStore[0].cleanUpConfig().rowMetaTxnIds || []).reverse()) {
       revertTransaction(rowMetaTxnId, graph);
     }
   });
