@@ -1,26 +1,22 @@
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parse, } from "yaml";
 
 import type { ComponentNode } from "./ComponentTreeType";
 
 type ParsedYamlNode = { [key: string]: ParsedYamlNode[] } | string;
 
-// Load the YAML content from a string or a file
-const yamlContent = fs.readFileSync("input.yaml", "utf8");
-
-// Parse the YAML content
-const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
-
 function convertToRequiredFormat(data: ParsedYamlNode[]): ComponentNode[] {
   return data.map((item) => {
     if (typeof item === "string") {
       return { Component: item };
     }
-      const key = Object.keys(item)[0];
-      return {
-        children: item[key] ? convertToRequiredFormat(item[key]) : undefined,
-        Component: key,
-      };
+    const key = Object.keys(item)[0];
+    return {
+      children: item[key] ? convertToRequiredFormat(item[key]) : undefined,
+      Component: key,
+    };
   });
 }
 
@@ -36,5 +32,12 @@ function cleanFormat(data: ComponentNode[]): ComponentNode[] {
 }
 
 export function getComponentTree(): ComponentNode[] {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const yamlFilePath = path.resolve(__dirname, "componentTree.yaml");
+
+  const yamlContent = fs.readFileSync(yamlFilePath, "utf8");
+
+  const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));
 }
