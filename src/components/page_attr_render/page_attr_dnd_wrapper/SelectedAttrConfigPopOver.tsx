@@ -9,6 +9,7 @@ import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
 import { ParentButton } from "./ParentButton";
+import { PreviewCSSButton } from "./PreviewCSSButton";
 import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
 
@@ -44,6 +45,7 @@ export function SelectedAttrConfigPopOver(
         <ParentButton item={props.item} />
         <DuplicateButton item={props.item} />
         <SaveAsTemplateButton item={props.item} size={20} />
+        <PreviewCSSButton item={props.item} size={20} />
         <DeleteButton componentName={getComponentName()} item={props.item} />
       </div>
     </span>
