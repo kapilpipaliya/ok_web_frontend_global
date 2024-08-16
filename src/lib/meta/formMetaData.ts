@@ -5,7 +5,7 @@ import { Perm } from "./auth/Perm";
 import { Role } from "./auth/Role";
 import { SignUp } from "./auth/SignUp";
 import { User } from "./auth/User";
-import { Comp } from "./base/Comp";
+import { Comp, parentCompAttribute } from "./base/Comp";
 import { CompCategory } from "./base/CompCategory";
 import { DataType } from "./base/DataType";
 import { File, FileTag, Folder } from "./file/File";
@@ -89,14 +89,7 @@ FormMetaData.CompExample = {
   attributes: [
     ...FormMetaData.Page.attributes,
     // TODO: Fix this. It will select Parent Comp.
-    {
-      collection: "g:'Comp'",
-      componentName: "SelectBox",
-      displayName: "Parent Component",
-      name: "ParentComp",
-      type: "ParentComp",
-      // validation: { required: true },
-    },
+    parentCompAttribute,
     rulesMetaAttribute!,
   ],
   name: "CompExample",

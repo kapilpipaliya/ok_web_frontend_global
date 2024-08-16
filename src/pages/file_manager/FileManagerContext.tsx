@@ -16,8 +16,10 @@ const getInitialFileManagerStore = () => {
       undefined as RowSelectionOptions<Vertex>["enableRowSelection"],
     expandedKeys: [] as string[],
     gridStore: null as DataGridStore | null,
+    parentVertexLabel: "Folder",
     root: null as null | Vertex,
     selectedItem: null as null | Vertex,
+    toParentEdgeType: "ParentFolder",
     treeItemHoverId: null as null | string,
     useSidebarData: true,
   };
@@ -33,13 +35,21 @@ export function FileManagerStoreProvider(
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
     onFileSelected?: (file: Vertex) => void;
+    parentVertexLabel: string;
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
+    toParentEdgeType: string;
   }>,
 ) {
   const fileManagerStore = createStore({
     ...getInitialFileManagerStore(),
     get enableRowSelection() {
       return props.enableRowSelection;
+    },
+    get parentVertexLabel() {
+      return props.parentVertexLabel;
+    },
+    get toParentEdgeType() {
+      return props.toParentEdgeType;
     },
   });
   props.setFileManagerStore?.(fileManagerStore[0]);
@@ -52,19 +62,22 @@ export function FileManagerStoreProvider(
         graph,
         setGraph,
         params.folderId,
+        props.toParentEdgeType,
+        props.parentVertexLabel,
         props.fileId,
       );
       // @ts-expect-error ignore
       if (!rootData.error && rootData.result.length > 0) {
         batch(() => {
-          // @ts-expect-error ignore
+          const resultData = rootData.result as Vertex[];
+
           fileManagerStore[1](
             "expandedKeys",
-            rootData.result.map((v) => v.id),
+            resultData.map((v) => v.id),
           );
-          // @ts-expect-error ignore
+
           fileManagerStore[1]("root", {
-            ...rootData.result[rootData.result.length - 1],
+            ...resultData[resultData.length - 1],
           });
           if (params.folderId) {
             // when folderId is provided, we want to select the same folder
@@ -72,13 +85,17 @@ export function FileManagerStoreProvider(
               ...graph.vertexes[params.folderId],
             });
           } else {
-            // @ts-expect-error ignore
-            fileManagerStore[1]("selectedItem", { ...rootData.result[0] });
+            fileManagerStore[1]("selectedItem", { ...resultData[0] });
           }
         });
       }
     } else {
-      const rootData = await getRootData(graph, setGraph);
+      const rootData = await getRootData(
+        graph,
+        setGraph,
+        props.toParentEdgeType,
+        props.parentVertexLabel,
+      );
       // @ts-expect-error ignore
       if (!rootData.error && rootData.result.length > 0) {
         batch(() => {

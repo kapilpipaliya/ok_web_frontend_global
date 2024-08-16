@@ -4,11 +4,11 @@ import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { FormStoreObject, useFormContext } from "~/components/form/FormContext";
+import { type FormStoreObject, useFormContext } from "~/components/form/FormContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useZIndex } from "~/components/ZIndex";
-import { GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
@@ -46,7 +46,7 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
 const cleanupRowMetaTxnIds = (graph: GraphInterface, formStore?: FormStoreObject, excludeIds?: number[]) => {
   if (formStore) {
     for (const rowMetaTxnId of (formStore.cleanUpConfig().rowMetaTxnIds || []).reverse()) {
-      if (!excludeIds || !excludeIds.includes(rowMetaTxnId)) {
+      if (!(excludeIds?.includes(rowMetaTxnId))) {
         revertTransaction(rowMetaTxnId, graph);
       }
     }

@@ -13,14 +13,18 @@ export default function FileManager(
   props: Readonly<{
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
+    parentVertexLabel: string;
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
+    toParentEdgeType: string;
   }>,
 ) {
   return (
     <FileManagerStoreProvider
       enableRowSelection={props.enableRowSelection}
       fileId={props.fileId}
+      parentVertexLabel={props.parentVertexLabel}
       setFileManagerStore={props.setFileManagerStore}
+      toParentEdgeType={props.toParentEdgeType}
     >
       <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
         <Sidebar />

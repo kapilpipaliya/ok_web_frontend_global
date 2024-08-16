@@ -1,8 +1,9 @@
-import { parse, stringify } from "yaml";
-import fs from "fs";
-import { ComponentNode } from "./ComponentTreeType";
+import fs from "node:fs";
+import { parse, } from "yaml";
 
-type ParsedYamlNode = string | { [key: string]: ParsedYamlNode[] };
+import type { ComponentNode } from "./ComponentTreeType";
+
+type ParsedYamlNode = { [key: string]: ParsedYamlNode[] } | string;
 
 // Load the YAML content from a string or a file
 const yamlContent = fs.readFileSync("input.yaml", "utf8");
@@ -14,13 +15,12 @@ function convertToRequiredFormat(data: ParsedYamlNode[]): ComponentNode[] {
   return data.map((item) => {
     if (typeof item === "string") {
       return { Component: item };
-    } else {
+    }
       const key = Object.keys(item)[0];
       return {
-        Component: key,
         children: item[key] ? convertToRequiredFormat(item[key]) : undefined,
+        Component: key,
       };
-    }
   });
 }
 

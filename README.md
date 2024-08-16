@@ -134,3 +134,6 @@ https://blocks.tremor.so
 
 TODO: rename PreviewContext to ExecutionContext
 remove isDesignMode variable
+
+this may be useful:
+https://react-spectrum.adobe.com/react-stately/collections.html

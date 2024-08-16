@@ -1,8 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
-import { onCleanup } from "solid-js";
 
 import type {
   FieldAttribute,
@@ -13,7 +11,6 @@ import { useToast } from "~/components/Toast";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
-import { revertTransaction } from "../../transaction/revertTransaction";
 import { addNewVertex, newVertex } from "../vertex";
 import { newRow } from "./addNewRow";
 

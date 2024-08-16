@@ -5,8 +5,6 @@ import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { deleteEdge } from "~/lib/graph/mutate/edge";
-
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 import {
@@ -230,8 +228,8 @@ export function deleteVertex(
 
     console.error(
       `Multiple parents exist when deleting ${vertex.L[0]} (${actualVertexId}):`,
-      `\nVertex:`, vertex,
-      `\nParents:`, parentInfo
+      "\nVertex:", vertex,
+      "\nParents:", parentInfo
     );
     return { error: "Vertex Children Exist When deleting vertex" };
   }

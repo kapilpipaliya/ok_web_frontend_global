@@ -131,7 +131,9 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
               (vertex as unknown as Vertex).L[0] === "File"
             }
             fileId={selectedFileVertex()[0]?.id}
+            parentVertexLabel="Folder"
             setFileManagerStore={setFileManagerStore}
+            toParentEdgeType="ParentFolder"
           />
         </div>
       </CustomModal>

@@ -1,7 +1,14 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
-
+export const parentCompAttribute = {
+  collection: "g:'Comp'",
+  componentName: "SelectBox",
+  displayName: "Parent Component",
+  name: "ParentComp",
+  type: "ParentComp",
+  // validation: { required: true },
+};
 export const Comp: IFormMetaData = {
   attributes: [
     {
@@ -62,6 +69,7 @@ export const Comp: IFormMetaData = {
       componentName: "TextField", 
       name: "description" 
     },
+    parentCompAttribute,
     // TODO: add validation, duplicate row with same name is not allowed.
     {
       attributes: [

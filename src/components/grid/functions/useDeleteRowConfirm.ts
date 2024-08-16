@@ -6,9 +6,9 @@ import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import type { GridState } from "../DataGridContext";
+import type { DataGridState } from "../DataGridContext";
 
-export function useDeleteRowConfirm(gridState: GridState) {
+export function useDeleteRowConfirm(gridState: DataGridState) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();

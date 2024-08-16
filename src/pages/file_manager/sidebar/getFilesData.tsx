@@ -9,9 +9,10 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 export async function getFilesData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  toParentEdgeType: string,
   folderId: string,
 ) {
-  const expression = `id:'${folderId}'<-ParentFolder`;
+  const expression = `id:'${folderId}'<-${toParentEdgeType}`;
 
   const result = await fetchDataFromMG({ expression });
 
@@ -27,15 +28,17 @@ export async function getFilesData(
 export async function getRootData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  toParentEdgeType: string,
+  parentVertexLabel: string,
   folderId?: string,
   fileId?: string,
 ) {
   let expression;
   if ((folderId || fileId)) {
     // -> operator not return current vertex
-    expression = `id:'${folderId || fileId}'->'ParentFolder*'`;
+    expression = `id:'${folderId || fileId}'->${toParentEdgeType}*`;
   } else {
-    expression = `g:'Folder[root]'`;
+    expression = `g:'${parentVertexLabel}[root]'`;
   }
   if (!expression) {
     return { error: "Invalid expression" };

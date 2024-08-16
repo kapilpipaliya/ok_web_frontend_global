@@ -1,15 +1,16 @@
-import { int, Session } from "neo4j-driver";
-import { ComponentNode } from "./ComponentTreeType";
+import { int, type Session } from "neo4j-driver";
+
+import type { ComponentNode } from "./ComponentTreeType";
 
 export async function insertComponentTree(
   session: Session,
   components: ComponentNode[],
-  parentId: string | null = null
+  parentId: null | string = null
 ): Promise<void> {
   for (const component of components) {
     // Check if the node already exists
     const findNodeResult = await session.run(
-      `MATCH (n:Component {name: $name}) RETURN id(n) AS id`,
+      "MATCH (n:Component {name: $name}) RETURN id(n) AS id",
       { name: component.Component }
     );
 
@@ -33,7 +34,7 @@ export async function insertComponentTree(
         `MATCH (parent:Component)-[r:CompParent]->(child:Component)
          WHERE id(parent) = int($parentId) AND id(child) = int($childId)
          RETURN r`,
-        { parentId: int(parentId), childId: int(nodeId) }
+        { childId: int(nodeId), parentId: int(parentId) }
       );
 
       if (findEdgeResult.records.length === 0) {
@@ -42,7 +43,7 @@ export async function insertComponentTree(
           `MATCH (parent:Component), (child:Component)
            WHERE id(parent) = int($parentId) AND id(child) = int($childId)
            CREATE (parent)-[:CompParent]->(child)`,
-          { parentId: int(parentId), childId: int(nodeId) }
+          { childId: int(nodeId), parentId: int(parentId) }
         );
       }
     }

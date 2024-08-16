@@ -297,3 +297,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     </DataGridProvider>
   );
 }
+// Other good table component to look at:
+// https://github.com/adobe/react-spectrum/blob/main/packages/react-aria-components/src/Table.tsx
+// https://github.com/adobe/react-spectrum/blob/main/packages/%40react-aria/grid/src/useGridCell.ts

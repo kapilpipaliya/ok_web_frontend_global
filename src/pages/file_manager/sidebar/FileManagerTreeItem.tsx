@@ -26,7 +26,7 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
     });
   };
   const getChildrenItems = async () => {
-    const data = await getFilesData(graph, setGraph, props.item.id);
+    const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
     // @ts-expect-error ignore
     if (!data.error && data.result) {
       // @ts-expect-error ignore
