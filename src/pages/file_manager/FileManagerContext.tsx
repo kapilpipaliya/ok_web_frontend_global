@@ -8,6 +8,7 @@ import type { DataGridStore } from "~/components/grid/DataGridContext";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
+import { fetchChildrenDataBatch } from "./fetchChildrenDataBatch";
 import { getRootData } from "./sidebar/getFilesData";
 
 const getInitialFileManagerStore = () => {
@@ -21,12 +22,13 @@ const getInitialFileManagerStore = () => {
     selectedItem: null as null | Vertex,
     toParentEdgeType: "ParentFolder",
     treeItemHoverId: null as null | string,
+    useLocalData: true,
     useSidebarData: true,
   };
 };
 
 export type FileManagerObject = ReturnType<typeof getInitialFileManagerStore>;
-type FileManagerStore = ReturnType<typeof createStore<FileManagerObject>>;
+export type FileManagerStore = ReturnType<typeof createStore<FileManagerObject>>;
 export const FileManagerStoreContext = createContext<FileManagerStore>();
 
 export function FileManagerStoreProvider(
@@ -110,6 +112,10 @@ export function FileManagerStoreProvider(
         });
       }
     }
+
+    await fetchChildrenDataBatch(graph, setGraph, fileManagerStore[0].toParentEdgeType, fileManagerStore[0].expandedKeys);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    fileManagerStore[1]("useLocalData", false);
   });
 
   return (

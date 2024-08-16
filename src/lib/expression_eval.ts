@@ -443,7 +443,8 @@ addUnaryOp("<-", getPraents, getPraentsAsync);
 addUnaryOp(
   "id:",
   (id: string, context: object) => {
-    return context.graph.vertexes[id];
+    const ids = id.split(",");
+    return ids.map((id) => context.graph.vertexes[id]);
   },
   evalVertexById,
 );

@@ -135,8 +135,9 @@ function buildQuery(
 
     }
   } else if (relationType === "id") {
-    query = "MATCH (n) WHERE id(n) = $id RETURN n";
-    params = { id: int(edgeType) };
+    const ids = edgeType.split(",").map(id => int(id.trim()));
+    query = "MATCH (n) WHERE id(n) IN $ids RETURN n";
+    params = { ids };
   }
 
   if (!params) {

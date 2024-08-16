@@ -1,12 +1,15 @@
+import jsep from "jsep";
 import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
 import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
+import { evaluate } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
+import { fetchChildrenDataBatch } from "../fetchChildrenDataBatch";
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
 import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
-import { getFilesData } from "./getFilesData";
+import { getExpressionForFilesData, getFilesData } from "./getFilesData";
 
 export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const [children, setChildren] = createSignal<Vertex[]>([]);
@@ -26,11 +29,22 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
     });
   };
   const getChildrenItems = async () => {
-    const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
-    // @ts-expect-error ignore
-    if (!data.error && data.result) {
+    if (fileManagerStore.useLocalData) {
+      const expression = getExpressionForFilesData(fileManagerStore.toParentEdgeType, props.item.id);
+      const children = evaluate(jsep(expression), { graph, setGraph, vertexes: [props.item] }) || [];
+      setChildren(children);
+    } else {
+      setFileManagerStore("useLocalData", true);
+      const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
+
       // @ts-expect-error ignore
-      setChildren(data.result);
+      if (!data.error && data.result) {
+        await fetchChildrenDataBatch(graph, setGraph, fileManagerStore.toParentEdgeType, data.result.map(v => v.id));
+        await new Promise(resolve => setTimeout(resolve, 150));
+        setFileManagerStore("useLocalData", false);
+        // @ts-expect-error ignore
+        setChildren(data.result);
+      }
     }
   };
 
