@@ -37,6 +37,7 @@ export function FileManagerTreeItemContent(
         }
         size={16}
       />
+      &nbsp;&nbsp;
       <span>{props.item.P.name}</span>
     </div>
   );

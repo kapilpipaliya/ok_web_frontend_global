@@ -15,9 +15,8 @@ export function getExpressionForRootData(toParentEdgeType: string, parentVertexL
   if (folderId || fileId) {
     // -> operator not return current vertex
     return `id:'${folderId || fileId}'->${toParentEdgeType}*`;
-  } else {
-    return `g:'${parentVertexLabel}[root]'`;
   }
+    return `g:'${parentVertexLabel}[root]'`;
 }
 
 export async function getFilesData(

@@ -5,7 +5,6 @@ import { TreeItemContainer } from "~/components/page_designer/settings/layout/Tr
 import { evaluate } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { fetchChildrenDataBatch } from "../fetchChildrenDataBatch";
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
 import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
@@ -16,35 +15,39 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore, setFileManagerStore] = useFileManagerStore();
 
-  const toggleExpand = () => {
-    setFileManagerStore("expandedKeys", (keys) => {
-      const newKeys = [...keys];
-      const index = newKeys.indexOf(props.item.id);
-      if (index >= 0) {
-        newKeys.splice(index, 1);
-      } else {
-        newKeys.push(props.item.id);
+  const toggleExpand = async () => {
+    const isExpanded = fileManagerStore.expandedKeys.includes(props.item.id);
+    if (isExpanded) {
+      setFileManagerStore("expandedKeys", (keys) => keys.filter(key => key !== props.item.id));
+    } else {
+      const newExpandedKeys = [...fileManagerStore.expandedKeys, props.item.id];
+      if (!fileManagerStore.useLocalData) {
+        setFileManagerStore("useLocalData", true);
+        // fetch children of children
+        await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, children().map(v => v.id));
       }
-      return newKeys;
-    });
+      setFileManagerStore("expandedKeys", newExpandedKeys);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setFileManagerStore("useLocalData", false);
+    }
   };
+
+  const fetchRemoteChildrenItems = async () => {
+    const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
+    // @ts-expect-error ignore
+    if (!data.error && data.result) {
+      // @ts-expect-error ignore
+      setChildren(data.result);
+    }
+  };
+
   const getChildrenItems = async () => {
     if (fileManagerStore.useLocalData) {
       const expression = getExpressionForFilesData(fileManagerStore.toParentEdgeType, props.item.id);
       const children = evaluate(jsep(expression), { graph, setGraph, vertexes: [props.item] }) || [];
       setChildren(children);
     } else {
-      setFileManagerStore("useLocalData", true);
-      const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
-
-      // @ts-expect-error ignore
-      if (!data.error && data.result) {
-        await fetchChildrenDataBatch(graph, setGraph, fileManagerStore.toParentEdgeType, data.result.map(v => v.id));
-        await new Promise(resolve => setTimeout(resolve, 150));
-        setFileManagerStore("useLocalData", false);
-        // @ts-expect-error ignore
-        setChildren(data.result);
-      }
+      await fetchRemoteChildrenItems();
     }
   };
 

@@ -2,14 +2,13 @@ import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import { useParams } from "@solidjs/router";
 import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { DataGridStore } from "~/components/grid/DataGridContext";
 
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { fetchChildrenDataBatch } from "./fetchChildrenDataBatch";
-import { getRootData } from "./sidebar/getFilesData";
+import { getFilesData, getRootData } from "./sidebar/getFilesData";
 
 const getInitialFileManagerStore = () => {
   return {
@@ -59,6 +58,10 @@ export function FileManagerStoreProvider(
   const params = useParams();
 
   onMount(async () => {
+    let expandedKeys: string[] = [];
+    let selectedItem: null | Vertex = null;
+    let root: null | Vertex = null;
+
     if (params.folderId || props.fileId) {
       const rootData = await getRootData(
         graph,
@@ -68,28 +71,17 @@ export function FileManagerStoreProvider(
         props.parentVertexLabel,
         props.fileId,
       );
-      // @ts-expect-error ignore
-      if (!rootData.error && rootData.result.length > 0) {
-        batch(() => {
-          const resultData = rootData.result as Vertex[];
+      if ('result' in rootData && rootData.result.length > 0) {
+        const resultData = rootData.result as Vertex[];
+        expandedKeys = resultData.map((v) => v.id);
+        root = { ...resultData[resultData.length - 1] };
 
-          fileManagerStore[1](
-            "expandedKeys",
-            resultData.map((v) => v.id),
-          );
-
-          fileManagerStore[1]("root", {
-            ...resultData[resultData.length - 1],
-          });
-          if (params.folderId) {
-            // when folderId is provided, we want to select the same folder
-            fileManagerStore[1]("selectedItem", {
-              ...graph.vertexes[params.folderId],
-            });
-          } else {
-            fileManagerStore[1]("selectedItem", { ...resultData[0] });
-          }
-        });
+        if (params.folderId) {
+          // when folderId is provided, we want to select the same folder
+          selectedItem = { ...graph.vertexes[params.folderId] };
+        } else {
+          selectedItem = { ...resultData[0] };
+        }
       }
     } else {
       const rootData = await getRootData(
@@ -98,23 +90,21 @@ export function FileManagerStoreProvider(
         props.toParentEdgeType,
         props.parentVertexLabel,
       );
-      // @ts-expect-error ignore
-      if (!rootData.error && rootData.result.length > 0) {
-        batch(() => {
-          // @ts-expect-error ignore
-          fileManagerStore[1]("root", { ...rootData.result[0] });
-          // @ts-expect-error ignore
-          fileManagerStore[1]("expandedKeys", [rootData.result[0].id]);
-          if (!(params.folderId || props.fileId)) {
-            // @ts-expect-error ignore
-            fileManagerStore[1]("selectedItem", { ...rootData.result[0] });
-          }
-        });
+      if ('result' in rootData && rootData.result.length > 0) {
+        root = { ...rootData.result[0] };
+        expandedKeys = [root.id];
+        selectedItem = (params.folderId || props.fileId) ? null : { ...root };
       }
     }
 
-    await fetchChildrenDataBatch(graph, setGraph, fileManagerStore[0].toParentEdgeType, fileManagerStore[0].expandedKeys);
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await fetchChildrenDataBatch(graph, setGraph, fileManagerStore[0].toParentEdgeType, expandedKeys);
+
+    batch(() => {
+      fileManagerStore[1]("useLocalData", true);
+      if (root) { fileManagerStore[1]("root", root); }
+      fileManagerStore[1]("expandedKeys", expandedKeys);
+      if (selectedItem) { fileManagerStore[1]("selectedItem", selectedItem); }
+    });
     fileManagerStore[1]("useLocalData", false);
   });
 
@@ -127,4 +117,17 @@ export function FileManagerStoreProvider(
 
 export function useFileManagerStore() {
   return useContext(FileManagerStoreContext)!;
+}
+
+// fetch current children and children of children
+export async function fetchChildrenDataBatch(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  toParentEdgeType: string,
+  expandedKeys: string[]
+) {
+  const data = await getFilesData(graph, setGraph, toParentEdgeType, expandedKeys);
+  if ('result' in data && Array.isArray(data.result) && data.result.length > 0) {
+    await getFilesData(graph, setGraph, toParentEdgeType, data.result.map(v => v.id));
+  }
 }
