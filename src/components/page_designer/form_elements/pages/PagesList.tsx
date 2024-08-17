@@ -11,11 +11,11 @@ import { SearchBar } from "~/components/css_properties/SearchBar";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
-import { getTreeData, type NavItem } from "~/lib/graph/get/sync/getTreeData";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
+import { getTreeData, NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {

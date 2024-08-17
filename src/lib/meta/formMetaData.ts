@@ -5,7 +5,7 @@ import { Perm } from "./auth/Perm";
 import { Role } from "./auth/Role";
 import { SignUp } from "./auth/SignUp";
 import { User } from "./auth/User";
-import { Comp, parentCompAttribute } from "./base/Comp";
+import { Comp, } from "./base/Comp";
 import { CompCategory } from "./base/CompCategory";
 import { DataType } from "./base/DataType";
 import { File, FileTag, Folder } from "./file/File";

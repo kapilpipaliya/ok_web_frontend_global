@@ -137,3 +137,10 @@ remove isDesignMode variable
 
 this may be useful:
 https://react-spectrum.adobe.com/react-stately/collections.html
+
+
+data-structure functions:
+https://github.com/mimshins/utilityjs/tree/main/src
+
+this type of hooks are useful:
+https://github.com/gangnamssal/gnshooks/tree/master

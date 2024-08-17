@@ -416,7 +416,7 @@ addBinaryOp(
   evalGetChildren,
 );
 
-export async function getPraents(collection: string, context: object) {
+export function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];

@@ -13,15 +13,22 @@ export function PreviewCSSButton(props: Readonly<{
 }>) {
   let previewCSSRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
+  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   let timer: NodeJS.Timeout;
 
   const handleMouseEnter = () => {
     timer = setTimeout(() => setShowModal(true), 500);
   };
 
-  const _handleMouseLeave = () => {
+  const handleMouseLeave = (event: MouseEvent) => {
     clearTimeout(timer);
-    setShowModal(false);
+    const relatedTarget = event.relatedTarget as Node;
+    const floatingElement = floating();
+
+    // https://javascript.info/mousemove-mouseover-mouseout-mouseenter-mouseleave
+    if (!previewCSSRef?.contains(relatedTarget) && !floatingElement?.contains(relatedTarget)) {
+      setShowModal(false);
+    }
   };
 
   return (
@@ -31,7 +38,7 @@ export function PreviewCSSButton(props: Readonly<{
         icon="ic:baseline-css"
         onClick={() => setShowModal(true)}
         onMouseEnter={handleMouseEnter}
-        // onMouseLeave={handleMouseLeave}
+        onMouseLeave={handleMouseLeave}
         ref={(el) => (previewCSSRef = el)}
         size={props.size}
         title="Preview CSS" />
@@ -39,8 +46,14 @@ export function PreviewCSSButton(props: Readonly<{
         <PreviewCSSMenu
           item={props.item}
           onClose={() => setShowModal(false)}
-          onMouseLeave={() => setShowModal(false)}
-          parentRef={previewCSSRef!} />
+          onMouseLeave={(event) => {
+            if (previewCSSRef && !previewCSSRef.contains(event.relatedTarget as Node)) {
+              setShowModal(false);
+            }
+          }}
+          parentRef={previewCSSRef!}
+          ref={setFloating}
+        />
       </Show>
     </>
   );

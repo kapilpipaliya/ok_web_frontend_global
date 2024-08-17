@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, Show } from "solid-js";
+import { createSignal, JSX, Show } from "solid-js";
 
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -8,14 +8,70 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { ComponentPreview } from "./ComponentPreview";
+
+function ComponentItemContainer(props: {
+  child: Vertex;
+  children: JSX.Element;
+  isHovered: boolean;
+  onMouseEnter: (el: MouseEvent) => void;
+  onMouseLeave: (el: MouseEvent) => void;
+  ref: (el: HTMLDivElement) => void;
+  selectedComponents?: () => Set<Vertex>;
+  setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void;
+}) {
+  const [graph] = useGraph();
+  const [, setLayoutStore] = useDesignerLayoutStore() || [];
+
+  const onDragEnd = () => {
+    resetDragDropState(setLayoutStore);
+  };
+
+  const onDragStart = (e: DragEvent) => {
+    e.stopPropagation();
+    setLayoutStore("draggedVertices", []);
+    const dataTransfer = props.selectedComponents && props.selectedComponents().size > 0
+      ? Array.from(props.selectedComponents())
+      : [graph.vertexes[props.child.id]];
+    setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
+    if (props.setSelectedComponents) {
+      props.setSelectedComponents(() => new Set<Vertex>());
+    }
+  };
+
+  const baseStyle = "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
+
+  const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
+
+  const itemStyle = () => props.isHovered ? `${baseStyle} ${hoverStyle}` : baseStyle;
+
+  return (
+    <div // NOSONAR
+
+      class={itemStyle()}
+      draggable={true}
+      onDragEnd={onDragEnd}
+      onDragStart={onDragStart}
+      onMouseEnter={props.onMouseEnter}
+      onMouseLeave={props.onMouseLeave}
+      ref={props.ref}
+    >
+      {props.children}
+    </div>
+  );
+}
 
 export function ComonentItem(props: Readonly<{ child: Vertex }>) {
-  const [graph, _setGraph] = useGraph();
-  const [_layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
-  const [isHovered, _setIsHovered] = createSignal(false);
+  const [graph] = useGraph();
+  const [isHovered, setIsHovered] = createSignal(false);
+  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );
+  const [showPreview, setShowPreview] = createSignal(false);
+  let previewCSSRef: HTMLDivElement | undefined;
+  let previewTimer: NodeJS.Timeout;
 
   const handleCheckboxChange = (event: Event, id: Id) => {
     const isChecked = (event.target as HTMLInputElement).checked;
@@ -30,47 +86,39 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
     }
   };
 
-  const baseStyle =
-    "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
+  const handlePreviewMouseEnter = () => {
+    previewTimer = setTimeout(() => setShowPreview(true), 400);
+  };
 
-  const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
-
-  const itemStyle = () =>
-    isHovered() ? `${baseStyle} ${hoverStyle}` : baseStyle;
+  const handlePreviewMouseLeave = (event: MouseEvent) => {
+    clearTimeout(previewTimer);
+    const relatedTarget = event.relatedTarget as Node;
+    const floatingElement = floating();
+    if (
+      (floatingElement && floatingElement.contains(relatedTarget)) ||
+      (previewCSSRef && previewCSSRef.contains(relatedTarget))
+    ) {
+      // Mouse is over either floating() or previewCSSRef, don't close
+      return;
+    }
+    setShowPreview(false);
+  };
 
   return (
-    <div // NOSONAR
-      class={itemStyle()}
-      draggable={true}
-      onDragEnd={() => {
-        resetDragDropState(setLayoutStore);
+    <ComponentItemContainer
+      child={props.child}
+      isHovered={isHovered()}
+      onMouseEnter={() => {
+        // setIsHovered(true);
+        handlePreviewMouseEnter();
       }}
-      onDragStart={(e) => {
-        e.stopPropagation();
-        setLayoutStore("draggedVertices", []);
-        const dataTransfer =
-          selectedComponents().size > 0
-            ? Array.from(selectedComponents())
-            : [graph.vertexes[props.child.id]];
-        setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
-        setSelectedComponents(new Set<Vertex>());
+      onMouseLeave={(el) => {
+        // setIsHovered(false);
+        handlePreviewMouseLeave(el);
       }}
-    // onMouseEnter={() => setIsHovered(true)}
-    // onMouseLeave={() => setIsHovered(false)}
-    // ondblclick={() => {
-    //   setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
-    //   onClickAddComponent(
-    //     graph,
-    //     setGraph,
-    //     layoutStore.formData.txnId,
-    //     layoutStore.draggedVertices[0],
-    //     layoutStore.formData.formData || {},
-    //     layoutStore.selectedId !== -1
-    //       ? layoutStore.selectedId
-    //       : layoutStore.formData.formData.id,
-    //   );
-    //   setLayoutStore("draggedVertices", []);
-    // }}
+      ref={(el) => (previewCSSRef = el)}
+      selectedComponents={selectedComponents}
+      setSelectedComponents={setSelectedComponents}
     >
       <Show when={isHovered()}>
         <OpenComponentSettings
@@ -93,18 +141,33 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
         />
       </Show>
       <div class="flex {flex-flow:column} ai:center gap:5px pt:5px">
-        <Icon
-          height={24}
-          icon={
-            iconMap[props.child?.P.name as keyof typeof iconMap] ??
-            "material-symbols:widgets-outline-rounded"
-          }
-          width={24}
-        />
+        <Show when={false}>
+          <Icon
+            height={24}
+            icon={
+              iconMap[props.child?.P.name as keyof typeof iconMap] ??
+              "material-symbols:widgets-outline-rounded"
+            }
+            width={24}
+          />
+        </Show>
         <span class="font-size:14px">
           {props.child?.P.label || props.child?.P.name}
         </span>
       </div>
-    </div>
+      <Show when={showPreview()}>
+        <ComponentPreview
+          item={props.child}
+          onClose={() => setShowPreview(false)}
+          onMouseLeave={(event) => {
+            if (previewCSSRef && !previewCSSRef.contains(event.relatedTarget as Node)) {
+              setShowPreview(false);
+            }
+          }}
+          parentRef={previewCSSRef!}
+          ref={setFloating}
+        />
+      </Show>
+    </ComponentItemContainer>
   );
 }

@@ -318,7 +318,8 @@ export const componentsMap: Record<string, any> = {
 };
 
 export function getDynamicComponent(component: string) {
-  return componentsMap[component] || NotFoundComponent;
+  const componentName = component.replace('.', '');
+  return componentsMap[componentName] || NotFoundComponent;
 }
 
 // case "Tabs":
