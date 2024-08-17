@@ -5,11 +5,17 @@ import { type JSX, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
+import { getTableData } from "~/components/grid/functions/getTableData";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
 } from "~/components/page_designer/LayoutContext";
 import { ZIndex } from "~/components/ZIndex";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { isValidResponse } from "~/lib/api/isValidResponse";
+import { useGraph } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
@@ -17,6 +23,7 @@ import { RenderMainContent } from "./RenderMainContent";
 
 export function PageDesignerWrapper(): JSX.Element {
   const pageDesignerStore = createStore(getInitialDesignerLayoutStore());
+  const [graph, setGraph] = useGraph();
   const [layoutStore, setLayoutStore] = pageDesignerStore;
 
   const handleResize = () => {
@@ -37,7 +44,25 @@ export function PageDesignerWrapper(): JSX.Element {
     handleResize(); // Initial check
 
     makeEventListener(window, "resize", debouncedHandleResize);
+
+    fetchCompExamples();
   });
+
+  const fetchCompExamples = async () => {
+    // setGridState("isLoading", true);
+    const data = await getTableData(
+      FormMetaData.CompExample,
+      "CompExample",
+      undefined,
+      undefined,
+      false,
+    );
+    if (isValidResponse(data)) {
+      setGraphData(graph, setGraph, data.graph);
+    } else {
+      console.error("error", getErrorMessage(data));
+    }
+  };
 
   return (
     <ZIndex>

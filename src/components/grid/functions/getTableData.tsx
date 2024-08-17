@@ -8,9 +8,10 @@ export async function getTableData(
   tableId: string,
   skip?: number,
   limit?: number,
+  ignoreTables = true,
 ) {
   try {
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes, true);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes, ignoreTables);
 
     const result = await fetchDataFromMG({
       expression: `g:'${tableId}[$1]'`,

@@ -89,7 +89,13 @@ FormMetaData.CompExample = {
   attributes: [
     ...FormMetaData.Page.attributes,
     // TODO: Fix this. It will select Parent Comp.
-    parentCompAttribute,
+    {
+      collection: "g:'Comp'",
+      componentName: "SelectBox",
+      displayName: "Parent Component",
+      name: "Comp",
+      // validation: { required: true },
+    },
     rulesMetaAttribute!,
   ],
   name: "CompExample",
