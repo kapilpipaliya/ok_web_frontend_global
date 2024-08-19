@@ -1,6 +1,7 @@
 import { createSelector, Show } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
+import { ImportHtmlButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ImportHtmlButton";
 import { SaveAsTemplateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
@@ -98,6 +99,11 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           title="Duplicate"
         />
         <SaveAsTemplateButton
+          class="mr:5px opacity:.5 opacity:1:hover"
+          item={props.metaVertex}
+          size={20}
+        />
+        <ImportHtmlButton
           class="mr:5px opacity:.5 opacity:1:hover"
           item={props.metaVertex}
           size={20}

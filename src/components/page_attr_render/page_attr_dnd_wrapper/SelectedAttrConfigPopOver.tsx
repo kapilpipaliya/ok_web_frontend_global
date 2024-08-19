@@ -8,6 +8,7 @@ import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
+import { ImportHtmlButton } from "./ImportHtmlButton";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { PropertyDrawer } from "./PropertyDrawer";
@@ -18,7 +19,7 @@ interface SelectedAttrConfigPopOverProps {
 }
 
 export function SelectedAttrConfigPopOver(
-  props: SelectedAttrConfigPopOverProps,
+  props: Readonly<SelectedAttrConfigPopOverProps>,
 ) {
   const zIndex = useZIndex();
   const [, setLayoutStore] = useDesignerLayoutStore();
@@ -46,6 +47,7 @@ export function SelectedAttrConfigPopOver(
         <DuplicateButton item={props.item} />
         <SaveAsTemplateButton item={props.item} size={20} />
         <PreviewCSSButton item={props.item} size={20} />
+        <ImportHtmlButton item={props.item} size={20} />
         <DeleteButton componentName={getComponentName()} item={props.item} />
       </div>
     </span>

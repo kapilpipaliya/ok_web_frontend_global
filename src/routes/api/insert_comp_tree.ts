@@ -11,8 +11,7 @@ export async function GET({ request }: APIEvent) {
   try {
     neo4jSession = await getSessionForSubdomain(request);
 
-    const componentTree = getComponentTree();
-    const response = await insertComponentTree(neo4jSession, componentTree);
+    const response = await insertComponentTree(neo4jSession, getComponentTree());
 
     if (!response.success) {
       return new Response(

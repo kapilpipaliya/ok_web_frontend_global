@@ -179,6 +179,18 @@ export default class JsxParser {
         "name",
         "Icon",
       )!;
+    } else if (findVertexByLabelAndUniqueId(
+      graph,
+      "Comp",
+      "name",
+      comp,
+    )) {
+      componentVertex = findVertexByLabelAndUniqueId(
+        graph,
+        "Comp",
+        "name",
+        comp,
+      )!;
     } else {
       isText = true;
       componentVertex = findVertexByLabelAndUniqueId(

@@ -1,9 +1,9 @@
-import { int, type Session } from "neo4j-driver";
+import { int, type Session, type Transaction } from "neo4j-driver";
 
 import type { ComponentNode } from "./ComponentTreeType";
 
 export async function insertComponentTree(
-  session: Session,
+  session: Session | Transaction,
   components: ComponentNode[],
   parentId: null | number | string = null
 ): Promise<{ success: boolean }> {

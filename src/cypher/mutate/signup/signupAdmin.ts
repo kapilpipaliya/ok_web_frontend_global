@@ -5,6 +5,8 @@ import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
 import type { SignupRequestData } from "./SignupRequestData";
 
+import { getComponentTree } from "../sync/component_tree/convertToJson";
+import { insertComponentTree } from "../sync/component_tree/insertComonentTree";
 import { checkUserExistence } from "./checkUserExistence";
 import { createRootFolder } from "./createRootFolder";
 import { createUserInDB } from "./createUserInDB";
@@ -40,7 +42,11 @@ export async function signupAdmin(tx: TransactionPromise, data: SignupRequestDat
     await createRootFolder(tx);
   
     await insertDataTypes(tx);
+
+    // Insert component tree
+    await insertComponentTree(tx, getComponentTree());
     await insertComponents(tx);
+    
     syncNodesMGCall({
       nodesToTransfer: ["CompCategory", "Comp", "DataType"], //  "Nav"
       userport: driverPort,
