@@ -1,69 +1,17 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, JSX, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
-import { resetDragDropState } from "../../event_handler/resetDragDropState";
-import { useDesignerLayoutStore } from "../../LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
-import { ComponentPreview } from "./ComponentPreview";
-
-function ComponentItemContainer(props: {
-  child: Vertex;
-  children: JSX.Element;
-  isHovered: boolean;
-  onMouseEnter: (el: MouseEvent) => void;
-  onMouseLeave: (el: MouseEvent) => void;
-  ref: (el: HTMLDivElement) => void;
-  selectedComponents?: () => Set<Vertex>;
-  setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void;
-}) {
-  const [graph] = useGraph();
-  const [, setLayoutStore] = useDesignerLayoutStore() || [];
-
-  const onDragEnd = () => {
-    resetDragDropState(setLayoutStore);
-  };
-
-  const onDragStart = (e: DragEvent) => {
-    e.stopPropagation();
-    setLayoutStore("draggedVertices", []);
-    const dataTransfer = props.selectedComponents && props.selectedComponents().size > 0
-      ? Array.from(props.selectedComponents())
-      : [graph.vertexes[props.child.id]];
-    setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
-    if (props.setSelectedComponents) {
-      props.setSelectedComponents(() => new Set<Vertex>());
-    }
-  };
-
-  const baseStyle = "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
-
-  const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
-
-  const itemStyle = () => props.isHovered ? `${baseStyle} ${hoverStyle}` : baseStyle;
-
-  return (
-    <div // NOSONAR
-
-      class={itemStyle()}
-      draggable={true}
-      onDragEnd={onDragEnd}
-      onDragStart={onDragStart}
-      onMouseEnter={props.onMouseEnter}
-      onMouseLeave={props.onMouseLeave}
-      ref={props.ref}
-    >
-      {props.children}
-    </div>
-  );
-}
+import { ComponentItemContainer } from "./ComponentItemContainer";
+import { ComponentPreview } from "./preview/ComponentPreview";
 
 export function ComonentItem(props: Readonly<{ child: Vertex }>) {
   const [graph] = useGraph();
-  const [isHovered, setIsHovered] = createSignal(false);
+  const [isHovered, _setIsHovered] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
 
   const [selectedComponents, setSelectedComponents] = createSignal(
@@ -95,8 +43,8 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
     const relatedTarget = event.relatedTarget as Node;
     const floatingElement = floating();
     if (
-      (floatingElement && floatingElement.contains(relatedTarget)) ||
-      (previewCSSRef && previewCSSRef.contains(relatedTarget))
+      (floatingElement?.contains(relatedTarget)) ||
+      (previewCSSRef?.contains(relatedTarget))
     ) {
       // Mouse is over either floating() or previewCSSRef, don't close
       return;

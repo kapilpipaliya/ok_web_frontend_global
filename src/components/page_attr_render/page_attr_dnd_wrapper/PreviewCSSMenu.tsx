@@ -1,4 +1,4 @@
-import { createSignal, Setter, } from "solid-js";
+import { createSignal, type Setter, } from "solid-js";
 
 import type { Vertex, } from "~/lib/graph/graph";
 

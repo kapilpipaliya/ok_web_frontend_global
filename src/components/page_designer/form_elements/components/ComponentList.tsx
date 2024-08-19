@@ -1,4 +1,3 @@
-import jsep from "jsep";
 import {
   createMemo,
   createSignal,
@@ -12,13 +11,13 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import { SearchBar } from "~/components/css_properties/SearchBar";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
-import { evaluate } from "~/lib/expression_eval";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { ComonentItem } from "./ComonentItem";
+import { getCompChildren } from "./getCompChildren";
 
 export function ComponentList() {
   const [graph, setGraph] = useGraph();
@@ -55,16 +54,11 @@ export function ComponentList() {
   });
 
 
-  const getChildren = (vertex: Vertex) => {
-    if (!vertex) { return []; }
-    const children: Vertex[] =
-      evaluate(jsep("<-ParentComp"), { graph, setGraph, vertexes: [vertex] }) || [];
-    return children;
-  };
+ 
 
   // Filter children based on search query
   const filteredChildren = createMemo(() => {
-    const children = getChildren(rootCompVertex()!);
+    const children = getCompChildren(rootCompVertex()!, graph);
     const query = searchQuery().toLowerCase();
     return children.filter(child => 
       (child.P.label as string || child.P.name as string).toLowerCase().includes(query)

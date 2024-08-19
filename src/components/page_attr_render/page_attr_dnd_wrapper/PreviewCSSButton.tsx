@@ -26,7 +26,7 @@ export function PreviewCSSButton(props: Readonly<{
     const floatingElement = floating();
 
     // https://javascript.info/mousemove-mouseover-mouseout-mouseenter-mouseleave
-    if (!previewCSSRef?.contains(relatedTarget) && !floatingElement?.contains(relatedTarget)) {
+    if (!(previewCSSRef?.contains(relatedTarget) || floatingElement?.contains(relatedTarget))) {
       setShowModal(false);
     }
   };

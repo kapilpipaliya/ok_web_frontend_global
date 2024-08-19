@@ -15,7 +15,7 @@ import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { getTreeData, NavItem } from "../getTreeData";
+import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {

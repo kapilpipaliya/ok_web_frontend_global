@@ -48,7 +48,7 @@ export function DropdownMenu(
     <Portal mount={document.body}>
       <div
         aria-orientation="vertical"
-        class={`${local.class ?? ""} ${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem max-height:13rem min-width:12rem overflow-y:auto padding:0.25rem z-index:${zIndex}`}
+        class={`${local.class ?? ""} ${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem z-index:${zIndex}`}
         ref={(el) => {
           setFloating(el);
           if (typeof local.ref === 'function') {
