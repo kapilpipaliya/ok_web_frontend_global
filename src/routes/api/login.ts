@@ -19,10 +19,13 @@ export async function POST({ request }: APIEvent) {
     await updateSession(user);
 
     delete user.P.password;
+    if (subdomain === 'super' && user.P.username !== 'super') {
+      user.P.redirectUrl = 'settings';
+    }
     return user;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Server error Failed to login:", error);
-    return new Response(error.message, { status: 500 });
+    return new Response(error instanceof Error ? error.message : 'Unknown error', { status: 500 });
   }
 }
 
@@ -63,9 +66,8 @@ function authenticateRegularUser(user: Vertex, password: string) {
   return user;
 }
 
-// Function to authenticate super user
 async function authenticateSuperUser(
-  user: { [key: string]: any },
+  user: Vertex,
   email: string,
   password: string,
 ) {

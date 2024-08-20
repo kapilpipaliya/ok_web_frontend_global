@@ -233,7 +233,7 @@ export function Login(): JSX.Element {
       onSuccess: (value) => {
         setGraph("isLoadingPage", false);
         if (value != null && value.id !== null) {
-          navigate(`${graph.APP_BASE_URL}/Page`);
+          navigate(`${graph.APP_BASE_URL}/${value.P.redirectUrl ?? ''}`);
         }
       },
       promise: signInCall(formData),

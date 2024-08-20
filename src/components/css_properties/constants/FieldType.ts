@@ -12,7 +12,7 @@ interface CSSField extends Field {
   hashName?: string;
   info?: string;
   name: string;
-  projections?: [];
+  projections?: string[];
 }
 
 // field with all and custom property
