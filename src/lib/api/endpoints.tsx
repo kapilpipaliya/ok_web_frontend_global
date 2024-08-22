@@ -1,9 +1,10 @@
 export const API = {
-  getInitialDataUrl: "/api/get_initial_data",
-  getUserUrl: "/api/get_user",
-  loginUrl: "/api/login",
-  logOutUrl: "/api/logout",
-  profileUrl: "/api/profile",
-  signUpUrl: "/api/signup",
-  submitDataUrl: "/api/submit_data",
+  getInitialDataUrl: "/api/get/get_initial_data",
+  getSubDomainInfo: "/api/get/get_sub_domain_info",
+  getUserUrl: "/api/auth/get_user",
+  loginUrl: "/api/auth/login",
+  logOutUrl: "/api/auth/logout",
+  profileUrl: "/api/profile/profile",
+  signUpUrl: "/api/auth/signup",
+  submitDataUrl: "/api/mutate/submit_data",
 };

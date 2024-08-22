@@ -6,6 +6,7 @@ import { createSignal, onMount, Show } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
+import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { signInCall } from "~/lib/api/service/user/signInCall";
 import { useGraph } from "~/lib/graph/graph";
@@ -206,7 +207,7 @@ export function Login(): JSX.Element {
   });
 
   const getAll = async () => {
-    const data = await postAPI("/api/get_subdomain_Info", {});
+    const data = await postAPI(API.getSubDomainInfo, {});
     setFormData({
       ...formData(),
       // TODO: rename profileImage to companyLogo

@@ -4,10 +4,10 @@ import type { Transaction } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { updateSession } from "~/cypher/mutate/signup/updateSession";
 
-import type { SignupRequestData } from "../../cypher/mutate/signup/SignupRequestData";
+import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequestData";
 
-import { signupAdmin } from "../../cypher/mutate/signup/signupAdmin";
-import { signupUser } from "../../cypher/mutate/signup/signupUser";
+import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
+import { signupUser } from "../../../cypher/mutate/signup/signupUser";
 
 async function handleSignup(data: SignupRequestData, tx: Transaction, subdomain: string) {
   try {

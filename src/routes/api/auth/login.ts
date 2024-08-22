@@ -7,7 +7,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriverWithPort } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
-import { updateSession } from "../../cypher/mutate/signup/updateSession";
+import { updateSession } from "../../../cypher/mutate/signup/updateSession";
 
 export async function POST({ request }: APIEvent) {
   const { email, password } = await request.json();
