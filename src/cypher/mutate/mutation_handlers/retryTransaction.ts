@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function retryTransaction(

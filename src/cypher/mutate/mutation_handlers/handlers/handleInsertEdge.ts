@@ -1,6 +1,6 @@
 
 
-import { int } from "neo4j-driver";
+import { int, type Transaction } from "neo4j-driver";
 
 export async function handleInsertEdge(
   insertEdge: any,

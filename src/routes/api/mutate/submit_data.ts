@@ -12,7 +12,7 @@ export async function POST({ request }: APIEvent) {
   const tx = dbSession.beginTransaction();
   try {
     // - Authorization -
-    const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession);
+    const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession, true);
     if (authorizationError) {
       return authorizationError;
     }

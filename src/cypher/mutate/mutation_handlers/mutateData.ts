@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import type { MutationArgs } from "../../types/MutationArgs";
 
 import { fillOldIdToNewIdMap } from "./fillOldIdToNewIdMap";

@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import jsep from "jsep";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";

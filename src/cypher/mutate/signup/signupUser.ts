@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import type { SignupRequestData } from "./SignupRequestData";
 
 import { checkUserExistence } from "./checkUserExistence";

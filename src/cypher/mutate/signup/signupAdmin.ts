@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
 import type { SignupRequestData } from "./SignupRequestData";

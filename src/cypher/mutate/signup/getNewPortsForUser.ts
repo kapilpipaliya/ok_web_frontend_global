@@ -1,5 +1,7 @@
 
 
+import type { Transaction } from "neo4j-driver";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getNewPortsForUser(tx: Transaction) {
