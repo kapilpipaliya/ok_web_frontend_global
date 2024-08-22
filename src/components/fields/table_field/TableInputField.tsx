@@ -18,7 +18,7 @@ import {
 } from "~/components/page_attr_render/PageAttrContext";
 import { usePageRenderContext } from "~/components/page_attr_render/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";

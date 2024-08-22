@@ -302,6 +302,9 @@ export function DynamicComponent(
     get hasViewPermission() {
       return hasViewPermission();
     },
+    get isNoPermissionCheck() {
+      return isNoPermissionCheck();
+    },
     vertexes: [] as Vertex[],
   });
   const isCheckbox = () => {
