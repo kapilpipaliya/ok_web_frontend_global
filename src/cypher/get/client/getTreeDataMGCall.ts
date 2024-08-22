@@ -4,7 +4,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalAsync } from "~/lib/expression_eval";
 
-import { getSessionForSubdomain } from "../getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
 
 interface TreeNode {
   children?: TreeNode[];
@@ -27,7 +27,7 @@ export async function getTreeDataMGCall(
   "use server";
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
-  const session = await getSessionForSubdomain();
+  const { dbSession } = await getDBSessionForSubdomain();
 
   try {
     const getChildren = async (
@@ -41,7 +41,7 @@ export async function getTreeDataMGCall(
       const children = await evalAsync(jsep(levels.collection), {
         nodes,
         relationships,
-        session,
+        session: dbSession,
         vertexes,
       });
 
@@ -88,6 +88,6 @@ export async function getTreeDataMGCall(
     console.error("Error fetching tree data:", error);
     throw error; // Rethrow the error after logging
   } finally {
-    await session.close();
+    await dbSession.close();
   }
 }

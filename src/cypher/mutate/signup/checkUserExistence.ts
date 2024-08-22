@@ -1,7 +1,7 @@
-import type { Session, TransactionPromise } from "neo4j-driver-core";
+import type { Session, Transaction } from "neo4j-driver-core";
 
 export async function checkUserExistence(
-  txOrSession: Session | TransactionPromise,
+  txOrSession: Session | Transaction,
   username: string,
   email: string,
   subdomain: string,

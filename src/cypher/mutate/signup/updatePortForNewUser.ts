@@ -1,7 +1,7 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 export async function updatePortForNewUser(
-  tx: TransactionPromise,
+  tx: Transaction,
   driverPort: number,
   logsPort: number,
   labPort: number,

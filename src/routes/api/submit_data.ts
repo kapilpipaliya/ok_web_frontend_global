@@ -1,21 +1,28 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
+
+import { handleError } from "../../lib/handleError";
+import { checkSuperUserAuthorization } from "../../server/checkSuperUserAuthorization";
 
 export async function POST({ request }: APIEvent) {
   const data = await request.json();
-  const session = await getSessionForSubdomain(request);
-  const tx = session.beginTransaction();
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const tx = dbSession.beginTransaction();
   try {
+    const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession);
+    if (authorizationError) {
+      return authorizationError;
+    }
     const res = await mutateData(data, tx);
     await tx.commit();
     return res;
-  } catch (error: any) {
+  } catch (error: unknown) {
     await tx.rollback();
-    return { error: "Transaction failed: " + error.message };
+    return await handleError("Transaction failed:", error);
   } finally {
     await tx.close();
-    await session.close();
+    await dbSession.close();
   }
 }

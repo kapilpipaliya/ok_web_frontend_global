@@ -1,17 +1,15 @@
 import type {APIEvent} from "@solidjs/start/server";
 
-import {getDriver} from "~/cypher/driver";
-import {getSubDomainInfo} from "~/routes/api/getSubDomainInfo";
-import {getSubDomain} from "~/server/getSubDomain";
+import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import { getSubDomainInfo } from "~/cypher/get/getSubDomainInfo";
 
 export async function POST({ request }: APIEvent) {
-  const subdomain = await getSubDomain(request.headers.get("host")!);
-  const session = (await getDriver(subdomain)).session();
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
-  if (subdomain === "super") {
-    await session.close();
+  if (subDomain === "super") {
+    await dbSession.close();
     return { success: true};
   }
 
-  return await getSubDomainInfo(subdomain, session);
+  return await getSubDomainInfo(subDomain, dbSession);
 }

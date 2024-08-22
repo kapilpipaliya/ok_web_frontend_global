@@ -1,4 +1,4 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 import { int, type Session } from "neo4j-driver";
 
@@ -8,7 +8,7 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { ContextType } from "../../types/ContextType";
 
-import { getSessionForSubdomain } from "../getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 import { processResult } from "./processResult";
 
@@ -151,7 +151,7 @@ async function getSession(context: ContextType) {
   if (context.tx) {
     return null;
   }
-  return context.session || getSessionForSubdomain();
+  return context.session || (await getDBSessionForSubdomain()).dbSession;
 }
 
 function getEdgeType(edgeType: string, vertexes: Vertex[]) {
@@ -162,7 +162,7 @@ async function runQuery(
   session: null | Session,
   query: string,
   params: { [key: string]: unknown },
-  tx?: TransactionPromise,
+  tx?: Transaction,
 ) {
   if (tx) {
     return await tx.run(query, params);

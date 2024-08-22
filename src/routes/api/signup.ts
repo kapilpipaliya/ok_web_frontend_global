@@ -1,20 +1,15 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+import type { Transaction } from "neo4j-driver";
 
-import { getDriver } from "~/cypher/driver";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { updateSession } from "~/cypher/mutate/signup/updateSession";
-import { getSubDomain } from "~/server/getSubDomain";
 
 import type { SignupRequestData } from "../../cypher/mutate/signup/SignupRequestData";
 
 import { signupAdmin } from "../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../cypher/mutate/signup/signupUser";
 
-async function handleSignup(request: APIEvent["request"], subdomain: string) {
-  const data: SignupRequestData = await request.json();
-
-  const session = (await getDriver(subdomain)).session();
-  const tx = session.beginTransaction();
-
+async function handleSignup(data: SignupRequestData, tx: Transaction, subdomain: string) {
   try {
     let user;
 
@@ -30,16 +25,18 @@ async function handleSignup(request: APIEvent["request"], subdomain: string) {
 
     return user;
   } catch (error: any) {
-    console.error("Server error:", error.message, error);
     await tx.rollback();
     return new Response(error.message, { status: 500 });
-  } finally {
-    await session.close();
   }
 }
 
-// Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
-  const subdomain = await getSubDomain(request.headers.get("host")!);
-  return handleSignup(request, subdomain);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const data: SignupRequestData = await request.json();
+  const tx = dbSession.beginTransaction();
+  try {
+    return await handleSignup(data, tx, subDomain);
+  } finally {
+    await dbSession.close();
+  }
 }

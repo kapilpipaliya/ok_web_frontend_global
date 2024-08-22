@@ -3,13 +3,11 @@ import type {HTTPEvent} from "vinxi/runtime/http-types";
 
 import {readMultipartFormData} from "vinxi/http";
 
-import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {getSubDomain} from "~/server/getSubDomain";
+import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {replaceFiles} from "~/server/upload/replaceFiles";
 
 export async function PUT({ request }: APIEvent, event: HTTPEvent) {
-  const subdomain = await getSubDomain(request.headers.get("host")!);
-  const neo4jSession = await getSessionForSubdomain(request);
+  const { dbSession , subDomain} = await getDBSessionForSubdomain(request);
 
   try {
     const data = await readMultipartFormData(event);
@@ -17,8 +15,8 @@ export async function PUT({ request }: APIEvent, event: HTTPEvent) {
     if (!data || data.length === 0) {
       return { error: "No file data available" };
     }
-    return await replaceFiles(request, data, neo4jSession, subdomain);
+    return await replaceFiles(request, data, dbSession, subDomain);
   } finally {
-    await neo4jSession.close();
+    await dbSession.close();
   }
 }

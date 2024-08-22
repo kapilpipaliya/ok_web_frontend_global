@@ -1,5 +1,4 @@
 
-import type { TransactionPromise } from "neo4j-driver-core";
 
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
@@ -16,7 +15,7 @@ import { insertDataTypes } from "./insertDataTypes";
 import { updatePortForNewUser } from "./updatePortForNewUser";
 import { waitForDockerCreate } from "./waitForDockerCreate";
 
-export async function signupAdmin(tx: TransactionPromise, data: SignupRequestData) {
+export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
     // Check if the user already exists
     await checkUserExistence(tx, data.username, data.email, data.subdomain);
   

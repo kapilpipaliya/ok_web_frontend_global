@@ -1,11 +1,11 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 import type { SignupRequestData } from "./SignupRequestData";
 
 import { checkUserExistence } from "./checkUserExistence";
 import { createUserInUserDB } from "./createUserInDB";
 
-export async function signupUser(tx: TransactionPromise, data: SignupRequestData) {
+export async function signupUser(tx: Transaction, data: SignupRequestData) {
     // Check if the user already exists
     await checkUserExistence(tx, data.username, data.email, data.subdomain);
   

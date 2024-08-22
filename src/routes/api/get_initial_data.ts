@@ -1,16 +1,17 @@
 import type {APIEvent} from "@solidjs/start/dist/server";
 
 import {getInitialData} from "~/cypher/get/getInitialData";
-import {getSubDomain} from "~/server/getSubDomain";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function GET({ request }: APIEvent) {
-  const subdomain = await getSubDomain(request.headers.get("host")!);
+  const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const data = await getInitialData({ subdomain });
+    const data = await getInitialData(dbSession);
     return data;
-  } catch (error) {
-    console.error("Failed to get Initial Data", error);
-    return new Response("Internal Server Error", { status: 500 });
+  } catch (error: any) {
+    return new Response(`Internal Server Error: ${error.message}`, { status: 500 });
+  } finally {
+    await dbSession.close();
   }
 }

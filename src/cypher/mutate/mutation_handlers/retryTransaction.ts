@@ -1,15 +1,15 @@
-import type { TransactionPromise } from "neo4j-driver-core";
 
-import { getSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function retryTransaction(
-  callback: (tx: TransactionPromise) => Promise<any>,
+  callback: (tx: Transaction) => Promise<any>,
   maxRetries: number,
 ): Promise<any> {
   let attempt = 0;
   do {
-    const session = await getSessionForSubdomain();
-    const tx = session.beginTransaction();
+    const { dbSession } = await getDBSessionForSubdomain();
+    const tx = dbSession.beginTransaction();
     try {
       return await callback(tx);
     } catch (error: any) {
@@ -34,7 +34,7 @@ export async function retryTransaction(
       }
     } finally {
       await tx.close(); //  the transaction will be automatically rolled back if not commited.
-      await session.close();
+      await dbSession.close();
     }
   } while (attempt < maxRetries);
 }

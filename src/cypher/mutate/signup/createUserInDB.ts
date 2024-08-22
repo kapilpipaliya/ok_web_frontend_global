@@ -1,5 +1,5 @@
-
-import type { TransactionPromise } from "neo4j-driver-core";
+import type { Session, } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +7,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInDB(
-  superTx: TransactionPromise,
+  superTx: Transaction,
   username: string,
   email: string,
   password: string,
@@ -16,11 +16,11 @@ export async function createUserInDB(
   logsPort: number,
   labPort: number,
 ) {
-  const uId = uuidv4();
+  const uuid = uuidv4();
 
   const createUserQuery = `CREATE (u:User {
             username: $username,
-            uId:$uId,
+            uuid: $uuid,
             email: $email,
             subdomain: $subdomain,
             driverPort: $driverPort,
@@ -35,8 +35,8 @@ export async function createUserInDB(
     logsPort,
     password,
     subdomain,
-    uId,
     username,
+    uuid,
   };
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);
@@ -47,16 +47,16 @@ export async function createUserInDB(
 }
 
 export async function createUserInUserDB(
-  tx: TransactionPromise,
+  sessionOrTx: Session | Transaction,
   params: { [key: string]: any },
 ) {
   const createUserQuery2 = `CREATE (u:User {
                 username: 'superadmin',
-                uId:$uId,
+                uuid: $uuid,
                 email: $email,
                 password: $password,
                 avatar: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
-  const createUserResult = await tx.run(createUserQuery2, params);
+  const createUserResult = await sessionOrTx.run(createUserQuery2, params);
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

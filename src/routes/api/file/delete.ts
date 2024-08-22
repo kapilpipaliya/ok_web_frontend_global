@@ -3,7 +3,7 @@ import type {HTTPEvent} from "vinxi/runtime/http-types";
 
 import {getQuery} from "vinxi/http";
 
-import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {deleteFile} from "~/server/upload/deleteFile";
 
 export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
@@ -17,12 +17,12 @@ export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
     });
   }
 
-  const neo4jSession = await getSessionForSubdomain(request);
+  const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    return await deleteFile(fileId as string, neo4jSession);
+    return await deleteFile(fileId as string, dbSession);
   } finally {
-    await neo4jSession.close();
+    await dbSession.close();
   }
 }
 

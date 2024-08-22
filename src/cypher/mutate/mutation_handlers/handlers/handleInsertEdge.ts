@@ -1,10 +1,10 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 import { int } from "neo4j-driver";
 
 export async function handleInsertEdge(
   insertEdge: any,
-  tx: TransactionPromise,
+  tx: Transaction,
   clientToServerVertexIdMap: Map<number, number>,
   clientToServerEdgeIdMap: Map<number, number>,
   txnResult: any[],

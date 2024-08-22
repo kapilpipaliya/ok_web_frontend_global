@@ -1,4 +1,4 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+import type { Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -44,7 +44,7 @@ export async function getPropsFromMetaExpressionMGCall(
 
 async function getComponentPropertiesMGCall(
   metaRows: Vertex[],
-  tx: TransactionPromise,
+  tx: Transaction,
 ): Promise<{ [key: string]: any }> {
   const metaData: { [key: string]: any } = {};
 

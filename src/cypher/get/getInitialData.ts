@@ -1,28 +1,27 @@
+import type { Session } from "neo4j-driver";
+
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { getDriver } from "~/cypher/driver";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import {fetchFromMGAndSaveToArray} from "~/cypher/get/fetchFromMGAndSaveToArray";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 // exporting this function breaks the api
-export async function getInitialData(args: { subdomain: string; }) {
+export async function getInitialData(dbSession: Session) {
   const nodeObj: Record<string, Vertex> = {};
   const relationshipObj: Record<string, Edge> = {};
 
-  const session = (await getDriver(args.subdomain)).session();
-
   try {
     await fetchFromMGAndSaveToArray(
-      session,
+      dbSession,
       "MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
       {},
       nodeObj,
       relationshipObj
     );
     await fetchFromMGAndSaveToArray(
-      session,
+      dbSession,
       "MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
       {},
       nodeObj,
@@ -33,8 +32,6 @@ export async function getInitialData(args: { subdomain: string; }) {
     await fetchAndSaveFormMetaData('CompExample', nodeObj, relationshipObj);
   } catch (error: any) {
     return { error: error.message };
-  } finally {
-    await session.close(); // Ensure the session is always closed
   }
 
   return {

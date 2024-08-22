@@ -4,8 +4,7 @@ import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
-
-export async function getSessionForSubdomain(request?: APIEvent["request"]) {
+export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const host = request
     ? request.headers.get("host")!
     : getRequestURL().hostname;
@@ -13,5 +12,6 @@ export async function getSessionForSubdomain(request?: APIEvent["request"]) {
     throw new Error("Host header is missing");
   }
   const subDomain = await getSubDomain(host);
-  return (await getDriver(subDomain)).session();
+  const dbSession = (await getDriver(subDomain)).session();
+  return { dbSession, subDomain };
 }

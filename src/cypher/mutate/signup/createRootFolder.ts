@@ -1,6 +1,6 @@
-import type { TransactionPromise } from "neo4j-driver-core";
 
-export async function createRootFolder(tx: TransactionPromise): Promise<void> {
+
+export async function createRootFolder(tx: Transaction): Promise<void> {
   const query = `
     MERGE (:Folder {name: 'root'})
     MERGE (:Comp {name: 'root'})

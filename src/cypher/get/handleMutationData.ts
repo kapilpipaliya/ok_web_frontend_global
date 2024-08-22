@@ -1,4 +1,4 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 import { int } from "neo4j-driver";
 
@@ -11,7 +11,7 @@ import { mutateData } from "../mutate/mutation_handlers/mutateData";
 export async function handleMutationData(
   mutationData: any,
   vertex: Vertex[],
-  tx: TransactionPromise,
+  tx: Transaction,
 ) {
   const mutationResult = await mutateData(mutationData, tx);
   if (mutationResult.error) {

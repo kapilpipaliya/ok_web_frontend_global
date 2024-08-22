@@ -4,11 +4,11 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { evalAsync } from "~/lib/expression_eval";
 
-import { getSessionForSubdomain } from "./getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 import { isReservedKeyword } from "./reservedKeywords";
 export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
-  const session = await getSessionForSubdomain();
+  const {dbSession} = await getDBSessionForSubdomain();
 
   const label = vertex.L[0];
   const name = vertex.P.name;
@@ -42,7 +42,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
       });
       if (keys.length > 0) {
         const uniqueConstraintExists = await doesUniqueConstraintExist(
-          session,
+          dbSession,
           label,
           id,
           keys,
@@ -60,7 +60,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   } catch (error: any) {
     return { error: error.message };
   } finally {
-    await session.close();
+    await dbSession.close();
   }
 }
 

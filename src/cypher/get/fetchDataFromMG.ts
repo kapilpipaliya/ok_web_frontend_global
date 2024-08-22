@@ -4,9 +4,12 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { evalAsync } from "~/lib/expression_eval";
+import { checkSuperUserAuthorization } from "~/server/checkSuperUserAuthorization";
 
 import type { ContextType } from "../types/ContextType";
 import type { NestedExpression } from "../types/NestedExpression";
+
+import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,
@@ -17,6 +20,12 @@ export async function fetchDataFromMG(
   },
 ): Promise<ServerResult> {
   "use server";
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+
+  const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession);
+  if (authorizationError) {
+    return authorizationError;
+  }
   try {
     const mainResult = await evalAsync(jsep(expression.expression), context);
 

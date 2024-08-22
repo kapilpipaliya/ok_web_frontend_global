@@ -1,4 +1,4 @@
-import type { TransactionPromise } from "neo4j-driver-core";
+
 
 import jsep from "jsep";
 
@@ -11,7 +11,7 @@ import type { ServerResult } from "../types/ServerResult";
 export async function getSelectionOptionsBase(
   vertex: Vertex[],
   collection: string,
-  tx: TransactionPromise,
+  tx: Transaction,
 ): Promise<{ error: boolean } & Partial<ServerResult>> {
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};

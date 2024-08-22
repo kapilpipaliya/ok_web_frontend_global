@@ -1,15 +1,6 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import { logout } from "../../server/logout";
 
-import { getHttpsSession } from "~/server/getHttpsSession";
-
-// Cant export this function
-async function logout() {
-  const session = await getHttpsSession();
-  await session.update((d) => (d.userId = undefined));
-  await session.clear();
-}
-
-export async function POST({ request }: APIEvent) {
+export async function POST() {
   try {
     await logout();
     return {
