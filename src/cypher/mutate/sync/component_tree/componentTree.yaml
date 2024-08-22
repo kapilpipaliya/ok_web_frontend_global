@@ -1,8 +1,7 @@
 - root:
   - Accordion:
       - Accordion.Item:
-          - Accordion.Header:
-              - Accordion.Trigger
+          - Accordion.Trigger
           - Accordion.Content
   - Alert
   - AlertDialog:
@@ -71,8 +70,8 @@
       - Dialog.Portal:
           - Dialog.Overlay
           - Dialog.Content:
-              - Dialog.CloseButton
-              - Dialog.Title
+              - Dialog.Close
+              - Dialog.Label
               - Dialog.Description
   - DropdownMenu:
       - DropdownMenu.Trigger:
@@ -165,13 +164,14 @@
       - Pagination.Items
       - Pagination.Next
   - Popover:
-      - Popover.Trigger
       - Popover.Anchor
+          - Popover.Trigger
       - Popover.Portal:
+          - Popover.Overlay
           - Popover.Content:
               - Popover.Arrow
-              - Popover.CloseButton
-              - Popover.Title
+              - Popover.Close
+              - Popover.Label
               - Popover.Description
   - Progress:
       - Progress.Label
@@ -243,8 +243,26 @@
   - ToggleGroup:
       - ToggleGroup.Item
   - Tooltip:
-      - Tooltip.Trigger
+      - Tooltip.Anchor
+          - Tooltip.Trigger
       - Tooltip.Portal:
           - Tooltip.Content:
               - Tooltip.Arrow
   - I18nProvider
+  - Disclosure:
+      - Disclosure.Trigger
+      - Disclosure.Content
+  - Drawer:
+      - Drawer.Trigger
+      - Drawer.Portal:
+          - Drawer.Overlay
+          - Drawer.Content:
+              - Drawer.Close
+              - Drawer.Label
+              - Drawer.Description
+  - OtpField:
+      - OtpField.Input
+  - Resizable:
+      - Resizable.Panel
+      - Resizable.Handle
+      - Resizable.Panel
