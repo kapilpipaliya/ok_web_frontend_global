@@ -7,8 +7,6 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export default function PageShareView() {
   const params = useParams();
 
-  // Need to fix this
-  // http://localhost:3000/book2 render page form
   return (
     <GetInitialData>
       <AuthenticateUser>

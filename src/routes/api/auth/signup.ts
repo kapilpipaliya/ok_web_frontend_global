@@ -31,12 +31,21 @@ async function handleSignup(data: SignupRequestData, tx: Transaction, subdomain:
 }
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
-  const data: SignupRequestData = await request.json();
-  const tx = dbSession.beginTransaction();
-  try {
-    return await handleSignup(data, tx, subDomain);
-  } finally {
-    await dbSession.close();
+  if (request.headers.get("content-type")?.includes("application/json")) {
+    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+    const data: SignupRequestData = await request.json();
+    const tx = dbSession.beginTransaction();
+    try {
+      return await handleSignup(data, tx, subDomain);
+    } finally {
+      await dbSession.close();
+    }
+  } else {
+    return new Response(
+      JSON.stringify({
+        error: "Invalid content type. Expected application/json",
+      }),
+      { status: 415 }
+    );
   }
 }

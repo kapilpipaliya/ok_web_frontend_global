@@ -10,22 +10,42 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
 
 export async function POST({ request }: APIEvent) {
-  const { email, password } = await request.json();
-  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
-  try {
-    const user = await authenticateUser(email, password, subDomain, dbSession);
+  if (request.headers.get("content-type")?.includes("application/json")) {
+    const body = await request.json();
+    const { email, password } = body;
 
-    await updateSession(user);
-
-    delete user.P.password;
-    if (subDomain === 'super' && user.P.username !== 'super') {
-      user.P.redirectUrl = 'settings';
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({
+          error: "Email or password is missing",
+        }),
+        { status: 400 }
+      );
     }
-    return user;
-  } catch (error: unknown) {
-    return new Response(error instanceof Error ? error.message : 'Unknown error', { status: 500 });
-  } finally {
-    await dbSession.close();
+
+    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+    try {
+      const user = await authenticateUser(email, password, subDomain, dbSession);
+
+      await updateSession(user);
+
+      delete user.P.password;
+      if (subDomain === 'super' && user.P.username !== 'super') {
+        user.P.redirectUrl = 'settings';
+      }
+      return user;
+    } catch (error: unknown) {
+      return new Response(error instanceof Error ? error.message : 'Unknown error', { status: 500 });
+    } finally {
+      await dbSession.close();
+    }
+  } else {
+    return new Response(
+      JSON.stringify({
+        error: "Invalid content type. Expected application/json",
+      }),
+      { status: 415 }
+    );
   }
 }
 

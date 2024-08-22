@@ -199,3 +199,10 @@ https://github.com/gangnamssal/gnshooks/tree/master
 
 
 https://remixicon.com
+
+
+conflicting corvu package with kobalte:
+Accordion
+Dialog
+PopOver
+Tooltip

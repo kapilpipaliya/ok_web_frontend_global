@@ -7,7 +7,18 @@ import { handleError } from "../../../lib/handleError";
 import { checkSuperUserAuthorization } from "../../../server/checkSuperUserAuthorization";
 
 export async function POST({ request }: APIEvent) {
-  const data = await request.json();
+  let data;
+  if (request.headers.get("content-type")?.includes("application/json")) {
+    data = await request.json();
+  } else {
+    return new Response(
+      JSON.stringify({
+        error: "Invalid content type. Expected application/json",
+      }),
+      { status: 415 }
+    );
+  }
+
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   const tx = dbSession.beginTransaction();
   try {
