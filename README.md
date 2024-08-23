@@ -139,6 +139,58 @@ this may be useful:
 https://react-spectrum.adobe.com/react-stately/collections.html
 
 
+Table:
+Make it Highly customizable
+Add Header Grouping
+Add Pagination
+Add Filtering
+Add Sorting
+Add Expanding
+Add Row Actions
+Add Row Selection
+Add Row Grouping
+Add Row Details
+Add Row Details Expanding
+Add Row Details Expanding
+Add Column Visibility
+Add Column Resizing
+Add Column Ordering
+Add Column Filtering
+Add Column Grouping
+Add Column Pinning
+Add Column Expanding
+Add Column Sorting
+Add Column Filtering
+Add Column Grouping
+Add Column Pinning
+
+Add Component:
+TableHeader - if not provided children, take it from the TableRow. just need to add TableHeader component in the tree.
+TableBody
+TableFooter
+Table
+TableRow - wrap with Repeter component. For Insert, Delete, Update, need to add saparate component in the TableRow. In the TableRow, add TableCell components`.
+TableCell
+TableColumn
+TableColumnGroup
+TableGroup
+TableExpand
+TableExpandRow
+TableExpandColumn
+TablePagination
+TableFilter
+TableSort
+TablePin
+TableColumnFilter
+TableColumnPin
+TableColumnSort
+
+Find a good table component libraries:
+https://www.npmjs.com/package/@tanstack/react-table
+and study the code.
+design the full table component that is highly customizable.
+
+
 data-structure functions:
 https://github.com/mimshins/utilityjs/tree/main/src
 
