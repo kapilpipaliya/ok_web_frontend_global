@@ -78,78 +78,77 @@ export const Comp: IFormMetaData = {
         {
           attributes: [textFieldInputMeta],
           componentName: "TextField",
-          name: "label",
+          name: "type",
         },
         {
-          componentName: "CheckBox",
-          name: "required",
+          attributes: [textFieldInputMeta],
+          componentName: "TextField",
+          name: "default",
         },
-        {
-          collection: "g:'DataType'",
-          componentName: "SelectBox",
-
-          name: "dataType",
-          onchange: '["Comp",null]',
-        },
-        {
-          collection: "->$0DataType->$0Comp",
-          componentName: "SelectBox",
-          displayName: "Component",
-          name: "Comp",
-        },
-        {
-          collection: "g:'CompExample'",
-          componentName: "SelectBox",
-          displayName: "Comp Example",
-          name: "CompExample",
-        },
-        {
-          attributes: [
-            {
-              collection: "<-$0->$0Comp->$0Prop",
-              componentName: "SelectBox",
-              displayExpr: "::'P.name'",
-              name: "name",
-            },
-            {
-              componentName:
-                "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-              meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
-              name: "value",
-            },
-          ],
-          componentName: "DynamicTable",
-          displayName: "Value Property",
-          // TODO: Be sure the name is ok, it will not change in production.
-          name: "valueProp",
-          tab: "Properties",
-        },
-        {
-          componentName:
-            "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
-          meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
-          name: "value",
-          // componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
-        },
+        // {
+        //   collection: "g:'DataType'",
+        //   componentName: "SelectBox",
+        //   name: "dataType",
+        //   onchange: '["Comp",null]',
+        // },
+        // {
+        //   collection: "->$0DataType->$0Comp",
+        //   componentName: "SelectBox",
+        //   displayName: "Component",
+        //   name: "Comp",
+        // },
+        // {
+        //   collection: "g:'CompExample'",
+        //   componentName: "SelectBox",
+        //   displayName: "Comp Example",
+        //   name: "CompExample",
+        // },
+        // {
+        //   attributes: [
+        //     {
+        //       collection: "<-$0->$0Comp->$0Prop",
+        //       componentName: "SelectBox",
+        //       displayExpr: "::'P.name'",
+        //       name: "name",
+        //     },
+        //     {
+        //       componentName:
+        //         "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+        //       meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
+        //       name: "value",
+        //     },
+        //   ],
+        //   componentName: "DynamicTable",
+        //   displayName: "Value Property",
+        //   // TODO: Be sure the name is ok, it will not change in production.
+        //   name: "valueProp",
+        //   tab: "Properties",
+        // },
+        // {
+        //   componentName:
+        //     "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
+        //   meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
+        //   name: "value",
+        //   // componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
+        // },
         {
           attributes: [textFieldTextAreaMeta],
           componentName: "TextField",
           name: "description",
-
           // autoResizeEnabled: true,
           width: "550px",
         },
-        {
-          children: "Reset",
-          class: "border-color:#FF0000 color:#FF0000",
+        // {
+        //   children: "Reset",
+        //   class: "border-color:#FF0000 color:#FF0000",
 
-          componentName: "Button",
-          name: "reset",
-          variant: "outlined",
-          // TODO:
-          // function: "reset",
-          // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
-        },
+        //   componentName: "Button",
+        //   name: "reset",
+        //   variant: "outlined",
+        //   // TODO:
+        //   // function: "reset",
+        //   // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
+        // },
       ],
       componentName: "DynamicTable",
       name: "Prop",
