@@ -1,14 +1,14 @@
-import type {Session} from "neo4j-driver";
-import type {MultiPartData} from "vinxi/runtime/http-types";
+import type { Session } from "neo4j-driver";
+import type { MultiPartData } from "vinxi/runtime/http-types";
 
 import path from "node:path";
 
-import {processResult} from "~/cypher/get/evaluate/processResult";
-import {calculateChecksum} from "~/server/upload/utils/calculateChecksum";
-import {ensureDirectoryExists} from "~/server/upload/utils/ensureDirectoryExists";
-import {getFileMetadataFromNeo4j} from "~/server/upload/utils/getFileMetadataFromNeo4j";
-import {saveFileMetadataToNeo4j} from "~/server/upload/utils/saveFileMetadataToNeo4j";
-import {saveFileToDisk} from "~/server/upload/utils/saveFileToDisk";
+import { processResult } from "~/cypher/get/evaluate/processResult";
+import { calculateChecksum } from "~/server/upload/utils/calculateChecksum";
+import { ensureDirectoryExists } from "~/server/upload/utils/ensureDirectoryExists";
+import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
+import { saveFileMetadataToNeo4j } from "~/server/upload/utils/saveFileMetadataToNeo4j";
+import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
 
 export async function replaceFiles(
   request: Request,
@@ -25,12 +25,12 @@ export async function replaceFiles(
   const query = new URL(request.url).searchParams;
   const fileId = query.get("fileId");
   if (!fileId) {
-    return {error: "fileId is required"};
+    return { error: "fileId is required" };
   }
 
   const oldFileMetadata = await getFileMetadataFromNeo4j(neo4jSession, fileId);
   if (!oldFileMetadata) {
-    return {error: "File metadata not found for the provided fileId"};
+    return { error: "File metadata not found for the provided fileId" };
   }
 
   const newFileNodes = await Promise.all(
@@ -39,7 +39,7 @@ export async function replaceFiles(
         return null;
       }
 
-      const {ext, name} = path.parse(file.filename);
+      const { ext, name } = path.parse(file.filename);
       const newVersion = (oldFileMetadata.P.version || 0) + 1;
       const newFilename = `${name}_v${newVersion}_${currentDate}${ext}`;
       const filePath = saveFileToDisk(userDir, newFilename, file.data);

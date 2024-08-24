@@ -23,18 +23,29 @@ export function ComponentItemContainer(props: {
     resetDragDropState(setLayoutStore);
   };
 
-  const baseStyle = "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
+  const baseStyle =
+    "background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px position:relative transition:transform|0.2s|ease-in-out,|box-shadow|0.2s|ease-in-out";
 
   const hoverStyle = "box-shadow:4px|4px|4px cursor:move";
 
-  const itemStyle = () => props.isHovered ? `${baseStyle} ${hoverStyle}` : baseStyle;
+  const itemStyle = () =>
+    props.isHovered ? `${baseStyle} ${hoverStyle}` : baseStyle;
 
   return (
     <div // NOSONAR
       class={itemStyle()}
       draggable={true}
       onDragEnd={onDragEnd}
-      onDragStart={(e) => onCompDragStart(e, graph, props.child.id, setLayoutStore, props.selectedComponents, props.setSelectedComponents)}
+      onDragStart={(e) =>
+        onCompDragStart(
+          e,
+          graph,
+          props.child.id,
+          setLayoutStore,
+          props.selectedComponents,
+          props.setSelectedComponents,
+        )
+      }
       onMouseEnter={props.onMouseEnter}
       onMouseLeave={props.onMouseLeave}
       ref={props.ref}
@@ -43,4 +54,3 @@ export function ComponentItemContainer(props: {
     </div>
   );
 }
-

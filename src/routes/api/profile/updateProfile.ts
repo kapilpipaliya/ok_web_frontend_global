@@ -1,37 +1,41 @@
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
-import {getDriverWithPort} from "~/cypher/driver";
-import {getHttpsSession} from "~/server/getHttpsSession";
+import { getDriverWithPort } from "~/cypher/driver";
+import { getHttpsSession } from "~/server/getHttpsSession";
 
-export async function updateProfile(payload: any, session: Session, _subdomain: string) {
-  const {email, profileImage, userId, username, uuid} = payload;
+export async function updateProfile(
+  payload: any,
+  session: Session,
+  _subdomain: string,
+) {
+  const { email, profileImage, userId, username, uuid } = payload;
 
   // Ensure user exists
   const userExists = await session.run(
     "MATCH (u:User) WHERE u.uuid = $uuid RETURN u;",
-    {uuid}
+    { uuid },
   );
   if (userExists.records.length === 0) {
-    return {error: "User not exists", status: 404};
+    return { error: "User not exists", status: 404 };
   }
 
   // Check if email and username already exists
   if (email) {
     const emailExists = await session.run(
       "MATCH (u:User {email: $email}) RETURN u;",
-      {email}
+      { email },
     );
     if (emailExists.records.length > 0) {
-      return {error: "Email address already exists", status: 500};
+      return { error: "Email address already exists", status: 500 };
     }
   }
   if (username) {
     const usernameExists = await session.run(
       "MATCH (u:User {username: $username}) RETURN u;",
-      {username}
+      { username },
     );
     if (usernameExists.records.length > 0) {
-      return {error: "Username already exists", status: 500};
+      return { error: "Username already exists", status: 500 };
     }
   }
 
@@ -77,5 +81,5 @@ export async function updateProfile(payload: any, session: Session, _subdomain: 
     }));
   }
 
-  return {message: "Profile updated successfully", user: user.properties};
+  return { message: "Profile updated successfully", user: user.properties };
 }

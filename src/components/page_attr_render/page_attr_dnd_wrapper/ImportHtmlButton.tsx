@@ -6,11 +6,13 @@ import { IconButton } from "~/components/IconButton";
 
 import { ImportMenu } from "./ImportMenu";
 
-export function ImportHtmlButton(props: Readonly<{
-  class?: string;
-  item: Vertex;
-  size: number;
-}>) {
+export function ImportHtmlButton(
+  props: Readonly<{
+    class?: string;
+    item: Vertex;
+    size: number;
+  }>,
+) {
   let saveAsTemplateRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   return (

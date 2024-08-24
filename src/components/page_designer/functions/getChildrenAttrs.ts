@@ -4,7 +4,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 
 import type {

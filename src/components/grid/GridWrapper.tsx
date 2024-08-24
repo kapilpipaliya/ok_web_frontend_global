@@ -69,7 +69,7 @@ export function GridWrapper(props: Readonly<AbstractGridProps>) {
       </Show> */}
 
       <Show when={tableId()}>
-        <DataGrid isShowPagination tableId={tableId()}/>
+        <DataGrid isShowPagination tableId={tableId()} />
       </Show>
     </>
   );

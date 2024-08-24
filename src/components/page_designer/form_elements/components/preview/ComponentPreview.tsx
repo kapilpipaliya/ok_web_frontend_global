@@ -1,8 +1,8 @@
-import type { Setter, } from "solid-js";
+import type { Setter } from "solid-js";
 
 import { createStore } from "solid-js/store";
 
-import type { Id, Vertex, } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 
@@ -15,7 +15,7 @@ export function ComponentPreview(
     onMouseLeave: (event: MouseEvent) => void;
     parentRef: HTMLElement;
     ref: Setter<HTMLElement | null>;
-  }>
+  }>,
 ) {
   const [collapsedKeys, setCollapsedKeys] = createStore<string[]>([]);
 
@@ -41,7 +41,11 @@ export function ComponentPreview(
 
       <div class="mt:2">
         <div>
-          <CompPreviewTreeItem collapsedKeys={collapsedKeys} item={props.item} toggleExpand={toggleExpand} />
+          <CompPreviewTreeItem
+            collapsedKeys={collapsedKeys}
+            item={props.item}
+            toggleExpand={toggleExpand}
+          />
         </div>
         <br />
         Preview: If Component example is there. (Load data sync)

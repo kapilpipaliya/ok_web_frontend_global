@@ -82,15 +82,21 @@ export function PageViewWrapper(
   );
   const [previewStore] = usePreviewContext();
 
-  const isNoPermissionCheck = createMemo(() =>
-    props.isNoPermissionCheck ||
-    formStore.formMetaData?.isNoPermissionCheck ||
-    previewStore.isNoPermissionCheck,
+  const isNoPermissionCheck = createMemo(
+    () =>
+      props.isNoPermissionCheck ||
+      formStore.formMetaData?.isNoPermissionCheck ||
+      previewStore.isNoPermissionCheck,
   );
   const allConfiguredPermission = createMemo(() =>
-    getConfiguredPermissions(graph.userRoles, formStore.formMeta, graph, setGraph),
+    getConfiguredPermissions(
+      graph.userRoles,
+      formStore.formMeta,
+      graph,
+      setGraph,
+    ),
   );
-  
+
   const permissions = {
     delete: createMemo(() => checkPermission("delete")),
     edit: createMemo(() => checkPermission("edit")),
@@ -99,26 +105,42 @@ export function PageViewWrapper(
   };
 
   function checkPermission(action: string) {
-    if (!formStore.formMetaData) { return false; }
+    if (!formStore.formMetaData) {
+      return false;
+    }
     return (
       isNoPermissionCheck() ||
-      (action === "insert" && !id() && hasPermissions(allConfiguredPermission(), action, graph, setGraph)) ||
-      (!!id() && hasPermissions(allConfiguredPermission(), action, graph, setGraph))
+      (action === "insert" &&
+        !id() &&
+        hasPermissions(allConfiguredPermission(), action, graph, setGraph)) ||
+      (!!id() &&
+        hasPermissions(allConfiguredPermission(), action, graph, setGraph))
     );
   }
 
   setFormStore({
-    get hasDeletePermission() { return permissions.delete(); },
-    get hasEditPermission() { return permissions.edit(); },
-    get hasInsertPermission() { return permissions.insert(); },
-    get hasViewPermission() { return permissions.view(); },
-    get isNoPermissionCheck() { return isNoPermissionCheck(); },
+    get hasDeletePermission() {
+      return permissions.delete();
+    },
+    get hasEditPermission() {
+      return permissions.edit();
+    },
+    get hasInsertPermission() {
+      return permissions.insert();
+    },
+    get hasViewPermission() {
+      return permissions.view();
+    },
+    get isNoPermissionCheck() {
+      return isNoPermissionCheck();
+    },
   });
 
   const authError = createMemo(() => {
     if (id() && !(permissions.edit() || permissions.view())) {
       return `You are not authorized to edit or view ${props.pageVertexName}`;
-    }if (!(id() || permissions.insert())) {
+    }
+    if (!(id() || permissions.insert())) {
       return `You are not authorized to insert ${props.pageVertexName}`;
     }
     return "";
@@ -176,7 +198,9 @@ export function PageViewWrapper(
       return;
     }
     if (!formStore.formMeta) {
-      const metaVertexResult = untrack(() => createMeta(form, metaTxnId, graph, setGraph));
+      const metaVertexResult = untrack(() =>
+        createMeta(form, metaTxnId, graph, setGraph),
+      );
 
       if (metaVertexResult.error) {
         return { error: "Meta Vertex Error" };
@@ -195,19 +219,31 @@ export function PageViewWrapper(
   }
 
   async function loadData() {
-    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) { return; }
+    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
+      return;
+    }
     try {
       const { incoming, outgoing } = getEdgesFromRowsAttr(
-        formStore.formMetaData!.attributes, false);
-      const data = await fetchDataFromMG({ expression: `id:'${id()}'`, incoming, outgoing });
-      
+        formStore.formMetaData!.attributes,
+        false,
+      );
+      const data = await fetchDataFromMG({
+        expression: `id:'${id()}'`,
+        incoming,
+        outgoing,
+      });
+
       if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} found`);
         return;
       }
-      
+
       setGraphData(graph, setGraph, data.graph);
-      setFormStore({get formData() { return graph.vertexes[data.result[0].id]; }})
+      setFormStore({
+        get formData() {
+          return graph.vertexes[data.result[0].id];
+        },
+      });
     } catch (e: any) {
       setFormStore("error", `Error When Loading Form: ${e.message}`);
     }
@@ -244,12 +280,20 @@ export function PageViewWrapper(
         setFormStore("error", "Error when creating new vertex");
         return;
       }
-      setFormStore({get formData() { return graph.vertexes[newVertexObj.id]; }})
+      setFormStore({
+        get formData() {
+          return graph.vertexes[newVertexObj.id];
+        },
+      });
     }
 
     if (!id() && formStore.formData?.L[0] === "Form") {
       const layoutId = addFormInitialComponent(
-        formStore.formData, graph, formStore.txnId, setGraph);
+        formStore.formData,
+        graph,
+        formStore.txnId,
+        setGraph,
+      );
       if (layoutId === -1) {
         setFormStore("error", "Adding component to layout failed");
         return;
@@ -290,7 +334,9 @@ export function PageViewWrapper(
   onCleanup(() => {
     // @ts-expect-error ignore
     // setLayoutStore?.("formData", undefined);
-    for (const rowMetaTxnId of (pageFormStore[0].cleanUpConfig().rowMetaTxnIds || []).reverse()) {
+    for (const rowMetaTxnId of (
+      pageFormStore[0].cleanUpConfig().rowMetaTxnIds || []
+    ).reverse()) {
       revertTransaction(rowMetaTxnId, graph);
     }
     pageFormStore[0].cleanUpConfig().rowMetaTxnIds = [];

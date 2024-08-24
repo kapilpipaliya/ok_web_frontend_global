@@ -31,7 +31,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     "data",
     "meta",
     "children",
-    "onChange"
+    "onChange",
   ]);
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
@@ -107,11 +107,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   return (
     <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
       {/* @ts-expect-error children is not a valid prop */}
-      <Button
-        ref={setInternalRef}
-        {...others}
-        {...extraProps}
-      >
+      <Button ref={setInternalRef} {...others} {...extraProps}>
         {local.data?.P?.[local.meta.P.name] ??
           local.meta.P.text ??
           local.meta.P.children}

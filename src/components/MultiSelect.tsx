@@ -5,7 +5,7 @@ import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";

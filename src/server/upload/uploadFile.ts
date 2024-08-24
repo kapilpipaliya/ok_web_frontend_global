@@ -1,18 +1,18 @@
-import type {Session} from "neo4j-driver";
-import type {MultiPartData} from "vinxi/runtime/http-types";
+import type { Session } from "neo4j-driver";
+import type { MultiPartData } from "vinxi/runtime/http-types";
 
 import path from "node:path";
 
-import {processResult} from "~/cypher/get/evaluate/processResult";
-import {calculateChecksum} from "~/server/upload/utils/calculateChecksum";
-import {ensureDirectoryExists} from "~/server/upload/utils/ensureDirectoryExists";
-import {saveFileMetadataToNeo4j} from "~/server/upload/utils/saveFileMetadataToNeo4j";
-import {saveFileToDisk} from "~/server/upload/utils/saveFileToDisk";
+import { processResult } from "~/cypher/get/evaluate/processResult";
+import { calculateChecksum } from "~/server/upload/utils/calculateChecksum";
+import { ensureDirectoryExists } from "~/server/upload/utils/ensureDirectoryExists";
+import { saveFileMetadataToNeo4j } from "~/server/upload/utils/saveFileMetadataToNeo4j";
+import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
 
 export async function uploadFiles(
   data: MultiPartData[],
   subdomain: string,
-  neo4jSession: Session
+  neo4jSession: Session,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
@@ -25,7 +25,7 @@ export async function uploadFiles(
       if (!file?.filename) {
         return null;
       }
-      const {ext, name} = path.parse(file.filename);
+      const { ext, name } = path.parse(file.filename);
       const newFilename = `${name}_${currentDate}${ext}`;
       const filePath = saveFileToDisk(userDir, newFilename, file.data);
       const fileSize = file.data.length;
@@ -45,7 +45,7 @@ export async function uploadFiles(
       };
 
       return await saveFileMetadataToNeo4j(neo4jSession, metadata);
-    })
+    }),
   );
 
   const context = {
@@ -56,7 +56,7 @@ export async function uploadFiles(
   const result = processResult(
     fileNodes.filter((node) => node !== null),
     context,
-    "f"
+    "f",
   );
 
   return {

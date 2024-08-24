@@ -4,7 +4,10 @@ import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { type FormStoreObject, useFormContext } from "~/components/form/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "~/components/form/FormContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useZIndex } from "~/components/ZIndex";
@@ -43,10 +46,16 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
   return metaAttribute;
 };
 
-const cleanupRowMetaTxnIds = (graph: GraphInterface, formStore?: FormStoreObject, excludeIds?: number[]) => {
+const cleanupRowMetaTxnIds = (
+  graph: GraphInterface,
+  formStore?: FormStoreObject,
+  excludeIds?: number[],
+) => {
   if (formStore) {
-    for (const rowMetaTxnId of (formStore.cleanUpConfig().rowMetaTxnIds || []).reverse()) {
-      if (!(excludeIds?.includes(rowMetaTxnId))) {
+    for (const rowMetaTxnId of (
+      formStore.cleanUpConfig().rowMetaTxnIds || []
+    ).reverse()) {
+      if (!excludeIds?.includes(rowMetaTxnId)) {
         revertTransaction(rowMetaTxnId, graph);
       }
     }
@@ -69,8 +78,7 @@ export function RulesModal(
   const excludeIds = [...(formStore?.cleanUpConfig().rowMetaTxnIds || [])];
 
   const prevTxnIndex =
-    props.prevTxnIndex ??
-    getLastTxnIndex(formStore!.txnId, graph);
+    props.prevTxnIndex ?? getLastTxnIndex(formStore!.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedRule),
@@ -116,15 +124,11 @@ export function RulesModal(
     }
     props.closeModal();
   };
-  
+
   onCleanup(() => {
     cleanupRowMetaTxnIds(graph, formStore, excludeIds);
     if (revertChanges) {
-      revertTransactionUpToIndex(
-        formStore!.txnId,
-        prevTxnIndex - 1,
-        graph,
-      );
+      revertTransactionUpToIndex(formStore!.txnId, prevTxnIndex - 1, graph);
     }
   });
 

@@ -1,8 +1,7 @@
-
 import { createEffect, createMemo, createSignal, For } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -17,7 +16,12 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [_children, setChildren] = createSignal<Vertex[]>([]);
 
   const fetchChildren = async (item: Vertex) => {
-    const data = await getFilesData(graph, setGraph,fileManagerStore.toParentEdgeType, item.id);
+    const data = await getFilesData(
+      graph,
+      setGraph,
+      fileManagerStore.toParentEdgeType,
+      item.id,
+    );
     // @ts-expect-error ignore
     if (!data.error && data.result) {
       // @ts-expect-error ignore
@@ -66,7 +70,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
       </div>
       <div>
         <DataGrid
-          CustomAddNewButton={fileManagerStore.parentVertexLabel === "Comp" ? AddNewCompButton : AddNewFileButton}
+          CustomAddNewButton={
+            fileManagerStore.parentVertexLabel === "Comp"
+              ? AddNewCompButton
+              : AddNewFileButton
+          }
           enableRowSelection={fileManagerStore.enableRowSelection}
           getTableData={() => fetchChildren(props.item)}
           initializeGridStoreParent={(gridStore_) => {
@@ -77,7 +85,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
             });
           }}
           isShowPagination={false}
-          tableId={fileManagerStore.parentVertexLabel === "Folder" ? "File" : fileManagerStore.parentVertexLabel}
+          tableId={
+            fileManagerStore.parentVertexLabel === "Folder"
+              ? "File"
+              : fileManagerStore.parentVertexLabel
+          }
         />
       </div>
     </div>

@@ -464,7 +464,7 @@ addBinaryOp(
 
     for (const currentVertex of vertexes) {
       const type = edgeType.replace("$0", currentVertex.L[0]);
-      
+
       const edgeIds = currentVertex.IN[type];
       if (!edgeIds) {
         continue;
@@ -506,7 +506,10 @@ addUnaryOp("json:", (string) => {
 addUnaryOp(
   "g:",
   (edgeType, context) => {
-    const { filter, label, limit, skip } = getLabelFilterSkipLimit(edgeType, context);
+    const { filter, label, limit, skip } = getLabelFilterSkipLimit(
+      edgeType,
+      context,
+    );
 
     if (filter && Object.keys(filter).length > 0) {
       const vertexIds = findVertexIdsByLabel(context.graph, label);

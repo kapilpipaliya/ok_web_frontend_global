@@ -121,7 +121,10 @@ function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
           autocomplete="email"
           name="email"
           onInput={(e) =>
-            props.setFormData({ ...props.formData(), email: e.currentTarget.value })
+            props.setFormData({
+              ...props.formData(),
+              email: e.currentTarget.value,
+            })
           }
           placeholder="Your email or username"
           required
@@ -142,7 +145,9 @@ function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
           Password
         </label>
         <PasswordInput
-          onChange={(value) => props.setFormData({ ...props.formData(), password: value })}
+          onChange={(value) =>
+            props.setFormData({ ...props.formData(), password: value })
+          }
           value={props.formData().password}
         />
         <div
@@ -223,7 +228,9 @@ export function Login(): JSX.Element {
 
   const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
-    if (!validateFormData(formData().email, formData().password)) { return; }
+    if (!validateFormData(formData().email, formData().password)) {
+      return;
+    }
 
     setGraph("isLoadingPage", true);
     await showLoadingToast({
@@ -234,7 +241,7 @@ export function Login(): JSX.Element {
       onSuccess: (value) => {
         setGraph("isLoadingPage", false);
         if (value != null && value.id !== null) {
-          navigate(`${graph.APP_BASE_URL}/${value.P.redirectUrl ?? ''}`);
+          navigate(`${graph.APP_BASE_URL}/${value.P.redirectUrl ?? ""}`);
         }
       },
       promise: signInCall(formData),

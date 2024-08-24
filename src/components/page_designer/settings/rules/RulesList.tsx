@@ -1,9 +1,8 @@
-
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 

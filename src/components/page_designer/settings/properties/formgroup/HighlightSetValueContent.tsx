@@ -1,10 +1,9 @@
-
 import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/IconButton";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { DefaultValueContent } from "./DefaultValueContent";
@@ -22,7 +21,11 @@ export function HighlightSetValueContent(
   const [graph, setGraph] = useGraph();
   const componentExample = createMemo(
     () =>
-      evalExpression("->$0CompExample", { graph, setGraph, vertexes: [props.meta] }) || [],
+      evalExpression("->$0CompExample", {
+        graph,
+        setGraph,
+        vertexes: [props.meta],
+      }) || [],
   );
 
   return (
@@ -43,8 +46,11 @@ export function HighlightSetValueContent(
             />
           </Match>
           <Match when={componentExample().length > 0}>
-              <PageAttrRender data={props.selectedLayout} metaVertex={componentExample()[0]} />
-            </Match>
+            <PageAttrRender
+              data={props.selectedLayout}
+              metaVertex={componentExample()[0]}
+            />
+          </Match>
           <Match when={true}>
             <DynamicComponent
               componentName={props.componentName()}

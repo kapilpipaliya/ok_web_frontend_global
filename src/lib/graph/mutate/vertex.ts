@@ -221,15 +221,19 @@ export function deleteVertex(
   }
 
   if (Object.keys(vertex.IN).length > 0) {
-    const parentInfo = Object.entries(vertex.IN).map(([edgeType, edgeIds]) => {
-      const parents = edgeIds.map(id => graph.vertexes[graph.edges[id].S]);
-      return `${edgeType}: ${parents.map(p => JSON.stringify(p)).join(", ")}`;
-    }).join(", ");
+    const parentInfo = Object.entries(vertex.IN)
+      .map(([edgeType, edgeIds]) => {
+        const parents = edgeIds.map((id) => graph.vertexes[graph.edges[id].S]);
+        return `${edgeType}: ${parents.map((p) => JSON.stringify(p)).join(", ")}`;
+      })
+      .join(", ");
 
     console.error(
       `Multiple parents exist when deleting ${vertex.L[0]} (${actualVertexId}):`,
-      "\nVertex:", vertex,
-      "\nParents:", parentInfo
+      "\nVertex:",
+      vertex,
+      "\nParents:",
+      parentInfo,
     );
     return { error: "Vertex Children Exist When deleting vertex" };
   }

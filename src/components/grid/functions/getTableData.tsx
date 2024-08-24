@@ -11,22 +11,28 @@ export async function getTableData(
   ignoreTables = true,
 ) {
   try {
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes, ignoreTables);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(
+      form.attributes,
+      ignoreTables,
+    );
 
-    const result = await fetchDataFromMG({
-      expression: `g:'${tableId}[$1]'`,
-      incoming,
-      outgoing,
-    }, {
-      $1: {
-        filter: "",
-        limit: limit,
-        skip: skip,
+    const result = await fetchDataFromMG(
+      {
+        expression: `g:'${tableId}[$1]'`,
+        incoming,
+        outgoing,
       },
-      nodes: {} as { [key: string]: any },
-      relationships: {} as { [key: string]: any },
-      vertexes: undefined as any,
-  });
+      {
+        $1: {
+          filter: "",
+          limit: limit,
+          skip: skip,
+        },
+        nodes: {} as { [key: string]: any },
+        relationships: {} as { [key: string]: any },
+        vertexes: undefined as any,
+      },
+    );
     return result;
   } catch (e: any) {
     console.error("error", e);

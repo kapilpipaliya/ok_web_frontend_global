@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse, } from "yaml";
+import { parse } from "yaml";
 
 import type { ComponentNode } from "./ComponentTreeType";
 

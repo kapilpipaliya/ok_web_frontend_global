@@ -1,8 +1,7 @@
-
 import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
 import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -18,22 +17,34 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const toggleExpand = async () => {
     const isExpanded = fileManagerStore.expandedKeys.includes(props.item.id);
     if (isExpanded) {
-      setFileManagerStore("expandedKeys", (keys) => keys.filter(key => key !== props.item.id));
+      setFileManagerStore("expandedKeys", (keys) =>
+        keys.filter((key) => key !== props.item.id),
+      );
     } else {
       const newExpandedKeys = [...fileManagerStore.expandedKeys, props.item.id];
       if (!fileManagerStore.useLocalData) {
         setFileManagerStore("useLocalData", true);
         // fetch children of children
-        await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, children().map(v => v.id));
+        await getFilesData(
+          graph,
+          setGraph,
+          fileManagerStore.toParentEdgeType,
+          children().map((v) => v.id),
+        );
       }
       setFileManagerStore("expandedKeys", newExpandedKeys);
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       setFileManagerStore("useLocalData", false);
     }
   };
 
   const fetchRemoteChildrenItems = async () => {
-    const data = await getFilesData(graph, setGraph, fileManagerStore.toParentEdgeType, props.item.id);
+    const data = await getFilesData(
+      graph,
+      setGraph,
+      fileManagerStore.toParentEdgeType,
+      props.item.id,
+    );
     // @ts-expect-error ignore
     if (!data.error && data.result) {
       // @ts-expect-error ignore
@@ -43,8 +54,16 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
 
   const getChildrenItems = async () => {
     if (fileManagerStore.useLocalData) {
-      const expression = getExpressionForFilesData(fileManagerStore.toParentEdgeType, props.item.id);
-      const children = evalExpression(expression, { graph, setGraph, vertexes: [props.item] }) || [];
+      const expression = getExpressionForFilesData(
+        fileManagerStore.toParentEdgeType,
+        props.item.id,
+      );
+      const children =
+        evalExpression(expression, {
+          graph,
+          setGraph,
+          vertexes: [props.item],
+        }) || [];
       setChildren(children);
     } else {
       await fetchRemoteChildrenItems();

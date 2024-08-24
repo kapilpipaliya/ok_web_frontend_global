@@ -4,14 +4,14 @@ import { createUniqueId, For, Match, onCleanup, Switch } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
+import {
+  textFieldInputMeta,
+  textFieldTextAreaMeta,
+} from "~/components/constants/textFieldInput";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
-import {
-  addNewVertex,
-  newVertex,
-} from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -80,15 +80,13 @@ function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
   txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const vertices: ({
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
       id: vertexIds.seoTitle,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -98,9 +96,7 @@ function createVertices(
       },
     },
     {
-      attributes: [
-        textFieldTextAreaMeta
-      ],
+      attributes: [textFieldTextAreaMeta],
       id: vertexIds.seoDescription,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -120,7 +116,7 @@ function createVertices(
         setGraph,
         txnId,
         graph.vertexes[vertex.id],
-        vertex.attributes
+        vertex.attributes,
       );
     }
   });

@@ -4,7 +4,7 @@ import type { Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriver, } from "~/cypher/driver";
+import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
@@ -19,23 +19,31 @@ export async function POST({ request }: APIEvent) {
         JSON.stringify({
           error: "Email or password is missing",
         }),
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
     try {
-      const user = await authenticateUser(email, password, subDomain, dbSession);
+      const user = await authenticateUser(
+        email,
+        password,
+        subDomain,
+        dbSession,
+      );
 
       await updateSession(user);
 
       delete user.P.password;
-      if (subDomain === 'super' && user.P.username !== 'super') {
-        user.P.redirectUrl = 'settings';
+      if (subDomain === "super" && user.P.username !== "super") {
+        user.P.redirectUrl = "settings";
       }
       return user;
     } catch (error: unknown) {
-      return new Response(error instanceof Error ? error.message : 'Unknown error', { status: 500 });
+      return new Response(
+        error instanceof Error ? error.message : "Unknown error",
+        { status: 500 },
+      );
     } finally {
       await dbSession.close();
     }
@@ -44,7 +52,7 @@ export async function POST({ request }: APIEvent) {
       JSON.stringify({
         error: "Invalid content type. Expected application/json",
       }),
-      { status: 415 }
+      { status: 415 },
     );
   }
 }
@@ -84,16 +92,14 @@ function comparePassword(user: Vertex, password: string) {
   return user;
 }
 
-async function authenticateSuperUser(
-  superUser: Vertex,
-  password: string,
-) {
+async function authenticateSuperUser(superUser: Vertex, password: string) {
   const superDbSession = (await getDriver("super")).session();
 
   try {
-    const query =
-      "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
-    const superDbResult = await superDbSession.run(query, { uuid: superUser.P.uuid });
+    const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
+    const superDbResult = await superDbSession.run(query, {
+      uuid: superUser.P.uuid,
+    });
 
     if (superDbResult.records.length === 0) {
       throw new Error("Not Authorized Email or Username.");

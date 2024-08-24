@@ -1,5 +1,3 @@
-
-
 import type { Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
@@ -18,7 +16,7 @@ export async function getNewPortsForUser(tx: Transaction) {
     const portResult = convertNodeToJson(createResult.records[0].get("n"));
     return portResult.P;
   }
-    // if exists than return ports from db
-    const portResult = convertNodeToJson(resultPort.records[0].get("n"));
-    return portResult.P;
+  // if exists than return ports from db
+  const portResult = convertNodeToJson(resultPort.records[0].get("n"));
+  return portResult.P;
 }

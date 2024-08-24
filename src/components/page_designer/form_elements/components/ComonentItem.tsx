@@ -43,8 +43,8 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
     const relatedTarget = event.relatedTarget as Node;
     const floatingElement = floating();
     if (
-      (floatingElement?.contains(relatedTarget)) ||
-      (previewCSSRef?.contains(relatedTarget))
+      floatingElement?.contains(relatedTarget) ||
+      previewCSSRef?.contains(relatedTarget)
     ) {
       // Mouse is over either floating() or previewCSSRef, don't close
       return;
@@ -108,7 +108,10 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           item={props.child}
           onClose={() => setShowPreview(false)}
           onMouseLeave={(event) => {
-            if (previewCSSRef && !previewCSSRef.contains(event.relatedTarget as Node)) {
+            if (
+              previewCSSRef &&
+              !previewCSSRef.contains(event.relatedTarget as Node)
+            ) {
               setShowPreview(false);
             }
           }}

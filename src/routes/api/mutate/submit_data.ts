@@ -15,7 +15,7 @@ export async function POST({ request }: APIEvent) {
       JSON.stringify({
         error: "Invalid content type. Expected application/json",
       }),
-      { status: 415 }
+      { status: 415 },
     );
   }
 
@@ -23,7 +23,11 @@ export async function POST({ request }: APIEvent) {
   const tx = dbSession.beginTransaction();
   try {
     // - Authorization -
-    const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession, true);
+    const authorizationError = await checkSuperUserAuthorization(
+      subDomain,
+      dbSession,
+      true,
+    );
     if (authorizationError) {
       return authorizationError;
     }

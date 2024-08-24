@@ -4,16 +4,16 @@ import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 
 export const Login: IFormMetaData = {
   attributes: [
-    { attributes: [
-      textFieldInputMeta
-    ], componentName: "TextField", name: "email" },
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
+      componentName: "TextField",
+      name: "email",
+    },
+    {
+      attributes: [textFieldInputMeta],
       componentName: "TextField",
       mode: "password",
-      name: "pass"
+      name: "pass",
     },
   ],
   isRealTime: true,

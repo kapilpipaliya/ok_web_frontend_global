@@ -1,10 +1,10 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
-import type {HTTPEvent} from "vinxi/runtime/http-types";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { HTTPEvent } from "vinxi/runtime/http-types";
 
-import {readMultipartFormData} from "vinxi/http";
+import { readMultipartFormData } from "vinxi/http";
 
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {uploadFiles} from "~/server/upload/uploadFile";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { uploadFiles } from "~/server/upload/uploadFile";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

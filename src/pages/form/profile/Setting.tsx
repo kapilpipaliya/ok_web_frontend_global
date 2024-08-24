@@ -37,7 +37,8 @@ export function Settings(): JSX.Element {
   const [isMainScreenLoad, setIsMainScreenLoad] = createSignal<boolean>(false);
   const [plans, setPlans] = createSignal<any[]>([]);
   const [contactList, setContactList] = createSignal<any[]>([]);
-  const [originalProfileData, setOriginalProfileData] = createStore<ProfileData>({});
+  const [originalProfileData, setOriginalProfileData] =
+    createStore<ProfileData>({});
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
   const [profileData, setProfileData] = createStore<ProfileData>({
@@ -115,7 +116,10 @@ export function Settings(): JSX.Element {
       <Breadcrumb breadcrumb={breadcrumbData} title="Account Setting" />
       <TabSection selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
 
-      <Show fallback={<LoaderNew loaderHeight="50vh" />} when={!isMainScreenLoad()}>
+      <Show
+        fallback={<LoaderNew loaderHeight="50vh" />}
+        when={!isMainScreenLoad()}
+      >
         <Switch>
           <Match when={selectedTab() === "General"}>
             <GeneralSection
@@ -169,7 +173,9 @@ const TabSection = (props: TabSectionProps): JSX.Element => {
           />
           <span
             class={`${
-              props.selectedTab() === tab ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""
+              props.selectedTab() === tab
+                ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)"
+                : ""
             } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
           >
             {tab}

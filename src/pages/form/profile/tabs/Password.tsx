@@ -13,7 +13,9 @@ interface PasswordSectionProps {
   };
 }
 
-export const PasswordSection = (props: Readonly<PasswordSectionProps>): JSX.Element => {
+export const PasswordSection = (
+  props: Readonly<PasswordSectionProps>,
+): JSX.Element => {
   const [_graph, _setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
 
@@ -29,7 +31,9 @@ export const PasswordSection = (props: Readonly<PasswordSectionProps>): JSX.Elem
     newPassword: false,
   });
 
-  const handleInputChange = (e: { currentTarget: HTMLInputElement } & Event) => {
+  const handleInputChange = (
+    e: { currentTarget: HTMLInputElement } & Event,
+  ) => {
     const { name, value } = e.currentTarget;
     setPasswordData({ ...passwordData, [name]: value });
   };
@@ -99,43 +103,51 @@ export const PasswordSection = (props: Readonly<PasswordSectionProps>): JSX.Elem
     <div class="bg:#f5f7fa box-shadow:0|0|12|.1|rgb(237,239,241) m:20 p:10px|15px r:8 w:80%">
       <div>
         <div class="font-weight:700">Password</div>
-        <div class="font-weight:400 mb:30">Update your account password here</div>
-        
+        <div class="font-weight:400 mb:30">
+          Update your account password here
+        </div>
+
         <PasswordField
           label="Current User"
           name="username"
           readOnly
           value={props.profileData.username}
         />
-        
+
         <PasswordField
           label="Current Password"
           name="currentPassword"
           onChange={handleInputChange}
           showPassword={showPassword.currentPassword}
-          togglePasswordVisibility={() => togglePasswordVisibility("currentPassword")}
+          togglePasswordVisibility={() =>
+            togglePasswordVisibility("currentPassword")
+          }
           value={passwordData.currentPassword}
         />
-        
+
         <PasswordField
           label="New Password"
           name="newPassword"
           onChange={handleInputChange}
           showPassword={showPassword.newPassword}
-          togglePasswordVisibility={() => togglePasswordVisibility("newPassword")}
+          togglePasswordVisibility={() =>
+            togglePasswordVisibility("newPassword")
+          }
           value={passwordData.newPassword}
         />
-        
+
         <PasswordField
           label="Confirm Password"
           name="confirmPassword"
           onChange={handleInputChange}
           showPassword={showPassword.confirmPassword}
-          togglePasswordVisibility={() => togglePasswordVisibility("confirmPassword")}
+          togglePasswordVisibility={() =>
+            togglePasswordVisibility("confirmPassword")
+          }
           value={passwordData.confirmPassword}
         />
       </div>
-      
+
       <div class="flex jc:end">
         <button
           class="bg:#5b7dff border:none color:white cursor:pointer m:15|10 p:5|10 r:4"
@@ -174,7 +186,9 @@ const PasswordField = (props: PasswordFieldProps): JSX.Element => {
         <Icon
           aria-label="Toggle password visibility"
           class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:20 top:33px top:10px@md"
-          icon={props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}
+          icon={
+            props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"
+          }
           onClick={props.togglePasswordVisibility}
         />
       </Show>

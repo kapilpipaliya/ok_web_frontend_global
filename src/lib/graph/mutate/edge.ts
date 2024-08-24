@@ -185,7 +185,9 @@ export function replaceEdgeStart(
   batch(() => {
     setGraph("edges", actualEdgeId, "S", actualNewStartVertexId);
     setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) => {
-      const filteredV = Array.isArray(v) ? v.filter((e) => e !== actualEdgeId) : v;
+      const filteredV = Array.isArray(v)
+        ? v.filter((e) => e !== actualEdgeId)
+        : v;
       return filteredV.length ? filteredV : undefined;
     });
     setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v: any) =>
@@ -246,7 +248,9 @@ export function replaceEdgeEnd(
   batch(() => {
     setGraph("edges", actualEdgeId, "E", actualNewEndVertexId);
     setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) => {
-      const filteredV = Array.isArray(v) ? v.filter((e) => e !== actualEdgeId) : v;
+      const filteredV = Array.isArray(v)
+        ? v.filter((e) => e !== actualEdgeId)
+        : v;
       return filteredV.length ? filteredV : undefined;
     });
     setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v: any) =>
@@ -302,11 +306,15 @@ export function deleteEdge(
   batch(() => {
     const type = edge.T;
     setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) => {
-      const filteredIds = Array.isArray(ids) ? ids.filter((id_) => id_ !== actualEdgeId) : ids;
+      const filteredIds = Array.isArray(ids)
+        ? ids.filter((id_) => id_ !== actualEdgeId)
+        : ids;
       return filteredIds.length ? filteredIds : undefined;
     });
     setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) => {
-      const filteredIds = Array.isArray(ids) ? ids.filter((id_) => id_ !== actualEdgeId) : ids;
+      const filteredIds = Array.isArray(ids)
+        ? ids.filter((id_) => id_ !== actualEdgeId)
+        : ids;
       return filteredIds.length ? filteredIds : undefined;
     });
     setGraph("edges", actualEdgeId, undefined);

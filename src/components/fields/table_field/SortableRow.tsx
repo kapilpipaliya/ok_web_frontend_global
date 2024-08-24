@@ -21,7 +21,6 @@ import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 import { useFormContext } from "../../form/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
-
 export const SortableRow = (
   props: Readonly<
     {

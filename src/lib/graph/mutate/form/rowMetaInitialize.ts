@@ -11,24 +11,40 @@ import { addNewEdge, newEdge } from "../edge";
 import { mergeVertexProperties } from "../vertex";
 import { getColumnProps, newRow } from "./addNewRow";
 
-
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   joinVertex: Vertex,
   tableMeta: Vertex,
-  tableColumnsTemplate: Vertex[]
+  tableColumnsTemplate: Vertex[],
 ) {
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   // when we delete the row, revertTransaction will not work, so used new metaTxnId.
   //const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
   const metaTxnId = graph.newTxnId;
-  const rows = rowMetaAttrInst.error ? {} : klona(rowMetaAttrInst.vertex?.P.rows);
+  const rows = rowMetaAttrInst.error
+    ? {}
+    : klona(rowMetaAttrInst.vertex?.P.rows);
 
   if (rowMetaAttrInst.error) {
-    createNewMetaInstance(graph, setGraph, metaTxnId, joinVertex, tableMeta, tableColumnsTemplate, rows);
+    createNewMetaInstance(
+      graph,
+      setGraph,
+      metaTxnId,
+      joinVertex,
+      tableMeta,
+      tableColumnsTemplate,
+      rows,
+    );
   } else {
-    updateExistingMetaInstance(graph, setGraph, metaTxnId, rowMetaAttrInst.vertex!, tableColumnsTemplate, rows);
+    updateExistingMetaInstance(
+      graph,
+      setGraph,
+      metaTxnId,
+      rowMetaAttrInst.vertex!,
+      tableColumnsTemplate,
+      rows,
+    );
   }
 
   onCleanup(() => {
@@ -41,7 +57,6 @@ export function rowMetaInitialize(
   return metaTxnId;
 }
 
-
 export function createNewMetaInstance(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -49,20 +64,41 @@ export function createNewMetaInstance(
   joinVertex: Vertex,
   tableMeta: Vertex,
   tableColumnsTemplate: Vertex[],
-  rows: { [key: Id]: Id }
+  rows: { [key: Id]: Id },
 ) {
   const P = { ...klona(tableMeta.P), templateId: tableMeta.id };
-  
+
   batch(() => {
-    const metaInstanceResult = newRow(graph, setGraph, metaTxnId, joinVertex, "AttrInst", undefined, P);
+    const metaInstanceResult = newRow(
+      graph,
+      setGraph,
+      metaTxnId,
+      joinVertex,
+      "AttrInst",
+      undefined,
+      P,
+    );
     if (metaInstanceResult.error) {
       console.error("Error creating a row for attribute instance");
       return;
     }
 
-    createAttributeRows(graph, setGraph, metaTxnId, metaInstanceResult.vertexId!, tableColumnsTemplate, rows);
+    createAttributeRows(
+      graph,
+      setGraph,
+      metaTxnId,
+      metaInstanceResult.vertexId!,
+      tableColumnsTemplate,
+      rows,
+    );
 
-    mergeVertexProperties(metaTxnId, metaInstanceResult.vertexId!, graph, setGraph, { metaTxnId, rows });
+    mergeVertexProperties(
+      metaTxnId,
+      metaInstanceResult.vertexId!,
+      graph,
+      setGraph,
+      { metaTxnId, rows },
+    );
   });
 }
 
@@ -72,11 +108,20 @@ export function updateExistingMetaInstance(
   metaTxnId: number,
   metaInstance: Vertex,
   tableColumnsTemplate: Vertex[],
-  rows: { [key: Id]: Id }
+  rows: { [key: Id]: Id },
 ) {
   batch(() => {
-    createAttributeRows(graph, setGraph, metaTxnId, metaInstance.id, tableColumnsTemplate, rows);
-    mergeVertexProperties(metaTxnId, metaInstance.id, graph, setGraph, { rows });
+    createAttributeRows(
+      graph,
+      setGraph,
+      metaTxnId,
+      metaInstance.id,
+      tableColumnsTemplate,
+      rows,
+    );
+    mergeVertexProperties(metaTxnId, metaInstance.id, graph, setGraph, {
+      rows,
+    });
   });
 }
 function createAttributeRows(
@@ -85,10 +130,12 @@ function createAttributeRows(
   metaTxnId: number,
   parentId: Id,
   tableColumnsTemplate: Vertex[],
-  rows: { [key: Id]: Id }
+  rows: { [key: Id]: Id },
 ) {
   for (const attrColumn of tableColumnsTemplate) {
-    if (rows[attrColumn.id]) { continue; }
+    if (rows[attrColumn.id]) {
+      continue;
+    }
 
     // now this P is not needed, just use {}
     const P = getColumnProps(attrColumn, graph);
@@ -99,7 +146,7 @@ function createAttributeRows(
       attrColumn,
       P,
       graph,
-      setGraph
+      setGraph,
     );
     const edgeNew = newEdge(
       graph.newVertexId,

@@ -51,7 +51,7 @@ export function DropdownMenu(
         class={`${local.class ?? ""} ${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem z-index:${zIndex}`}
         ref={(el) => {
           setFloating(el);
-          if (typeof local.ref === 'function') {
+          if (typeof local.ref === "function") {
             local.ref(el);
           }
         }}

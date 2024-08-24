@@ -5,13 +5,13 @@ import type { ComponentNode } from "./ComponentTreeType";
 export async function insertComponentTree(
   session: Session | Transaction,
   components: ComponentNode[],
-  parentId: null | number | string = null
+  parentId: null | number | string = null,
 ): Promise<{ success: boolean }> {
   for (const component of components) {
     // Check if the node already exists
     const findNodeResult = await session.run(
       "MATCH (n:Comp {name: $name}) RETURN id(n) AS id",
-      { name: component.Component }
+      { name: component.Component },
     );
 
     let nodeId: number;
@@ -23,7 +23,7 @@ export async function insertComponentTree(
       const createNodeResult = await session.run(
         `CREATE (n:Comp {name: $name})
          RETURN id(n) AS id`,
-        { name: component.Component }
+        { name: component.Component },
       );
       nodeId = createNodeResult.records[0].get("id");
     }
@@ -34,7 +34,7 @@ export async function insertComponentTree(
         `MATCH (parent:Comp)<-[r:ParentComp]-(child:Comp)
          WHERE id(parent) = $parentId AND id(child) = $childId
          RETURN r`,
-        { childId: nodeId, parentId: parentId }
+        { childId: nodeId, parentId: parentId },
       );
 
       if (findEdgeResult.records.length === 0) {
@@ -43,7 +43,7 @@ export async function insertComponentTree(
           `MATCH (parent:Comp), (child:Comp)
            WHERE id(parent) = $parentId AND id(child) = $childId
            CREATE (parent)<-[:ParentComp]-(child)`,
-          { childId: int(nodeId), parentId: int(parentId) }
+          { childId: int(nodeId), parentId: int(parentId) },
         );
       }
     }

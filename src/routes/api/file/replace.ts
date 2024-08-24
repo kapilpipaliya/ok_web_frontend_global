@@ -1,13 +1,13 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
-import type {HTTPEvent} from "vinxi/runtime/http-types";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { HTTPEvent } from "vinxi/runtime/http-types";
 
-import {readMultipartFormData} from "vinxi/http";
+import { readMultipartFormData } from "vinxi/http";
 
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {replaceFiles} from "~/server/upload/replaceFiles";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { replaceFiles } from "~/server/upload/replaceFiles";
 
 export async function PUT({ request }: APIEvent, event: HTTPEvent) {
-  const { dbSession , subDomain} = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const data = await readMultipartFormData(event);

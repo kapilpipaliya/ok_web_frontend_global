@@ -1,4 +1,4 @@
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
 export async function pricing(_payload: any, session: Session) {
   const query = "MATCH (n:Pricing) RETURN n;";

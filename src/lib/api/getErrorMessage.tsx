@@ -1,4 +1,3 @@
-
 export function getErrorMessage(res: any): string {
   if (!res) {
     return "No response received";

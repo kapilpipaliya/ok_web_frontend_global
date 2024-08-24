@@ -8,12 +8,14 @@ export function onCompDragStart(
   childId: string,
   setLayoutStore: ReturnType<typeof useDesignerLayoutStore>[1],
   selectedComponents?: () => Set<Vertex>,
-  setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void) {
+  setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void,
+) {
   e.stopPropagation();
   setLayoutStore("draggedVertices", []);
-  const draggedItems = selectedComponents && selectedComponents().size > 0
-    ? Array.from(selectedComponents())
-    : [graph.vertexes[childId]];
+  const draggedItems =
+    selectedComponents && selectedComponents().size > 0
+      ? Array.from(selectedComponents())
+      : [graph.vertexes[childId]];
   setLayoutStore("draggedVertices", (prev) => [...prev, ...draggedItems]);
   if (setSelectedComponents) {
     setSelectedComponents(() => new Set<Vertex>());

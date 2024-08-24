@@ -1,10 +1,9 @@
-import { createSignal, type Setter, } from "solid-js";
+import { createSignal, type Setter } from "solid-js";
 
-import type { Vertex, } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-
 
 export function PreviewCSSMenu(
   props: Readonly<{
@@ -13,7 +12,7 @@ export function PreviewCSSMenu(
     onMouseLeave: (event: MouseEvent) => void;
     parentRef: HTMLElement;
     ref: Setter<HTMLElement | null>;
-  }>
+  }>,
 ) {
   const [_layoutStore] = useDesignerLayoutStore();
   // TODO: fix this
@@ -31,12 +30,9 @@ export function PreviewCSSMenu(
         Preview CSS
       </h4>
 
-        <div class="mt:2">
-        <code>
-            {cssContent()}
-        </code>
-        </div>
-      
+      <div class="mt:2">
+        <code>{cssContent()}</code>
+      </div>
     </DropdownMenu>
   );
 }

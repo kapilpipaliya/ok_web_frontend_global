@@ -1,6 +1,6 @@
-import type {APIEvent} from "@solidjs/start/server";
+import type { APIEvent } from "@solidjs/start/server";
 
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { getSubDomainInfo } from "~/cypher/get/getSubDomainInfo";
 
 export async function POST({ request }: APIEvent) {
@@ -8,7 +8,7 @@ export async function POST({ request }: APIEvent) {
 
   if (subDomain === "super") {
     await dbSession.close();
-    return { success: true};
+    return { success: true };
   }
 
   return await getSubDomainInfo(subDomain, dbSession);

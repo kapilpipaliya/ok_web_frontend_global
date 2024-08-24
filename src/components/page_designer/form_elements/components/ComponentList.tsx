@@ -1,10 +1,4 @@
-import {
-  createMemo,
-  createSignal,
-  For,
-  onMount,
-  Show,
-} from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
@@ -39,11 +33,16 @@ export function ComponentList() {
   onMount(async () => {
     setIsFetchingData(true);
     const result = await fetchData();
-    if ((result as {error: string})?.error) {
-      showErrorToast((result as {error: string}).error);
+    if ((result as { error: string })?.error) {
+      showErrorToast((result as { error: string }).error);
     } else if ((result as ServerResult)?.result) {
       setGraphData(graph, setGraph, (result as ServerResult).graph);
-      const rootVertex = findVertexByLabelAndUniqueId(graph, 'Comp', 'name', 'root');
+      const rootVertex = findVertexByLabelAndUniqueId(
+        graph,
+        "Comp",
+        "name",
+        "root",
+      );
       if (rootVertex) {
         setRootCompVertex(rootVertex);
       } else {
@@ -53,15 +52,14 @@ export function ComponentList() {
     setIsFetchingData(false);
   });
 
-
- 
-
   // Filter children based on search query
   const filteredChildren = createMemo(() => {
     const children = getCompChildren(rootCompVertex()!, graph);
     const query = searchQuery().toLowerCase();
-    return children.filter(child => 
-      (child.P.label as string || child.P.name as string).toLowerCase().includes(query)
+    return children.filter((child) =>
+      ((child.P.label as string) || (child.P.name as string))
+        .toLowerCase()
+        .includes(query),
     );
   });
 

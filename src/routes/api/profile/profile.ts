@@ -1,14 +1,18 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
-import type {Session} from "neo4j-driver";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { Session } from "neo4j-driver";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import {password} from "~/routes/api/profile/password";
-import {pricing} from "~/routes/api/profile/pricing";
-import {supportTicket} from "~/routes/api/profile/supportTicket";
-import {updateProfile} from "~/routes/api/profile/updateProfile";
+import { password } from "~/routes/api/profile/password";
+import { pricing } from "~/routes/api/profile/pricing";
+import { supportTicket } from "~/routes/api/profile/supportTicket";
+import { updateProfile } from "~/routes/api/profile/updateProfile";
 
 async function handleRequest(
-  func: (payload: any, session: Session, subDomain: string) => Promise<Record<string, any>>,
+  func: (
+    payload: any,
+    session: Session,
+    subDomain: string,
+  ) => Promise<Record<string, any>>,
   params: Record<string, any>,
   dbSession: Session,
   subDomain: string,
@@ -43,4 +47,3 @@ export async function POST({ request }: APIEvent) {
       return { error: "Invalid action" };
   }
 }
-

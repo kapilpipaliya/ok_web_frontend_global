@@ -1,5 +1,3 @@
-
-
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -22,12 +20,18 @@ export async function fetchDataFromMG(
   "use server";
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
 
-  const authorizationError = await checkSuperUserAuthorization(subDomain, dbSession);
+  const authorizationError = await checkSuperUserAuthorization(
+    subDomain,
+    dbSession,
+  );
   if (authorizationError) {
     return authorizationError;
   }
   try {
-    const mainResult = await evalExpressionAsync(expression.expression, context);
+    const mainResult = await evalExpressionAsync(
+      expression.expression,
+      context,
+    );
 
     await processIncomingOutgoingExpressions(expression, mainResult, context);
 

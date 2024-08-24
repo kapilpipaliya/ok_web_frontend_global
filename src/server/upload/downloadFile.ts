@@ -1,15 +1,15 @@
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
-import {getFileMetadataFromNeo4j} from "~/server/upload/utils/getFileMetadataFromNeo4j";
+import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
 
 export async function downloadFile(fileId: string, session: Session) {
   const fileMetadata = await getFileMetadataFromNeo4j(session, fileId);
 
   if (!fileMetadata) {
-    return new Response(JSON.stringify({error: "File not found"}), {
-      headers: {"Content-Type": "application/json"},
+    return new Response(JSON.stringify({ error: "File not found" }), {
+      headers: { "Content-Type": "application/json" },
       status: 404,
     });
   }
@@ -30,9 +30,9 @@ export async function downloadFile(fileId: string, session: Session) {
     });
   } catch (_error) {
     return new Response(
-      JSON.stringify({error: "Error reading file from disk"}),
+      JSON.stringify({ error: "Error reading file from disk" }),
       {
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         status: 500,
       },
     );

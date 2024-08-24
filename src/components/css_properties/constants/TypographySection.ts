@@ -10,25 +10,21 @@ import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "./FieldType";
 
 export const TypographySection = {
-  fontFamily: createSelectOptions(
-    "font-family",
-    "Font family",
-    [
-      ...extraPropertyValues["font-family"].values,
-      "Arial Black",
-      "Brush Script MT",
-      "Comic Sans MS",
-      "Courier New",
-      "Georgia",
-      "Helvetica",
-      "Impact",
-      "Lucida Sans Unicode",
-      "Tahoma",
-      "Times New Roman",
-      "Trebuchet MS",
-      "Verdana",
-    ],
-  ),
+  fontFamily: createSelectOptions("font-family", "Font family", [
+    ...extraPropertyValues["font-family"].values,
+    "Arial Black",
+    "Brush Script MT",
+    "Comic Sans MS",
+    "Courier New",
+    "Georgia",
+    "Helvetica",
+    "Impact",
+    "Lucida Sans Unicode",
+    "Tahoma",
+    "Times New Roman",
+    "Trebuchet MS",
+    "Verdana",
+  ]),
   fontSize: {
     componentName: "textFieldOptions",
     label: "Size",
@@ -110,11 +106,13 @@ export const TypographySection = {
     "White space",
     extraPropertyValues["white-space"].values,
   ),
-  wordBreak: createSelectOptions(
-    "word-break",
-    "Word break",
-    ["normal", "break-all", "keep-all", "break-word", ...CSSWideKeywords],
-  ),
+  wordBreak: createSelectOptions("word-break", "Word break", [
+    "normal",
+    "break-all",
+    "keep-all",
+    "break-word",
+    ...CSSWideKeywords,
+  ]),
   direction: {
     componentName: "select",
     label: "Direction",

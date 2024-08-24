@@ -5,7 +5,6 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { getCompChildren } from "../../getCompChildren";
 
-
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Id[];
@@ -14,9 +13,7 @@ export function TreeItemContent(
   }>,
 ) {
   const [graph] = useGraph();
-  const children = createMemo(() =>
-    getCompChildren(props.item, graph),
-  );
+  const children = createMemo(() => getCompChildren(props.item, graph));
 
   return (
     <div

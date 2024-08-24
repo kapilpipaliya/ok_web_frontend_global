@@ -1,4 +1,4 @@
-import type { Transaction } from 'neo4j-driver';
+import type { Transaction } from "neo4j-driver";
 
 export async function insertDataTypes(transaction: Transaction): Promise<void> {
   const query = `
@@ -12,7 +12,7 @@ export async function insertDataTypes(transaction: Transaction): Promise<void> {
   try {
     await transaction.run(query);
   } catch (error) {
-    console.error('Error inserting data types:', error);
+    console.error("Error inserting data types:", error);
     throw error; // Re-throw the error to ensure the transaction is properly rolled back if needed
   }
 }

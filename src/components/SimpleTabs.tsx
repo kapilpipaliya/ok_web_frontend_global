@@ -1,8 +1,7 @@
-
 import { For } from "solid-js";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function TabsWithUnderline(
   props: Readonly<{

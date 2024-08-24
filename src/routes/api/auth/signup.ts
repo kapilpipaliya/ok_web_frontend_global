@@ -9,7 +9,11 @@ import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequ
 import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../../cypher/mutate/signup/signupUser";
 
-async function handleSignup(data: SignupRequestData, tx: Transaction, subdomain: string) {
+async function handleSignup(
+  data: SignupRequestData,
+  tx: Transaction,
+  subdomain: string,
+) {
   try {
     let user;
 
@@ -45,7 +49,7 @@ export async function POST({ request }: APIEvent) {
       JSON.stringify({
         error: "Invalid content type. Expected application/json",
       }),
-      { status: 415 }
+      { status: 415 },
     );
   }
 }

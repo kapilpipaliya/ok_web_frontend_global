@@ -1,10 +1,10 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
-import type {HTTPEvent} from "vinxi/runtime/http-types";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { HTTPEvent } from "vinxi/runtime/http-types";
 
-import {getQuery} from "vinxi/http";
+import { getQuery } from "vinxi/http";
 
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {downloadFile} from "~/server/upload/downloadFile";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { downloadFile } from "~/server/upload/downloadFile";
 
 export async function GET({ request }: APIEvent, event: HTTPEvent) {
   const query = getQuery(event);

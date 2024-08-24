@@ -1,9 +1,7 @@
-
-
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -25,10 +23,10 @@ export function AddNewFileButton() {
       currentItem.L[0] === "Folder"
         ? currentItem
         : evalExpression("->ParentFolder", {
-          graph,
-          setGraph,
-          vertexes: [currentItem],
-        })[0];
+            graph,
+            setGraph,
+            vertexes: [currentItem],
+          })[0];
     const newFormTxnId = graph.newTxnId;
 
     const parentFolderMetaVertex = {

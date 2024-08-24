@@ -6,11 +6,13 @@ import { IconButton } from "~/components/IconButton";
 
 import { PreviewCSSMenu } from "./PreviewCSSMenu";
 
-export function PreviewCSSButton(props: Readonly<{
-  class?: string;
-  item: Vertex;
-  size: number;
-}>) {
+export function PreviewCSSButton(
+  props: Readonly<{
+    class?: string;
+    item: Vertex;
+    size: number;
+  }>,
+) {
   let previewCSSRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
@@ -26,7 +28,12 @@ export function PreviewCSSButton(props: Readonly<{
     const floatingElement = floating();
 
     // https://javascript.info/mousemove-mouseover-mouseout-mouseenter-mouseleave
-    if (!(previewCSSRef?.contains(relatedTarget) || floatingElement?.contains(relatedTarget))) {
+    if (
+      !(
+        previewCSSRef?.contains(relatedTarget) ||
+        floatingElement?.contains(relatedTarget)
+      )
+    ) {
       setShowModal(false);
     }
   };
@@ -41,13 +48,17 @@ export function PreviewCSSButton(props: Readonly<{
         onMouseLeave={handleMouseLeave}
         ref={(el) => (previewCSSRef = el)}
         size={props.size}
-        title="Preview CSS" />
+        title="Preview CSS"
+      />
       <Show when={showModal()}>
         <PreviewCSSMenu
           item={props.item}
           onClose={() => setShowModal(false)}
           onMouseLeave={(event) => {
-            if (previewCSSRef && !previewCSSRef.contains(event.relatedTarget as Node)) {
+            if (
+              previewCSSRef &&
+              !previewCSSRef.contains(event.relatedTarget as Node)
+            ) {
               setShowModal(false);
             }
           }}

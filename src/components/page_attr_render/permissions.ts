@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { evalExpression, } from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getConfiguredPermissions(
   currentUserRoleId: Id[],

@@ -16,7 +16,7 @@ interface UserResult {
 
 export async function findUserByEmail(
   session: Session,
-  email: string
+  email: string,
 ): Promise<UserResult> {
   const query = `
     MATCH (u:User)
@@ -25,7 +25,7 @@ export async function findUserByEmail(
     OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
     RETURN u, s, collect(r) AS roles
   `;
-  
+
   const result = await session.run(query, { email });
 
   if (result.records.length === 0) {
@@ -34,11 +34,13 @@ export async function findUserByEmail(
 
   const record = result.records[0];
   const user = convertNodeToJson(record.get("u") as Node);
-  const roles = (record.get("roles") as Node[]).map((role) => convertNodeToJson(role));
+  const roles = (record.get("roles") as Node[]).map((role) =>
+    convertNodeToJson(role),
+  );
   let userSetting = convertNodeToJson(record.get("s") as Node);
 
   if (user && !userSetting) {
-    userSetting = await createUserSetting(session, user.id) as Vertex;
+    userSetting = (await createUserSetting(session, user.id)) as Vertex;
   }
 
   return {

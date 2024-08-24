@@ -1,11 +1,11 @@
-import Accordion from '@corvu/accordion';
-import Dialog from '@corvu/dialog';
-import Disclosure from '@corvu/disclosure';
-import Drawer from '@corvu/drawer';
-import OtpField from '@corvu/otp-field';
-import Popover from '@corvu/popover';
-import Resizable from '@corvu/resizable';
-import Tooltip from '@corvu/tooltip';
+import Accordion from "@corvu/accordion";
+import Dialog from "@corvu/dialog";
+import Disclosure from "@corvu/disclosure";
+import Drawer from "@corvu/drawer";
+import OtpField from "@corvu/otp-field";
+import Popover from "@corvu/popover";
+import Resizable from "@corvu/resizable";
+import Tooltip from "@corvu/tooltip";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { RadioGroupField } from "~/components/fields/RadioGroupField";
@@ -124,15 +124,19 @@ export function getDynamicComponent(component: string) {
 
   if (corvuComponents[componentKey as keyof typeof corvuComponents]) {
     return subComponent
-      // @ts-expect-error ignore
-      ? corvuComponents[componentKey as keyof typeof corvuComponents][subComponent] || NotFoundComponent
+      ? // @ts-expect-error ignore
+        corvuComponents[componentKey as keyof typeof corvuComponents][
+          subComponent
+        ] || NotFoundComponent
       : corvuComponents[componentKey as keyof typeof corvuComponents];
   }
 
   if (kobalteComponents[componentKey as keyof typeof kobalteComponents]) {
     return subComponent
-      // @ts-expect-error ignore
-      ? kobalteComponents[componentKey as keyof typeof kobalteComponents][subComponent] || NotFoundComponent
+      ? // @ts-expect-error ignore
+        kobalteComponents[componentKey as keyof typeof kobalteComponents][
+          subComponent
+        ] || NotFoundComponent
       : kobalteComponents[componentKey as keyof typeof kobalteComponents];
   }
 

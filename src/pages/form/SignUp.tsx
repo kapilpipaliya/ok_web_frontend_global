@@ -107,28 +107,36 @@ export function SignUp(): JSX.Element {
             <InputField
               label="Sub Domain"
               name="subdomain"
-              onInput={(e) => setFormData({ ...formData(), subdomain: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), subdomain: e.target.value })
+              }
               placeholder="Enter SubDomain"
               value={formData().subdomain}
             />
             <InputField
               label="Username"
               name="username"
-              onInput={(e) => setFormData({ ...formData(), username: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), username: e.target.value })
+              }
               placeholder="Enter Name"
               value={formData().username}
             />
             <InputField
               label="Email Address"
               name="email"
-              onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), email: e.target.value })
+              }
               placeholder="Enter Email"
               value={formData().email}
             />
             <PasswordField
               label="Password"
               name="password"
-              onInput={(e) => setFormData({ ...formData(), password: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), password: e.target.value })
+              }
               placeholder="Enter Password"
               showPassword={showPassword()}
               togglePasswordVisibility={togglePasswordVisibility}
@@ -173,7 +181,11 @@ interface InputFieldProps {
 
 const InputField = (props: InputFieldProps): JSX.Element => (
   <div class="m:10|0|0|0">
-    <label class="f:14" for={props.name} style={{ display: "block", marginBottom: "5px" }}>
+    <label
+      class="f:14"
+      for={props.name}
+      style={{ display: "block", marginBottom: "5px" }}
+    >
       {props.label}
     </label>
     <input
@@ -183,7 +195,7 @@ const InputField = (props: InputFieldProps): JSX.Element => (
       required
       style={{
         border: "1px solid #ccc",
-        'border-radius': "4px",
+        "border-radius": "4px",
         padding: "8px",
         width: "100%",
       }}
@@ -205,7 +217,11 @@ interface PasswordFieldProps {
 
 const PasswordField = (props: PasswordFieldProps): JSX.Element => (
   <div class="m:10|0|10|0">
-    <label class="f:14" for={props.name} style={{ display: "block", marginBottom: "5px" }}>
+    <label
+      class="f:14"
+      for={props.name}
+      style={{ display: "block", marginBottom: "5px" }}
+    >
       {props.label}
     </label>
     <div class="rel">

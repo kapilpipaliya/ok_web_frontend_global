@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, type JSX, Show } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
 
@@ -23,7 +23,9 @@ interface SupportTicketSectionProps {
   setIsMainScreenLoad: SetStoreFunction<boolean>;
 }
 
-export const SupportTicketSection = (props: Readonly<SupportTicketSectionProps>): JSX.Element => {
+export const SupportTicketSection = (
+  props: Readonly<SupportTicketSectionProps>,
+): JSX.Element => {
   const [messages, setMessages] = createSignal<any[]>([]);
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
@@ -73,7 +75,7 @@ export const SupportTicketSection = (props: Readonly<SupportTicketSectionProps>)
       setMessages(
         message.vertexes.length > 0
           ? message.vertexes.map((v: any) => v.properties)
-          : []
+          : [],
       );
       scrollToBottom();
     };
@@ -246,9 +248,7 @@ export const SupportTicketSection = (props: Readonly<SupportTicketSectionProps>)
       <div class="m:0|15">
         <Table headers={6}>
           <For each={["ID", "Name", "Subject", "Message", "Status", "Actions"]}>
-            {(header) => (
-              <TableHeadCell>{header}</TableHeadCell>
-            )}
+            {(header) => <TableHeadCell>{header}</TableHeadCell>}
           </For>
 
           <For

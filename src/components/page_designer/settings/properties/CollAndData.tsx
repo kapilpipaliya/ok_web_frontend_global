@@ -63,12 +63,10 @@ function createFieldAttributes(
       name: "data",
     },
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
       class: PROPERTIES.Css.TextField,
       componentName: "TextField",
-      name: "data"
+      name: "data",
     },
   ];
 }

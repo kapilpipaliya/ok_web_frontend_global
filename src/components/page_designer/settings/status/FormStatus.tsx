@@ -7,10 +7,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
-import {
-  addNewVertex,
-  newVertex,
-} from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
@@ -228,15 +225,13 @@ function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
   txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const vertices: ({
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
       id: vertexIds.formStatus,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -264,9 +259,7 @@ function createVertices(
       },
     },
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
       id: vertexIds.submissionLimit,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -276,9 +269,7 @@ function createVertices(
       },
     },
     {
-      attributes: [
-        textFieldInputMeta
-      ],
+      attributes: [textFieldInputMeta],
       id: vertexIds.warningMessage,
       P: {
         class: PROPERTIES.Css.TextField,
@@ -298,7 +289,7 @@ function createVertices(
         setGraph,
         txnId,
         graph.vertexes[vertex.id],
-        vertex.attributes
+        vertex.attributes,
       );
     }
   });

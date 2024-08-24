@@ -9,7 +9,7 @@ export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
     const email = await getUserEmailFromSession();
-    const {user} = await findUserByEmail(dbSession, email);
+    const { user } = await findUserByEmail(dbSession, email);
 
     if (!user) {
       return new Response(

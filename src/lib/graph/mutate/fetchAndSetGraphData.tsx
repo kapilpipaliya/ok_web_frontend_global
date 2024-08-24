@@ -9,7 +9,8 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 export async function fetchAndSetGraphData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  expression: string) {
+  expression: string,
+) {
   const result = await fetchDataFromMG({ expression });
 
   if (!isValidResponse(result)) {

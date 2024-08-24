@@ -67,7 +67,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const metaTxnId = graph.newTxnId;
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const propAttributes = createMemo(() =>
-    createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph)
+    createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
 
   onCleanup(() => {
@@ -128,64 +128,62 @@ function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
   txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const vertices: ({
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
-      {
-        attributes: [
-          textFieldInputMeta
-        ],
-        id: vertexIds.name,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextField",
-          displayName: "Unique Name",
-          name: "name",
-        },
+    {
+      attributes: [textFieldInputMeta],
+      id: vertexIds.name,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextField",
+        displayName: "Unique Name",
+        name: "name",
       },
-      {
-        id: vertexIds.as,
-        P: { displayName: "As", name: "as" },
-      },
-      {
-        id: vertexIds.perm,
-        P: { displayName: "Permission", name: "perm" },
-      },
-      {
-        id: vertexIds.calculatedValue,
-        P: { displayName: "Calculated Value Expr", name: "calculatedValue" },
-      },
-      {
-        id: vertexIds.class,
-        P: { displayName: "Class", name: "class" },
-      },
-      {
-        id: vertexIds.errorClass,
-        P: { displayName: "Error Class", name: "errorClass" },
-      },
-      {
-        id: vertexIds.defaultValue,
-        P: { displayName: "Default Value", name: "defaultValue" },
-      },
-      {
-        id: vertexIds.required,
-        P: { displayName: "Required Expr", name: "required" },
-      },
-      {
-        id: vertexIds.hidden,
-        P: { displayName: "Hidden Expr", name: "hidden" },
-      },
-      {
-        id: vertexIds.disabled,
-        P: { displayName: "Disabled Expr", name: "disabled" },
-      },
-      {
-        id: vertexIds.thankYouPage,
-        P: { displayName: "Thank You Page", name: "thankYouPage" },
-      },
-    ];
+    },
+    {
+      id: vertexIds.as,
+      P: { displayName: "As", name: "as" },
+    },
+    {
+      id: vertexIds.perm,
+      P: { displayName: "Permission", name: "perm" },
+    },
+    {
+      id: vertexIds.calculatedValue,
+      P: { displayName: "Calculated Value Expr", name: "calculatedValue" },
+    },
+    {
+      id: vertexIds.class,
+      P: { displayName: "Class", name: "class" },
+    },
+    {
+      id: vertexIds.errorClass,
+      P: { displayName: "Error Class", name: "errorClass" },
+    },
+    {
+      id: vertexIds.defaultValue,
+      P: { displayName: "Default Value", name: "defaultValue" },
+    },
+    {
+      id: vertexIds.required,
+      P: { displayName: "Required Expr", name: "required" },
+    },
+    {
+      id: vertexIds.hidden,
+      P: { displayName: "Hidden Expr", name: "hidden" },
+    },
+    {
+      id: vertexIds.disabled,
+      P: { displayName: "Disabled Expr", name: "disabled" },
+    },
+    {
+      id: vertexIds.thankYouPage,
+      P: { displayName: "Thank You Page", name: "thankYouPage" },
+    },
+  ];
 
   vertices.forEach((vertex) => {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -196,7 +194,7 @@ function createVertices(
         setGraph,
         txnId,
         graph.vertexes[vertex.id],
-        vertex.attributes
+        vertex.attributes,
       );
     }
   });
@@ -206,13 +204,13 @@ function createPropAttributes(
   metaAttributes: Vertex[],
   txnId: number,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   return metaAttributes.map((vertex) => {
     const form = FormMetaData.Comp;
     const propAttribute = form.attributes.find((attr) => attr.name === "Prop")!;
     const valueAttribute = propAttribute.attributes!.find(
-      (attr) => attr.name === "value"
+      (attr) => attr.name === "value",
     )!;
     return cloneVertexWithEdges(
       txnId,
@@ -222,7 +220,7 @@ function createPropAttributes(
         meta: valueAttribute.meta,
       },
       graph,
-      setGraph
+      setGraph,
     );
   });
 }
@@ -231,17 +229,17 @@ function moveClassToLast(
   vertices: Vertex[],
   vertexIds: ReturnType<typeof createVertexIds>,
   graph: GraphInterface,
-  layoutStore: PageLayoutObject
+  layoutStore: PageLayoutObject,
 ) {
   const otherVertices = vertices.filter(
-    (vertex) => !Object.keys(vertexIds).includes(vertex.P.name)
+    (vertex) => !Object.keys(vertexIds).includes(vertex.P.name),
   );
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
   const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(
-    (vertex) => !vertex.P.name.endsWith("Class")
+    (vertex) => !vertex.P.name.endsWith("Class"),
   );
 
   return [
@@ -272,20 +270,20 @@ interface PropertyFieldProps {
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
   const componentName = createMemo(() =>
-    getComponentForCollRow(props.meta, props.meta, graph, setGraph)
+    getComponentForCollRow(props.meta, props.meta, graph, setGraph),
   );
   const metaProps = getPropsFromMetaExpression(
     graph,
     setGraph,
     props.meta,
-    props.meta
+    props.meta,
   );
   mergeVertexProperties(
     props.metaTxnId,
     props.meta.id,
     graph,
     setGraph,
-    metaProps
+    metaProps,
   );
 
   return (

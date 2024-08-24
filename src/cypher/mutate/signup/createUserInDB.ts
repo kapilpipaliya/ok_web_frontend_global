@@ -1,4 +1,4 @@
-import type { Session, } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 import type { Transaction } from "neo4j-driver";
 
 import { v4 as uuidv4 } from "uuid";
@@ -59,6 +59,9 @@ export async function createUserInUserDB(
                 isSuper: $isSuper,
                 avatar: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
-  const createUserResult = await sessionOrTx.run(createUserQuery2, { ...params, isSuper: isSuper ?? null });
+  const createUserResult = await sessionOrTx.run(createUserQuery2, {
+    ...params,
+    isSuper: isSuper ?? null,
+  });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

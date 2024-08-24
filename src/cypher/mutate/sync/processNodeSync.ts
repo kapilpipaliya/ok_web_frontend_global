@@ -27,7 +27,10 @@ export async function processNodeSync(
     vertexes,
   };
 
-  const mainResult: Vertex[] = await evalExpressionAsync(expression.expression, context);
+  const mainResult: Vertex[] = await evalExpressionAsync(
+    expression.expression,
+    context,
+  );
 
   if (!mainResult || mainResult.length === 0) {
     return {

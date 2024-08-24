@@ -1,5 +1,3 @@
-
-
 import { int, type Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -27,7 +25,12 @@ export async function evalGetRelatedNodes(
 
   const session = await getSession(context);
 
-  const { params, query } = buildQuery(edgeType, vertexes, relationType, context);
+  const { params, query } = buildQuery(
+    edgeType,
+    vertexes,
+    relationType,
+    context,
+  );
 
   if (!query) {
     return;
@@ -113,29 +116,35 @@ function buildQuery(
       query = "MATCH (n) RETURN DISTINCT labels(n)";
       params = { allLabels: true };
     } else {
-      const { filter, label: newLabel, limit, skip } = getLabelFilterSkipLimit(label, context);
+      const {
+        filter,
+        label: newLabel,
+        limit,
+        skip,
+      } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
-          query = `MATCH (n:${newLabel})`;
-          if (isObject(filter) && Object.keys(filter).length > 0) {
-            const filterKeys = Object.keys(filter);
-            const filterConditions = filterKeys.map(key => `n.${key} = $${key}`).join(" AND ");
-            query += ` WHERE ${filterConditions}`;
-            params = filter;
-          }
-          if (skip) {
-            query += ` SKIP ${skip}`;
-          }
-          if (limit) {
-            query += ` LIMIT ${limit}`;
-          }
-          query += " RETURN n";
-        } else {
-          params = { name: name };
+        query = `MATCH (n:${newLabel})`;
+        if (isObject(filter) && Object.keys(filter).length > 0) {
+          const filterKeys = Object.keys(filter);
+          const filterConditions = filterKeys
+            .map((key) => `n.${key} = $${key}`)
+            .join(" AND ");
+          query += ` WHERE ${filterConditions}`;
+          params = filter;
         }
-
+        if (skip) {
+          query += ` SKIP ${skip}`;
+        }
+        if (limit) {
+          query += ` LIMIT ${limit}`;
+        }
+        query += " RETURN n";
+      } else {
+        params = { name: name };
+      }
     }
   } else if (relationType === "id") {
-    const ids = edgeType.split(",").map(id => int(id.trim()));
+    const ids = edgeType.split(",").map((id) => int(id.trim()));
     query = "MATCH (n) WHERE id(n) IN $ids RETURN n";
     params = { ids };
   }
@@ -175,7 +184,6 @@ async function closeSession(session: null | Session, context: ContextType) {
     await session.close();
   }
 }
-
 
 // typed-neo4j/src/db.ts
 /*async function find<T extends Record<string, unknown>, V extends keyof VertexSchema>(

@@ -27,7 +27,9 @@ const getInitialFileManagerStore = () => {
 };
 
 export type FileManagerObject = ReturnType<typeof getInitialFileManagerStore>;
-export type FileManagerStore = ReturnType<typeof createStore<FileManagerObject>>;
+export type FileManagerStore = ReturnType<
+  typeof createStore<FileManagerObject>
+>;
 export const FileManagerStoreContext = createContext<FileManagerStore>();
 
 export function FileManagerStoreProvider(
@@ -71,7 +73,7 @@ export function FileManagerStoreProvider(
         props.parentVertexLabel,
         props.fileId,
       );
-      if ('result' in rootData && rootData.result.length > 0) {
+      if ("result" in rootData && rootData.result.length > 0) {
         const resultData = rootData.result as Vertex[];
         expandedKeys = resultData.map((v) => v.id);
         root = { ...resultData[resultData.length - 1] };
@@ -90,20 +92,29 @@ export function FileManagerStoreProvider(
         props.toParentEdgeType,
         props.parentVertexLabel,
       );
-      if ('result' in rootData && rootData.result.length > 0) {
+      if ("result" in rootData && rootData.result.length > 0) {
         root = { ...rootData.result[0] };
         expandedKeys = [root.id];
-        selectedItem = (params.folderId || props.fileId) ? null : { ...root };
+        selectedItem = params.folderId || props.fileId ? null : { ...root };
       }
     }
 
-    await fetchChildrenDataBatch(graph, setGraph, fileManagerStore[0].toParentEdgeType, expandedKeys);
+    await fetchChildrenDataBatch(
+      graph,
+      setGraph,
+      fileManagerStore[0].toParentEdgeType,
+      expandedKeys,
+    );
 
     batch(() => {
       fileManagerStore[1]("useLocalData", true);
-      if (root) { fileManagerStore[1]("root", root); }
+      if (root) {
+        fileManagerStore[1]("root", root);
+      }
       fileManagerStore[1]("expandedKeys", expandedKeys);
-      if (selectedItem) { fileManagerStore[1]("selectedItem", selectedItem); }
+      if (selectedItem) {
+        fileManagerStore[1]("selectedItem", selectedItem);
+      }
     });
     fileManagerStore[1]("useLocalData", false);
   });
@@ -124,10 +135,24 @@ export async function fetchChildrenDataBatch(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   toParentEdgeType: string,
-  expandedKeys: string[]
+  expandedKeys: string[],
 ) {
-  const data = await getFilesData(graph, setGraph, toParentEdgeType, expandedKeys);
-  if ('result' in data && Array.isArray(data.result) && data.result.length > 0) {
-    await getFilesData(graph, setGraph, toParentEdgeType, data.result.map(v => v.id));
+  const data = await getFilesData(
+    graph,
+    setGraph,
+    toParentEdgeType,
+    expandedKeys,
+  );
+  if (
+    "result" in data &&
+    Array.isArray(data.result) &&
+    data.result.length > 0
+  ) {
+    await getFilesData(
+      graph,
+      setGraph,
+      toParentEdgeType,
+      data.result.map((v) => v.id),
+    );
   }
 }

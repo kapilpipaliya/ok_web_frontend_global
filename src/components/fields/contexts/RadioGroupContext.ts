@@ -7,7 +7,7 @@ export interface RadioGroupStoreObject {
   onChange: (value: string) => void;
   radioGroupRootId: string;
   value: string;
-};
+}
 type RadioGroupStore = ReturnType<typeof createStore<RadioGroupStoreObject>>;
 
 export const RadioGroupContext = createContext<RadioGroupStore>();

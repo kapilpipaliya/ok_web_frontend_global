@@ -1,28 +1,25 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { textFieldInputMeta, textFieldTextAreaMeta } from "~/components/constants/textFieldInput";
+import {
+  textFieldInputMeta,
+  textFieldTextAreaMeta,
+} from "~/components/constants/textFieldInput";
 
 export const collectionAttr = [
   {
-    attributes: [
-      textFieldInputMeta
-    ],
+    attributes: [textFieldInputMeta],
     componentName: "TextField",
     name: "displayName",
     onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
   },
   {
-    attributes: [
-      textFieldInputMeta
-    ],
+    attributes: [textFieldInputMeta],
     componentName: "TextField",
     displayName: "ID",
     name: "name",
   },
   {
-    attributes: [
-      textFieldTextAreaMeta
-    ],
+    attributes: [textFieldTextAreaMeta],
     componentName: "TextField",
     name: "definition",
   },

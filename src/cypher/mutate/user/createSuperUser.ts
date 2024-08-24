@@ -2,14 +2,21 @@ import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
-export async function createSuperUser(email: string, username: string, password: string, superDbSession: Session) {
+export async function createSuperUser(
+  email: string,
+  username: string,
+  password: string,
+  superDbSession: Session,
+) {
   try {
     // Check if a user with the same username already exists
     const checkUserQuery = `
       MATCH (u:User { username: $username })
       RETURN u
     `;
-    const checkUserResult = await superDbSession.run(checkUserQuery, { username });
+    const checkUserResult = await superDbSession.run(checkUserQuery, {
+      username,
+    });
 
     if (checkUserResult.records.length > 0) {
       return { error: "User with the same username already exists." };
@@ -25,7 +32,11 @@ export async function createSuperUser(email: string, username: string, password:
       })
       RETURN u
     `;
-    const result = await superDbSession.run(query, { email, password, username });
+    const result = await superDbSession.run(query, {
+      email,
+      password,
+      username,
+    });
 
     if (result.records.length === 0) {
       return { error: "Failed to create super user." };

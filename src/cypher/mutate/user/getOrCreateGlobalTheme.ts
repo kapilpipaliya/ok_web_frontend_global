@@ -1,8 +1,8 @@
-import type {Node, Session} from "neo4j-driver";
+import type { Node, Session } from "neo4j-driver";
 
-import type {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
-import {convertNodeToJson} from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getOrCreateGlobalTheme(
   session: Session,

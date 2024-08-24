@@ -1,10 +1,10 @@
-import type {APIEvent} from "@solidjs/start/dist/server";
-import type {HTTPEvent} from "vinxi/runtime/http-types";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { HTTPEvent } from "vinxi/runtime/http-types";
 
-import {getQuery} from "vinxi/http";
+import { getQuery } from "vinxi/http";
 
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {deleteFile} from "~/server/upload/deleteFile";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { deleteFile } from "~/server/upload/deleteFile";
 
 export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
   const query = getQuery(event);
@@ -25,4 +25,3 @@ export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
     await dbSession.close();
   }
 }
-

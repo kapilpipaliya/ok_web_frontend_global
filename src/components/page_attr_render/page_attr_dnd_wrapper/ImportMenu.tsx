@@ -48,10 +48,14 @@ export function ImportMenu(
   };
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
-      revertTransactionUpToIndex(layoutStore.formStore[0].txnId, prevTxnIndex, graph);
+      revertTransactionUpToIndex(
+        layoutStore.formStore[0].txnId,
+        prevTxnIndex,
+        graph,
+      );
     }
     props.onClose();
-  }
+  };
 
   onMount(() => {
     nameInputRef.focus();
@@ -69,9 +73,7 @@ export function ImportMenu(
       </h3>
 
       <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
-        <p>
-          Import HTML to the page.
-        </p>
+        <p>Import HTML to the page.</p>
       </div>
 
       <div>
@@ -102,7 +104,8 @@ export function ImportMenu(
             class="lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:white display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem"
             disabled={!htmlContent()}
             onClick={onImport}
-            type="button">
+            type="button"
+          >
             Import
           </button>
           <button class="" onClick={onCancel} type="button">

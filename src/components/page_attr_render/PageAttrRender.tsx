@@ -104,10 +104,7 @@ export function PageAttrRender(
             </Match> */}
             <Match when={parentComponent() === "TreeViewChild"}>
               <li>
-                <Show
-                  fallback={<Content />}
-                  when={previewStore.isDesignMode}
-                >
+                <Show fallback={<Content />} when={previewStore.isDesignMode}>
                   <PageAttrDnDWrapper item={item}>
                     <Content />
                   </PageAttrDnDWrapper>
@@ -115,10 +112,7 @@ export function PageAttrRender(
               </li>
             </Match>
             <Match when={true}>
-              <Show
-                fallback={<Content />}
-                when={previewStore.isDesignMode}
-              >
+              <Show fallback={<Content />} when={previewStore.isDesignMode}>
                 <PageAttrDnDWrapper item={item}>
                   <Content />
                 </PageAttrDnDWrapper>

@@ -1,6 +1,5 @@
 import type { Transaction } from "neo4j-driver";
 
-
 export async function updatePortForNewUser(
   tx: Transaction,
   driverPort: number,

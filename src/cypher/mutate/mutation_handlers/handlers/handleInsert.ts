@@ -8,11 +8,17 @@ export async function handleInsert(
   clientToServerVertexIdMap: Map<string, string>,
   txnResult: { insert: [string, string] }[],
 ) {
-  const labels = (Array.isArray(insert) ? insert[0].L : insert.L).map((label: string) => `:${label}`).join("");
+  const labels = (Array.isArray(insert) ? insert[0].L : insert.L)
+    .map((label: string) => `:${label}`)
+    .join("");
   const query = `UNWIND $props AS props CREATE (n${labels}) SET n = props, n.createdAt = localDateTime() RETURN n`;
 
   try {
-    const result = await tx.run(query, { props: Array.isArray(insert) ? insert.map((vertex) => vertex.P) : [insert.P] });
+    const result = await tx.run(query, {
+      props: Array.isArray(insert)
+        ? insert.map((vertex) => vertex.P)
+        : [insert.P],
+    });
     if (result.records.length > 0) {
       result.records.forEach((record, index) => {
         const id = record.get("n").elementId;

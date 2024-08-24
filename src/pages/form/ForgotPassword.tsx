@@ -116,7 +116,7 @@ export function ForgotPassword(): JSX.Element {
 
     if (!validatePassword(newPassword())) {
       showErrorToast(
-        "Password must be at least 6 characters long and include at least one letter, one number, and one uppercase letter."
+        "Password must be at least 6 characters long and include at least one letter, one number, and one uppercase letter.",
       );
       return;
     }

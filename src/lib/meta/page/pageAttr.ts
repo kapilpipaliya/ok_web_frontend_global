@@ -19,9 +19,7 @@ export const pageAttr = [
     name: "data",
   },
   {
-    attributes: [
-      textFieldInputMeta
-    ],
+    attributes: [textFieldInputMeta],
     componentName: "TextField",
     displayName: "ID",
     name: "name",

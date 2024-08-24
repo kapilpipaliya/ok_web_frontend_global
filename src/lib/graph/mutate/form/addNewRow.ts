@@ -9,10 +9,7 @@ import {
   IdAttr,
   type Vertex,
 } from "~/lib/graph/graph";
-import {
-  addNewVertex,
-  newVertex,
-} from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
 import { getInEdge } from "../../get/sync/getInEdge";
@@ -56,7 +53,6 @@ export function newRow(
   properties?: { [key: string]: any },
   inward?: boolean,
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
-
   return batch(() => {
     const vertexNew = newVertex(
       graph.newVertexId,

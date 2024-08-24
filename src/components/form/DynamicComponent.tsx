@@ -1,5 +1,12 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { createMemo, ErrorBoundary, Match, Show, splitProps, Switch } from "solid-js";
+import {
+  createMemo,
+  ErrorBoundary,
+  Match,
+  Show,
+  splitProps,
+  Switch,
+} from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
@@ -138,7 +145,8 @@ export function DynamicComponent(
     !previewStore ||
     props.isNoPermissionCheck ||
     formStore?.formMeta?.P.isNoPermissionCheck ||
-    previewStore.isDesignMode || previewStore.isNoPermissionCheck;
+    previewStore.isDesignMode ||
+    previewStore.isNoPermissionCheck;
   const hasPermission = () =>
     hasInsertPermission() || hasViewPermission() || hasEditPermission();
   const hasNoPermission = () =>
@@ -275,12 +283,12 @@ export function DynamicComponent(
           if (value !== null) {
             result[key] = key.toLowerCase().endsWith("class")
               ? mergeCSS(
-                "",
-                value,
-                { P: { name: key } } as unknown as Vertex,
-                props.meta,
-                graph,
-              )
+                  "",
+                  value,
+                  { P: { name: key } } as unknown as Vertex,
+                  props.meta,
+                  graph,
+                )
               : value;
           }
         }
@@ -308,8 +316,12 @@ export function DynamicComponent(
     vertexes: [] as Vertex[],
   });
   const isCheckbox = () => {
-    return componentName() === "Checkbox" || componentName() === "Switch" || componentName() === "MenubarCheckboxItem";
-  }
+    return (
+      componentName() === "Checkbox" ||
+      componentName() === "Switch" ||
+      componentName() === "MenubarCheckboxItem"
+    );
+  };
   const DisplayError = () => (
     <Show when={props.meta.P.error}>
       <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
@@ -317,18 +329,26 @@ export function DynamicComponent(
   );
   const noOnChangePassedComponent = () => {
     const name = componentName();
-    const specialComponents = ["TextFieldTextArea", "TextFieldInput", "DynamicTable"];
+    const specialComponents = [
+      "TextFieldTextArea",
+      "TextFieldInput",
+      "DynamicTable",
+    ];
     return specialComponents.includes(name);
-  }
+  };
   const Content = () => (
     <>
-      <ErrorBoundary fallback={(err) => {
-        console.error(err);
-        return <div>Error: {err.message}</div>;
-      }}>
+      <ErrorBoundary
+        fallback={(err) => {
+          console.error(err);
+          return <div>Error: {err.message}</div>;
+        }}
+      >
         <Dynamic
           {...deNullifyAndMergeCSS()}
-          checked={isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined}
+          checked={
+            isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined
+          }
           component={component()}
           componentName={componentName()}
           data={props.data}
@@ -339,16 +359,20 @@ export function DynamicComponent(
           onChange={noOnChangePassedComponent() ? undefined : onChange}
           title={props.title ?? ""}
           txnId={props.txnId}
-          value={isCheckbox() ? undefined : ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
+          value={
+            isCheckbox()
+              ? undefined
+              : ifNotNull(props.data?.P[props.meta.P[IdAttr]])
+          }
           {...expressionProperties()}
           disabled={
             isNoPermissionCheck()
               ? customMetaProps.disabled
               : props.disabled ??
-              previewStore.isViewOnly ??
-              isDisabledPermission() ??
-              expressionProperties().disabled ??
-              customMetaProps.disabled
+                previewStore.isViewOnly ??
+                isDisabledPermission() ??
+                expressionProperties().disabled ??
+                customMetaProps.disabled
           }
         >
           <Show when={props.meta.id}>
@@ -466,7 +490,6 @@ const _inputTypes = {
         </Match>
         
         */
-
 
 /*
   <Match when={componentName() === "TabContainer"}>
