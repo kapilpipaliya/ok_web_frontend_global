@@ -1,6 +1,6 @@
 import { type Accessor, type JSX, Match, type Setter, Switch } from "solid-js";
 
-import type { DataEditorField } from "../../constants/FieldType";
+import type { DataEditorField } from "../../constants/FieldSchemaType";
 
 import {
   generateBoxShadow,

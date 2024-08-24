@@ -1,6 +1,6 @@
 import { type JSX, Show, splitProps } from "solid-js";
 
-import type { TextFieldOptionsField } from "../../constants/FieldType";
+import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
 
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
 
@@ -20,7 +20,7 @@ export function InputField(props: Readonly<InputFieldProps>) {
 
   const InnerInput = () => (
     <input
-      class={`${local.class ?? ""} ${local.meta.showInside ? "outline:none p:5" : ""} f:14 w:100%`}
+      class={`${local.class ?? ""} ${local.meta.showInside ?? true ? "outline:none p:5" : ""} f:14 w:100%`}
       onInput={local.handleChange}
       placeholder={
         local.meta.type === "number" ? "0" : local.meta.placeholder ?? ""
@@ -45,7 +45,7 @@ export function InputField(props: Readonly<InputFieldProps>) {
           <InnerInput />
         </label>
       }
-      when={local.meta.showInside}
+      when={local.meta.showInside ?? true}
     >
       <InnerInput />
     </Show>

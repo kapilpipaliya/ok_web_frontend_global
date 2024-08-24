@@ -4,7 +4,7 @@ import {
   createSelectOptions,
   type TextFieldOptionsField,
   type ToggleField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 import { Icons } from "./Icons";
 
 export const DisplaySection = {

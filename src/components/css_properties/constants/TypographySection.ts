@@ -3,11 +3,11 @@ import type {
   ColorPickerField,
   SelectField,
   TextFieldOptionsField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 import { sizeTypes } from "./csseditor_constants";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createSelectOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldSchemaType";
 
 export const TypographySection = {
   fontFamily: createSelectOptions("font-family", "Font family", [

@@ -11,7 +11,7 @@ import {
 import type {
   CSSJSONSchemaSearchType,
   GenericField,
-} from "./constants/FieldType";
+} from "./constants/FieldSchemaType";
 
 import { DynamicCSSComponent } from "./components/DynamicCssComponent";
 

@@ -1,5 +1,3 @@
-
-
 import type { Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";

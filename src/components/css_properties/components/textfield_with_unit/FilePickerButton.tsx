@@ -1,4 +1,4 @@
-import { createMemo, createSignal, type JSX } from "solid-js";
+import { type Accessor, createMemo, createSignal, type JSX } from "solid-js";
 
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
@@ -6,15 +6,17 @@ import { CustomModal } from "~/components/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";
 import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import FileManager from "~/pages/file_manager/FileManager";
 
-import type { TextFieldOptionsField } from "../../constants/FieldType";
+import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
 
-import { useComponentMeta, useCssState } from "../../CssEditorContext";
+import { useCssState } from "../../CssEditorContext";
 import { useCssEditorProps } from "../../CSSEditorPropsContext";
+import { useRenderContext } from "../../RenderContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 
 interface FilePickerButtonProps
@@ -26,7 +28,10 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   let fileManagerStore: FileManagerObject;
-  const meta = useComponentMeta() as TextFieldOptionsField;
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(
+    parentItems?.meta || [],
+  ) as Accessor<TextFieldOptionsField>;
   const cssEditorProps = useCssEditorProps();
   const [formStore] = useFormContext();
   const { showErrorToast } = useToast();
@@ -38,7 +43,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     }
     return (
       evalExpression(
-        `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name)}`,
+        `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta().name)}`,
         { graph, setGraph, vertexes: [cssEditorProps.data] },
       ) || []
     );
@@ -70,7 +75,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.name,
           state() || "Default",
-          meta.name,
+          meta().name,
         ),
       },
     } as Vertex;

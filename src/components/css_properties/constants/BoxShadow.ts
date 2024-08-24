@@ -7,7 +7,7 @@ import {
   type DataEditorField,
   type TextFieldOptionsField,
   type ToggleField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 export const BoxShadow = {
   boxShadow: {

@@ -1,9 +1,9 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { TextFieldOptionsField } from "./FieldType";
+import type { TextFieldOptionsField } from "./FieldSchemaType";
 
 import { defaultPixelSizeTypes } from "./csseditor_constants";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createSelectOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldSchemaType";
 
 export const gapFields = {
   gap: {

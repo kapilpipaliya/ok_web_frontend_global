@@ -1,4 +1,4 @@
-import type { FieldWithCustomProperty } from "./FieldType";
+import type { FieldWithCustomProperty } from "./FieldSchemaType";
 
 import { sizeTypes } from "./csseditor_constants";
 

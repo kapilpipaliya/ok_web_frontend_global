@@ -1,19 +1,20 @@
 import { Icon } from "@iconify-icon/solid";
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { path } from "rambda";
-import { createSignal, For, Match, type Setter, Show, Switch } from "solid-js";
+import { type Accessor, createSignal, For, Match, type Setter, Show, Switch } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import type { SelectField } from "../constants/FieldType";
+import type { SelectField } from "../constants/FieldSchemaType";
 
 import {
-  useComponentMeta,
   useCssDefaultEditor,
   useCssEditor,
   useCssState,
 } from "../CssEditorContext";
+import { useRenderContext } from "../RenderContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
@@ -25,7 +26,8 @@ function formatString(str: string): string {
 }
 
 export const Select = () => {
-  const meta = useComponentMeta() as SelectField;
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(parentItems?.meta || []) as Accessor<SelectField>;
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
@@ -34,29 +36,29 @@ export const Select = () => {
   const toggleDropdown = () => setIsActive(!isActive());
 
   const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
     return (
       path(projections, cssState) ||
       path(projections, cssDefault) ||
-      meta.value ||
+      meta().value ||
       ""
     );
   };
 
   const selectOption = (option: any) => {
-    if (meta.isAddToClass ?? true) {
-      setCssState(state(), ...(meta.projections ?? []), {
-        [meta.name]: option.value || option,
+    if (meta().isAddToClass ?? true) {
+      setCssState(state(), ...(meta().projections ?? []), {
+        [meta().name]: option.value || option,
       });
     }
-    if (meta.onChangeInput) {
-      meta.onChangeInput(meta.name, option.value || option);
+    if (meta().onChangeInput) {
+      meta().onChangeInput(meta().name, option.value || option);
     }
     setIsActive(false);
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    const dropdown = document.getElementById(`select-dropdown${meta.label}`);
+    const dropdown = document.getElementById(`select-dropdown${meta().label}`);
     if (dropdown && !dropdown.contains(event.target as Node)) {
       setIsActive(false);
     }
@@ -66,13 +68,13 @@ export const Select = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta.isLabelOnTop}>
+        <Match when={meta().isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper />
             <Content />
           </div>
         </Match>
-        <Match when={meta.label}>
+        <Match when={meta().label}>
           <div class={"flex ai:center jc:space-between w:100%"}>
             <LabelWrapper />
             <Content />
@@ -89,7 +91,7 @@ export const Select = () => {
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
     return (
-      <div class={`${meta.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
+      <div class={`${meta().isLabelOnTop ? "w:full" : "w:50%"} rel`}>
         <DropdownButton
           isActive={isActive()}
           selectedValue={selectedValue()}
@@ -103,7 +105,7 @@ export const Select = () => {
               parentRef={reference()!}
             >
               <DropdownList
-                options={meta.options}
+                options={meta().options}
                 selectedValue={selectedValue()}
                 selectOption={selectOption}
               />

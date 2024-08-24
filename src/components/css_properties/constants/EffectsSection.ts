@@ -5,11 +5,11 @@ import type {
   SelectField,
   TextFieldOptionsField,
   ToggleField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 import { sizeTypes } from "./csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";
-import { createGridOptions } from "./FieldType";
+import { createGridOptions } from "./FieldSchemaType";
 
 export const EffectsSection = {
   filter: {

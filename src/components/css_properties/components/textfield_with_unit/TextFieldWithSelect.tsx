@@ -1,21 +1,22 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { path } from "rambda";
-import { type Component, Match, Switch } from "solid-js";
+import { type Accessor, type Component, Match, Switch } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
-import type { TextFieldOptionsField } from "../../constants/FieldType";
+import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
 
 import { sizeTypes } from "../../constants/csseditor_constants";
 import {
-  useComponentMeta,
   useCssDefaultEditor,
   useCssEditor,
   useCssState,
 } from "../../CssEditorContext";
 import { useCssEditorProps } from "../../CSSEditorPropsContext";
+import { useRenderContext } from "../../RenderContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 import { CenterDiv } from "../CenterDiv";
 import { Container } from "../Container";
@@ -26,14 +27,17 @@ export const TextFieldWithSelect: Component = () => {
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const cssEditorProps = useCssEditorProps();
-  const meta = useComponentMeta() as TextFieldOptionsField;
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(
+    parentItems?.meta || [],
+  ) as Accessor<TextFieldOptionsField>;
   const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
   const [cssDefault] = useCssDefaultEditor();
 
   // input will automatically display value without units, if its number field.
   const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
     return path(projections, cssState) || path(projections, cssDefault) || "";
   };
 
@@ -44,23 +48,23 @@ export const TextFieldWithSelect: Component = () => {
   function determineSelectedOption(): string {
     return (
       sizeTypes.find((unit) => selectedValue().includes(unit)) ??
-      meta.unitOptions?.[0] ??
+      meta().unitOptions?.[0] ??
       ""
     );
   }
 
   function changeValue(value: string) {
-    if (meta.isAddToClass ?? true) {
-      setCssState(state(), ...(meta.projections ?? []), { [meta.name]: value });
+    if (meta().isAddToClass ?? true) {
+      setCssState(state(), ...(meta().projections ?? []), { [meta().name]: value });
     }
-    meta.onChangeInput?.(value);
+    meta().onChangeInput?.(value);
   }
 
   function handleInputChange(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = target.value;
 
-    if (meta.type === "number") {
+    if (meta().type === "number") {
       handleNumberInputChange(value);
     } else {
       changeValue(value);
@@ -74,20 +78,20 @@ export const TextFieldWithSelect: Component = () => {
     }
 
     if (
-      meta.inputProps?.min !== undefined &&
-      numericValue < meta.inputProps.min
+      meta().inputProps?.min !== undefined &&
+      numericValue < meta().inputProps.min
     ) {
       return;
     }
     if (
-      meta.inputProps?.max !== undefined &&
-      numericValue > meta.inputProps.max
+      meta().inputProps?.max !== undefined &&
+      numericValue > meta().inputProps.max
     ) {
       return;
     }
 
     changeValue(
-      meta.unitOptions
+      meta().unitOptions
         ? `${numericValue}${selectedOption()}`
         : `${numericValue}`,
     );
@@ -111,7 +115,7 @@ export const TextFieldWithSelect: Component = () => {
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.name,
           state() || "Default",
-          meta.name,
+          meta().name,
         ),
       },
     } as Vertex;
@@ -126,7 +130,7 @@ export const TextFieldWithSelect: Component = () => {
   };
 
   const resetValue = () => {
-    changeValue(cssDefault[state() ?? ""]?.[meta.name]);
+    changeValue(cssDefault[state() ?? ""]?.[meta().name]);
     setSelectedOption(determineSelectedOption());
     clearFileSelection();
   };
@@ -134,27 +138,27 @@ export const TextFieldWithSelect: Component = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta.isLabelOnTop}>
+        <Match when={meta().isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper onResetIconClick={resetValue} />
             <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
-              meta={meta}
+              meta={meta()}
               resetValue={resetValue}
               selectedValue={selectedValue}
             />
           </div>
         </Match>
-        <Match when={meta.label}>
+        <Match when={meta().label}>
           <CenterDiv>
             <LabelWrapper onResetIconClick={resetValue} />
             <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
-              meta={meta}
+              meta={meta()}
               resetValue={resetValue}
               selectedValue={selectedValue}
             />
@@ -165,7 +169,7 @@ export const TextFieldWithSelect: Component = () => {
             changeValue={changeValue}
             determineSelectedOption={determineSelectedOption}
             handleInputChange={handleInputChange}
-            meta={meta}
+            meta={meta()}
             resetValue={resetValue}
             selectedValue={selectedValue}
           />

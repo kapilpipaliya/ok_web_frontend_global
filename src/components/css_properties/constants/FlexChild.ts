@@ -1,8 +1,8 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { TextFieldOptionsField } from "./FieldType";
+import type { TextFieldOptionsField } from "./FieldSchemaType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createSelectOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldSchemaType";
 import { Icons } from "./Icons";
 
 export const FlexChild = {

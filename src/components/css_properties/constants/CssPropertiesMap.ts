@@ -1,6 +1,6 @@
 /* eslint-disable perfectionist/sort-objects */
 
-import type { CSSJSONSchemaType } from "./FieldType";
+import type { CSSJSONSchemaType } from "./FieldSchemaType";
 
 import { BackgroundSection } from "./BackgroundSection";
 import { BorderSection } from "./BorderSection";

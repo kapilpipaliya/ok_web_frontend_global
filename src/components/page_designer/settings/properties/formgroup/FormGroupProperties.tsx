@@ -208,16 +208,19 @@ function createPropAttributes(
 ) {
   return metaAttributes.map((vertex) => {
     const form = FormMetaData.Comp;
-    const propAttribute = form.attributes.find((attr) => attr.name === "Prop")!;
-    const valueAttribute = propAttribute.attributes!.find(
-      (attr) => attr.name === "value",
+    const _propAttribute = form.attributes.find(
+      (attr) => attr.name === "Prop",
     )!;
+    // now we simplified this so user cant enter default value
+    // const valueAttribute = propAttribute.attributes!.find(
+    //   (attr) => attr.name === "value",
+    // )!;
     return cloneVertexWithEdges(
       txnId,
       vertex,
       {
-        componentName: valueAttribute.componentName,
-        meta: valueAttribute.meta,
+        // componentName: valueAttribute.componentName,
+        // meta: valueAttribute.meta,
       },
       graph,
       setGraph,

@@ -1,4 +1,4 @@
-import type { FieldWithCustomProperty } from "./FieldType";
+import type { FieldWithCustomProperty } from "./FieldSchemaType";
 
 import { defaultPixelSizeTypes, sizeTypes } from "./csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";

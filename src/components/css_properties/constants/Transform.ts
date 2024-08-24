@@ -2,10 +2,10 @@ import type {
   DataEditorField,
   FieldWithCustomProperty,
   TextFieldOptionsField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 import { sizeTypes } from "./csseditor_constants";
-import { createGridOptions } from "./FieldType";
+import { createGridOptions } from "./FieldSchemaType";
 
 export const Transform = {
   transform: {

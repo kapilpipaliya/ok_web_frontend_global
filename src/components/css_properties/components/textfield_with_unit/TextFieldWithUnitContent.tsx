@@ -1,7 +1,7 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { type Component, createSignal, onCleanup, Show } from "solid-js";
 
-import type { OptionType } from "../../constants/FieldType";
+import type { OptionType } from "../../constants/FieldSchemaType";
 
 import { FilePickerButton } from "./FilePickerButton";
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
@@ -123,7 +123,11 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
 
   return (
     <div
-      class={`${props.meta.showInside ? "b:1px|solid|#ccc" : ""} ${props.meta.showInside ? "p:0|5|0|5" : ""} ${props.meta.isLabelOnTop ? "" : "max-w:50% w:50%"} flex rel ai:center jc:space-between r:5`}
+      class={`
+        ${props.meta.showInside ?? true ? "b:1px|solid|#ccc p:0|5|0|5" : ""}
+        ${props.meta.isLabelOnTop ? "" : "max-w:50% w:50%"}
+        flex rel ai:center jc:space-between r:5
+      `}
       ref={setReference}
     >
       <div class={"flex ai:center flex:1"}>
@@ -157,7 +161,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
         setIsDropdownOpen={setIsDropdownOpen}
         toggleDropdown={toggleDropdown}
       />
-      <Show when={isAnotherDropdownOpen()}>
+      <Show when={isAnotherDropdownOpen() && filteredOptions().length > 0}>
         <SuggestionsDropdown
           isDropdownOpen={isAnotherDropdownOpen}
           options={filteredOptions()}

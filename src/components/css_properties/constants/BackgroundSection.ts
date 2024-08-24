@@ -3,10 +3,10 @@ import type {
   ColorPickerField,
   FieldWithCustomProperty,
   TextFieldOptionsField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
-import { createSelectOptions } from "./FieldType";
+import { createSelectOptions } from "./FieldSchemaType";
 
 export const BackgroundSection = {
   background: {
@@ -17,7 +17,6 @@ export const BackgroundSection = {
   } as TextFieldOptionsField,
   backgroundColor: {
     componentName: "colorPicker",
-    isLabelOnTop: true,
     label: "Color",
     name: "background-color",
   } as ColorPickerField,

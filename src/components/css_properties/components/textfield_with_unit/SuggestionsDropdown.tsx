@@ -3,7 +3,10 @@ import { type Accessor, For, Show } from "solid-js";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
-import type { AnotherOption, OptionType } from "../../constants/FieldType";
+import type {
+  AnotherOption,
+  OptionType,
+} from "../../constants/FieldSchemaType";
 
 interface SuggestionsDropdownProps {
   isDropdownOpen: () => boolean;

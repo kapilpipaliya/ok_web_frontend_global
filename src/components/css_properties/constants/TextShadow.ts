@@ -2,10 +2,10 @@ import type {
   ColorPickerField,
   DataEditorField,
   TextFieldOptionsField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 import { defaultPixelSizeTypes } from "./csseditor_constants";
-import { createGridOptions } from "./FieldType";
+import { createGridOptions } from "./FieldSchemaType";
 
 export const TextShadow = {
   textShadow: {

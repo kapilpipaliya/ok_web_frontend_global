@@ -1,14 +1,16 @@
 import { path } from "rambda";
-import { type JSX, Match, Switch } from "solid-js";
+import { type Accessor, type JSX, Match, Switch } from "solid-js";
 
-import type { ColorPickerField } from "../constants/FieldType";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+
+import type { ColorPickerField } from "../constants/FieldSchemaType";
 
 import {
-  useComponentMeta,
   useCssDefaultEditor,
   useCssEditor,
   useCssState,
 } from "../CssEditorContext";
+import { useRenderContext } from "../RenderContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
@@ -16,9 +18,10 @@ export const ColorPickerInput = () => {
   const [cssState, setCssState] = useCssEditor();
   const [cssDefault] = useCssDefaultEditor();
   const [state] = useCssState();
-  const meta = useComponentMeta() as ColorPickerField;
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(parentItems?.meta || []) as Accessor<ColorPickerField>;
   const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta.projections ?? []), meta.name];
+    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
     return path(projections, cssState) || path(projections, cssDefault) || "";
   };
 
@@ -26,12 +29,12 @@ export const ColorPickerInput = () => {
     HTMLInputElement,
     InputEvent
   > = (event) => {
-    if (meta.onChangeInput) {
-      meta.onChangeInput(event.target.value);
+    if (meta().onChangeInput) {
+      meta().onChangeInput!(event.target.value);
     }
-    if (meta.isAddToClass ?? true) {
-      setCssState(state(), ...(meta.projections ?? []), {
-        [meta.name]: event.target.value,
+    if (meta().isAddToClass ?? true) {
+      setCssState(state(), ...(meta().projections ?? []), {
+        [meta().name]: event.target.value,
       });
     }
   };
@@ -57,13 +60,13 @@ export const ColorPickerInput = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta.isLabelOnTop}>
+        <Match when={meta().isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper />
             <Content />
           </div>
         </Match>
-        <Match when={meta.label}>
+        <Match when={meta().label}>
           <div class={"flex ai:center jc:space-between w:100%"}>
             <LabelWrapper />
             <Content />

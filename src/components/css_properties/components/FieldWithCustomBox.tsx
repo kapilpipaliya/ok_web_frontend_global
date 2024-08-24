@@ -1,31 +1,35 @@
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { type Accessor, createEffect, createSignal, For, Show } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type {
   ButtonGroupField,
   FieldWithCustomProperty,
   GenericField,
-} from "../constants/FieldType";
+} from "../constants/FieldSchemaType";
 
 import {
-  ComponentMetaContext,
-  useComponentMeta,
   useCssEditor,
   useCssState,
 } from "../CssEditorContext";
+import { RenderContextProvider, useRenderContext } from "../RenderContext";
 import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = () => {
-  const meta = useComponentMeta() as FieldWithCustomProperty;
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(
+    parentItems?.meta || [],
+  ) as Accessor<FieldWithCustomProperty>;
   const [optionType, setOptionType] = createSignal("all");
   const [cssState] = useCssEditor();
   const [state] = useCssState();
 
   createEffect(() => {
-    if (meta.customProperty && meta.customProperty.length > 0) {
+    if (meta().customProperty && meta().customProperty.length > 0) {
       let isValueSet = false;
-      meta.customProperty.forEach((property) => {
+      meta().customProperty.forEach((property) => {
         if (cssState[state()]?.[property.name] !== undefined) {
           isValueSet = true;
         }
@@ -35,26 +39,27 @@ export const FieldWithCustomBox = () => {
       }
     }
   });
+  const repeterStore = createStore({
+    meta: [] as Accessor<GenericField>[],
+  });
   return (
     <div>
       <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
         <DynamicCSSComponent
           value={
             {
-              ...meta,
-              componentName: meta.mainFieldType ?? "textFieldOptions",
-              type: meta.type ?? "text",
+              ...meta(),
+              componentName: meta().mainFieldType ?? "textFieldOptions",
+              type: meta().type ?? "text",
             } as GenericField
           }
         />
-        <ComponentMetaContext.Provider
-          value={
-            {
+            <RenderContextProvider meta={() => (            {
               componentName: "buttonGroups",
               isAddToClass: false,
               isLabelOnTop: false,
               label: "",
-              name: meta.name,
+              name: meta().name,
               onChangeInput: () => {
                 if (optionType() === "all") {
                   setOptionType("custom");
@@ -76,25 +81,23 @@ export const FieldWithCustomBox = () => {
                   value: "custom",
                 },
               ],
-            } as ButtonGroupField
-          }
-        >
+            } as ButtonGroupField)} store={repeterStore}>
           <ButtonGroups />
-        </ComponentMetaContext.Provider>
+        </RenderContextProvider>
       </div>
       <Show when={optionType() === "custom"}>
         <div
-          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${meta.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
+          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${meta().gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
         >
-          <For each={meta.customProperty}>
+          <For each={meta().customProperty}>
             {(item) => {
               return (
                 <DynamicCSSComponent
                   value={
                     {
-                      ...meta,
-                      componentName: meta.mainFieldType ?? "textFieldOptions",
-                      type: meta.type ?? "text",
+                      ...meta(),
+                      componentName: meta().mainFieldType ?? "textFieldOptions",
+                      type: meta().type ?? "text",
                       ...item,
                     } as GenericField
                   }

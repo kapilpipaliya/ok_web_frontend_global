@@ -4,7 +4,7 @@ import {
   createGridOptions,
   createSelectOptions,
   type TextFieldOptionsField,
-} from "./FieldType";
+} from "./FieldSchemaType";
 
 export const PositionSection = {
   dimentions: createGridOptions("grid", "Dimention", [
