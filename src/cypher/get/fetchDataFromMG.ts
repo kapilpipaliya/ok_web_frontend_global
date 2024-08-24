@@ -1,9 +1,9 @@
-import jsep from "jsep";
+
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { evalAsync } from "~/lib/expression_eval";
+import { evalExpressionAsync } from "~/lib/expression_eval";
 import { checkSuperUserAuthorization } from "~/server/checkSuperUserAuthorization";
 
 import type { ContextType } from "../types/ContextType";
@@ -27,7 +27,7 @@ export async function fetchDataFromMG(
     return authorizationError;
   }
   try {
-    const mainResult = await evalAsync(jsep(expression.expression), context);
+    const mainResult = await evalExpressionAsync(expression.expression, context);
 
     await processIncomingOutgoingExpressions(expression, mainResult, context);
 

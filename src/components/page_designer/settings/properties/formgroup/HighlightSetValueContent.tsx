@@ -1,10 +1,10 @@
-import jsep from "jsep";
+
 import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/IconButton";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { DefaultValueContent } from "./DefaultValueContent";
@@ -22,7 +22,7 @@ export function HighlightSetValueContent(
   const [graph, setGraph] = useGraph();
   const componentExample = createMemo(
     () =>
-      evaluate(jsep("->$0CompExample"), { graph, setGraph, vertexes: [props.meta] }) || [],
+      evalExpression("->$0CompExample", { graph, setGraph, vertexes: [props.meta] }) || [],
   );
 
   return (

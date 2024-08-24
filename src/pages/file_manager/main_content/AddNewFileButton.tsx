@@ -1,9 +1,9 @@
-import jsep from "jsep";
+
 
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -24,7 +24,7 @@ export function AddNewFileButton() {
     const folder: Vertex =
       currentItem.L[0] === "Folder"
         ? currentItem
-        : evaluate(jsep("->ParentFolder"), {
+        : evalExpression("->ParentFolder", {
           graph,
           setGraph,
           vertexes: [currentItem],

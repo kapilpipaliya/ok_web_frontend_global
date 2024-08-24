@@ -1,10 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 export function getTextValue(value: any) {
   if (typeof value === "string") {
@@ -26,7 +24,7 @@ export function getConditionsExpression(
   setGraph: SetStoreFunction<GraphInterface>,
   isTest?: boolean,
 ) {
-  const conditionRows = evaluate(jsep("->RuleCond"), {
+  const conditionRows = evalExpression("->RuleCond", {
     graph,
     setGraph,
     vertexes: [rule],
@@ -35,7 +33,7 @@ export function getConditionsExpression(
     return "";
   }
   const getFieldValue = (fieldName: string, condition: Vertex) => {
-    const evaluatedFieldName = evaluate(jsep(fieldName), {
+    const evaluatedFieldName = evalExpression(fieldName, {
       graph,
       setGraph,
       vertexes: [condition],

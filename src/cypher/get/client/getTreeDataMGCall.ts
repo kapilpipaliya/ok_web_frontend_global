@@ -1,8 +1,8 @@
-import jsep from "jsep";
+
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { evalAsync } from "~/lib/expression_eval";
+import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
 
@@ -38,7 +38,7 @@ export async function getTreeDataMGCall(
         return [];
       }
 
-      const children = await evalAsync(jsep(levels.collection), {
+      const children = await evalExpressionAsync(levels.collection, {
         nodes,
         relationships,
         session: dbSession,

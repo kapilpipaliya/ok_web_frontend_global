@@ -1,8 +1,8 @@
-import jsep from "jsep";
+
 import { For } from "solid-js";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 export function TabsWithUnderline(
   props: Readonly<{
@@ -15,7 +15,7 @@ export function TabsWithUnderline(
   const getOptionLabel = (option: any) => {
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
-        return evaluate(jsep(props.displayValueKey), option);
+        return evalExpression(props.displayValueKey, option);
       }
       return option[props.displayValueKey];
     }

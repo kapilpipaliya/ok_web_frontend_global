@@ -1,10 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 import { evaluateRule } from "./evaluateRule";
 
@@ -16,7 +14,7 @@ export function evaluateAttributeRules(
   conditionType: string,
 ): boolean {
   const rules =
-    evaluate(jsep(`->$0${conditionType}`), {
+    evalExpression(`->$0${conditionType}`, {
       graph,
       setGraph,
       vertexes: [attribute],

@@ -14,7 +14,7 @@ export async function GET({ request }: APIEvent) {
     if (!user) {
       return new Response(
         JSON.stringify({
-          error: `Not Authorized`,
+          error: "Not Authorized",
         }),
         { status: 401 },
       );

@@ -1,8 +1,8 @@
-import jsep from "jsep";
+
 import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
 import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -44,7 +44,7 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const getChildrenItems = async () => {
     if (fileManagerStore.useLocalData) {
       const expression = getExpressionForFilesData(fileManagerStore.toParentEdgeType, props.item.id);
-      const children = evaluate(jsep(expression), { graph, setGraph, vertexes: [props.item] }) || [];
+      const children = evalExpression(expression, { graph, setGraph, vertexes: [props.item] }) || [];
       setChildren(children);
     } else {
       await fetchRemoteChildrenItems();
@@ -54,7 +54,7 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   onMount(getChildrenItems);
 
   // const children = createMemo(() =>
-  //   sortVertexesByPosition(evaluate(jsep("<-ParentFolder"), { graph, setGraph, vertexes: [props.item] }) || [])
+  //   sortVertexesByPosition(evalExpression("<-ParentFolder", { graph, setGraph, vertexes: [props.item] }) || [])
   // );
   const isSelectedHoverId = createSelector(
     () => fileManagerStore.treeItemHoverId,

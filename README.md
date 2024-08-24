@@ -206,3 +206,10 @@ Accordion
 Dialog
 PopOver
 Tooltip
+
+
+When reset a new super user:
+1, create a super user
+2. sync components
+3. add component properties manuallay.
+4. add essential pages.

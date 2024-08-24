@@ -1,10 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 export interface NavItem {
   children?: NavItem[];
@@ -32,7 +30,7 @@ export function getTreeData(
     if (!levels.collection) {
       return result;
     }
-    const children = evaluate(jsep(levels.collection), {
+    const children = evalExpression(levels.collection, {
       graph,
       setGraph,
       vertexes: vertexes,

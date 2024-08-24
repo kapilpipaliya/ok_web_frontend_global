@@ -2,7 +2,7 @@ import jsep from "jsep";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { evalAsync } from "~/lib/expression_eval";
+import { evalAsync, evalExpressionAsync } from "~/lib/expression_eval";
 
 import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 import { isReservedKeyword } from "./reservedKeywords";
@@ -29,15 +29,14 @@ export async function checkUniqueConstrains(vertex: Vertex) {
       return { error: "Provided name already exists" };
     }
 
-    const uniqueConstrains = await evalAsync(
-      jsep(`g:'Form[${label}]'->$0Unique`),
+    const uniqueConstrains = await evalExpressionAsync(`g:'Form[${label}]'->$0Unique`,
       {},
     );
     if (!Array.isArray(uniqueConstrains)) {
       return { error: false };
     }
     for (const uniqueConstraintVertex of uniqueConstrains) {
-      const keys = await evalAsync(jsep("->$0Key"), {
+      const keys = await evalExpressionAsync("->$0Key", {
         vertexes: [uniqueConstraintVertex],
       });
       if (keys.length > 0) {

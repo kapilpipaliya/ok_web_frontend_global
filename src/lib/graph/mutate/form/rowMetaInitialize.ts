@@ -118,7 +118,7 @@ function createAttributeRows(
 
     // now not needed because we are using cloneVertexWithEdges, so it use children attributes same.
     // Recursively clone child Attrs
-    /* const childAttrs = evaluate(jsep('->Attr'), {
+    /* const childAttrs = evalExpression('->Attr', {
       graph,
       setGraph,
       vertexes: [attrColumn],

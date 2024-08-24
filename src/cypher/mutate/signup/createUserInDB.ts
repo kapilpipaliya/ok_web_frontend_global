@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriverWithPort } from "~/cypher/driver";
 
-export async function createUserInDB(
+export async function createUserInSuperDB(
   superTx: Transaction,
   username: string,
   email: string,
@@ -25,6 +25,7 @@ export async function createUserInDB(
             subdomain: $subdomain,
             driverPort: $driverPort,
             logsPort: $logsPort,
+            password: $password,
             labPort: $labPort
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
@@ -40,23 +41,24 @@ export async function createUserInDB(
   };
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);
-  const session2 = (await getDriverWithPort(driverPort)).session();
-  await createUserInUserDB(session2, createUserParams);
-  session2.close();
+  const userSession = (await getDriverWithPort(driverPort)).session();
+  await createUserInUserDB(userSession, createUserParams, true);
+  userSession.close();
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }
 
 export async function createUserInUserDB(
   sessionOrTx: Session | Transaction,
   params: { [key: string]: any },
+  isSuper?: boolean,
 ) {
   const createUserQuery2 = `CREATE (u:User {
                 username: 'superadmin',
                 uuid: $uuid,
                 email: $email,
-                password: $password,
+                isSuper: $isSuper,
                 avatar: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
-  const createUserResult = await sessionOrTx.run(createUserQuery2, params);
+  const createUserResult = await sessionOrTx.run(createUserQuery2, { ...params, isSuper: isSuper ?? null });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

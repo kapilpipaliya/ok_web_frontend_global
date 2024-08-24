@@ -1,9 +1,9 @@
-import jsep from "jsep";
+
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 import type { CSSStore } from "../CssEditorContext";
 
@@ -46,7 +46,7 @@ export function cssStateToString(
                 key,
               );
               const files =
-                evaluate(jsep(`->${edgeName}`), {
+                evalExpression(`->${edgeName}`, {
                   graph,
                   setGraph: () => {},
                   vertexes: [data],

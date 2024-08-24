@@ -1,12 +1,10 @@
 import type { Session } from "neo4j-driver";
 
-import jsep from "jsep";
-
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { EdgeMap, Vertex, VertexMap } from "~/lib/graph/graph";
 
 import { addNodeEdges } from "~/cypher/mutate/sync/addNodeEdges";
-import { evalAsync } from "~/lib/expression_eval";
+import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { findOrCreateNodeAndUpdateProperties } from "./findOrCreateNodeAndUpdateProperties";
 
@@ -29,10 +27,7 @@ export async function processNodeSync(
     vertexes,
   };
 
-  const mainResult: Vertex[] = await evalAsync(
-    jsep(expression.expression),
-    context,
-  );
+  const mainResult: Vertex[] = await evalExpressionAsync(expression.expression, context);
 
   if (!mainResult || mainResult.length === 0) {
     return {

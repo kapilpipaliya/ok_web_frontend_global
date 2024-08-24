@@ -1,8 +1,8 @@
-import jsep from "jsep";
+
 import { createEffect, createMemo, createSignal, For } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -33,7 +33,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
     while (currentItem) {
       breadcrumbItems.unshift(currentItem);
       const parentVertex: Vertex[] =
-        evaluate(jsep(`->${fileManagerStore.toParentEdgeType}`), {
+        evalExpression(`->${fileManagerStore.toParentEdgeType}`, {
           graph,
           setGraph,
           vertexes: [currentItem],

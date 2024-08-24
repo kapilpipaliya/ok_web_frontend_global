@@ -50,7 +50,7 @@ export function validateDragOver(
       return;
     }
 
-    // const rootChildren = () => evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [formData] }) || [];
+    // const rootChildren = () => evalExpression("->Attr", { graph, setGraph, vertexes: [formData] }) || [];
     // const isFormRootVertetx = () => formData?.L?.[0] === "Form";
     const rootVertexes = () => {
       // if (isFormRootVertetx()) {

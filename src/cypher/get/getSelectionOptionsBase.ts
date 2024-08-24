@@ -2,11 +2,9 @@
 
 import type { Transaction } from "neo4j-driver";
 
-import jsep from "jsep";
-
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { evalAsync } from "~/lib/expression_eval";
+import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import type { ServerResult } from "../types/ServerResult";
 
@@ -18,7 +16,7 @@ export async function getSelectionOptionsBase(
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
 
-  const value = await evalAsync(jsep(collection), {
+  const value = await evalExpressionAsync(collection, {
     nodes,
     relationships,
     tx,

@@ -610,8 +610,10 @@ function projectedValueUnOps(projection: any, context: any) {
   return getTextValue(path(projection, vertex));
 }
 
-// const parse_tree = jsep('(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)');
+export function evalExpression(expression: string, context: object) {
+  return evaluate(jsep(expression), context);
+}
 
-//console.log(parse_tree)
-// const value = evaluate(parse_tree, {a: 2, b: 2, c: 5});
-// console.log(value)
+export function evalExpressionAsync(expression: string, context: object) {
+  return evalAsync(jsep(expression), context);
+}

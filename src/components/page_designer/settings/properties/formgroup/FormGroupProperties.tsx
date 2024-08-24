@@ -54,7 +54,7 @@ function modifyMetaVertexExpr(meta: Vertex) {
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
-  onChange(meta: Vertex, data: any): void;
+  onChange(meta: Vertex, data: unknown): void;
   selectedLayout: Vertex;
   txnId: number;
 }
@@ -110,14 +110,13 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 
 export function createVertexIds() {
   return {
+    as: `asVertex${createUniqueId()}`,
     calculatedValue: `calculatedValueVertex${createUniqueId()}`,
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
     hidden: `hiddenVertex${createUniqueId()}`,
-    label: `labelVertex${createUniqueId()}`,
-    labelClass: `labelClassVertex${createUniqueId()}`,
     name: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
@@ -147,16 +146,8 @@ function createVertices(
         },
       },
       {
-        attributes: [
-          textFieldInputMeta
-        ],
-        id: vertexIds.label,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextField",
-          displayName: "Label",
-          name: "label",
-        },
+        id: vertexIds.as,
+        P: { displayName: "As", name: "as" },
       },
       {
         id: vertexIds.perm,
@@ -169,10 +160,6 @@ function createVertices(
       {
         id: vertexIds.class,
         P: { displayName: "Class", name: "class" },
-      },
-      {
-        id: vertexIds.labelClass,
-        P: { displayName: "Label Class", name: "labelClass" },
       },
       {
         id: vertexIds.errorClass,
@@ -262,11 +249,11 @@ function moveClassToLast(
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
-    graph.vertexes[vertexIds.label],
     graph.vertexes[vertexIds.perm],
     // Default value can be only entered when it is in Form Builder
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     graph.vertexes[vertexIds.calculatedValue],
+    graph.vertexes[vertexIds.as],
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hidden],
     graph.vertexes[vertexIds.disabled],
@@ -277,7 +264,7 @@ function moveClassToLast(
 interface PropertyFieldProps {
   meta: Vertex;
   metaTxnId: number;
-  onChange: (meta: Vertex, data: any) => void;
+  onChange: (meta: Vertex, data: unknown) => void;
   selectedLayout: Vertex;
   txnId: number;
 }

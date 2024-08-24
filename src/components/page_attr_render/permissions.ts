@@ -1,10 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 export function getConfiguredPermissions(
   currentUserRoleId: Id[],
@@ -18,14 +16,14 @@ export function getConfiguredPermissions(
   const configuredPermissions: Vertex[] = [];
 
   const allRolePermissions: Vertex[] =
-    evaluate(jsep(`->$0${vertex.L?.[0] !== "Attr" ? "Global" : ""}Perm`), {
+    evalExpression(`->$0${vertex.L?.[0] !== "Attr" ? "Global" : ""}Perm`, {
       graph,
       setGraph,
       vertexes: [vertex],
     }) || [];
   for (const rp of allRolePermissions) {
     const roles: Vertex[] =
-      evaluate(jsep("->$0Role"), { graph, setGraph, vertexes: [rp] }) || [];
+      evalExpression("->$0Role", { graph, setGraph, vertexes: [rp] }) || [];
     if (roles.some((r) => currentUserRoleId.includes(r.id))) {
       configuredPermissions.push(rp);
     }
@@ -42,7 +40,7 @@ export function hasPermissions(
 ) {
   for (const r of configuredPermissions) {
     const allRolePermissions: Vertex[] =
-      evaluate(jsep("->$0Perm"), { graph, setGraph, vertexes: [r] }) || [];
+      evalExpression("->$0Perm", { graph, setGraph, vertexes: [r] }) || [];
     if (allRolePermissions.some((p) => p.P.name === permission)) {
       return true;
     }

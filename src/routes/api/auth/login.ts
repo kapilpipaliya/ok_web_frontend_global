@@ -4,7 +4,7 @@ import type { Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriverWithPort } from "~/cypher/driver";
+import { getDriver, } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
@@ -14,7 +14,7 @@ export async function POST({ request }: APIEvent) {
     const body = await request.json();
     const { email, password } = body;
 
-    if (!email || !password) {
+    if (!(email && password)) {
       return new Response(
         JSON.stringify({
           error: "Email or password is missing",
@@ -52,7 +52,7 @@ export async function POST({ request }: APIEvent) {
 async function authenticateUser(
   emailOrUsername: string,
   password: string,
-  subDomain: string,
+  _subDomain: string,
   dbSession: Session,
 ) {
   try {
@@ -66,16 +66,17 @@ async function authenticateUser(
 
     const user = convertNodeToJson(result.records[0].get("u"));
 
-    if (subDomain === "super") {
+    // when super user, check password from super db
+    if (user.P.isSuper) {
       return await authenticateSuperUser(user, password);
     }
-    return authenticateRegularUser(user, password);
+    return comparePassword(user, password);
   } finally {
     await dbSession.close();
   }
 }
 
-function authenticateRegularUser(user: Vertex, password: string) {
+function comparePassword(user: Vertex, password: string) {
   if (user.P.password !== password) {
     throw new Error("Unauthorized: Incorrect email, username, or password.");
   }
@@ -87,21 +88,19 @@ async function authenticateSuperUser(
   superUser: Vertex,
   password: string,
 ) {
-  const userDbSession = (
-    await getDriverWithPort(superUser.P.driverPort)
-  ).session();
+  const superDbSession = (await getDriver("super")).session();
 
   try {
     const query =
       "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
-    const userDbResult = await userDbSession.run(query, { uuid: superUser.P.uuid });
+    const superDbResult = await superDbSession.run(query, { uuid: superUser.P.uuid });
 
-    if (userDbResult.records.length === 0) {
+    if (superDbResult.records.length === 0) {
       throw new Error("Not Authorized Email or Username.");
     }
-    const user = convertNodeToJson(userDbResult.records[0].get("u"));
-    return authenticateRegularUser(user, password);
+    const user = convertNodeToJson(superDbResult.records[0].get("u"));
+    return comparePassword(user, password);
   } finally {
-    await userDbSession.close();
+    await superDbSession.close();
   }
 }

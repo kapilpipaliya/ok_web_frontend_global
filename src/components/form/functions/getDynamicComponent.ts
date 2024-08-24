@@ -99,8 +99,7 @@ const kobalteComponents = {
 
 export const componentsMap: Record<string, any> = {
   Box: BoxField,
-  Button: ButtonField,
-  CheckBox: Checkbox,
+  Button: ButtonField, // kobalte button
   ColorBox: KobalteTextField,
   DynamicTable: TableInputField,
   ErrorPage: PageField,
@@ -109,7 +108,6 @@ export const componentsMap: Record<string, any> = {
   HtmlEditor: KobalteTextField,
   ImageUploader: FileUploader,
   Link: Link,
-  NumberBox: NumberField,
   Page: PageField,
   RadioGroup: RadioGroupField,
   Repeater: Repeater,

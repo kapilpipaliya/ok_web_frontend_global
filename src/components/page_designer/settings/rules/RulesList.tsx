@@ -1,9 +1,9 @@
-import jsep from "jsep";
+
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 import { IconButton } from "~/components/IconButton";
 import { ZIndex } from "~/components/ZIndex";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
@@ -20,7 +20,7 @@ export function RulesList() {
   const rules = createMemo(() => {
     if (layoutStore.formStore[0]?.formData) {
       return (
-        evaluate(jsep("->Rule"), {
+        evalExpression("->Rule", {
           graph,
           setGraph,
           vertexes: [layoutStore.formStore[0].formData],
@@ -65,7 +65,7 @@ export function RulesList() {
   };
   const removeAllConditions = (rule: Vertex) => {
     const conditions =
-      evaluate(jsep("->$0Cond"), {
+      evalExpression("->$0Cond", {
         graph,
         setGraph,
         vertexes: [rule],

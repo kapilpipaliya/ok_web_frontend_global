@@ -1,12 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
-import jsep from "jsep";
 import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
@@ -69,7 +68,7 @@ export function MultiSelectField(
   const getOptionLabel = (option: Option) => {
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
-        return evaluate(jsep(props.displayValueKey), option);
+        return evalExpression(props.displayValueKey, option);
       }
       return option[props.displayValueKey as keyof Option];
     }

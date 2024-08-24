@@ -1,4 +1,4 @@
-import jsep from "jsep";
+
 import { createMemo, createSignal, type JSX } from "solid-js";
 
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
@@ -7,7 +7,7 @@ import { CustomModal } from "~/components/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";
 import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import FileManager from "~/pages/file_manager/FileManager";
@@ -38,10 +38,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       return [];
     }
     return (
-      evaluate(
-        jsep(
+      evalExpression(
           `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta.name)}`,
-        ),
         { graph, setGraph, vertexes: [cssEditorProps.data] },
       ) || []
     );

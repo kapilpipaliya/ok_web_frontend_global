@@ -1,12 +1,10 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import jsep from "jsep";
-
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { validateInput } from "~/components/page_designer/settings/properties/validations/validateInput";
-import { evaluate } from "~/lib/expression_eval";
+import { evalExpression, } from "~/lib/expression_eval";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 
 import type {
@@ -26,7 +24,7 @@ export function getChildrenAttrs(
     return [];
   }
   return sortVertexesByPosition(
-    evaluate(jsep("->Attr"), { graph, setGraph, vertexes: [child] }) || [],
+    evalExpression("->Attr", { graph, setGraph, vertexes: [child] }) || [],
   );
 }
 
@@ -197,11 +195,11 @@ export function getAllFieldsUsedInAllRules(
     return {};
   }
   const rules =
-    evaluate(jsep("->Rule"), { graph, setGraph, vertexes: [formVertex] }) || [];
+    evalExpression("->Rule", { graph, setGraph, vertexes: [formVertex] }) || [];
   const ruleToIDMap: RuleToIDMap = {};
   rules.forEach((rule: Vertex) => {
     ruleToIDMap[rule.id] = (
-      evaluate(jsep("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)"), {
+      evalExpression("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)", {
         graph,
         setGraph,
         vertexes: [rule],
@@ -246,7 +244,7 @@ export function getAllFieldsUsedInRootLevelSetting(
   projection: string,
 ): Id[] {
   const allUniqueKeys =
-    evaluate(jsep(projection), { graph, setGraph, vertexes: [formVertex] }) ||
+    evalExpression(projection, { graph, setGraph, vertexes: [formVertex] }) ||
     [];
   const allUniqueKeyIds = allUniqueKeys.map((key: Vertex) => key.id);
 
@@ -275,7 +273,7 @@ export function allFormAttrsInPageFromLevel(
     if (excludeVertices.includes(vertex.id)) {
       return;
     }
-    const compLabel = evaluate(jsep("->$0Comp"), {
+    const compLabel = evalExpression("->$0Comp", {
       graph,
       vertexes: [vertex],
     })?.[0]?.P.name;
@@ -285,7 +283,7 @@ export function allFormAttrsInPageFromLevel(
     }
 
     const children =
-      evaluate(jsep("->Attr"), { graph, vertexes: [vertex] }) || [];
+      evalExpression("->Attr", { graph, vertexes: [vertex] }) || [];
     for (const child of children) {
       collectFormProperties(child);
     }
