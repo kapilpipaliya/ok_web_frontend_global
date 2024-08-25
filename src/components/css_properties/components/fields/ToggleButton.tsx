@@ -1,8 +1,7 @@
+import { Icon } from "@iconify-icon/solid";
 import { For, splitProps } from "solid-js";
 
-import type { ToggleField } from "../constants/FieldSchemaType";
-
-import { IconifyIcon } from "./IconifyIcon";
+import type { ToggleField } from "../../constants/FieldSchemaType";
 
 export const ToggleButton = (props: Readonly<ToggleField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
@@ -35,7 +34,11 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
                 local.onChange?.(option.value);
               }}
             >
-              {option.icon ? <IconifyIcon icon={option.key} /> : option.key}
+              {option.icon ? (
+                <Icon height={23} icon={option.icon} width={23} />
+              ) : (
+                option.key
+              )}
             </div>
           );
         }}

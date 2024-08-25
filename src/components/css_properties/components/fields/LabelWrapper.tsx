@@ -2,9 +2,9 @@ import { type Accessor, createMemo } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import type { ColorPickerField } from "../constants/FieldSchemaType";
+import type { ColorPickerField } from "../../constants/FieldSchemaType";
 
-import { useRenderContext } from "../RenderContext";
+import { useRenderContext } from "../../RenderContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(

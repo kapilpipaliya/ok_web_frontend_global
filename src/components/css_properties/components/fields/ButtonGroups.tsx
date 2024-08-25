@@ -1,10 +1,9 @@
+import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, splitProps } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
-import type { ButtonGroupField } from "../constants/FieldSchemaType";
-
-import { IconifyIcon } from "./IconifyIcon";
+import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
 export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
@@ -32,7 +31,11 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                 <span
                   class={`${props.value === option.value ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
                 >
-                  {option.icon ? <IconifyIcon icon={option.key} /> : option.key}
+                  {option.icon ? (
+                    <Icon height={23} icon={option.icon} width={23} />
+                  ) : (
+                    option.key
+                  )}
                 </span>
               </CustomTooltip>
             </label>

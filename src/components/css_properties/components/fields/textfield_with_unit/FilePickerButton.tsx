@@ -1,7 +1,12 @@
 import { type Accessor, createMemo, createSignal, type JSX } from "solid-js";
 
+import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
+import { useCssState } from "~/components/css_properties/CssEditorContext";
+import { useCssEditorProps } from "~/components/css_properties/CSSEditorPropsContext";
+import { useRenderContext } from "~/components/css_properties/RenderContext";
+import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
 import { CustomModal } from "~/components/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";
 import { IconButton } from "~/components/IconButton";
@@ -11,13 +16,6 @@ import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import FileManager from "~/pages/file_manager/FileManager";
-
-import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
-
-import { useCssState } from "../../CssEditorContext";
-import { useCssEditorProps } from "../../CSSEditorPropsContext";
-import { useRenderContext } from "../../RenderContext";
-import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 
 interface FilePickerButtonProps
   extends JSX.InputHTMLAttributes<HTMLInputElement> {

@@ -1,9 +1,10 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { splitProps } from "solid-js";
 
-import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
+import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 
-import { sizeTypes } from "../../constants/csseditor_constants";
+import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
+
 import { TextFieldWithUnitContent } from "./TextFieldWithUnitContent";
 
 export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {

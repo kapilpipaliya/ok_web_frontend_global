@@ -12,8 +12,8 @@ import type { TransitionAttributes } from "../utils/generate/generateTransition"
 
 import { useCssEditor, useCssState } from "../CssEditorContext";
 import { useRenderContext } from "../RenderContext";
-import { LabelWrapper } from "./LabelWrapper";
-import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
+import { LabelWrapper } from "./fields/LabelWrapper";
+import { CssPropertyRow } from "./fields/shadow_editor/CssPropertyRow";
 
 export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [, setCssState] = useCssEditor();

@@ -10,6 +10,7 @@ import type {
 import { sizeTypes } from "./csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";
 import { createGridOptions } from "./FieldSchemaType";
+import { Icons } from "./Icons";
 
 export const EffectsSection = {
   filter: {
@@ -84,8 +85,8 @@ export const EffectsSection = {
     label: "Backface",
     name: "backface-visibility",
     options: [
-      { key: "Visible", value: "visible" },
-      { key: "Hidden", value: "hidden" },
+      { icon: Icons.visibility.yes, key: "Visible", value: "visible" },
+      { icon: Icons.visibility.no, key: "Hidden", value: "hidden" },
     ],
   } as ToggleField,
 

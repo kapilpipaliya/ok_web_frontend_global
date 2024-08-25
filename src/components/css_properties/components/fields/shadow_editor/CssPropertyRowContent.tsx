@@ -1,27 +1,27 @@
 import { type Accessor, type JSX, Match, type Setter, Switch } from "solid-js";
 
-import type { DataEditorField } from "../../constants/FieldSchemaType";
+import type { DataEditorField } from "../../../constants/FieldSchemaType";
 
 import {
   generateBoxShadow,
   type ShadowAttributes,
-} from "../../utils/generate/generateBoxShadow";
+} from "../../../utils/generate/generateBoxShadow";
 import {
   type FilterAttributes,
   generateFilter,
-} from "../../utils/generate/generateFilter";
+} from "../../../utils/generate/generateFilter";
 import {
   generateTextShadow,
   type TextShadowAttributes,
-} from "../../utils/generate/generateTextShadow";
+} from "../../../utils/generate/generateTextShadow";
 import {
   generateTransform,
   type TransformAttributes,
-} from "../../utils/generate/generateTransform";
+} from "../../../utils/generate/generateTransform";
 import {
   generateTransition,
   type TransitionAttributes,
-} from "../../utils/generate/generateTransition";
+} from "../../../utils/generate/generateTransition";
 
 export interface CssPropertyRowContentProps {
   centerComponent?: JSX.Element;

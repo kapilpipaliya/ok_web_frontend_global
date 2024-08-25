@@ -1,6 +1,6 @@
 import { type JSX, Show, splitProps } from "solid-js";
 
-import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
+import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
 

@@ -1,6 +1,5 @@
+import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
 import { isNumber } from "~/lib/data_structure/number/isNumber";
-
-import { sizeTypes } from "../../constants/csseditor_constants";
 
 export function getValueWithoutUnits(
   valueWithUnits: number | string,

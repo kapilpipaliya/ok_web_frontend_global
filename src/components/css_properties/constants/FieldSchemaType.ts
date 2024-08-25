@@ -9,6 +9,7 @@ export interface Field {
   class?: string;
   componentName: string;
   projections?: (number | string)[];
+  useParentProjection?: boolean;
 }
 
 export interface FormField extends Field {
@@ -17,7 +18,6 @@ export interface FormField extends Field {
   info?: string;
   name: string;
   onChange?: (value: any) => void;
-  useParentProjection?: boolean;
   value?: any;
 }
 
@@ -44,12 +44,10 @@ export interface ColorPickerField extends FormField {
   onChangeInput?: (value: string) => void;
 }
 
-export interface GridField extends FormField {
-  children: GenericField[];
-  componentName: "grid";
-  gap: string;
-  "grid-template-columns": string;
-  padding: string;
+export interface BoxField extends Field {
+  children?: GenericField[];
+  componentName: "box";
+  name?: string;
 }
 
 export interface AnotherOption {
@@ -82,7 +80,7 @@ export interface ToggleField extends FormField {
   isLabelOnTop?: boolean;
   label: string;
   onChangeInput?: (value: string) => void;
-  options: { icon?: boolean; key: string; value: string }[];
+  options: { icon?: string; key: string; value: string }[];
 }
 
 // box-shadow
@@ -110,7 +108,7 @@ export interface ButtonGroupField extends FormField {
   label: string;
   onChangeInput?: (value: string) => void;
   options: {
-    icon?: true;
+    icon?: string;
     key: string;
     tooltip?: string;
     value: string;
@@ -124,19 +122,12 @@ export interface StringField extends FormField {
   options: string[];
 }
 
-export interface DividerField extends Field {
-  componentName: "divider";
-  label: string;
-  title?: string;
-}
-
 export type GenericField =
+  | BoxField
   | ButtonGroupField
   | ColorPickerField
   | DataEditorField
-  | DividerField
   | FieldWithCustomProperty
-  | GridField
   | SelectField
   | StringField
   | TextFieldOptionsField
@@ -179,13 +170,11 @@ export const createGridOptions = (
   name: string,
   _label: string,
   children: GenericField[],
-): GridField => ({
+): BoxField => ({
   children,
-  componentName: "grid",
-  gap: "5px|10px",
-  "grid-template-columns": "repeat(2,auto)",
+  class: "grid ai:center gap:5px|10px grid-template-cols:repeat(2,auto) p:5px",
+  componentName: "box",
   name,
-  padding: "5px",
   useParentProjection: true,
 });
 

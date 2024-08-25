@@ -3,7 +3,7 @@ import { type Accessor, For, type JSX, type Setter, Show } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { IconButton } from "~/components/IconButton";
 
-import type { DataEditorField } from "../../constants/FieldSchemaType";
+import type { DataEditorField } from "../../../constants/FieldSchemaType";
 
 export interface CssPropertyRowSettingsProps {
   children?: JSX.Element;

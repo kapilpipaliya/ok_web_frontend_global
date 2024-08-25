@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createSignal, For, Show } from "solid-js";
 
+import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
+
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
-
-import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
 
 interface DropDownProps {
   isDropdownOpen: () => boolean;

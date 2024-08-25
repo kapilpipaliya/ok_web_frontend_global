@@ -3,12 +3,14 @@ import { type Accessor, createMemo, Match, splitProps, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import { ButtonGroups } from "~/components/css_properties/components/ButtonGroups";
-import { ColorPickerInput } from "~/components/css_properties/components/ColorPickerInput";
 import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
+import { ButtonGroups } from "~/components/css_properties/components/fields/ButtonGroups";
+import { ColorPickerInput } from "~/components/css_properties/components/fields/ColorPickerInput";
+import { Select } from "~/components/css_properties/components/fields/Select";
+import { ToggleButton } from "~/components/css_properties/components/fields/ToggleButton";
 import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
-import { Select } from "~/components/css_properties/components/Select";
-import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
+import { BoxField } from "~/components/fields/BoxField";
+import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { useFormContext } from "~/components/form/FormContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
@@ -23,21 +25,16 @@ import {
 import { useCssEditorProps } from "../CSSEditorPropsContext";
 import { RenderContextProvider } from "../RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
-import { CenterDiv } from "./CenterDiv";
-import { Divider } from "./Divider";
-import { GridField } from "./GridField";
-import { LabelWrapper } from "./LabelWrapper";
-import { NotFoundComponent } from "./NotFoundComponent";
+import { LabelWrapper } from "./fields/LabelWrapper";
+import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { RenderChildren } from "./RenderChildren";
-import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
 
 const componentMap: Record<string, any> = {
+  box: BoxField,
   buttonGroups: ButtonGroups,
   colorPicker: ColorPickerInput,
   dataEditor: DataEditWithCustomDialog,
-  divider: Divider,
   fieldWithCustomProperty: FieldWithCustomBox,
-  grid: GridField,
   select: Select,
   textField: TextFieldWithSelect,
   textFieldOptions: TextFieldWithSelect,
@@ -171,10 +168,10 @@ export function DynamicCSSComponent(
           </div>
         </Match>
         <Match when={props.meta.label}>
-          <CenterDiv>
+          <div class={"flex ai:center jc:space-between w:full"}>
             <LabelWrapper onResetIconClick={resetValue} value={value()} />
             <Content />
-          </CenterDiv>
+          </div>
         </Match>
         <Match when={true}>
           <Content />

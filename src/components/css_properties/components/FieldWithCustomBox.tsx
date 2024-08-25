@@ -9,7 +9,7 @@ import type {
 } from "../constants/FieldSchemaType";
 
 import { useCssEditor, useCssState } from "../CssEditorContext";
-import { ButtonGroups } from "./ButtonGroups";
+import { ButtonGroups } from "./fields/ButtonGroups";
 
 export const FieldWithCustomBox = (
   props: Readonly<FieldWithCustomProperty>,
@@ -61,13 +61,13 @@ export const FieldWithCustomBox = (
             },
             options: [
               {
-                icon: true,
+                icon: "radix-icons:box",
                 key: "allCustom",
                 tooltip: "All",
                 value: "all",
               },
               {
-                icon: true,
+                icon: "lucide:box-select",
                 key: "customIcon",
                 tooltip: "Custom",
                 value: "custom",

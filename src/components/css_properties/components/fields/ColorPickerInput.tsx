@@ -1,6 +1,6 @@
 import { type JSX, splitProps } from "solid-js";
 
-import type { ColorPickerField } from "../constants/FieldSchemaType";
+import type { ColorPickerField } from "../../constants/FieldSchemaType";
 
 export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   const [local, others] = splitProps(props, ["componentName", "onChange"]);

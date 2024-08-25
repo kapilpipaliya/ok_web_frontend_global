@@ -5,7 +5,7 @@ import { createSignal, For, type Setter, Show, splitProps } from "solid-js";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
-import type { SelectField } from "../constants/FieldSchemaType";
+import type { SelectField } from "../../constants/FieldSchemaType";
 
 function formatString(str: string): string {
   return str

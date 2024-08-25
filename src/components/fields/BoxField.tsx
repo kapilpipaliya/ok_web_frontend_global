@@ -3,7 +3,9 @@ import { Dynamic } from "solid-js/web";
 
 import type { GenericComponentProps } from "./FieldType";
 
-export function BoxField(props: Readonly<GenericComponentProps>) {
+export function BoxField(
+  props: { as?: string } & Readonly<GenericComponentProps>,
+) {
   const [local, others] = splitProps(props, [
     "componentName",
     "meta",
@@ -14,10 +16,11 @@ export function BoxField(props: Readonly<GenericComponentProps>) {
     "isTableInside",
     "txnId",
     "children",
+    "as",
   ]);
 
   return (
-    <Dynamic component={local.meta.P.as || "div"} {...others}>
+    <Dynamic component={local.as || "div"} {...others}>
       {local.children}
     </Dynamic>
   );

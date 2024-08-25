@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createSignal } from "solid-js";
 
-import type { DataEditorField } from "../../constants/FieldSchemaType";
+import type { DataEditorField } from "../../../constants/FieldSchemaType";
 
 import { CssPropertyRowContent } from "./CssPropertyRowContent";
 import { CssPropertyRowSettings } from "./CssPropertyRowSettings";

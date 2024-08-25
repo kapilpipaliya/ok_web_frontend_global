@@ -1,7 +1,7 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { type Component, createSignal, onCleanup, Show } from "solid-js";
 
-import type { OptionType } from "../../constants/FieldSchemaType";
+import type { OptionType } from "~/components/css_properties/constants/FieldSchemaType";
 
 import { FilePickerButton } from "./FilePickerButton";
 import { getValueWithoutUnits } from "./getValueWithoutUnits";
