@@ -12,7 +12,7 @@ export const TextShadow = {
     children: [
       {
         componentName: "colorPicker",
-        hashName: 'color',
+        hashName: "color",
         info: "text-shadow",
         isLabelOnTop: true,
         label: "Shadow Color",
@@ -21,7 +21,7 @@ export const TextShadow = {
       createGridOptions("grid", "Shadow", [
         {
           componentName: "textFieldOptions",
-          hashName: 'offset-x_offset-y',
+          hashName: "offset-x_offset-y",
           info: "text-shadow",
           isLabelOnTop: true,
           label: "X Offset",
@@ -31,7 +31,7 @@ export const TextShadow = {
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
-          hashName: 'offset-x_offset-y',
+          hashName: "offset-x_offset-y",
           info: "text-shadow",
           isLabelOnTop: true,
           label: "Y Offset",
@@ -41,7 +41,7 @@ export const TextShadow = {
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
-          hashName: 'blur-radius',
+          hashName: "blur-radius",
           info: "text-shadow",
           isLabelOnTop: true,
           label: "Blur",
@@ -54,6 +54,7 @@ export const TextShadow = {
     componentName: "dataEditor",
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
+    hideLabel: true,
     label: "Text Shadow",
     name: "text-shadow",
     useParentProjection: true,

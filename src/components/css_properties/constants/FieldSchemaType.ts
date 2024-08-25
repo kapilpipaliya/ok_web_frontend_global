@@ -13,6 +13,7 @@ export interface Field {
 
 export interface FormField extends Field {
   hashName?: string;
+  hideLabel?: boolean;
   info?: string;
   name: string;
   onChange?: (value: any) => void;

@@ -1,22 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { makeEventListener } from "@solid-primitives/event-listener";
-import {
-  createSignal,
-  For,
-  Match,
-  type Setter,
-  Show,
-  splitProps,
-  Switch,
-} from "solid-js";
+import { createSignal, For, type Setter, Show, splitProps } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
 import type { SelectField } from "../constants/FieldSchemaType";
-
-import { Container } from "./Container";
-import { LabelWrapper } from "./LabelWrapper";
 
 function formatString(str: string): string {
   return str
@@ -45,56 +34,32 @@ export const Select = (props: Readonly<SelectField>) => {
   };
   makeEventListener(document, "mousedown", handleClickOutside);
 
+  const [reference, setReference] = createSignal<HTMLElement | null>(null);
+
   return (
-    <Container>
-      <Switch>
-        <Match when={props.isLabelOnTop}>
-          <div class={"w:full"}>
-            <LabelWrapper />
-            <Content />
-          </div>
-        </Match>
-        <Match when={props.label}>
-          <div class={"flex ai:center jc:space-between w:100%"}>
-            <LabelWrapper />
-            <Content />
-          </div>
-        </Match>
-        <Match when={true}>
-          <Content />
-        </Match>
-      </Switch>
-    </Container>
+    <div class={`${props.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
+      <DropdownButton
+        isActive={isActive()}
+        setReference={setReference}
+        toggleDropdown={toggleDropdown}
+        value={props.value}
+      />
+      <Show when={isActive()}>
+        <ZIndex>
+          <DropdownMenu
+            onClickOutside={() => setIsActive(false)}
+            parentRef={reference()!}
+          >
+            <DropdownList
+              options={props.options}
+              selectOption={selectOption}
+              value={props.value}
+            />
+          </DropdownMenu>
+        </ZIndex>
+      </Show>
+    </div>
   );
-
-  function Content() {
-    const [reference, setReference] = createSignal<HTMLElement | null>(null);
-
-    return (
-      <div class={`${props.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
-        <DropdownButton
-          isActive={isActive()}
-          setReference={setReference}
-          toggleDropdown={toggleDropdown}
-          value={props.value}
-        />
-        <Show when={isActive()}>
-          <ZIndex>
-            <DropdownMenu
-              onClickOutside={() => setIsActive(false)}
-              parentRef={reference()!}
-            >
-              <DropdownList
-                options={props.options}
-                selectOption={selectOption}
-                value={props.value}
-              />
-            </DropdownMenu>
-          </ZIndex>
-        </Show>
-      </div>
-    );
-  }
 };
 
 interface DropdownButtonProps {

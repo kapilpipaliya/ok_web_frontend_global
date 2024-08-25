@@ -40,6 +40,7 @@ export const FieldWithCustomBox = (
             {
               ...props,
               componentName: props.mainFieldType ?? "textFieldOptions",
+              hideLabel: true,
               type: props.type ?? "text",
             } as GenericField
           }

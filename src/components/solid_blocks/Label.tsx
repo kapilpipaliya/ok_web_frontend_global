@@ -12,6 +12,7 @@ import { useFormContext } from "../form/FormContext";
 
 interface LabeledFieldProps {
   children: JSX.Element;
+  inline?: boolean;
   label?: string;
   position?: "bottom" | "left" | "right" | "system" | "top";
   required?: boolean;
@@ -67,7 +68,7 @@ export function Label(
 
   return (
     <Dynamic
-      class={`inline-flex align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
+      class={`${props.inline ? "inline-flex" : "flex"} align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
       component={component()}
     >
       <Switch fallback={resolvedChildren()}>

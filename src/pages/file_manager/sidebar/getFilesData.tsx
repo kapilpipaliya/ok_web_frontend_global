@@ -20,7 +20,7 @@ export function getExpressionForRootData(
 ) {
   if (folderId || fileId) {
     // -> operator not return current vertex
-    return `id:'${folderId || fileId}'->${toParentEdgeType}*`;
+    return `id:'${folderId || fileId}'->'${toParentEdgeType}*'`;
   }
   return `g:'${parentVertexLabel}[root]'`;
 }

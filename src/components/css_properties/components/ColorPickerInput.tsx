@@ -1,9 +1,6 @@
-import { type JSX, Match, splitProps, Switch } from "solid-js";
+import { type JSX, splitProps } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldSchemaType";
-
-import { Container } from "./Container";
-import { LabelWrapper } from "./LabelWrapper";
 
 export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   const [local, others] = splitProps(props, ["componentName", "onChange"]);
@@ -16,7 +13,7 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
     local.onChange?.(target.value);
   };
 
-  const Content = () => (
+  return (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
       <input
         {...others}
@@ -34,27 +31,5 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
         value={props.value || ""}
       />
     </div>
-  );
-
-  return (
-    <Container>
-      <Switch>
-        <Match when={props.isLabelOnTop}>
-          <div class={"w:full"}>
-            <LabelWrapper />
-            <Content />
-          </div>
-        </Match>
-        <Match when={props.label}>
-          <div class={"flex ai:center jc:space-between w:100%"}>
-            <LabelWrapper />
-            <Content />
-          </div>
-        </Match>
-        <Match when={true}>
-          <Content />
-        </Match>
-      </Switch>
-    </Container>
   );
 };

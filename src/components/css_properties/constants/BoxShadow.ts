@@ -79,5 +79,6 @@ export const BoxShadow = {
     label: "Box Shadow",
     name: "box-shadow",
     useParentProjection: true,
+    hideLabel: true,
   } as DataEditorField,
 };

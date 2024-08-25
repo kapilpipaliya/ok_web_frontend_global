@@ -1,57 +1,31 @@
-import { path } from "rambda";
 import { type Accessor, createMemo } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type { ColorPickerField } from "../constants/FieldSchemaType";
 
-import {
-  useCssDefaultEditor,
-  useCssEditor,
-  useCssState,
-} from "../CssEditorContext";
 import { useRenderContext } from "../RenderContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(
-  props: Readonly<{ onResetIconClick?: () => void }>,
+  props: Readonly<{ onResetIconClick?: () => void; value?: any }>,
 ) {
-  const [cssState, setCssState] = useCssEditor();
-  const [cssDefault] = useCssDefaultEditor();
-  const [state] = useCssState();
   const [parentItems] = useRenderContext();
   const meta = getLastItem(
     parentItems?.meta || [],
   ) as Accessor<ColorPickerField>;
 
   const isValueConfigured = createMemo(() => {
-    const projections = [
-      state() || "",
-      ...(meta().projections ?? []),
-      meta().name,
-    ];
-    const value = path(projections, cssState);
-    if (Array.isArray(value)) {
-      return value.length > 0;
+    if (Array.isArray(props.value)) {
+      return props.value.length > 0;
     }
-    return !!value;
+    return !!props.value;
   });
   return (
     <ContainerLabel
       hashName={meta().hashName}
       info={meta().info ?? meta().name}
-      onResetIconClick={() => {
-        const projections = [
-          state() || "",
-          ...(meta().projections ?? []),
-          meta().name,
-        ];
-        const value = path(projections, cssDefault);
-        setCssState(state(), ...(meta().projections ?? []), {
-          [meta().name]: value,
-        });
-        props.onResetIconClick?.();
-      }}
+      onResetIconClick={props.onResetIconClick}
       showResetIcon={isValueConfigured()}
       title={meta().label}
     />

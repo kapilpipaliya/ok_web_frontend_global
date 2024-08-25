@@ -47,6 +47,7 @@ export const EffectsSection = {
     label: "Filter",
     name: "filter",
     useParentProjection: true,
+    hideLabel: true,
   } as DataEditorField,
 
   backdropFilter: {
@@ -74,6 +75,7 @@ export const EffectsSection = {
     label: "Backdrop Filter",
     name: "backdrop-filter",
     useParentProjection: true,
+    hideLabel: true,
   } as DataEditorField,
 
   backfaceVisibility: {

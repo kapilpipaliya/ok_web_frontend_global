@@ -15,7 +15,6 @@ interface ContentProps {
   determineSelectedOption: () => string;
   handleInputChange: (event: Event) => void;
   meta: any; // Define the proper type here
-  resetValue: () => void;
   value: string;
 }
 

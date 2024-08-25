@@ -1,17 +1,15 @@
-import { For, Match, splitProps, Switch } from "solid-js";
+import { For, splitProps } from "solid-js";
 
 import type { ToggleField } from "../constants/FieldSchemaType";
 
-import { CenterDiv } from "./CenterDiv";
 import { IconifyIcon } from "./IconifyIcon";
-import { LabelWrapper } from "./LabelWrapper";
 
 export const ToggleButton = (props: Readonly<ToggleField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
 
   const isSelected = (option: any) => props.value === option.value;
 
-  const Content = () => (
+  return (
     <div
       class={`${
         !props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
@@ -43,25 +41,5 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
         }}
       </For>
     </div>
-  );
-
-  return (
-    <Switch>
-      <Match when={props.isLabelOnTop}>
-        <div class={"w:full"}>
-          <LabelWrapper />
-          <Content />
-        </div>
-      </Match>
-      <Match when={props.label}>
-        <CenterDiv>
-          <LabelWrapper />
-          <Content />
-        </CenterDiv>
-      </Match>
-      <Match when={true}>
-        <Content />
-      </Match>
-    </Switch>
   );
 };

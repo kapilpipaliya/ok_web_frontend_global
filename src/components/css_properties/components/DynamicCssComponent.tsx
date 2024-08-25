@@ -9,6 +9,9 @@ import { DataEditWithCustomDialog } from "~/components/css_properties/components
 import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
 import { Select } from "~/components/css_properties/components/Select";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
+import { useFormContext } from "~/components/form/FormContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
@@ -17,9 +20,13 @@ import {
   useCssEditor,
   useCssState,
 } from "../CssEditorContext";
+import { useCssEditorProps } from "../CSSEditorPropsContext";
 import { RenderContextProvider } from "../RenderContext";
+import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
+import { CenterDiv } from "./CenterDiv";
 import { Divider } from "./Divider";
 import { GridField } from "./GridField";
+import { LabelWrapper } from "./LabelWrapper";
 import { NotFoundComponent } from "./NotFoundComponent";
 import { RenderChildren } from "./RenderChildren";
 import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
@@ -56,6 +63,10 @@ export function DynamicCSSComponent(
   const [cssState, setCssState] = useCssEditor();
   const [cssDefault] = useCssDefaultEditor();
   const [state] = useCssState();
+
+  const [graph, setGraph] = useGraph();
+  const [formStore] = useFormContext();
+  const cssEditorProps = useCssEditorProps();
 
   const projections = createMemo(
     () =>
@@ -108,10 +119,63 @@ export function DynamicCSSComponent(
     );
   };
 
+  const clearFileSelection = () => {
+    const txnId = formStore?.txnId;
+    if (!txnId) {
+      return;
+    }
+    if (!(cssEditorProps?.meta && cssEditorProps?.data)) {
+      return;
+    }
+    const selectedFileMetaVertex = {
+      id: "",
+      IN: {},
+      L: [],
+      OUT: {},
+      P: {
+        type: getCssSelectedFileEdgeName(
+          cssEditorProps.data.L[0],
+          cssEditorProps.meta.P.name,
+          state() || "Default",
+          props.meta.name,
+        ),
+      },
+    } as Vertex;
+
+    setSelectionValue(
+      txnId,
+      cssEditorProps.data,
+      graph,
+      setGraph,
+      selectedFileMetaVertex,
+    );
+  };
+
+  const resetValue = () => {
+    onChange(undefined);
+    // setSelectedOption(determineSelectedOption());
+    clearFileSelection();
+  };
+
   return (
     <RenderContextProvider meta={() => props.meta} store={repeterStore}>
       <Switch>
         {/* <Match when={isHidden()} /> */}
+        <Match when={props.meta.hideLabel}>
+          <Content />
+        </Match>
+        <Match when={props.meta.isLabelOnTop}>
+          <div class={"w:full"}>
+            <LabelWrapper onResetIconClick={resetValue} value={value()} />
+            <Content />
+          </div>
+        </Match>
+        <Match when={props.meta.label}>
+          <CenterDiv>
+            <LabelWrapper onResetIconClick={resetValue} value={value()} />
+            <Content />
+          </CenterDiv>
+        </Match>
         <Match when={true}>
           <Content />
         </Match>

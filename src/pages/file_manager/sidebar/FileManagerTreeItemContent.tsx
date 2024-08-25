@@ -33,12 +33,14 @@ export function FileManagerTreeItemContent(
       <IconButton
         class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
         icon={
-          props.item.L[0] === "Folder" ? "ic:round-folder" : "ic:round-file"
+          props.item.L[0] === "Folder"
+            ? "ic:round-folder"
+            : "ic:round-insert-drive-file"
         }
         size={16}
       />
       &nbsp;&nbsp;
-      <span>{props.item.P.name}</span>
+      <span>{props.item.P.name || "no name"}</span>
     </div>
   );
 }

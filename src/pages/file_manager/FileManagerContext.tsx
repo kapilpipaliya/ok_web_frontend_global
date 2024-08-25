@@ -68,9 +68,9 @@ export function FileManagerStoreProvider(
       const rootData = await getRootData(
         graph,
         setGraph,
-        params.folderId,
         props.toParentEdgeType,
         props.parentVertexLabel,
+        params.folderId,
         props.fileId,
       );
       if ("result" in rootData && rootData.result.length > 0) {

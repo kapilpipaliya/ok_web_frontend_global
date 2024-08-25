@@ -71,6 +71,7 @@ export const Transform = {
     ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Transform",
+    hideLabel: true,
     label: "Transform",
     name: "transform",
     useParentProjection: true,

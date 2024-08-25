@@ -65,6 +65,7 @@ export const Transition = {
     componentName: "dataEditor",
     dialogLabel: "Adjust Transition",
     fallback: "No transition",
+    hideLabel: true,
     label: "Transition",
     name: "transition",
     useParentProjection: true,

@@ -1,12 +1,10 @@
-import { For, type JSX, Match, splitProps, Switch } from "solid-js";
+import { For, type JSX, splitProps } from "solid-js";
 
 import { CustomTooltip } from "~/components/Tooltip";
 
 import type { ButtonGroupField } from "../constants/FieldSchemaType";
 
-import { CenterDiv } from "./CenterDiv";
 import { IconifyIcon } from "./IconifyIcon";
-import { LabelWrapper } from "./LabelWrapper";
 
 export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
@@ -17,7 +15,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
     local.onChange?.(option.value);
   };
 
-  const Content = () => (
+  return (
     <div class="flex border:1px|solid|rgb(211,211,211) box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border f:14px flex:wrap min-w:max position:relative px:4px py:2px r:0.3rem w:100%">
       <For each={props.options}>
         {(option) => {
@@ -42,25 +40,5 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
         }}
       </For>
     </div>
-  );
-
-  return (
-    <Switch>
-      <Match when={props.isLabelOnTop}>
-        <div class={"w:full"}>
-          <LabelWrapper />
-          <Content />
-        </div>
-      </Match>
-      <Match when={props.label}>
-        <CenterDiv>
-          <LabelWrapper />
-          <Content />
-        </CenterDiv>
-      </Match>
-      <Match when={true}>
-        <Content />
-      </Match>
-    </Switch>
   );
 };

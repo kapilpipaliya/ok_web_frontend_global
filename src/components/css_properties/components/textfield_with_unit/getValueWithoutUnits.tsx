@@ -1,6 +1,13 @@
+import { isNumber } from "~/lib/data_structure/number/isNumber";
+
 import { sizeTypes } from "../../constants/csseditor_constants";
 
-export function getValueWithoutUnits(valueWithUnits: string): number | string {
+export function getValueWithoutUnits(
+  valueWithUnits: number | string,
+): number | string {
+  if (isNumber(valueWithUnits)) {
+    return valueWithUnits;
+  }
   if (!valueWithUnits) {
     return "";
   }

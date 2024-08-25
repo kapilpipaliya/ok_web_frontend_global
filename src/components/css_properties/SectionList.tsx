@@ -45,7 +45,7 @@ export const CollapsibleSection = (
       }}
     >
       <button
-        class="flex ai:center cursor:pointer jc:space-between"
+        class="flex ai:center cursor:pointer w:full"
         onClick={() => setIsOpen(!isOpen())}
         type="button"
       >
