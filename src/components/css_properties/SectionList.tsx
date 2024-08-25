@@ -60,7 +60,7 @@ export const CollapsibleSection = (
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
         <For each={Object.entries(props.propertyFieldMap)}>
-          {([, value]) => <DynamicCSSComponent value={value} />}
+          {([, value]) => <DynamicCSSComponent meta={value} />}
         </For>
       </Show>
     </div>

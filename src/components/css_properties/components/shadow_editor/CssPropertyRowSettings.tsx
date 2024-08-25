@@ -41,13 +41,12 @@ export function CssPropertyRowSettings(
       <div class={"b:1px|solid|#ccc bg:#fff p:6 r:4"}>
         <Header />
 
-        <For each={Object.entries(props.meta.children)}>
-          {([_sectionName, properties], _index) => {
+        <For each={props.meta.children || []}>
+          {(meta) => {
             return (
               <DynamicCSSComponent
-                value={{
-                  ...properties,
-                  isAddToClass: true,
+                meta={{
+                  ...meta,
                   projections: [props.meta.name, props.rowIndex],
                 }}
               />

@@ -7,14 +7,14 @@ import { getValueWithoutUnits } from "./getValueWithoutUnits";
 interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
   meta: TextFieldOptionsField;
-  selectedValue: () => string;
+  value: string;
 }
 
 export function InputField(props: Readonly<InputFieldProps>) {
   const [local, others] = splitProps(props, [
     "class",
     "meta",
-    "selectedValue",
+    "value",
     "handleChange",
   ]);
 
@@ -29,8 +29,8 @@ export function InputField(props: Readonly<InputFieldProps>) {
       type={local.meta.type || "text"}
       value={
         local.meta.type === "number"
-          ? getValueWithoutUnits(local.selectedValue())
-          : local.selectedValue()
+          ? getValueWithoutUnits(local.value)
+          : local.value
       }
       {...local.meta.inputProps}
       {...others}

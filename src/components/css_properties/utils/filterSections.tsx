@@ -9,7 +9,7 @@ export function filterSections(query: string) {
   return Object.entries(JSONSchema).reduce(
     (acc, [sectionName, propertyFieldMap]) => {
       const filteredProperties = filterPropertyFieldMap(
-        propertyFieldMap,
+        propertyFieldMap as { [key: string]: GenericField },
         query,
       );
       if (Object.keys(filteredProperties).length > 0) {

@@ -6,13 +6,22 @@ import {
   generateBoxShadow,
   type ShadowAttributes,
 } from "../../utils/generate/generateBoxShadow";
-import { generateFilter } from "../../utils/generate/generateFilter";
+import {
+  type FilterAttributes,
+  generateFilter,
+} from "../../utils/generate/generateFilter";
 import {
   generateTextShadow,
   type TextShadowAttributes,
 } from "../../utils/generate/generateTextShadow";
-import { generateTransform } from "../../utils/generate/generateTransform";
-import { generateTransition } from "../../utils/generate/generateTransition";
+import {
+  generateTransform,
+  type TransformAttributes,
+} from "../../utils/generate/generateTransform";
+import {
+  generateTransition,
+  type TransitionAttributes,
+} from "../../utils/generate/generateTransition";
 
 export interface CssPropertyRowContentProps {
   centerComponent?: JSX.Element;
@@ -55,19 +64,28 @@ export function CssPropertyRowContent(
       </Match>
       <Match when={props.meta.name === "filter"}>
         <RenderButton
-          label={generateFilter([props.option], true)}
+          label={generateFilter([props.option as FilterAttributes], true)}
+          onClick={handleButtonClick}
+        />
+      </Match>
+      <Match when={props.meta.name === "backdrop-filter"}>
+        <RenderButton
+          label={generateFilter([props.option as FilterAttributes], true)}
           onClick={handleButtonClick}
         />
       </Match>
       <Match when={props.meta.name === "transition"}>
         <RenderButton
-          label={generateTransition([props.option], true)}
+          label={generateTransition(
+            [props.option as TransitionAttributes],
+            true,
+          )}
           onClick={handleButtonClick}
         />
       </Match>
       <Match when={props.meta.name === "transform"}>
         <RenderButton
-          label={generateTransform([props.option], true)}
+          label={generateTransform([props.option as TransformAttributes], true)}
           onClick={handleButtonClick}
         />
       </Match>

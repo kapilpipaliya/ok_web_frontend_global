@@ -6,14 +6,14 @@ import { createSelectOptions } from "./FieldSchemaType";
 
 export const Transition = {
   transition: {
-    children: {
-      easing: createSelectOptions(
+    children: [
+      createSelectOptions(
         "easing",
         "Easing",
         ["ease", "ease-in", "ease-in-out", "ease-out", "linear"],
         true,
       ),
-      shadow: createGridOptions("size Grid", "Transition", [
+      createGridOptions("size Grid", "Transition", [
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
@@ -31,7 +31,7 @@ export const Transition = {
           unitOptions: timesTypes,
         } as TextFieldOptionsField,
       ]),
-      type: createSelectOptions(
+      createSelectOptions(
         "type",
         "Type",
         [
@@ -61,11 +61,12 @@ export const Transition = {
         ],
         true,
       ),
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Transition",
     fallback: "No transition",
     label: "Transition",
     name: "transition",
+    useParentProjection: true,
   } as DataEditorField,
 };

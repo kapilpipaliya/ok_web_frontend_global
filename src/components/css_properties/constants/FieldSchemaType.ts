@@ -5,18 +5,23 @@ export type CustomProperty = {
   name: string;
 };
 
-interface Field {
+export interface Field {
+  class?: string;
   componentName: string;
+  projections?: (number | string)[];
 }
-interface CSSField extends Field {
+
+export interface FormField extends Field {
   hashName?: string;
   info?: string;
   name: string;
-  projections?: string[];
+  onChange?: (value: any) => void;
+  useParentProjection?: boolean;
+  value?: any;
 }
 
 // field with all and custom property
-export interface FieldWithCustomProperty extends CSSField {
+export interface FieldWithCustomProperty extends FormField {
   align?: string;
   componentName: "fieldWithCustomProperty";
   customProperty: CustomProperty[];
@@ -30,7 +35,7 @@ export interface FieldWithCustomProperty extends CSSField {
   type?: string;
 }
 
-export interface ColorPickerField extends CSSField {
+export interface ColorPickerField extends FormField {
   componentName: "colorPicker";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
@@ -38,7 +43,7 @@ export interface ColorPickerField extends CSSField {
   onChangeInput?: (value: string) => void;
 }
 
-export interface GridField extends CSSField {
+export interface GridField extends FormField {
   children: GenericField[];
   componentName: "grid";
   gap: string;
@@ -54,7 +59,7 @@ export interface AnotherOption {
 export type OptionType = AnotherOption[] | string[];
 
 // text field with unit options
-export interface TextFieldOptionsField extends CSSField {
+export interface TextFieldOptionsField extends FormField {
   componentName: "textFieldOptions";
   inputProps?: any;
   isAddToClass?: boolean;
@@ -70,7 +75,7 @@ export interface TextFieldOptionsField extends CSSField {
   // value?: string; // depricated
 }
 
-export interface ToggleField extends CSSField {
+export interface ToggleField extends FormField {
   componentName: "toggleButton";
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
@@ -80,16 +85,14 @@ export interface ToggleField extends CSSField {
 }
 
 // box-shadow
-export interface DataEditorField extends CSSField {
-  children: {
-    [key: string]: GenericField;
-  };
+export interface DataEditorField extends FormField {
+  children: GenericField[];
   componentName: "dataEditor";
   dialogLabel: string;
   fallback?: string; // not used?
   label: string;
 }
-export interface SelectField extends CSSField {
+export interface SelectField extends FormField {
   componentName: "select";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
@@ -99,7 +102,7 @@ export interface SelectField extends CSSField {
   value?: string;
 }
 
-export interface ButtonGroupField extends CSSField {
+export interface ButtonGroupField extends FormField {
   componentName: "buttonGroups";
   isAddToClass?: boolean;
   isLabelOnTop: boolean;
@@ -113,7 +116,7 @@ export interface ButtonGroupField extends CSSField {
   }[];
 }
 
-export interface StringField extends CSSField {
+export interface StringField extends FormField {
   componentName: "select";
   isLabelOnTop: boolean;
   label: string;
@@ -182,6 +185,7 @@ export const createGridOptions = (
   "grid-template-columns": "repeat(2,auto)",
   name,
   padding: "5px",
+  useParentProjection: true,
 });
 
 export function createSelectOptions(

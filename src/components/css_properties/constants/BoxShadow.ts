@@ -11,15 +11,15 @@ import {
 
 export const BoxShadow = {
   boxShadow: {
-    children: {
-      data: {
+    children: [
+      {
         componentName: "colorPicker",
         info: "box-shadow",
         isLabelOnTop: true,
         label: "Shadow Color",
         name: "color",
       } as ColorPickerField,
-      shadow: createGridOptions("grid", "Shadow", [
+      createGridOptions("grid", "Shadow", [
         {
           componentName: "textFieldOptions",
           hashName: "length",
@@ -46,7 +46,7 @@ export const BoxShadow = {
           info: "box-shadow",
           isLabelOnTop: true,
           label: "Blur",
-          name: "blur",
+          name: "blur-radius",
           unitOptions: defaultPixelSizeTypes,
           type: "number",
         } as TextFieldOptionsField,
@@ -61,7 +61,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
       ]),
-      inset: {
+      {
         componentName: "toggleButton",
         info: "box-shadow",
         label: "",
@@ -71,11 +71,12 @@ export const BoxShadow = {
           { key: "Inside", value: "inset" },
         ],
       } as ToggleField,
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
     label: "Box Shadow",
     name: "box-shadow",
+    useParentProjection: true,
   } as DataEditorField,
 };

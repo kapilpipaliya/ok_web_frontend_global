@@ -7,24 +7,24 @@ import { generateTransform } from "./generate/generateTransform";
 import { generateTransition } from "./generate/generateTransition";
 
 export function arrayToString(name: string, arr: any[]): string {
+  if (name === "box-shadow") {
+    return generateBoxShadow(arr);
+  }
+  if (name === "text-shadow") {
+    return generateTextShadow(arr);
+  }
+  if (name === "filter") {
+    return generateFilter(arr);
+  }
+  if (name === "transition") {
+    return generateTransition(arr);
+  }
+  if (name === "transform") {
+    return generateTransform(arr);
+  }
   return arr
     .map((item) => {
       if (isObject(item)) {
-        if (name === "box-shadow") {
-          return generateBoxShadow(arr);
-        }
-        if (name === "text-shadow") {
-          return generateTextShadow(arr);
-        }
-        if (name === "filter") {
-          return generateFilter(arr);
-        }
-        if (name === "transition") {
-          return generateTransition(arr);
-        }
-        if (name === "transform") {
-          return generateTransform(arr);
-        }
         return Object.entries(item)
           .map(
             ([key, value]) => `${key}:${value.toString().replaceAll(" ", "|")}`,

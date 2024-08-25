@@ -1,20 +1,20 @@
 import { Icon } from "@iconify-icon/solid";
 import { makeEventListener } from "@solid-primitives/event-listener";
-import { path } from "rambda";
-import { type Accessor, createSignal, For, Match, type Setter, Show, Switch } from "solid-js";
+import {
+  createSignal,
+  For,
+  Match,
+  type Setter,
+  Show,
+  splitProps,
+  Switch,
+} from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type { SelectField } from "../constants/FieldSchemaType";
 
-import {
-  useCssDefaultEditor,
-  useCssEditor,
-  useCssState,
-} from "../CssEditorContext";
-import { useRenderContext } from "../RenderContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
@@ -25,40 +25,20 @@ function formatString(str: string): string {
     .join(" ");
 }
 
-export const Select = () => {
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(parentItems?.meta || []) as Accessor<SelectField>;
-  const [cssState, setCssState] = useCssEditor();
-  const [state] = useCssState();
-  const [cssDefault] = useCssDefaultEditor();
+export const Select = (props: Readonly<SelectField>) => {
   const [isActive, setIsActive] = createSignal(false);
 
   const toggleDropdown = () => setIsActive(!isActive());
 
-  const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
-    return (
-      path(projections, cssState) ||
-      path(projections, cssDefault) ||
-      meta().value ||
-      ""
-    );
-  };
+  const [local, _others] = splitProps(props, ["componentName", "onChange"]);
 
   const selectOption = (option: any) => {
-    if (meta().isAddToClass ?? true) {
-      setCssState(state(), ...(meta().projections ?? []), {
-        [meta().name]: option.value || option,
-      });
-    }
-    if (meta().onChangeInput) {
-      meta().onChangeInput(meta().name, option.value || option);
-    }
+    local.onChange?.(option.value || option);
     setIsActive(false);
   };
 
   const handleClickOutside = (event: MouseEvent) => {
-    const dropdown = document.getElementById(`select-dropdown${meta().label}`);
+    const dropdown = document.getElementById(`select-dropdown${props.label}`);
     if (dropdown && !dropdown.contains(event.target as Node)) {
       setIsActive(false);
     }
@@ -68,13 +48,13 @@ export const Select = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta().isLabelOnTop}>
+        <Match when={props.isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper />
             <Content />
           </div>
         </Match>
-        <Match when={meta().label}>
+        <Match when={props.label}>
           <div class={"flex ai:center jc:space-between w:100%"}>
             <LabelWrapper />
             <Content />
@@ -91,12 +71,12 @@ export const Select = () => {
     const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
     return (
-      <div class={`${meta().isLabelOnTop ? "w:full" : "w:50%"} rel`}>
+      <div class={`${props.isLabelOnTop ? "w:full" : "w:50%"} rel`}>
         <DropdownButton
           isActive={isActive()}
-          selectedValue={selectedValue()}
           setReference={setReference}
           toggleDropdown={toggleDropdown}
+          value={props.value}
         />
         <Show when={isActive()}>
           <ZIndex>
@@ -105,9 +85,9 @@ export const Select = () => {
               parentRef={reference()!}
             >
               <DropdownList
-                options={meta().options}
-                selectedValue={selectedValue()}
+                options={props.options}
                 selectOption={selectOption}
+                value={props.value}
               />
             </DropdownMenu>
           </ZIndex>
@@ -119,9 +99,9 @@ export const Select = () => {
 
 interface DropdownButtonProps {
   isActive: boolean;
-  selectedValue: string;
   setReference: Setter<HTMLElement | null>;
   toggleDropdown: () => void;
+  value?: string;
 }
 
 const DropdownButton = (props: DropdownButtonProps) => (
@@ -141,12 +121,8 @@ const DropdownButton = (props: DropdownButtonProps) => (
       class="select-button"
       role="combobox"
     >
-      <span
-        class={`selected-value ${!props.selectedValue && "color:lightgray"}`}
-      >
-        {props.selectedValue
-          ? formatString(props.selectedValue)
-          : "Select Value"}
+      <span class={`selected-value ${!props.value && "color:lightgray"}`}>
+        {props.value ? formatString(props.value) : "Select Value"}
       </span>
       <span class="arrow" />
     </button>
@@ -156,8 +132,8 @@ const DropdownButton = (props: DropdownButtonProps) => (
 
 interface DropdownListProps {
   options: any[];
-  selectedValue: string;
   selectOption: (option: any) => void;
+  value?: string;
 }
 
 const DropdownList = (props: DropdownListProps) => (
@@ -168,16 +144,16 @@ const DropdownList = (props: DropdownListProps) => (
         return (
           <li // NOSONAR
             classList={{
-              "bg:#efefef:hover": props.selectedValue !== label(),
-              "bg:rgb(229,234,253)": props.selectedValue === label(),
-              "bg:rgb(229,234,253):hover": props.selectedValue === label(),
+              "bg:#efefef:hover": props.value !== label(),
+              "bg:rgb(229,234,253)": props.value === label(),
+              "bg:rgb(229,234,253):hover": props.value === label(),
               "flex rel ai:center cursor:pointer f:14 jc:space-between p:5 r:5": true,
-              "font-weight:medium": props.selectedValue === label(),
+              "font-weight:medium": props.value === label(),
             }}
             onClick={() => props.selectOption(option)}
           >
             <label>{formatString(label())}</label>
-            <Show when={props.selectedValue === label()}>
+            <Show when={props.value === label()}>
               <Icon
                 class="color:dodgerblue"
                 height={22}

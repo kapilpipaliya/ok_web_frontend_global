@@ -1,4 +1,5 @@
-import { type Accessor, Match, Switch } from "solid-js";
+import { path } from "rambda";
+import { type Accessor, createMemo, Match, splitProps, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
@@ -9,12 +10,18 @@ import { FieldWithCustomBox } from "~/components/css_properties/components/Field
 import { Select } from "~/components/css_properties/components/Select";
 import { ToggleButton } from "~/components/css_properties/components/ToggleButton";
 
-import type { GenericField } from "../constants/FieldSchemaType";
+import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
+import {
+  useCssDefaultEditor,
+  useCssEditor,
+  useCssState,
+} from "../CssEditorContext";
 import { RenderContextProvider } from "../RenderContext";
 import { Divider } from "./Divider";
 import { GridField } from "./GridField";
 import { NotFoundComponent } from "./NotFoundComponent";
+import { RenderChildren } from "./RenderChildren";
 import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
 
 const componentMap: Record<string, any> = {
@@ -34,26 +41,75 @@ const repeterStore = createStore({
   meta: [] as Accessor<GenericField>[],
 });
 
-export function DynamicCSSComponent(props: Readonly<{ value: GenericField }>) {
+export function DynamicCSSComponent(
+  props: Readonly<{ [key: string]: any; meta: GenericField }>,
+) {
   const Component = () =>
-    componentMap[props.value.componentName] || NotFoundComponent;
+    componentMap[props.meta.componentName] || NotFoundComponent;
+
+  const [, otherMeta] = splitProps(
+    props.meta as { children: GenericField[] } & FormField,
+    ["children", "projections"],
+  );
+  const [, otherProps] = splitProps(props, ["meta"]);
+
+  const [cssState, setCssState] = useCssEditor();
+  const [cssDefault] = useCssDefaultEditor();
+  const [state] = useCssState();
+
+  const projections = createMemo(
+    () =>
+      props.projections ?? [state() || "", ...(props.meta.projections ?? [])],
+  );
+
+  const value = createMemo(() => {
+    return (
+      path(
+        [...projections(), (props.meta as FormField).name || ""],
+        cssState,
+      ) ||
+      path(
+        [...projections(), (props.meta as FormField).name || ""],
+        cssDefault,
+      ) ||
+      ""
+    );
+  });
+
+  const onChange = (data: any) => {
+    if (props.meta.onChangeInput) {
+      props.meta.onChangeInput!(data);
+    }
+    if (props.meta.isAddToClass ?? true) {
+      // @ts-expect-error projections type is dynamic
+      setCssState(...projections(), {
+        [(props.meta as FormField).name]: data,
+      });
+    }
+
+    // (props.meta as FormField).onChange?.(data, formStore, setFormStore);
+
+    // props.meta.error = "";
+  };
 
   const Content = () => {
     return (
       <>
         <Dynamic
           component={Component()}
-          // onChange={onChange}
-          // value={value()}
-          // {...otherMeta}
-          // {...otherProps}
-        />
+          onChange={onChange}
+          value={value()}
+          {...otherMeta}
+          {...otherProps}
+        >
+          <RenderChildren meta={props.meta} projections={projections()} />
+        </Dynamic>
       </>
     );
   };
 
   return (
-    <RenderContextProvider meta={() => props.value} store={repeterStore}>
+    <RenderContextProvider meta={() => props.meta} store={repeterStore}>
       <Switch>
         {/* <Match when={isHidden()} /> */}
         <Match when={true}>

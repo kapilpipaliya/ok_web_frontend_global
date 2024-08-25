@@ -1,45 +1,28 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { path } from "rambda";
-import { type Accessor, type Component, Match, Switch } from "solid-js";
+import { Match, splitProps, Switch } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
 
 import { sizeTypes } from "../../constants/csseditor_constants";
-import {
-  useCssDefaultEditor,
-  useCssEditor,
-  useCssState,
-} from "../../CssEditorContext";
+import { useCssState } from "../../CssEditorContext";
 import { useCssEditorProps } from "../../CSSEditorPropsContext";
-import { useRenderContext } from "../../RenderContext";
 import { getCssSelectedFileEdgeName } from "../../utils/getCssSelectedFileEdgeName";
 import { CenterDiv } from "../CenterDiv";
 import { Container } from "../Container";
 import { LabelWrapper } from "../LabelWrapper";
 import { TextFieldWithUnitContent } from "./TextFieldWithUnitContent";
 
-export const TextFieldWithSelect: Component = () => {
+export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const cssEditorProps = useCssEditorProps();
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(
-    parentItems?.meta || [],
-  ) as Accessor<TextFieldOptionsField>;
-  const [cssState, setCssState] = useCssEditor();
   const [state] = useCssState();
-  const [cssDefault] = useCssDefaultEditor();
 
   // input will automatically display value without units, if its number field.
-  const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
-    return path(projections, cssState) || path(projections, cssDefault) || "";
-  };
 
   const [selectedOption, setSelectedOption] = createWritableMemo(() =>
     determineSelectedOption(),
@@ -47,24 +30,22 @@ export const TextFieldWithSelect: Component = () => {
 
   function determineSelectedOption(): string {
     return (
-      sizeTypes.find((unit) => selectedValue().includes(unit)) ??
-      meta().unitOptions?.[0] ??
+      sizeTypes.find((unit) => props.value?.includes(unit)) ??
+      props.unitOptions?.[0] ??
       ""
     );
   }
+  const [local, _others] = splitProps(props, ["componentName", "onChange"]);
 
-  function changeValue(value: string) {
-    if (meta().isAddToClass ?? true) {
-      setCssState(state(), ...(meta().projections ?? []), { [meta().name]: value });
-    }
-    meta().onChangeInput?.(value);
+  function changeValue(value?: string) {
+    local.onChange?.(value);
   }
 
   function handleInputChange(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = target.value;
 
-    if (meta().type === "number") {
+    if (props.type === "number") {
       handleNumberInputChange(value);
     } else {
       changeValue(value);
@@ -78,20 +59,20 @@ export const TextFieldWithSelect: Component = () => {
     }
 
     if (
-      meta().inputProps?.min !== undefined &&
-      numericValue < meta().inputProps.min
+      props.inputProps?.min !== undefined &&
+      numericValue < props.inputProps.min
     ) {
       return;
     }
     if (
-      meta().inputProps?.max !== undefined &&
-      numericValue > meta().inputProps.max
+      props.inputProps?.max !== undefined &&
+      numericValue > props.inputProps.max
     ) {
       return;
     }
 
     changeValue(
-      meta().unitOptions
+      props.unitOptions
         ? `${numericValue}${selectedOption()}`
         : `${numericValue}`,
     );
@@ -115,7 +96,7 @@ export const TextFieldWithSelect: Component = () => {
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.name,
           state() || "Default",
-          meta().name,
+          props.name,
         ),
       },
     } as Vertex;
@@ -130,7 +111,7 @@ export const TextFieldWithSelect: Component = () => {
   };
 
   const resetValue = () => {
-    changeValue(cssDefault[state() ?? ""]?.[meta().name]);
+    changeValue(undefined);
     setSelectedOption(determineSelectedOption());
     clearFileSelection();
   };
@@ -138,29 +119,29 @@ export const TextFieldWithSelect: Component = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta().isLabelOnTop}>
+        <Match when={props.isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper onResetIconClick={resetValue} />
             <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
-              meta={meta()}
+              meta={props}
               resetValue={resetValue}
-              selectedValue={selectedValue}
+              value={props.value}
             />
           </div>
         </Match>
-        <Match when={meta().label}>
+        <Match when={props.label}>
           <CenterDiv>
             <LabelWrapper onResetIconClick={resetValue} />
             <TextFieldWithUnitContent
               changeValue={changeValue}
               determineSelectedOption={determineSelectedOption}
               handleInputChange={handleInputChange}
-              meta={meta()}
+              meta={props}
               resetValue={resetValue}
-              selectedValue={selectedValue}
+              value={props.value}
             />
           </CenterDiv>
         </Match>
@@ -169,9 +150,9 @@ export const TextFieldWithSelect: Component = () => {
             changeValue={changeValue}
             determineSelectedOption={determineSelectedOption}
             handleInputChange={handleInputChange}
-            meta={meta()}
+            meta={props}
             resetValue={resetValue}
-            selectedValue={selectedValue}
+            value={props.value}
           />
         </Match>
       </Switch>

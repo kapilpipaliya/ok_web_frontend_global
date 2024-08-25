@@ -9,14 +9,14 @@ import { createGridOptions } from "./FieldSchemaType";
 
 export const TextShadow = {
   textShadow: {
-    children: {
-      data: {
+    children: [
+      {
         componentName: "colorPicker",
         isLabelOnTop: true,
         label: "Shadow Color",
         name: "color",
       } as ColorPickerField,
-      shadow: createGridOptions("grid", "Shadow", [
+      createGridOptions("grid", "Shadow", [
         {
           componentName: "textFieldOptions",
           isLabelOnTop: true,
@@ -41,20 +41,13 @@ export const TextShadow = {
           type: "number",
           unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
-        {
-          componentName: "textFieldOptions",
-          isLabelOnTop: true,
-          label: "Spread",
-          name: "spread",
-          type: "number",
-          unitOptions: defaultPixelSizeTypes,
-        } as TextFieldOptionsField,
       ]),
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
     label: "Text Shadow",
     name: "text-shadow",
+    useParentProjection: true,
   } as DataEditorField,
 };

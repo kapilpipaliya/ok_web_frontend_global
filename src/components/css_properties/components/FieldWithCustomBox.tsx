@@ -1,8 +1,6 @@
-import { type Accessor, createEffect, createSignal, For, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type {
   ButtonGroupField,
@@ -10,26 +8,20 @@ import type {
   GenericField,
 } from "../constants/FieldSchemaType";
 
-import {
-  useCssEditor,
-  useCssState,
-} from "../CssEditorContext";
-import { RenderContextProvider, useRenderContext } from "../RenderContext";
+import { useCssEditor, useCssState } from "../CssEditorContext";
 import { ButtonGroups } from "./ButtonGroups";
 
-export const FieldWithCustomBox = () => {
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(
-    parentItems?.meta || [],
-  ) as Accessor<FieldWithCustomProperty>;
+export const FieldWithCustomBox = (
+  props: Readonly<FieldWithCustomProperty>,
+) => {
   const [optionType, setOptionType] = createSignal("all");
   const [cssState] = useCssEditor();
   const [state] = useCssState();
 
   createEffect(() => {
-    if (meta().customProperty && meta().customProperty.length > 0) {
+    if (props.customProperty && props.customProperty.length > 0) {
       let isValueSet = false;
-      meta().customProperty.forEach((property) => {
+      props.customProperty.forEach((property) => {
         if (cssState[state()]?.[property.name] !== undefined) {
           isValueSet = true;
         }
@@ -39,65 +31,63 @@ export const FieldWithCustomBox = () => {
       }
     }
   });
-  const repeterStore = createStore({
-    meta: [] as Accessor<GenericField>[],
-  });
+
   return (
     <div>
       <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
         <DynamicCSSComponent
-          value={
+          meta={
             {
-              ...meta(),
-              componentName: meta().mainFieldType ?? "textFieldOptions",
-              type: meta().type ?? "text",
+              ...props,
+              componentName: props.mainFieldType ?? "textFieldOptions",
+              type: props.type ?? "text",
             } as GenericField
           }
         />
-            <RenderContextProvider meta={() => (            {
-              componentName: "buttonGroups",
-              isAddToClass: false,
-              isLabelOnTop: false,
-              label: "",
-              name: meta().name,
-              onChangeInput: () => {
-                if (optionType() === "all") {
-                  setOptionType("custom");
-                } else {
-                  setOptionType("all");
-                }
+        <ButtonGroups
+          {...({
+            componentName: "buttonGroups",
+            isAddToClass: false,
+            isLabelOnTop: false,
+            label: "",
+            name: props.name,
+            onChangeInput: () => {
+              if (optionType() === "all") {
+                setOptionType("custom");
+              } else {
+                setOptionType("all");
+              }
+            },
+            options: [
+              {
+                icon: true,
+                key: "allCustom",
+                tooltip: "All",
+                value: "all",
               },
-              options: [
-                {
-                  icon: true,
-                  key: "allCustom",
-                  tooltip: "All",
-                  value: "all",
-                },
-                {
-                  icon: true,
-                  key: "customIcon",
-                  tooltip: "Custom",
-                  value: "custom",
-                },
-              ],
-            } as ButtonGroupField)} store={repeterStore}>
-          <ButtonGroups />
-        </RenderContextProvider>
+              {
+                icon: true,
+                key: "customIcon",
+                tooltip: "Custom",
+                value: "custom",
+              },
+            ],
+          } as ButtonGroupField)}
+        />
       </div>
       <Show when={optionType() === "custom"}>
         <div
-          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${meta().gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
+          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${props.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
         >
-          <For each={meta().customProperty}>
+          <For each={props.customProperty}>
             {(item) => {
               return (
                 <DynamicCSSComponent
-                  value={
+                  meta={
                     {
-                      ...meta(),
-                      componentName: meta().mainFieldType ?? "textFieldOptions",
-                      type: meta().type ?? "text",
+                      ...props,
+                      componentName: props.mainFieldType ?? "textFieldOptions",
+                      type: props.type ?? "text",
                       ...item,
                     } as GenericField
                   }

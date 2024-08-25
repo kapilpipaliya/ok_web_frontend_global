@@ -1,5 +1,5 @@
 export interface ShadowAttributes {
-  blur: string;
+  "blur-radius": string;
   color?: string;
   inset?: string;
   "offset-x": string;
@@ -16,7 +16,7 @@ export function generateBoxShadow(
   return shadows
     .map((shadow) => {
       const {
-        blur = "0px",
+        "blur-radius": blurRadius = "0px",
         color = "",
         inset = "",
         "offset-x": xOffset = "0px",
@@ -27,7 +27,7 @@ export function generateBoxShadow(
       const colorPart = color ? `${separator}${color}` : "";
       const insetPart = inset ? `${separator}${inset}` : "";
 
-      return `${xOffset}${separator}${yOffset}${separator}${blur}${separator}${spread}${colorPart}${insetPart}`;
+      return `${xOffset}${separator}${yOffset}${separator}${blurRadius}${separator}${spread}${colorPart}${insetPart}`;
     })
     .join(separator2);
 }

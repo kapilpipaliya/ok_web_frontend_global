@@ -1,5 +1,4 @@
 import { Icon } from "@iconify-icon/solid";
-import { path } from "rambda";
 import { type Accessor, For } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -11,43 +10,37 @@ import type { TextShadowAttributes } from "../utils/generate/generateTextShadow"
 import type { TransformAttributes } from "../utils/generate/generateTransform";
 import type { TransitionAttributes } from "../utils/generate/generateTransition";
 
-import {
-  useCssDefaultEditor,
-  useCssEditor,
-  useCssState,
-} from "../CssEditorContext";
+import { useCssEditor, useCssState } from "../CssEditorContext";
 import { useRenderContext } from "../RenderContext";
 import { LabelWrapper } from "./LabelWrapper";
 import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 
-export const DataEditWithCustomDialog = () => {
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(parentItems?.meta || []) as Accessor<DataEditorField>;
-  const [cssState, setCssState] = useCssEditor();
+export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
+  const [, setCssState] = useCssEditor();
   const [state] = useCssState();
-  const [cssDefault] = useCssDefaultEditor();
+  const [parentItems] = useRenderContext();
+  const meta = getLastItem(
+    parentItems?.meta || [],
+  ) as Accessor<DataEditorField>;
 
-  const selectedValue = ():
+  type Value =
     | FilterAttributes[]
     | ShadowAttributes[]
     | TextShadowAttributes[]
     | TransformAttributes[]
-    | TransitionAttributes[] => {
-    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
-    return path(projections, cssState) || path(projections, cssDefault) || [];
-  };
+    | TransitionAttributes[];
 
   const addOption = () => {
-    setCssState(state(), ...(meta().projections ?? []), {
-      [meta().name]: [...selectedValue(), {}],
+    setCssState(state(), ...(props.projections ?? []), {
+      [props.name]: [...props.value, {}],
     });
   };
 
   const deleteOption = (index: number) => {
-    const currentOptions = [...selectedValue()];
+    const currentOptions = [...(props.value as Value)];
     currentOptions.splice(index, 1);
-    setCssState(state(), ...(meta().projections ?? []), {
-      [meta().name]: currentOptions,
+    setCssState(state(), ...(props.projections ?? []), {
+      [props.name]: currentOptions,
     });
   };
 
@@ -59,7 +52,9 @@ export const DataEditWithCustomDialog = () => {
     >
       <div
         class={`${
-          selectedValue().length > 0 ? "bb:1px|solid|lightgrey m:1 pb:5" : ""
+          (props.value || []).length > 0
+            ? "bb:1px|solid|lightgrey m:1 pb:5"
+            : ""
         } flex ai:center jc:space-between mb:6px`}
       >
         <LabelWrapper />
@@ -69,12 +64,12 @@ export const DataEditWithCustomDialog = () => {
           onClick={addOption}
         />
       </div>
-      <For each={selectedValue() as unknown as { [key: string]: string }[]}>
+      <For each={props.value as unknown as { [key: string]: string }[]}>
         {(option, i) => (
           <CssPropertyRow
             deleteOption={deleteOption}
             index={i}
-            label={meta().label}
+            label={props.label}
             meta={meta()}
             option={option}
           />

@@ -1,58 +1,37 @@
-import { path } from "rambda";
-import { type Accessor, type JSX, Match, Switch } from "solid-js";
-
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { type JSX, Match, splitProps, Switch } from "solid-js";
 
 import type { ColorPickerField } from "../constants/FieldSchemaType";
 
-import {
-  useCssDefaultEditor,
-  useCssEditor,
-  useCssState,
-} from "../CssEditorContext";
-import { useRenderContext } from "../RenderContext";
 import { Container } from "./Container";
 import { LabelWrapper } from "./LabelWrapper";
 
-export const ColorPickerInput = () => {
-  const [cssState, setCssState] = useCssEditor();
-  const [cssDefault] = useCssDefaultEditor();
-  const [state] = useCssState();
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(parentItems?.meta || []) as Accessor<ColorPickerField>;
-  const selectedValue = (): string => {
-    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
-    return path(projections, cssState) || path(projections, cssDefault) || "";
-  };
+export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
+  const [local, others] = splitProps(props, ["componentName", "onChange"]);
 
   const handleChange: JSX.InputEventHandlerUnion<
     HTMLInputElement,
     InputEvent
   > = (event) => {
-    if (meta().onChangeInput) {
-      meta().onChangeInput!(event.target.value);
-    }
-    if (meta().isAddToClass ?? true) {
-      setCssState(state(), ...(meta().projections ?? []), {
-        [meta().name]: event.target.value,
-      });
-    }
+    const target = event.target as HTMLInputElement;
+    local.onChange?.(target.value);
   };
 
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
       <input
+        {...others}
         class="b:none bg:#ffffff cursor:pointer; h:25px mr:10 p:0 r:5 w:30px"
         onInput={handleChange}
         type="color"
-        value={selectedValue()}
+        value={props.value || ""}
       />
       <input
+        {...others}
         class="b:none f:14 outline:none w:100%"
         onInput={handleChange}
         placeholder="Enter color code"
         type="text"
-        value={selectedValue()}
+        value={props.value || ""}
       />
     </div>
   );
@@ -60,13 +39,13 @@ export const ColorPickerInput = () => {
   return (
     <Container>
       <Switch>
-        <Match when={meta().isLabelOnTop}>
+        <Match when={props.isLabelOnTop}>
           <div class={"w:full"}>
             <LabelWrapper />
             <Content />
           </div>
         </Match>
-        <Match when={meta().label}>
+        <Match when={props.label}>
           <div class={"flex ai:center jc:space-between w:100%"}>
             <LabelWrapper />
             <Content />

@@ -20,10 +20,16 @@ export function LabelWrapper(
   const [cssDefault] = useCssDefaultEditor();
   const [state] = useCssState();
   const [parentItems] = useRenderContext();
-  const meta = getLastItem(parentItems?.meta || []) as Accessor<ColorPickerField>;
+  const meta = getLastItem(
+    parentItems?.meta || [],
+  ) as Accessor<ColorPickerField>;
 
   const isValueConfigured = createMemo(() => {
-    const projections = [state() || "", ...(meta().projections ?? []), meta().name];
+    const projections = [
+      state() || "",
+      ...(meta().projections ?? []),
+      meta().name,
+    ];
     const value = path(projections, cssState);
     if (Array.isArray(value)) {
       return value.length > 0;

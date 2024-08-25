@@ -16,7 +16,7 @@ interface DropDownProps {
   toggleDropdown: (event: MouseEvent) => void;
 }
 
-export function UnitsDropdown(props: DropDownProps) {
+export function UnitsDropdown(props: Readonly<DropDownProps>) {
   const [searchTerm, setSearchTerm] = createSignal("");
 
   const filteredOptions = () => {

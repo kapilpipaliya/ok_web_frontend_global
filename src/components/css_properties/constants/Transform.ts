@@ -9,8 +9,8 @@ import { createGridOptions } from "./FieldSchemaType";
 
 export const Transform = {
   transform: {
-    children: {
-      shadow: createGridOptions("Grid", "Transform", [
+    children: [
+      createGridOptions("Grid", "Transform", [
         {
           componentName: "select",
           isLabelOnTop: true,
@@ -68,10 +68,11 @@ export const Transform = {
           ],
         },
       ]),
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Transform",
     label: "Transform",
     name: "transform",
+    useParentProjection: true,
   } as DataEditorField,
 };

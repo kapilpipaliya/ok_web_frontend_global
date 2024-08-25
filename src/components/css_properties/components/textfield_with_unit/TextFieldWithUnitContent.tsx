@@ -16,15 +16,15 @@ interface ContentProps {
   handleInputChange: (event: Event) => void;
   meta: any; // Define the proper type here
   resetValue: () => void;
-  selectedValue: () => string;
+  value: string;
 }
 
 export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
-  const [startValue, setStartValue] = createWritableMemo<number | string>(() =>
-    props.selectedValue(),
+  const [startValue, setStartValue] = createWritableMemo<number | string>(
+    () => props.value,
   );
   const [selectedUnitOption, setSelectedUnitOption] = createSignal(
     props.determineSelectedOption(),
@@ -44,14 +44,15 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
   const selectOption = (option: string) => {
     setIsDropdownOpen(false);
     setSelectedUnitOption(option);
-    const value = getValueWithoutUnits(props.selectedValue());
+    const value = getValueWithoutUnits(props.value);
     props.changeValue(`${value}${option}`);
   };
 
   const moveIncrement = (event: MouseEvent) => {
     if (isMoving()) {
       const diff = startY() - event.pageY;
-      let newValue = Number(startValue()) + diff;
+      let newValue =
+        Number(getValueWithoutUnits(startValue() as string)) + diff;
       newValue = clampValue(newValue);
       props.changeValue(`${newValue}${selectedUnitOption()}`);
     }
@@ -61,7 +62,7 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
     event.preventDefault();
     setIsMoving(true);
     setStartY(event.pageY);
-    setStartValue(getValueWithoutUnits(props.selectedValue()));
+    setStartValue(getValueWithoutUnits(props.value));
     document.addEventListener("mousemove", moveIncrement);
     document.addEventListener("mouseup", upIncrement);
   };
@@ -143,12 +144,12 @@ export const TextFieldWithUnitContent: Component<ContentProps> = (props) => {
           handleChange={handleInputChange}
           meta={props.meta}
           onFocus={handleInputFocus}
-          selectedValue={props.selectedValue}
+          value={props.value}
         />
         <Show when={props.meta.showFilePicker}>
           <FilePickerButton
             handleChange={handleInputChange}
-            selectedValue={props.selectedValue}
+            value={props.value}
           />
         </Show>
       </div>

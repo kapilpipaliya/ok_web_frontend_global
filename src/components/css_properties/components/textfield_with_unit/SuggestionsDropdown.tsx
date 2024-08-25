@@ -16,7 +16,7 @@ interface SuggestionsDropdownProps {
   setIsDropdownOpen: (isOpen: boolean) => void;
 }
 
-export function SuggestionsDropdown(props: SuggestionsDropdownProps) {
+export function SuggestionsDropdown(props: Readonly<SuggestionsDropdownProps>) {
   return (
     <Show when={props.options}>
       <Show when={props.isDropdownOpen()}>

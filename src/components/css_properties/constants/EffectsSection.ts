@@ -13,8 +13,8 @@ import { createGridOptions } from "./FieldSchemaType";
 
 export const EffectsSection = {
   filter: {
-    children: {
-      shadow: createGridOptions("Shadow Grid", "Filter", [
+    children: [
+      createGridOptions("Shadow Grid", "Filter", [
         {
           componentName: "select",
           isLabelOnTop: true,
@@ -40,17 +40,18 @@ export const EffectsSection = {
           type: "number",
         } as TextFieldOptionsField,
       ]),
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Adjust Filter",
     fallback: "No Filter Effects",
     label: "Filter",
     name: "filter",
+    useParentProjection: true,
   } as DataEditorField,
 
   backdropFilter: {
-    children: {
-      shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
+    children: [
+      createGridOptions("Shadow Grid", "Backdrop Filter", [
         {
           componentName: "select",
           isLabelOnTop: true,
@@ -67,11 +68,12 @@ export const EffectsSection = {
           type: "number",
         } as TextFieldOptionsField,
       ]),
-    },
+    ],
     componentName: "dataEditor",
     dialogLabel: "Backdrop Filter",
     label: "Backdrop Filter",
     name: "backdrop-filter",
+    useParentProjection: true,
   } as DataEditorField,
 
   backfaceVisibility: {
