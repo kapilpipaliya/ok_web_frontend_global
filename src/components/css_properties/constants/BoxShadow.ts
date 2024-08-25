@@ -16,6 +16,7 @@ export const BoxShadow = {
         componentName: "colorPicker",
         info: "box-shadow",
         isLabelOnTop: true,
+        hashName: "color",
         label: "Shadow Color",
         name: "color",
       } as ColorPickerField,

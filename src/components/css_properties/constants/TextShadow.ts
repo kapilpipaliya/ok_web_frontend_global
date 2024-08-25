@@ -12,6 +12,8 @@ export const TextShadow = {
     children: [
       {
         componentName: "colorPicker",
+        hashName: 'color',
+        info: "text-shadow",
         isLabelOnTop: true,
         label: "Shadow Color",
         name: "color",
@@ -19,6 +21,8 @@ export const TextShadow = {
       createGridOptions("grid", "Shadow", [
         {
           componentName: "textFieldOptions",
+          hashName: 'offset-x_offset-y',
+          info: "text-shadow",
           isLabelOnTop: true,
           label: "X Offset",
           name: "offset-x",
@@ -27,6 +31,8 @@ export const TextShadow = {
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
+          hashName: 'offset-x_offset-y',
+          info: "text-shadow",
           isLabelOnTop: true,
           label: "Y Offset",
           name: "offset-y",
@@ -35,6 +41,8 @@ export const TextShadow = {
         } as TextFieldOptionsField,
         {
           componentName: "textFieldOptions",
+          hashName: 'blur-radius',
+          info: "text-shadow",
           isLabelOnTop: true,
           label: "Blur",
           name: "blur-radius",

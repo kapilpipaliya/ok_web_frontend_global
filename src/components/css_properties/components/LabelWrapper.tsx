@@ -39,7 +39,7 @@ export function LabelWrapper(
   return (
     <ContainerLabel
       hashName={meta().hashName}
-      info={meta().name ?? meta().info}
+      info={meta().info ?? meta().name}
       onResetIconClick={() => {
         const projections = [
           state() || "",

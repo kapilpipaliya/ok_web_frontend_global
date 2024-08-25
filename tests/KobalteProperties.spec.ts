@@ -2,6 +2,7 @@ import { expect, Locator, Page, test } from '@playwright/test';
 import { capitalize, toPascal } from "case-switcher-js";
 import fs from 'fs';
 import path from 'path';
+
 import { generateIndexFile } from './functions/generateIndexFile';
 
 async function getNextSiblingDiv(locator: Locator): Promise<Locator> {
