@@ -21,13 +21,20 @@ test('save kobalte properties', async ({ page }) => {
   const componentsDiv = await getNextSiblingDiv(componentDetails);
   const componentLinks = await componentsDiv.locator('a').all();
   
+  const ignoredFiles = fs.readdirSync(path.join('src', 'cypher', 'mutate', 'sync', 'component_properties', 'corvu'))
+                         .map(file => file.replace('.ts', ''));
+
   for (const link of componentLinks) {
-    const linkText = await link.textContent();
-    console.log(`Component: ${linkText}`);
+    const linkTextContent = (await link.textContent())!.trim().replace(/new$/, '')
+    const linkText = toPascal(capitalize(linkTextContent));
+    if (ignoredFiles.includes(linkText!.trim())) {
+      console.log(`Ignoring component: ${linkText}`);
+      continue;
+    }
     
     await link.click();
-    await page.waitForTimeout(500);
-    await extractComponentData(page, toPascal(capitalize(linkText!.trim())).replace(/new$/, ''));
+    await expect(page).toHaveTitle(new RegExp(`^${linkTextContent}`), { timeout: 5000 });
+    await extractComponentData(page, linkText);
   }
 
   generateIndexFile(['src', 'cypher', 'mutate', 'sync', 'component_properties', 'kobalte']);
