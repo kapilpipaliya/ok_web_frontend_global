@@ -1,4 +1,4 @@
-export const DisclosureRoot = [
+export const Disclosure = [
   {
     "default": "-",
     "description": "Whether the disclosure is expanded.",

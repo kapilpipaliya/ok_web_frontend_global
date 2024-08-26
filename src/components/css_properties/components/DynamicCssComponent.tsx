@@ -39,10 +39,6 @@ const componentMap: Record<string, any> = {
   toggleButton: ToggleButton,
 };
 
-const repeterStore = createStore({
-  meta: [] as Accessor<GenericField>[],
-});
-
 export function DynamicCSSComponent(
   props: Readonly<{ [key: string]: any; meta: GenericField, projections: string[] }>,
 ) {
@@ -145,7 +141,9 @@ export function DynamicCSSComponent(
     // setSelectedOption(determineSelectedOption());
     clearFileSelection();
   };
-
+  const repeterStore = createStore({
+    meta: [] as Accessor<GenericField>[],
+  });
   return (
     <RenderContextProvider meta={() => props.meta} store={repeterStore}>
       <Switch>

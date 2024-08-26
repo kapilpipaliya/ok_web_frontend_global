@@ -1,4 +1,4 @@
-export const TooltipRoot = [
+export const Tooltip = [
   {
     "default": "-",
     "description": "Whether the tooltip is open.",

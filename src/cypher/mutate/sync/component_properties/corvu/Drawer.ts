@@ -1,4 +1,4 @@
-export const DrawerRoot = [
+export const Drawer = [
   {
     "default": "[0, 1]",
     "description": "An array of points to snap to. Can be either percentages of the total drawer height or CSS pixel values.",

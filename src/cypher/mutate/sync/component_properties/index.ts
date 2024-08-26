@@ -1,7 +1,7 @@
 import corvu from "./corvu";
 import kobalte from "./kobalte";
 
-export default {
+export const DefaultComponentProperties = {
   ...kobalte,
   ...corvu,
 };

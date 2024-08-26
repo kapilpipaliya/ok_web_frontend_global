@@ -1,4 +1,4 @@
-export const ResizableRoot = [
+export const Resizable = [
   {
     "default": "'horizontal'",
     "description": "The orientation of the resizable.",

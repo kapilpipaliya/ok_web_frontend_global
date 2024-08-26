@@ -1,4 +1,4 @@
-export const DialogRoot = [
+export const Dialog = [
   {
     "default": "'dialog'",
     "description": "The role attribute of the dialog element.",

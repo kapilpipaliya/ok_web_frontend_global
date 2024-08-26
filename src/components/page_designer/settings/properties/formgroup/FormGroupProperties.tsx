@@ -37,6 +37,7 @@ import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
+import { RenderDefaultProperties } from "./RenderDefaultProperties";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
@@ -66,8 +67,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const vertexIds = createVertexIds();
   const metaTxnId = graph.newTxnId;
   createVertices(vertexIds, metaTxnId, graph, setGraph);
+  const selectedComp = () =>graph.vertexes[layoutStore.selectedComponent];
   const propAttributes = createMemo(() =>
-    createPropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
+    clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
 
   onCleanup(() => {
@@ -78,12 +80,13 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     <>
       <div class="">
         <ValidationConfig
-          componentMeta={graph.vertexes[layoutStore.selectedComponent]}
+          componentMeta={selectedComp()}
           data={props.selectedLayout}
           meta={{ P: { name: "validation" } } as unknown as Vertex}
           onChange={props.onChange}
         />
       </div>
+      <RenderDefaultProperties/>
       <For
         each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
       >
@@ -200,7 +203,7 @@ function createVertices(
   });
 }
 
-function createPropAttributes(
+function clonePropAttributes(
   metaAttributes: Vertex[],
   txnId: number,
   graph: GraphInterface,

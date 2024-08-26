@@ -1,4 +1,4 @@
-export const OtpFieldRoot = [
+export const OtpField = [
   {
     "default": "-",
     "description": "Max number of chars. Is required.",

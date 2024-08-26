@@ -1,4 +1,4 @@
-export const PopoverRoot = [
+export const Popover = [
   {
     "default": "'bottom'",
     "description": "The initial placement of the popover.",

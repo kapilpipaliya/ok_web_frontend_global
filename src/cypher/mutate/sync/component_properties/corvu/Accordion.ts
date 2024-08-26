@@ -1,4 +1,4 @@
-export const AccordionRoot = [
+export const Accordion = [
   {
     "default": "false",
     "description": "Whether multiple accordion items can be expanded at the same time.",

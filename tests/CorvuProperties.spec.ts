@@ -1,7 +1,8 @@
 import { expect, Locator, Page, test } from '@playwright/test';
+import { capitalize, toPascal } from "case-switcher-js";
 import fs from 'fs';
 import path from 'path';
-import { toPascal, capitalize } from "case-switcher-js";
+
 import { generateIndexFile } from './functions/generateIndexFile';
 
 async function getNextSiblingDiv(locator: Locator): Promise<Locator> {
@@ -25,6 +26,7 @@ test('save corvu properties', async ({ page }) => {
     console.log(`Component: ${linkText}`);
     
     await link.click();
+    await expect(page.getByRole('heading', { exact: true, name: linkText?.trim() })).toBeVisible();
     await extractComponentData(page, toPascal(capitalize(linkText!.trim())));
   }
 
@@ -60,7 +62,10 @@ async function extractComponentData(page: Page, name: string) {
 
         let variableName = name;
         if (cleanedTableHeaderText && name !== cleanedTableHeaderText) {
-            variableName += cleanedTableHeaderText;
+            const cleanedHeaderText = cleanedTableHeaderText.replace(/Root$/, '');
+            if (cleanedHeaderText) {
+                variableName += cleanedHeaderText;
+            }
         }
 
         if (componentDetailsMap.has(variableName)) {
