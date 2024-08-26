@@ -15,7 +15,7 @@ export const FlexChild = {
     { key: "customIcon", tooltip: "Custom", value: "custom" },
   ]),*/
   flex: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Flex",
     name: "flex",
     options: [
@@ -26,7 +26,7 @@ export const FlexChild = {
     ],
   } as TextFieldOptionsField,
   order: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Order",
     name: "order",
     type: "number",

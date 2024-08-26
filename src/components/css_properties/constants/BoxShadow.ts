@@ -22,7 +22,7 @@ export const BoxShadow = {
       } as ColorPickerField,
       createGridOptions("grid", "Shadow", [
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -32,7 +32,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -42,7 +42,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,
@@ -52,7 +52,7 @@ export const BoxShadow = {
           type: "number",
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "length",
           info: "box-shadow",
           isLabelOnTop: true,

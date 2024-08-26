@@ -9,7 +9,7 @@ import {
 export const PositionSection = {
   dimentions: createGridOptions("grid", "Dimention", [
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Top",
       name: "top",
@@ -17,7 +17,7 @@ export const PositionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Right",
       name: "right",
@@ -25,7 +25,7 @@ export const PositionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Bottom",
       name: "bottom",
@@ -33,7 +33,7 @@ export const PositionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Left",
       name: "left",
@@ -50,7 +50,7 @@ export const PositionSection = {
     ...CSSWideKeywords,
   ]),
   zIndex: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Z-Index",
     name: "z-index",
     type: "number",

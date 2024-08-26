@@ -20,7 +20,7 @@ export const TextShadow = {
       } as ColorPickerField,
       createGridOptions("grid", "Shadow", [
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "offset-x_offset-y",
           info: "text-shadow",
           isLabelOnTop: true,
@@ -30,7 +30,7 @@ export const TextShadow = {
           unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "offset-x_offset-y",
           info: "text-shadow",
           isLabelOnTop: true,
@@ -40,7 +40,7 @@ export const TextShadow = {
           unitOptions: defaultPixelSizeTypes,
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           hashName: "blur-radius",
           info: "text-shadow",
           isLabelOnTop: true,

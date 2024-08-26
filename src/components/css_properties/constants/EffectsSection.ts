@@ -33,7 +33,7 @@ export const EffectsSection = {
           ],
         },
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -62,7 +62,7 @@ export const EffectsSection = {
           options: extraPropertyValues["backdrop-filter"].values,
         } as SelectField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -91,7 +91,7 @@ export const EffectsSection = {
   } as ToggleField,
 
   perspective: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     isLabelOnTop: true,
     label: "Perspective",
     name: "perspective",

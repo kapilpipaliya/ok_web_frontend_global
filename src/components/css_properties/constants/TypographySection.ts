@@ -26,7 +26,7 @@ export const TypographySection = {
     "Verdana",
   ]),
   fontSize: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Size",
     name: "font-size",
     unitOptions: sizeTypes,
@@ -34,7 +34,7 @@ export const TypographySection = {
   } as TextFieldOptionsField,
 
   lineHeight: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Line height",
     name: "line-height",
     unitOptions: sizeTypes,
@@ -52,14 +52,14 @@ export const TypographySection = {
     options: extraPropertyValues["font-weight"].values,
   } as SelectField,
   letterSpacing: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Spacing",
     name: "letter-spacing",
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   textIndent: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Indent",
     name: "text-indent",
     unitOptions: sizeTypes,

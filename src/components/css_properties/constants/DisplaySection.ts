@@ -101,7 +101,7 @@ export const DisplaySection = {
     ...CSSWideKeywords,
   ]),
   opacity: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Opacity",
     name: "opacity",
     unitOptions: ["%"],

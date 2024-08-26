@@ -39,7 +39,7 @@ export const FieldWithCustomBox = (
           meta={
             {
               ...props,
-              componentName: props.mainFieldType ?? "textFieldOptions",
+              componentName: props.mainFieldType ?? "string",
               hideLabel: true,
               type: props.type ?? "text",
             } as GenericField
@@ -87,7 +87,7 @@ export const FieldWithCustomBox = (
                   meta={
                     {
                       ...props,
-                      componentName: props.mainFieldType ?? "textFieldOptions",
+                      componentName: props.mainFieldType ?? "string",
                       type: props.type ?? "text",
                       ...item,
                     } as GenericField

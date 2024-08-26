@@ -7,7 +7,7 @@ import { createSelectOptions } from "./FieldSchemaType";
 
 export const ColumnsSection = {
   columnCount: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     isLabelOnTop: true,
     label: "Column Count",
     name: "column-count",
@@ -15,7 +15,7 @@ export const ColumnsSection = {
     type: "number",
   } as TextFieldOptionsField,
   columnGap: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     isLabelOnTop: true,
     label: "Column Gap",
     name: "column-gap",
@@ -23,25 +23,25 @@ export const ColumnsSection = {
     type: "number",
   } as TextFieldOptionsField,
   columnRule: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Column Rule",
     name: "column-rule",
     type: "text",
   } as TextFieldOptionsField,
   columnRuleColor: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Column Rule Color",
     name: "column-rule-color",
     type: "text",
   } as TextFieldOptionsField,
   columnRuleStyle: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Column Rule Style",
     name: "column-rule-style",
     type: "text",
   } as TextFieldOptionsField,
   columnRuleWidth: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Column Rule Width",
     name: "column-rule-width",
     type: "text",

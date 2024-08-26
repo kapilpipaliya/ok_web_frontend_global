@@ -32,7 +32,7 @@ export const Transform = {
           ],
         },
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           isLabelOnTop: true,
           label: "Value",
           name: "value",
@@ -51,7 +51,7 @@ export const Transform = {
           gridType: "repeat(2,auto)",
           isLabelOnTop: true,
           label: "Transform Origin",
-          mainFieldType: "textFieldOptions",
+          mainFieldType: "string",
           name: "transform-origin",
           options: sizeTypes,
           padding: "5px",

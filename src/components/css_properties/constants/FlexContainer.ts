@@ -7,21 +7,21 @@ import { createSelectOptions } from "./FieldSchemaType";
 
 export const gapFields = {
   gap: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Gap",
     name: "gap",
     type: "number",
     unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   rowGap: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Row Gap",
     name: "row-gap",
     type: "number",
     unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   columnGap: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Column Gap",
     name: "column-gap",
     type: "number",

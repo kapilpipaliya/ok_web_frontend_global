@@ -34,8 +34,8 @@ const componentMap: Record<string, any> = {
   dataEditor: DataEditWithCustomDialog,
   fieldWithCustomProperty: FieldWithCustomBox,
   select: Select,
+  string: TextFieldWithSelect,
   textField: TextFieldWithSelect,
-  textFieldOptions: TextFieldWithSelect,
   toggleButton: ToggleButton,
 };
 

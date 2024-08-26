@@ -15,7 +15,7 @@ export const Transition = {
       ),
       createGridOptions("size Grid", "Transition", [
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           isLabelOnTop: true,
           label: "Duration",
           name: "duration",
@@ -23,7 +23,7 @@ export const Transition = {
           unitOptions: timesTypes,
         } as TextFieldOptionsField,
         {
-          componentName: "textFieldOptions",
+          componentName: "string",
           isLabelOnTop: true,
           label: "Delay",
           name: "delay",

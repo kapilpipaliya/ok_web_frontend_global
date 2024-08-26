@@ -6,43 +6,43 @@ import { createSelectOptions } from "./FieldSchemaType";
 
 export const GridChild = {
   gridArea: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Area",
     name: "grid-area",
     type: "text",
   } as TextFieldOptionsField,
   gridRow: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Row",
     name: "grid-row",
     type: "text",
   } as TextFieldOptionsField,
   gridColumn: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Column",
     name: "grid-column",
     type: "text",
   } as TextFieldOptionsField,
   gridRowStart: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Row Start",
     name: "grid-row-start",
     type: "text",
   } as TextFieldOptionsField,
   gridRowEnd: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Row End",
     name: "grid-row-end",
     type: "text",
   } as TextFieldOptionsField,
   gridColumnStart: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Column Start",
     name: "grid-column-start",
     type: "text",
   } as TextFieldOptionsField,
   gridColumnEnd: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Grid Column End",
     name: "grid-column-end",
     type: "text",

@@ -10,7 +10,7 @@ import { createSelectOptions } from "./FieldSchemaType";
 
 export const BackgroundSection = {
   background: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Background",
     name: "background",
     options: [...CSSWideKeywords],
@@ -21,7 +21,7 @@ export const BackgroundSection = {
     name: "background-color",
   } as ColorPickerField,
   backgroundImage: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Image",
     name: "background-image",
     options: [...extraPropertyValues["background-image"].values],
@@ -29,7 +29,7 @@ export const BackgroundSection = {
   } as TextFieldOptionsField,
   // todo add gradient support
   backgroundRepeat: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Repeat",
     name: "background-repeat",
     options: [
@@ -50,16 +50,16 @@ export const BackgroundSection = {
       { label: "Position Y", name: "background-position-y" },
     ],
     gridType: "repeat(1,auto)",
-    mainFieldType: "textFieldOptions",
+    mainFieldType: "string",
   } as FieldWithCustomProperty,
   backgroundSize: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Size",
     name: "background-size",
     options: ["auto", "cover", "contain", ...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundAttachment: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Attachment",
     name: "background-attachment",
     options: ["scroll", "fixed", "local", ...CSSWideKeywords],
@@ -78,7 +78,7 @@ export const BackgroundSection = {
     ...CSSWideKeywords,
   ]),
   backgroundBlendMode: {
-    componentName: "textFieldOptions",
+    componentName: "string",
     label: "Blend Mode",
     name: "background-blend-mode",
     options: [

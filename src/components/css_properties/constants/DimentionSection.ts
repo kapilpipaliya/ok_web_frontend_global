@@ -7,7 +7,7 @@ import {
 export const DimentionSection = {
   width: createGridOptions("grid", "Dimention", [
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Width",
       name: "width",
@@ -15,7 +15,7 @@ export const DimentionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Min width",
       name: "min-width",
@@ -23,7 +23,7 @@ export const DimentionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Max width",
       name: "max-width",
@@ -34,7 +34,7 @@ export const DimentionSection = {
   // eslint-disable-next-line perfectionist/sort-objects
   height: createGridOptions("grid", "Dimention", [
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Height",
       name: "height",
@@ -42,7 +42,7 @@ export const DimentionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Min height",
       name: "min-height",
@@ -50,7 +50,7 @@ export const DimentionSection = {
       unitOptions: sizeTypes,
     } as TextFieldOptionsField,
     {
-      componentName: "textFieldOptions",
+      componentName: "string",
       isLabelOnTop: true,
       label: "Max height",
       name: "max-height",

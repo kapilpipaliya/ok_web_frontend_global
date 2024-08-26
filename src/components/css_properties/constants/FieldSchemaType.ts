@@ -59,7 +59,7 @@ export type OptionType = AnotherOption[] | string[];
 
 // text field with unit options
 export interface TextFieldOptionsField extends FormField {
-  componentName: "textFieldOptions";
+  componentName: "string";
   inputProps?: any;
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;
@@ -91,6 +91,7 @@ export interface DataEditorField extends FormField {
   fallback?: string; // not used?
   label: string;
 }
+
 export interface SelectField extends FormField {
   componentName: "select";
   isAddToClass?: boolean;
