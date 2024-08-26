@@ -18,9 +18,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
 import {
-  useCssDefaultEditor,
   useCssEditor,
-  useCssState,
 } from "../CssEditorContext";
 import { useCssEditorProps } from "../CSSEditorPropsContext";
 import { RenderContextProvider } from "../RenderContext";
@@ -46,7 +44,7 @@ const repeterStore = createStore({
 });
 
 export function DynamicCSSComponent(
-  props: Readonly<{ [key: string]: any; meta: GenericField }>,
+  props: Readonly<{ [key: string]: any; meta: GenericField, projections: string[] }>,
 ) {
   const Component = () =>
     componentMap[props.meta.componentName] || NotFoundComponent;
@@ -58,8 +56,6 @@ export function DynamicCSSComponent(
   const [, otherProps] = splitProps(props, ["meta"]);
 
   const [cssState, setCssState] = useCssEditor();
-  const [cssDefault] = useCssDefaultEditor();
-  const [state] = useCssState();
 
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
@@ -67,7 +63,7 @@ export function DynamicCSSComponent(
 
   const projections = createMemo(
     () =>
-      props.projections ?? [state() || "", ...(props.meta.projections ?? [])],
+      props.projections ?? [...(props.meta.projections ?? [])],
   );
 
   const value = createMemo(() => {
@@ -75,10 +71,6 @@ export function DynamicCSSComponent(
       path(
         [...projections(), (props.meta as FormField).name || ""],
         cssState,
-      ) ||
-      path(
-        [...projections(), (props.meta as FormField).name || ""],
-        cssDefault,
       ) ||
       ""
     );
@@ -133,8 +125,8 @@ export function DynamicCSSComponent(
         type: getCssSelectedFileEdgeName(
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.name,
-          state() || "Default",
-          props.meta.name,
+          props.projections[0] || "Default",
+          props.meta.name!,
         ),
       },
     } as Vertex;

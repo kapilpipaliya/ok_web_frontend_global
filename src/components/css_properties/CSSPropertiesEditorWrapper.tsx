@@ -9,7 +9,6 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import type { CSSStore } from "./CssEditorContext";
 
 import {
-  CssDefaultEditorContext,
   CssEditorContext,
   CssStateContext,
 } from "./CssEditorContext";
@@ -29,12 +28,8 @@ export function CSSPropertiesEditorWrapper(
   }>,
 ) {
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
-  const [cssDefaultState, setCssDefaultCssState] = createStore({
-    "": {},
-  } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const defaultValues = "";
   const cssValue = (props.data?.P[props.meta.P.name] as string) || "";
 
   const initializeState = (
@@ -48,7 +43,6 @@ export function CSSPropertiesEditorWrapper(
     }
   };
 
-  initializeState(defaultValues, setCssDefaultCssState);
   initializeState(cssValue, setCssState);
 
   const onCSSStateChange = (
@@ -66,7 +60,6 @@ export function CSSPropertiesEditorWrapper(
           CssEditorContext,
           [cssState, onCSSStateChange as SetStoreFunction<CSSStore>],
         ],
-        [CssDefaultEditorContext, [cssDefaultState, setCssDefaultCssState]],
         [CssStateContext, [state, setState]],
         [
           CssEditorPropsProvider,

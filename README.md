@@ -213,3 +213,10 @@ When reset a new super user:
 2. sync components
 3. add component properties manuallay.
 4. add essential pages.
+
+
+AI:
+https://llama.meta.com/docs/llama-everywhere/running-meta-llama-on-linux/
+
+PowerDnsRestAPI:
+https://doc.powerdns.com/authoritative/http-api/index.html

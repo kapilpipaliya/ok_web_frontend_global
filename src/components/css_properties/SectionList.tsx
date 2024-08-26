@@ -14,6 +14,7 @@ import type {
 } from "./constants/FieldSchemaType";
 
 import { DynamicCSSComponent } from "./components/DynamicCssComponent";
+import { useCssState } from "./CssEditorContext";
 
 export const CollapsibleSection = (
   props: Readonly<{
@@ -27,6 +28,7 @@ export const CollapsibleSection = (
 ) => {
   // dont used createWritableMemo here, because props.isOpen is not a state.
   const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true);
+  const [state] = useCssState();
 
   // Sync with setAllOpen signal
   createEffect(() => {
@@ -60,7 +62,7 @@ export const CollapsibleSection = (
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
         <For each={Object.entries(props.propertyFieldMap)}>
-          {([, value]) => <DynamicCSSComponent meta={value} />}
+          {([, value]) => <DynamicCSSComponent meta={value} projections={[state() || ""]}/>}
         </For>
       </Show>
     </div>
