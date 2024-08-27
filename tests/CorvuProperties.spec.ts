@@ -50,10 +50,10 @@ async function extractComponentData(page: Page, name: string) {
                     const typeNode = cells[2].querySelector('.font-mono');
                     const descriptionNode = cells[2].querySelector('.prose');
                     return {
+                        componentName: typeNode ? typeNode.textContent?.trim() || '' : '',
                         default: cells[1].textContent?.trim() || '',
                         description: descriptionNode ? descriptionNode.textContent?.trim() || '' : '',
-                        property: cells[0].textContent?.trim() || '',
-                        type: typeNode ? typeNode.textContent?.trim() || '' : ''
+                        property: cells[0].textContent?.trim() || ''
                     };
                 }
                 return null;

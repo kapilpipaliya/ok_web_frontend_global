@@ -1,25 +1,25 @@
 export const Breadcrumbs = [
   {
+    "componentName": "string | JSX.Element",
     "description": "The visual separator between each breadcrumb item. It will be used as the default children of Breadcrumbs.Separator.",
-    "property": "separator",
-    "type": "string | JSX.Element"
+    "property": "separator"
   },
   {
+    "componentName": "BreadcrumbsIntlTranslations",
     "description": "Localization strings.",
-    "property": "translations",
-    "type": "BreadcrumbsIntlTranslations"
+    "property": "translations"
   }
 ];
 
 export const BreadcrumbsLink = [
   {
+    "componentName": "boolean",
     "description": "Whether the breadcrumb link represents the current page.",
-    "property": "current",
-    "type": "boolean"
+    "property": "current"
   },
   {
+    "componentName": "boolean",
     "description": "Whether the breadcrumb link is disabled.",
-    "property": "disabled",
-    "type": "boolean"
+    "property": "disabled"
   }
 ];

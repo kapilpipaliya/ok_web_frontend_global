@@ -1,7 +1,7 @@
 export const Button = [
   {
+    "componentName": "boolean",
     "description": "Whether the button is disabled.",
-    "property": "disabled",
-    "type": "boolean"
+    "property": "disabled"
   }
 ];

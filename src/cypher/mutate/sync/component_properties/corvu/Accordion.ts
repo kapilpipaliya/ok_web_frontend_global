@@ -1,95 +1,95 @@
 export const Accordion = [
   {
+    "componentName": "boolean",
     "default": "false",
     "description": "Whether multiple accordion items can be expanded at the same time.",
-    "property": "multiple",
-    "type": "boolean"
+    "property": "multiple"
   },
   {
+    "componentName": "string | string[] | null",
     "default": "-",
     "description": "The value of the accordion.",
-    "property": "value",
-    "type": "string | string[] | null"
+    "property": "value"
   },
   {
+    "componentName": "(value: string | string[] | null) => void",
     "default": "-",
     "description": "Callback fired when the value changes.",
-    "property": "onValueChange",
-    "type": "(value: string | string[] | null) => void"
+    "property": "onValueChange"
   },
   {
+    "componentName": "string | string[] | null",
     "default": "null",
     "description": "The value of the accordion initially.",
-    "property": "initialValue",
-    "type": "string | string[] | null"
+    "property": "initialValue"
   },
   {
+    "componentName": "boolean",
     "default": "true",
     "description": "Whether the accordion can be fully collapsed.",
-    "property": "collapsible",
-    "type": "boolean"
+    "property": "collapsible"
   },
   {
+    "componentName": "boolean",
     "default": "false",
     "description": "Whether the accordion is disabled.",
-    "property": "disabled",
-    "type": "boolean"
+    "property": "disabled"
   },
   {
+    "componentName": "'vertical' | 'horizontal'",
     "default": "vertical",
     "description": "The orientation of the accordion.",
-    "property": "orientation",
-    "type": "'vertical' | 'horizontal'"
+    "property": "orientation"
   },
   {
+    "componentName": "boolean",
     "default": "true",
     "description": "Whether the accordion should loop when navigating with the keyboard.",
-    "property": "loop",
-    "type": "boolean"
+    "property": "loop"
   },
   {
+    "componentName": "'ltr' | 'rtl'",
     "default": "ltr",
     "description": "The text direction of the accordion.",
-    "property": "textDirection",
-    "type": "'ltr' | 'rtl'"
+    "property": "textDirection"
   },
   {
+    "componentName": "'remove' | 'hide'",
     "default": "remove",
     "description": "Whether the accordion content should be removed or hidden when collapsed. Useful if you want to always render the content for SEO reasons.",
-    "property": "collapseBehavior",
-    "type": "'remove' | 'hide'"
+    "property": "collapseBehavior"
   },
   {
+    "componentName": "string",
     "default": "-",
     "description": "The id of the accordion context. Useful if you have nested accordions and want to create components that belong to a accordion higher up in the tree.",
-    "property": "contextId",
-    "type": "string"
+    "property": "contextId"
   }
 ];
 
 export const AccordionItem = [
   {
+    "componentName": "string",
     "default": "createUniqueId()",
     "description": "Value of the accordion item.",
-    "property": "value",
-    "type": "string"
+    "property": "value"
   },
   {
+    "componentName": "boolean",
     "default": "-",
     "description": "Whether the accordion item is disabled. Used to override the default provided by .",
-    "property": "disabled",
-    "type": "boolean"
+    "property": "disabled"
   },
   {
+    "componentName": "string",
     "default": "createUniqueId()",
     "description": "The id attribute of the accordion item trigger element.",
-    "property": "triggerId",
-    "type": "string"
+    "property": "triggerId"
   },
   {
+    "componentName": "ValidComponent",
     "default": "Fragment",
     "description": "Component to render the dynamic component as.",
-    "property": "as",
-    "type": "ValidComponent"
+    "property": "as"
   }
 ];

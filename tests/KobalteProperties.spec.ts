@@ -60,9 +60,9 @@ async function extractComponentData(page: Page, name: string) {
                     typeNode?.remove();
                     const descriptionNode = cells[1];
                     return {
+                        componentName: type,
                         description: descriptionNode ? descriptionNode.textContent?.trim() || '' : '',
-                        property: cells[0].textContent?.trim() || '',
-                        type
+                        property: cells[0].textContent?.trim() || ''
                     };
                 }
                 return null;
