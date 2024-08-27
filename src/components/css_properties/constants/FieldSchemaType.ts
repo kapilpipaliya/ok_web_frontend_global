@@ -123,7 +123,12 @@ export interface StringField extends FormField {
   options: string[];
 }
 
+export interface ArrayField extends Omit<TextFieldOptionsField, "componentName"> {
+  componentName: "array";
+}
+
 export type GenericField =
+  | ArrayField
   | BoxField
   | ButtonGroupField
   | ColorPickerField

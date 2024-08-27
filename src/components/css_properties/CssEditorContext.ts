@@ -1,4 +1,4 @@
-import { createContext, createSignal, useContext } from "solid-js";
+import { createContext, useContext } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
 export interface CSSStore {
@@ -12,9 +12,3 @@ export const CssEditorContext = createContext<
 export function useCssEditor() {
   return useContext(CssEditorContext);
 }
-
-export function useCssState() {
-  return useContext(CssStateContext);
-}
-
-export const CssStateContext = createContext(createSignal(""));

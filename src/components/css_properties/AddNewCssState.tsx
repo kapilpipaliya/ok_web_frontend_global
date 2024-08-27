@@ -2,12 +2,11 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
 import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
-import {
-  useCssEditor,
-  useCssState,
-} from "~/components/css_properties/CssEditorContext";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
+
+import { useCssEditor } from "./CssEditorContext";
+import { useCssState } from "./CssStateContext";
 
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);

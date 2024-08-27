@@ -1,6 +1,8 @@
 import { klona } from "klona";
+import { createStore } from "solid-js/store";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
+import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -29,13 +31,13 @@ export function UniqueConstrains() {
 
   return (
     <div class="mt:6">
+      <PageRenderContextProvider data={layoutStore.formStore[0]?.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
       <TableInputField
-        data={layoutStore.formStore[0]?.formData}
         isNoPermissionCheck={true}
         isRealTime={false}
-        meta={graph.vertexes[metaVertexId]}
         txnId={layoutStore.formStore[0].txnId}
-      />
+        />
+      </PageRenderContextProvider>
     </div>
   );
 }

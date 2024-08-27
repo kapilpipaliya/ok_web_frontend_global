@@ -1,8 +1,10 @@
 import { klona } from "klona";
 import { createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
+import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
@@ -96,17 +98,13 @@ export function PermissionModal(
                     :
                   </h3>
                   <div class="mt:0.5rem">
+                    <PageRenderContextProvider data={props.selectedAttr ? props.selectedAttr : layoutStore.formStore[0].formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
                     <TableInputField
-                      data={
-                        props.selectedAttr
-                          ? props.selectedAttr
-                          : layoutStore.formStore[0].formData
-                      }
                       isNoPermissionCheck={true}
                       isRealTime={false}
-                      meta={graph.vertexes[metaVertexId]}
                       txnId={layoutStore.formStore[0].txnId}
                     />
+                    </PageRenderContextProvider>
                   </div>
                 </div>
               </div>

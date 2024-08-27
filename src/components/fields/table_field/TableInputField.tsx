@@ -39,16 +39,20 @@ export function TableInputField(
   >,
 ) {
   const [graph, setGraph] = useGraph();
+  const [parentItems] = usePageRenderContext();
+  const meta = () => getLastItem(parentItems!.vertexes)!;
+  const data = () => getLastItem(parentItems!.data)!;
+  
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
     sortVertexesByPosition(
-      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes ||
+      getSelectionOptions(graph, setGraph, "->Attr", [meta()]).vertexes ||
         [],
     ),
   );
 
-  const [parentItems] = usePageRenderContext();
+
   const parentData = createMemo(() =>
     getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1)),
   );
@@ -60,8 +64,8 @@ export function TableInputField(
     // TODO: else if it has a parent Form Container(Record) use it.
     const vertexes = getSublistRows(
       graph,
-      props.meta,
-      props.data || parentData(),
+      meta(),
+      data() || parentData(),
     );
     setSortedVertexes(vertexes);
   });
@@ -95,16 +99,16 @@ export function TableInputField(
         Please Define table columns
       </Match>
       <Match when={true}>
-        {/*<Show when={props.meta.P.attributes}>*/}
-        {/*  <FormGroup form={{title: '', label: props.meta.P.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={vertex}/>*/}
+        {/*<Show when={meta().P.attributes}>*/}
+        {/*  <FormGroup form={{title: '', label: meta().P.title || meta().P[IdAttr], attributes: meta().P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
         {/* <Show when={props.isTableInside}> */}
         <AddNewButton
           onClick={() =>
             insertNewRow(
               props.txnId || 0,
-              props.meta,
-              props.data!,
+              meta(),
+              data()!,
               props.isRealTime ?? false,
               graph,
               setGraph,
@@ -175,7 +179,7 @@ export function TableInputField(
                       isNoPermissionCheck={props.isNoPermissionCheck}
                       isRealTime={props.isRealTime ?? false}
                       joinVertex={vertex}
-                      meta={props.meta}
+                      meta={meta()}
                       onChange={props.onChange}
                       rowIndex={index()}
                       setDragFromIndex={setDragFromIndex}

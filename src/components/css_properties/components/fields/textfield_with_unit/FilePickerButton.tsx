@@ -3,8 +3,8 @@ import { type Accessor, createMemo, createSignal, type JSX } from "solid-js";
 import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
-import { useCssState } from "~/components/css_properties/CssEditorContext";
 import { useCssEditorProps } from "~/components/css_properties/CSSEditorPropsContext";
+import { useCssState } from "~/components/css_properties/CssStateContext";
 import { useRenderContext } from "~/components/css_properties/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
 import { CustomModal } from "~/components/CustomModal";

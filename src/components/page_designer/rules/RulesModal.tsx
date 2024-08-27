@@ -1,6 +1,7 @@
 import jsep from "jsep";
 import { klona } from "klona";
 import { createMemo, createSignal, onCleanup } from "solid-js";
+import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
@@ -8,6 +9,7 @@ import {
   type FormStoreObject,
   useFormContext,
 } from "~/components/form/FormContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useZIndex } from "~/components/ZIndex";
@@ -159,17 +161,13 @@ export function RulesModal(
                     :
                   </h3>
                   <div class="mt:0.5rem">
+                  <PageRenderContextProvider data={props.selectedRule ? props.selectedRule : formStore!.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
                     <TableInputField
-                      data={
-                        props.selectedRule
-                          ? props.selectedRule
-                          : formStore!.formData
-                      }
                       isNoPermissionCheck={true}
                       isRealTime={false}
-                      meta={graph.vertexes[metaVertexId]}
                       txnId={formStore!.txnId}
                     />
+                  </PageRenderContextProvider>
                   </div>
                 </div>
               </div>

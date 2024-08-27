@@ -9,6 +9,7 @@ import { InitialPermissions } from "./InitialPermissions";
 export function getInitialPageRenderStore() {
   return {
     ...InitialPermissions,
+    data: [] as Vertex[],
     vertexes: [] as Vertex[],
   };
 }
@@ -22,11 +23,15 @@ export function usePageRenderContext() {
 }
 export const PageRenderContextProvider = (props: {
   children: JSX.Element;
-  item: Vertex;
+  data: Vertex;
+  meta: Vertex;
   store: PageRenderStore;
 }) => {
   const parentItems = usePageRenderContext();
-  props.store[1]("vertexes", [...(parentItems[0]?.vertexes || []), props.item]);
+  props.store[1]("vertexes", [...(parentItems[0]?.vertexes || []), props.meta]);
+  if (props.data) {
+    props.store[1]("data", [...(parentItems[0]?.data || []), props.data]);
+  }
 
   return (
     <PageRenderContext.Provider value={props.store}>

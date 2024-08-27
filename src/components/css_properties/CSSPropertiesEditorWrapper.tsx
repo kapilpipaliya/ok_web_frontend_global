@@ -10,10 +10,10 @@ import type { CSSStore } from "./CssEditorContext";
 
 import {
   CssEditorContext,
-  CssStateContext,
 } from "./CssEditorContext";
 import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
+import { CssStateContext } from "./CssStateContext";
 import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
 
 export function CSSPropertiesEditorWrapper(

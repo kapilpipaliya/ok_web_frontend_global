@@ -298,6 +298,7 @@ export function DynamicComponent(
     return result;
   });
   const repeterStore = createStore({
+    data: [] as Vertex[],
     get hasDeletePermission() {
       return hasDeletePermission();
     },
@@ -351,11 +352,9 @@ export function DynamicComponent(
           }
           component={component()}
           componentName={componentName()}
-          data={props.data}
           isNoPermissionCheck={isNoPermissionCheck()}
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
-          meta={props.meta}
           onChange={noOnChangePassedComponent() ? undefined : onChange}
           title={props.title ?? ""}
           txnId={props.txnId}
@@ -402,7 +401,7 @@ export function DynamicComponent(
           userRoles={graph.userRoles}
         />
       </Show> */}
-      <PageRenderContextProvider item={props.meta} store={repeterStore}>
+      <PageRenderContextProvider data={props.data!} meta={props.meta} store={repeterStore}>
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
           <Match

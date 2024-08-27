@@ -6,11 +6,13 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { FormContext, type IFormContext } from "../form/FormContext";
+import { FormContext, type FormStoreObject } from "../form/FormContext";
+import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
 
 export function FormField(
   props: Readonly<
@@ -23,6 +25,9 @@ export function FormField(
 ) {
   const [graph, setGraph] = useGraph();
   const [previewStore] = usePreviewContext();
+  const [parentItems] = usePageRenderContext();
+  const meta = () => getLastItem(parentItems!.vertexes)!;
+  const data = () => getLastItem(parentItems!.data)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -32,19 +37,17 @@ export function FormField(
   const formFieldStore = createStore({
     cleanUpConfig: () => cleanUpConfig,
     txnId,
-  } as unknown as IFormContext);
+  } as unknown as FormStoreObject);
   const [formData, setFormData] = formFieldStore;
 
-  if (props.data?.id) {
+  if (data()?.id) {
     setFormData({
-      formData: props.data,
-      formMeta: props.meta,
-      groupByTabsAndGroup: {},
-      tabs: [],
+      formData: data(),
+      formMeta: meta(),
       txnId,
     });
   } else {
-    const form = generateFormMetaAttributes(graph, () => {}, props.meta);
+    const form = generateFormMetaAttributes(graph, () => {}, meta());
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
         acc[attr.name] = attr.defaultValue;
@@ -58,7 +61,7 @@ export function FormField(
       txnId,
       props.label ??
         previewStore.previewMeta?.P[IdAttr] ??
-        props.meta.P[IdAttr],
+        meta().P[IdAttr],
       defaultValues,
     );
     if (createResult.error) {
@@ -66,9 +69,7 @@ export function FormField(
     }
     setFormData({
       formData: createResult.vertex!,
-      formMeta: props.meta,
-      groupByTabsAndGroup: {},
-      tabs: [],
+      formMeta: meta(),
       txnId,
     });
   }
@@ -83,7 +84,7 @@ export function FormField(
   return (
     <FormContext.Provider value={formFieldStore}>
       <div class="">
-        <PageAttrRender data={formData.formData} metaVertex={props.meta} />
+        <PageAttrRender data={formData.formData} metaVertex={meta()} />
       </div>
       <div />
     </FormContext.Provider>

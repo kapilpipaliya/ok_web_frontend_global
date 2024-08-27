@@ -86,7 +86,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           onChange={props.onChange}
         />
       </div>
-      <RenderDefaultProperties/>
+      <RenderDefaultProperties onChange={props.onChange}/>
       <For
         each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
       >

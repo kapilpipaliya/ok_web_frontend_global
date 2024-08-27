@@ -30,6 +30,7 @@ export const SortableRow = (
       isNoPermissionCheck?: boolean;
       isRealTime: boolean;
       joinVertex: Vertex;
+      meta: Vertex;
       rowIndex: number;
       setDragFromIndex: (index: number) => void;
       setDragToIndex: (index: number) => void;

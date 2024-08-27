@@ -2,81 +2,113 @@ export const Slider = [
   {
     "componentName": "number[]",
     "description": "The controlled values of the slider. Must be used in conjunction with onChange.",
-    "property": "value"
+    "name": "value",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "number[]",
     "description": "The value of the slider when initially rendered. Use when you do not need to control the state of the slider.",
-    "property": "defaultValue"
+    "name": "defaultValue",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "(value: number[]) => void",
     "description": "Event handler called when the value changes.",
-    "property": "onChange"
+    "name": "onChange",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "(value: number[]) => void",
     "description": "Event handler called when the value changes at the end of an interaction.",
-    "property": "onChangeEnd"
+    "name": "onChangeEnd",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the slider is visually inverted. Defaults to false.",
-    "property": "inverted"
+    "name": "inverted",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum slider value. Defaults to 0",
-    "property": "minValue"
+    "name": "minValue",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The maximum slider value. Defaults to 100",
-    "property": "maxValue"
+    "name": "maxValue",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The stepping interval. Defaults to 1",
-    "property": "step"
+    "name": "step",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum permitted steps between thumbs. Defaults to 0",
-    "property": "minStepsBetweenThumbs"
+    "name": "minStepsBetweenThumbs",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "(params: GetValueLabelParams) => string",
     "description": "A function to get the accessible label text representing the current value in a human-readable format. If not provided, the value label will be read as a percentage of the max value.",
-    "property": "getValueLabel"
+    "name": "getValueLabel",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "'horizontal' | 'vertical'",
     "description": "The orientation of the slider.",
-    "property": "orientation"
+    "name": "orientation",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "string",
     "description": "The name of the slider, used when submitting an HTML form.",
-    "property": "name"
+    "name": "name",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "'valid' | 'invalid'",
     "description": "Whether the slider should display its \"valid\" or \"invalid\" visual styling.",
-    "property": "validationState"
+    "name": "validationState",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the user must check a radio group item before the owning form can be submitted.",
-    "property": "required"
+    "name": "required",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the radio group is disabled.",
-    "property": "disabled"
+    "name": "disabled",
+    "hashName": "slider-1",
+    "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the radio group items can be selected but not changed by the user.",
-    "property": "readOnly"
+    "name": "readOnly",
+    "hashName": "slider-1",
+    "kobalte": true
   }
 ];

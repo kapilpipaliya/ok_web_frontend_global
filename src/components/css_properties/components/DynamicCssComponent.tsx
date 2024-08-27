@@ -24,10 +24,12 @@ import { useCssEditorProps } from "../CSSEditorPropsContext";
 import { RenderContextProvider } from "../RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { LabelWrapper } from "./fields/LabelWrapper";
+import { ArrayComponent } from "./fields/textfield_with_unit/ArrayComponent";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { RenderChildren } from "./RenderChildren";
 
 const componentMap: Record<string, any> = {
+  array: ArrayComponent,
   box: BoxField,
   buttonGroups: ButtonGroups,
   colorPicker: ColorPickerInput,
@@ -40,7 +42,7 @@ const componentMap: Record<string, any> = {
 };
 
 export function DynamicCSSComponent(
-  props: Readonly<{ [key: string]: any; meta: GenericField, projections: string[] }>,
+  props: Readonly<{ [key: string]: any; meta: GenericField, projections?: string[] }>,
 ) {
   const Component = () =>
     componentMap[props.meta.componentName] || NotFoundComponent;
@@ -86,6 +88,8 @@ export function DynamicCSSComponent(
     // (props.meta as FormField).onChange?.(data, formStore, setFormStore);
 
     // props.meta.error = "";
+
+    props.onChange?.(data);
   };
 
   const Content = () => {

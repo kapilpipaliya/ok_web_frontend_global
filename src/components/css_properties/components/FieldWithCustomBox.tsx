@@ -8,7 +8,8 @@ import type {
   GenericField,
 } from "../constants/FieldSchemaType";
 
-import { useCssEditor, useCssState } from "../CssEditorContext";
+import { useCssEditor } from "../CssEditorContext";
+import { useCssState } from "../CssStateContext";
 import { ButtonGroups } from "./fields/ButtonGroups";
 
 export const FieldWithCustomBox = (

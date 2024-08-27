@@ -14,7 +14,7 @@ import type {
 } from "./constants/FieldSchemaType";
 
 import { DynamicCSSComponent } from "./components/DynamicCssComponent";
-import { useCssState } from "./CssEditorContext";
+import { useCssState } from "./CssStateContext";
 
 export const CollapsibleSection = (
   props: Readonly<{

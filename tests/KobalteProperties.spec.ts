@@ -48,7 +48,10 @@ async function extractComponentData(page: Page, name: string) {
     const componentDetailsMap = new Map();
 
     for (const table of tables) {
-        const tableHeaderText = await table.locator('xpath=./parent::*/preceding-sibling::h3[position()=1 or position()=2][1]').textContent();
+        const tableHeader = await table.locator('xpath=./parent::*/preceding-sibling::h3[position()=1 or position()=2][1]');
+        const tableHeaderText = await tableHeader.textContent();
+        const tableHeaderId = await tableHeader.evaluate((el) => el.id);
+        const tableHeaderHashText = tableHeaderId || '';
         const cleanedTableHeaderText = tableHeaderText ? tableHeaderText.replace(/[<./>]/g, '').trim() : '';
         const rows = table.locator('tr');
         const componentDetails = await rows.evaluateAll((rows) => {
@@ -62,7 +65,7 @@ async function extractComponentData(page: Page, name: string) {
                     return {
                         componentName: type,
                         description: descriptionNode ? descriptionNode.textContent?.trim() || '' : '',
-                        property: cells[0].textContent?.trim() || ''
+                        name: cells[0].textContent?.trim() || ''
                     };
                 }
                 return null;
@@ -71,10 +74,16 @@ async function extractComponentData(page: Page, name: string) {
 
         const variableName = cleanedTableHeaderText;
 
+        const componentDetailsModified = componentDetails.map(item => ({
+            ...item,
+            hashName: tableHeaderHashText,
+            kobalte: true,
+        }));
+
         if (componentDetailsMap.has(variableName)) {
-            componentDetailsMap.set(variableName, [...componentDetailsMap.get(variableName), ...componentDetails]);
+            componentDetailsMap.set(variableName, [...componentDetailsMap.get(variableName), ...componentDetailsModified]);
         } else {
-            componentDetailsMap.set(variableName, componentDetails);
+            componentDetailsMap.set(variableName, componentDetailsModified);
         }
     }
     if (componentDetailsMap.size === 0) {

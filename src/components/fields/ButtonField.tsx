@@ -6,13 +6,15 @@ import { createEffect, createMemo, Show, splitProps } from "solid-js";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { Button } from "~/kobalte/packages/core/src/button";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { useGraph, } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 
 import { useFormContext } from "../form/FormContext";
+import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";
@@ -21,18 +23,17 @@ import { useToast } from "../Toast";
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   as?: string;
   children?: JSX.Element;
-  data: Vertex;
-  meta: Vertex;
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
   const [local, others] = splitProps(props, [
     "ref",
-    "data",
-    "meta",
     "children",
     "onChange",
   ]);
+  const [parentItems] = usePageRenderContext();
+  const meta = () => getLastItem(parentItems!.vertexes)!;
+  const data = () => getLastItem(parentItems!.data)!;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const [formStore] = useFormContext();
@@ -59,7 +60,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, props.meta, formStore!.formData)) {
+    if (isAnyFieldInvalid(graph, setGraph, meta(), formStore!.formData)) {
       return;
     }
     const data = commitTxn(formStore!.txnId, graph);
@@ -91,26 +92,26 @@ export function ButtonField(props: Readonly<ButtonProps>) {
         if (previewStore.isDesignMode) {
           return;
         }
-        if (props.meta.P.type === "submit") {
+        if (meta().P.type === "submit") {
           if (previewStore.isViewOnly) {
             return;
           }
           onSubmit();
-        } else if (props.meta.P.type === "cancel") {
+        } else if (meta().P.type === "cancel") {
           onCancel();
-        } else if (props.meta.P.type === "reset") {
+        } else if (meta().P.type === "reset") {
           onReset();
         }
       },
     };
   });
   return (
-    <Show when={!(previewStore.isViewOnly && props.meta.P.type === "submit")}>
+    <Show when={!(previewStore.isViewOnly && meta().P.type === "submit")}>
       {/* @ts-expect-error children is not a valid prop */}
       <Button ref={setInternalRef} {...others} {...extraProps}>
-        {local.data?.P?.[local.meta.P.name] ??
-          local.meta.P.text ??
-          local.meta.P.children}
+        {data()?.P?.[meta().P.name] ??
+          meta().P.text ??
+          meta().P.children}
         {local.children}
       </Button>
     </Show>

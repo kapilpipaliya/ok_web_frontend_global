@@ -8,8 +8,6 @@ export function BoxField(
 ) {
   const [local, others] = splitProps(props, [
     "componentName",
-    "meta",
-    "data",
     "onChange",
     "value",
     "isRealTime",

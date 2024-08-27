@@ -10,7 +10,8 @@ import type { TextShadowAttributes } from "../utils/generate/generateTextShadow"
 import type { TransformAttributes } from "../utils/generate/generateTransform";
 import type { TransitionAttributes } from "../utils/generate/generateTransition";
 
-import { useCssEditor, useCssState } from "../CssEditorContext";
+import { useCssEditor } from "../CssEditorContext";
+import { useCssState } from "../CssStateContext";
 import { useRenderContext } from "../RenderContext";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { CssPropertyRow } from "./fields/shadow_editor/CssPropertyRow";

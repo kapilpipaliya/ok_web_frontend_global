@@ -1,10 +1,12 @@
 import { klona } from "klona";
+import { createStore } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -57,13 +59,13 @@ export function Permission() {
         title="All Form Permissions"
       />
       <div class="mt:.5rem px:0.25rem">
+        <PageRenderContextProvider data={layoutStore.formStore[0]?.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
         <TableInputField
-          data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
-          meta={graph.vertexes[metaVertexId]}
           txnId={layoutStore.formStore[0].txnId}
-        />
+          />
+        </PageRenderContextProvider>
       </div>
     </div>
   );

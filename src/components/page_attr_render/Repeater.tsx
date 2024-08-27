@@ -8,14 +8,19 @@ import {
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { getInitialPageRenderStore } from "./PageRenderContext";
+import { getInitialPageRenderStore, usePageRenderContext } from "./PageRenderContext";
 
-export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
+export const Repeater = () => {
   const [graph, setGraph] = useGraph();
+  const [parentItems] = usePageRenderContext();
+  const meta = () => getLastItem(parentItems!.vertexes)!;
+  const data = () => getLastItem(parentItems!.data)!;
+
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
   const repeaterContext = useRepeaterVertexContext();
@@ -24,14 +29,14 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
     setIsFetching(true);
 
     const result = await getSelectionOptionsMGCall(
-      [props.data],
+      [data()],
       expression ?? `g:'${collection}'`,
     );
 
     if (result) {
       setGraphData(graph, setGraph, result.graph!, true);
       setOptions(
-        // props.data ||
+        // data() ||
         getSelectionOptions(
           graph,
           setGraph,
@@ -44,18 +49,18 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
     setIsFetching(false);
   };
   createEffect(() => {
-    const expression = props.meta.P.data;
+    const expression = meta().P.data;
     if (expression) {
       setInitialState(expression);
       return;
     }
     const data = getSelectionOptions(graph, setGraph, "->$0Data", [
-      props.meta,
+      meta(),
     ]).vertexes;
     if (data) {
       setOptions(data);
     } else {
-      const collection = getCollection(graph, props.meta);
+      const collection = getCollection(graph, meta());
       if (collection) {
         setInitialState(undefined, collection);
       }
@@ -71,7 +76,7 @@ export const Repeater = (props: Readonly<{ data: Vertex; meta: Vertex }>) => {
           <RepeaterVertexContext.Provider
             value={[vertex, ...useRepeaterVertexContext()]}
           >
-            <PageAttrRender data={vertex} metaVertex={props.meta} />
+            <PageAttrRender data={vertex} metaVertex={meta()} />
           </RepeaterVertexContext.Provider>
         )}
       </For>

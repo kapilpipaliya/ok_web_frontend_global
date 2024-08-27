@@ -2,12 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";
 import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
+  _setGraph: SetStoreFunction<GraphInterface>,
   fromVertex: Vertex,
   toVertexId: Id | number,
   formData: Vertex,
@@ -32,11 +31,12 @@ export function validateDragOver(
     if (toVertexId === formData.id) {
       // Allow drag over it
     } else {
-      const compVertex = getComponentFromLayoutRow(toVertexId, graph, setGraph);
-      if (!compVertex?.P.child) {
-        // Don't allow drag and drop
-        return false;
-      }
+      // each component can accept children
+      // const compVertex = getComponentFromLayoutRow(toVertexId, graph, setGraph);
+      // if (!compVertex?.P.child) {
+      //   // Don't allow drag and drop
+      //   return false;
+      // }
     }
   } else {
     const toParentVertex = getParentVertex(
