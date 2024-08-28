@@ -9,7 +9,7 @@ export default function TablePage() {
   return (
     <Switch>
       <Match when={params.entity === "Comp"}>
-        <FileManager parentVertexLabel="Comp" toParentEdgeType="ParentComp" />
+        <FileManager parentVertexLabel="Comp" rootKeys={["root", "ArkUI"]} toParentEdgeType="ParentComp"/>
       </Match>
       <Match when={true}>
         <GridWrapper tableId={params.entity} />

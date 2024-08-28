@@ -164,7 +164,7 @@ export function FileManagerConfigIcons(
           size={18}
           title="Create New File"
         />
-        <Show when={fileManagerStore.root?.id !== props.metaVertex.id}>
+        <Show when={!fileManagerStore.root?.some(root => root.id === props.metaVertex.id)}>
           <IconButton
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="mdi:rename-box"

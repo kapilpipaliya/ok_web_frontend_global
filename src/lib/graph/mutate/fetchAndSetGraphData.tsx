@@ -10,8 +10,11 @@ export async function fetchAndSetGraphData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   expression: string,
+  context?: {
+    [key: string]: any;
+  },
 ) {
-  const result = await fetchDataFromMG({ expression });
+  const result = await fetchDataFromMG({ expression }, context);
 
   if (!isValidResponse(result)) {
     // @ts-expect-error ignore

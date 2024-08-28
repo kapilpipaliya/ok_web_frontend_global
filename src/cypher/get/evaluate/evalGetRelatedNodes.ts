@@ -1,4 +1,4 @@
-import { int, type Session } from "neo4j-driver";
+import { int, Transaction, type Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -124,7 +124,26 @@ function buildQuery(
       } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
-        if (isObject(filter) && Object.keys(filter).length > 0) {
+        if (Array.isArray(filter) && filter.length > 0) {
+          const filterConditions = filter
+            .map((condition, index) => {
+              if (typeof condition === 'object' && condition !== null) {
+                return Object.keys(condition)
+                  .map((key) => `n.${key} = $${key}_${index}`)
+                  .join(" AND ");
+              }
+            })
+            .join(" AND ");
+          query += ` WHERE ${filterConditions}`;
+          params = filter.reduce((acc, condition, index) => {
+            if (typeof condition === 'object' && condition !== null) {
+              Object.keys(condition).forEach((key) => {
+                acc[`${key}_${index}`] = condition[key];
+              });
+            }
+            return acc;
+          }, {});
+        } else if (isObject(filter) && Object.keys(filter).length > 0) {
           const filterKeys = Object.keys(filter);
           const filterConditions = filterKeys
             .map((key) => `n.${key} = $${key}`)
@@ -132,6 +151,7 @@ function buildQuery(
           query += ` WHERE ${filterConditions}`;
           params = filter;
         }
+
         if (skip) {
           query += ` SKIP ${skip}`;
         }

@@ -8,7 +8,9 @@ import type { DataGridStore } from "~/components/grid/DataGridContext";
 
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { getFilesData, getRootData } from "./sidebar/getFilesData";
+import { getFilesData } from "./sidebar/getFilesData";
+import { getParentData } from "./sidebar/getParentData";
+import { getRootData } from "./sidebar/getRootData";
 
 const getInitialFileManagerStore = () => {
   return {
@@ -17,7 +19,8 @@ const getInitialFileManagerStore = () => {
     expandedKeys: [] as string[],
     gridStore: null as DataGridStore | null,
     parentVertexLabel: "Folder",
-    root: null as null | Vertex,
+    root: null as null | Vertex[],
+    rootKeys: ["root"],
     selectedItem: null as null | Vertex,
     toParentEdgeType: "ParentFolder",
     treeItemHoverId: null as null | string,
@@ -39,6 +42,7 @@ export function FileManagerStoreProvider(
     fileId?: string;
     onFileSelected?: (file: Vertex) => void;
     parentVertexLabel: string;
+    rootKeys?: string[];
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
     toParentEdgeType: string;
   }>,
@@ -51,6 +55,7 @@ export function FileManagerStoreProvider(
     get parentVertexLabel() {
       return props.parentVertexLabel;
     },
+    rootKeys: props.rootKeys || ["root"],
     get toParentEdgeType() {
       return props.toParentEdgeType;
     },
@@ -60,44 +65,15 @@ export function FileManagerStoreProvider(
   const params = useParams();
 
   onMount(async () => {
-    let expandedKeys: string[] = [];
-    let selectedItem: null | Vertex = null;
-    let root: null | Vertex = null;
-
-    if (params.folderId || props.fileId) {
-      const rootData = await getRootData(
-        graph,
-        setGraph,
-        props.toParentEdgeType,
-        props.parentVertexLabel,
-        params.folderId,
-        props.fileId,
-      );
-      if ("result" in rootData && rootData.result.length > 0) {
-        const resultData = rootData.result as Vertex[];
-        expandedKeys = resultData.map((v) => v.id);
-        root = { ...resultData[resultData.length - 1] };
-
-        if (params.folderId) {
-          // when folderId is provided, we want to select the same folder
-          selectedItem = { ...graph.vertexes[params.folderId] };
-        } else {
-          selectedItem = { ...resultData[0] };
-        }
-      }
-    } else {
-      const rootData = await getRootData(
-        graph,
-        setGraph,
-        props.toParentEdgeType,
-        props.parentVertexLabel,
-      );
-      if ("result" in rootData && rootData.result.length > 0) {
-        root = { ...rootData.result[0] };
-        expandedKeys = [root.id];
-        selectedItem = params.folderId || props.fileId ? null : { ...root };
-      }
-    }
+    const { expandedKeys, root, selectedItem } = await fetchRootData(
+      graph,
+      setGraph,
+      props.toParentEdgeType,
+      props.parentVertexLabel,
+      fileManagerStore[0].rootKeys,
+      params.folderId,
+      props.fileId,
+    );
 
     await fetchChildrenDataBatch(
       graph,
@@ -130,6 +106,56 @@ export function useFileManagerStore() {
   return useContext(FileManagerStoreContext)!;
 }
 
+async function fetchRootData(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  toParentEdgeType: string,
+  parentVertexLabel: string,
+  rootKeys: string[],
+  folderId?: string,
+  fileId?: string,
+) {
+  let expandedKeys: string[] = [];
+  let selectedItem: null | Vertex = null;
+  let root: null | Vertex[] = null;
+
+  if (folderId || fileId) {
+    const rootData = await getParentData(
+      graph,
+      setGraph,
+      toParentEdgeType,
+      folderId,
+      fileId,
+    );
+    if ("result" in rootData && rootData.result.length > 0) {
+      const resultData = rootData.result as Vertex[];
+      expandedKeys = resultData.map((v) => v.id);
+
+      if (folderId) {
+        // when folderId is provided, we want to select the same folder
+        selectedItem = { ...graph.vertexes[folderId] };
+      } else {
+        selectedItem = { ...resultData[0] };
+      }
+    }
+  }
+  const rootData = await getRootData(
+    graph,
+    setGraph,
+    parentVertexLabel,
+    rootKeys,
+  );
+  if ("result" in rootData && rootData.result.length > 0) {
+    root = rootData.result;
+    expandedKeys = [...expandedKeys, ...root!.map((v) => v.id)];
+    if (!selectedItem) {
+      selectedItem = { ...root![0] } as Vertex;
+    }
+  }
+
+  return { expandedKeys, root, selectedItem };
+}
+
 // fetch current children and children of children
 export async function fetchChildrenDataBatch(
   graph: GraphInterface,
@@ -137,6 +163,9 @@ export async function fetchChildrenDataBatch(
   toParentEdgeType: string,
   expandedKeys: string[],
 ) {
+  if (expandedKeys.length === 0) {
+    return;
+  }
   const data = await getFilesData(
     graph,
     setGraph,

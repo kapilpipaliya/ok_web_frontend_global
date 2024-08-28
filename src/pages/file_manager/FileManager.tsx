@@ -14,6 +14,7 @@ export default function FileManager(
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
     parentVertexLabel: string;
+    rootKeys?: string[];
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
     toParentEdgeType: string;
   }>,
@@ -23,6 +24,7 @@ export default function FileManager(
       enableRowSelection={props.enableRowSelection}
       fileId={props.fileId}
       parentVertexLabel={props.parentVertexLabel}
+      rootKeys={props.rootKeys}
       setFileManagerStore={props.setFileManagerStore}
       toParentEdgeType={props.toParentEdgeType}
     >

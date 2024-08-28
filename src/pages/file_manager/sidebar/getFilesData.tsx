@@ -12,19 +12,6 @@ export function getExpressionForFilesData(
   return `id:'${ids}'<-${toParentEdgeType}`;
 }
 
-export function getExpressionForRootData(
-  toParentEdgeType: string,
-  parentVertexLabel: string,
-  folderId?: string,
-  fileId?: string,
-) {
-  if (folderId || fileId) {
-    // -> operator not return current vertex
-    return `id:'${folderId || fileId}'->'${toParentEdgeType}*'`;
-  }
-  return `g:'${parentVertexLabel}[root]'`;
-}
-
 export async function getFilesData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -35,23 +22,3 @@ export async function getFilesData(
   return await fetchAndSetGraphData(graph, setGraph, expression);
 }
 
-export async function getRootData(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  toParentEdgeType: string,
-  parentVertexLabel: string,
-  folderId?: string,
-  fileId?: string,
-) {
-  const expression = getExpressionForRootData(
-    toParentEdgeType,
-    parentVertexLabel,
-    folderId,
-    fileId,
-  );
-  if (!expression) {
-    return { error: "Invalid expression" };
-  }
-
-  return await fetchAndSetGraphData(graph, setGraph, expression);
-}
