@@ -1,39 +1,34 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 
 export const collectionAttr = [
   {
-    attributes: [textFieldInputMeta],
-    componentName: "TextField",
-    name: "displayName",
-    onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+    componentName: "SystemString",
+    key: "displayName",
+    onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
   },
   {
-    attributes: [textFieldInputMeta],
-    componentName: "TextField",
+    componentName: "SystemString",
     displayName: "ID",
-    name: "name",
+    key: "key",
   },
   {
-    attributes: [textFieldTextAreaMeta],
-    componentName: "TextField",
-    name: "definition",
+    class: PROPERTIES.Css.TextField,
+    componentName: "SystemTextArea",
+    key: "definition",
   },
   {
     collection: "g:'DataType'",
     componentName: "SelectBox",
 
-    name: "dataType",
+    key: "dataType",
   },
   {
     collection: "->$0DataType->$0Comp",
     componentName: "SelectBox",
 
-    name: "Comp",
+    key: "Comp",
     // smaller version:
     // collection: "g:'Comp'",
   },
@@ -41,23 +36,23 @@ export const collectionAttr = [
     collection: "g:'Coll'",
     componentName: "SelectBox",
 
-    name: "coll",
+    key: "coll",
   },
   {
-    componentName: "CheckBox",
-    name: "required",
+    componentName: "SystemBoolean",
+    key: "required",
   },
   {
-    componentName: "CheckBox",
-    name: "disabled",
-  },
-  {
-    componentName: "TagBox",
-    name: "hidden",
+    componentName: "SystemBoolean",
+    key: "disabled",
   },
   {
     componentName: "TagBox",
-    name: "disabled",
+    key: "hidden",
+  },
+  {
+    componentName: "TagBox",
+    key: "disabled",
   },
   {
     attributes: [
@@ -65,19 +60,19 @@ export const collectionAttr = [
         collection: "<-$0->$0Comp->$0Prop",
         componentName: "SelectBox",
 
-        displayExpr: "::'P.name'",
-        name: "name",
+        displayExpr: "::'P.key'",
+        key: "key",
       },
       {
         componentName:
-          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'||->$0Name->$0DataType->$0Default::'P.key'",
+        key: "value",
         meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-        name: "value",
       },
     ],
     componentName: "DynamicTable",
     displayName: "Properties",
-    name: "Prop",
+    key: "Prop",
   },
   /*{
     attributes: [
@@ -85,7 +80,7 @@ export const collectionAttr = [
         collection: "g:'Role'",
         componentName: "SelectBox",
 
-        name: "role",
+        key: "role",
       },
       {
         attributes: [
@@ -93,28 +88,28 @@ export const collectionAttr = [
             collection: "g:'Perm'",
             componentName: "TagBox",
 
-            name: "perm",
+            key: "perm",
           },
           {
-            componentName: "TextField",
-            name: "scope",
+            componentName: "SystemString",
+            key: "scope",
             attributes: [
-              textFieldInputMeta
+              SystemString
             ],
           },
         ],
         componentName: "DynamicTable",
-        name: "Perm",
+        key: "Perm",
       },
     ],
     componentName: "DynamicTable",
     displayName: "Permissions",
-    name: "Role",
+    key: "Role",
   },*/
   {
     componentName: "DynamicTable",
+    key: "Attr",
     label: "Attr",
-    name: "Attr",
 
     tab: "expand",
     type: "Attr",

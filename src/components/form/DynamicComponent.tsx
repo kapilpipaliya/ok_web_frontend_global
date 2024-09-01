@@ -1,4 +1,5 @@
 import { createLazyMemo } from "@solid-primitives/memo";
+import { toTitle } from "case-switcher-js";
 import {
   createMemo,
   ErrorBoundary,
@@ -22,6 +23,7 @@ import {
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
+import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import {
   PageRenderContextProvider,
@@ -32,6 +34,7 @@ import {
   hasPermissions,
 } from "../page_attr_render/permissions";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
+import { Label } from "../solid_blocks/Label";
 import { useToast } from "../Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
@@ -69,6 +72,7 @@ export function DynamicComponent(
     isRealTime?: boolean;
     isTableInside?: boolean;
     meta: Vertex;
+    noLabel?: boolean;
     onChange?: (data: any) => void;
     title?: string;
     txnId?: number;
@@ -82,9 +86,11 @@ export function DynamicComponent(
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
 
-  const component = createMemo(() => getDynamicComponent(componentName()));
+  const component = createMemo(
+    () => getDynamicComponent(componentName()) || NotFoundComponent,
+  );
 
-  const [_selectedProps, customMetaProps] = splitProps(props.meta.P, [
+  const [selectedProps, customMetaProps] = splitProps(props.meta.P, [
     "validation",
     "labelClass",
   ]);
@@ -159,9 +165,9 @@ export function DynamicComponent(
     if (props.onChange) {
       props.onChange(value);
     } else {
-      const existingValue = props.data?.P[props.meta.P.name];
+      const existingValue = props.data?.P[props.meta.P.key];
       // Check if the user has the appropriate permissions for the specific field
-      /*if (!hasFieldPermission(props.meta.P.name)) {
+      /*if (!hasFieldPermission(props.meta.P.key)) {
         showErrorToast("You do not have permission to modify this field.");
         return;
       }*/
@@ -191,7 +197,7 @@ export function DynamicComponent(
       }
 
       // Log the action for auditing purposes
-      // logAction('modify', props.meta.P.name, value, currentUser);
+      // logAction('modify', props.meta.P.key, value, currentUser);
 
       // TODO: if only insert permission, and value is set dont display it.
       setValueGlobal(
@@ -240,7 +246,7 @@ export function DynamicComponent(
             values[property] = mergeCSS(
               "",
               values[property],
-              { P: { name: property } } as unknown as Vertex,
+              { P: { key: property } } as unknown as Vertex,
               props.meta,
               graph,
             );
@@ -269,7 +275,7 @@ export function DynamicComponent(
               result[key] = mergeCSS(
                 "",
                 value,
-                { P: { name: key } } as unknown as Vertex,
+                { P: { key: key } } as unknown as Vertex,
                 props.meta,
                 graph,
               );
@@ -285,7 +291,7 @@ export function DynamicComponent(
               ? mergeCSS(
                   "",
                   value,
-                  { P: { name: key } } as unknown as Vertex,
+                  { P: { key: key } } as unknown as Vertex,
                   props.meta,
                   graph,
                 )
@@ -329,13 +335,13 @@ export function DynamicComponent(
     </Show>
   );
   const noOnChangePassedComponent = () => {
-    const name = componentName();
+    const key = componentName();
     const specialComponents = [
       "TextFieldTextArea",
       "TextFieldInput",
       "DynamicTable",
     ];
-    return specialComponents.includes(name);
+    return specialComponents.includes(key);
   };
   const Content = () => (
     <>
@@ -356,7 +362,6 @@ export function DynamicComponent(
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
           onChange={noOnChangePassedComponent() ? undefined : onChange}
-          title={props.title ?? ""}
           txnId={props.txnId}
           value={
             isCheckbox()
@@ -401,9 +406,47 @@ export function DynamicComponent(
           userRoles={graph.userRoles}
         />
       </Show> */}
-      <PageRenderContextProvider data={props.data!} meta={props.meta} store={repeterStore}>
+      <PageRenderContextProvider
+        data={props.data!}
+        meta={props.meta}
+        store={repeterStore}
+      >
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
+          <Match
+            when={
+              (componentName()?.startsWith("System") ||
+                componentName() === "SelectBox" ||
+                componentName() === "TagBox") &&
+              !props.noLabel &&
+              !props.meta.P.noLabel
+            }
+          >
+            <Label
+              class={mergeCSS(
+                "",
+                selectedProps.labelClass,
+                { P: { key: "labelClass" } } as unknown as Vertex,
+                props.data!,
+                graph,
+              )}
+              label={
+                props.label ||
+                expressionProperties().label ||
+                props.meta.P.label ||
+                toTitle(props.meta.P.key)
+              }
+              layoutClass={props.meta.P.labelLayoutClass}
+              position={props.meta.P.labelPosition}
+              required={
+                props.meta.P.validation?.required ||
+                expressionProperties().required
+              }
+              //tooltip={(props.meta).P.tooltip}
+            >
+              <Content />
+            </Label>
+          </Match>
           <Match
             keyed
             when={
@@ -424,7 +467,7 @@ export function DynamicComponent(
                   class={mergeCSS(
                     "",
                     selectedProps.labelClass,
-                    { P: { name: "labelClass" } } as unknown as Vertex,
+                    { P: { key: "labelClass" } } as unknown as Vertex,
                     props.meta,
                     graph,
                   )}
@@ -471,7 +514,7 @@ const _inputTypes = {
         <Match when={componentName() === "SelectBox"}>
           <MultiSelectField
             disable={props.disabled}
-            displayValueKey="::'P.displayName'||::'P.name'||::'P.id'"
+            displayValueKey="::'P.displayName'||::'P.key'||::'P.id'"
             onRemove={(value: any) => handleChange(value)}
             onSelect={(value: any) => handleChange(value)}
             optionValueKey="id"

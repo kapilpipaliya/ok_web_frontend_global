@@ -48,11 +48,15 @@ async function fetchAndSaveFormMetaData(
 ) {
   const form = FormMetaData[formName];
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-  const result = await fetchDataFromMG({
-    expression: `g:'${formName}'`,
-    incoming,
-    outgoing,
-  });
+  const result = await fetchDataFromMG(
+    {
+      expression: `g:'${formName}'`,
+      incoming,
+      outgoing,
+    },
+    undefined,
+    false,
+  );
 
   if (result.graph) {
     // TODO: modify so it not break existing edges and vertexes

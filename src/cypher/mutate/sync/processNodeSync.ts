@@ -31,6 +31,11 @@ export async function processNodeSync(
     expression.expression,
     context,
   );
+  if (
+    expression.expression === "->ParentComp" &&
+    vertexes[0]?.P?.key === "Resizable.Panel"
+  ) {
+  }
 
   if (!mainResult || mainResult.length === 0) {
     return {
@@ -74,7 +79,7 @@ export async function processNodeSync(
 
   for (const vertex of mainResult) {
     const newCreatedVertex =
-      children.find((child) => child.P.name === vertex.P.name) ||
+      children.find((child) => child.P.key === vertex.P.key) ||
       (await findOrCreateNodeAndUpdateProperties(
         sessionSource,
         sessionTarget,

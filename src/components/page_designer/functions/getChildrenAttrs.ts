@@ -14,6 +14,7 @@ import type {
 
 import { sortVertexesByPosition } from "../../../lib/graph/get/sync/sortVertexesByPosition";
 import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
+import { uniqueNameKey } from "../constant";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,
@@ -45,7 +46,7 @@ export function generateFormMetaAttributes(
   ): FieldAttribute[] {
     const children = getChildrenAttrs(graph, setGraph, vertex);
     const componentName = getChildVertex(graph, ["$0Comp"], vertex).vertex?.P
-      .name;
+      .key;
 
     if (
       vertex !== rootVertex &&
@@ -61,7 +62,7 @@ export function generateFormMetaAttributes(
                 .attributes
             : undefined,
         componentName: componentName,
-        name: vertex.P.name,
+        key: vertex.P[uniqueNameKey],
         title: parentComponent === "Label" ? parent.P.label : vertex.P.title,
       });
     }
@@ -70,7 +71,7 @@ export function generateFormMetaAttributes(
     }
     return children.map((child) => {
       const childComponent = getChildVertex(graph, ["$0Comp"], child).vertex?.P
-        .name;
+        .key;
       return {
         attributes: getAllInputFields(
           graph,
@@ -82,7 +83,7 @@ export function generateFormMetaAttributes(
         //title: componentName === "Label" ? vertex.P.label : child.P.title,
         componentName: childComponent,
         id: child.id,
-        name: child.P.name,
+        key: child.P[uniqueNameKey],
       };
     });
   }
@@ -91,7 +92,7 @@ export function generateFormMetaAttributes(
   return {
     attributes: result,
     id: rootVertex.id,
-    name: rootVertex.P.name,
+    key: rootVertex.P[uniqueNameKey],
     title: rootVertex.P.title,
   };
 }
@@ -129,10 +130,13 @@ export function isUniqueIdUsed(
   setGraph: SetStoreFunction<GraphInterface>,
   formVertex: Vertex,
   layoutVertex: Vertex,
-  name: string,
+  key: string,
 ) {
   function checkVertex(attrVertex: Vertex) {
-    if (attrVertex.P.name === name && attrVertex.id !== layoutVertex.id) {
+    if (
+      attrVertex.P[uniqueNameKey] === key &&
+      attrVertex.id !== layoutVertex.id
+    ) {
       return true;
     }
 
@@ -150,7 +154,7 @@ export function isAnyFieldInvalid(
 ) {
   function checkVertex(attrVertex: Vertex) {
     if (attrVertex.P.validation) {
-      const value = data.P[attrVertex.P.name];
+      const value = data.P[attrVertex.P[uniqueNameKey]];
       const error = validateInput(attrVertex.P.validation, value);
       mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
         error: error || "",
@@ -276,7 +280,7 @@ export function allFormAttrsInPageFromLevel(
     const compLabel = evalExpression("->$0Comp", {
       graph,
       vertexes: [vertex],
-    })?.[0]?.P.name;
+    })?.[0]?.P.key;
 
     if (compLabel === componentLabel) {
       verticesWithFormAttr.push(vertex.id);

@@ -1,14 +1,11 @@
-import { textFieldInputMeta } from "~/components/constants/textFieldInput";
-
 export const Perm = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
   ],
   isInlineEditable: true,
-  name: "Perm",
+  key: "Perm",
   title: "Perm",
 };

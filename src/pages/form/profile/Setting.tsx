@@ -10,12 +10,13 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { Breadcrumb } from "~/components/Breadcrumb";
+import { HeaderWithDescription } from "~/components/HeaderWithDescription";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
+import { DropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 
 import { GeneralSection } from "./tabs/General";
 import { PasswordSection } from "./tabs/Password";
@@ -50,7 +51,7 @@ export function Settings(): JSX.Element {
     username: "",
   });
 
-  const breadcrumbData = [
+  const _breadcrumbData = [
     { href: "/admin", name: "Admin" },
     { name: "Settings" },
   ];
@@ -113,7 +114,13 @@ export function Settings(): JSX.Element {
 
   return (
     <>
-      <Breadcrumb breadcrumb={breadcrumbData} title="Account Setting" />
+      <HeaderWithDescription
+        description="Manage your account settings and preferences."
+        title="Account Settings"
+      />
+      <div class="position:fixed right:1rem top:1rem">
+        <DropdownMenuDisplay />
+      </div>
       <TabSection selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
 
       <Show

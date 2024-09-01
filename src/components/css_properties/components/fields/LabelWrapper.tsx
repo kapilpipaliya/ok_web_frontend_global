@@ -24,7 +24,7 @@ export function LabelWrapper(
   return (
     <ContainerLabel
       hashName={meta().hashName}
-      info={meta().info ?? meta().name}
+      info={meta().info ?? meta().key}
       onResetIconClick={props.onResetIconClick}
       showResetIcon={isValueConfigured()}
       title={meta().label}

@@ -1,10 +1,10 @@
 import type { Session, Transaction } from "neo4j-driver-core";
 
-export async function checkUserExistence(
+export async function newAdminValidations(
   txOrSession: Session | Transaction,
   username: string,
   email: string,
-  subdomain: string,
+  subDomain: string,
 ) {
   const checkIfExists = async (
     label: string,
@@ -16,7 +16,7 @@ export async function checkUserExistence(
     return result.records.length > 0;
   };
 
-  if (subdomain && (await checkIfExists("User", "subdomain", subdomain))) {
+  if (subDomain && (await checkIfExists("SubDomain", "key", subDomain))) {
     throw new Error("Sub Domain already exists");
   }
 

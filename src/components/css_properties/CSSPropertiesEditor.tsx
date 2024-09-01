@@ -88,7 +88,7 @@ export function CSSPropertiesEditor(
     }
     const edgesPrefixToRemove = getCssSelectedFileEdgeName(
       props.data.L[0],
-      props.meta.P.name,
+      props.meta.P.key,
       currentState,
       "",
     );
@@ -120,7 +120,7 @@ export function CSSPropertiesEditor(
         <span>Preview:</span>
         <br />
         <DynamicComponent
-          componentName={formStore!.formData.P.name}
+          componentName={formStore!.formData.P.key}
           data={formStore!.formData}
           isNoPermissionCheck
           meta={{ P: { class: props.data.P.value } } as unknown as Vertex}

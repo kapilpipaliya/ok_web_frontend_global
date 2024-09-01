@@ -17,7 +17,7 @@ export function formNameDisplayExprFromVertex(
   const collectionVertex = findVertexByLabelAndUniqueId(
     graph,
     "Form",
-    "name",
+    "key",
     collection,
   );
   if (collectionVertex) {
@@ -27,6 +27,6 @@ export function formNameDisplayExprFromVertex(
     }
     return nameKeys.length === 1
       ? `::'P.${nameKeys[0]}'`
-      : nameKeys.map((name) => `(::'P.${name}')`).join("+(' ')");
+      : nameKeys.map((key) => `(::'P.${key}')`).join("+(' ')");
   }
 }

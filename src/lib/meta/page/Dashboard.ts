@@ -1,22 +1,18 @@
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 
 export const Dashboard = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
-      name: "description",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
+      key: "description",
     },
   ],
   isInlineEditable: true,
-  name: "Dashboard",
+  key: "Dashboard",
   title: "Dashboards",
 };

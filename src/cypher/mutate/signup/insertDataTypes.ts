@@ -1,12 +1,15 @@
 import type { Transaction } from "neo4j-driver";
 
+/**
+ * @deprecated This function is deprecated and should not be used.
+ */
 export async function insertDataTypes(transaction: Transaction): Promise<void> {
   const query = `
     UNWIND [
       'Null', 'String', 'Boolean', 'Integer', 'Float', 
       'List', 'Map', 'Duration', 'Date', 'LocalTime', 
       'LocalDateTime', '->', '=>', '<-', '<='] AS dataTypeName
-    MERGE (dt:DataType {name: dataTypeName})
+    MERGE (dt:DataType {key: dataTypeName})
   `;
 
   try {

@@ -39,7 +39,7 @@ export const DisplaySection = {
   visibility: {
     componentName: "toggleButton",
     label: "Visibility",
-    name: "visibility",
+    key: "visibility",
     options: [
       { icon: Icons.visibility.yes, key: "Visible", value: "visible" },
       { icon: Icons.visibility.no, key: "Hidden", value: "hidden" },
@@ -57,8 +57,8 @@ export const DisplaySection = {
     align: "end",
     componentName: "fieldWithCustomProperty",
     customProperty: [
-      { label: "X", name: "overflow-x" },
-      { label: "Y", name: "overflow-y" },
+      { label: "X", key: "overflow-x" },
+      { label: "Y", key: "overflow-y" },
     ],
     gap: "5px 10px",
     "grid-template-columns": "1fr 25%",
@@ -66,7 +66,7 @@ export const DisplaySection = {
     isLabelOnTop: true,
     label: "Overflow",
     mainFieldType: "select",
-    name: "overflow",
+    key: "overflow",
     options: [...extraPropertyValues["overflow"].values, ...CSSWideKeywords],
     padding: "5px",
   } as FieldWithCustomProperty,*/
@@ -103,7 +103,7 @@ export const DisplaySection = {
   opacity: {
     componentName: "string",
     label: "Opacity",
-    name: "opacity",
+    key: "opacity",
     unitOptions: ["%"],
     type: "number",
     inputProps: {

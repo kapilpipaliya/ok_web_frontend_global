@@ -1,4 +1,5 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { uniqueNameKey } from "~/components/page_designer/constant";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/getChildrenAttrs";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
@@ -17,7 +18,7 @@ export function UniqueNameField(
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   function setUniqueNameValue(metaVertex: Vertex, data: string) {
-    if (metaVertex.P.name === "name") {
+    if (metaVertex.P.key === uniqueNameKey) {
       if (data.length) {
         if (
           isUniqueIdUsed(
@@ -61,6 +62,7 @@ export function UniqueNameField(
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={props.meta}
+          noLabel
           onChange={(data: string) => setUniqueNameValue(props.meta, data)}
           txnId={0}
         />

@@ -8,6 +8,7 @@ import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
+import { updateRedirectUrl } from "./updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (request.headers.get("content-type")?.includes("application/json")) {
@@ -35,9 +36,7 @@ export async function POST({ request }: APIEvent) {
       await updateSession(user);
 
       delete user.P.password;
-      if (subDomain === "super" && user.P.username !== "super") {
-        user.P.redirectUrl = "settings";
-      }
+      updateRedirectUrl(user, subDomain);
       return user;
     } catch (error: unknown) {
       return new Response(

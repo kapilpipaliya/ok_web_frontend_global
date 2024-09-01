@@ -1,47 +1,39 @@
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 
 export const Import = {
   attributes: [
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
       height: 500,
-      name: "csv",
+      key: "csv",
       width: 600,
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "label",
+      componentName: "SystemString",
+      key: "label",
     },
-    { componentName: "CheckBox", name: "dry" },
+    { componentName: "SystemBoolean", key: "dry" },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "lookup",
+      componentName: "SystemString",
+      key: "lookup",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "lookupId",
+      componentName: "SystemString",
+      key: "lookupId",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "lookupChild",
+      componentName: "SystemString",
+      key: "lookupChild",
     },
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "column",
+          componentName: "SystemString",
+          key: "column",
         },
         // {
-        //  name: "column",
+        //  key: "column",
         //  componentName: "SelectBox",
         //
         //   displayExpr: "key",
@@ -49,37 +41,33 @@ export const Import = {
         //  },
         // },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
+          componentName: "SystemString",
           displayName: "Attribute ID",
-          name: "attrId",
+          key: "attrId",
         },
         {
           collection: "g:'Form'",
           componentName: "SelectBox",
-          displayExpr: "name",
+          displayExpr: "key",
 
           displayName: "Lookup Collection",
-          name: "coll",
+          key: "coll",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
+          componentName: "SystemString",
           displayName: "Lookup Label",
-          name: "collLabel",
+          key: "collLabel",
         },
-        { componentName: "CheckBox", name: "inward" },
+        { componentName: "SystemBoolean", key: "inward" },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
+          componentName: "SystemString",
           displayName: "Lookup Collection ID",
-          name: "collId",
+          key: "collId",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
+          componentName: "SystemString",
           displayName: "Edge Type",
-          name: "edge",
+          key: "edge",
         },
         {
           collection:
@@ -88,21 +76,21 @@ export const Import = {
           displayExpr: "key",
 
           displayName: "Function",
-          name: "func",
+          key: "func",
           saveValue: true,
         },
-        { componentName: "CheckBox", name: "skip" },
+        { componentName: "SystemBoolean", key: "skip" },
         {
-          attributes: [textFieldTextAreaMeta],
-          componentName: "TextField",
-          name: "skipRow",
+          class: PROPERTIES.Css.TextField,
+          componentName: "SystemTextArea",
+          key: "skipRow",
         },
       ],
       componentName: "DynamicTable",
-      name: "meta",
+      key: "meta",
     },
   ],
   isRealTime: true,
-  name: "Import",
+  key: "Import",
   title: "Simple Insert",
 };

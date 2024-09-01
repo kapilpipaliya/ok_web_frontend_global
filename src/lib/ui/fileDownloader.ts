@@ -5,8 +5,8 @@ export function fileDownloader(opt: {
   mime?: string;
   title: string;
 }) {
-  const throwError = (name: string) => {
-    throw new Error(`No ${name} provided to generate-download-link.`);
+  const throwError = (key: string) => {
+    throw new Error(`No ${key} provided to generate-download-link.`);
   };
 
   const data = opt.data || throwError("data");

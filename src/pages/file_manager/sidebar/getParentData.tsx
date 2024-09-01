@@ -18,12 +18,12 @@ export async function getParentData(
   setGraph: SetStoreFunction<GraphInterface>,
   toParentEdgeType: string,
   folderId?: string,
-  fileId?: string
+  fileId?: string,
 ) {
   const expression = getExpressionForParentData(
     toParentEdgeType,
     folderId,
-    fileId
+    fileId,
   );
   if (!expression) {
     return { error: "Invalid expression" };

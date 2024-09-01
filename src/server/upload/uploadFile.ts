@@ -11,12 +11,12 @@ import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
 
 export async function uploadFiles(
   data: MultiPartData[],
-  subdomain: string,
+  subDomain: string,
   neo4jSession: Session,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
-  const userDir = path.join("/Users/ankit", subdomain, year, month, day);
+  const userDir = path.join("/Users/ankit", subDomain, year, month, day);
 
   ensureDirectoryExists(userDir);
 
@@ -40,7 +40,7 @@ export async function uploadFiles(
         fileSize,
         mimeType,
         originalFilename: file.filename,
-        subdomain,
+        subDomain,
         // username,
       };
 

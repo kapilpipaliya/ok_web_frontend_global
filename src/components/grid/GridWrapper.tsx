@@ -34,11 +34,11 @@ export function GridWrapper(props: Readonly<AbstractGridProps>) {
   const getCurrentLocation = (data: NavItem[], path = []) => {
     for (const item of data) {
       if (item.P.url === param.pathname) {
-        return [...path, item.name];
+        return [...path, item.key];
       }
       if (item.children) {
         // @ts-ignore
-        const result = getCurrentLocation(item.children, [...path, item.name]);
+        const result = getCurrentLocation(item.children, [...path, item.key]);
         if (result.length > 0) {
           return result;
         }
@@ -61,8 +61,8 @@ export function GridWrapper(props: Readonly<AbstractGridProps>) {
         <Breadcrumb
           breadcrumb={[
             ...breadcrumbData,
-            { name: `${nav()[1]}` },
-            { name: nav()[2] },
+            { key: `${nav()[1]}` },
+            { key: nav()[2] },
           ]}
           title={`${nav()[2]}`}
         />

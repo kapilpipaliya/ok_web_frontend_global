@@ -2,6 +2,9 @@ import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 
 import { getHttpsSession } from "~/server/getHttpsSession";
+
+import { generate401RedirectUrl } from "./generate401RedirectUrl";
+
 export default createMiddleware({
   onRequest: [
     async (event) => {
@@ -12,7 +15,7 @@ export default createMiddleware({
         const httpSession = await getHttpsSession();
         if (!httpSession.data?.email) {
           // Redirect to the login page if not authorized
-          return redirect("/not-authorized");
+          return redirect(generate401RedirectUrl(url.pathname));
         }
       }
     },

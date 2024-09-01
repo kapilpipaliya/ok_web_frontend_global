@@ -8,13 +8,15 @@ import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInSuperDB(
   superTx: Transaction,
-  username: string,
-  email: string,
-  password: string,
-  subdomain: string,
-  driverPort: number,
-  logsPort: number,
-  labPort: number,
+  userData: {
+    driverPort: number;
+    email: string;
+    labPort: number;
+    logsPort: number;
+    password: string;
+    subDomain: string[];
+    username: string;
+  },
 ) {
   const uuid = uuidv4();
 
@@ -22,7 +24,6 @@ export async function createUserInSuperDB(
             username: $username,
             uuid: $uuid,
             email: $email,
-            subdomain: $subdomain,
             driverPort: $driverPort,
             logsPort: $logsPort,
             password: $password,
@@ -30,21 +31,33 @@ export async function createUserInSuperDB(
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
-    driverPort,
-    email,
-    labPort,
-    logsPort,
-    password,
-    subdomain,
-    username,
+    ...userData,
     uuid,
   };
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);
-  const userSession = (await getDriverWithPort(driverPort)).session();
+  const userNode = createUserResult.records[0].get("u");
+
+  for (const subDomain of userData.subDomain) {
+    const createSubDomainQuery =
+      "CREATE (s:SubDomain { key: $subDomain }) RETURN s;";
+    const createSubDomainParams = { subDomain };
+    const createSubDomainResult = await superTx.run(
+      createSubDomainQuery,
+      createSubDomainParams,
+    );
+    const _subDomainNode = createSubDomainResult.records[0].get("s");
+
+    const createEdgeQuery = `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $subDomain })
+                             CREATE (u)-[:UserSubDomain]->(s);`;
+    const createEdgeParams = { subDomain, uuid };
+    await superTx.run(createEdgeQuery, createEdgeParams);
+  }
+
+  const userSession = (await getDriverWithPort(userData.driverPort)).session();
   await createUserInUserDB(userSession, createUserParams, true);
   userSession.close();
-  return convertNodeToJson(createUserResult.records[0].get("u"));
+  return convertNodeToJson(userNode);
 }
 
 export async function createUserInUserDB(
@@ -52,6 +65,7 @@ export async function createUserInUserDB(
   params: { [key: string]: any },
   isSuper?: boolean,
 ) {
+  // Isnt superadmin username confusing?
   const createUserQuery2 = `CREATE (u:User {
                 username: 'superadmin',
                 uuid: $uuid,

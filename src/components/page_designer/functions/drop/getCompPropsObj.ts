@@ -15,9 +15,9 @@ export function getCompPropsObj(
     const initialValues = propVertexes.vertexes.reduce(
       (acc, curr) => {
         if (typeof curr.P.value === "boolean") {
-          acc[curr.P.name] = curr.P.value;
+          acc[curr.P.key] = curr.P.value;
         } else if (curr.P.value) {
-          acc[curr.P.name] = curr.P.value;
+          acc[curr.P.key] = curr.P.value;
         }
         return acc;
       },

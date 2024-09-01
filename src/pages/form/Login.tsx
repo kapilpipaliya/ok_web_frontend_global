@@ -9,10 +9,12 @@ import { useToast } from "~/components/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { signInCall } from "~/lib/api/service/user/signInCall";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
+
+import { handleLoginRedirect } from "./handleLoginRedirect";
 
 // Utility Functions
 function validateFormData(email: string, password: string): boolean {
@@ -240,9 +242,7 @@ export function Login(): JSX.Element {
       },
       onSuccess: (value) => {
         setGraph("isLoadingPage", false);
-        if (value != null && value.id !== null) {
-          navigate(`${graph.APP_BASE_URL}/${value.P.redirectUrl ?? ""}`);
-        }
+        handleLoginRedirect(value as Vertex, graph, navigate);
       },
       promise: signInCall(formData),
       successMessage: "Logged In Successfully",

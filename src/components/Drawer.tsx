@@ -57,7 +57,10 @@ export function Drawer(props: Readonly<DrawerProps>) {
   };
 
   const handleEscClose = (event: KeyboardEvent) => {
-    if (activeClickOutside < graph.activeClickOutside) {
+    if (
+      activeClickOutside !==
+      graph.activeClickOutside[graph.activeClickOutside.length - 1]
+    ) {
       return;
     }
     if (event.key === "Escape" && isOpen()) {

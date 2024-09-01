@@ -1,5 +1,5 @@
 // TODO:
-//  if possible, use Name Keys, if not found use "name"
+//  if possible, use Name Keys, if not found use "key"
 //  key else Primary Keys will be used.
 // TODO:
 import type { Vertex } from "~/lib/graph/graph";

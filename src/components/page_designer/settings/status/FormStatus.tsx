@@ -4,14 +4,13 @@ import { createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { textFieldInputMeta } from "~/components/constants/textFieldInput";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
+import { PROPERTIES } from "../../../constants/constant";
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { PROPERTIES } from "../properties/constant";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
@@ -58,7 +57,7 @@ export function FormStatus() {
               {(metaVertex) => {
                 return (
                   <div class="grid-col-span:4@sm">
-                    <Show when={metaVertex.P.name === "formStatus"}>
+                    <Show when={metaVertex.P.key === "formStatus"}>
                       <div>
                         <label
                           class="lh:1.25rem color:rgb(17,24,39) display:block f:0.875rem font-weight:500 leading:1.5rem"
@@ -92,7 +91,7 @@ export function FormStatus() {
                         (formStatus() === "Disable on specific date" ||
                           formStatus() ===
                             "Disable on specific date or at submission limit") &&
-                        metaVertex.P.name === "expirationDate"
+                        metaVertex.P.key === "expirationDate"
                       }
                     >
                       <div>
@@ -135,7 +134,7 @@ export function FormStatus() {
                         (formStatus() === "Disable at submission limit" ||
                           formStatus() ===
                             "Disable on specific date or at submission limit") &&
-                        metaVertex.P.name === "submissionLimit"
+                        metaVertex.P.key === "submissionLimit"
                       }
                     >
                       <div>
@@ -164,7 +163,7 @@ export function FormStatus() {
                           formStatus() === "Disable at submission limit" ||
                           formStatus() ===
                             "Disable on specific date or at submission limit") &&
-                        metaVertex.P.name === "warningMessage"
+                        metaVertex.P.key === "warningMessage"
                       }
                     >
                       <div>
@@ -231,13 +230,12 @@ function createVertices(
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
-      attributes: [textFieldInputMeta],
       id: vertexIds.formStatus,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemString",
         displayName: "Form Status",
-        name: "formStatus",
+        key: "formStatus",
       },
     },
     {
@@ -246,7 +244,7 @@ function createVertices(
         class: PROPERTIES.Css.TextField,
         componentName: "DatePicker",
         displayName: "Expiration Date",
-        name: "expirationDate",
+        key: "expirationDate",
       },
     },
     {
@@ -255,27 +253,25 @@ function createVertices(
         class: PROPERTIES.Css.TextField,
         componentName: "TimePicker",
         displayName: "Expiration Time",
-        name: "expirationTime",
+        key: "expirationTime",
       },
     },
     {
-      attributes: [textFieldInputMeta],
       id: vertexIds.submissionLimit,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemString",
         displayName: "Submission Limit",
-        name: "submissionLimit",
+        key: "submissionLimit",
       },
     },
     {
-      attributes: [textFieldInputMeta],
       id: vertexIds.warningMessage,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemString",
         displayName: "Warning Message",
-        name: "warningMessage",
+        key: "warningMessage",
       },
     },
   ];

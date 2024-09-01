@@ -10,9 +10,12 @@ export async function getRootData(
   parentVertexLabel: string,
   rootKeys: string[],
 ) {
-  const filter = rootKeys.map((key) => ({ name: key }));
+  const filter = rootKeys.map((key) => ({ key: key }));
 
-  return await fetchAndSetGraphData(graph, setGraph, `g:'${parentVertexLabel}[$1]'`, {$1: {filter}, nodes: {}, relationships: {}});
+  return await fetchAndSetGraphData(
+    graph,
+    setGraph,
+    `g:'${parentVertexLabel}[$1]'`,
+    { $1: { filter }, nodes: {}, relationships: {} },
+  );
 }
-
-

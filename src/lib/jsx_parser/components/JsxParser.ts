@@ -145,7 +145,7 @@ export default class JsxParser {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "Box",
       )!;
       if (comp !== "div") {
@@ -155,35 +155,35 @@ export default class JsxParser {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "Image",
       )!;
     } else if (comp === "a") {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "A",
       )!;
     } else if (comp === "Repeater") {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "Repeater",
       )!;
     } else if (comp === "svg") {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "Icon",
       )!;
-    } else if (findVertexByLabelAndUniqueId(graph, "Comp", "name", comp)) {
+    } else if (findVertexByLabelAndUniqueId(graph, "Comp", "key", comp)) {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         comp,
       )!;
     } else {
@@ -191,7 +191,7 @@ export default class JsxParser {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
+        "key",
         "Text",
       )!;
     }
@@ -213,7 +213,7 @@ export default class JsxParser {
         graph,
         setGraph,
         this.props.txnId,
-        { P: { name: "as" } } as any,
+        { P: { key: "as" } } as any,
         graph.vertexes[rowId],
         componentVertex,
         comp,
@@ -294,7 +294,7 @@ export default class JsxParser {
         graph,
         setGraph,
         this.props.txnId,
-        { P: { name: "attr" } } as any,
+        { P: { key: "attr" } } as any,
         graph.vertexes[rowId],
         componentVertex,
         JSON.stringify(uiKitProps),
@@ -310,7 +310,7 @@ export default class JsxParser {
         setGraph,
         this.props.txnId,
         {
-          P: { name: key === "className" || key === "class" ? "class" : key },
+          P: { key: key === "className" || key === "class" ? "class" : key },
         } as any,
         graph.vertexes[rowId],
         componentVertex,
@@ -323,7 +323,7 @@ export default class JsxParser {
         graph,
         setGraph,
         this.props.txnId,
-        { P: { name: "icon" } } as any,
+        { P: { key: "icon" } } as any,
         graph.vertexes[rowId],
         componentVertex,
         `'${"mdi:hamburger-menu".replaceAll("'", "\\'")}'`,
@@ -346,7 +346,7 @@ export default class JsxParser {
           const componentVertex = findVertexByLabelAndUniqueId(
             graph,
             "Comp",
-            "name",
+            "key",
             "Text",
           )!;
           const rowId = componentDrop(
@@ -365,7 +365,7 @@ export default class JsxParser {
             graph,
             setGraph,
             this.props.txnId,
-            { P: { name: "text" } } as any,
+            { P: { key: "text" } } as any,
             graph.vertexes[rowId],
             componentVertex,
             `'${value.replaceAll("'", "\\'")}'`,
@@ -412,7 +412,7 @@ export default class JsxParser {
           graph,
           setGraph,
           this.props.txnId,
-          { P: { name: "text" } } as any,
+          { P: { key: "text" } } as any,
           graph.vertexes[rowId],
           componentVertex,
           `'${children.replaceAll("'", "\\'")}'`,

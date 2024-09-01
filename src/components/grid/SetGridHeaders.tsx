@@ -32,8 +32,8 @@ export function setGridHeaders(
       continue;
     }
     // @ts-ignore
-    column.accessorKey = `P.${attribute.name}`;
-    column.id = attribute.name;
+    column.accessorKey = `P.${attribute.key}`;
+    column.id = attribute.key;
     column.cell = (info) => {
       return (
         <Switch>
@@ -78,11 +78,11 @@ export function setGridHeaders(
         attribute.label ||
           attribute.title ||
           attribute.displayName ||
-          attribute.name,
+          attribute.key,
       );
     column.footer = (_info) =>
       capitalizeFirstLetter(
-        attribute.title || attribute.displayName || attribute.name,
+        attribute.title || attribute.displayName || attribute.key,
       );
     tableColumns.push(column);
   }

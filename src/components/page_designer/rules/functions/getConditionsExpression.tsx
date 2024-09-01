@@ -37,7 +37,7 @@ export function getConditionsExpression(
       graph,
       setGraph,
       vertexes: [condition],
-    })?.[0]?.P.name;
+    })?.[0]?.P.key;
     if (evaluatedFieldName) {
       return (
         getTextValue(formVertex.P[evaluatedFieldName]) ??

@@ -13,6 +13,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
+import { uniqueNameKey } from "~/components/page_designer/constant";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
@@ -26,12 +27,11 @@ import {
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { textFieldInputMeta } from "../../../../constants/textFieldInput";
+import { PROPERTIES } from "../../../../constants/constant";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../../LayoutContext";
-import { PROPERTIES } from "../constant";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
@@ -47,8 +47,8 @@ function modifyMetaVertexExpr(meta: Vertex) {
     ...meta,
     P: {
       ...meta.P,
-      displayName: `${meta.P.displayName ?? meta.P.name} Expr`,
-      name: `${meta.P.name}`,
+      displayName: `${meta.P.displayName ?? meta.P.key} Expr`,
+      key: `${meta.P.key}`,
     },
   };
 }
@@ -67,7 +67,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const vertexIds = createVertexIds();
   const metaTxnId = graph.newTxnId;
   createVertices(vertexIds, metaTxnId, graph, setGraph);
-  const selectedComp = () =>graph.vertexes[layoutStore.selectedComponent];
+  const selectedComp = () => graph.vertexes[layoutStore.selectedComponent];
   const propAttributes = createMemo(() =>
     clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
@@ -82,11 +82,11 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         <ValidationConfig
           componentMeta={selectedComp()}
           data={props.selectedLayout}
-          meta={{ P: { name: "validation" } } as unknown as Vertex}
+          meta={{ P: { key: "validation" } } as unknown as Vertex}
           onChange={props.onChange}
         />
       </div>
-      <RenderDefaultProperties onChange={props.onChange}/>
+      <RenderDefaultProperties onChange={props.onChange} />
       <For
         each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
       >
@@ -120,7 +120,7 @@ export function createVertexIds() {
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
     hidden: `hiddenVertex${createUniqueId()}`,
-    name: `nameVertex${createUniqueId()}`,
+    key: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
@@ -137,54 +137,57 @@ function createVertices(
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
-      attributes: [textFieldInputMeta],
-      id: vertexIds.name,
+      id: vertexIds.key,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemString",
         displayName: "Unique Name",
-        name: "name",
+        key: uniqueNameKey,
       },
     },
     {
       id: vertexIds.as,
-      P: { displayName: "As", name: "as" },
+      P: { componentName: "SystemString", displayName: "As", key: "as" },
     },
     {
       id: vertexIds.perm,
-      P: { displayName: "Permission", name: "perm" },
+      P: { displayName: "Permission", key: "perm" },
     },
     {
       id: vertexIds.calculatedValue,
-      P: { displayName: "Calculated Value Expr", name: "calculatedValue" },
+      P: {
+        componentName: "SystemString",
+        displayName: "Calculated Value Expr",
+        key: "calculatedValue",
+      },
     },
     {
       id: vertexIds.class,
-      P: { displayName: "Class", name: "class" },
+      P: { displayName: "Class", key: "class" },
     },
     {
       id: vertexIds.errorClass,
-      P: { displayName: "Error Class", name: "errorClass" },
+      P: { displayName: "Error Class", key: "errorClass" },
     },
     {
       id: vertexIds.defaultValue,
-      P: { displayName: "Default Value", name: "defaultValue" },
+      P: { displayName: "Default Value", key: "defaultValue" },
     },
     {
       id: vertexIds.required,
-      P: { displayName: "Required Expr", name: "required" },
+      P: { displayName: "Required Expr", key: "required" },
     },
     {
       id: vertexIds.hidden,
-      P: { displayName: "Hidden Expr", name: "hidden" },
+      P: { displayName: "Hidden Expr", key: "hidden" },
     },
     {
       id: vertexIds.disabled,
-      P: { displayName: "Disabled Expr", name: "disabled" },
+      P: { displayName: "Disabled Expr", key: "disabled" },
     },
     {
       id: vertexIds.thankYouPage,
-      P: { displayName: "Thank You Page", name: "thankYouPage" },
+      P: { displayName: "Thank You Page", key: "thankYouPage" },
     },
   ];
 
@@ -211,12 +214,10 @@ function clonePropAttributes(
 ) {
   return metaAttributes.map((vertex) => {
     const form = FormMetaData.Comp;
-    const _propAttribute = form.attributes.find(
-      (attr) => attr.name === "Prop",
-    )!;
+    const _propAttribute = form.attributes.find((attr) => attr.key === "Prop")!;
     // now we simplified this so user cant enter default value
     // const valueAttribute = propAttribute.attributes!.find(
-    //   (attr) => attr.name === "value",
+    //   (attr) => attr.key === "value",
     // )!;
     return cloneVertexWithEdges(
       txnId,
@@ -238,18 +239,18 @@ function moveClassToLast(
   layoutStore: PageLayoutObject,
 ) {
   const otherVertices = vertices.filter(
-    (vertex) => !Object.keys(vertexIds).includes(vertex.P.name),
+    (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
   );
-  const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+  const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
   const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(
-    (vertex) => !vertex.P.name.endsWith("Class"),
+    (vertex) => !vertex.P.key.endsWith("Class"),
   );
 
   return [
-    graph.vertexes[vertexIds.name],
+    graph.vertexes[vertexIds.key],
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
@@ -295,7 +296,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
   return (
     <div>
       <Switch>
-        <Match when={props.meta.P.name === "name"}>
+        <Match when={props.meta.P.key === uniqueNameKey}>
           <UniqueNameField
             meta={props.meta}
             onChange={props.onChange}
@@ -303,7 +304,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             txnId={props.txnId}
           />
         </Match>
-        <Match when={props.meta.P.name === "thankYouPage"}>
+        <Match when={props.meta.P.key === "thankYouPage"}>
           <SelectPageField
             meta={props.meta}
             onChange={props.onChange}
@@ -313,10 +314,10 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         </Match>
         <Match
           when={
-            props.meta.P.name === "required" ||
-            props.meta.P.name === "hidden" ||
-            props.meta.P.name === "disabled" ||
-            props.meta.P.name === "calculatedValue"
+            props.meta.P.key === "required" ||
+            props.meta.P.key === "hidden" ||
+            props.meta.P.key === "disabled" ||
+            props.meta.P.key === "calculatedValue"
           }
         >
           <SelectRuleField
@@ -325,7 +326,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             txnId={props.txnId}
           />
         </Match>
-        <Match when={props.meta.P.name === "perm"}>
+        <Match when={props.meta.P.key === "perm"}>
           <SelectPermissionField
             meta={props.meta}
             selectedLayout={props.selectedLayout}
@@ -342,6 +343,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             isNoPermissionCheck={true}
             isRealTime={false}
             meta={props.meta}
+            noLabel
             onChange={(data) => props.onChange(props.meta, data)}
             txnId={props.txnId}
           />

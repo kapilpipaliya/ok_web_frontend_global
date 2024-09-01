@@ -33,7 +33,7 @@ export function SaveNewComp(
     const newFormTxnId = graph.newTxnId;
 
     const createResult = createForm(graph, setGraph, newFormTxnId, "Comp", {
-      name: componentName(),
+      key: componentName(),
     });
     const dataVertex = createResult.vertex!;
 
@@ -70,10 +70,10 @@ export function SaveNewComp(
     showSuccessToast("File uploaded successfully");
   };
 
-  const saveAsTemplate = async (name: string) => {
+  const saveAsTemplate = async (key: string) => {
     const res = await checkUniqueConstrains({
       L: ["TemplatePage"],
-      P: { name },
+      P: { key },
     } as unknown as Vertex);
     if (res.error) {
       setError(res.message);
@@ -98,7 +98,7 @@ export function SaveNewComp(
 
       <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
         <p>
-          Component name must be unique. If the name already exists, you will be
+          Component key must be unique. If the key already exists, you will be
           prompted to change it.
         </p>
       </div>

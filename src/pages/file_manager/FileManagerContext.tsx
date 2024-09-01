@@ -20,7 +20,7 @@ const getInitialFileManagerStore = () => {
     gridStore: null as DataGridStore | null,
     parentVertexLabel: "Folder",
     root: null as null | Vertex[],
-    rootKeys: ["root"],
+    rootKeys: ["Root"],
     selectedItem: null as null | Vertex,
     toParentEdgeType: "ParentFolder",
     treeItemHoverId: null as null | string,
@@ -55,7 +55,7 @@ export function FileManagerStoreProvider(
     get parentVertexLabel() {
       return props.parentVertexLabel;
     },
-    rootKeys: props.rootKeys || ["root"],
+    rootKeys: props.rootKeys || ["Root"],
     get toParentEdgeType() {
       return props.toParentEdgeType;
     },

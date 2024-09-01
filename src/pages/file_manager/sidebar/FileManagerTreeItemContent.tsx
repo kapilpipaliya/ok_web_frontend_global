@@ -40,7 +40,7 @@ export function FileManagerTreeItemContent(
         size={16}
       />
       &nbsp;&nbsp;
-      <span>{props.item.P.name || "no name"}</span>
+      <span>{props.item.P.key || "no key"}</span>
     </div>
   );
 }

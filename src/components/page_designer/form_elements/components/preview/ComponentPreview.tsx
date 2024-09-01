@@ -5,6 +5,7 @@ import { createStore } from "solid-js/store";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { useZIndex } from "~/components/ZIndex";
 
 import { CompPreviewTreeItem } from "./tree_item/ComponentTreeItem";
 
@@ -17,6 +18,7 @@ export function ComponentPreview(
     ref: Setter<HTMLElement | null>;
   }>,
 ) {
+  const zIndex = useZIndex();
   const [collapsedKeys, setCollapsedKeys] = createStore<string[]>([]);
 
   function toggleExpand(itemId: Id) {
@@ -34,12 +36,15 @@ export function ComponentPreview(
       parentRef={props.parentRef}
       placement="bottom-end"
       ref={props.ref}
+      useAutoPlacement={true}
+      useFlip={false}
+      // useShift={false}
     >
       {/* <h4 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
         Preview CSS
       </h4> */}
 
-      <div class="mt:2">
+      <div class={`mt:2 z-index:${zIndex}`}>
         <div>
           <CompPreviewTreeItem
             collapsedKeys={collapsedKeys}

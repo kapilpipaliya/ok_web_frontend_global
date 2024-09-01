@@ -7,8 +7,8 @@ import { newVertex } from "~/lib/graph/mutate/vertex";
 export function createAttrMetaVertex(graph: Store<GraphInterface>) {
   return newVertex(graph.newVertexId, [], {
     componentName: "Table",
+    key: "Attr",
     label: "Attr",
-    name: "Attr",
 
     tab: "Attribute",
     type: "Attr",

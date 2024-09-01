@@ -1,4 +1,10 @@
-import { autoUpdate, flip, type Placement, shift } from "@floating-ui/dom";
+import {
+  autoPlacement,
+  autoUpdate,
+  flip,
+  type Placement,
+  shift,
+} from "@floating-ui/dom";
 import { useFloating } from "solid-floating-ui";
 import { createSignal, type JSX, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -13,6 +19,9 @@ export function DropdownMenu(
     onClickOutside?: () => void;
     parentRef: HTMLElement;
     placement?: Placement;
+    useAutoPlacement?: boolean;
+    useFlip?: boolean;
+    useShift?: boolean;
   } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -22,8 +31,9 @@ export function DropdownMenu(
 
   const position = useFloating(reference, floating, {
     middleware: [
-      flip(), // Automatically flip the dropdown if it doesn't fit
-      shift({ padding: 8 }), // Adjust the dropdown to stay within the viewport with a padding of 8px
+      props.useFlip ?? true ? flip() : undefined, // Automatically flip the dropdown if it doesn't fit
+      props.useShift ?? true ? shift({ padding: 8 }) : undefined, // Adjust the dropdown to stay within the viewport with a padding of 8px
+      props.useAutoPlacement ?? false ? autoPlacement() : undefined, // Automatically choose the best placement for the dropdown
     ],
     placement: props.placement ?? "bottom-start",
     strategy: "fixed",

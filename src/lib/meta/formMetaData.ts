@@ -51,10 +51,10 @@ for (const key in FormMetaData) {
 }
 
 const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.name === "Rule",
+  (x) => x.key === "Rule",
 );
 const permissionMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.name === "Perm",
+  (x) => x.key === "Perm",
 );
 FormMetaData.Page.attributes.push(permissionMetaAttribute!);
 
@@ -66,22 +66,22 @@ FormMetaData.Form = {
       componentName: "SelectBox",
       displayName: "Form Category",
       inward: true,
-      name: "form",
+      key: "form",
       parentLabel: "FormCategory",
     },
     {
       attributes: [
         {
           componentName: "TagBox",
-          name: "key",
+          key: "key",
         },
       ],
       componentName: "DynamicTable",
-      name: "Unique",
+      key: "Unique",
     },
     rulesMetaAttribute!,
   ],
-  name: "Form",
+  key: "Form",
   title: "Form",
 };
 
@@ -93,27 +93,27 @@ FormMetaData.CompExample = {
       collection: "g:'Comp'",
       componentName: "SelectBox",
       displayName: "Parent Component",
-      name: "Comp",
+      key: "Comp",
       // validation: { required: true },
     },
     rulesMetaAttribute!,
   ],
-  name: "CompExample",
+  key: "CompExample",
   title: "Comp Example",
 };
 
 FormMetaData.ThankYouPage = {
   attributes: [...FormMetaData.Page.attributes],
-  name: "ThankYouPage",
+  key: "ThankYouPage",
   title: "Thank You Page",
 };
 FormMetaData.ErrorPage = {
   attributes: [...FormMetaData.Page.attributes],
-  name: "ErrorPage",
+  key: "ErrorPage",
   title: "Error Page",
 };
 FormMetaData.TemplatePage = {
   attributes: [...FormMetaData.Page.attributes],
-  name: "TemplatePage",
+  key: "TemplatePage",
   title: "Templates",
 };

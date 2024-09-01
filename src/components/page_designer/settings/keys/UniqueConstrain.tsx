@@ -15,10 +15,10 @@ export function UniqueConstrains() {
   const [graph, setGraph] = useGraph();
   const uniqueConstrainsMetaAttribute = klona(
     FormMetaData.Form.attributes,
-  ).find((meta) => meta.name === "Unique")!;
+  ).find((meta) => meta.key === "Unique")!;
   modifyFieldMetaAllFields(
     uniqueConstrainsMetaAttribute.attributes!.find(
-      (attribute) => attribute.name === "key",
+      (attribute) => attribute.key === "key",
     )!,
     graph,
     setGraph,
@@ -29,13 +29,19 @@ export function UniqueConstrains() {
     uniqueConstrainsMetaAttribute,
   );
 
+  const repeaterStore = createStore({});
+
   return (
     <div class="mt:6">
-      <PageRenderContextProvider data={layoutStore.formStore[0]?.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
-      <TableInputField
-        isNoPermissionCheck={true}
-        isRealTime={false}
-        txnId={layoutStore.formStore[0].txnId}
+      <PageRenderContextProvider
+        data={layoutStore.formStore[0]?.formData}
+        meta={graph.vertexes[metaVertexId]}
+        store={repeaterStore}
+      >
+        <TableInputField
+          isNoPermissionCheck={true}
+          isRealTime={false}
+          txnId={layoutStore.formStore[0].txnId}
         />
       </PageRenderContextProvider>
     </div>

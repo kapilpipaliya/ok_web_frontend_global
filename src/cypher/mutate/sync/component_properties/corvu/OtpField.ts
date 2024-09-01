@@ -3,7 +3,7 @@ export const OtpField = [
     "componentName": "number",
     "default": "-",
     "description": "Max number of chars. Is required.",
-    "name": "maxLength",
+    "key": "maxLength",
     "corvu": true,
     "hashName": "Root"
   },
@@ -11,7 +11,7 @@ export const OtpField = [
     "componentName": "string",
     "default": "-",
     "description": "The value of the OTP Field.",
-    "name": "value",
+    "key": "value",
     "corvu": true,
     "hashName": "Root"
   },
@@ -19,7 +19,7 @@ export const OtpField = [
     "componentName": "(value: string) => void",
     "default": "-",
     "description": "Callback fired when the OTP Field value changes.",
-    "name": "onValueChange",
+    "key": "onValueChange",
     "corvu": true,
     "hashName": "Root"
   },
@@ -27,7 +27,7 @@ export const OtpField = [
     "componentName": "(value: string) => void",
     "default": "-",
     "description": "Callback fired when the OTP Field is filled.",
-    "name": "onComplete",
+    "key": "onComplete",
     "corvu": true,
     "hashName": "Root"
   },
@@ -35,7 +35,7 @@ export const OtpField = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether to create extra space on the right for password managers.",
-    "name": "shiftPWManagers",
+    "key": "shiftPWManagers",
     "corvu": true,
     "hashName": "Root"
   },
@@ -43,7 +43,7 @@ export const OtpField = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the OTP Field context. Useful if you have nested OTP Fields and want to create components that belong to an OTP Field higher up in the tree.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Root"
   },
@@ -51,7 +51,7 @@ export const OtpField = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Root"
   }
@@ -62,7 +62,7 @@ export const OtpFieldInput = [
     "componentName": "string | null",
     "default": "'^\\\\d*$'",
     "description": "Regex pattern for the input. null disables the pattern and allow all chars.",
-    "name": "pattern",
+    "key": "pattern",
     "corvu": true,
     "hashName": "Input"
   },
@@ -70,7 +70,7 @@ export const OtpFieldInput = [
     "componentName": "string | null",
     "default": "-",
     "description": "Override the styles to apply when JavaScript is disabled. corvu provides a default for this but you're free to define your own styling. null disables the fallback.",
-    "name": "noScriptCSSFallback",
+    "key": "noScriptCSSFallback",
     "corvu": true,
     "hashName": "Input"
   },
@@ -78,7 +78,7 @@ export const OtpFieldInput = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the OTP Field context. Useful if you have nested OTP Fields and want to create components that belong to an OTP Field higher up in the tree.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Input"
   },
@@ -86,7 +86,7 @@ export const OtpFieldInput = [
     "componentName": "ValidComponent",
     "default": "input",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Input"
   }

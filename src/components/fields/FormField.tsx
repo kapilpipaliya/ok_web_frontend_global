@@ -17,7 +17,7 @@ import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
 export function FormField(
   props: Readonly<
     {
-      // For Root Level Forms we use Parent vertex label as form name
+      // For Root Level Forms we use Parent vertex label as form key
       label?: string;
       submitButton?: any;
     } & GenericComponentProps
@@ -50,7 +50,7 @@ export function FormField(
     const form = generateFormMetaAttributes(graph, () => {}, meta());
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
-        acc[attr.name] = attr.defaultValue;
+        acc[attr.key] = attr.defaultValue;
         return acc;
       },
       {} as { [key: string]: any },
@@ -59,9 +59,7 @@ export function FormField(
       graph,
       setGraph,
       txnId,
-      props.label ??
-        previewStore.previewMeta?.P[IdAttr] ??
-        meta().P[IdAttr],
+      props.label ?? previewStore.previewMeta?.P[IdAttr] ?? meta().P[IdAttr],
       defaultValues,
     );
     if (createResult.error) {

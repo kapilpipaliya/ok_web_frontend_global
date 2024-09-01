@@ -22,7 +22,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
       .searchData()
       .find(
         (navData: any) =>
-          navData.P.name === props.activeSection() && navData.children,
+          navData.P.key === props.activeSection() && navData.children,
       );
   return (
     <Show when={!props.isCollapsed()}>
@@ -54,7 +54,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                   >
                     <div
                       class={`${
-                        props.expandedSections().get(nav.P.name)
+                        props.expandedSections().get(nav.P.key)
                           ? ""
                           : "color:#37c"
                       } ${
@@ -63,8 +63,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                           : "font-weight:400"
                       } capitalize flex ai:center f:15 jc:space-between pl:12 pr:12`}
                     >
-                      <div onClick={() => props.toggleSection(nav.P.name)}>
-                        {nav.P.name}
+                      <div onClick={() => props.toggleSection(nav.P.key)}>
+                        {nav.P.key}
                       </div>
                       <div>
                         <button
@@ -72,7 +72,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                           onClick={(e) => {
                             e.stopPropagation();
 
-                            props.toggleSection(nav.P.name);
+                            props.toggleSection(nav.P.key);
                           }}
                         >
                           <Icon
@@ -81,7 +81,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                             style={{
                               "margin-top": "7px",
                               transform: `${
-                                props.expandedSections().get(nav.P.name)
+                                props.expandedSections().get(nav.P.key)
                                   ? "rotate(180deg)"
                                   : "rotate(0deg)"
                               }`,
@@ -91,7 +91,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                         </button>
                       </div>
                     </div>
-                    <Show when={!props.expandedSections().get(nav.P.name)}>
+                    <Show when={!props.expandedSections().get(nav.P.key)}>
                       <For each={nav.children}>
                         {(child) => {
                           return (
@@ -105,7 +105,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                             >
                               <Icon
                                 color={`${
-                                  props.activeSection() === child.P.name
+                                  props.activeSection() === child.P.key
                                     ? "#3B82F6"
                                     : "#4B5563"
                                 }`}
@@ -114,7 +114,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                                 width={24}
                               />
                               <span class="color:#4B5563 ml:8 ">
-                                {child.P.name}
+                                {child.P.key}
                               </span>
                             </a>
                           );

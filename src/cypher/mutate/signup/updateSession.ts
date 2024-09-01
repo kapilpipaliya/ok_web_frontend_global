@@ -7,6 +7,6 @@ export async function updateSession(createUserResult: Vertex) {
   await http_session.update((oldData) => ({
     ...oldData,
     email: createUserResult.P.email,
-    // subdomain: createUserResult.P.subdomain,
+    // subDomain: createUserResult.P.subDomain,
   }));
 }

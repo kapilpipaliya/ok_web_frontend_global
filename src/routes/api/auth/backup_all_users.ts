@@ -8,8 +8,8 @@ import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
 
 export async function saveGraphToCypherQL() {
-  const subdomain = "default"; // Adjust this as needed
-  const session = (await getDriver(subdomain)).session();
+  const subDomain = "default"; // Adjust this as needed
+  const session = (await getDriver(subDomain)).session();
 
   try {
     const query = "MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m";

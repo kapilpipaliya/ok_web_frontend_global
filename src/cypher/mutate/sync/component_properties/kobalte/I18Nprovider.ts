@@ -2,14 +2,14 @@ export const I18nProvider = [
   {
     "componentName": "string",
     "description": "The locale to apply to the children.",
-    "name": "locale",
+    "key": "locale",
     "hashName": "i18nprovider-1",
     "kobalte": true
   },
   {
     "componentName": "JSX.Element",
     "description": "The contents that should have the locale applied.",
-    "name": "children",
+    "key": "children",
     "hashName": "i18nprovider-1",
     "kobalte": true
   }

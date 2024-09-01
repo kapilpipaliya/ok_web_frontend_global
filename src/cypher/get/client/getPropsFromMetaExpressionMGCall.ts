@@ -51,10 +51,10 @@ async function getComponentPropertiesMGCall(
   for (const curr of metaRows) {
     const result = await getSelectionOptionsBase(
       [curr],
-      "->$0Name::'P.name'||::'P.name'",
+      "->$0Name::'P.key'||::'P.key'",
       tx,
     );
-    const key = result.result; // ->$0Name:P.name||:P.name
+    const key = result.result; // ->$0Name:P.key||:P.key
     if (key && curr.P.value !== undefined) {
       metaData[key] = curr.P.value;
     }

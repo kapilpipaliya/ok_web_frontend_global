@@ -2,119 +2,119 @@ export const ContextMenu = [
   {
     "componentName": "(open: boolean) => void",
     "description": "Event handler called when the open state of the menu changes.",
-    "name": "onOpenChange",
+    "key": "onOpenChange",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "string",
     "description": "A unique identifier for the component. The id is used to generate id attributes for nested components. If no id prop is provided, a generated id will be used.",
-    "name": "id",
+    "key": "id",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu should be the only visible content for screen readers, when set to true:  - interaction with outside elements will be disabled.  - scroll will be locked.  - focus will be locked inside the menu content.  - elements outside the menu content will not be visible for screen readers.",
-    "name": "modal",
+    "key": "modal",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the scroll should be locked even if the menu is not modal.",
-    "name": "preventScroll",
+    "key": "preventScroll",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Used to force mounting the menu (portal and content) when more control is needed. Useful when controlling animation with SolidJS animation libraries.",
-    "name": "forceMount",
+    "key": "forceMount",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "Placement",
     "description": "The placement of the menu content.",
-    "name": "placement",
+    "key": "placement",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The distance between the menu content and the trigger element. By default, it's 0 plus half of the arrow offset, if it exists.",
-    "name": "gutter",
+    "key": "gutter",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The skidding of the menu content along the trigger element.",
-    "name": "shift",
+    "key": "shift",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean | string",
     "description": "Controls the behavior of the menu content when it overflows the viewport: - If a boolean, specifies whether the menu content should flip to the opposite side when it overflows. - If a string, indicates the preferred fallback placements when it overflows.The placements must be spaced-delimited, e.g. \"top left\".",
-    "name": "flip",
+    "key": "flip",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu content should slide when it overflows.",
-    "name": "slide",
+    "key": "slide",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu content can overlap the trigger element when it overflows.",
-    "name": "overlap",
+    "key": "overlap",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu content should have the same width as the trigger element. This will be exposed to CSS as --kb-popper-anchor-width.",
-    "name": "sameWidth",
+    "key": "sameWidth",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu content should fit the viewport. If this is set to true, the menu content will have maxWidth and maxHeight set to the viewport size. This will be exposed to CSS as --kb-popper-available-width and --kb-popper-available-height.",
-    "name": "fitViewport",
+    "key": "fitViewport",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether to hide the menu content when the trigger element becomes occluded.",
-    "name": "hideWhenDetached",
+    "key": "hideWhenDetached",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding in order to consider the trigger element occluded.",
-    "name": "detachedPadding",
+    "key": "detachedPadding",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding between the arrow and the menu content corner.",
-    "name": "arrowPadding",
+    "key": "arrowPadding",
     "hashName": "contextmenu",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding between the menu content and the viewport edge. This will be exposed to CSS as --kb-popper-overflow-padding.",
-    "name": "overflowPadding",
+    "key": "overflowPadding",
     "hashName": "contextmenu",
     "kobalte": true
   }
@@ -124,7 +124,7 @@ export const ContextMenuTrigger = [
   {
     "componentName": "boolean",
     "description": "Whether the context menu trigger is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenutrigger",
     "kobalte": true
   }
@@ -134,42 +134,42 @@ export const ContextMenuContent = [
   {
     "componentName": "(event: Event) => void",
     "description": "Event handler called when focus moves into the component after opening. It can be prevented by calling event.preventDefault.",
-    "name": "onOpenAutoFocus",
+    "key": "onOpenAutoFocus",
     "hashName": "contextmenucontent",
     "kobalte": true
   },
   {
     "componentName": "(event: Event) => void",
     "description": "Event handler called when focus moves to the trigger after closing. It can be prevented by calling event.preventDefault.",
-    "name": "onCloseAutoFocus",
+    "key": "onCloseAutoFocus",
     "hashName": "contextmenucontent",
     "kobalte": true
   },
   {
     "componentName": "(event: KeyboardEvent) => void",
     "description": "Event handler called when the escape key is down. It can be prevented by calling event.preventDefault.",
-    "name": "onEscapeKeyDown",
+    "key": "onEscapeKeyDown",
     "hashName": "contextmenucontent",
     "kobalte": true
   },
   {
     "componentName": "(event: PointerDownOutsideEvent) => void",
     "description": "Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onPointerDownOutside",
+    "key": "onPointerDownOutside",
     "hashName": "contextmenucontent",
     "kobalte": true
   },
   {
     "componentName": "(event: FocusOutsideEvent) => void",
     "description": "Event handler called when the focus moves outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onFocusOutside",
+    "key": "onFocusOutside",
     "hashName": "contextmenucontent",
     "kobalte": true
   },
   {
     "componentName": "(event: InteractOutsideEvent) => void",
     "description": "Event handler called when an interaction (pointer or focus event) happens outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onInteractOutside",
+    "key": "onInteractOutside",
     "hashName": "contextmenucontent",
     "kobalte": true
   }
@@ -179,7 +179,7 @@ export const ContextMenuArrow = [
   {
     "componentName": "number",
     "description": "The size of the arrow.",
-    "name": "size",
+    "key": "size",
     "hashName": "contextmenuarrow",
     "kobalte": true
   }
@@ -189,28 +189,28 @@ export const ContextMenuItem = [
   {
     "componentName": "string",
     "description": "Optional text used for typeahead purposes. By default, the typeahead behavior will use the .textContent of the ContextMenu.ItemLabel part if provided, or fallback to the .textContent of the ContextMenu.Item. Use this when the content is complex, or you have non-textual content inside.",
-    "name": "textValue",
+    "key": "textValue",
     "hashName": "contextmenuitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the item is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenuitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu should close when the item is activated.",
-    "name": "closeOnSelect",
+    "key": "closeOnSelect",
     "hashName": "contextmenuitem",
     "kobalte": true
   },
   {
     "componentName": "() => void",
     "description": "Event handler called when the user selects an item (via mouse or keyboard).",
-    "name": "onSelect",
+    "key": "onSelect",
     "hashName": "contextmenuitem",
     "kobalte": true
   }
@@ -220,7 +220,7 @@ export const ContextMenuItemIndicator = [
   {
     "componentName": "boolean",
     "description": "Used to force mounting when more control is needed. Useful when controlling animation with SolidJS animation libraries.",
-    "name": "forceMount",
+    "key": "forceMount",
     "hashName": "contextmenuitemindicator",
     "kobalte": true
   }
@@ -230,28 +230,28 @@ export const ContextMenuRadioGroup = [
   {
     "componentName": "string",
     "description": "The controlled value of the menu radio item to check.",
-    "name": "value",
+    "key": "value",
     "hashName": "contextmenuradiogroup",
     "kobalte": true
   },
   {
     "componentName": "string",
     "description": "The value of the menu radio item that should be checked when initially rendered. Useful when you do not need to control the state of the radio group.",
-    "name": "defaultValue",
+    "key": "defaultValue",
     "hashName": "contextmenuradiogroup",
     "kobalte": true
   },
   {
     "componentName": "(value: string) => void",
     "description": "Event handler called when the value changes.",
-    "name": "onChange",
+    "key": "onChange",
     "hashName": "contextmenuradiogroup",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the radio group is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenuradiogroup",
     "kobalte": true
   }
@@ -261,35 +261,35 @@ export const ContextMenuRadioItem = [
   {
     "componentName": "string",
     "description": "The value of the menu item radio.",
-    "name": "value",
+    "key": "value",
     "hashName": "contextmenuradioitem",
     "kobalte": true
   },
   {
     "componentName": "string",
     "description": "Optional text used for typeahead purposes. By default, the typeahead behavior will use the .textContent of the ContextMenu.ItemLabel part if provided, or fallback to the .textContent of the ContextMenu.Item. Use this when the content is complex, or you have non-textual content inside.",
-    "name": "textValue",
+    "key": "textValue",
     "hashName": "contextmenuradioitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the item is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenuradioitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu should close when the item is checked.",
-    "name": "closeOnSelect",
+    "key": "closeOnSelect",
     "hashName": "contextmenuradioitem",
     "kobalte": true
   },
   {
     "componentName": "() => void",
     "description": "Event handler called when the user selects an item (via mouse or keyboard).",
-    "name": "onSelect",
+    "key": "onSelect",
     "hashName": "contextmenuradioitem",
     "kobalte": true
   }
@@ -299,56 +299,56 @@ export const ContextMenuCheckboxItem = [
   {
     "componentName": "boolean",
     "description": "The controlled checked state of the item.",
-    "name": "checked",
+    "key": "checked",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "The default checked state when initially rendered. Useful when you do not need to control the checked state.",
-    "name": "defaultChecked",
+    "key": "defaultChecked",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "(checked: boolean) => void",
     "description": "Event handler called when the checked state of the item changes.",
-    "name": "onChange",
+    "key": "onChange",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "string",
     "description": "Optional text used for typeahead purposes. By default, the typeahead behavior will use the .textContent of the ContextMenu.ItemLabel part if provided, or fallback to the .textContent of the ContextMenu.Item. Use this when the content is complex, or you have non-textual content inside.",
-    "name": "textValue",
+    "key": "textValue",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the item is in an indeterminate state.",
-    "name": "indeterminate",
+    "key": "indeterminate",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the item is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the menu should close when the item is checked/unchecked.",
-    "name": "closeOnSelect",
+    "key": "closeOnSelect",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   },
   {
     "componentName": "() => void",
     "description": "Event handler called when the user selects an item (via mouse or keyboard).",
-    "name": "onSelect",
+    "key": "onSelect",
     "hashName": "contextmenucheckboxitem",
     "kobalte": true
   }
@@ -358,91 +358,91 @@ export const ContextMenuSub = [
   {
     "componentName": "boolean",
     "description": "The controlled open state of the sub menu.",
-    "name": "open",
+    "key": "open",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "The default open state when initially rendered. Useful when you do not need to control the open state.",
-    "name": "defaultOpen",
+    "key": "defaultOpen",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "(open: boolean) => void",
     "description": "Event handler called when the open state of the sub menu changes.",
-    "name": "onOpenChange",
+    "key": "onOpenChange",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "(anchor?: HTMLElement) => AnchorRect  | undefined",
     "description": "Function that returns the trigger element's DOMRect.",
-    "name": "getAnchorRect",
+    "key": "getAnchorRect",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The distance between the sub menu content and the trigger element. By default, it's 0 plus half of the arrow offset, if it exists.",
-    "name": "gutter",
+    "key": "gutter",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The skidding of the sub menu content along the trigger element.",
-    "name": "shift",
+    "key": "shift",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the sub menu content should slide when it overflows.",
-    "name": "slide",
+    "key": "slide",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the sub menu content can overlap the trigger element when it overflows.",
-    "name": "overlap",
+    "key": "overlap",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the sub menu content should fit the viewport. If this is set to true, the sub menu content will have maxWidth and maxHeight set to the viewport size. This will be exposed to CSS as --kb-popper-available-width and --kb-popper-available-height.",
-    "name": "fitViewport",
+    "key": "fitViewport",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether to hide the sub menu content when the trigger element becomes occluded.",
-    "name": "hideWhenDetached",
+    "key": "hideWhenDetached",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding in order to consider the trigger element occluded.",
-    "name": "detachedPadding",
+    "key": "detachedPadding",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding between the arrow and the sub menu content corner.",
-    "name": "arrowPadding",
+    "key": "arrowPadding",
     "hashName": "contextmenusub",
     "kobalte": true
   },
   {
     "componentName": "number",
     "description": "The minimum padding between the sub menu content and the viewport edge. This will be exposed to CSS as --kb-popper-overflow-padding.",
-    "name": "overflowPadding",
+    "key": "overflowPadding",
     "hashName": "contextmenusub",
     "kobalte": true
   }
@@ -452,14 +452,14 @@ export const ContextMenuSubTrigger = [
   {
     "componentName": "string",
     "description": "Optional text used for typeahead purposes. By default, the typeahead behavior will use the .textContent of the ContextMenu.SubTrigger. Use this when the content is complex, or you have non-textual content inside.",
-    "name": "textValue",
+    "key": "textValue",
     "hashName": "contextmenusubtrigger",
     "kobalte": true
   },
   {
     "componentName": "boolean",
     "description": "Whether the sub menu trigger is disabled or not.",
-    "name": "disabled",
+    "key": "disabled",
     "hashName": "contextmenusubtrigger",
     "kobalte": true
   }
@@ -469,28 +469,28 @@ export const ContextMenuSubContent = [
   {
     "componentName": "(event: KeyboardEvent) => void",
     "description": "Event handler called when the escape key is down. It can be prevented by calling event.preventDefault.",
-    "name": "onEscapeKeyDown",
+    "key": "onEscapeKeyDown",
     "hashName": "contextmenusubcontent",
     "kobalte": true
   },
   {
     "componentName": "(event: PointerDownOutsideEvent) => void",
     "description": "Event handler called when a pointer event occurs outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onPointerDownOutside",
+    "key": "onPointerDownOutside",
     "hashName": "contextmenusubcontent",
     "kobalte": true
   },
   {
     "componentName": "(event: FocusOutsideEvent) => void",
     "description": "Event handler called when the focus moves outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onFocusOutside",
+    "key": "onFocusOutside",
     "hashName": "contextmenusubcontent",
     "kobalte": true
   },
   {
     "componentName": "(event: InteractOutsideEvent) => void",
     "description": "Event handler called when an interaction (pointer or focus event) happens outside the bounds of the component. It can be prevented by calling event.preventDefault.",
-    "name": "onInteractOutside",
+    "key": "onInteractOutside",
     "hashName": "contextmenusubcontent",
     "kobalte": true
   }

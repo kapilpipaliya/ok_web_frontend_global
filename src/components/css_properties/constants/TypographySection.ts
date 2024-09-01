@@ -28,7 +28,7 @@ export const TypographySection = {
   fontSize: {
     componentName: "string",
     label: "Size",
-    name: "font-size",
+    key: "font-size",
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
@@ -36,39 +36,39 @@ export const TypographySection = {
   lineHeight: {
     componentName: "string",
     label: "Line height",
-    name: "line-height",
+    key: "line-height",
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   colorPicker: {
     componentName: "colorPicker",
     label: "Color",
-    name: "color",
+    key: "color",
   } as ColorPickerField,
   fontWeight: {
     componentName: "select",
     label: "Weight",
-    name: "font-weight",
+    key: "font-weight",
     options: extraPropertyValues["font-weight"].values,
   } as SelectField,
   letterSpacing: {
     componentName: "string",
     label: "Spacing",
-    name: "letter-spacing",
+    key: "letter-spacing",
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   textIndent: {
     componentName: "string",
     label: "Indent",
-    name: "text-indent",
+    key: "text-indent",
     unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   fontStyle: {
     componentName: "select",
     label: "Style",
-    name: "font-style",
+    key: "font-style",
     options: [
       { label: "Normal", value: "normal" },
       { label: "Italic", value: "italic" },
@@ -79,25 +79,25 @@ export const TypographySection = {
   fontVariant: {
     componentName: "select",
     label: "Variant",
-    name: "font-variant",
+    key: "font-variant",
     options: extraPropertyValues["font-variant"].values,
   } as SelectField,
   textDecoration: {
     componentName: "select",
     label: "Decoration",
-    name: "text-decoration",
+    key: "text-decoration",
     options: extraPropertyValues["text-decoration"].values,
   } as SelectField,
   textTransform: {
     componentName: "select",
     label: "Transform",
-    name: "text-transform",
+    key: "text-transform",
     options: ["none", "capitalize", "uppercase", "lowercase"],
   } as SelectField,
   textAlign: {
     componentName: "select",
     label: "Align",
-    name: "text-align",
+    key: "text-align",
     options: ["left", "center", "right", "justify"],
   } as SelectField,
   // add Writing mode
@@ -116,7 +116,7 @@ export const TypographySection = {
   direction: {
     componentName: "select",
     label: "Direction",
-    name: "direction",
+    key: "direction",
     options: [
       { label: "RTL", value: "rtl" },
       { label: "LTR", value: "ltr" },

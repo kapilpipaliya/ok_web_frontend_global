@@ -86,9 +86,8 @@ export function SelectField(
 
   const _getDynamicOptions = () => {
     return (
-      getSelectionOptions(graph, setGraph, getCollection(), [
-        data(),
-      ]).vertexes || []
+      getSelectionOptions(graph, setGraph, getCollection(), [data()])
+        .vertexes || []
     );
   };
 
@@ -221,7 +220,7 @@ export function SelectField(
         displayValueKey={
           meta().P.labelKey
             ? meta().P.labelKey
-            : "::'P.displayName'||::'P.name'||::'P.id'||::'label'"
+            : "::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         }
         isLoadingOptions={loading()}
         loadOptions={loadOptions}
@@ -229,7 +228,7 @@ export function SelectField(
         onSelect={(e) => onChangeSelect(e, false)}
         options={options()}
         optionValueKey={meta().P.valueKey ? meta().P.valueKey : "id"}
-        placeholder={`${props.title}`}
+        placeholder={`${props.title || ""}`}
         renderLabel={meta().P.renderLabel}
         selectedValues={() => {
           if (isStaticOptions(meta())) {
@@ -247,11 +246,9 @@ export function SelectField(
             }
             return ensureArray(value);
           }
-          return selectedValue(meta(), data(), graph).map(
-            (id) => {
-              return graph.vertexes[id];
-            },
-          );
+          return selectedValue(meta(), data(), graph).map((id) => {
+            return graph.vertexes[id];
+          });
         }}
         selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
       />

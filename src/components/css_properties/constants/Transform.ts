@@ -14,8 +14,8 @@ export const Transform = {
         {
           componentName: "select",
           isLabelOnTop: true,
+          key: "type",
           label: "Type",
-          name: "type",
           options: [
             "move x",
             "move y",
@@ -34,8 +34,8 @@ export const Transform = {
         {
           componentName: "string",
           isLabelOnTop: true,
+          key: "value",
           label: "Value",
-          name: "value",
           type: "number",
           unitOptions: sizeTypes,
         } as TextFieldOptionsField,
@@ -43,16 +43,16 @@ export const Transform = {
           align: "end",
           componentName: "fieldWithCustomProperty",
           customProperty: [
-            { label: "Left", name: "transform-origin" },
-            { label: "Top", name: "transform-origin" },
+            { key: "transform-origin", label: "Left" },
+            { key: "transform-origin", label: "Top" },
           ],
           gap: "5px 10px",
           "grid-template-columns": "1fr 25%",
           gridType: "repeat(2,auto)",
           isLabelOnTop: true,
+          key: "transform-origin",
           label: "Transform Origin",
           mainFieldType: "string",
-          name: "transform-origin",
           options: sizeTypes,
           padding: "5px",
           type: "number",
@@ -60,8 +60,8 @@ export const Transform = {
         {
           componentName: "buttonGroups",
           isLabelOnTop: true,
+          key: "transform-style",
           label: "Type",
-          name: "transform-style",
           options: [
             { key: "2D", tooltip: "2D", value: "flat" },
             { key: "3D", tooltip: "3D", value: "preserve-3d" },
@@ -72,8 +72,8 @@ export const Transform = {
     componentName: "dataEditor",
     dialogLabel: "Adjust Transform",
     hideLabel: true,
+    key: "transform",
     label: "Transform",
-    name: "transform",
     useParentProjection: true,
   } as DataEditorField,
 };

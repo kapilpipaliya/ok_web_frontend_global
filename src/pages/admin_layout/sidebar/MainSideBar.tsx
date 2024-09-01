@@ -24,19 +24,19 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
             <Show when={navNode.P.url !== "undefined"}>
               <a
                 class={`${
-                  props.activeSection() === navNode.P.name
+                  props.activeSection() === navNode.P.key
                     ? "bg:white color:#37c"
                     : ""
                 } gap:10 `}
                 href={navNode.P.url}
-                onClick={() => props.setActiveSection(navNode.P.name)}
+                onClick={() => props.setActiveSection(navNode.P.key)}
                 style={
                   "display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; "
                 }
               >
                 <Icon
                   color={`${
-                    props.activeSection() === navNode.P.name
+                    props.activeSection() === navNode.P.key
                       ? "#3B82F6"
                       : "#4B5563"
                   }`}

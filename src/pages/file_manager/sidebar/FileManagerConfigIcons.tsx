@@ -37,7 +37,7 @@ export function FileManagerConfigIcons(
     showDialog: false,
   });
 
-  const handleCreateNewDirectory = async (name: string) => {
+  const handleCreateNewDirectory = async (key: string) => {
     try {
       const newFormTxnId = graph.newTxnId;
       const tableMetaVertex = {
@@ -59,7 +59,7 @@ export function FileManagerConfigIcons(
         false,
         graph,
         setGraph,
-        { name },
+        { key },
       );
       const data = commitTxn(newFormTxnId, graph);
 
@@ -87,7 +87,7 @@ export function FileManagerConfigIcons(
     title: string,
     label: string,
     placeholder: string,
-    action: (name: string) => void,
+    action: (key: string) => void,
     ref: HTMLElement,
   ) => {
     setState({
@@ -140,7 +140,7 @@ export function FileManagerConfigIcons(
             openDialog(
               "Add New Directory",
               "Enter Directory Name",
-              "Enter directory name",
+              "Enter directory key",
               handleCreateNewDirectory,
               e.currentTarget,
             )
@@ -156,7 +156,7 @@ export function FileManagerConfigIcons(
             openDialog(
               "Add New File",
               "Enter File Name",
-              "Enter file name",
+              "Enter file key",
               handleCreateNewFile,
               e.currentTarget,
             )
@@ -164,7 +164,13 @@ export function FileManagerConfigIcons(
           size={18}
           title="Create New File"
         />
-        <Show when={!fileManagerStore.root?.some(root => root.id === props.metaVertex.id)}>
+        <Show
+          when={
+            !fileManagerStore.root?.some(
+              (root) => root.id === props.metaVertex.id,
+            )
+          }
+        >
           <IconButton
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="mdi:rename-box"
@@ -173,7 +179,7 @@ export function FileManagerConfigIcons(
               openDialog(
                 `Rename ${props.metaVertex.L[0]}`,
                 `Enter ${props.metaVertex.L[0]} Name`,
-                "Enter new name",
+                "Enter new key",
                 handleRenameItem,
                 e.currentTarget,
               )
@@ -199,8 +205,8 @@ export function FileManagerConfigIcons(
             parentRef={state.buttonRef!}
           >
             <CommonAddComponent
-              addNewState={(name) => {
-                state.dialogAction(name);
+              addNewState={(key) => {
+                state.dialogAction(key);
                 setState("showDialog", false);
               }}
               label={state.dialogLabel}

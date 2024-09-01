@@ -22,7 +22,7 @@ export function configureState() {
   const transactions = new ReactiveMap() as GraphInterface["transactions"];
 
   const graph = createStore<GraphInterface>({
-    activeClickOutside: 0,
+    activeClickOutside: [],
     APP_BASE_URL: "/admin",
     componentIdMap: {},
     edges: {} as EdgeMap,

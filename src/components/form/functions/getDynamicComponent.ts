@@ -7,6 +7,7 @@ import Popover from "@corvu/popover";
 import Resizable from "@corvu/resizable";
 import Tooltip from "@corvu/tooltip";
 
+import { componentMap } from "~/components/css_properties/components/componentMap";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/SelectField";
@@ -23,6 +24,8 @@ import { ContextMenu } from "~/kobalte/packages/core/src/context-menu";
 // import { Dialog } from "~/kobalte/packages/core/src/dialog";
 import { DropdownMenu } from "~/kobalte/packages/core/src/dropdown-menu";
 import { HoverCard } from "~/kobalte/packages/core/src/hover-card";
+// import { Tooltip } from "~/kobalte/packages/core/src/tooltip";
+import { I18nProvider } from "~/kobalte/packages/core/src/i18n";
 import { Image } from "~/kobalte/packages/core/src/image";
 import { Link } from "~/kobalte/packages/core/src/link";
 import { Listbox } from "~/kobalte/packages/core/src/listbox";
@@ -42,14 +45,12 @@ import { TextField as KobalteTextField } from "~/kobalte/packages/core/src/text-
 import { Toast } from "~/kobalte/packages/core/src/toast";
 import { ToggleButton } from "~/kobalte/packages/core/src/toggle-button";
 import { ToggleGroup } from "~/kobalte/packages/core/src/toggle-group";
-// import { Tooltip } from "~/kobalte/packages/core/src/tooltip";
 
 import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
-import { Signature } from "../../SignatureBox";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 
 const corvuComponents = {
@@ -75,6 +76,8 @@ const kobalteComponents = {
   // Dialog,
   DropdownMenu,
   HoverCard,
+  // Tooltip,
+  I18nProvider,
   Image,
   Link,
   Listbox,
@@ -94,25 +97,24 @@ const kobalteComponents = {
   Toast,
   ToggleButton,
   ToggleGroup,
-  // Tooltip,
 };
 
 export const componentsMap: Record<string, any> = {
   Box: BoxField,
-  Button: ButtonField, // kobalte button
-  ColorBox: KobalteTextField,
+  Button: ButtonField, // usen kobalte button
+  // https://ark-ui.com/solid/docs/components/color-picker
+  // ColorBox: KobalteTextField,
   DynamicTable: TableInputField,
   ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
-  HtmlEditor: KobalteTextField,
+  // HtmlEditor: KobalteTextField,
   ImageUploader: FileUploader,
   Link: Link,
   Page: PageField,
   RadioGroup: RadioGroupField,
   Repeater: Repeater,
   SelectBox: SelectField,
-  SignatureBox: Signature,
   TagBox: SelectField,
   TemplatePage: PageField,
   Text: TextField,
@@ -120,7 +122,16 @@ export const componentsMap: Record<string, any> = {
 };
 
 export function getDynamicComponent(component: string) {
+  if (!component) {
+    return;
+  }
   const [componentKey, subComponent] = component.split(".");
+
+  if (componentKey.startsWith("System")) {
+    const key = componentKey.replace("System", "");
+    const lowerCaseKey = key.charAt(0).toLowerCase() + key.slice(1);
+    return componentMap[lowerCaseKey] || NotFoundComponent;
+  }
 
   if (corvuComponents[componentKey as keyof typeof corvuComponents]) {
     return subComponent
@@ -140,5 +151,5 @@ export function getDynamicComponent(component: string) {
       : kobalteComponents[componentKey as keyof typeof kobalteComponents];
   }
 
-  return componentsMap[componentKey] || NotFoundComponent;
+  return componentsMap[componentKey];
 }

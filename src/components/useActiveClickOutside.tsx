@@ -1,17 +1,24 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { onCleanup } from "solid-js";
+import { createUniqueId, onCleanup } from "solid-js";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
 export function useActiveClickOutside(
-  graph: Store<GraphInterface>,
+  _graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  setGraph("activeClickOutside", (prev) => prev + 1);
-  const activeClickOutside = graph.activeClickOutside;
+  const currentId = createUniqueId();
+  setGraph("activeClickOutside", (uniqueIds: string[]) => [
+    ...uniqueIds,
+    currentId,
+  ]);
+
   onCleanup(() => {
-    setGraph("activeClickOutside", (prev) => prev - 1);
+    setGraph("activeClickOutside", (uniqueIds: string[]) =>
+      uniqueIds.filter((id) => id !== currentId),
+    );
   });
-  return activeClickOutside;
+
+  return currentId;
 }

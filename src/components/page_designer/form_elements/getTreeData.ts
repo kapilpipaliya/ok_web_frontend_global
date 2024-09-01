@@ -8,7 +8,7 @@ export interface NavItem {
   children?: NavItem[];
   expanded: boolean;
   id: string;
-  name: string;
+  key: string;
   P: any;
 }
 
@@ -38,12 +38,12 @@ export function getTreeData(
     for (const child of (children || []).sort(
       (a: any, b: any) => a.P.pos - b.P.pos,
     )) {
-      const name =
-        levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
+      const key =
+        levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.key;
       const navItem: NavItem = {
         expanded: true,
         id: child.id,
-        name: name,
+        key: key,
         P: child.P,
       };
       if (

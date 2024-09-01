@@ -10,5 +10,5 @@ export function getPkForCollection(
 ) {
   const pks =
     getSelectionOptions(graph, () => 0, "->$0Pk", [collVertex]).vertexes || [];
-  return pks.map((pk) => pk.P.name);
+  return pks.map((pk) => pk.P.key);
 }

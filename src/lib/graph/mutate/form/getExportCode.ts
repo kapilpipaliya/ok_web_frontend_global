@@ -51,7 +51,7 @@ export function getExportCode(
           const label = v.L[0];
           if (FormMetaData[label]) {
             const pksResult = {} as { [primaryKey: string]: any };
-            pksResult.name = v.P.name;
+            pksResult.key = v.P.key;
             if (!result.OUT) {
               result.OUT = {} as {
                 [EdgeType: string]: { [primaryKey: string]: any }[];
@@ -63,7 +63,7 @@ export function getExportCode(
             const collVertex = findVertexByLabelAndUniqueId(
               graph,
               "Form",
-              "name",
+              "key",
               label,
             );
             if (!collVertex) {
@@ -77,7 +77,7 @@ export function getExportCode(
               pksResult[pk] = v.P[pk];
             }
             if (pks.length === 0) {
-              pksResult.name = v.P.name;
+              pksResult.key = v.P.key;
             }
 
             if (!result.OUT) {

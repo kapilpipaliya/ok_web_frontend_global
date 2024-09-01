@@ -3,8 +3,8 @@ import { createSignal } from "solid-js";
 
 import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
-import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 
+import { PROPERTIES } from "../constants/constant";
 import { useCssEditor } from "./CssEditorContext";
 import { useCssState } from "./CssStateContext";
 

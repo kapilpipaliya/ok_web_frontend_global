@@ -148,7 +148,7 @@ export function DisplayProperty(
               componentName = vertexes;
             }
             if (!componentName) {
-              componentName = getStringComponent(graph)?.P.name;
+              componentName = getStringComponent(graph)?.P.key;
             }
             setTimeout(() => {
               runWithOwner(outerOwner, () => {
@@ -180,6 +180,7 @@ export function DisplayProperty(
             ? graph.vertexes[metaVertex().P.templateId]
             : metaVertex()
         }
+        noLabel={true}
         onChange={props.onChange}
         title={toTitle(
           props.column.P.displayName || props.column.P[IdAttr] || "",
@@ -205,9 +206,9 @@ export function DisplayProperty(
       </Match>
       <Match
         when={
-          metaVertex().P.name === "value" &&
-          ((props.joinVertex?.P.name ?? "").endsWith("Class") ||
-            (props.joinVertex?.P.name ?? "") === "class")
+          metaVertex().P.key === "value" &&
+          ((props.joinVertex?.P.key ?? "").endsWith("Class") ||
+            (props.joinVertex?.P.key ?? "") === "class")
         }
       >
         <td class="align-content:center">

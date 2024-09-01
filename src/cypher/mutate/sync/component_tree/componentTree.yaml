@@ -1,4 +1,4 @@
-- root:
+- Root:
   - Accordion:
       - Accordion.Item:
           - Accordion.Trigger
@@ -264,5 +264,5 @@
       - OtpField.Input
   - Resizable:
       - Resizable.Panel
-      - Resizable.Handle
-      - Resizable.Panel
+      - Resizable.
+

@@ -23,21 +23,21 @@ const getSuperSession = async () => {
 };
 // Function to get a driver instance based on the database ID
 export async function getDriver(
-  subdomain: string,
+  subDomain: string,
   username?: string,
   password?: string,
 ) {
   let port;
-  if (subdomain === "super" || subdomain === "www") {
+  if (subDomain === "super" || subDomain === "www") {
     port = 1102;
   } else {
     const session = (await getSuperSession()).session();
-    const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;
-    const res = await session.run(query, { subdomain });
+    const query = `MATCH (n:User {subDomain: '${subDomain}'}) RETURN n;`;
+    const res = await session.run(query, { subDomain });
     if (res.records.length > 0) {
       port = res.records[0].get("n")?.properties.driverPort;
     } else {
-      throw new Error(`Subdomain ${subdomain} Not Found!`);
+      throw new Error(`Subdomain ${subDomain} Not Found!`);
     }
     await session.close();
   }

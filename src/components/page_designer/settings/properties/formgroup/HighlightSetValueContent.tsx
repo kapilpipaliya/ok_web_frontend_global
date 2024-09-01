@@ -37,7 +37,7 @@ export function HighlightSetValueContent(
       </span>
       <span class="f:15 flex:1">
         <Switch>
-          <Match when={props.meta.P.name === "defaultValue"}>
+          <Match when={props.meta.P.key === "defaultValue"}>
             <DefaultValueContent
               meta={props.meta}
               onChange={props.onChange}
@@ -58,6 +58,7 @@ export function HighlightSetValueContent(
               isNoPermissionCheck={true}
               isRealTime={false}
               meta={props.meta}
+              noLabel
               onChange={(data) => props.onChange(props.meta, data)}
               txnId={props.txnId}
             />
@@ -70,7 +71,7 @@ export function HighlightSetValueContent(
                       meta={{
                         P: {
                           [IdAttr]: "import",
-                          displayExpr: "$P.name",
+                          displayExpr: "$P.key",
                           collection: `ids:'${props.selectedLayout.id}'->Rule`
                         },
                       } as unknown as Vertex}

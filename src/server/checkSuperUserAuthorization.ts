@@ -1,5 +1,6 @@
 import type { Session } from "neo4j-driver";
 
+import { superUserData } from "../../tests/auth/data/signUpData";
 import { findUserByEmail } from "../cypher/mutate/user/findUserByEmail";
 import { getUserEmailFromSession } from "./getUserEmailFromSession";
 
@@ -8,13 +9,17 @@ export async function checkSuperUserAuthorization(
   dbSession: Session,
   isMutate = false,
 ) {
-  return null;
   if (subDomain === "super") {
     const email = await getUserEmailFromSession();
-    const { user } = await findUserByEmail(dbSession, email);
-    if (user?.P.username !== "super") {
+    if (!email) {
       return {
-        error: `Not Authorized: Only super user can ${isMutate ? "mutate" : "get"} data in super subdomain.`,
+        error: `Access Denied: You do not have permission to ${isMutate ? "make changes" : "view information"} in this area.`,
+      };
+    }
+    const { user } = await findUserByEmail(dbSession, email);
+    if (user?.P.username !== superUserData.username) {
+      return {
+        error: `Access Denied: You do not have permission to ${isMutate ? "make changes" : "view information"} in this area.`,
       };
     }
   }

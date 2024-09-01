@@ -86,7 +86,7 @@ export function PageItem(
   });
 
   return (
-    <Show when={props.child.name}>
+    <Show when={props.child.key}>
       <div // NOSONAR
         class={`relative ${itemStyle()}`}
         draggable={true}
@@ -97,14 +97,14 @@ export function PageItem(
         ref={menuRef!}
       >
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
-        <div class="font-size:14px">{toTitle(props.child.name)}</div>
+        <div class="font-size:14px">{toTitle(props.child.key)}</div>
         <Show when={props.previewPageId === props.child.id}>
           <DropdownMenu
             onClickOutside={() => props.setPreviewPageId(null)}
             onMouseLeave={() => props.setPreviewPageId(null)}
             parentRef={menuRef!}
           >
-            {toTitle(props.child.name)} Preview
+            {toTitle(props.child.key)} Preview
             <PageViewWrapper
               formId={props.child.id}
               isNoPermissionCheck={true}

@@ -1,13 +1,12 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { getComponentTree } from "~/cypher/mutate/sync/component_tree/convertToJson";
-import { insertComponentTree } from "~/cypher/mutate/sync/component_tree/insertComonentTree";
+import { insertComponents } from "~/cypher/mutate/signup/insertComponents";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
-    const response = await insertComponentTree(dbSession, getComponentTree());
+    const response = await insertComponents(dbSession);
 
     if (!response.success) {
       return new Response(

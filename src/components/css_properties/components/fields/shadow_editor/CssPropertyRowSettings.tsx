@@ -47,7 +47,7 @@ export function CssPropertyRowSettings(
               <DynamicCSSComponent
                 meta={{
                   ...meta,
-                  projections: [props.meta.name, props.rowIndex],
+                  projections: [props.meta.key, props.rowIndex],
                 }}
               />
             );

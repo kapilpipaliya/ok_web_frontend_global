@@ -21,10 +21,10 @@ export async function connectToNeo4jWithRetry(
       await session.close();
       return driver;
     } catch (error) {
-      console.error(
+      /*console.error(
         `Failed to connect to Neo4j (attempt ${retries + 1}):`,
         error,
-      );
+      );*/
       retries += 1;
       if (retries >= maxRetries) {
         console.error("Max retries reached. Unable to connect to Neo4j.");

@@ -28,14 +28,14 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   let metaAttribute = klona(
-    FormMetaData.Form.attributes.find((x) => x.name === "Rule")!,
+    FormMetaData.Form.attributes.find((x) => x.key === "Rule")!,
   );
   for (const attribute of metaAttribute.attributes!) {
-    if (attribute.name === "cond") {
+    if (attribute.key === "cond") {
       for (const condAttribute of attribute.attributes!) {
         if (
-          condAttribute.name === "leftField" ||
-          condAttribute.name === "rightField"
+          condAttribute.key === "leftField" ||
+          condAttribute.key === "rightField"
         ) {
           modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStore);
         }
@@ -43,7 +43,7 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
     }
   }
   if (selectedRule) {
-    metaAttribute = metaAttribute.attributes!.find((x) => x.name === "cond")!;
+    metaAttribute = metaAttribute.attributes!.find((x) => x.key === "cond")!;
   }
   return metaAttribute;
 };
@@ -134,6 +134,8 @@ export function RulesModal(
     }
   });
 
+  const repeaterStore = createStore({});
+
   return (
     <Portal>
       <div
@@ -156,18 +158,26 @@ export function RulesModal(
                     id="modal-title"
                   >
                     {props.selectedRule
-                      ? `${props.selectedRule.P.name} Rules`
+                      ? `${props.selectedRule.P.key} Rules`
                       : "All Rules"}
                     :
                   </h3>
                   <div class="mt:0.5rem">
-                  <PageRenderContextProvider data={props.selectedRule ? props.selectedRule : formStore!.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
-                    <TableInputField
-                      isNoPermissionCheck={true}
-                      isRealTime={false}
-                      txnId={formStore!.txnId}
-                    />
-                  </PageRenderContextProvider>
+                    <PageRenderContextProvider
+                      data={
+                        props.selectedRule
+                          ? props.selectedRule
+                          : formStore!.formData
+                      }
+                      meta={graph.vertexes[metaVertexId]}
+                      store={repeaterStore}
+                    >
+                      <TableInputField
+                        isNoPermissionCheck={true}
+                        isRealTime={false}
+                        txnId={formStore!.txnId}
+                      />
+                    </PageRenderContextProvider>
                   </div>
                 </div>
               </div>

@@ -34,10 +34,13 @@ export async function findUserByEmail(
 
   const record = result.records[0];
   const user = convertNodeToJson(record.get("u") as Node);
-  const roles = (record.get("roles") as Node[]).map((role) =>
-    convertNodeToJson(role),
-  );
-  let userSetting = convertNodeToJson(record.get("s") as Node);
+  const roles =
+    (record.get("roles") as Node[] | null)?.map((role) =>
+      convertNodeToJson(role),
+    ) || [];
+  let userSetting = record.get("s")
+    ? convertNodeToJson(record.get("s") as Node)
+    : null;
 
   if (user && !userSetting) {
     userSetting = (await createUserSetting(session, user.id)) as Vertex;

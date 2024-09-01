@@ -1,8 +1,8 @@
 import type { JSXElement } from "solid-js";
 
 export type CustomProperty = {
+  key: string;
   label: string;
-  name: string;
 };
 
 export interface Field {
@@ -16,7 +16,7 @@ export interface FormField extends Field {
   hashName?: string;
   hideLabel?: boolean;
   info?: string;
-  name: string;
+  key: string;
   onChange?: (value: any) => void;
   value?: any;
 }
@@ -47,7 +47,7 @@ export interface ColorPickerField extends FormField {
 export interface BoxField extends Field {
   children?: GenericField[];
   componentName: "box";
-  name?: string;
+  key?: string;
 }
 
 export interface AnotherOption {
@@ -123,7 +123,8 @@ export interface StringField extends FormField {
   options: string[];
 }
 
-export interface ArrayField extends Omit<TextFieldOptionsField, "componentName"> {
+export interface ArrayField
+  extends Omit<TextFieldOptionsField, "componentName"> {
   componentName: "array";
 }
 
@@ -153,7 +154,7 @@ export type CSSJSONSchemaSearchType = {
 };
 
 export function createButtonGroupOptions(
-  name: string,
+  key: string,
   label: string,
   iconOptions: { key: string; tooltip?: string; value: string }[],
   isLabelOnTop = true,
@@ -161,8 +162,8 @@ export function createButtonGroupOptions(
   return {
     componentName: "buttonGroups",
     isLabelOnTop,
+    key,
     label,
-    name,
     options: iconOptions.map(({ key, tooltip, value }) => ({
       icon: true,
       key,
@@ -173,19 +174,19 @@ export function createButtonGroupOptions(
 }
 
 export const createGridOptions = (
-  name: string,
+  key: string,
   _label: string,
   children: GenericField[],
 ): BoxField => ({
   children,
   class: "grid ai:center gap:5px|10px grid-template-cols:repeat(2,auto) p:5px",
   componentName: "box",
-  name,
+  key,
   useParentProjection: true,
 });
 
 export function createSelectOptions(
-  name: string,
+  key: string,
   label: string,
   options: ({ label: string; value: string } | string)[] | string[],
   isLabelOnTop = false,
@@ -193,8 +194,8 @@ export function createSelectOptions(
   return {
     componentName: "select",
     isLabelOnTop,
+    key,
     label,
-    name,
     options,
   };
 }

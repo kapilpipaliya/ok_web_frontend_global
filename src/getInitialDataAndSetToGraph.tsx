@@ -14,7 +14,7 @@ export function getInitialDataAndSetToGraph(
     const vertexMap = {} as { [key: string]: Id };
     for (const vertex of Object.values(vertexes)) {
       if (vertex.L[0] === "Comp") {
-        const propName = vertex.P.name;
+        const propName = vertex.P.key;
         const vertexId = vertex.id;
         vertexMap[propName] = vertexId;
       }

@@ -4,7 +4,7 @@ import { For, type JSX, Show } from "solid-js";
 import { SiteTitle } from "~/components/SiteTitle";
 
 export type PageHeaderProps = {
-  breadcrumb: { href?: string; icon?: string; name: string }[];
+  breadcrumb: { href?: string; icon?: string; key: string }[];
   children?: JSX.Element;
   class?: string;
   title: string;
@@ -51,7 +51,7 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                           style={{ color: "rgb(156,163,175)" }}
                         />
                         <span class="ms-1 lh:1.25rem md:ms-2 color:rgb(107,114,128)  color:rgb(156,163,175)@dark  f:0.875rem font-weight:500">
-                          {item.name}
+                          {item.key}
                         </span>
                       </div>
                     }
@@ -71,7 +71,7 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                           class="ms-1 lh:1.25rem md:ms-2 color:rgb(55,65,81)  color:rgb(37,99,235):hover  color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark f:0.875rem font-weight:500"
                           href={item.href}
                         >
-                          {item.name}
+                          {item.key}
                         </a>
                       </div>
                     </li>

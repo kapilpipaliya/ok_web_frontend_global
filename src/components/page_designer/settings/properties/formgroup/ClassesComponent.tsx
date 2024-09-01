@@ -19,11 +19,11 @@ interface ClassesComponentProps {
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
-  const componentName = graph.vertexes[layoutStore.selectedComponent].P.name;
+  const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
   const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
   const classVertices = props.metaAttributes.filter((vertex) =>
-    vertex.P.name.endsWith("Class"),
+    vertex.P.key.endsWith("Class"),
   );
   const metaClasses = [
     graph.vertexes[props.vertexIds.class],
@@ -37,10 +37,10 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   return (
     <>
       <TabsWithUnderline
-        displayValueKey="::'P.displayName'||::'P.name'||::'P.id'||::'label'"
+        displayValueKey="::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         onTabClick={handleTabClick}
         selectedIndex={selectedIndex()}
-        tabs={metaClasses as unknown as { name: string }[]}
+        tabs={metaClasses as unknown as { key: string }[]}
       />
       <Show keyed when={selectedIndex() + 1}>
         <CSSPropertiesEditorWrapper

@@ -14,7 +14,7 @@ function getComponentProperties(
       const key = getSelectionOptions(
         graph,
         setGraph,
-        "->$0Name::'P.name'||::'P.name'",
+        "->$0Name::'P.key'||::'P.key'",
         [curr],
       ).vertexes;
       if (key && curr.P.value !== undefined) {

@@ -1,10 +1,8 @@
-import { toTitle } from "case-switcher-js";
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useRepeaterVertexContext } from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { getId } from "~/components/page_attr_render/utils/getID";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -69,7 +67,6 @@ export function PageAttrRender(
               data={getData()}
               // onChange={props.onChange}
               meta={item}
-              title={toTitle(getId(graph, item) ?? "")}
               txnId={formStore?.txnId}
             />
           );

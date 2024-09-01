@@ -8,20 +8,20 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 export async function supportTicket(
   data: any,
   session: Session,
-  subdomain: string,
+  subDomain: string,
 ) {
   const { action, ...payload } = data;
 
   switch (action) {
     case "chat":
-      // payload: { panel: 'supportTicket',action: 'chat',name, email, subject, message }
-      return await chat(payload, session, subdomain);
+      // payload: { panel: 'supportTicket',action: 'chat',key, email, subject, message }
+      return await chat(payload, session, subDomain);
     case "create":
-      // payload: { panel: 'supportTicket',action: 'create',name, email, subject, message }
+      // payload: { panel: 'supportTicket',action: 'create',key, email, subject, message }
       return await createTicket(payload, session);
     case "delete":
       // payload: { panel: 'supportTicket',action: 'delete',id }
-      return await deleteTicket(payload, session, subdomain);
+      return await deleteTicket(payload, session, subDomain);
     case "getTicktes":
       // payload: { panel: 'supportTicket',action: 'getTicktes', email}
       return await getTicket(payload, session);
@@ -50,13 +50,13 @@ export async function supportTicket(
   }
 
   async function createTicket(payload: any, session: Session) {
-    const { email, message, name, subject } = payload;
+    const { email, key, message, subject } = payload;
 
-    const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) SET n.createdAt = localDateTime() RETURN n;`;
+    const query = `CREATE (n:Support {key: $key, email: $email,subject: $subject, message: $message, status: "pending"}) SET n.createdAt = localDateTime() RETURN n;`;
     await session.run(query, {
       email: email,
+      key: key,
       message: message,
-      name: name,
       subject: subject,
     });
     return {

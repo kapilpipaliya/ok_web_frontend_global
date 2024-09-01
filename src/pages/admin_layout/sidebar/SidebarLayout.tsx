@@ -15,7 +15,7 @@ export interface navbarDataI {
   expanded: boolean;
   href: string;
   id: string;
-  name: string;
+  key: string;
 }
 
 export function Sidebar() {
@@ -58,7 +58,7 @@ export function Sidebar() {
     const searchLower = searchTerm.toLowerCase();
     return data
       .map((item: any) => {
-        if (item.name.toLowerCase().includes(searchLower)) {
+        if (item.key.toLowerCase().includes(searchLower)) {
           return item;
         }
         if (item.children) {

@@ -1,29 +1,24 @@
-import { textFieldInputMeta } from "~/components/constants/textFieldInput";
-
 export const User = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "email",
+      componentName: "SystemString",
+      key: "email",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "pass",
+      componentName: "SystemString",
+      key: "pass",
     },
     {
       collection: "g:'Role'",
       componentName: "TagBox",
-      name: "role",
+      key: "role",
     },
   ],
   isInlineEditable: true,
-  name: "User",
+  key: "User",
   title: "User",
 };

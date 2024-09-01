@@ -3,13 +3,6 @@ import { type Accessor, createMemo, Match, splitProps, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import { DataEditWithCustomDialog } from "~/components/css_properties/components/DataEditWithCustomDialog";
-import { ButtonGroups } from "~/components/css_properties/components/fields/ButtonGroups";
-import { ColorPickerInput } from "~/components/css_properties/components/fields/ColorPickerInput";
-import { Select } from "~/components/css_properties/components/fields/Select";
-import { ToggleButton } from "~/components/css_properties/components/fields/ToggleButton";
-import { FieldWithCustomBox } from "~/components/css_properties/components/FieldWithCustomBox";
-import { BoxField } from "~/components/fields/BoxField";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { useFormContext } from "~/components/form/FormContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -17,32 +10,20 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
-import {
-  useCssEditor,
-} from "../CssEditorContext";
+import { useCssEditor } from "../CssEditorContext";
 import { useCssEditorProps } from "../CSSEditorPropsContext";
 import { RenderContextProvider } from "../RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
+import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
-import { ArrayComponent } from "./fields/textfield_with_unit/ArrayComponent";
-import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { RenderChildren } from "./RenderChildren";
 
-const componentMap: Record<string, any> = {
-  array: ArrayComponent,
-  box: BoxField,
-  buttonGroups: ButtonGroups,
-  colorPicker: ColorPickerInput,
-  dataEditor: DataEditWithCustomDialog,
-  fieldWithCustomProperty: FieldWithCustomBox,
-  select: Select,
-  string: TextFieldWithSelect,
-  textField: TextFieldWithSelect,
-  toggleButton: ToggleButton,
-};
-
 export function DynamicCSSComponent(
-  props: Readonly<{ [key: string]: any; meta: GenericField, projections?: string[] }>,
+  props: Readonly<{
+    [key: string]: any;
+    meta: GenericField;
+    projections?: string[];
+  }>,
 ) {
   const Component = () =>
     componentMap[props.meta.componentName] || NotFoundComponent;
@@ -60,16 +41,12 @@ export function DynamicCSSComponent(
   const cssEditorProps = useCssEditorProps();
 
   const projections = createMemo(
-    () =>
-      props.projections ?? [...(props.meta.projections ?? [])],
+    () => props.projections ?? [...(props.meta.projections ?? [])],
   );
 
   const value = createMemo(() => {
     return (
-      path(
-        [...projections(), (props.meta as FormField).name || ""],
-        cssState,
-      ) ||
+      path([...projections(), (props.meta as FormField).key || ""], cssState) ||
       ""
     );
   });
@@ -81,7 +58,7 @@ export function DynamicCSSComponent(
     if (props.meta.isAddToClass ?? true) {
       // @ts-expect-error projections type is dynamic
       setCssState(...projections(), {
-        [(props.meta as FormField).name]: data,
+        [(props.meta as FormField).key]: data,
       });
     }
 
@@ -124,9 +101,9 @@ export function DynamicCSSComponent(
       P: {
         type: getCssSelectedFileEdgeName(
           cssEditorProps.data.L[0],
-          cssEditorProps.meta.P.name,
+          cssEditorProps.meta.P.key,
           props.projections[0] || "Default",
-          props.meta.name!,
+          props.meta.key!,
         ),
       },
     } as Vertex;

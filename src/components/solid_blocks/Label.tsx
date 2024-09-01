@@ -14,6 +14,7 @@ interface LabeledFieldProps {
   children: JSX.Element;
   inline?: boolean;
   label?: string;
+  layoutClass?: string;
   position?: "bottom" | "left" | "right" | "system" | "top";
   required?: boolean;
 }
@@ -56,6 +57,7 @@ export function Label(
     "position",
     "children",
     "required",
+    "layoutClass",
   ]);
   const resolvedChildren = children(() => local.children);
 
@@ -68,7 +70,7 @@ export function Label(
 
   return (
     <Dynamic
-      class={`${props.inline ? "inline-flex" : "flex"} align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
+      class={`${props.inline ? "inline-flex" : "flex"}  ${local.layoutClass ?? ""} align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
       component={component()}
     >
       <Switch fallback={resolvedChildren()}>

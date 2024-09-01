@@ -9,9 +9,17 @@ export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
     const email = await getUserEmailFromSession();
-    const { user } = await findUserByEmail(dbSession, email);
+    if (!email) {
+      return new Response(
+        JSON.stringify({
+          error: "Not Authorized",
+        }),
+        { status: 401 },
+      );
+    }
+    const data = await findUserByEmail(dbSession, email);
 
-    if (!user) {
+    if (!data.user) {
       return new Response(
         JSON.stringify({
           error: "Not Authorized",
@@ -20,9 +28,9 @@ export async function GET({ request }: APIEvent) {
       );
     }
 
-    delete user.P.password;
+    delete data.user.P.password;
 
-    return user;
+    return data;
   } catch (error: unknown) {
     return new Response(
       error instanceof Error ? error.message : "Unknown error",

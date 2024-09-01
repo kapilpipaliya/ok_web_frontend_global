@@ -1,7 +1,4 @@
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { useGraph } from "../../graph/graph";
@@ -9,15 +6,13 @@ import { useGraph } from "../../graph/graph";
 export const Nav = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "title",
-      onchange: '{"new": ["name","id"]}',
+      componentName: "SystemString",
+      key: "title",
+      onchange: '{"new": ["key","id"]}',
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
       validationRules: [
         {
           message: "ID is required",
@@ -46,26 +41,25 @@ export const Nav = {
       ],
     },
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
-      name: "description",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
+      key: "description",
     },
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
+          componentName: "SystemString",
           displayName: "ID",
-          name: "name",
+          key: "key",
         },
         {
-          attributes: [textFieldTextAreaMeta],
-          componentName: "TextField",
-          name: "definition",
+          class: PROPERTIES.Css.TextField,
+          componentName: "SystemTextArea",
+          key: "definition",
         },
         {
-          componentName: "CheckBox",
-          name: "expanded",
+          componentName: "SystemBoolean",
+          key: "expanded",
         },
         {
           componentName: "SelectBox",
@@ -73,18 +67,17 @@ export const Nav = {
 Form
 Url`,
 
-          name: "func",
+          key: "func",
         },
         {
           collection: "g:'Form'",
           componentName: "SelectBox",
 
-          name: "Form",
+          key: "Form",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "url",
+          componentName: "SystemString",
+          key: "url",
         },
         {
           attributes: [
@@ -92,7 +85,7 @@ Url`,
               collection: "g:'Role'",
               componentName: "SelectBox",
 
-              name: "role",
+              key: "role",
             },
             {
               attributes: [
@@ -100,33 +93,32 @@ Url`,
                   collection: "g:'Perm'",
                   componentName: "SelectBox",
 
-                  name: "perm",
+                  key: "perm",
                 },
               ],
               componentName: "DynamicTable",
-              name: "Perm",
+              key: "Perm",
             },
           ],
           componentName: "DynamicTable",
-          name: "Role",
+          key: "Role",
           tab: "Permission",
         },
         {
           attributes: [
             {
-              attributes: [textFieldInputMeta],
-              componentName: "TextField",
+              componentName: "SystemString",
               displayName: "ID",
-              name: "name",
+              key: "key",
             },
             {
-              attributes: [textFieldTextAreaMeta],
-              componentName: "TextField",
-              name: "definition",
+              class: PROPERTIES.Css.TextField,
+              componentName: "SystemTextArea",
+              key: "definition",
             },
             {
-              componentName: "CheckBox",
-              name: "expanded",
+              componentName: "SystemBoolean",
+              key: "expanded",
             },
             {
               componentName: "SelectBox",
@@ -134,18 +126,17 @@ Url`,
 Form
 Url`,
 
-              name: "func",
+              key: "func",
             },
             {
               collection: "g:'Form'",
               componentName: "SelectBox",
 
-              name: "Form",
+              key: "Form",
             },
             {
-              attributes: [textFieldInputMeta],
-              componentName: "TextField",
-              name: "url",
+              componentName: "SystemString",
+              key: "url",
             },
             {
               attributes: [
@@ -153,7 +144,7 @@ Url`,
                   collection: "g:'Role'",
                   componentName: "SelectBox",
 
-                  name: "role",
+                  key: "role",
                 },
                 {
                   attributes: [
@@ -161,33 +152,32 @@ Url`,
                       collection: "g:'Perm'",
                       componentName: "SelectBox",
 
-                      name: "perm",
+                      key: "perm",
                     },
                   ],
                   componentName: "DynamicTable",
-                  name: "Perm",
+                  key: "Perm",
                 },
               ],
               componentName: "DynamicTable",
-              name: "Role",
+              key: "Role",
               tab: "Permission",
             },
             {
               attributes: [
                 {
-                  attributes: [textFieldInputMeta],
-                  componentName: "TextField",
+                  componentName: "SystemString",
                   displayName: "ID",
-                  name: "name",
+                  key: "key",
                 },
                 {
-                  attributes: [textFieldTextAreaMeta],
-                  componentName: "TextField",
-                  name: "definition",
+                  class: PROPERTIES.Css.TextField,
+                  componentName: "SystemTextArea",
+                  key: "definition",
                 },
                 {
-                  componentName: "CheckBox",
-                  name: "expanded",
+                  componentName: "SystemBoolean",
+                  key: "expanded",
                 },
                 {
                   componentName: "SelectBox",
@@ -195,18 +185,17 @@ Url`,
 Form
 Url`,
 
-                  name: "func",
+                  key: "func",
                 },
                 {
                   collection: "g:'Form'",
                   componentName: "SelectBox",
 
-                  name: "Form",
+                  key: "Form",
                 },
                 {
-                  attributes: [textFieldInputMeta],
-                  componentName: "TextField",
-                  name: "url",
+                  componentName: "SystemString",
+                  key: "url",
                 },
                 {
                   attributes: [
@@ -214,7 +203,7 @@ Url`,
                       collection: "g:'Role'",
                       componentName: "SelectBox",
 
-                      name: "role",
+                      key: "role",
                     },
                     {
                       attributes: [
@@ -222,33 +211,32 @@ Url`,
                           collection: "g:'Perm'",
                           componentName: "SelectBox",
 
-                          name: "perm",
+                          key: "perm",
                         },
                       ],
                       componentName: "DynamicTable",
-                      name: "Perm",
+                      key: "Perm",
                     },
                   ],
                   componentName: "DynamicTable",
-                  name: "Role",
+                  key: "Role",
                   tab: "Permission",
                 },
                 {
                   attributes: [
                     {
-                      attributes: [textFieldInputMeta],
-                      componentName: "TextField",
+                      componentName: "SystemString",
                       displayName: "ID",
-                      name: "name",
+                      key: "key",
                     },
                     {
-                      attributes: [textFieldTextAreaMeta],
-                      componentName: "TextField",
-                      name: "definition",
+                      class: PROPERTIES.Css.TextField,
+                      componentName: "SystemTextArea",
+                      key: "definition",
                     },
                     {
-                      componentName: "CheckBox",
-                      name: "expanded",
+                      componentName: "SystemBoolean",
+                      key: "expanded",
                     },
                     {
                       componentName: "SelectBox",
@@ -256,18 +244,17 @@ Url`,
 Form
 Url`,
 
-                      name: "func",
+                      key: "func",
                     },
                     {
                       collection: "g:'Form'",
                       componentName: "SelectBox",
 
-                      name: "Form",
+                      key: "Form",
                     },
                     {
-                      attributes: [textFieldInputMeta],
-                      componentName: "TextField",
-                      name: "url",
+                      componentName: "SystemString",
+                      key: "url",
                     },
                     {
                       attributes: [
@@ -275,7 +262,7 @@ Url`,
                           collection: "g:'Role'",
                           componentName: "SelectBox",
 
-                          name: "role",
+                          key: "role",
                         },
                         {
                           attributes: [
@@ -283,20 +270,20 @@ Url`,
                               collection: "g:'Perm'",
                               componentName: "SelectBox",
 
-                              name: "perm",
+                              key: "perm",
                             },
                           ],
                           componentName: "DynamicTable",
-                          name: "Perm",
+                          key: "Perm",
                         },
                       ],
                       componentName: "DynamicTable",
-                      name: "Role",
+                      key: "Role",
                       tab: "Permission",
                     },
                   ],
                   componentName: "DynamicTable",
-                  name: "Attr",
+                  key: "Attr",
 
                   tab: "expand",
 
@@ -304,7 +291,7 @@ Url`,
                 },
               ],
               componentName: "DynamicTable",
-              name: "Attr",
+              key: "Attr",
 
               tab: "expand",
 
@@ -312,7 +299,7 @@ Url`,
             },
           ],
           componentName: "DynamicTable",
-          name: "Attr",
+          key: "Attr",
 
           tab: "expand",
 
@@ -320,13 +307,13 @@ Url`,
         },
       ],
       componentName: "DynamicTable",
-      name: "Attr",
+      key: "Attr",
 
       tab: "Attributes",
 
       type: "NavAttr",
     },
   ],
-  name: "Nav",
+  key: "Nav",
   title: "Navigation",
 };

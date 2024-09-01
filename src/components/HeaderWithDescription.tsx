@@ -19,7 +19,7 @@ export function HeaderWithDescription(
     <div
       classList={{
         [`bg:${props.backgroundColor || "rgb(255,255,255)"}`]: true,
-        [`border-color:${props.borderColor || "rgb(229,231,235)"}`]: true,
+        [`border-color:${props.borderColor || "rgb(229,231,235)"}`]: true, // border-gray-200
         [`px:${props.paddingX || "1rem"}`]: true,
         [`px:${props.paddingXSm || "1.5rem"}@sm`]: true,
         [`py:${props.paddingY || "1.25rem"}`]: true,
@@ -28,7 +28,7 @@ export function HeaderWithDescription(
     >
       <h3
         classList={{
-          [`color:${props.titleColor || "rgb(17,24,39)"}`]: true,
+          [`color:${props.titleColor || "rgb(17,24,39)"}`]: true, // text-gray-900
           "f:1rem": true,
           "font-weight:600": true,
           "leading:1.5rem": true,
@@ -39,7 +39,7 @@ export function HeaderWithDescription(
       </h3>
       <p
         classList={{
-          [`color:${props.descriptionColor || "rgb(107,114,128)"}`]: true,
+          [`color:${props.descriptionColor || "rgb(107,114,128)"}`]: true, // text-gray-500
           "f:0.875rem": true,
           "lh:1.25rem": true,
           "mt:0.25rem": true,

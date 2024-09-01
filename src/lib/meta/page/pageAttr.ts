@@ -1,33 +1,30 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { textFieldInputMeta } from "~/components/constants/textFieldInput";
-
 export const pageAttr = [
   {
     collection: "g:'ALL_LABELS'",
     componentName: "SelectBox",
     displayName: "Collection",
-    name: "collection",
+    key: "collection",
     saveValue: true,
   },
   {
     // collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
     componentName: "SelectBox",
-    // displayExpr: "P.displayName||P.name",
-    displayExpr: "$P.displayName ($P.name)",
+    // displayExpr: "P.displayName||P.key",
+    displayExpr: "$P.displayName ($P.key)",
     displayName: "Data",
-    name: "data",
+    key: "data",
   },
   {
-    attributes: [textFieldInputMeta],
-    componentName: "TextField",
+    componentName: "SystemString",
     displayName: "ID",
-    name: "name",
+    key: "key",
   },
   // to load initial data
   {
     componentName: "TagBox",
-    name: "All",
+    key: "All",
     type: "'*'",
   },
   {
@@ -36,19 +33,19 @@ export const pageAttr = [
         collection: "<-$0->$0Comp->$0Prop",
         componentName: "SelectBox",
 
-        displayExpr: "::'P.name'",
-        name: "name",
+        displayExpr: "::'P.key'",
+        key: "key",
       },
       {
         componentName:
-          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'||->$0Name->$0DataType->$0Default::'P.key'",
+        key: "value",
         meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-        name: "value",
       },
     ],
     componentName: "DynamicTable",
     displayName: "Property",
-    name: "Prop",
+    key: "Prop",
   },
   {
     attributes: [
@@ -56,7 +53,7 @@ export const pageAttr = [
         collection: "g:'Role'",
         componentName: "SelectBox",
 
-        name: "role",
+        key: "role",
       },
       {
         attributes: [
@@ -64,20 +61,20 @@ export const pageAttr = [
             collection: "g:'Perm'",
             componentName: "SelectBox",
 
-            name: "perm",
+            key: "perm",
           },
         ],
         componentName: "DynamicTable",
-        name: "Perm",
+        key: "Perm",
       },
     ],
     componentName: "DynamicTable",
-    name: "Role",
+    key: "Role",
   },
   {
     componentName: "DynamicTable",
+    key: "Attr",
     label: "Attr",
-    name: "Attr",
 
     tab: "expand",
     type: "Attr",

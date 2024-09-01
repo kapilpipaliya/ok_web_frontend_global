@@ -3,7 +3,7 @@ import { capitalize, toPascal } from "case-switcher-js";
 import fs from 'fs';
 import path from 'path';
 
-import { generateIndexFile } from './functions/generateIndexFile';
+import { generateIndexFile } from '../functions/generateIndexFile';
 
 async function getNextSiblingDiv(locator: Locator): Promise<Locator> {
     await locator.click();
@@ -59,7 +59,7 @@ async function extractComponentData(page: Page, name: string) {
                         componentName: typeNode ? typeNode.textContent?.trim() || '' : '',
                         default: cells[1].textContent?.trim() || '',
                         description: descriptionNode ? descriptionNode.textContent?.trim() || '' : '',
-                        name: cells[0].textContent?.trim() || ''
+                        key: cells[0].textContent?.trim() || ''
                     };
                 }
                 return null;

@@ -1,29 +1,24 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 
 export const FormCategory: IFormMetaData = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "label",
+      componentName: "SystemString",
+      key: "label",
     },
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
-      name: "description",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
+      key: "description",
     },
   ],
   isInlineEditable: true,
-  name: "FormCategory",
+  key: "FormCategory",
   title: "Form Category",
 };

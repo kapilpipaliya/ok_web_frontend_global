@@ -7,7 +7,7 @@ export async function registerUserCall(formData: any) {
   return await postAPI(API.signUpUrl, {
     email: formData().email.toLowerCase(),
     password: formData().password,
-    subdomain: formData().subdomain,
+    subDomain: formData().subDomain,
     username: formData().username.toLowerCase(),
   });
 }

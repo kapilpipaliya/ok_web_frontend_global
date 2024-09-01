@@ -28,7 +28,7 @@ export function TreeItemContent(
         metaVertexId={props.item.id}
         toggleExpand={props.toggleExpand}
       />
-      {props.item.P.name}
+      {props.item.P.key}
     </div>
   );
 }

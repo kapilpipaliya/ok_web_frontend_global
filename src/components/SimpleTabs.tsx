@@ -8,7 +8,7 @@ export function TabsWithUnderline(
     displayValueKey: string;
     onTabClick: (index: number) => void;
     selectedIndex: number;
-    tabs: Array<{ name: string }>;
+    tabs: Array<{ key: string }>;
   }>,
 ) {
   const getOptionLabel = (option: any) => {
@@ -31,7 +31,6 @@ export function TabsWithUnderline(
         <select
           class="lh:1.5rem lh:1.25rem@sm border-color:rgb(209,213,219) border-color:rgb(99,102,241):focus border-radius:0.375rem display:block outline-offset:2px:focus outline:2px|solid|transparent pl:0.75rem pr:2.5rem py:0.5rem width:100%"
           id="tabs"
-          name="tabs"
           onChange={(e) => props.onTabClick(e.currentTarget.selectedIndex)}
           value={props.selectedIndex}
         >

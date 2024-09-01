@@ -1,4 +1,4 @@
-import { int, Transaction, type Session } from "neo4j-driver";
+import { int, type Session, type Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -127,7 +127,7 @@ function buildQuery(
         if (Array.isArray(filter) && filter.length > 0) {
           const filterConditions = filter
             .map((condition, index) => {
-              if (typeof condition === 'object' && condition !== null) {
+              if (typeof condition === "object" && condition !== null) {
                 return Object.keys(condition)
                   .map((key) => `n.${key} = $${key}_${index}`)
                   .join(" AND ");
@@ -136,7 +136,7 @@ function buildQuery(
             .join(" AND ");
           query += ` WHERE ${filterConditions}`;
           params = filter.reduce((acc, condition, index) => {
-            if (typeof condition === 'object' && condition !== null) {
+            if (typeof condition === "object" && condition !== null) {
               Object.keys(condition).forEach((key) => {
                 acc[`${key}_${index}`] = condition[key];
               });
@@ -160,7 +160,7 @@ function buildQuery(
         }
         query += " RETURN n";
       } else {
-        params = { name: name };
+        params = { key: key };
       }
     }
   } else if (relationType === "id") {

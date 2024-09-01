@@ -1,7 +1,10 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createRootFolder } from "~/cypher/mutate/signup/createRootFolder";
 import { createSuperUser } from "~/cypher/mutate/user/createSuperUser";
+
+import { superUserData } from "../../../../tests/auth/data/signUpData";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -16,11 +19,14 @@ export async function GET({ request }: APIEvent) {
       );
     }
 
-    const email = "superuser@easyformforge.com";
-    const username = "superuser";
-    const password = "kK11235813@";
+    const user = await createSuperUser(
+      superUserData.email,
+      superUserData.username,
+      superUserData.password,
+      dbSession,
+    );
+    await createRootFolder(dbSession);
 
-    const user = await createSuperUser(email, username, password, dbSession);
     return user;
   } catch (error: unknown) {
     return new Response(

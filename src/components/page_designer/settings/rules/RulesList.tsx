@@ -102,7 +102,7 @@ export function RulesList() {
               removed from all places where it is used.
             </p>
             <For each={ruleUsage()}>
-              {(id) => <div>{graph.vertexes[id].P.name}</div>}
+              {(id) => <div>{graph.vertexes[id].P.key}</div>}
             </For>
           </div>
         </SimpleWithDismissButton>
@@ -122,7 +122,7 @@ export function RulesList() {
             onMouseLeave={() => unhighlightRule()}
           >
             <span class="flex:1">
-              {rule.P.name} ({ruleUsageCount(rule).length} usage
+              {rule.P.key} ({ruleUsageCount(rule).length} usage
               {ruleUsageCount(rule).length > 1 ? "s" : ""})
             </span>
             <div class="flex gap:2">

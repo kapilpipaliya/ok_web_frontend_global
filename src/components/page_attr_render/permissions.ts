@@ -41,7 +41,7 @@ export function hasPermissions(
   for (const r of configuredPermissions) {
     const allRolePermissions: Vertex[] =
       evalExpression("->$0Perm", { graph, setGraph, vertexes: [r] }) || [];
-    if (allRolePermissions.some((p) => p.P.name === permission)) {
+    if (allRolePermissions.some((p) => p.P.key === permission)) {
       return true;
     }
   }

@@ -3,7 +3,7 @@ export const Popover = [
     "componentName": "Placement",
     "default": "'bottom'",
     "description": "The initial placement of the popover.",
-    "name": "placement",
+    "key": "placement",
     "corvu": true,
     "hashName": "Root"
   },
@@ -11,7 +11,7 @@ export const Popover = [
     "componentName": "Strategy",
     "default": "'absolute'",
     "description": "The strategy to use when positioning the popover.",
-    "name": "strategy",
+    "key": "strategy",
     "corvu": true,
     "hashName": "Root"
   },
@@ -19,7 +19,7 @@ export const Popover = [
     "componentName": "FloatingOptions | null",
     "default": "{ flip: true, shift: true }",
     "description": "Floating options of the popover.",
-    "name": "floatingOptions",
+    "key": "floatingOptions",
     "corvu": true,
     "hashName": "Root"
   }
@@ -30,7 +30,7 @@ export const PopoverAnchor = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Anchor"
   },
@@ -38,7 +38,7 @@ export const PopoverAnchor = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the popover context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Anchor"
   }
@@ -49,7 +49,7 @@ export const PopoverArrow = [
     "componentName": "number",
     "default": "16",
     "description": "Size of the arrow in px.",
-    "name": "size",
+    "key": "size",
     "corvu": true,
     "hashName": "Arrow"
   },
@@ -57,7 +57,7 @@ export const PopoverArrow = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Arrow"
   },
@@ -65,7 +65,7 @@ export const PopoverArrow = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the popover context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Arrow"
   }

@@ -6,7 +6,7 @@ import type { TransactionValue } from "~/lib/graph/transaction/TransactionType";
 
 export type Id = string;
 
-export const IdAttr = "name";
+export const IdAttr = "key";
 
 export interface Vertex {
   id: Id;
@@ -50,7 +50,7 @@ export interface TransactionDetail {
 }
 
 export interface GraphInterface {
-  activeClickOutside: number;
+  activeClickOutside: string[];
   APP_BASE_URL: string;
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;

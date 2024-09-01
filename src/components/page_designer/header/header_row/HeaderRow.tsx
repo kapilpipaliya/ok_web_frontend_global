@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 
 import { FormContext } from "~/components/form/FormContext";
+import { DropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
@@ -44,6 +45,7 @@ export function HeaderRow() {
         </Show>
         <PreviewButton />
         <ExportSection />
+        <DropdownMenuDisplay />
       </div>
     </header>
   );

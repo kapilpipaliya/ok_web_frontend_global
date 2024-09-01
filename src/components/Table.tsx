@@ -124,8 +124,8 @@ export function CommonTable(props: Readonly<TableProps>) {
     props.headers.filter(
       (header) =>
         !(
-          ["Actions", "name"].includes(header.header) ||
-          ["Actions", "name"].includes(header.name)
+          ["Actions", "key"].includes(header.header) ||
+          ["Actions", "key"].includes(header.key)
         ),
     );
 
@@ -178,7 +178,7 @@ export function CommonTable(props: Readonly<TableProps>) {
               {(row) => (
                 <CardContainer>
                   <CardHeaderContainer>
-                    <CardHeader title={row.P.name} />
+                    <CardHeader title={row.P.key} />
                     <Show
                       when={
                         isMultiRowSelectionEnabled(row) ||

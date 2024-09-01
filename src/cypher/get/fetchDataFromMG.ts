@@ -16,16 +16,19 @@ export async function fetchDataFromMG(
     relationships: {} as { [key: string]: any },
     vertexes: undefined as any,
   },
+  permissionCheck = true,
 ): Promise<ServerResult> {
   "use server";
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
 
-  const authorizationError = await checkSuperUserAuthorization(
-    subDomain,
-    dbSession,
-  );
-  if (authorizationError) {
-    return authorizationError;
+  if (permissionCheck) {
+    const authorizationError = await checkSuperUserAuthorization(
+      subDomain,
+      dbSession,
+    );
+    if (authorizationError) {
+      return authorizationError;
+    }
   }
   try {
     const mainResult = await evalExpressionAsync(

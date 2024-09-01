@@ -6,20 +6,20 @@ import { generateTextShadow } from "./generate/generateTextShadow";
 import { generateTransform } from "./generate/generateTransform";
 import { generateTransition } from "./generate/generateTransition";
 
-export function arrayToString(name: string, arr: any[]): string {
-  if (name === "box-shadow") {
+export function arrayToString(key: string, arr: any[]): string {
+  if (key === "box-shadow") {
     return generateBoxShadow(arr);
   }
-  if (name === "text-shadow") {
+  if (key === "text-shadow") {
     return generateTextShadow(arr);
   }
-  if (name === "filter") {
+  if (key === "filter") {
     return generateFilter(arr);
   }
-  if (name === "transition") {
+  if (key === "transition") {
     return generateTransition(arr);
   }
-  if (name === "transform") {
+  if (key === "transform") {
     return generateTransform(arr);
   }
   return arr

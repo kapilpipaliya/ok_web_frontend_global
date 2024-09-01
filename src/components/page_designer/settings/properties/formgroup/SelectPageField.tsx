@@ -19,7 +19,7 @@ export function SelectPageField(
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     return (
       <div class="flex ai:center gap:4">
-        <span>{option.P.name}</span>
+        <span>{option.P.key}</span>
         <IconButton
           icon={"mingcute:settings-5-line"}
           iconClass={"opacity:.5 opacity:1:hover"}
@@ -39,7 +39,7 @@ export function SelectPageField(
       collection: `g:'ThankYouPage'`,
       componentName: "SelectBox",
       displayName: props.meta.P.displayName,
-      name: props.meta.P.name,
+      key: props.meta.P.key,
       renderLabel: RenderLabel,
     },
   } as unknown as Vertex;
@@ -52,6 +52,7 @@ export function SelectPageField(
         isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
+        noLabel
         txnId={layoutStore.formStore[0].txnId}
       />
     );

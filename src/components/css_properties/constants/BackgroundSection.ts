@@ -12,18 +12,18 @@ export const BackgroundSection = {
   background: {
     componentName: "string",
     label: "Background",
-    name: "background",
+    key: "background",
     options: [...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundColor: {
     componentName: "colorPicker",
     label: "Color",
-    name: "background-color",
+    key: "background-color",
   } as ColorPickerField,
   backgroundImage: {
     componentName: "string",
     label: "Image",
-    name: "background-image",
+    key: "background-image",
     options: [...extraPropertyValues["background-image"].values],
     showFilePicker: true,
   } as TextFieldOptionsField,
@@ -31,7 +31,7 @@ export const BackgroundSection = {
   backgroundRepeat: {
     componentName: "string",
     label: "Repeat",
-    name: "background-repeat",
+    key: "background-repeat",
     options: [
       "repeat",
       "repeat-x",
@@ -43,11 +43,11 @@ export const BackgroundSection = {
   backgroundPosition: {
     componentName: "fieldWithCustomProperty",
     label: "Position",
-    name: "background-position",
+    key: "background-position",
     options: ["top", "bottom", "left", "right", "center", ...CSSWideKeywords],
     customProperty: [
-      { label: "Position X", name: "background-position-x" },
-      { label: "Position Y", name: "background-position-y" },
+      { label: "Position X", key: "background-position-x" },
+      { label: "Position Y", key: "background-position-y" },
     ],
     gridType: "repeat(1,auto)",
     mainFieldType: "string",
@@ -55,13 +55,13 @@ export const BackgroundSection = {
   backgroundSize: {
     componentName: "string",
     label: "Size",
-    name: "background-size",
+    key: "background-size",
     options: ["auto", "cover", "contain", ...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundAttachment: {
     componentName: "string",
     label: "Attachment",
-    name: "background-attachment",
+    key: "background-attachment",
     options: ["scroll", "fixed", "local", ...CSSWideKeywords],
   } as TextFieldOptionsField,
   backgroundOrigin: createSelectOptions("background-origin", "Origin", [
@@ -80,7 +80,7 @@ export const BackgroundSection = {
   backgroundBlendMode: {
     componentName: "string",
     label: "Blend Mode",
-    name: "background-blend-mode",
+    key: "background-blend-mode",
     options: [
       "normal",
       "multiply",

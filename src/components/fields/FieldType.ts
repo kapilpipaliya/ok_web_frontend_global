@@ -14,4 +14,4 @@ export interface GenericComponentProps {
   value?: any;
 }
 
-export type DisplayComponentProps = {}
+export type DisplayComponentProps = {};

@@ -3,206 +3,192 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 
 export const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.
   collection: "g:'Folder'",
   componentName: "SelectBox",
   displayName: "Parent Folder",
-  name: "ParentFolder",
+  key: "ParentFolder",
   type: "ParentFolder",
   validation: { required: true },
 };
 
 export const File: IFormMetaData = {
   attributes: [
-    // The name of the file as it was uploaded, including the file extension (e.g., document.pdf).
+    // The key of the file as it was uploaded, including the file extension (e.g., document.pdf).
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       displayName: "File Name",
-      name: "name",
+      key: "key",
     },
     // The size of the file in bytes, kilobytes, megabytes, etc.
     {
       componentName: "NumberBox",
       disabled: true,
       displayName: "File Size (bytes)",
-      name: "fileSize",
+      key: "fileSize",
     },
     // The MIME type of the file (e.g., image/jpeg, application/pdf). This helps in identifying the file format and handling it appropriately.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "File Type",
-      name: "fileType",
+      key: "fileType",
     },
     // The date and time when the file was uploaded. This can help track the age of files and manage storage space.
     {
       componentName: "DateBox",
       disabled: true,
       displayName: "Upload Date",
-      name: "uploadDate",
+      key: "uploadDate",
     },
     // Information about the user who uploaded the file, such as a user ID or username.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Uploader",
-      name: "uploader",
+      key: "uploader",
     },
     // The location of the file in your storage system, which could be a file path (for on-premises storage) or a URL (for cloud storage).
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "File Path",
-      name: "filePath",
+      key: "filePath",
     },
     // A brief description or notes about the file, which can provide context or additional details.
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
       displayName: "Description",
-      name: "description",
+      key: "description",
     },
     // A checksum or hash value (e.g., MD5, SHA-256) for verifying the file's integrity. This can ensure the file hasn't been altered or corrupted.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Checksum",
-      name: "checksum",
+      key: "checksum",
     },
     // Tags or categories assigned to the file, which can help in organizing and searching files.
     {
       componentName: "TagBox",
       disabled: true,
       displayName: "Tags",
-      name: "tags",
+      key: "tags",
     },
     // If your system supports versioning, this would indicate the version of the file.
     {
       componentName: "NumberBox",
       disabled: true,
       displayName: "Version",
-      name: "version",
+      key: "version",
     },
     // A URL to a thumbnail image for visual files (e.g., images, videos). This can be used for quick previews.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Thumbnail URL",
-      name: "thumbnailUrl",
+      key: "thumbnailUrl",
     },
     // If applicable, an expiration date for temporary files, after which they may be automatically deleted.
     {
       componentName: "DateBox",
       disabled: true,
       displayName: "Expiration Date",
-      name: "expirationDate",
+      key: "expirationDate",
     },
     parentDirectory,
   ],
   isInlineEditable: false,
-  name: "File",
+  key: "File",
   title: "File",
 };
 export const Folder: IFormMetaData = {
   attributes: [
-    // The name of the directory.
+    // The key of the directory.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       displayName: "Directory Name",
-      name: "name",
+      key: "key",
     },
     // The date and time when the directory was created.
     {
       componentName: "DateBox",
       disabled: true,
       displayName: "Creation Date",
-      name: "creationDate",
+      key: "creationDate",
     },
     // Information about the user who created the directory.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Creator",
-      name: "creator",
+      key: "creator",
     },
     // The location of the directory in your storage system.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Directory Path",
-      name: "directoryPath",
+      key: "directoryPath",
     },
     // A brief description or notes about the directory.
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
       displayName: "Description",
-      name: "description",
+      key: "description",
     },
     // Tags or categories assigned to the directory.
-    { componentName: "TagBox", displayName: "Tags", name: "fileTag" },
+    { componentName: "TagBox", displayName: "Tags", key: "fileTag" },
     // The number of files in the directory.
     {
       componentName: "NumberBox",
       disabled: true,
       displayName: "File Count",
-      name: "fileCount",
+      key: "fileCount",
     },
     parentDirectory,
   ],
   isInlineEditable: false,
-  name: "Folder",
+  key: "Folder",
   title: "Folder",
 };
 
 export const FileTag: IFormMetaData = {
   attributes: [
-    // The name of the tag.
+    // The key of the tag.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       displayName: "Tag Name",
-      name: "name",
+      key: "key",
     },
     // A brief description or notes about the tag.
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
       displayName: "Description",
-      name: "description",
+      key: "description",
     },
     // The date and time when the tag was created.
     {
       componentName: "DateBox",
       disabled: true,
       displayName: "Creation Date",
-      name: "creationDate",
+      key: "creationDate",
     },
     // Information about the user who created the tag.
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
+      componentName: "SystemString",
       disabled: true,
       displayName: "Creator",
-      name: "creator",
+      key: "creator",
     },
   ],
   isInlineEditable: false,
-  name: "FileTag",
+  key: "FileTag",
   title: "File Tag",
 };

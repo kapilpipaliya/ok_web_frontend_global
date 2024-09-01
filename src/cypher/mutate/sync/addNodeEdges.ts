@@ -20,7 +20,7 @@ export async function addNodeEdges(
   outLabel: string,
   inward: boolean,
 ): Promise<Vertex[]> {
-  // Find children with the same name in the target database; if not exists, create a node and edge.
+  // Find children with the same key in the target database; if not exists, create a node and edge.
   const userChildrenVertexes = await getChildrenOrParentVertex(
     sessionTarget,
     parentVertex.id,
@@ -33,7 +33,7 @@ export async function addNodeEdges(
 
   for (const superVertex of superChildrenVertexes) {
     const existingChild = userChildrenVertexes.find(
-      (childVertex) => superVertex.P.name === childVertex.P.name,
+      (childVertex) => superVertex.P.key === childVertex.P.key,
     );
 
     if (existingChild) {

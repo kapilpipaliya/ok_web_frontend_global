@@ -11,7 +11,7 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () =>
-    getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
+    getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
   return (
     <span class="position:relative ">
       <div

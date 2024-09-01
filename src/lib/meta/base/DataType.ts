@@ -1,28 +1,24 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { textFieldInputMeta } from "~/components/constants/textFieldInput";
-
 export const DataType: IFormMetaData = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "label",
+      componentName: "SystemString",
+      key: "label",
     },
     {
       collection: "g:'Comp'",
       componentName: "SelectBox",
       displayName: "Default Component",
 
-      name: "default",
+      key: "default",
     },
   ],
   isInlineEditable: true,
-  name: "DataType",
+  key: "DataType",
   title: "DataType",
 };

@@ -35,7 +35,7 @@ export interface ValidationConfigType {
 
 export function ValidationConfig(props: Readonly<ValidationProps>) {
   const rules =
-    validations[props.componentMeta.P.name as keyof typeof validations]?.split(
+    validations[props.componentMeta.P.key as keyof typeof validations]?.split(
       "|",
     ) || [];
   const [values, setValues] = createStore<ValidationConfigType>(

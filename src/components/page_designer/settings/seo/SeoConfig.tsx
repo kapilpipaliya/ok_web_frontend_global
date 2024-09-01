@@ -4,18 +4,14 @@ import { createUniqueId, For, Match, onCleanup, Switch } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
+import { PROPERTIES } from "../../../constants/constant";
 import { useDesignerLayoutStore } from "../../LayoutContext";
-import { PROPERTIES } from "../properties/constant";
 import { Label } from "../properties/formgroup/Label";
 
 export function SEOFormGroupProperties() {
@@ -86,23 +82,21 @@ function createVertices(
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
     {
-      attributes: [textFieldInputMeta],
       id: vertexIds.seoTitle,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemString",
         displayName: "SEO Title",
-        name: "seoTitle",
+        key: "seoTitle",
       },
     },
     {
-      attributes: [textFieldTextAreaMeta],
       id: vertexIds.seoDescription,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "TextField",
+        componentName: "SystemTextArea",
         displayName: "SEO Description",
-        name: "seoDescription",
+        key: "seoDescription",
       },
     },
   ];

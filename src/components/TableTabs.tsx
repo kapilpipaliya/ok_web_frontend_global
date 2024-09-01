@@ -11,7 +11,7 @@ interface TableTabProps {
 export function TableTabs(props: Readonly<TableTabProps>) {
   const [currentTab, setCurrentTab] = createSignal<string>(props.tabs[0]);
 
-  const dynamicIcon = (name: string) => {
+  const dynamicIcon = (key: string) => {
     const icons: { [key: string]: string } = {
       Attribute: "carbon:data-1",
       Events: "codicon:symbol-method",
@@ -21,8 +21,8 @@ export function TableTabs(props: Readonly<TableTabProps>) {
       Transform: "icon-park-outline:transform",
       "Unique Constrain": "material-symbols:inbox-customize-outline",
     };
-    return icons[name] ? (
-      <Icon height={22} icon={icons[name]} width={22} />
+    return icons[key] ? (
+      <Icon height={22} icon={icons[key]} width={22} />
     ) : (
       <div />
     );

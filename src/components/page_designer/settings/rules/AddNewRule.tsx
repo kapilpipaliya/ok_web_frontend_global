@@ -25,11 +25,11 @@ export function AddNewRule(
     revertTransaction(metaTxnId, graph);
   });
 
-  const addNewState = (name: string) => {
+  const addNewState = (key: string) => {
     const rulesMetaVertexId = graph.newVertexId;
 
     const metaAttribute = FormMetaData.Form.attributes.find(
-      (x) => x.name === "Rule",
+      (x) => x.key === "Rule",
     )!;
     addNewVertex(
       metaTxnId,
@@ -45,14 +45,14 @@ export function AddNewRule(
       false,
       graph,
       setGraph,
-      { name },
+      { key },
     );
 
     const rule = graph.vertexes[rowResult!.vertexId!];
 
     const condMetaVertexId = graph.newVertexId;
     const condMetaAttribute = metaAttribute.attributes!.find(
-      (x) => x.name === "cond",
+      (x) => x.key === "cond",
     )!;
     addNewVertex(
       metaTxnId,
@@ -78,7 +78,7 @@ export function AddNewRule(
       addNewState={addNewState}
       label="Enter Rule Name"
       onClose={props.onClose}
-      placeholder="Enter Rule name"
+      placeholder="Enter Rule key"
       title="Add New Rule"
     >
       <Show when={selectedRule()}>

@@ -1,7 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, Show } from "solid-js";
 
+import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
+import { ZIndex } from "~/components/ZIndex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
@@ -93,31 +95,35 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           <Icon
             height={24}
             icon={
-              iconMap[props.child?.P.name as keyof typeof iconMap] ??
+              iconMap[props.child?.P.key as keyof typeof iconMap] ??
               "material-symbols:widgets-outline-rounded"
             }
             width={24}
           />
         </Show>
-        <span class="font-size:14px">
-          {props.child?.P.label || props.child?.P.name}
+        <span
+          class={`${getDynamicComponent(props.child?.P.key) ? "" : "color:red"} font-size:14px`}
+        >
+          {props.child?.P.label || props.child?.P.key}
         </span>
       </div>
       <Show when={showPreview()}>
-        <ComponentPreview
-          item={props.child}
-          onClose={() => setShowPreview(false)}
-          onMouseLeave={(event) => {
-            if (
-              previewCSSRef &&
-              !previewCSSRef.contains(event.relatedTarget as Node)
-            ) {
-              setShowPreview(false);
-            }
-          }}
-          parentRef={previewCSSRef!}
-          ref={setFloating}
-        />
+        <ZIndex>
+          <ComponentPreview
+            item={props.child}
+            onClose={() => setShowPreview(false)}
+            onMouseLeave={(event) => {
+              if (
+                previewCSSRef &&
+                !previewCSSRef.contains(event.relatedTarget as Node)
+              ) {
+                setShowPreview(false);
+              }
+            }}
+            parentRef={previewCSSRef!}
+            ref={setFloating}
+          />
+        </ZIndex>
       </Show>
     </ComponentItemContainer>
   );

@@ -8,7 +8,7 @@ interface TreeNode {
   children?: TreeNode[];
   expanded: boolean;
   id: string;
-  name: string;
+  key: string;
   P: any;
 }
 
@@ -48,15 +48,15 @@ export async function getTreeDataMGCall(
       for (const child of (children || []).sort(
         (a: Vertex, b: Vertex) => a.P.pos - b.P.pos,
       )) {
-        const name =
+        const key =
           levels?.nameExpr?.(child) ||
           options?.nameExpr?.(child) ||
-          child.P.name;
+          child.P.key;
 
         const navItem: TreeNode = {
           expanded: true,
           id: child.id,
-          name,
+          key,
           P: child.P,
         };
 

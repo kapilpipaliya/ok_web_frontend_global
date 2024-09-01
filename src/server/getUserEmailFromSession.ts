@@ -1,9 +1,9 @@
 import { getHttpsSession } from "~/server/getHttpsSession";
 
-export async function getUserEmailFromSession(): Promise<string> {
+export async function getUserEmailFromSession(): Promise<null | string> {
   const httpSession = await getHttpsSession();
   if (!httpSession.data.email) {
-    throw new Error("Session is not authorized");
+    return null;
   }
   return httpSession.data.email;
 }

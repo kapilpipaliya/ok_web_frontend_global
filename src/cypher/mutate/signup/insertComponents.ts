@@ -1,20 +1,27 @@
-import type { Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { componentsMap } from "~/components/form/functions/getDynamicComponent";
 
-export async function insertComponents(
-  transaction: Transaction,
-): Promise<void> {
-  const query = `
-    UNWIND $keys AS key
-    MERGE (k:Key {name: key})
-    RETURN k;
-  `;
+import { getComponentTree } from "../sync/component_tree/convertToJson";
+import { insertComponentTree } from "../sync/component_tree/insertComonentTree";
 
-  try {
-    await transaction.run(query, { keys: Object.keys(componentsMap) });
-  } catch (error) {
-    console.error("Error inserting data types:", error);
-    throw error; // Re-throw the error to ensure the transaction is properly rolled back if needed
+export async function insertComponents(superTx: Session | Transaction) {
+  const response = await insertComponentTree(superTx, getComponentTree());
+  if (!response.success) {
+    return response;
   }
+
+  const componentTree = {
+    children: Object.keys(componentsMap).map((key) => ({
+      children: [],
+      Component: key,
+    })),
+    Component: "Root",
+  };
+  const response2 = await insertComponentTree(superTx, [componentTree]);
+  if (!response2.success) {
+    return response2;
+  }
+
+  return { success: true };
 }

@@ -62,7 +62,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"
             >
-              {item.P.name}
+              {item.P.key}
               {index() < breadcrumb().length - 1 && " / "}
             </button>
           )}

@@ -5,10 +5,12 @@ import { createSignal, type JSX } from "solid-js";
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/Toast";
 import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
+
+import { handleLoginRedirect } from "./handleLoginRedirect";
 
 export function SignUp(): JSX.Element {
   const [graph, setGraph] = useGraph();
@@ -19,7 +21,7 @@ export function SignUp(): JSX.Element {
     email: "",
     loginType: "signup",
     password: "",
-    subdomain: "",
+    subDomain: "",
     username: "",
   });
 
@@ -53,9 +55,7 @@ export function SignUp(): JSX.Element {
         },
         onSuccess: (value) => {
           setGraph("isLoadingPage", false);
-          if (value != null && value.id !== null) {
-            navigate(`${graph.APP_BASE_URL}/Page`);
-          }
+          handleLoginRedirect(value as Vertex, graph, navigate);
         },
         promise: registerUserCall(formData),
         successMessage: "Registered Successfully",
@@ -106,12 +106,12 @@ export function SignUp(): JSX.Element {
           <div class="grid gap:0|10 grid-template-columns:1fr|50%">
             <InputField
               label="Sub Domain"
-              name="subdomain"
+              name="subDomain"
               onInput={(e) =>
-                setFormData({ ...formData(), subdomain: e.target.value })
+                setFormData({ ...formData(), subDomain: e.target.value })
               }
               placeholder="Enter SubDomain"
-              value={formData().subdomain}
+              value={formData().subDomain}
             />
             <InputField
               label="Username"

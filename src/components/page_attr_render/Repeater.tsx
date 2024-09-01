@@ -13,7 +13,10 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { getInitialPageRenderStore, usePageRenderContext } from "./PageRenderContext";
+import {
+  getInitialPageRenderStore,
+  usePageRenderContext,
+} from "./PageRenderContext";
 
 export const Repeater = () => {
   const [graph, setGraph] = useGraph();

@@ -12,6 +12,8 @@ import {
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
+import { uniqueNameKey } from "../../constant";
+
 export function getRowProps(
   fromVertex: Vertex,
   txnId: number,
@@ -24,7 +26,7 @@ export function getRowProps(
   const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {
     id: 0,
   } as unknown as Vertex);
-  return { ...props, name: uniqueName };
+  return { ...props, [uniqueNameKey]: uniqueName };
 }
 
 export function processChildrenAttrs(

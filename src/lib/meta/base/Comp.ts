@@ -1,14 +1,11 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 export const parentCompAttribute = {
   collection: "g:'Comp'",
   componentName: "SelectBox",
   displayName: "Parent Component",
-  name: "ParentComp",
+  key: "ParentComp",
   type: "ParentComp",
   // validation: { required: true },
 };
@@ -19,18 +16,16 @@ export const Comp: IFormMetaData = {
       componentName: "SelectBox",
 
       inward: true,
-      name: "category",
+      key: "category",
       parentLabel: "CompCategory",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "label",
+      componentName: "SystemString",
+      key: "label",
     },
     {
       childLabel: "Child",
@@ -39,7 +34,7 @@ export const Comp: IFormMetaData = {
 
       displayName: "Parent Component",
       inward: true,
-      name: "parent",
+      key: "parent",
       parentLabel: "Comp",
     },
     {
@@ -48,93 +43,90 @@ export const Comp: IFormMetaData = {
       displayName: "DataType",
 
       inward: true,
-      name: "dataType",
+      key: "dataType",
       parentLabel: "DataType",
     },
     {
-      componentName: "CheckBox",
+      componentName: "SystemBoolean",
       displayName: "Children",
-      name: "child",
+      key: "child",
     },
     // {
-    //   componentName: "CheckBox",
+    //   componentName: "SystemBoolean",
     //   displayName: "Hidden",
-    //   name: "hide",
+    //   key: "hide",
     // },
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
-      name: "description",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
+      key: "description",
     },
     parentCompAttribute,
-    // TODO: add validation, duplicate row with same name is not allowed.
+    // TODO: add validation, duplicate row with same key is not allowed.
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "name",
+          componentName: "SystemString",
+          key: "key",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "type",
+          componentName: "SystemString",
+          key: "type",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "default",
+          componentName: "SystemString",
+          key: "default",
         },
         // {
         //   collection: "g:'DataType'",
         //   componentName: "SelectBox",
-        //   name: "dataType",
+        //   key: "dataType",
         //   onchange: '["Comp",null]',
         // },
         // {
         //   collection: "->$0DataType->$0Comp",
         //   componentName: "SelectBox",
         //   displayName: "Component",
-        //   name: "Comp",
+        //   key: "Comp",
         // },
         // {
         //   collection: "g:'CompExample'",
         //   componentName: "SelectBox",
         //   displayName: "Comp Example",
-        //   name: "CompExample",
+        //   key: "CompExample",
         // },
         // {
         //   attributes: [
         //     {
         //       collection: "<-$0->$0Comp->$0Prop",
         //       componentName: "SelectBox",
-        //       displayExpr: "::'P.name'",
-        //       name: "name",
+        //       displayExpr: "::'P.key'",
+        //       key: "key",
         //     },
         //     {
         //       componentName:
-        //         "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+        //         "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
         //       meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
-        //       name: "value",
+        //       key: "value",
         //     },
         //   ],
         //   componentName: "DynamicTable",
         //   displayName: "Value Property",
-        //   // TODO: Be sure the name is ok, it will not change in production.
-        //   name: "valueProp",
+        //   // TODO: Be sure the key is ok, it will not change in production.
+        //   key: "valueProp",
         //   tab: "Properties",
         // },
         // {
         //   componentName:
-        //     "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
+        //     "->$0Comp<-CompChild::'P.key'||->$0Comp::'P.key'||->$0DataType->$0Default::'P.key'",
         //   meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
-        //   name: "value",
-        //   // componentName: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
+        //   key: "value",
+        //   // componentName: "->$0Comp<-CompChild::'P.key'||->$0Comp::'P.key'||->$0DataType->$0Default::'P.key'||defaultComp|->$0DataType::'P.key'",
         // },
         {
-          attributes: [textFieldTextAreaMeta],
-          componentName: "TextField",
-          name: "description",
+          class: PROPERTIES.Css.TextField,
+          componentName: "SystemTextArea",
+          key: "description",
           // autoResizeEnabled: true,
           width: "550px",
         },
@@ -143,7 +135,7 @@ export const Comp: IFormMetaData = {
         //   class: "border-color:#FF0000 color:#FF0000",
 
         //   componentName: "Button",
-        //   name: "reset",
+        //   key: "reset",
         //   variant: "outlined",
         //   // TODO:
         //   // function: "reset",
@@ -151,36 +143,34 @@ export const Comp: IFormMetaData = {
         // },
       ],
       componentName: "DynamicTable",
-      name: "Prop",
+      key: "Prop",
       tab: "Properties",
     },
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "name",
+          componentName: "SystemString",
+          key: "key",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "label",
+          componentName: "SystemString",
+          key: "label",
         },
         {
-          attributes: [textFieldTextAreaMeta],
-          componentName: "TextField",
-          name: "description",
+          class: PROPERTIES.Css.TextField,
+          componentName: "SystemTextArea",
+          key: "description",
 
           // autoResizeEnabled: true,
           width: "550px",
         },
       ],
       componentName: "DynamicTable",
-      name: "Event",
+      key: "Event",
       tab: "Events",
     },
   ],
   isInlineEditable: false,
-  name: "Comp",
+  key: "Comp",
   title: "Component",
 };

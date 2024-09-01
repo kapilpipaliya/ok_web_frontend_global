@@ -13,7 +13,7 @@ export function modifyFieldMetaAllFields(
   layoutStore: PageLayoutObject,
   ignoreTable?: boolean,
 ) {
-  attribute.labelKey = "::'name'||::'P.displayName'||::'P.name'||::'P.id'";
+  attribute.labelKey = "::'key'||::'P.key'||::'P.id'";
   attribute.valueKey = "id";
   attribute.childrenKey = "attributes";
   attribute.options = () =>

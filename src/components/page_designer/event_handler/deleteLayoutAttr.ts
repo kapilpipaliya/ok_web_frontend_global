@@ -93,7 +93,7 @@ export function deleteLayoutAttr(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  name: string,
+  key: string,
   showSuccessToast: (message: string) => void,
 ) {
   if (
@@ -119,7 +119,7 @@ export function deleteLayoutAttr(
   });
 
   deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
-  if (name) {
-    showSuccessToast(`${name} deleted successfully`);
+  if (key) {
+    showSuccessToast(`${key} deleted successfully`);
   }
 }

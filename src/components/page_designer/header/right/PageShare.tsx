@@ -29,12 +29,12 @@ export function ShareSection() {
         return "";
       }
 
-      if (!P?.name) {
+      if (!P?.key) {
         setError(`Please configure ${L[0]} Name first.`);
         return "";
       }
 
-      return `${protocol}//${hostname}${formattedPort}/view/${L[0]}/${P.name}/new`;
+      return `${protocol}//${hostname}${formattedPort}/view/${L[0]}/${P.key}/new`;
     }
     return "";
   };
@@ -104,7 +104,7 @@ export function ShareSection() {
         <input
           class="p:10 r:0|5|5|0 w:full"
           disabled={access() === "everyone"}
-          name="email"
+          key="email"
           onInput={(e) => setEmail(e.target.value)}
           placeholder="Enter email, for multiple emails use ';' to separate"
           type="email"

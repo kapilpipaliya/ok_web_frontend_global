@@ -21,7 +21,7 @@ export function PrimaryKey() {
           meta={
             {
               P: modifyFieldMetaAllFields(
-                { name: "primaryKey" } as FieldAttribute,
+                { key: "primaryKey" } as FieldAttribute,
                 graph,
                 setGraph,
                 layoutStore,

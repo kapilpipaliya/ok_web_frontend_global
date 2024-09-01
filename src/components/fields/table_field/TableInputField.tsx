@@ -42,16 +42,14 @@ export function TableInputField(
   const [parentItems] = usePageRenderContext();
   const meta = () => getLastItem(parentItems!.vertexes)!;
   const data = () => getLastItem(parentItems!.data)!;
-  
+
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
     sortVertexesByPosition(
-      getSelectionOptions(graph, setGraph, "->Attr", [meta()]).vertexes ||
-        [],
+      getSelectionOptions(graph, setGraph, "->Attr", [meta()]).vertexes || [],
     ),
   );
-
 
   const parentData = createMemo(() =>
     getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1)),
@@ -62,11 +60,7 @@ export function TableInputField(
   createEffect(() => {
     // if a parent has data vertex use it,
     // TODO: else if it has a parent Form Container(Record) use it.
-    const vertexes = getSublistRows(
-      graph,
-      meta(),
-      data() || parentData(),
-    );
+    const vertexes = getSublistRows(graph, meta(), data() || parentData());
     setSortedVertexes(vertexes);
   });
 

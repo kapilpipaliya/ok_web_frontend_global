@@ -24,7 +24,7 @@ export function SelectRuleField(props: SelectRuleFieldProps) {
       collection: () => `id:'${layoutStore.formStore[0].formData.id}'->Rule`,
       componentName: "SelectBox",
       displayName: props.meta.P.displayName,
-      name: props.meta.P.name,
+      key: props.meta.P.key,
       renderLabel: getRenderOptionLabelFunction(RulesModal),
       useLocalStorage: true,
     },

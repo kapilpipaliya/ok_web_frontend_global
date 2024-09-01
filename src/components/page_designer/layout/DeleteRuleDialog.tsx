@@ -11,8 +11,8 @@ const getAttributeNames = (
   ids: Array<Id | number>,
 ): string[] => {
   return ids
-    .map((id) => graph.vertexes[id]?.P.name)
-    .filter((name) => name !== undefined);
+    .map((id) => graph.vertexes[id]?.P.key)
+    .filter((key) => key !== undefined);
 };
 
 const AttributeList = (
@@ -53,7 +53,7 @@ export function DeleteAttributeDialog() {
       : "",
     layoutStore.usedAttrsInNameKeys &&
     layoutStore.usedAttrsInNameKeys.length > 0
-      ? "Please delete them from the name keys before deleting the attribute."
+      ? "Please delete them from the key keys before deleting the attribute."
       : "",
     layoutStore.usedAttrsInUniqueConstraints &&
     layoutStore.usedAttrsInUniqueConstraints.length > 0
@@ -79,10 +79,10 @@ export function DeleteAttributeDialog() {
             <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
               <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem">
                 <li>
-                  The attribute {graph.vertexes[attr]?.P.name} is used in the
+                  The attribute {graph.vertexes[attr]?.P.key} is used in the
                   following rules:{" "}
                   {layoutStore.usedAttrsInRules[attr]
-                    .map((rule) => graph.vertexes[rule]?.P.name)
+                    .map((rule) => graph.vertexes[rule]?.P.key)
                     .join(", ")}
                   .
                 </li>
@@ -92,7 +92,7 @@ export function DeleteAttributeDialog() {
         </For>
         <AttributeList
           attributes={nameKeyAttributes()}
-          title="The following attributes are used in name keys:"
+          title="The following attributes are used in key keys:"
         />
         <AttributeList
           attributes={uniqueConstraintAttributes()}

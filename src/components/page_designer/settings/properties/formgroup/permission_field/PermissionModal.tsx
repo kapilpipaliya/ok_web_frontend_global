@@ -19,10 +19,10 @@ const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   // const [graph, setGraph] = useGraph();
   // const [layoutStore] = useDesignerLayoutStore();
   const metaAttribute = klona(
-    FormMetaData.Form.attributes.find((x) => x.name === "Perm")!,
+    FormMetaData.Form.attributes.find((x) => x.key === "Perm")!,
   );
   for (const attribute of metaAttribute.attributes!) {
-    if (attribute.name === "scope") {
+    if (attribute.key === "scope") {
       // TODO add button to display rules dialog.
     }
   }
@@ -70,6 +70,7 @@ export function PermissionModal(
     }
     props.closeModal();
   };
+  const repeaterStore = createStore({});
 
   return (
     <Portal>
@@ -93,17 +94,25 @@ export function PermissionModal(
                     id="modal-title"
                   >
                     {props.selectedAttr
-                      ? `${props.selectedAttr.P.name} Permissions`
+                      ? `${props.selectedAttr.P.key} Permissions`
                       : "All Permissions"}
                     :
                   </h3>
                   <div class="mt:0.5rem">
-                    <PageRenderContextProvider data={props.selectedAttr ? props.selectedAttr : layoutStore.formStore[0].formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
-                    <TableInputField
-                      isNoPermissionCheck={true}
-                      isRealTime={false}
-                      txnId={layoutStore.formStore[0].txnId}
-                    />
+                    <PageRenderContextProvider
+                      data={
+                        props.selectedAttr
+                          ? props.selectedAttr
+                          : layoutStore.formStore[0].formData
+                      }
+                      meta={graph.vertexes[metaVertexId]}
+                      store={repeaterStore}
+                    >
+                      <TableInputField
+                        isNoPermissionCheck={true}
+                        isRealTime={false}
+                        txnId={layoutStore.formStore[0].txnId}
+                      />
                     </PageRenderContextProvider>
                   </div>
                 </div>

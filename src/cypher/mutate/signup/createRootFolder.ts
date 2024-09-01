@@ -1,9 +1,12 @@
-import type { Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
-export async function createRootFolder(tx: Transaction): Promise<void> {
+export async function createRootFolder(
+  tx: Session | Transaction,
+): Promise<void> {
   const query = `
-    MERGE (:Folder {name: 'root'})
-    MERGE (:Comp {name: 'root'})
+    MERGE (:Folder {key: 'Root'})
+    MERGE (:Comp {key: 'Root'})
+    MERGE (:Comp {key: 'ArkUI'})
   `;
 
   try {

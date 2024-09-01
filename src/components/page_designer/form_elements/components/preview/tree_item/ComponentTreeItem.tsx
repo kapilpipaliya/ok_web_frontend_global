@@ -11,6 +11,7 @@ import { TreeItemContent } from "./TreeItemContent";
 
 export function CompPreviewTreeItem(
   props: Readonly<{
+    ancestorIds?: Id[]; // Add a new prop to track ancestor IDs
     collapsedKeys: string[];
     item: Vertex;
     toggleExpand: (itemId: Id) => void;
@@ -23,6 +24,10 @@ export function CompPreviewTreeItem(
   const onDragEnd = () => {
     resetDragDropState(setLayoutStore);
   };
+
+  // Create a new array of ancestor IDs including the current item's ID
+  const currentAncestorIds = [...(props.ancestorIds || []), props.item.id];
+
   return (
     <>
       <TreeItemContainer
@@ -45,13 +50,17 @@ export function CompPreviewTreeItem(
       <Show when={!props.collapsedKeys.includes(props.item.id)}>
         <ul class="pb:5 pl:8 pt:3">
           <For each={children()}>
-            {(child) => (
-              <CompPreviewTreeItem
-                collapsedKeys={props.collapsedKeys}
-                item={child}
-                toggleExpand={props.toggleExpand}
-              />
-            )}
+            {(child) =>
+              // Skip rendering if the child item is an ancestor of the current item
+              !currentAncestorIds.includes(child.id) && (
+                <CompPreviewTreeItem
+                  ancestorIds={currentAncestorIds} // Pass the ancestor IDs down
+                  collapsedKeys={props.collapsedKeys}
+                  item={child}
+                  toggleExpand={props.toggleExpand}
+                />
+              )
+            }
           </For>
         </ul>
       </Show>

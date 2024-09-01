@@ -23,7 +23,7 @@ export function ComponentList() {
   // Fetch data function
   async function fetchData() {
     try {
-      const expression = `g:'Comp[root]'<-'ParentComp*'`;
+      const expression = `g:'Comp[Root]'<-'ParentComp*'`;
       return await fetchAndSetGraphData(graph, setGraph, expression);
     } catch (error: unknown) {
       return { error: error instanceof Error ? error.message : String(error) };
@@ -40,8 +40,8 @@ export function ComponentList() {
       const rootVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
-        "name",
-        "root",
+        "key",
+        "Root",
       );
       if (rootVertex) {
         setRootCompVertex(rootVertex);
@@ -57,7 +57,7 @@ export function ComponentList() {
     const children = getCompChildren(rootCompVertex()!, graph);
     const query = searchQuery().toLowerCase();
     return children.filter((child) =>
-      ((child.P.label as string) || (child.P.name as string))
+      ((child.P.label as string) || (child.P.key as string))
         .toLowerCase()
         .includes(query),
     );

@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-objects */
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -27,15 +28,24 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
 
+    /* Ignore HTTPS errors */
+    ignoreHTTPSErrors: true,
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Enable video recording for all tests, including passed ones */
+    // video: 'on',
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'],
+        // https://www.youtube.com/watch?v=uF5nCRI_uME
+        viewport: { width: 2048, height: 1280 }
+       },
     },
 
     {
@@ -75,4 +85,7 @@ export default defineConfig({
   //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: !process.env.CI,
   // },
+
+  /* Set timeout to 5 minutes (300000 milliseconds) */
+  // timeout: 300000,
 });

@@ -8,16 +8,17 @@ import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequ
 
 import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../../cypher/mutate/signup/signupUser";
+import { updateRedirectUrl } from "./updateRedirectUrl";
 
 async function handleSignup(
   data: SignupRequestData,
   tx: Transaction,
-  subdomain: string,
+  subDomain: string,
 ) {
   try {
     let user;
 
-    if (subdomain === "super") {
+    if (subDomain === "super") {
       user = await signupAdmin(tx, data);
     } else {
       user = await signupUser(tx, data);
@@ -26,6 +27,7 @@ async function handleSignup(
     await tx.commit();
     await updateSession(user);
     delete user.P.password;
+    updateRedirectUrl(user, subDomain);
 
     return user;
   } catch (error: any) {

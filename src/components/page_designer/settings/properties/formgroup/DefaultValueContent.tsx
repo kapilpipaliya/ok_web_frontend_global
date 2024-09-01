@@ -16,11 +16,12 @@ export function DefaultValueContent(
 
   return (
     <DynamicComponent
-      componentName={graph.vertexes[layoutStore.selectedComponent].P.name}
+      componentName={graph.vertexes[layoutStore.selectedComponent].P.key}
       data={props.selectedLayout}
       isNoPermissionCheck={true}
       isRealTime={false}
       meta={graph.vertexes[layoutStore.selectedComponent]}
+      noLabel
       onChange={(data) => props.onChange(props.meta, data)}
       txnId={props.txnId}
     />

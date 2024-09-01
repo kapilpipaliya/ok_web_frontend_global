@@ -18,14 +18,16 @@ export function Permission() {
   const [graph] = useGraph();
   const uniqueConstrainsMetaAttribute = klona(
     FormMetaData.Form.attributes,
-  ).find((meta) => meta.name === "Perm");
+  ).find((meta) => meta.key === "Perm");
   if (!uniqueConstrainsMetaAttribute) {
     return <></>;
   }
-  //modifyFieldMetaAllFields(uniqueConstrainsMetaAttribute.attributes!.find((attribute) => attribute.name === "key")!, graph, setGraph, layoutStore, true);
+  //modifyFieldMetaAllFields(uniqueConstrainsMetaAttribute.attributes!.find((attribute) => attribute.key === "key")!, graph, setGraph, layoutStore, true);
   const { metaVertexId } = generateTableInputMeta(
     uniqueConstrainsMetaAttribute,
   );
+
+  const repeaterStore = createStore({});
 
   return (
     <div class="mt:6">
@@ -45,7 +47,7 @@ export function Permission() {
             {
               P: {
                 collection: "->$0Perm",
-                name: "globalPerm",
+                key: "globalPerm",
               } as unknown as FieldAttribute,
             } as unknown as Vertex
           }
@@ -59,11 +61,15 @@ export function Permission() {
         title="All Form Permissions"
       />
       <div class="mt:.5rem px:0.25rem">
-        <PageRenderContextProvider data={layoutStore.formStore[0]?.formData} meta={graph.vertexes[metaVertexId]} store={createStore({})}>
-        <TableInputField
-          isNoPermissionCheck={true}
-          isRealTime={false}
-          txnId={layoutStore.formStore[0].txnId}
+        <PageRenderContextProvider
+          data={layoutStore.formStore[0]?.formData}
+          meta={graph.vertexes[metaVertexId]}
+          store={repeaterStore}
+        >
+          <TableInputField
+            isNoPermissionCheck={true}
+            isRealTime={false}
+            txnId={layoutStore.formStore[0].txnId}
           />
         </PageRenderContextProvider>
       </div>

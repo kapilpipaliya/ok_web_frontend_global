@@ -2,13 +2,17 @@ import { createSignal, For } from "solid-js";
 
 import { TextFieldWithSelect } from "./TextFieldWithSelect";
 
-export function ArrayComponent(props: Readonly<{
-  onChange: (value: number[] | string[]) => void;
-  type?: "number" | "string";
-  unitOptions?: string[];
-  value: number[] | string[];
-}>) {
-  const [items, setItems] = createSignal<(number | string)[]>(props.value || []);
+export function ArrayComponent(
+  props: Readonly<{
+    onChange: (value: number[] | string[]) => void;
+    type?: "number" | "string";
+    unitOptions?: string[];
+    value: number[] | string[];
+  }>,
+) {
+  const [items, setItems] = createSignal<(number | string)[]>(
+    props.value || [],
+  );
 
   const addItem = () => {
     const newItems = [...items(), props.type === "number" ? 0 : ""];
@@ -38,7 +42,8 @@ export function ArrayComponent(props: Readonly<{
               onChange={(value) => updateItem(index(), value)}
               type={props.type}
               unitOptions={props.unitOptions}
-              value={item.toString()} />
+              value={item.toString()}
+            />
             <button
               class="c:white rounded bg:red-50 px:8 py:4"
               onClick={() => removeItem(index())}
@@ -48,10 +53,7 @@ export function ArrayComponent(props: Readonly<{
           </div>
         )}
       </For>
-      <button
-        class="bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={addItem}
-      >
+      <button class="c:white rounded bg:blue-50 px:8 py:4" onClick={addItem}>
         Add Item
       </button>
     </div>

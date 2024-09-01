@@ -23,7 +23,7 @@ export const FieldWithCustomBox = (
     if (props.customProperty && props.customProperty.length > 0) {
       let isValueSet = false;
       props.customProperty.forEach((property) => {
-        if (cssState[state()]?.[property.name] !== undefined) {
+        if (cssState[state()]?.[property.key] !== undefined) {
           isValueSet = true;
         }
       });
@@ -51,8 +51,8 @@ export const FieldWithCustomBox = (
             componentName: "buttonGroups",
             isAddToClass: false,
             isLabelOnTop: false,
+            key: props.key,
             label: "",
-            name: props.name,
             onChangeInput: () => {
               if (optionType() === "all") {
                 setOptionType("custom");

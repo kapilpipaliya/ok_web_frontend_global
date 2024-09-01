@@ -21,4 +21,3 @@ export async function getFilesData(
   const expression = getExpressionForFilesData(toParentEdgeType, folderId);
   return await fetchAndSetGraphData(graph, setGraph, expression);
 }
-

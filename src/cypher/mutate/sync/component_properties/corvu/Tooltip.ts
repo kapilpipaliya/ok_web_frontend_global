@@ -3,7 +3,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "-",
     "description": "Whether the tooltip is open.",
-    "name": "open",
+    "key": "open",
     "corvu": true,
     "hashName": "Root"
   },
@@ -11,7 +11,7 @@ export const Tooltip = [
     "componentName": "(open: boolean) => void",
     "default": "-",
     "description": "Callback fired when the open state changes.",
-    "name": "onOpenChange",
+    "key": "onOpenChange",
     "corvu": true,
     "hashName": "Root"
   },
@@ -19,7 +19,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "false",
     "description": "Whether the tooltip is open initially.",
-    "name": "initialOpen",
+    "key": "initialOpen",
     "corvu": true,
     "hashName": "Root"
   },
@@ -27,7 +27,7 @@ export const Tooltip = [
     "componentName": "Placement",
     "default": "'bottom'",
     "description": "The initial placement of the tooltip.",
-    "name": "placement",
+    "key": "placement",
     "corvu": true,
     "hashName": "Root"
   },
@@ -35,7 +35,7 @@ export const Tooltip = [
     "componentName": "Strategy",
     "default": "'absolute'",
     "description": "The strategy to use when positioning the tooltip.",
-    "name": "strategy",
+    "key": "strategy",
     "corvu": true,
     "hashName": "Root"
   },
@@ -43,7 +43,7 @@ export const Tooltip = [
     "componentName": "FloatingOptions | null",
     "default": "{ flip: true, shift: true }",
     "description": "Floating options of the tooltip.",
-    "name": "floatingOptions",
+    "key": "floatingOptions",
     "corvu": true,
     "hashName": "Root"
   },
@@ -51,7 +51,7 @@ export const Tooltip = [
     "componentName": "number",
     "default": "500",
     "description": "The delay in milliseconds before the tooltip opens after the mouse pointer is moved over the trigger.",
-    "name": "openDelay",
+    "key": "openDelay",
     "corvu": true,
     "hashName": "Root"
   },
@@ -59,7 +59,7 @@ export const Tooltip = [
     "componentName": "number",
     "default": "0",
     "description": "The delay in milliseconds before the tooltip closes after the mouse pointer leaves.",
-    "name": "closeDelay",
+    "key": "closeDelay",
     "corvu": true,
     "hashName": "Root"
   },
@@ -67,7 +67,7 @@ export const Tooltip = [
     "componentName": "number",
     "default": "0",
     "description": "The duration in milliseconds that the tooltip should ignore the openDelay when the mouse pointer leaves and re-enters.",
-    "name": "skipDelayDuration",
+    "key": "skipDelayDuration",
     "corvu": true,
     "hashName": "Root"
   },
@@ -75,7 +75,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip content should be hoverable.",
-    "name": "hoverableContent",
+    "key": "hoverableContent",
     "corvu": true,
     "hashName": "Root"
   },
@@ -83,7 +83,7 @@ export const Tooltip = [
     "componentName": "'true' | string",
     "default": "-",
     "description": "Optionally add this tooltip to a group. With the same group property will close when another tooltip in the same group opens.",
-    "name": "group",
+    "key": "group",
     "corvu": true,
     "hashName": "Root"
   },
@@ -91,7 +91,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip should open when the trigger is focused.",
-    "name": "openOnFocus",
+    "key": "openOnFocus",
     "corvu": true,
     "hashName": "Root"
   },
@@ -99,7 +99,7 @@ export const Tooltip = [
     "componentName": "(event: FocusEvent) => void",
     "default": "-",
     "description": "Callback fired when the trigger is focused and openOnFocus is true. Can be prevented by calling event.preventDefault.",
-    "name": "onFocus",
+    "key": "onFocus",
     "corvu": true,
     "hashName": "Root"
   },
@@ -107,7 +107,7 @@ export const Tooltip = [
     "componentName": "(event: FocusEvent) => void",
     "default": "-",
     "description": "Callback fired when the trigger is blurred and openOnFocus is true. Can be prevented by calling event.preventDefault.",
-    "name": "onBlur",
+    "key": "onBlur",
     "corvu": true,
     "hashName": "Root"
   },
@@ -115,7 +115,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip should open when the mouse pointer is moved over the trigger.",
-    "name": "openOnHover",
+    "key": "openOnHover",
     "corvu": true,
     "hashName": "Root"
   },
@@ -123,7 +123,7 @@ export const Tooltip = [
     "componentName": "(event: MouseEvent) => void",
     "default": "-",
     "description": "Callback fired when the mouse pointer is moved over the trigger and openOnHover is true. Can be prevented by calling event.preventDefault.",
-    "name": "onHover",
+    "key": "onHover",
     "corvu": true,
     "hashName": "Root"
   },
@@ -131,7 +131,7 @@ export const Tooltip = [
     "componentName": "(event: MouseEvent) => void",
     "default": "-",
     "description": "Callback fired when the mouse pointer leaves the tooltip and openOnHover is true. Can be prevented by calling event.preventDefault.",
-    "name": "onLeave",
+    "key": "onLeave",
     "corvu": true,
     "hashName": "Root"
   },
@@ -139,7 +139,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip should close when the user presses the Escape key.",
-    "name": "closeOnEscapeKeyDown",
+    "key": "closeOnEscapeKeyDown",
     "corvu": true,
     "hashName": "Root"
   },
@@ -147,7 +147,7 @@ export const Tooltip = [
     "componentName": "(event: KeyboardEvent) => void",
     "default": "-",
     "description": "Callback fired when the user presses the Escape key. Can be prevented by calling event.preventDefault.",
-    "name": "onEscapeKeyDown",
+    "key": "onEscapeKeyDown",
     "corvu": true,
     "hashName": "Root"
   },
@@ -155,7 +155,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip should close when the user presses on the trigger.",
-    "name": "closeOnPointerDown",
+    "key": "closeOnPointerDown",
     "corvu": true,
     "hashName": "Root"
   },
@@ -163,7 +163,7 @@ export const Tooltip = [
     "componentName": "(event: MouseEvent) => void",
     "default": "-",
     "description": "Callback fired when the user presses on the trigger and closeOnPointerDown is true. Can be prevented by calling event.preventDefault.",
-    "name": "onPointerDown",
+    "key": "onPointerDown",
     "corvu": true,
     "hashName": "Root"
   },
@@ -171,7 +171,7 @@ export const Tooltip = [
     "componentName": "boolean",
     "default": "true",
     "description": "Whether the tooltip should close when the user scrolls.",
-    "name": "closeOnScroll",
+    "key": "closeOnScroll",
     "corvu": true,
     "hashName": "Root"
   },
@@ -179,7 +179,7 @@ export const Tooltip = [
     "componentName": "(event: Event) => void",
     "default": "-",
     "description": "Callback fired when the user scrolls and the tooltip is about to close. Can be prevented by calling event.preventDefault.",
-    "name": "onScroll",
+    "key": "onScroll",
     "corvu": true,
     "hashName": "Root"
   },
@@ -187,7 +187,7 @@ export const Tooltip = [
     "componentName": "string",
     "default": "createUniqueId()",
     "description": "The id attribute of the tooltip element.",
-    "name": "tooltipId",
+    "key": "tooltipId",
     "corvu": true,
     "hashName": "Root"
   },
@@ -195,7 +195,7 @@ export const Tooltip = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context. Useful if you have nested tooltips and want to create components that belong to a tooltip higher up in the tree.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Root"
   }
@@ -206,7 +206,7 @@ export const TooltipAnchor = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Anchor"
   },
@@ -214,7 +214,7 @@ export const TooltipAnchor = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Anchor"
   }
@@ -225,7 +225,7 @@ export const TooltipTrigger = [
     "componentName": "ValidComponent",
     "default": "button",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Trigger"
   },
@@ -233,7 +233,7 @@ export const TooltipTrigger = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Trigger"
   }
@@ -244,7 +244,7 @@ export const TooltipPortal = [
     "componentName": "boolean",
     "default": "false",
     "description": "Whether the tooltip portal should be forced to render. Useful when using third-party animation libraries.",
-    "name": "forceMount",
+    "key": "forceMount",
     "corvu": true,
     "hashName": "Portal"
   },
@@ -252,7 +252,7 @@ export const TooltipPortal = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Portal"
   }
@@ -263,7 +263,7 @@ export const TooltipContent = [
     "componentName": "boolean",
     "default": "false",
     "description": "Whether the tooltip content should be forced to render. Useful when using third-party animation libraries.",
-    "name": "forceMount",
+    "key": "forceMount",
     "corvu": true,
     "hashName": "Content"
   },
@@ -271,7 +271,7 @@ export const TooltipContent = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Content"
   },
@@ -279,7 +279,7 @@ export const TooltipContent = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Content"
   }
@@ -290,7 +290,7 @@ export const TooltipArrow = [
     "componentName": "number",
     "default": "16",
     "description": "Size of the arrow in px.",
-    "name": "size",
+    "key": "size",
     "corvu": true,
     "hashName": "Arrow"
   },
@@ -298,7 +298,7 @@ export const TooltipArrow = [
     "componentName": "ValidComponent",
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "name": "as",
+    "key": "as",
     "corvu": true,
     "hashName": "Arrow"
   },
@@ -306,7 +306,7 @@ export const TooltipArrow = [
     "componentName": "string",
     "default": "-",
     "description": "The id of the tooltip context to use.",
-    "name": "contextId",
+    "key": "contextId",
     "corvu": true,
     "hashName": "Arrow"
   }

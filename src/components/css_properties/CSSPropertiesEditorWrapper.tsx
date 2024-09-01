@@ -8,9 +8,7 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "./CssEditorContext";
 
-import {
-  CssEditorContext,
-} from "./CssEditorContext";
+import { CssEditorContext } from "./CssEditorContext";
 import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import { CssStateContext } from "./CssStateContext";
@@ -30,7 +28,7 @@ export function CSSPropertiesEditorWrapper(
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const cssValue = (props.data?.P[props.meta.P.name] as string) || "";
+  const cssValue = (props.data?.P[props.meta.P.key] as string) || "";
 
   const initializeState = (
     value: string,

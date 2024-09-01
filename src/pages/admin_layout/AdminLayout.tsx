@@ -1,13 +1,11 @@
 import { useLocation } from "@solidjs/router";
-import { createEffect, type JSX, Show } from "solid-js";
+import { createEffect, type JSX } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
-import { Navbar } from "~/pages/admin_layout/Navbar";
 
 import { AuthenticateUser } from "./AuthenticateUser";
-import { DropdownMenuDisplay } from "./DropdownMenuDisplay";
 
 interface AdminLayoutProps {
   children?: JSX.Element;
@@ -46,19 +44,6 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
           "flex-grow:1": graph.isSideBarOpen || graph.isSubSideBarOpen,
         }}
       >
-        <Show
-          when={
-            location.pathname.includes("/admin/") &&
-            !isPageDesignerPath(location.pathname)
-          }
-        >
-          <Navbar
-            meta={graph.vertexes[navBarVertexId]}
-            right={<DropdownMenuDisplay />}
-            showCloseDrawerBtn={location.pathname.includes("/admin/")}
-            toggleSidebar={() => setGraph("isSideBarOpen", (prev) => !prev)}
-          />
-        </Show>
         {props.children}
       </div>
     </AuthenticateUser>

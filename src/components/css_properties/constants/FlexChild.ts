@@ -17,7 +17,7 @@ export const FlexChild = {
   flex: {
     componentName: "string",
     label: "Flex",
-    name: "flex",
+    key: "flex",
     options: [
       { icon: Icons.flex.auto, label: "auto", value: "0 0 auto" },
       { icon: Icons.flex.expand, label: "expand", value: "1 1 0%" },
@@ -28,7 +28,7 @@ export const FlexChild = {
   order: {
     componentName: "string",
     label: "Order",
-    name: "order",
+    key: "order",
     type: "number",
   } as TextFieldOptionsField,
   alignSelf: createSelectOptions("align-self", "Align Self", [

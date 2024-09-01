@@ -41,7 +41,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     }
     return (
       evalExpression(
-        `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.name, state() || "Default", meta().name)}`,
+        `->${getCssSelectedFileEdgeName(cssEditorProps.data.L[0], cssEditorProps.meta.P.key, state() || "Default", meta().key)}`,
         { graph, setGraph, vertexes: [cssEditorProps.data] },
       ) || []
     );
@@ -71,9 +71,9 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       P: {
         type: getCssSelectedFileEdgeName(
           cssEditorProps.data.L[0],
-          cssEditorProps.meta.P.name,
+          cssEditorProps.meta.P.key,
           state() || "Default",
-          meta().name,
+          meta().key,
         ),
       },
     } as Vertex;

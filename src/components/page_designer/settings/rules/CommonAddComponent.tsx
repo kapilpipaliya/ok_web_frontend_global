@@ -2,12 +2,12 @@ import { createSignal, type JSX, onMount } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { PROPERTIES } from "~/components/constants/constant";
 import { IconButton } from "~/components/IconButton";
-import { PROPERTIES } from "~/components/page_designer/settings/properties/constant";
 
 export function CommonAddComponent(
   props: Readonly<{
-    addNewState: (name: string) => void;
+    addNewState: (key: string) => void;
     children?: JSX.Element;
     label: string;
     onClose: (rowVertex?: Vertex) => void;

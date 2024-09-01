@@ -19,7 +19,7 @@ export function setPropertyValueGlobal(
   return untrack(() => {
     if (valueSet ?? true) {
       mergeVertexProperties(txnId, layoutVertex.id, graph, setGraph, {
-        [meta.P.name]: value,
+        [meta.P.key]: value,
       });
     }
   });

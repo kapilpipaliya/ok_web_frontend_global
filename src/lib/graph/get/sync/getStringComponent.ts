@@ -14,7 +14,7 @@ export function getStringComponent(
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
       graph,
       "DataType",
-      "name",
+      "key",
       "String",
     );
     if (!attrDataTypeVertex) {

@@ -12,6 +12,7 @@ import { useToast } from "~/components/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";
+import { uniqueNameKey } from "../../constant";
 import { getUniqueName } from "../getChildrenAttrs";
 import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
@@ -70,20 +71,20 @@ export function componentDrop(
   };
   let props = properties ?? {};
   if (toIndex) {
-    props = { ...props, name: uniqueName, pos: toIndex };
+    props = { ...props, pos: toIndex, [uniqueNameKey]: uniqueName };
   } else {
-    props = { ...props, name: uniqueName };
+    props = { ...props, [uniqueNameKey]: uniqueName };
   }
   if (fromVertex.L[0] === "Comp") {
     const compProps = getCompPropsObj(graph, fromVertex);
     props = { ...compProps, ...props };
-    if (fromVertex.P.name === "Text" && !props.text) {
+    if (fromVertex.P.key === "Text" && !props.text) {
       props = { ...props, text: "Sample Text" };
     }
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);
     delete p.pos;
-    delete p.name;
+    delete p.key;
     props = { ...props, ...p };
   }
   batch(() => {

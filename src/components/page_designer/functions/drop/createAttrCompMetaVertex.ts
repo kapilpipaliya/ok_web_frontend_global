@@ -7,6 +7,6 @@ export function createAttrCompMetaVertex(graph: GraphInterface) {
     collection: "g:'Comp'",
     componentName: "SelectBox",
 
-    name: "Comp",
+    key: "Comp",
   });
 }

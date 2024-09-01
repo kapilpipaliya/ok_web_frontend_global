@@ -27,8 +27,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   };
 
   const getComponent = () =>
-    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P
-      .name as string;
+    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.key as string;
 
   const HideShowIcon = () => {
     const isHiddenAttr = () =>

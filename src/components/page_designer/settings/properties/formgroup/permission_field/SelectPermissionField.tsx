@@ -20,7 +20,7 @@ export function SelectPermissionField(props: SelectPermissionFieldProps) {
       collection: () => `id:'${layoutStore.formStore[0].formData.id}'->$0Perm`,
       componentName: "TagBox",
       displayName: props.meta.P.displayName,
-      name: props.meta.P.name,
+      key: props.meta.P.key,
       useLocalStorage: true,
     },
   } as unknown as Vertex;

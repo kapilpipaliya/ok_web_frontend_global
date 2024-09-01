@@ -39,7 +39,7 @@ export function cssStateToString(
             if (stateValue.includes("$1")) {
               const edgeName = getCssSelectedFileEdgeName(
                 data.L[0],
-                meta.P.name,
+                meta.P.key,
                 selector || "Default",
                 key,
               );

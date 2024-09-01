@@ -6,7 +6,7 @@ import { getLastTxnIndex } from "./getLastTxnIndex";
 
 export function saveStepIndex(
   txnId: number,
-  name: string,
+  key: string,
   graph: Store<GraphInterface>,
 ) {
   if (!(txnId && graph.transactions.has(txnId))) {
@@ -14,6 +14,6 @@ export function saveStepIndex(
   }
   const transaction = graph.transactions.get(txnId);
   if (transaction) {
-    transaction.namedUndoStepIndexes[name] = getLastTxnIndex(txnId, graph);
+    transaction.namedUndoStepIndexes[key] = getLastTxnIndex(txnId, graph);
   }
 }

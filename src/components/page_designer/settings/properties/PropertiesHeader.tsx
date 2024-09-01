@@ -11,7 +11,7 @@ export function PropertiesHeader() {
 
   const getComponentName = () =>
     layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1
-      ? graph.vertexes[layoutStore.selectedComponent].P.name || ""
+      ? graph.vertexes[layoutStore.selectedComponent].P.key || ""
       : "";
   return (
     <div class="flex ai:center cursor:pointer jc:space-between">

@@ -9,22 +9,22 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   const { dbSession } = await getDBSessionForSubdomain();
 
   const label = vertex.L[0];
-  const name = vertex.P.name;
+  const key = vertex.P.key;
   const id = vertex.id;
 
-  if (!name) {
-    return { error: "Please configure the name first" };
+  if (!key) {
+    return { error: "Please configure the key first" };
   }
 
-  if (label === "Form" && isReservedKeyword(name)) {
+  if (label === "Form" && isReservedKeyword(key)) {
     return {
-      error: `The name "${name}" is a reserved word and cannot be used`,
+      error: `The key "${key}" is a reserved word and cannot be used`,
     };
   }
 
   try {
-    if (await doesNameExist(session, label, name, id)) {
-      return { error: "Provided name already exists" };
+    if (await doesNameExist(session, label, key, id)) {
+      return { error: "Provided key already exists" };
     }
 
     const uniqueConstrains = await evalExpressionAsync(
@@ -48,7 +48,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
         );
         if (uniqueConstraintExists) {
           return {
-            error: `Unique constraint ${keys.map((k: Vertex) => k.P.name).join(", ")} already exists`,
+            error: `Unique constraint ${keys.map((k: Vertex) => k.P.key).join(", ")} already exists`,
           };
         }
       }
@@ -65,11 +65,11 @@ export async function checkUniqueConstrains(vertex: Vertex) {
 async function doesNameExist(
   session: any,
   label: string,
-  name: string,
+  key: string,
   id?: string,
 ) {
-  const query = `MATCH (v:${label}) WHERE v.name = $name ${id ? "AND v.elementId != $id" : ""} RETURN v`;
-  const params = id ? { id, name } : { name };
+  const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND v.elementId != $id" : ""} RETURN v`;
+  const params = id ? { id, key } : { key };
   const result = await session.run(query, params);
   return result.records.length > 0;
 }
@@ -85,8 +85,8 @@ async function doesUniqueConstraintExist(
   let query = `MATCH (v:${label}) WHERE ${id ? "v.elementId != $id AND " : ""}`;
 
   for (const key of keys) {
-    query += `v.${key.P.name} = $${key.P.name} AND `;
-    params[key.P.name] = vertex.P[key.P.name];
+    query += `v.${key.P.key} = $${key.P.key} AND `;
+    params[key.P.key] = vertex.P[key.P.key];
   }
 
   query = query.slice(0, -5); // Remove the last ' AND '

@@ -18,16 +18,28 @@ export async function findOrCreateNodeAndUpdateProperties(
   const existingNode = await findExistingNode(
     sessionTarget,
     nodeType,
-    properties.name,
+    properties.key,
   );
 
   let createdNode;
   if (existingNode) {
-    createdNode = await updateNodeProperties(
-      sessionTarget,
-      existingNode,
-      properties,
+    const existingProperties = existingNode.P;
+    const propertiesAreDifferent = Object.keys(properties).some(
+      (key) =>
+        key !== "createdAt" &&
+        key !== "updatedAt" &&
+        properties[key] !== existingProperties[key],
     );
+
+    if (propertiesAreDifferent) {
+      createdNode = await updateNodeProperties(
+        sessionTarget,
+        existingNode,
+        properties,
+      );
+    } else {
+      createdNode = existingNode;
+    }
   } else {
     createdNode = await createNode(sessionTarget, nodeType, properties);
   }

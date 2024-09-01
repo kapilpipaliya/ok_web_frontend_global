@@ -62,7 +62,9 @@ export const CollapsibleSection = (
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
         <For each={Object.entries(props.propertyFieldMap)}>
-          {([, value]) => <DynamicCSSComponent meta={value} projections={[state() || ""]}/>}
+          {([, value]) => (
+            <DynamicCSSComponent meta={value} projections={[state() || ""]} />
+          )}
         </For>
       </Show>
     </div>

@@ -41,7 +41,7 @@ export function CssPropertyRowContent(
 
   return (
     <Switch>
-      <Match when={props.meta.name === "box-shadow"}>
+      <Match when={props.meta.key === "box-shadow"}>
         <RenderButton
           label={generateBoxShadow([props.option as ShadowAttributes], true)}
           onClick={handleButtonClick}
@@ -50,7 +50,7 @@ export function CssPropertyRowContent(
           class={`box-shadow:${generateBoxShadow([props.option as ShadowAttributes])}`}
         />
       </Match>
-      <Match when={props.meta.name === "text-shadow"}>
+      <Match when={props.meta.key === "text-shadow"}>
         <RenderButton
           label={generateTextShadow(
             [props.option as TextShadowAttributes],
@@ -62,19 +62,19 @@ export function CssPropertyRowContent(
           class={`text-shadow:${generateTextShadow([props.option as TextShadowAttributes])}`}
         />
       </Match>
-      <Match when={props.meta.name === "filter"}>
+      <Match when={props.meta.key === "filter"}>
         <RenderButton
           label={generateFilter([props.option as FilterAttributes], true)}
           onClick={handleButtonClick}
         />
       </Match>
-      <Match when={props.meta.name === "backdrop-filter"}>
+      <Match when={props.meta.key === "backdrop-filter"}>
         <RenderButton
           label={generateFilter([props.option as FilterAttributes], true)}
           onClick={handleButtonClick}
         />
       </Match>
-      <Match when={props.meta.name === "transition"}>
+      <Match when={props.meta.key === "transition"}>
         <RenderButton
           label={generateTransition(
             [props.option as TransitionAttributes],
@@ -83,7 +83,7 @@ export function CssPropertyRowContent(
           onClick={handleButtonClick}
         />
       </Match>
-      <Match when={props.meta.name === "transform"}>
+      <Match when={props.meta.key === "transform"}>
         <RenderButton
           label={generateTransform([props.option as TransformAttributes], true)}
           onClick={handleButtonClick}

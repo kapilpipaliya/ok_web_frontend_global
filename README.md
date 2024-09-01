@@ -223,3 +223,18 @@ https://doc.powerdns.com/authoritative/http-api/index.html
 
 HeadLess Combobox:
 https://github.com/crvouga/headless-combobox
+
+Integrate:
+https://ark-ui.com/solid/docs/overview/introduction
+https://github.com/uNmAnNeR/imaskjs/tree/master/packages/solid-imask#solid-imask-plugin
+https://www.solid-ui.com
+https://github.com/xbmlz/solid-color
+https://github.com/srsholmes/solid-code-input
+https://github.com/elite174/solid-simple-datepicker
+https://github.com/rnwonder/solid-date-picker
+https://github.com/DigiChanges/solid-wizard
+https://github.com/alxnddr/solid-monaco
+
+
+DnD Solutions:
+https://discord.com/channels/722131463138705510/722131463889223772/1279381710412316702

@@ -29,7 +29,7 @@ export function SelectPermField(
     const [isOpenRule, setIsOpenRule] = createSignal(false);
     return (
       <div class="flex ai:center gap:4">
-        <span>{option.P.name}</span>
+        <span>{option.P.key}</span>
         <IconButton
           class="center-content flex"
           icon={"mingcute:settings-5-line"}
@@ -59,7 +59,7 @@ export function SelectPermField(
       collection: () => `id:'${layoutStore.formStore[0].formData.id}'->Rule`,
       componentName: "SelectBox",
       displayName: props.metaVertex.P.displayName,
-      name: props.metaVertex.P.name,
+      key: props.metaVertex.P.key,
       renderLabel: RenderLabel,
       useLocalStorage: true,
     },
@@ -72,6 +72,7 @@ export function SelectPermField(
         isNoPermissionCheck={true}
         isRealTime={false}
         meta={meta}
+        noLabel
         txnId={layoutStore.formStore[0].txnId}
       />
     );

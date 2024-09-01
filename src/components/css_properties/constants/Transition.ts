@@ -17,16 +17,16 @@ export const Transition = {
         {
           componentName: "string",
           isLabelOnTop: true,
+          key: "duration",
           label: "Duration",
-          name: "duration",
           type: "number",
           unitOptions: timesTypes,
         } as TextFieldOptionsField,
         {
           componentName: "string",
           isLabelOnTop: true,
+          key: "delay",
           label: "Delay",
-          name: "delay",
           type: "number",
           unitOptions: timesTypes,
         } as TextFieldOptionsField,
@@ -66,8 +66,8 @@ export const Transition = {
     dialogLabel: "Adjust Transition",
     fallback: "No transition",
     hideLabel: true,
+    key: "transition",
     label: "Transition",
-    name: "transition",
     useParentProjection: true,
   } as DataEditorField,
 };

@@ -1,10 +1,7 @@
 import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
@@ -15,15 +12,13 @@ import { collectionAttr } from "./collectionAttr";
 export const Coll: IFormMetaData = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "title",
-      onchange: '{"new": ["name","id"]}',
+      componentName: "SystemString",
+      key: "title",
+      onchange: '{"new": ["key","id"]}',
     },
     {
-      attributes: [textFieldInputMeta],
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
       validationRules: [
         {
           message: "ID is required",
@@ -62,7 +57,7 @@ export const Coll: IFormMetaData = {
       componentName: "SelectBox",
 
       inward: true,
-      name: "category",
+      key: "category",
       parentLabel: "CollCategory",
     },
     {
@@ -70,45 +65,45 @@ export const Coll: IFormMetaData = {
       componentName: "TagBox",
 
       inward: true,
-      name: "dashboard",
+      key: "dashboard",
       parentLabel: "Dashboard",
     },
     {
-      attributes: [textFieldTextAreaMeta],
-      componentName: "TextField",
-      name: "description",
+      class: PROPERTIES.Css.TextField,
+      componentName: "SystemTextArea",
+      key: "description",
     },
-    { componentName: "CheckBox", name: "public" },
-    { componentName: "CheckBox", name: "isInlineEditable" },
-    // { name: "supportCustomFields", componentName: "CheckBox" },
-    // { name: "searchOnly", componentName: "CheckBox" },
-    // { name: "supportDeletedRecordSearch", componentName: "CheckBox" },
+    { componentName: "SystemBoolean", key: "public" },
+    { componentName: "SystemBoolean", key: "isInlineEditable" },
+    // { key: "supportCustomFields", componentName: "SystemBoolean" },
+    // { key: "searchOnly", componentName: "SystemBoolean" },
+    // { key: "supportDeletedRecordSearch", componentName: "SystemBoolean" },
     {
       collection: "->Attr",
       componentName: "TagBox",
       displayName: "Primary Key",
 
-      name: "pk",
+      key: "pk",
       // TODO: add validation
-      // If there is not name attribute,
+      // If there is not key attribute,
       // then this field is required.
     },
     {
       collection: "->Attr",
       componentName: "TagBox",
 
-      name: "nameKey",
+      key: "nameKey",
       // TODO: add validation
-      // If there is not name attribute,
+      // If there is not key attribute,
       // then this field is required.
     },
 
     {
       attributes: collectionAttr,
       componentName: "DynamicTable",
-      label: "Attr",
+      key: "Attr",
 
-      name: "Attr",
+      label: "Attr",
       tab: "Attribute",
 
       type: "Attr",
@@ -116,20 +111,19 @@ export const Coll: IFormMetaData = {
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "name",
+          componentName: "SystemString",
+          key: "key",
         },
         // {
-        //   componentName: "TextField",
-        //   name: "label",
+        //   componentName: "SystemString",
+        //   key: "label",
         // },
         {
           attributes: [
             {
               componentName: "SelectBox",
               displayName: "Paren",
-              name: "leftParen",
+              key: "leftParen",
 
               options: `(
 ((
@@ -138,38 +132,38 @@ export const Coll: IFormMetaData = {
             {
               componentName: "SelectBox",
               displayName: "Field",
-              name: "leftField",
+              key: "leftField",
               // collection: "g:'DataType'",
             },
             // {
-            //   componentName: "TextField",
+            //   componentName: "SystemString",
             //   displayName: "Value",
-            //   name: "leftValue",
+            //   key: "leftValue",
             // },
             {
               componentName: "SelectBox",
               displayName: "Operator",
-              name: "operator",
+              key: "operator",
               options: `${Object.keys(unaryOperatorsInitial).join("\n")}
 ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
               componentName: "SelectBox",
               displayName: "Field",
-              name: "rightField",
+              key: "rightField",
               // collection: "g:'DataType'",
             },
             /*{
-              componentName: "TextField",
+              componentName: "SystemString",
               displayName: "Value",
-              name: "rightValue",
+              key: "rightValue",
             },
             {
               collection: "g:'DataType'",
               componentName: "SelectBox",
               displayName: "DataType",
               
-                name: "dataType",
+                key: "dataType",
               
             },
             {
@@ -177,19 +171,19 @@ ${Object.keys(binopsInitial).join("\n")}`,
               componentName: "SelectBox",
               displayName: "Component",
               
-                name: "comp",
+                key: "comp",
               
             },*/
             {
-              componentName: `->$0RightField->$0Comp<-CompChild::'P.name'||->$0RightField->$0Comp::'P.name'||->$0RightField->$0DataType->$0Default::'P.name'`,
+              componentName: `->$0RightField->$0Comp<-CompChild::'P.key'||->$0RightField->$0Comp::'P.key'||->$0RightField->$0DataType->$0Default::'P.key'`,
               displayName: "Value",
+              key: "rightValue",
               meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
-              name: "rightValue",
             },
             {
               componentName: "SelectBox",
               displayName: "Paren",
-              name: "rightParen",
+              key: "rightParen",
 
               options: `)
 ))
@@ -198,32 +192,32 @@ ${Object.keys(binopsInitial).join("\n")}`,
             {
               componentName: "SelectBox",
               displayName: "AndOr",
-              name: "andOr",
+              key: "andOr",
 
               options: `${Object.keys(binopsInitial).join("\n")}`,
             },
           ],
           componentName: "DynamicTable",
           displayName: "Conditions",
-          name: "cond",
+          key: "cond",
         },
       ],
       componentName: "DynamicTable",
-      label: "Rule",
+      key: "Rule",
 
-      name: "Rule",
+      label: "Rule",
       tab: "Rules",
 
       type: "Rule",
     },
 
     /*      {
-                  name: "Child",
+                  key: "Child",
                   componentName: "DynamicTable",
                   tab: "Child",
                   attributes: [
                     {
-                      name: "coll",
+                      key: "coll",
                       componentName: "SelectBox",
                       
  
@@ -231,18 +225,18 @@ ${Object.keys(binopsInitial).join("\n")}`,
                       
                     },
                     {
-                      name: "displayName",
-                      componentName: "TextField",
+                      key: "displayName",
+                      componentName: "SystemString",
                       
-                        onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+                        onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
                       
                     },
                     {
-                      name: "name",
-                      componentName: "TextField",
+                      key: "key",
+                      componentName: "SystemString",
                     },
                     {
-                      name: "tab",
+                      key: "tab",
                       componentName: "SelectBox",
                       
  
@@ -250,7 +244,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                       
                     },
                     {
-                      name: "group",
+                      key: "group",
                       componentName: "SelectBox",
                       
                         collection: "-CollChild->$0Group",
@@ -258,22 +252,22 @@ ${Object.keys(binopsInitial).join("\n")}`,
                       
                     },
                     {
-                      name: "Prop",
+                      key: "Prop",
                       displayName: "Property",
                       componentName: "DynamicTable",
                       attributes: [
                         {
-                          name: "name",
+                          key: "key",
                           componentName: "SelectBox",
                           
-                            displayExpr: "::'P.name'",
+                            displayExpr: "::'P.key'",
                             collection: "g:'Comp[Table]'->$0Prop",
                           
                         },
                         {
-                          name: "value",
+                          key: "value",
                           meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-                          componentName: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                          componentName: "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
                         },
                       ],
                     },
@@ -285,17 +279,15 @@ ${Object.keys(binopsInitial).join("\n")}`,
           collection: "g:'Coll'",
           componentName: "SelectBox",
 
-          name: "coll",
+          key: "coll",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "displayName",
+          componentName: "SystemString",
+          key: "displayName",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "fieldDefaults",
+          componentName: "SystemString",
+          key: "fieldDefaults",
         },
         {
           attributes: [
@@ -303,51 +295,49 @@ ${Object.keys(binopsInitial).join("\n")}`,
               collection: "g:'Comp[Table]'->$0Prop",
               componentName: "SelectBox",
 
-              displayExpr: "::'P.name'",
-              name: "name",
+              displayExpr: "::'P.key'",
+              key: "key",
             },
             {
               componentName:
-                "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
+              key: "value",
               meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-              name: "value",
             },
           ],
           componentName: "DynamicTable",
           displayName: "Property",
-          name: "Prop",
+          key: "Prop",
         },
       ],
       componentName: "DynamicTable",
-      name: "Transform",
+      key: "Transform",
       tab: "Transform",
     },
     {
       attributes: [
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "name",
+          componentName: "SystemString",
+          key: "key",
           validation: { required: true },
         },
         {
           collection: "g:'Role'",
           componentName: "TagBox",
-          name: "role",
+          key: "role",
         },
         {
           collection: "g:'Perm'",
           componentName: "TagBox",
-          name: "perm",
+          key: "perm",
         },
         {
-          attributes: [textFieldInputMeta],
-          componentName: "TextField",
-          name: "scope",
+          componentName: "SystemString",
+          key: "scope",
         },
       ],
       componentName: "DynamicTable",
-      name: "Perm",
+      key: "Perm",
       tab: "Permission",
     },
     {
@@ -357,14 +347,14 @@ ${Object.keys(binopsInitial).join("\n")}`,
           componentName: "TagBox",
           displayName: "Unique Constrain Keys",
 
-          name: "pk",
+          key: "pk",
         },
       ],
       componentName: "DynamicTable",
-      name: "uniqueConstrain",
+      key: "uniqueConstrain",
       tab: "Unique Constrain",
     },
   ],
-  name: "Coll",
+  key: "Coll",
   title: "Collection",
 };

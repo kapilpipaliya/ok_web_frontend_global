@@ -33,7 +33,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
 
   const addOption = () => {
     setCssState(state(), ...(props.projections ?? []), {
-      [props.name]: [...props.value, {}],
+      [props.key]: [...props.value, {}],
     });
   };
 
@@ -41,7 +41,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
     const currentOptions = [...(props.value as Value)];
     currentOptions.splice(index, 1);
     setCssState(state(), ...(props.projections ?? []), {
-      [props.name]: currentOptions,
+      [props.key]: currentOptions,
     });
   };
 

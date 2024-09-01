@@ -14,11 +14,11 @@ export async function replaceFiles(
   request: Request,
   data: MultiPartData[],
   neo4jSession: Session,
-  subdomain: string,
+  subDomain: string,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
-  const userDir = path.join("/Users/ankit", subdomain, year, month, day);
+  const userDir = path.join("/Users/ankit", subDomain, year, month, day);
 
   ensureDirectoryExists(userDir);
 
@@ -54,7 +54,7 @@ export async function replaceFiles(
         fileSize,
         mimeType,
         originalFilename: file.filename,
-        subdomain,
+        subDomain,
         version: newVersion,
       };
 

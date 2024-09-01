@@ -259,14 +259,14 @@ export function PageViewWrapper(
       setFormStore("error", `${props.pageVertexName} is not authorized`);
       return;
     }
-    if (!formStore.formMeta?.P.name) {
-      setFormStore("error", "No name for the page");
+    if (!formStore.formMeta?.P.key) {
+      setFormStore("error", "No key for the page");
       return;
     }
     if (!id()) {
       const newVertexObj = newVertex(
         graph.newVertexId,
-        [formStore.formMeta.P.name],
+        [formStore.formMeta.P.key],
         {},
       );
       // TODO: Do Create Transformation for the vertex

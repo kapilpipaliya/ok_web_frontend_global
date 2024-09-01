@@ -52,8 +52,8 @@ export function SyncData() {
     <>
       <Breadcrumb
         breadcrumb={[
-          { href: "/admin", icon: "clarity:administrator-line", name: "Admin" },
-          { name: "Sync" },
+          { href: "/admin", icon: "clarity:administrator-line", key: "Admin" },
+          { key: "Sync" },
         ]}
         title="Sync"
       />
@@ -120,7 +120,7 @@ export function SyncData() {
         label: "Lab Port",
       },
       {
-        key: "P.subdomain",
+        key: "P.subDomain",
         label: "Subdomain",
       },
     ];

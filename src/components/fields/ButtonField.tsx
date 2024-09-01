@@ -7,7 +7,7 @@ import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { Button } from "~/kobalte/packages/core/src/button";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph, } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -26,11 +26,7 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
-  const [local, others] = splitProps(props, [
-    "ref",
-    "children",
-    "onChange",
-  ]);
+  const [local, others] = splitProps(props, ["ref", "children", "onChange"]);
   const [parentItems] = usePageRenderContext();
   const meta = () => getLastItem(parentItems!.vertexes)!;
   const data = () => getLastItem(parentItems!.data)!;
@@ -109,9 +105,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     <Show when={!(previewStore.isViewOnly && meta().P.type === "submit")}>
       {/* @ts-expect-error children is not a valid prop */}
       <Button ref={setInternalRef} {...others} {...extraProps}>
-        {data()?.P?.[meta().P.name] ??
-          meta().P.text ??
-          meta().P.children}
+        {data()?.P?.[meta().P.key] ?? meta().P.text ?? meta().P.children}
         {local.children}
       </Button>
     </Show>

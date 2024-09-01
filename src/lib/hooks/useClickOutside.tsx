@@ -13,7 +13,10 @@ export function useClickOutside(
 ) {
   const activeClickOutside = useActiveClickOutside(graph, setGraph);
   const handleClickOutside = (event: MouseEvent) => {
-    if (activeClickOutside < graph.activeClickOutside) {
+    if (
+      activeClickOutside !==
+      graph.activeClickOutside[graph.activeClickOutside.length - 1]
+    ) {
       return;
     }
     callback(event);

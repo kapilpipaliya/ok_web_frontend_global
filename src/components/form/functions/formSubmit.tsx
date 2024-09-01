@@ -44,7 +44,7 @@ export function formSubmit(closePopUp?: () => void) {
         return;
       }
 
-      const name = formStore!.formData!.P.name;
+      const key = formStore!.formData!.P.key;
 
       const res = await checkUniqueConstrains(formStore!.formData!);
 
@@ -64,7 +64,7 @@ export function formSubmit(closePopUp?: () => void) {
           }
         },
         promise: submitDataCall(
-          { ...data, name },
+          { ...data, key },
           graph,
           setGraph,
           formStore!.txnId,

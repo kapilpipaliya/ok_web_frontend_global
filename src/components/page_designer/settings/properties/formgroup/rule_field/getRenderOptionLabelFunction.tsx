@@ -13,7 +13,7 @@ export function getRenderOptionLabelFunction(component: typeof RulesModal) {
 
     return (
       <div class="flex ai:center gap:4">
-        <span>{option.P.name}</span>
+        <span>{option.P.key}</span>
         <IconButton
           class="center-content flex"
           icon={"mingcute:settings-5-line"}

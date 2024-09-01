@@ -21,7 +21,7 @@ export function NameKey() {
           meta={
             {
               P: modifyFieldMetaAllFields(
-                { name: "nameKey" } as FieldAttribute,
+                { key: "nameKey" } as FieldAttribute,
                 graph,
                 setGraph,
                 layoutStore,

@@ -65,14 +65,14 @@ export const reservedKeywords = {
     "REQUIRE",
     "SCALAR",
   ],
-  added: ["name", "id", "type", "label"],
+  added: ["key", "id", "type", "label"],
   added2: Object.keys(FormMetaData),
 };
-export function isReservedKeyword(name: string) {
+export function isReservedKeyword(key: string) {
   for (const category in reservedKeywords) {
     if (
       reservedKeywords[category as keyof typeof reservedKeywords].includes(
-        name.toUpperCase(),
+        key.toUpperCase(),
       )
     ) {
       return true;

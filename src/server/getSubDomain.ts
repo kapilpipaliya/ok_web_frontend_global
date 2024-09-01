@@ -17,21 +17,21 @@ export async function getSubDomain(host: string) {
     return "super"; // Return default 'super' when accessed via IP
   }
 
-  // Assuming the URL is something like `subdomain.example.com`
+  // Assuming the URL is something like `subDomain.example.com`
   // Split the host by '.' and check the length
   const parts = hostWithoutPort.split(".");
 
-  // Determine if a subdomain exists (assuming your domain is example.com)
-  let subdomain;
+  // Determine if a subDomain exists (assuming your domain is example.com)
+  let subDomain;
   if (parts.length > 2) {
-    subdomain = parts[parts.length - 3]; // Get the subdomain part
+    subDomain = parts[parts.length - 3]; // Get the subDomain part
   } else {
-    subdomain = "super"; // Default to 'super' if no subdomain is found
+    subDomain = "super"; // Default to 'super' if no subDomain is found
   }
 
-  if (subdomain === "www") {
+  if (subDomain === "www") {
     return "super";
   }
 
-  return subdomain;
+  return subDomain;
 }

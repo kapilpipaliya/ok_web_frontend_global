@@ -1,10 +1,7 @@
 import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {
-  textFieldInputMeta,
-  textFieldTextAreaMeta,
-} from "~/components/constants/textFieldInput";
+import { PROPERTIES } from "~/components/constants/constant";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { useGraph } from "../../graph/graph";
@@ -13,17 +10,15 @@ import { pageAttr } from "./pageAttr";
 export const Page: IFormMetaData = {
   attributes: [
     {
-      attributes: [textFieldInputMeta],
       class: "p:8 w:100%",
-      componentName: "TextField",
-      name: "title",
-      // onchange: '{"new": ["name","id"]}', // TODO: Fix this, it's not working with kobalte
+      componentName: "SystemString",
+      key: "title",
+      // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
     },
     {
-      attributes: [textFieldInputMeta],
       class: "p:8 w:100%",
-      componentName: "TextField",
-      name: "name",
+      componentName: "SystemString",
+      key: "key",
       validation: { required: true },
 
       validationRules: [
@@ -53,49 +48,48 @@ export const Page: IFormMetaData = {
       ],
     },
     {
-      attributes: [textFieldTextAreaMeta],
-      class: "p:8 w:100%",
-      componentName: "TextField",
-      name: "description",
+      class: `${PROPERTIES.Css.TextField} p:8 w:100%`,
+      componentName: "SystemTextArea",
+      key: "description",
     },
     {
       collection: "g:'Dashboard'",
       componentName: "TagBox",
       inward: true,
-      name: "dashboard",
+      key: "dashboard",
       parentLabel: "Dashboard",
     },
-    { componentName: "CheckBox", name: "public" },
-    /*{ componentName: "CheckBox", name: "isRealTime" },
+    { componentName: "SystemBoolean", key: "public" },
+    /*{ componentName: "SystemBoolean", key: "isRealTime" },
     {
       collection: "g:'Form'",
       componentName: "SelectBox",
       displayName: "Collection",
       
-        name: "coll",
+        key: "coll",
         // inward: true,
         parentLabel: "Form",
       
     },
     {
-      collection: `g:'{{->$0Coll::'P.name'}}'`,
+      collection: `g:'{{->$0Coll::'P.key'}}'`,
       componentName: "SelectBox",
-        name: "data",
+        key: "data",
     },*/
     {
       attributes: pageAttr,
       componentName: "DynamicTable",
+      key: "Attr",
       label: "Attr",
-      name: "Attr",
       tab: "Attribute",
       type: "Attr",
     },
     {
       collection: "->$0Perm",
       componentName: "TagBox",
-      name: "globalPerm",
+      key: "globalPerm",
     },
   ],
-  name: "Page",
+  key: "Page",
   title: "Page",
 };
