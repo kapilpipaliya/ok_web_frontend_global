@@ -32,7 +32,7 @@ export async function getDriver(
     port = 1102;
   } else {
     const session = (await getSuperSession()).session();
-    const query = `MATCH (n:User {subDomain: '${subDomain}'}) RETURN n;`;
+    const query = `MATCH (n:SubDomain {key: '${subDomain}'}) RETURN n;`;
     const res = await session.run(query, { subDomain });
     if (res.records.length > 0) {
       port = res.records[0].get("n")?.properties.driverPort;

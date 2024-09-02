@@ -35,12 +35,43 @@ export async function createDockerContainer(
   const docker = new Docker();
 
   try {
-    const container = await docker.createContainer({
-      ExposedPorts,
-      HostConfig: hostConfig,
-      Image,
-      name,
-    });
+    let container;
+    try {
+      await new Promise<void>((resolve, reject) => {
+        docker.pull(Image, {}, (err: Error | null, stream: NodeJS.ReadableStream | undefined) => {
+          if (err) {
+            return reject(err);
+          }
+          if (!stream) {
+            return reject(new Error("No stream returned from docker.pull"));
+          }
+          docker.modem.followProgress(stream, onFinished, onProgress);
+
+          function onFinished(err: Error | null, output: any) {
+            if (err) {
+              return reject(err);
+            }
+            resolve(output);
+          }
+
+          function onProgress(event: any) {
+            console.log(event);
+          }
+        });
+      });
+
+      container = await docker.createContainer({
+        ExposedPorts,
+        HostConfig: hostConfig,
+        Image,
+        name,
+      });
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        throw new Error(`No such image: ${Image}`);
+      }
+      throw error;
+    }
 
     const containerId = container.id;
 

@@ -30,7 +30,13 @@ export async function createSuperUser(
         username: $username,
         uuid: uuid
       })
-      RETURN u
+      CREATE (s:SubDomain {
+        driverPort: 1102,
+        labPort: 1104,
+        logsPort: 1103
+      })
+      CREATE (u)-[:UserSubDomain]->(s)
+      RETURN u, s
     `;
     const result = await superDbSession.run(query, {
       email,

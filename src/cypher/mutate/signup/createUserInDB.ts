@@ -24,10 +24,7 @@ export async function createUserInSuperDB(
             username: $username,
             uuid: $uuid,
             email: $email,
-            driverPort: $driverPort,
-            logsPort: $logsPort,
-            password: $password,
-            labPort: $labPort
+            password: $password
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
@@ -39,9 +36,18 @@ export async function createUserInSuperDB(
   const userNode = createUserResult.records[0].get("u");
 
   for (const subDomain of userData.subDomain) {
-    const createSubDomainQuery =
-      "CREATE (s:SubDomain { key: $subDomain }) RETURN s;";
-    const createSubDomainParams = { subDomain };
+    const createSubDomainQuery = `CREATE (s:SubDomain {
+            key: $subDomain,
+            driverPort: $driverPort,
+            labPort: $labPort,
+            logsPort: $logsPort
+        }) RETURN s;`;
+    const createSubDomainParams = {
+      subDomain,
+      driverPort: userData.driverPort,
+      labPort: userData.labPort,
+      logsPort: userData.logsPort,
+    };
     const createSubDomainResult = await superTx.run(
       createSubDomainQuery,
       createSubDomainParams,
