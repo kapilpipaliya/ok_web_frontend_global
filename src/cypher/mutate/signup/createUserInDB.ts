@@ -43,10 +43,10 @@ export async function createUserInSuperDB(
             logsPort: $logsPort
         }) RETURN s;`;
     const createSubDomainParams = {
-      subDomain,
       driverPort: userData.driverPort,
       labPort: userData.labPort,
       logsPort: userData.logsPort,
+      subDomain,
     };
     const createSubDomainResult = await superTx.run(
       createSubDomainQuery,
