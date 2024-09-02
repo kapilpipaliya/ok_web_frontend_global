@@ -1,7 +1,7 @@
-import { parse } from "tldjs";
+import tld from "tldjs";
 
 export async function getSubDomain(host: string) {
-  const { subdomain } = parse(host);
+  const { subdomain } = tld.parse(host);
 
   if (!subdomain || subdomain === "www") {
     return "super";
