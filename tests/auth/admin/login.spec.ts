@@ -9,7 +9,7 @@ import { signOut } from '../functions/signOut';
 
 test.describe('admin login', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://mydomain.com/auth/login');
+    await page.goto('/auth/login');
   });
 
   test.afterEach(async ({ page }) => {

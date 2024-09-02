@@ -5,7 +5,7 @@ import { waitForDockerCreate } from '~/cypher/mutate/signup/waitForDockerCreate'
 // import { removeDockerContainer } from '~/server/docker/removeDockerContainer';
 // import { stopDockerContainer } from '~/server/docker/stopDockerContainer';
 
-test.use({baseURL: 'https://mydomain.com'});
+
 test.describe('super user setup', () => {
   let docker: Docker;
 

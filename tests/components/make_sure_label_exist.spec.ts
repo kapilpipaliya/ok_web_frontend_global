@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { superUserData } from '../auth/data/signUpData';
 import { logIn } from '../auth/functions/logIn';
 
-test.use({baseURL: 'https://mydomain.com'})
+test.use({baseURL: ''})
 
 test.describe('make sure label exists', () => {
   test.beforeEach(async ({ page }) => {

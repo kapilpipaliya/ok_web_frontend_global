@@ -9,7 +9,7 @@ import { signOut } from '../functions/signOut';
 
 test.describe('page designer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://mydomain.com/auth/login');
+    await page.goto('/auth/login');
   });
 
   test.afterEach(async ({ page }) => {
@@ -18,7 +18,7 @@ test.describe('page designer', () => {
 
   test('page designer test', async ({ page }) => {
     await logIn(page, signUpData.subDomain, signUpData.password);
-    await page.goto('https://mydomain.com/admin/Page/new');
+    await page.goto('/admin/Page/new');
     await page.locator('div').filter({ hasText: /^Accordion$/ }).click();
     await page.locator('div').filter({ hasText: /^Alert$/ }).click();
     await page.getByText('Breadcrumbs').click();

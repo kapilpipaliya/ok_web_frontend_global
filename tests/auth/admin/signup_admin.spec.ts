@@ -8,7 +8,7 @@ import { logIn } from '../functions/logIn';
 import { signOut } from '../functions/signOut';
 import { generate401RedirectUrl } from '~/generate401RedirectUrl';
 
-test.use({baseURL: 'https://mydomain.com'});
+
 
 test.describe('admin user setup', () => {
   test.beforeEach(async ({ page }) => {
