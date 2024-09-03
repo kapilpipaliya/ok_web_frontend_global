@@ -8,11 +8,11 @@ import type { Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function updateNodeProperties(
-  session: Session,
+  dbSession: Session,
   node: Vertex,
   properties: { [key: string]: any },
 ) {
-  const result = await session.run(
+  const result = await dbSession.run(
     "MATCH (n) WHERE id(n) = $id SET n += $properties SET n.updatedAt = localDateTime() RETURN n;",
     { id: int(node.id), properties },
   );

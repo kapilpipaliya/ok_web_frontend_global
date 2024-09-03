@@ -23,7 +23,7 @@ export async function evalGetRelatedNodes(
     return;
   }
 
-  const session = await getSession(context);
+  const dbSession = await getSession(context);
 
   const { params, query } = buildQuery(
     edgeType,
@@ -36,7 +36,7 @@ export async function evalGetRelatedNodes(
     return;
   }
   try {
-    const result = await runQuery(session, query, params, context.tx);
+    const result = await runQuery(dbSession, query, params, context.tx);
     if (params.allLabels) {
       return result.records.map((record) => record.get(0)[0]);
     }
@@ -55,7 +55,7 @@ export async function evalGetRelatedNodes(
     );
     throw error;
   } finally {
-    await closeSession(session, context);
+    await closeSession(dbSession, context);
   }
 }
 
@@ -124,32 +124,36 @@ function buildQuery(
       } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
-        if (Array.isArray(filter) && filter.length > 0) {
-          const filterConditions = filter
-            .map((condition, index) => {
+        if (Array.isArray(filter)) {
+          if (filter.length > 0) {
+            const filterConditions = filter
+              .map((condition, index) => {
+                if (typeof condition === "object" && condition !== null) {
+                  return Object.keys(condition)
+                    .map((key) => `n.${key} = $${key}_${index}`)
+                    .join(" AND ");
+                }
+              })
+              .join(" AND ");
+            query += ` WHERE ${filterConditions}`;
+            params = filter.reduce((acc, condition, index) => {
               if (typeof condition === "object" && condition !== null) {
-                return Object.keys(condition)
-                  .map((key) => `n.${key} = $${key}_${index}`)
-                  .join(" AND ");
+                Object.keys(condition).forEach((key) => {
+                  acc[`${key}_${index}`] = condition[key];
+                });
               }
-            })
-            .join(" AND ");
-          query += ` WHERE ${filterConditions}`;
-          params = filter.reduce((acc, condition, index) => {
-            if (typeof condition === "object" && condition !== null) {
-              Object.keys(condition).forEach((key) => {
-                acc[`${key}_${index}`] = condition[key];
-              });
-            }
-            return acc;
-          }, {});
-        } else if (isObject(filter) && Object.keys(filter).length > 0) {
-          const filterKeys = Object.keys(filter);
-          const filterConditions = filterKeys
-            .map((key) => `n.${key} = $${key}`)
-            .join(" AND ");
-          query += ` WHERE ${filterConditions}`;
-          params = filter;
+              return acc;
+            }, {});
+          }
+        } else if (isObject(filter)) {
+          if (Object.keys(filter).length > 0) {
+            const filterKeys = Object.keys(filter);
+            const filterConditions = filterKeys
+              .map((key) => `n.${key} = $${key}`)
+              .join(" AND ");
+            query += ` WHERE ${filterConditions}`;
+            params = filter;
+          }
         }
 
         if (skip) {
@@ -160,7 +164,7 @@ function buildQuery(
         }
         query += " RETURN n";
       } else {
-        params = { key: key };
+        params = {};
       }
     }
   } else if (relationType === "id") {
@@ -180,7 +184,7 @@ async function getSession(context: ContextType) {
   if (context.tx) {
     return null;
   }
-  return context.session || (await getDBSessionForSubdomain()).dbSession;
+  return context.dbSession || (await getDBSessionForSubdomain()).dbSession;
 }
 
 function getEdgeType(edgeType: string, vertexes: Vertex[]) {
@@ -188,7 +192,7 @@ function getEdgeType(edgeType: string, vertexes: Vertex[]) {
 }
 
 async function runQuery(
-  session: null | Session,
+  dbSession: null | Session,
   query: string,
   params: { [key: string]: unknown },
   tx?: Transaction,
@@ -196,12 +200,12 @@ async function runQuery(
   if (tx) {
     return await tx.run(query, params);
   }
-  return await session!.run(query, params);
+  return await dbSession!.run(query, params);
 }
 
-async function closeSession(session: null | Session, context: ContextType) {
-  if (!context.session && session) {
-    await session.close();
+async function closeSession(dbSession: null | Session, context: ContextType) {
+  if (!context.dbSession && dbSession) {
+    await dbSession.close();
   }
 }
 

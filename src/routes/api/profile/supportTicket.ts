@@ -7,7 +7,7 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 
 export async function supportTicket(
   data: any,
-  session: Session,
+  dbSession: Session,
   subDomain: string,
 ) {
   const { action, ...payload } = data;
@@ -15,28 +15,28 @@ export async function supportTicket(
   switch (action) {
     case "chat":
       // payload: { panel: 'supportTicket',action: 'chat',key, email, subject, message }
-      return await chat(payload, session, subDomain);
+      return await chat(payload, dbSession, subDomain);
     case "create":
       // payload: { panel: 'supportTicket',action: 'create',key, email, subject, message }
-      return await createTicket(payload, session);
+      return await createTicket(payload, dbSession);
     case "delete":
       // payload: { panel: 'supportTicket',action: 'delete',id }
-      return await deleteTicket(payload, session, subDomain);
+      return await deleteTicket(payload, dbSession, subDomain);
     case "getTicktes":
       // payload: { panel: 'supportTicket',action: 'getTicktes', email}
-      return await getTicket(payload, session);
+      return await getTicket(payload, dbSession);
     case "updateStatus":
       // payload: { panel: 'supportTicket',action: 'updateStatus',id, status }
-      return await updateStatus(payload, session);
+      return await updateStatus(payload, dbSession);
     default:
       return { error: "Invalid support ticket action", status: 400 };
   }
 
-  async function getTicket(payload: any, session: Session) {
+  async function getTicket(payload: any, dbSession: Session) {
     const { email } = payload;
 
     const query = "MATCH (n:Support {email: $email}) RETURN n;";
-    const result = await session.run(query, { email });
+    const result = await dbSession.run(query, { email });
 
     const data = result.records.map((r) => {
       const data = r.get("n").properties;
@@ -49,11 +49,11 @@ export async function supportTicket(
     };
   }
 
-  async function createTicket(payload: any, session: Session) {
+  async function createTicket(payload: any, dbSession: Session) {
     const { email, key, message, subject } = payload;
 
     const query = `CREATE (n:Support {key: $key, email: $email,subject: $subject, message: $message, status: "pending"}) SET n.createdAt = localDateTime() RETURN n;`;
-    await session.run(query, {
+    await dbSession.run(query, {
       email: email,
       key: key,
       message: message,
@@ -64,18 +64,18 @@ export async function supportTicket(
     };
   }
 
-  async function updateStatus(payload: any, session: Session) {
+  async function updateStatus(payload: any, dbSession: Session) {
     const { id, status } = payload;
 
     const query =
       "MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
-    await session.run(query, { id: int(id), status: status });
+    await dbSession.run(query, { id: int(id), status: status });
     return {
       message: "Status updated successfully",
     };
   }
 
-  async function chat(payload: any, _session: Session, _subdomain: string) {
+  async function chat(payload: any, dbSession: Session, _subDomain: string) {
     const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
       case "send": {
@@ -90,7 +90,7 @@ export async function supportTicket(
       }
       case "get": {
         const query = "MATCH (v) WHERE id(v) = $id RETURN v";
-        const result = await session.run(query, { id: parentVertexId });
+        const result = await dbSession.run(query, { id: parentVertexId });
 
         const messagesResult = await getSelectionOptionsMGCall(
           [convertNodeToJson(result.records[0].get("v"))],
@@ -105,8 +105,8 @@ export async function supportTicket(
 
   async function deleteTicket(
     payload: any,
-    _session: Session,
-    _subdomain: string,
+    dbSession: Session,
+    _subDomain: string,
   ) {
     const { id } = payload;
     // deleted this function intentionally, use mutation handler instead

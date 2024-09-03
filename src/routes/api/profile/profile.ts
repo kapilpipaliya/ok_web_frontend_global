@@ -10,7 +10,7 @@ import { updateProfile } from "~/routes/api/profile/updateProfile";
 async function handleRequest(
   func: (
     payload: any,
-    session: Session,
+    dbSession: Session,
     subDomain: string,
   ) => Promise<Record<string, any>>,
   params: Record<string, any>,

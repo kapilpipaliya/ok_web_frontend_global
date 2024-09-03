@@ -11,7 +11,7 @@ import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { ComponentItemContainer } from "./ComponentItemContainer";
 import { ComponentPreview } from "./preview/ComponentPreview";
 
-export function ComonentItem(props: Readonly<{ child: Vertex }>) {
+export function ComonentItem(props: Readonly<{ child: Vertex, expandedComponent?: Vertex, setExpandedComponent: (component?: Vertex) => void }>) {
   const [graph] = useGraph();
   const [isHovered, _setIsHovered] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
@@ -55,17 +55,20 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
   };
 
   return (
-    <ComponentItemContainer
+    <><ComponentItemContainer
       child={props.child}
       isHovered={isHovered()}
-      onMouseEnter={() => {
-        // setIsHovered(true);
-        handlePreviewMouseEnter();
+      onClick={() => {
+        props.setExpandedComponent(props.child === props.expandedComponent ? undefined : props.child);
       }}
-      onMouseLeave={(el) => {
-        // setIsHovered(false);
-        handlePreviewMouseLeave(el);
-      }}
+      // onMouseEnter={() => {
+      //   // setIsHovered(true);
+      //   handlePreviewMouseEnter();
+      // }}
+      // onMouseLeave={(el) => {
+      //   // setIsHovered(false);
+      //   handlePreviewMouseLeave(el);
+      // }}
       ref={(el) => (previewCSSRef = el)}
       selectedComponents={selectedComponents}
       setSelectedComponents={setSelectedComponents}
@@ -90,7 +93,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           wrapperClass="height:19px width:19px"
         />
       </Show>
-      <div class="flex {flex-flow:column} ai:center gap:5px pt:5px">
+      <div class="flex {flex-flow:column} gap:5px pt:5px cursor:pointer">
         <Show when={false}>
           <Icon
             height={24}
@@ -107,24 +110,24 @@ export function ComonentItem(props: Readonly<{ child: Vertex }>) {
           {props.child?.P.label || props.child?.P.key}
         </span>
       </div>
-      <Show when={showPreview()}>
-        <ZIndex>
-          <ComponentPreview
-            item={props.child}
-            onClose={() => setShowPreview(false)}
-            onMouseLeave={(event) => {
-              if (
-                previewCSSRef &&
-                !previewCSSRef.contains(event.relatedTarget as Node)
-              ) {
-                setShowPreview(false);
-              }
-            }}
-            parentRef={previewCSSRef!}
-            ref={setFloating}
-          />
-        </ZIndex>
-      </Show>
     </ComponentItemContainer>
+      <Show when={props.expandedComponent === props.child}>
+        <ComponentPreview
+          item={props.child}
+          // onClose={() => setShowPreview(false)}
+          // onMouseLeave={(event) => {
+          //   if (
+          //     previewCSSRef &&
+          //     !previewCSSRef.contains(event.relatedTarget as Node)
+          //   ) {
+          //     setShowPreview(false);
+          //   }
+          // }}
+          parentRef={previewCSSRef!}
+          ref={setFloating}
+        />
+
+      </Show>
+    </>
   );
 }

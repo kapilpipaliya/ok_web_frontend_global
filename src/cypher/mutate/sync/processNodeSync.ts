@@ -20,9 +20,9 @@ export async function processNodeSync(
   result: Vertex[];
 }> {
   const context = {
+    dbSession: sessionSource,
     nodes: {} as VertexMap,
     relationships: {} as EdgeMap,
-    session: sessionSource,
     setChildren: true,
     vertexes,
   };

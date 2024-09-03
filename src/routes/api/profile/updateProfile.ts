@@ -5,13 +5,13 @@ import { getHttpsSession } from "~/server/getHttpsSession";
 
 export async function updateProfile(
   payload: any,
-  session: Session,
+  dbSession: Session,
   _subdomain: string,
 ) {
   const { email, profileImage, userId, username, uuid } = payload;
 
   // Ensure user exists
-  const userExists = await session.run(
+  const userExists = await dbSession.run(
     "MATCH (u:User) WHERE u.uuid = $uuid RETURN u;",
     { uuid },
   );
@@ -21,7 +21,7 @@ export async function updateProfile(
 
   // Check if email and username already exists
   if (email) {
-    const emailExists = await session.run(
+    const emailExists = await dbSession.run(
       "MATCH (u:User {email: $email}) RETURN u;",
       { email },
     );
@@ -30,7 +30,7 @@ export async function updateProfile(
     }
   }
   if (username) {
-    const usernameExists = await session.run(
+    const usernameExists = await dbSession.run(
       "MATCH (u:User {username: $username}) RETURN u;",
       { username },
     );
@@ -53,7 +53,7 @@ export async function updateProfile(
   }
   query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
-  const result = await session.run(query, {
+  const result = await dbSession.run(query, {
     email,
     profileImage,
     userId,
@@ -62,10 +62,10 @@ export async function updateProfile(
   });
   const user = result.records[0]?.get("u");
 
-  const session2 = (
+  const dbSession2 = (
     await getDriverWithPort(user.properties.driverPort)
   ).session();
-  await session2.run(query, {
+  await dbSession2.run(query, {
     email,
     profileImage,
     userId,

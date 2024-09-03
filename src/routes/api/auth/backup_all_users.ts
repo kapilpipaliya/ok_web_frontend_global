@@ -9,11 +9,11 @@ import { getSubDomain } from "~/server/getSubDomain";
 
 export async function saveGraphToCypherQL() {
   const subDomain = "default"; // Adjust this as needed
-  const session = (await getDriver(subDomain)).session();
+  const dbSession = (await getDriver(subDomain)).session();
 
   try {
     const query = "MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m";
-    const result = await session.run(query);
+    const result = await dbSession.run(query);
 
     if (result.records.length === 0) {
       throw new Error("No nodes or relationships found in the database.");
@@ -60,7 +60,7 @@ export async function saveGraphToCypherQL() {
   } catch (error) {
     console.error("Error saving graph to CypherQL:", error);
   } finally {
-    await session.close();
+    await dbSession.close();
   }
 }
 

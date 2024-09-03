@@ -19,6 +19,7 @@ export function ComponentList() {
   const [isFetchingData, setIsFetchingData] = createSignal(true);
   const { showErrorToast } = useToast();
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
+  const [expandedComponent, setExpandedComponent] = createSignal<Vertex>();
 
   // Fetch data function
   async function fetchData() {
@@ -89,10 +90,14 @@ export function ComponentList() {
               <>
                 <div
                   class={
-                    "font-size:17px font-weight:600 margin-bottom:8px margin-top:8px"
+                    "font-weight:600 my:8px"
                   }
                 >
-                  <ComonentItem child={item} />
+                  <ComonentItem
+                    child={item}
+                    expandedComponent={expandedComponent()}
+                    setExpandedComponent={setExpandedComponent}
+                  />
                 </div>
               </>
             )}

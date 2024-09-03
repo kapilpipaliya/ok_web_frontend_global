@@ -31,15 +31,15 @@ export async function getDriver(
   if (subDomain === "super" || subDomain === "www") {
     port = 1102;
   } else {
-    const session = (await getSuperSession()).session();
+    const dbSession = (await getSuperSession()).session();
     const query = `MATCH (n:SubDomain {key: '${subDomain}'}) RETURN n;`;
-    const res = await session.run(query, { subDomain });
+    const res = await dbSession.run(query, { subDomain });
     if (res.records.length > 0) {
       port = res.records[0].get("n")?.properties.driverPort;
     } else {
       throw new Error(`Subdomain ${subDomain} Not Found!`);
     }
-    await session.close();
+    await dbSession.close();
   }
 
   return getDriverWithPort(port, username, password);

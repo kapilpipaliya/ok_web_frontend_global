@@ -23,7 +23,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   }
 
   try {
-    if (await doesNameExist(session, label, key, id)) {
+    if (await doesNameExist(dbSession, label, key, id)) {
       return { error: "Provided key already exists" };
     }
 
@@ -63,19 +63,19 @@ export async function checkUniqueConstrains(vertex: Vertex) {
 }
 
 async function doesNameExist(
-  session: any,
+  dbSession: any,
   label: string,
   key: string,
   id?: string,
 ) {
   const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND v.elementId != $id" : ""} RETURN v`;
   const params = id ? { id, key } : { key };
-  const result = await session.run(query, params);
+  const result = await dbSession.run(query, params);
   return result.records.length > 0;
 }
 
 async function doesUniqueConstraintExist(
-  session: any,
+  dbSession: any,
   label: string,
   id: string | undefined,
   keys: Vertex[],
@@ -92,6 +92,6 @@ async function doesUniqueConstraintExist(
   query = query.slice(0, -5); // Remove the last ' AND '
   query += " RETURN v";
 
-  const result = await session.run(query, params);
+  const result = await dbSession.run(query, params);
   return result.records.length > 0;
 }

@@ -4,8 +4,8 @@ import fs from "node:fs/promises";
 
 import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
 
-export async function downloadFile(fileId: string, session: Session) {
-  const fileMetadata = await getFileMetadataFromNeo4j(session, fileId);
+export async function downloadFile(fileId: string, dbSession: Session) {
+  const fileMetadata = await getFileMetadataFromNeo4j(dbSession, fileId);
 
   if (!fileMetadata) {
     return new Response(JSON.stringify({ error: "File not found" }), {

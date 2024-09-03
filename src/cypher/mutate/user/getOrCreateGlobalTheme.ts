@@ -5,13 +5,13 @@ import type { Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getOrCreateGlobalTheme(
-  session: Session,
+  dbSession: Session,
 ): Promise<null | Vertex> {
   const globalThemeQuery = `
       MATCH (t:GlobalTheme)
       RETURN t
     `;
-  const globalThemeResult = await session.run(globalThemeQuery);
+  const globalThemeResult = await dbSession.run(globalThemeQuery);
   if (globalThemeResult.records.length > 0) {
     return convertNodeToJson(globalThemeResult.records[0].get("t") as Node);
   }
@@ -19,7 +19,7 @@ export async function getOrCreateGlobalTheme(
         CREATE (t:GlobalTheme { createdAt: localDateTime() })
         RETURN t
       `;
-  const createGlobalThemeResult = await session.run(createGlobalThemeQuery);
+  const createGlobalThemeResult = await dbSession.run(createGlobalThemeQuery);
   return createGlobalThemeResult.records.length > 0
     ? convertNodeToJson(createGlobalThemeResult.records[0].get("t") as Node)
     : null;

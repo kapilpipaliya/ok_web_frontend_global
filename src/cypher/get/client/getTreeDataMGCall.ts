@@ -37,14 +37,14 @@ export async function getTreeDataMGCall(
       }
 
       const children = await evalExpressionAsync(levels.collection, {
+        dbSession,
         nodes,
         relationships,
-        session: dbSession,
         vertexes,
       });
 
       const childNodes: TreeNode[] = [];
-      // Using await Promise.all close the session first, so used for...of
+      // Using await Promise.all close the dbSession first, so used for...of
       for (const child of (children || []).sort(
         (a: Vertex, b: Vertex) => a.P.pos - b.P.pos,
       )) {

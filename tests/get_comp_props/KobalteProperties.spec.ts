@@ -16,6 +16,7 @@ async function getNextSiblingDiv(locator: Locator): Promise<Locator> {
 }
 
 test('save kobalte properties', async ({ page }) => {
+    test.setTimeout(300000); // Increased timeout to 5 minutes
   await page.goto('https://kobalte.dev/docs/core/overview/introduction/');
   
   const componentDetails = await page.getByRole('heading', { exact: true, name: 'Components' });
@@ -25,6 +26,8 @@ test('save kobalte properties', async ({ page }) => {
   const ignoredFiles = fs.readdirSync(path.join('src', 'cypher', 'mutate', 'sync', 'component_properties', 'corvu'))
                          .map(file => file.replace('.ts', ''));
 
+  const componentNameToUrlMap: Record<string, string> = {};
+
   for (const link of componentLinks) {
     const linkTextContent = (await link.textContent())!.trim().replace(/new$/, '')
     const linkText = toPascal(capitalize(linkTextContent));
@@ -33,10 +36,21 @@ test('save kobalte properties', async ({ page }) => {
       continue;
     }
     
+    const componentUrl = await link.getAttribute('href');
+    const urlParts = componentUrl!.split('/');
+    const lastPart = urlParts[urlParts.length - 1];
+    componentNameToUrlMap[linkText] = lastPart;
+
     await link.click();
     await expect(page).toHaveTitle(new RegExp(`^${linkTextContent}`), { timeout: 5000 });
     await extractComponentData(page, linkText);
   }
+
+  // Save the componentName to URL map to a separate file
+  const urlMapFilePath = path.join('src', 'cypher', 'mutate', 'sync', 'component_properties', 'kobalte-components.ts');
+  const urlMapContent = `export const kobalteComponentUrls = ${JSON.stringify(componentNameToUrlMap, null, 2)};\n`;
+  fs.writeFileSync(urlMapFilePath, urlMapContent.trim());
+  console.log(`Component name to URL map created: ${urlMapFilePath}`);
 
   generateIndexFile(['src', 'cypher', 'mutate', 'sync', 'component_properties', 'kobalte']);
 });

@@ -1,11 +1,11 @@
 import type { Session } from "neo4j-driver";
 
-export async function password(payload: any, session: Session) {
+export async function password(payload: any, dbSession: Session) {
   const { currentPassword, newPassword, username } = payload;
 
   const findUserQuery =
     "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
-  const findUserResult = await session.run(findUserQuery, {
+  const findUserResult = await dbSession.run(findUserQuery, {
     password: currentPassword,
     username: username,
   });
@@ -15,7 +15,7 @@ export async function password(payload: any, session: Session) {
 
   const query =
     "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
-  const result = await session.run(query, {
+  const result = await dbSession.run(query, {
     password: newPassword,
     username: username,
   });

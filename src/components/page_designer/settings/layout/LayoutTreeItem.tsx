@@ -160,7 +160,7 @@ export function LayoutTreeItem(
           children().length > 0
         }
       >
-        <ul class="pb:5 pl:8 pt:3">
+        <ul class="pl:8 pt:5">
           <For each={children()}>
             {(vertex) => (
               <Show when={layoutStore.formStore[0]}>

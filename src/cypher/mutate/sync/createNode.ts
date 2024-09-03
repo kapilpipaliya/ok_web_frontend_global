@@ -4,11 +4,11 @@ import type { Session } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function createNode(
-  session: Session,
+  dbSession: Session,
   nodeType: string,
   properties: { [key: string]: any },
 ) {
-  const result = await session.run(
+  const result = await dbSession.run(
     `CREATE (n:${nodeType}) SET n = $properties SET n.createdAt = localDateTime() RETURN n;`,
     { properties },
   );

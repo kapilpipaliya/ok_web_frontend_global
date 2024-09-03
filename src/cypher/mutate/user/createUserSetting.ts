@@ -7,7 +7,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function createUserSetting(
-  session: Session,
+  dbSession: Session,
   userId: string,
 ): Promise<null | Vertex> {
   const createUserSettingQuery = `
@@ -16,7 +16,7 @@ export async function createUserSetting(
       CREATE (u)-[:UserSetting]->(s:UserSetting { createdAt: localDateTime() })
       RETURN s
     `;
-  const createResult = await session.run(createUserSettingQuery, {
+  const createResult = await dbSession.run(createUserSettingQuery, {
     userId: int(userId),
   });
   return createResult.records.length > 0

@@ -2,10 +2,10 @@ import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
-export async function getSubDomainInfo(subDomain: string, session: Session) {
+export async function getSubDomainInfo(subDomain: string, dbSession: Session) {
   try {
     const query = "MATCH (u:User {subDomain: $subDomain}) RETURN u;";
-    const result = await session.run(query, { subDomain });
+    const result = await dbSession.run(query, { subDomain });
 
     if (result.records.length === 0) {
       return { error: "Subdomain is not valid" };
@@ -18,6 +18,6 @@ export async function getSubDomainInfo(subDomain: string, session: Session) {
     console.error("Failed to execute query:", error);
     throw error;
   } finally {
-    await session.close();
+    await dbSession.close();
   }
 }

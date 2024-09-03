@@ -15,10 +15,10 @@ export async function connectToNeo4jWithRetry(
       const driver = neo4j.driver(uri, undefined, {
         disableLosslessIntegers: true,
       });
-      // Try to establish a connection by creating a session and running a simple query
-      const session = driver.session();
-      await session.run("RETURN 1");
-      await session.close();
+      // Try to establish a connection by creating a dbSession and running a simple query
+      const dbSession = driver.session();
+      await dbSession.run("RETURN 1");
+      await dbSession.close();
       return driver;
     } catch (error) {
       /*console.error(

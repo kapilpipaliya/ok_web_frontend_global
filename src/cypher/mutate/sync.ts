@@ -12,17 +12,17 @@ export async function syncNodesMGCall(args: {
   const nodesToTransfer = args.nodesToTransfer;
   const userport = args.userport;
   // Creating Neo4j driver instances for admin and user sessions.
-  const admin = neo4j.driver("bolt://localhost:1102", undefined, {
+  const adminDriver = neo4j.driver("bolt://localhost:1102", undefined, {
     disableLosslessIntegers: true,
   });
-  const user = neo4j.driver(`bolt://localhost:${userport}`, undefined, {
+  const userDriver = neo4j.driver(`bolt://localhost:${userport}`, undefined, {
     disableLosslessIntegers: true,
   });
-  const sessionSource = admin.session();
-  const sessionTarget = user.session();
+  const dbSessionSource = adminDriver.session();
+  const dbSessionTarget = userDriver.session();
 
   try {
-    await transferNodeTypes(sessionSource, sessionTarget, nodesToTransfer);
+    await transferNodeTypes(dbSessionSource, dbSessionTarget, nodesToTransfer);
     return {
       error: false,
       message: "Migration completed successfully.",
@@ -33,7 +33,7 @@ export async function syncNodesMGCall(args: {
       error: "Error migrating nodes.",
     };
   } finally {
-    await sessionSource.close();
-    await sessionTarget.close();
+    await dbSessionSource.close();
+    await dbSessionTarget.close();
   }
 }

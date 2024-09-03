@@ -11,8 +11,9 @@ import { TreeItemContent } from "./TreeItemContent";
 
 export function CompPreviewTreeItem(
   props: Readonly<{
-    ancestorIds?: Id[]; // Add a new prop to track ancestor IDs
+    ancestorIds?: Id[];
     collapsedKeys: string[];
+    hideFirstItem?: boolean;
     item: Vertex;
     toggleExpand: (itemId: Id) => void;
   }>,
@@ -30,25 +31,27 @@ export function CompPreviewTreeItem(
 
   return (
     <>
-      <TreeItemContainer
-        draggable={true}
-        hasChildren={!!children().length}
-        isHovered={false}
-        onDragEnd={onDragEnd}
-        onDragStart={(e) =>
-          onCompDragStart(e, graph, props.item.id, setLayoutStore)
-        }
-        onMouseEnter={() => {}}
-        onmouseleave={() => {}}
-      >
-        <TreeItemContent
-          collapsedKeys={props.collapsedKeys}
-          item={props.item}
-          toggleExpand={props.toggleExpand}
-        />
-      </TreeItemContainer>
+      <Show when={!props.hideFirstItem}>
+        <TreeItemContainer
+          draggable={true}
+          hasChildren={!!children().length}
+          isHovered={false}
+          onDragEnd={onDragEnd}
+          onDragStart={(e) =>
+            onCompDragStart(e, graph, props.item.id, setLayoutStore)
+          }
+          onMouseEnter={() => {}}
+          onmouseleave={() => {}}
+        >
+          <TreeItemContent
+            collapsedKeys={props.collapsedKeys}
+            item={props.item}
+            toggleExpand={props.toggleExpand}
+          />
+        </TreeItemContainer>
+      </Show>
       <Show when={!props.collapsedKeys.includes(props.item.id)}>
-        <ul class="pb:5 pl:8 pt:3">
+        <ul class="pl:8 pt:5">
           <For each={children()}>
             {(child) =>
               // Skip rendering if the child item is an ancestor of the current item

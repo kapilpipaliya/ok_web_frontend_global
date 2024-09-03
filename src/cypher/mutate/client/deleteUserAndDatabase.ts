@@ -12,7 +12,7 @@ export async function deleteUserAndDatabase(userName: string) {
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
 
-  const sessionSource = (await getDriver(subDomain)).session();
+  const dbSessionSource = (await getDriver(subDomain)).session();
 
   try {
     const stopDockerRes = await stopDockerContainer(userName);
@@ -36,6 +36,6 @@ export async function deleteUserAndDatabase(userName: string) {
       error: "Error deleting user",
     };
   } finally {
-    await sessionSource.close();
+    await dbSessionSource.close();
   }
 }

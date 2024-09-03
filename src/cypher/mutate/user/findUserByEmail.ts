@@ -15,7 +15,7 @@ interface UserResult {
 }
 
 export async function findUserByEmail(
-  session: Session,
+  dbSession: Session,
   email: string,
 ): Promise<UserResult> {
   const query = `
@@ -26,7 +26,7 @@ export async function findUserByEmail(
     RETURN u, s, collect(r) AS roles
   `;
 
-  const result = await session.run(query, { email });
+  const result = await dbSession.run(query, { email });
 
   if (result.records.length === 0) {
     throw new Error(`User with email or username "${email}" not found.`);
@@ -43,11 +43,11 @@ export async function findUserByEmail(
     : null;
 
   if (user && !userSetting) {
-    userSetting = (await createUserSetting(session, user.id)) as Vertex;
+    userSetting = (await createUserSetting(dbSession, user.id)) as Vertex;
   }
 
   return {
-    globalTheme: await getOrCreateGlobalTheme(session),
+    globalTheme: await getOrCreateGlobalTheme(dbSession),
     roles,
     user,
     userSetting,

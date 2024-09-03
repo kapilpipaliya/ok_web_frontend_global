@@ -53,7 +53,7 @@ import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 
-const corvuComponents = {
+export const corvuComponents = {
   Accordion,
   Dialog,
   Disclosure,
@@ -64,7 +64,16 @@ const corvuComponents = {
   Tooltip,
 };
 
-const kobalteComponents = {
+export const arkUIComponents = {
+  // ColorPicker,
+  // DatePicker,
+  // Dropdown,
+  // Modal,
+  // Slider,
+  // Tabs,
+};
+
+export const kobalteComponents = {
   // Accordion,
   Alert,
   AlertDialog,
@@ -140,6 +149,15 @@ export function getDynamicComponent(component: string) {
           subComponent
         ] || NotFoundComponent
       : corvuComponents[componentKey as keyof typeof corvuComponents];
+  }
+
+  if (arkUIComponents[componentKey as keyof typeof arkUIComponents]) {
+    return subComponent
+      ? // @ts-expect-error ignore
+        arkUIComponents[componentKey as keyof typeof arkUIComponents][
+          subComponent
+        ] || NotFoundComponent
+      : arkUIComponents[componentKey as keyof typeof arkUIComponents];
   }
 
   if (kobalteComponents[componentKey as keyof typeof kobalteComponents]) {

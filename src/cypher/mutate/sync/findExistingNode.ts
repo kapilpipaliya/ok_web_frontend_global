@@ -4,11 +4,11 @@ import type { Session } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function findExistingNode(
-  session: Session,
+  dbSession: Session,
   nodeType: string,
   key: string,
 ) {
-  const result = await session.run(
+  const result = await dbSession.run(
     `MATCH (n:${nodeType} {key: $key}) RETURN n;`,
     { key: key },
   );

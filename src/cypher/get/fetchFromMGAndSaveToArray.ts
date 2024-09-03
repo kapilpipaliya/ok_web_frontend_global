@@ -10,14 +10,14 @@ import {
 } from "~/cypher/convertNodeToJson";
 
 export async function fetchFromMGAndSaveToArray(
-  session: Session,
+  dbSession: Session,
   query: string,
   params: Record<string, unknown>,
   nodeObj: Record<string, Vertex>,
   relationshipObj: Record<string, Edge>,
 ): Promise<void> {
   try {
-    const result = await session.run(query, params);
+    const result = await dbSession.run(query, params);
     for (const record of result.records) {
       record.forEach((value) => {
         if (value instanceof types.Node) {

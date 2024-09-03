@@ -10,8 +10,9 @@ export function ComponentItemContainer(props: {
   child: Vertex;
   children: JSX.Element;
   isHovered: boolean;
-  onMouseEnter: (el: MouseEvent) => void;
-  onMouseLeave: (el: MouseEvent) => void;
+  onClick?: (el: MouseEvent) => void;
+  onMouseEnter?: (el: MouseEvent) => void;
+  onMouseLeave?: (el: MouseEvent) => void;
   ref: (el: HTMLDivElement) => void;
   selectedComponents?: () => Set<Vertex>;
   setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void;
@@ -35,6 +36,7 @@ export function ComponentItemContainer(props: {
     <div // NOSONAR
       class={itemStyle()}
       draggable={true}
+      onClick={props.onClick}
       onDragEnd={onDragEnd}
       onDragStart={(e) =>
         onCompDragStart(

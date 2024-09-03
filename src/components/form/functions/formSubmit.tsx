@@ -2,6 +2,8 @@ import { useNavigate } from "@solidjs/router";
 
 import { useFormContext } from "~/components/form/FormContext";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -24,7 +26,8 @@ export function formSubmit(closePopUp?: () => void) {
     if (graph.transactions.get(formStore!.txnId)?.steps.length === 0) {
       showWarningToast(`There is nothing to save for ${label}.`);
     } else if (isDisabledTxn(formStore!.txnId, graph)) {
-      showWarningToast(`${label} is already saved.`);
+      showWarningToast(`${label} is already saved or not changed.`);
+      return;
     }
 
     const isValid = true;
@@ -48,8 +51,8 @@ export function formSubmit(closePopUp?: () => void) {
 
       const res = await checkUniqueConstrains(formStore!.formData!);
 
-      if (res.error) {
-        showErrorToast(res.message);
+      if (!isValidResponse(res)) {
+        showErrorToast(getErrorMessage(res));
         return;
       }
 

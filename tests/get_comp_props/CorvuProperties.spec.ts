@@ -21,14 +21,28 @@ test('save corvu properties', async ({ page }) => {
     const componentsDiv = await getNextSiblingDiv(componentDetails);
     const componentLinks = await componentsDiv.locator('a').all();
 
+    const componentNameToUrlMap: Record<string, string> = {};
+
     for (const link of componentLinks) {
         const linkText = await link.textContent();
         console.log(`Component: ${linkText}`);
 
+        const componentUrl = await link.getAttribute('href');
+        const urlParts = componentUrl!.split('/').filter(Boolean);
+        const lastPart = urlParts[urlParts.length - 1];
+        const componentName = toPascal(capitalize(linkText!.trim()));
+        componentNameToUrlMap[componentName] = lastPart;
+
         await link.click();
         await expect(page.getByRole('heading', { exact: true, name: linkText?.trim() })).toBeVisible();
-        await extractComponentData(page, toPascal(capitalize(linkText!.trim())));
+        await extractComponentData(page, componentName);
     }
+
+    // Save the componentName to URL map to a separate file
+    const urlMapFilePath = path.join('src', 'cypher', 'mutate', 'sync', 'component_properties', 'corvu-components.ts');
+    const urlMapContent = `export const corvuComponentUrls = ${JSON.stringify(componentNameToUrlMap, null, 2)};\n`;
+    fs.writeFileSync(urlMapFilePath, urlMapContent.trim());
+    console.log(`Component name to URL map created: ${urlMapFilePath}`);
 
     generateIndexFile(['src', 'cypher', 'mutate', 'sync', 'component_properties', 'corvu']);
 });

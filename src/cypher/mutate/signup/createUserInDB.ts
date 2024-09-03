@@ -60,9 +60,9 @@ export async function createUserInSuperDB(
     await superTx.run(createEdgeQuery, createEdgeParams);
   }
 
-  const userSession = (await getDriverWithPort(userData.driverPort)).session();
-  await createUserInUserDB(userSession, createUserParams, true);
-  userSession.close();
+  const userDbSession = (await getDriverWithPort(userData.driverPort)).session();
+  await createUserInUserDB(userDbSession, createUserParams, true);
+  userDbSession.close();
   return convertNodeToJson(userNode);
 }
 
