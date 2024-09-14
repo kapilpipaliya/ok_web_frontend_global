@@ -3,7 +3,6 @@ import type { Node, Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getOrCreateGlobalTheme } from "~/cypher/mutate/user/getOrCreateGlobalTheme";
 
 import { createUserSetting } from "./createUserSetting";
 
@@ -47,7 +46,6 @@ export async function findUserByEmail(
   }
 
   return {
-    globalTheme: await getOrCreateGlobalTheme(dbSession),
     roles,
     user,
     userSetting,

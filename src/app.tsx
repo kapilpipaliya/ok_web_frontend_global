@@ -9,18 +9,22 @@ import { configureState } from "~/configureState";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/LoaderSimple";
 import { Toaster } from "./components/solid-toast/src";
+import { getGlobalThemeVertex } from "./getGlobalThemeVertex";
 import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const loadingSite = createSignal(false);
   const graph = configureState();
-
+  const themeConfig = () => {
+    const themeConfig = getGlobalThemeVertex(graph[0])?.P;
+    return themeConfig ? JSON.parse(themeConfig) : {};
+  };
   return (
     <Router
       root={(props) => {
         return (
-          <CSSRuntimeProvider config={graph[0].globalTheme.P}>
+          <CSSRuntimeProvider config={themeConfig()}>
             <GraphContext.Provider value={graph}>
               <MetaProvider>
                 <Suspense fallback={<LoaderNew />}>

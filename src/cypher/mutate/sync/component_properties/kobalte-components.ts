@@ -9,6 +9,7 @@ export const kobalteComponentUrls = {
   "ContextMenu": "context-menu",
   "DropdownMenu": "dropdown-menu",
   "HoverCard": "hover-card",
+  "I18Nprovider": "i18n-provider",
   "Image": "image",
   "Link": "link",
   "Menubar": "menubar",
@@ -26,6 +27,5 @@ export const kobalteComponentUrls = {
   "TextField": "text-field",
   "Toast": "toast",
   "ToggleButton": "toggle-button",
-  "ToggleGroup": "toggle-group",
-  "I18Nprovider": "i18n-provider"
+  "ToggleGroup": "toggle-group"
 };

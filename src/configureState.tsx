@@ -1,5 +1,5 @@
 import { ReactiveMap } from "@solid-primitives/map";
-import { createStore } from "solid-js/store";
+import { createStore, } from "solid-js/store";
 
 import type {
   EdgeMap,
@@ -11,9 +11,6 @@ import type {
 
 import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
 import { saveUserSetting } from "~/saveUserSetting";
-
-import { addNewVertex, newVertex } from "./lib/graph/mutate/vertex";
-import masterConfig from "./master.css";
 
 export function configureState() {
   let newVertexId = -500000;
@@ -30,7 +27,7 @@ export function configureState() {
       // setTitle: (title:string) =>
       // ?mergeVertexProperties(0, navBarVertexId, graph, setGraph, { title }),
     },
-    globalTheme: {} as Vertex,
+    globalThemeId: "",
     isDevelopment: true,
     isLoadingPage: false,
     isSideBarOpen: false,
@@ -62,13 +59,6 @@ export function configureState() {
     vertexes: {} as VertexMap,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
   });
-  const newGlobalThemeVertexObj = newVertex(
-    graph[0].newVertexId,
-    ["GlobalTheme"],
-    masterConfig,
-  );
-  addNewVertex(0, newGlobalThemeVertexObj, graph[0], graph[1]);
-  graph[1]("globalTheme", graph[0].vertexes[newGlobalThemeVertexObj.id]);
 
   return graph;
 }

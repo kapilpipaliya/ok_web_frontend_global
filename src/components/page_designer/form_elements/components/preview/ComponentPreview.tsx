@@ -39,9 +39,9 @@ export function ComponentPreview(
         <div>
           <CompPreviewTreeItem
             collapsedKeys={collapsedKeys}
+            hideFirstItem={true}
             item={props.item}
             toggleExpand={toggleExpand}
-            hideFirstItem={true}
           />
         </div>
         Examples:

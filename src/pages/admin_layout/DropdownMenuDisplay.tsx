@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+
 import { createSignal, type JSX, Show } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
@@ -10,9 +10,8 @@ import { useGraph } from "~/lib/graph/graph";
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 
-export function DropdownMenuDisplay(): JSX.Element {
-  const [graph, _setGraph] = useGraph();
-  const _navigate = useNavigate();
+export function UserDropdownMenuDisplay(): JSX.Element {
+  const [graph] = useGraph();
   const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: HTMLButtonElement;
@@ -30,7 +29,7 @@ export function DropdownMenuDisplay(): JSX.Element {
         class="flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover height:40px p:.2rem|.3rem r:50% width:40px"
         id="dropdown-toggle"
         onClick={handleOpen}
-        ref={btnEl}
+        ref={btnEl!}
         style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${profileImage})`}
       />
       <Show when={isOpen()}>
@@ -38,7 +37,7 @@ export function DropdownMenuDisplay(): JSX.Element {
           <DropdownMenu
             class="r:5"
             onClickOutside={handleClose}
-            parentRef={btnEl}
+            parentRef={btnEl!}
             placement="bottom-end"
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">

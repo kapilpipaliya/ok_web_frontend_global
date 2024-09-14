@@ -1,96 +1,96 @@
 export const Disclosure = [
   {
     "componentName": "boolean",
+    "corvu": true,
     "default": "-",
     "description": "Whether the disclosure is expanded.",
-    "key": "expanded",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "expanded"
   },
   {
     "componentName": "(expanded: boolean) => void",
+    "corvu": true,
     "default": "-",
     "description": "Callback fired when the expanded state changes.",
-    "key": "onExpandedChange",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "onExpandedChange"
   },
   {
     "componentName": "boolean",
+    "corvu": true,
     "default": "false",
     "description": "Whether the disclosure is expanded initially.",
-    "key": "initialExpanded",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "initialExpanded"
   },
   {
     "componentName": "'remove' | 'hide'",
+    "corvu": true,
     "default": "remove",
     "description": "Whether the disclosure content should be removed or hidden when collapsed. Useful if you want to always render the content for SEO reasons.",
-    "key": "collapseBehavior",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "collapseBehavior"
   },
   {
     "componentName": "string",
+    "corvu": true,
     "default": "createUniqueId()",
     "description": "The id attribute of the disclosure content element.",
-    "key": "disclosureId",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "disclosureId"
   },
   {
     "componentName": "string",
+    "corvu": true,
     "default": "-",
     "description": "The id of the disclosure context. Useful if you have nested disclosures and want to create components that belong to a disclosure higher up in the tree.",
-    "key": "contextId",
-    "corvu": true,
-    "hashName": "Root"
+    "hashName": "Root",
+    "key": "contextId"
   }
 ];
 
 export const DisclosureTrigger = [
   {
     "componentName": "ValidComponent",
+    "corvu": true,
     "default": "button",
     "description": "Component to render the dynamic component as.",
-    "key": "as",
-    "corvu": true,
-    "hashName": "Trigger"
+    "hashName": "Trigger",
+    "key": "as"
   },
   {
     "componentName": "string",
+    "corvu": true,
     "default": "-",
     "description": "The id of the disclosure context to use.",
-    "key": "contextId",
-    "corvu": true,
-    "hashName": "Trigger"
+    "hashName": "Trigger",
+    "key": "contextId"
   }
 ];
 
 export const DisclosureContent = [
   {
     "componentName": "ValidComponent",
+    "corvu": true,
     "default": "div",
     "description": "Component to render the dynamic component as.",
-    "key": "as",
-    "corvu": true,
-    "hashName": "Content"
+    "hashName": "Content",
+    "key": "as"
   },
   {
     "componentName": "boolean",
+    "corvu": true,
     "default": "false",
     "description": "Whether the disclosure content should be forced to render. Useful when using third-party animation libraries.",
-    "key": "forceMount",
-    "corvu": true,
-    "hashName": "Content"
+    "hashName": "Content",
+    "key": "forceMount"
   },
   {
     "componentName": "string",
+    "corvu": true,
     "default": "-",
     "description": "The id of the disclosure context to use.",
-    "key": "contextId",
-    "corvu": true,
-    "hashName": "Content"
+    "hashName": "Content",
+    "key": "contextId"
   }
 ];

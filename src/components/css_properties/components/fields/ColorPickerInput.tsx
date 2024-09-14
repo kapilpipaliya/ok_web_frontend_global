@@ -4,6 +4,7 @@ import type { ColorPickerField } from "../../constants/FieldSchemaType";
 
 export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   const [local, others] = splitProps(props, ["componentName", "onChange"]);
+  let inputRef: HTMLInputElement | undefined;
 
   const handleChange: JSX.InputEventHandlerUnion<
     HTMLInputElement,
@@ -14,14 +15,20 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   };
 
   return (
-    <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
-      <input
-        {...others}
-        class="b:none bg:#ffffff cursor:pointer; h:25px mr:10 p:0 r:5 w:30px"
-        onInput={handleChange}
-        type="color"
-        value={props.value || ""}
-      />
+    <div class={`${props.isLabelOnTop ? '' : 'max-w:50% w:50%'} flex ai:center b:1px|solid|lightgrey p:5 r:5`}>
+      <label // NOSONAR
+        class={`b:1px|solid|lightgrey bg:${props.value || "#ffffff"} cursor:pointer h:25px mr:10 r:5 w:30px`}
+        onClick={() => inputRef?.click()}
+      >      <input
+          id="color-input"
+          ref={inputRef}
+          {...others}
+          class="h:0 mt:30px w:0"
+          onInput={handleChange}
+          type="color"
+          value={props.value || ""}
+        /></label>
+
       <input
         {...others}
         class="b:none f:14 outline:none w:100%"

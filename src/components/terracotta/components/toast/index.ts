@@ -83,13 +83,13 @@ export interface ToastData<T> {
 export type ToasterListener<T> = (queue: ToastData<T>[]) => void;
 
 export class ToasterStore<T> {
+  private static toasterID = 0;
+
   private id: number;
 
   private listeners = new Set<ToasterListener<T>>();
 
   private queue: ToastData<T>[] = [];
-
-  private static toasterID = 0;
 
   private toastID = 0;
 

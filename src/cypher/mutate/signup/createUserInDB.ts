@@ -4,7 +4,6 @@ import type { Transaction } from "neo4j-driver";
 import { v4 as uuidv4 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriverWithPort } from "~/cypher/driver";
 
 export async function createUserInSuperDB(
   superTx: Transaction,
@@ -60,9 +59,6 @@ export async function createUserInSuperDB(
     await superTx.run(createEdgeQuery, createEdgeParams);
   }
 
-  const userDbSession = (await getDriverWithPort(userData.driverPort)).session();
-  await createUserInUserDB(userDbSession, createUserParams, true);
-  userDbSession.close();
   return convertNodeToJson(userNode);
 }
 

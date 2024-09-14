@@ -28,8 +28,17 @@ export async function getInitialData(dbSession: Session) {
       relationshipObj,
     );
 
+    await fetchFromMGAndSaveToArray(
+      dbSession,
+      "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+      {},
+      nodeObj,
+      relationshipObj,
+    );
+
     await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj);
     await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj);
+    await fetchAndSaveFormMetaData("GlobalSetting", nodeObj, relationshipObj);
   } catch (error: any) {
     return { error: error.message };
   }

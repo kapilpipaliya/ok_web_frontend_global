@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createMemo, Match, Switch } from "solid-js";
 
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { arkUIComponents, corvuComponents, kobalteComponents } from "../form/functions/getDynamicComponent";
 
@@ -14,9 +14,11 @@ export function OpenComponentURL(props: Readonly<{ class?: string; meta: Vertex;
   const componentUrl = createMemo(() => {
     if (kobalteComponents[componentKey() as keyof typeof kobalteComponents]) {
       return `https://kobalte.dev/docs/core/components/${componentVertex()?.P.info}`;
-    } else if (corvuComponents[componentKey() as keyof typeof corvuComponents]) {
+    }
+    if (corvuComponents[componentKey() as keyof typeof corvuComponents]) {
       return `https://corvu.dev/docs/primitives/${componentVertex()?.P.info}/`;
-    } else if (arkUIComponents[componentKey() as keyof typeof arkUIComponents]) {
+    }
+    if (arkUIComponents[componentKey() as keyof typeof arkUIComponents]) {
       return `https://ark-ui.com/solid/docs/components/${componentVertex()?.P.info}`;
     }
     return null;
@@ -28,7 +30,7 @@ export function OpenComponentURL(props: Readonly<{ class?: string; meta: Vertex;
         <a
           class={`${props.class ?? ""}`}
           href={componentUrl()!}
-          target="_blank"
+          rel="noreferrer" target="_blank"
         >
           <Icon
             height={21}

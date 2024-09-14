@@ -55,7 +55,7 @@ export interface GraphInterface {
   componentIdMap: { [key: string]: string };
   edges: EdgeMap;
   events: { [key: string]: any };
-  globalTheme: Vertex;
+  globalThemeId: Id;
   isDevelopment: boolean;
   isLoadingPage?: boolean;
   isSideBarOpen?: boolean;

@@ -54,8 +54,7 @@ export async function createDockerContainer(
             resolve(output);
           }
 
-          function onProgress(event: any) {
-            console.log(event);
+          function onProgress(_event: any) {
           }
         });
       });

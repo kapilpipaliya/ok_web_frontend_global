@@ -7,7 +7,9 @@ import { useGraph } from "~/lib/graph/graph";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
-  signOutCall: () => Promise<void>;
+  signOutCall: () => Promise<{
+    [key: string]: any;
+  }>;
 }
 
 export function AuthenticatedMenu(

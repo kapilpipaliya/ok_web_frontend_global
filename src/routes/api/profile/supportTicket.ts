@@ -105,7 +105,7 @@ export async function supportTicket(
 
   async function deleteTicket(
     payload: any,
-    dbSession: Session,
+    _dbSession: Session,
     _subDomain: string,
   ) {
     const { id } = payload;

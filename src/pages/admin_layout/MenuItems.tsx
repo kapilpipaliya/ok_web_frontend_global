@@ -6,7 +6,9 @@ import { AuthenticatedMenu } from "./AuthenticatedMenu";
 import { UnauthenticatedMenu } from "./UnauthenticatedMenu";
 export interface MenuItemsProps {
   onClose: () => void;
-  signOutCall: () => Promise<void>;
+  signOutCall: () => Promise<{
+    [key: string]: any;
+  }>;
 }
 
 export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {

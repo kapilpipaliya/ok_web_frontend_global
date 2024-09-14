@@ -3,7 +3,6 @@ import { createSignal, Show } from "solid-js";
 
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
-import { ZIndex } from "~/components/ZIndex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
@@ -19,7 +18,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex, expandedComponent?
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );
-  const [showPreview, setShowPreview] = createSignal(false);
+  const [_showPreview, setShowPreview] = createSignal(false);
   let previewCSSRef: HTMLDivElement | undefined;
   let previewTimer: NodeJS.Timeout;
 
@@ -36,11 +35,11 @@ export function ComonentItem(props: Readonly<{ child: Vertex, expandedComponent?
     }
   };
 
-  const handlePreviewMouseEnter = () => {
+  const _handlePreviewMouseEnter = () => {
     previewTimer = setTimeout(() => setShowPreview(true), 400);
   };
 
-  const handlePreviewMouseLeave = (event: MouseEvent) => {
+  const _handlePreviewMouseLeave = (event: MouseEvent) => {
     clearTimeout(previewTimer);
     const relatedTarget = event.relatedTarget as Node;
     const floatingElement = floating();
@@ -93,7 +92,7 @@ export function ComonentItem(props: Readonly<{ child: Vertex, expandedComponent?
           wrapperClass="height:19px width:19px"
         />
       </Show>
-      <div class="flex {flex-flow:column} gap:5px pt:5px cursor:pointer">
+      <div class="flex {flex-flow:column} cursor:pointer gap:5px pt:5px">
         <Show when={false}>
           <Icon
             height={24}
