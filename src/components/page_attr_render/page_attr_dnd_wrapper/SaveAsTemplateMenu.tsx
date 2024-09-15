@@ -10,6 +10,9 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { DropdownMenu } from "../../DropdownMenu";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { useToast } from "../../Toast";
+import { DialogFooter } from "../../dialog/DialogFooter";
+import { DialogSubTitle } from "../../dialog/DialogSubTitle";
+import { DialogHeader } from "../../dialog/DialogHeader";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -67,7 +70,7 @@ export function SaveAsTemplateMenu(
       P: { key },
     } as unknown as Vertex);
     if (res.error) {
-      setError(res.message);
+      setError(res.message || "An error occurred");
       return;
     }
     saveTemplate();
@@ -83,16 +86,9 @@ export function SaveAsTemplateMenu(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <h3 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
-        Save As Template
-      </h3>
+      <DialogHeader title="Save As Template" />
 
-      <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
-        <p>
-          Template key must be unique. If the key already exists, you will be
-          prompted to change it.
-        </p>
-      </div>
+      <DialogSubTitle>Template key must be unique. If the key already exists, you will be prompted to change it.</DialogSubTitle>
 
       <div>
         <label
@@ -117,16 +113,7 @@ export function SaveAsTemplateMenu(
         <div style={{ color: "red" }}>{error()}</div>
       </Show>
 
-      <div class="mt:0.25rem">
-        <button
-          class="lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:white display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem"
-          disabled={!templateName()}
-          onClick={() => saveAsTemplate(templateName())}
-          type="button"
-        >
-          Save
-        </button>
-      </div>
+      <DialogFooter disabled={!templateName()} onClick={() => saveAsTemplate(templateName())} />
     </DropdownMenu>
   );
 }

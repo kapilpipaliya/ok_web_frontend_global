@@ -11,7 +11,7 @@ export async function createRootFolder(
     MERGE (:Comp {key: 'ArkUI'})
     MERGE (globalSetting:GlobalSetting {key: 'Default'})
     MERGE (theme:Theme {key: 'Default'})
-    SET theme += $theme
+    SET theme.data = $theme
     MERGE (globalSetting)-[:GlobalSettingTheme]->(theme)
   `;
 

@@ -2,8 +2,11 @@ import { createSignal, type Setter } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DialogFooter, dialogCancelButtonClass, dialogOkButtonClass } from "~/components/dialog/DialogFooter";
+import { DialogHeader } from "~/components/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function PreviewCSSMenu(
   props: Readonly<{
@@ -26,13 +29,18 @@ export function PreviewCSSMenu(
       parentRef={props.parentRef}
       ref={props.ref}
     >
-      <h4 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
-        Preview CSS
-      </h4>
+      <DialogHeader title="Preview CSS" />
+      <DialogSubTitle>View the CSS content below:</DialogSubTitle>
 
       <div class="mt:2">
         <code>{cssContent()}</code>
       </div>
+
+      <DialogFooter>
+        <button class={dialogOkButtonClass} onClick={props.onClose} type="button">
+          Close
+        </button>
+      </DialogFooter>
     </DropdownMenu>
   );
 }

@@ -37,8 +37,10 @@ test.describe('super user setup', () => {
     // Verify that the super user setup was successful
     await expect(page).toHaveURL('/api/mutate/super_user_setup');
     // Add more assertions as needed
-    await page.getByText('{"id":"0","IN":{},"L":["User').isVisible();
+    const userText = await page.getByText('{"id":"0","IN":{},"L":["User');
+    await expect(userText).toBeVisible();
     await page.goto('/api/mutate/insert_comp_tree');
-    await page.getByText('{"success":true}').isVisible();
+    const successMessage = await page.getByText('{"success":true}');
+    await expect(successMessage).toBeVisible();
   });
 });

@@ -3,20 +3,20 @@ import { createSignal, For, Show } from "solid-js";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
 import { getGlobalThemeVertex } from "~/getGlobalThemeVertex";
-import { useGraph } from "~/lib/graph/graph";
+import { Id, useGraph, Vertex } from "~/lib/graph/graph";
 
 import { ThemeConfigDialog } from "./ThemeConfigDialog";
+import { IconButton } from "~/components/IconButton";
 
 export function ThemeDropdownMenu() {
-  const [isOpen, setIsOpen] = createSignal(false);
-  const [selectedTheme, setSelectedTheme] = createSignal(null);
-  const [showConfigDialog, setShowConfigDialog] = createSignal(false);
+  const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);
+  const [selectedTheme, setSelectedTheme] = createSignal<Id>();
   const { showErrorToast } = useToast();
   const [graph] = useGraph();
   const [buttonRef, setButtonRef] = createSignal<HTMLButtonElement>();
 
-  const handleOpen = () => setIsOpen(true);
-  const handleClose = () => setIsOpen(false);
+  const handleOpen = () => setIsThemeOptionsOpen(true);
+  const handleClose = () => setIsThemeOptionsOpen(false);
 
   const handleThemeSelect = (theme: any) => {
     setSelectedTheme(theme);
@@ -36,7 +36,7 @@ export function ThemeDropdownMenu() {
       >
         Themes
       </button>
-      <Show when={isOpen()}>
+      <Show when={isThemeOptionsOpen()}>
         <DropdownMenu
           class="theme-dropdown"
           onClickOutside={handleClose}
@@ -45,19 +45,11 @@ export function ThemeDropdownMenu() {
           <ul>
             <For each={graph.vertexLabelIdMap.Theme}>
               {(theme) => {
-                const isSelected = getGlobalThemeVertex(graph)?.id === theme; // Check if the theme is selected
+                const isSelected = getGlobalThemeVertex(graph)?.id === theme;
                 return (
-                  <li class={`${isSelected ? 'bg:beryl-45' : ''} flex ai:center`}> {/* Add a class for highlighting */}
+                  <li class={`${isSelected ? 'bg:beryl-45' : ''} flex ai:center`}>
                     <span onClick={() => handleThemeSelect(theme)}>{graph.vertexes[theme].P.key}</span>
-                    <button
-                      class="gear-icon"
-                      onClick={() => {
-                        setShowConfigDialog(true);
-                        handleClose();
-                      }}
-                    >
-                      ⚙️
-                    </button>
+                    <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
                   </li>
                 );
               }}
@@ -68,10 +60,35 @@ export function ThemeDropdownMenu() {
           </ul>
         </DropdownMenu>
       </Show>
-      <Show when={showConfigDialog()}>
+    </>
+  );
+}
+
+
+export function ThemeConfigButton(props: {
+  class?: string;
+  item: Vertex;
+  size: number;
+}) {
+  let saveAsTemplateRef: HTMLElement;
+  const [showModal, setShowModal] = createSignal(false);
+  return (
+    <>
+      <IconButton
+        class={`${props.class} cursor:pointer`}
+        icon="ph:gear"
+        onClick={() => setShowModal(true)}
+        ref={(el) => (saveAsTemplateRef = el)}
+        size={props.size}
+        title="Save as Template"
+      />
+      <Show when={showModal()}>
         <ThemeConfigDialog
-          onClose={() => setShowConfigDialog(false)}
-          theme={selectedTheme()} />
+          item={props.item}
+          onClose={() => setShowModal(false)}
+          onMouseLeave={() => setShowModal(false)}
+          parentRef={saveAsTemplateRef!}
+        />
       </Show>
     </>
   );

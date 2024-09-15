@@ -5,8 +5,11 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { DropdownMenu } from "../../DropdownMenu";
+import { DialogFooter, dialogCancelButtonClass, dialogOkButtonClass } from "../../dialog/DialogFooter";
+import { DialogHeader } from "../../dialog/DialogHeader";
+import { DialogSubTitle } from "../../dialog/DialogSubTitle";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function ImportMenu(
   props: Readonly<{
@@ -68,13 +71,8 @@ export function ImportMenu(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <h3 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
-        Import HTML
-      </h3>
-
-      <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
-        <p>Import HTML to the page.</p>
-      </div>
+      <DialogHeader title="Import HTML" />
+      <DialogSubTitle>Import HTML to the page.</DialogSubTitle>
 
       <div>
         <label
@@ -98,21 +96,19 @@ export function ImportMenu(
         <div style={{ color: "red" }}>{error()}</div>
       </Show>
 
-      <div class="">
-        <div class="flex ai:center jc:center mt:0.25rem">
-          <button
-            class="lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:white display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem"
-            disabled={!htmlContent()}
-            onClick={onImport}
-            type="button"
-          >
-            Import
-          </button>
-          <button class="" onClick={onCancel} type="button">
-            Cancel
-          </button>
-        </div>
-      </div>
+      <DialogFooter>
+        <button
+          class={dialogOkButtonClass}
+          disabled={!htmlContent()}
+          onClick={onImport}
+          type="button"
+        >
+          Import
+        </button>
+        <button class={dialogCancelButtonClass} onClick={onCancel} type="button">
+          Cancel
+        </button>
+      </DialogFooter>
     </DropdownMenu>
   );
 }

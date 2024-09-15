@@ -17,7 +17,7 @@ export default function App() {
   const loadingSite = createSignal(false);
   const graph = configureState();
   const themeConfig = () => {
-    const themeConfig = getGlobalThemeVertex(graph[0])?.P;
+    const themeConfig = getGlobalThemeVertex(graph[0])?.P?.data;
     return themeConfig ? JSON.parse(themeConfig) : {};
   };
   return (

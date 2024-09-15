@@ -1,6 +1,8 @@
 import { createSignal, onMount, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DialogFooter, dialogCancelButtonClass, dialogOkButtonClass } from "~/components/dialog/DialogFooter";
+import { DialogHeader } from "~/components/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
 import { useToast } from "~/components/Toast";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -11,6 +13,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentCompAttribute } from "~/lib/meta/base/Comp";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function SaveNewComp(
   props: Readonly<{
@@ -92,16 +95,8 @@ export function SaveNewComp(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <h3 class="lh:1.5rem color:gray-90 f:1rem  font:bold leading:1.5rem">
-        New Component
-      </h3>
-
-      <div class="lh:1.25rem color:gray-50  f:0.875rem max-width:36rem mt:0.5rem ">
-        <p>
-          Component key must be unique. If the key already exists, you will be
-          prompted to change it.
-        </p>
-      </div>
+      <DialogHeader title="New Component" />
+      <DialogSubTitle>Component key must be unique. If the key already exists, you will be prompted to change it.</DialogSubTitle>
 
       <div>
         <label
@@ -126,16 +121,23 @@ export function SaveNewComp(
         <div style={{ color: "red" }}>{error()}</div>
       </Show>
 
-      <div class="mt:0.25rem">
+      <DialogFooter>
         <button
-          class="lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:white display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem"
+          class={dialogOkButtonClass}
           disabled={!componentName()}
           onClick={() => saveAsTemplate(componentName())}
           type="button"
         >
           Save
         </button>
-      </div>
+        <button
+          class={dialogCancelButtonClass}
+          onClick={props.onClose}
+          type="button"
+        >
+          Cancel
+        </button>
+      </DialogFooter>
     </DropdownMenu>
   );
 }
