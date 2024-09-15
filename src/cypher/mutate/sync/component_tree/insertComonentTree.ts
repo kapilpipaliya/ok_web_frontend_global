@@ -36,7 +36,14 @@ export async function insertComponentTree(
 ): Promise<{ success: boolean }> {
   for (const component of components) {
     // Get the component URL from corvu or kobalte
-    const componentUrl = corvuComponentUrls[component.Component as keyof typeof corvuComponentUrls] || kobalteComponentUrls[component.Component as keyof typeof kobalteComponentUrls] || null;
+    const componentUrl =
+      corvuComponentUrls[
+        component.Component as keyof typeof corvuComponentUrls
+      ] ||
+      kobalteComponentUrls[
+        component.Component as keyof typeof kobalteComponentUrls
+      ] ||
+      null;
 
     // Check if the node already exists
     const findNodeResult = await dbSession.run(

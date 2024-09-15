@@ -16,7 +16,7 @@ export async function createRootFolder(
   `;
 
   const params = {
-    theme: getDefaultTheme()
+    theme: getDefaultTheme(),
   };
 
   try {

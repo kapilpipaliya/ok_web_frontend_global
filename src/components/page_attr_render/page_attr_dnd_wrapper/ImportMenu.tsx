@@ -1,15 +1,19 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
+import { DropdownMenu } from "~/components/DropdownMenu";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { DialogFooter, dialogCancelButtonClass, dialogOkButtonClass } from "../../dialog/DialogFooter";
+import {
+  dialogCancelButtonClass,
+  DialogFooter,
+  dialogOkButtonClass,
+} from "../../dialog/DialogFooter";
 import { DialogHeader } from "../../dialog/DialogHeader";
 import { DialogSubTitle } from "../../dialog/DialogSubTitle";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function ImportMenu(
   props: Readonly<{
@@ -105,7 +109,11 @@ export function ImportMenu(
         >
           Import
         </button>
-        <button class={dialogCancelButtonClass} onClick={onCancel} type="button">
+        <button
+          class={dialogCancelButtonClass}
+          onClick={onCancel}
+          type="button"
+        >
           Cancel
         </button>
       </DialogFooter>

@@ -13,10 +13,7 @@ import { newAdminValidations } from "./newAdminValidations";
 import { updatePortForNewUser } from "./updatePortForNewUser";
 import { waitForDockerCreate } from "./waitForDockerCreate";
 
-export async function signupAdmin(
-  tx: Transaction,
-  data: SignupRequestData,
-) {
+export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
   // Check if the user already exists
   await newAdminValidations(tx, data.username, data.email, data.subDomain);
 
@@ -37,12 +34,15 @@ export async function signupAdmin(
     username: data.username,
   });
 
-
   const userDbSession = (await getDriverWithPort(driverPort)).session();
-  await createUserInUserDB(userDbSession, {
-    email: data.email,
-    uuid: user.P.uuid,
-  }, true);
+  await createUserInUserDB(
+    userDbSession,
+    {
+      email: data.email,
+      uuid: user.P.uuid,
+    },
+    true,
+  );
 
   await createRootFolder(userDbSession);
 

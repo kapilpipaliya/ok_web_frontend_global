@@ -1,15 +1,20 @@
 import { createSignal, Show } from "solid-js";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { DropdownMenu } from "~/components/DropdownMenu";
+
+import {
+  dialogCancelButtonClass,
+  DialogFooter,
+  dialogOkButtonClass,
+} from "~/components/dialog/DialogFooter";
 import { DialogHeader } from "~/components/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
-import { dialogCancelButtonClass, DialogFooter, dialogOkButtonClass } from "~/components/dialog/DialogFooter";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
-import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 export function ThemeConfigDialog(
   props: Readonly<{
@@ -27,15 +32,12 @@ export function ThemeConfigDialog(
   const handleChange = (value: string) => {
     setThemeData(value);
   };
-  const saveNewTheme = async () => {
+  const _saveNewTheme = async () => {
     const newFormTxnId = graph.newTxnId;
-    const createResult = createForm(
-      graph,
-      setGraph,
-      newFormTxnId,
-      "Theme",
-      { key: "Default", data: themeData() },
-    );
+    const createResult = createForm(graph, setGraph, newFormTxnId, "Theme", {
+      data: themeData(),
+      key: "Default",
+    });
 
     if (createResult.error) {
       setError(createResult.error as string);
@@ -68,7 +70,13 @@ export function ThemeConfigDialog(
 
   const saveExistingTheme = async () => {
     const newFormTxnId = graph.newTxnId;
-    const mergeResult = mergeVertexProperties(newFormTxnId, props.item.id,graph, setGraph, { data: themeData() });
+    const mergeResult = mergeVertexProperties(
+      newFormTxnId,
+      props.item.id,
+      graph,
+      setGraph,
+      { data: themeData() },
+    );
     if (mergeResult.error) {
       setError(mergeResult.error as string);
       return;
@@ -86,26 +94,31 @@ export function ThemeConfigDialog(
   };
 
   return (
-    <DropdownMenu
-      class="padding:0.50rem"
-      parentRef={props.parentRef}
-    >
+    <DropdownMenu class="padding:0.50rem" parentRef={props.parentRef}>
       <DialogHeader title="Configure Theme" />
       <DialogSubTitle>Customize your theme colors</DialogSubTitle>
       <div class="flex flex:col gap:0.50rem">
         <label>Theme Colors</label>
         <textarea
+          class="h:400px w:400px"
           onInput={(e) => handleChange(e.target.value)}
           value={themeData()}
-        class="h:400px w:400px"
         />
       </div>
       <Show when={error()}>
         <div style={{ color: "red" }}>{error()}</div>
       </Show>
       <DialogFooter>
-        <button type="button" class={dialogOkButtonClass} onClick={handleSave}>Save</button>
-        <button type="button" class={dialogCancelButtonClass} onClick={props.onClose}>Cancel</button>
+        <button class={dialogOkButtonClass} onClick={handleSave} type="button">
+          Save
+        </button>
+        <button
+          class={dialogCancelButtonClass}
+          onClick={props.onClose}
+          type="button"
+        >
+          Cancel
+        </button>
       </DialogFooter>
     </DropdownMenu>
   );

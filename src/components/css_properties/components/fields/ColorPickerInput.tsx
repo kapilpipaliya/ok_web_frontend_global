@@ -15,11 +15,14 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   };
 
   return (
-    <div class={`${props.isLabelOnTop ? '' : 'max-w:50% w:50%'} flex ai:center b:1px|solid|lightgrey p:5 r:5`}>
+    <div
+      class={`${props.isLabelOnTop ? "" : "max-w:50% w:50%"} flex ai:center b:1px|solid|lightgrey p:5 r:5`}
+    >
       <label // NOSONAR
         class={`b:1px|solid|lightgrey bg:${props.value || "#ffffff"} cursor:pointer h:25px mr:10 r:5 w:30px`}
         onClick={() => inputRef?.click()}
-      >      <input
+      >
+        <input
           id="color-input"
           ref={inputRef}
           {...others}
@@ -27,7 +30,8 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
           onInput={handleChange}
           type="color"
           value={props.value || ""}
-        /></label>
+        />
+      </label>
 
       <input
         {...others}

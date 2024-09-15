@@ -88,11 +88,7 @@ export function ComponentList() {
           >
             {(item) => (
               <>
-                <div
-                  class={
-                    "font-weight:600 my:8px"
-                  }
-                >
+                <div class={"font-weight:600 my:8px"}>
                   <ComonentItem
                     child={item}
                     expandedComponent={expandedComponent()}

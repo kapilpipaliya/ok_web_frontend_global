@@ -1,16 +1,16 @@
 import { createSignal, For, Show } from "solid-js";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
+import { IconButton } from "~/components/IconButton";
 import { useToast } from "~/components/Toast";
 import { getGlobalThemeVertex } from "~/getGlobalThemeVertex";
-import { Id, useGraph, Vertex } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { ThemeConfigDialog } from "./ThemeConfigDialog";
-import { IconButton } from "~/components/IconButton";
 
 export function ThemeDropdownMenu() {
   const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);
-  const [selectedTheme, setSelectedTheme] = createSignal<Id>();
+  const [, setSelectedTheme] = createSignal<Id>();
   const { showErrorToast } = useToast();
   const [graph] = useGraph();
   const [buttonRef, setButtonRef] = createSignal<HTMLButtonElement>();
@@ -47,8 +47,12 @@ export function ThemeDropdownMenu() {
               {(theme) => {
                 const isSelected = getGlobalThemeVertex(graph)?.id === theme;
                 return (
-                  <li class={`${isSelected ? 'bg:beryl-45' : ''} flex ai:center`}>
-                    <span onClick={() => handleThemeSelect(theme)}>{graph.vertexes[theme].P.key}</span>
+                  <li
+                    class={`${isSelected ? "bg:beryl-45" : ""} flex ai:center bg:lightblue:hover`}
+                  >
+                    <span onClick={() => handleThemeSelect(theme)}>
+                      {graph.vertexes[theme].P.key}
+                    </span>
                     <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
                   </li>
                 );
@@ -63,7 +67,6 @@ export function ThemeDropdownMenu() {
     </>
   );
 }
-
 
 export function ThemeConfigButton(props: {
   class?: string;

@@ -38,25 +38,28 @@ export async function createDockerContainer(
     let container;
     try {
       await new Promise<void>((resolve, reject) => {
-        docker.pull(Image, {}, (err: Error | null, stream: NodeJS.ReadableStream | undefined) => {
-          if (err) {
-            return reject(err);
-          }
-          if (!stream) {
-            return reject(new Error("No stream returned from docker.pull"));
-          }
-          docker.modem.followProgress(stream, onFinished, onProgress);
-
-          function onFinished(err: Error | null, output: any) {
+        docker.pull(
+          Image,
+          {},
+          (err: Error | null, stream: NodeJS.ReadableStream | undefined) => {
             if (err) {
               return reject(err);
             }
-            resolve(output);
-          }
+            if (!stream) {
+              return reject(new Error("No stream returned from docker.pull"));
+            }
+            docker.modem.followProgress(stream, onFinished, onProgress);
 
-          function onProgress(_event: any) {
-          }
-        });
+            function onFinished(err: Error | null, output: any) {
+              if (err) {
+                return reject(err);
+              }
+              resolve(output);
+            }
+
+            function onProgress(_event: any) {}
+          },
+        );
       });
 
       container = await docker.createContainer({

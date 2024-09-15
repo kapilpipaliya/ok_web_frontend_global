@@ -7,12 +7,12 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
+import { DialogFooter } from "../../dialog/DialogFooter";
+import { DialogHeader } from "../../dialog/DialogHeader";
+import { DialogSubTitle } from "../../dialog/DialogSubTitle";
 import { DropdownMenu } from "../../DropdownMenu";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 import { useToast } from "../../Toast";
-import { DialogFooter } from "../../dialog/DialogFooter";
-import { DialogSubTitle } from "../../dialog/DialogSubTitle";
-import { DialogHeader } from "../../dialog/DialogHeader";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -88,7 +88,10 @@ export function SaveAsTemplateMenu(
     >
       <DialogHeader title="Save As Template" />
 
-      <DialogSubTitle>Template key must be unique. If the key already exists, you will be prompted to change it.</DialogSubTitle>
+      <DialogSubTitle>
+        Template key must be unique. If the key already exists, you will be
+        prompted to change it.
+      </DialogSubTitle>
 
       <div>
         <label
@@ -113,7 +116,10 @@ export function SaveAsTemplateMenu(
         <div style={{ color: "red" }}>{error()}</div>
       </Show>
 
-      <DialogFooter disabled={!templateName()} onClick={() => saveAsTemplate(templateName())} />
+      <DialogFooter
+        disabled={!templateName()}
+        onClick={() => saveAsTemplate(templateName())}
+      />
     </DropdownMenu>
   );
 }

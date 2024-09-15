@@ -4,12 +4,19 @@ import { createMemo, Match, Switch } from "solid-js";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { arkUIComponents, corvuComponents, kobalteComponents } from "../form/functions/getDynamicComponent";
+import {
+  arkUIComponents,
+  corvuComponents,
+  kobalteComponents,
+} from "../form/functions/getDynamicComponent";
 
-export function OpenComponentURL(props: Readonly<{ class?: string; meta: Vertex; }>) {
+export function OpenComponentURL(
+  props: Readonly<{ class?: string; meta: Vertex }>,
+) {
   const [graph] = useGraph();
-  const componentKey = () => props.meta.P.key.split('.')[0];
-  const componentVertex = () => findVertexByLabelAndUniqueId(graph, "Comp", "key", componentKey());
+  const componentKey = () => props.meta.P.key.split(".")[0];
+  const componentVertex = () =>
+    findVertexByLabelAndUniqueId(graph, "Comp", "key", componentKey());
 
   const componentUrl = createMemo(() => {
     if (kobalteComponents[componentKey() as keyof typeof kobalteComponents]) {
@@ -30,12 +37,10 @@ export function OpenComponentURL(props: Readonly<{ class?: string; meta: Vertex;
         <a
           class={`${props.class ?? ""}`}
           href={componentUrl()!}
-          rel="noreferrer" target="_blank"
+          rel="noreferrer"
+          target="_blank"
         >
-          <Icon
-            height={21}
-            icon={"ci:external-link"}
-            width={21} />
+          <Icon height={21} icon={"ci:external-link"} width={21} />
         </a>
       </Match>
     </Switch>

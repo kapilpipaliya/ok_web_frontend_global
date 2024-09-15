@@ -1,8 +1,13 @@
 import { createSignal, onMount, Show } from "solid-js";
 
-import { DialogFooter, dialogCancelButtonClass, dialogOkButtonClass } from "~/components/dialog/DialogFooter";
+import {
+  dialogCancelButtonClass,
+  DialogFooter,
+  dialogOkButtonClass,
+} from "~/components/dialog/DialogFooter";
 import { DialogHeader } from "~/components/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
+import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -13,7 +18,6 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentCompAttribute } from "~/lib/meta/base/Comp";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function SaveNewComp(
   props: Readonly<{
@@ -96,7 +100,10 @@ export function SaveNewComp(
       parentRef={props.parentRef}
     >
       <DialogHeader title="New Component" />
-      <DialogSubTitle>Component key must be unique. If the key already exists, you will be prompted to change it.</DialogSubTitle>
+      <DialogSubTitle>
+        Component key must be unique. If the key already exists, you will be
+        prompted to change it.
+      </DialogSubTitle>
 
       <div>
         <label

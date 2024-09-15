@@ -4,11 +4,13 @@ import { evalExpression } from "./lib/expression_eval";
 
 export function getGlobalThemeVertex(graph: GraphInterface) {
   const globalSettingId = graph.vertexLabelIdMap.GlobalSetting?.[0];
-  if (!globalSettingId) { return {}; }
+  if (!globalSettingId) {
+    return {};
+  }
   const globalSettingVertex = graph.vertexes[globalSettingId];
-  return evalExpression('->$0Theme', {
+  return evalExpression("->$0Theme", {
     graph,
-    setGraph: () => { },
+    setGraph: () => {},
     vertexes: [globalSettingVertex],
   })?.[0];
 }

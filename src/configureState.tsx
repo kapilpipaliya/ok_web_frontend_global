@@ -1,5 +1,5 @@
 import { ReactiveMap } from "@solid-primitives/map";
-import { createStore, } from "solid-js/store";
+import { createStore } from "solid-js/store";
 
 import type {
   EdgeMap,

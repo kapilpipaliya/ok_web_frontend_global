@@ -19,7 +19,9 @@ export function PropertiesHeader() {
       <div class="f:16 flex:grow font-weight:bold mb:2px ml:5px p:3|0 text-align:left">
         {getComponentName()} Properties{" "}
         <OpenComponentSettings id={layoutStore.selectedComponent as string} />
-        <OpenComponentURL meta={graph.vertexes[layoutStore.selectedComponent]} />
+        <OpenComponentURL
+          meta={graph.vertexes[layoutStore.selectedComponent]}
+        />
       </div>
       <Icon
         class="bg:#ededed:hover color:lightgray cursor:pointer r:50%"
