@@ -8,5 +8,8 @@ export function getErrorMessage(res: any): string {
   if (res.statusCode === 500) {
     return "Internal server error";
   }
+  if (res.message) {
+    return res.message;
+  }
   return "";
 }

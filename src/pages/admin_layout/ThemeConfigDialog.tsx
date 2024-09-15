@@ -9,6 +9,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { useToast } from "~/components/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
 
 export function ThemeConfigDialog(
   props: Readonly<{
@@ -59,8 +60,8 @@ export function ThemeConfigDialog(
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
       showSuccessToast("Theme Saved Successfully");
       return data;
-    } catch (_error) {
-      setError("An unexpected error occurred");
+    } catch (er) {
+      setError(getErrorMessage(er));
       return null;
     }
   };

@@ -1,3 +1,5 @@
+import { isValidResponse } from "./isValidResponse";
+
 /**
  * Common function to make POST requests to a specified URL with given data.
  * @param {string} url - The URL to which the POST request is sent.
@@ -31,8 +33,8 @@ export async function postAPI(
   }
 
   const responseData = await response.json();
-  if (responseData.error) {
-    throw new Error(responseData.error);
+  if (!isValidResponse(responseData)) {
+    throw responseData;
   }
 
   return responseData;
