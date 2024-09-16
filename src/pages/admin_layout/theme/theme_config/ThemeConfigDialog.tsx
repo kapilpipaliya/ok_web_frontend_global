@@ -1,4 +1,5 @@
 import { createSignal, Show } from "solid-js";
+import { PROPERTIES } from "~/components/constants/constant";
 
 import {
   dialogCancelButtonClass,
@@ -110,19 +111,19 @@ export function ThemeConfigDialog(
       <DialogHeader
         title={`Configure Theme [${themeName()}]`}
       />
-      <div class="flex flex:col gap:0.50rem">
+      <div class="flex flex:col gap:0.50rem w:400px">
         <Show when={!props.item}>
           <label>Theme Name</label>
           <input
+            class={PROPERTIES.Css.TextField}
             type="text"
             value={themeName()}
             onInput={(e) => handleNameChange(e.target.value)}
-            class="mb:0.5rem"
           />
         </Show>
         <label>Theme Configuration</label>
         <textarea
-          class="h:400px w:400px"
+          class={`${PROPERTIES.Css.TextField} h:400px`}
           onInput={(e) => handleChange(e.target.value)}
           value={themeData()}
         />

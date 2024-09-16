@@ -22,12 +22,12 @@ export async function handleDataSubmission(
   }
   try {
     await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
-    if (options.successMessage === null) {
+    if (options.successMessage !== null) {
       showSuccessToast(options.successMessage || "Transaction committed successfully");
     }
     return true;
   } catch (_error) {
-    if (options.errorMessage === null) {
+    if (options.errorMessage !== null) {
       showErrorToast(options.errorMessage || "An error occurred while committing the transaction");
     }
     return false;

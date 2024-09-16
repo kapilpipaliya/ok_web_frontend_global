@@ -98,7 +98,9 @@ export function SelectThemeMenu() {
                     {graph.vertexes[theme].P.key}
                   </span>
                   <ThemePreview item={graph.vertexes[theme]} />
-                  <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
+                  </div>
                 </li>
               );
             }}
