@@ -5,6 +5,7 @@ import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function SaveIconButton() {
   const formStore = useFormContext();
@@ -18,7 +19,7 @@ export function SaveIconButton() {
 
   return (
     <IconButton
-      class={`${isDisabled() ? "cursor:not-allowed" : "color:#000:hover"} b:1px|solid|lightgrey bg:white color:grey  jc:center p:6 r:7`}
+      class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
       icon="bi:floppy"
       onClick={onSubmit}
       size={22}

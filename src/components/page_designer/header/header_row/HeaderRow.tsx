@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 
 import { FormContext } from "~/components/form/FormContext";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
-import { ThemeDropdownMenu } from "~/pages/admin_layout/ThemeDropdownMenu";
+import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
@@ -46,7 +46,7 @@ export function HeaderRow() {
         </Show>
         <PreviewButton />
         <ExportSection />
-        <ThemeDropdownMenu />
+        <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>
     </header>

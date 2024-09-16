@@ -4,13 +4,14 @@ import { CustomModal } from "~/components/CustomModal";
 import { IconButton } from "~/components/IconButton";
 
 import { ShareSection } from "./PageShare";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function ExportSection() {
   const [openDialog, setOpenDialog] = createSignal(false);
   return (
     <>
       <IconButton
-        class="b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
+        class={headerIconButtonClass}
         icon="basil:share-box-outline"
         onClick={() => setOpenDialog(true)}
         title="Share"

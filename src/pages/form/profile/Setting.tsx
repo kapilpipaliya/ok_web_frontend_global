@@ -17,7 +17,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
-import { ThemeDropdownMenu } from "~/pages/admin_layout/ThemeDropdownMenu";
+import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
 import { GeneralSection } from "./tabs/General";
 import { PasswordSection } from "./tabs/Password";
@@ -120,7 +120,7 @@ export function Settings(): JSX.Element {
         title="Account Settings"
       />
       <div class="position:fixed right:1rem top:1rem">
-        <ThemeDropdownMenu />
+        <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>
       <TabSection selectedTab={selectedTab} setSelectedTab={setSelectedTab} />

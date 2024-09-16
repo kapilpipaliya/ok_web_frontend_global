@@ -1,13 +1,20 @@
-import type { GraphInterface } from "./lib/graph/graph";
+import type { GraphInterface, Vertex } from "./lib/graph/graph";
 
 import { evalExpression } from "./lib/expression_eval";
 
-export function getGlobalThemeVertex(graph: GraphInterface) {
+export function getGlobalSettingVertex(graph: GraphInterface): Vertex | undefined {
   const globalSettingId = graph.vertexLabelIdMap.GlobalSetting?.[0];
   if (!globalSettingId) {
-    return {};
+    return;
   }
-  const globalSettingVertex = graph.vertexes[globalSettingId];
+  return graph.vertexes[globalSettingId];
+}
+
+export function getGlobalThemeVertex(graph: GraphInterface): Vertex | undefined {
+  const globalSettingVertex = getGlobalSettingVertex(graph);
+  if (!globalSettingVertex) {
+    return;
+  }
   return evalExpression("->$0Theme", {
     graph,
     setGraph: () => {},

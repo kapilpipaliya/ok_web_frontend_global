@@ -7,6 +7,7 @@ import PreviewPage from "~/components/PreviewPage";
 import { useZIndex, ZIndex } from "~/components/ZIndex";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function PreviewButton() {
   const [layoutStore] = useDesignerLayoutStore();
@@ -56,7 +57,7 @@ export function PreviewButton() {
   return (
     <>
       <IconButton
-        class="flex ai:center b:1px|solid|lightgrey bg:white color:grey color:#000:hover cursor:pointer jc:center p:6 r:7"
+        class={headerIconButtonClass}
         icon="ph:eye"
         onClick={handleButtonClick}
         size={22}

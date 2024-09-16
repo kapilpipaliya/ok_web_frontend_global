@@ -13,5 +13,7 @@ test.describe('super user login', () => {
     await logIn(page, superUserData.email, superUserData.password, { isSuperUser: true });
     await page.waitForURL('/admin/');
     await expect(page.getByRole('heading', { name: 'Recent Users' })).toBeVisible();
+    await page.goto('/admin/Page/new');
+    // await expect(page.getByRole('heading', { name: 'New Page' })).toBeVisible();
   });
 });

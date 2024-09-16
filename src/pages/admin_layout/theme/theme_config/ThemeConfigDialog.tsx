@@ -6,7 +6,6 @@ import {
   dialogOkButtonClass,
 } from "~/components/dialog/DialogFooter";
 import { DialogHeader } from "~/components/dialog/DialogHeader";
-import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { useToast } from "~/components/Toast";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
@@ -18,25 +17,35 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 export function ThemeConfigDialog(
   props: Readonly<{
-    item: Vertex;
+    item?: Vertex; // Make item optional
     onClose: () => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
-  }>,
+  }>
 ) {
   const [graph, setGraph] = useGraph();
   const { showSuccessToast, showWarningToast } = useToast();
   const [error, setError] = createSignal("");
-  const [themeData, setThemeData] = createSignal(props.item.P.data);
+  const [themeData, setThemeData] = createSignal(
+    props.item ? props.item.P.data : ""
+  );
+  const [themeName, setThemeName] = createSignal(
+    props.item ? props.item.P.key : "New"
+  );
 
   const handleChange = (value: string) => {
     setThemeData(value);
   };
-  const _saveNewTheme = async () => {
+
+  const handleNameChange = (value: string) => {
+    setThemeName(value);
+  };
+
+  const saveNewTheme = async () => {
     const newFormTxnId = graph.newTxnId;
     const createResult = createForm(graph, setGraph, newFormTxnId, "Theme", {
       data: themeData(),
-      key: "Default",
+      key: themeName(),
     });
 
     if (createResult.error) {
@@ -72,10 +81,10 @@ export function ThemeConfigDialog(
     const newFormTxnId = graph.newTxnId;
     const mergeResult = mergeVertexProperties(
       newFormTxnId,
-      props.item.id,
+      props.item!.id,
       graph,
       setGraph,
-      { data: themeData() },
+      { data: themeData() }
     );
     if (mergeResult.error) {
       setError(mergeResult.error as string);
@@ -89,16 +98,29 @@ export function ThemeConfigDialog(
   };
 
   const handleSave = async () => {
-    // await saveNewTheme();
-    await saveExistingTheme();
+    if (props.item) {
+      await saveExistingTheme();
+    } else {
+      await saveNewTheme();
+    }
   };
 
   return (
     <DropdownMenu class="padding:0.50rem" parentRef={props.parentRef}>
-      <DialogHeader title="Configure Theme" />
-      <DialogSubTitle>Customize your theme colors</DialogSubTitle>
+      <DialogHeader
+        title={`Configure Theme [${themeName()}]`}
+      />
       <div class="flex flex:col gap:0.50rem">
-        <label>Theme Colors</label>
+        <Show when={!props.item}>
+          <label>Theme Name</label>
+          <input
+            type="text"
+            value={themeName()}
+            onInput={(e) => handleNameChange(e.target.value)}
+            class="mb:0.5rem"
+          />
+        </Show>
+        <label>Theme Configuration</label>
         <textarea
           class="h:400px w:400px"
           onInput={(e) => handleChange(e.target.value)}

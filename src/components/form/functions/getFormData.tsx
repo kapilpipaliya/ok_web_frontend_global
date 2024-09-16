@@ -21,7 +21,7 @@ export const getFormData = async (
     // @ts-ignore
     if (result.error || !result.graph) {
       // @ts-ignore
-      return { error: result.error || "Error When Loading Form4" };
+      return { error: result.error || "Error When Loading Form" };
     }
 
     return { error: "", graph: result.graph };

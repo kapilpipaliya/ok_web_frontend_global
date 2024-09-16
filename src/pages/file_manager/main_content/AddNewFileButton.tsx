@@ -1,6 +1,5 @@
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { useToast } from "~/components/Toast";
-import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
@@ -8,7 +7,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentDirectory } from "~/lib/meta/file/File";
 
 import { useFileManagerStore } from "../FileManagerContext";
-
+import { handleDataSubmission } from "../../../lib/graph/mutate/handleDataSubmission";
 export function AddNewFileButton() {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore] = useFileManagerStore();
@@ -46,23 +45,15 @@ export function AddNewFileButton() {
       folder.id,
     );
 
-    const commitData = commitTxn(newFormTxnId, graph);
-
-    if (!commitData) {
-      showErrorToast("Failed to upload file");
-      return;
+      const isSuccess = await handleDataSubmission(newFormTxnId, graph, setGraph, showErrorToast, showSuccessToast, {
+        successMessage: "File uploaded successfully",
+        errorMessage: "An error occurred while uploading the file",
+      });
+    if (isSuccess) {
+      fileManagerStore.gridStore?.[0].fetchTableData();
     }
-
-    try {
-      await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
-    } catch (_error) {
-      showErrorToast("An error occurred while uploading the file");
-      return;
-    }
-    showSuccessToast("File uploaded successfully");
-
-    fileManagerStore.gridStore?.[0].fetchTableData();
   };
+
   return (
     <div>
       <FileUploader onUploadSuccess={onUploadSuccess} />
