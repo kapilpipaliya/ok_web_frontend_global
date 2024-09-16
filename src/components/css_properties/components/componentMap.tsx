@@ -10,7 +10,7 @@ import { CheckboxField } from "./fields/CheckboxField";
 import { ColorPickerInput } from "./fields/ColorPickerInput";
 import { Select } from "./fields/Select";
 import { TextAreaField } from "./fields/TextArea";
-import { ArrayComponent } from "./fields/textfield_with_unit/ArrayComponent";
+import { ArrayComponent } from "./fields/ArrayComponent";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
 import { FieldWithCustomBox } from "./FieldWithCustomBox";

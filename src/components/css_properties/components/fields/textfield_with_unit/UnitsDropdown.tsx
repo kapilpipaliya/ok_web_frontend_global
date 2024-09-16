@@ -1,32 +1,32 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createSignal, For, Show } from "solid-js";
 
-import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
+import type { OptionType, TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 
 import { DropdownMenu } from "~/components/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
 interface DropDownProps {
   isDropdownOpen: () => boolean;
-  meta: TextFieldOptionsField;
   reference: Accessor<HTMLElement | null>;
   selectedOption: () => string;
   selectOption: (option: string) => void;
   setIsDropdownOpen: (isOpen: boolean) => void;
   toggleDropdown: (event: MouseEvent) => void;
+  unitOptions: string[]; // OptionType[];
 }
 
 export function UnitsDropdown(props: Readonly<DropDownProps>) {
   const [searchTerm, setSearchTerm] = createSignal("");
 
   const filteredOptions = () => {
-    return props.meta.unitOptions?.filter((option) =>
+    return props.unitOptions?.filter((option) =>
       option.toLowerCase().includes(searchTerm().toLowerCase()),
     );
   };
 
   return (
-    <Show when={props.meta.unitOptions}>
+    <Show when={props.unitOptions}>
       <span // NOSONAR
         class={"color:lightgrey cursor:pointer f:14 ml:5 pr:5 user-select:none"}
         onClick={props.toggleDropdown}

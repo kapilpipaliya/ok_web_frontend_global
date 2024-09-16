@@ -1,4 +1,3 @@
-import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/constants/constant";
@@ -10,13 +9,13 @@ import { pageAttr } from "./pageAttr";
 export const Page: IFormMetaData = {
   attributes: [
     {
-      class: "p:8 w:100%",
       componentName: "SystemString",
       key: "title",
+      containerClass: "p:8 w:100% b:1px|solid|#ccc",
       // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
     },
     {
-      class: "p:8 w:100%",
+      containerClass: "p:8 w:100% b:1px|solid|#ccc",
       componentName: "SystemString",
       key: "key",
       validation: { required: true },
@@ -30,20 +29,20 @@ export const Page: IFormMetaData = {
           ignoreEmptyValue: true,
           message: "This ID is already taken",
           type: "custom",
-          validationCallback: (options: any) => {
-            const { formData } =
-              (options.validator.context as IFormContext) ||
-              ({} as IFormContext);
-            const [graph, _setGraph] = useGraph();
-            const val = options.value;
-            return !findVertexByLabelAndUniqueIdWithSkip(
-              "Page",
-              "id",
-              val,
-              formData.id,
-              graph,
-            );
-          },
+          // validationCallback: (options: any) => {
+          //   const { formData } =
+          //     (options.validator.context as FormContext) ||
+          //     ({} as FormContext);
+          //   const [graph, _setGraph] = useGraph();
+          //   const val = options.value;
+          //   return !findVertexByLabelAndUniqueIdWithSkip(
+          //     "Page",
+          //     "id",
+          //     val,
+          //     formData.id,
+          //     graph,
+          //   );
+          // },
         },
       ],
     },

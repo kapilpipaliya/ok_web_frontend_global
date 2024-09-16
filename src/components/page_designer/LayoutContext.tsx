@@ -32,6 +32,7 @@ export function getInitialDesignerLayoutStore() {
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
     view: "Tablet",
+    selectedTab: "settings",
   };
 }
 

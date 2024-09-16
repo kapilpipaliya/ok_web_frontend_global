@@ -1,6 +1,6 @@
 import { createSignal, For } from "solid-js";
 
-import { TextFieldWithSelect } from "./TextFieldWithSelect";
+import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
 
 export function ArrayComponent(
   props: Readonly<{

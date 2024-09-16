@@ -13,17 +13,33 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   const width = bounds.right - bounds.left;
 
   // Determine the position based on offsets
-  if (offsetY < height * 0.25) {
-    return "before";
-  }
-  if (offsetY > height * 0.75) {
-    return "after";
-  }
-  if (offsetX < width * 0.25) {
-    return "left";
-  }
-  if (offsetX > width * 0.75) {
-    return "right";
+    // @ts-expect-error ignore
+  if (node.useCurrentPosition) {
+    if (offsetY < 4) {
+      return "before";
+    }
+    if (offsetY > height - 4) {
+      return "after";
+    }
+    if (offsetX < 20) {
+      return "left";
+    }
+    if (offsetX > width - 20) {
+      return "right";
+    }
+  } else {
+    if (offsetY < height * 0.25) {
+      return "before";
+    }
+    if (offsetY > height * 0.75) {
+      return "after";
+    }
+    if (offsetX < width * 0.25) {
+      return "left";
+    }
+    if (offsetX > width * 0.75) {
+      return "right";
+    }
   }
   return "center";
 }

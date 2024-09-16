@@ -60,6 +60,7 @@ export type OptionType = AnotherOption[] | string[];
 // text field with unit options
 export interface TextFieldOptionsField extends FormField {
   componentName: "string";
+  containerClass?: string;
   inputProps?: any;
   isAddToClass?: boolean;
   isLabelOnTop?: boolean;

@@ -17,10 +17,9 @@ import { FormStatusWrapper } from "./status/FormStatusWrapper";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [selectedTab, setSelectedTab] = createSignal("layers");
 
   const tabs = createMemo(() => {
-    const baseTabs = ["layers", "settings"];
+    const baseTabs = ["settings", "layers"];
     if (layoutStore.formStore[0]?.formData?.L[0] === "Form") {
       baseTabs.push("Keys");
     }
@@ -52,11 +51,11 @@ export function SettingTabs() {
                   class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px"
                   classList={{
                     "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover":
-                      selectedTab() !== data,
+                      layoutStore.selectedTab !== data,
                     "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)":
-                      selectedTab() === data,
+                      layoutStore.selectedTab === data,
                   }}
-                  onclick={() => setSelectedTab(data)}
+                  onclick={() => setLayoutStore("selectedTab", data)}
                   type="button"
                 >
                   {capitalizeFirstLetter(data)}
@@ -74,7 +73,7 @@ export function SettingTabs() {
       <Tabs />
       <div
         class="p:5"
-        classList={{ "display:none": selectedTab() !== "settings" }}
+        classList={{ "display:none": layoutStore.selectedTab !== "settings" }}
       >
         <FormConfig />
         <Show when={layoutStore.formStore[0]}>
@@ -86,12 +85,12 @@ export function SettingTabs() {
 
       <Show when={layoutStore.formStore[0]}>
         <FormContext.Provider value={layoutStore.formStore}>
-          <div classList={{ "display:none": selectedTab() !== "layers" }}>
+          <div classList={{ "display:none": layoutStore.selectedTab !== "layers" }}>
             <LayoutTree />
           </div>
 
           <Show when={layoutStore.formStore[0]?.formData?.L[0] === "Form"}>
-            <Show when={selectedTab() === "Keys"}>
+            <Show when={layoutStore.selectedTab === "Keys"}>
               {/* <PrimaryKey /> */}
               <NameKey />
               <Divider class="mt:10" />
@@ -102,13 +101,13 @@ export function SettingTabs() {
               <UniqueConstrains />
             </Show>
           </Show>
-          <Show when={selectedTab() === "Permission"}>
+          <Show when={layoutStore.selectedTab === "Permission"}>
             <Permission />
           </Show>
-          <Show when={selectedTab() === "Rules"}>
+          <Show when={layoutStore.selectedTab === "Rules"}>
             <Rules />
           </Show>
-          <Show when={selectedTab() === "SEO"}>
+          <Show when={layoutStore.selectedTab === "SEO"}>
             <SEOFormGroupProperties />
           </Show>
         </FormContext.Provider>
