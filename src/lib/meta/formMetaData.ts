@@ -58,7 +58,10 @@ const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
 const permissionMetaAttribute = FormMetaData.Coll.attributes.find(
   (x) => x.key === "Perm",
 );
-FormMetaData.Page.attributes.push(permissionMetaAttribute!);
+FormMetaData.Page.attributes.push({
+  ...permissionMetaAttribute!,
+  hidden: true,
+});
 
 FormMetaData.Form = {
   attributes: [

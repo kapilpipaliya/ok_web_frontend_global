@@ -1,7 +1,14 @@
+export const CONSTANTS = {
+  inputBorderRadius: "r:6",
+  inputFieldBorder: "border:1px|solid|#ccc",
+  fullWidth: "w:100%",
+  inputFieldPadding: "p:2",
+};
+
 export const PROPERTIES = {
   Css: {
-    CheckBox: "border:1px|solid|#ccc p:2",
-    RadioButton: "border:1px|solid|#ccc p:2",
-    TextField: "border:1px|solid|#ccc p:2 w:100%",
+    CheckBox: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+    RadioButton: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+    TextField: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.fullWidth} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
   },
 };

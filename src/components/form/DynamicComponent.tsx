@@ -413,6 +413,8 @@ export function DynamicComponent(
       >
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
+          {/* @ts-ignore */}
+          <Match when={props.meta.P.hidden === true}></Match>
           <Match
             when={
               (componentName()?.startsWith("System") ||
@@ -454,7 +456,7 @@ export function DynamicComponent(
               component() &&
               (isNoPermissionCheck() || !hasNoPermission())
             }
-          >
+          > 
             <Switch>
               {/* <Match
                 when={

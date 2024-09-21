@@ -64,6 +64,7 @@ export function PageViewWrapper(
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
+    hideSaveCancelButton?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -430,7 +431,7 @@ export function PageViewWrapper(
             >
               <Content />
             </Show>
-            <Show when={isNoPermissionCheck()}>
+            <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
               <SaveCancelButton
                 closePopUp={props.closePopUp}
                 disabled={isDisabledTxn(formStore.txnId, graph)}

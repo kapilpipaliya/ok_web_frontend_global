@@ -21,6 +21,7 @@ export function FormConfig() {
       }}
       isNoPermissionCheck={true}
       pageVertexName={params.entity}
+      hideSaveCancelButton={true}
     />
   );
 }
