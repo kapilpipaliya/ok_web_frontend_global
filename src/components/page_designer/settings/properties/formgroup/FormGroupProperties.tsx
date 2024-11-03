@@ -37,7 +37,6 @@ import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
-import { RenderDefaultProperties } from "./RenderDefaultProperties";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
@@ -86,7 +85,6 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           onChange={props.onChange}
         />
       </div>
-      <RenderDefaultProperties onChange={props.onChange} />
       <For
         each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
       >
