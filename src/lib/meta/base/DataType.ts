@@ -12,7 +12,7 @@ export const DataType: IFormMetaData = {
     },
     {
       collection: "g:'Comp'",
-      componentName: "SelectBox",
+      componentName: "Select",
       displayName: "Default Component",
 
       key: "default",

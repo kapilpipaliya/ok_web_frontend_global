@@ -33,7 +33,7 @@ export const getComponentClass = (componentName: string) => {
   switch (componentName) {
     case "CheckBox":
       return "min-w:50px";
-    case "SelectBox":
+    case "Select":
       return "min-w:200px";
     case "TextArea":
       return "min-w:200px";

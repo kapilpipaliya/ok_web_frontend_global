@@ -127,7 +127,7 @@ export function SelectField(
     // TODO: find when the direction is set?
     const direction = meta().P.dir;
     if (!props.componentName && direction) {
-      return direction === "->" ? "SelectBox" : "TagBox";
+      return direction === "->" ? "Select" : "MultiSelect";
     }
     return props.componentName;
   }
@@ -148,7 +148,7 @@ export function SelectField(
           let parsedValue;
           if (isRemove) {
             parsedValue = null;
-          } else if (getComponent() === "SelectBox") {
+          } else if (getComponent() === "Select") {
             parsedValue = isObject(value[0])
               ? // @ts-expect-error ignore
                 value[0][meta().P.valueKey || "id"]
@@ -236,7 +236,7 @@ export function SelectField(
             if (!value) {
               return [];
             }
-            if (!Array.isArray(value) && getComponent() === "SelectBox") {
+            if (!Array.isArray(value) && getComponent() === "Select") {
               const option = options().find(
                 (option) =>
                   (value?.[meta().P.valueKey ?? "id"] || value) ===
@@ -250,7 +250,7 @@ export function SelectField(
             return graph.vertexes[id];
           });
         }}
-        selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
+        selectionLimit={getComponent() === "Select" ? 1 : undefined}
       />
     </Show>
   );

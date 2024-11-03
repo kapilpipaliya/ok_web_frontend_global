@@ -18,7 +18,7 @@ export function SelectPermissionField(props: SelectPermissionFieldProps) {
     P: {
       class: "flex:1",
       collection: () => `id:'${layoutStore.formStore[0].formData.id}'->$0Perm`,
-      componentName: "TagBox",
+      componentName: "MultiSelect",
       displayName: props.meta.P.displayName,
       key: props.meta.P.key,
       useLocalStorage: true,

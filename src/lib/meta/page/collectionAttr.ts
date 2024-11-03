@@ -20,13 +20,13 @@ export const collectionAttr = [
   },
   {
     collection: "g:'DataType'",
-    componentName: "SelectBox",
+    componentName: "Select",
 
     key: "dataType",
   },
   {
     collection: "->$0DataType->$0Comp",
-    componentName: "SelectBox",
+    componentName: "Select",
 
     key: "Comp",
     // smaller version:
@@ -34,7 +34,7 @@ export const collectionAttr = [
   },
   {
     collection: "g:'Coll'",
-    componentName: "SelectBox",
+    componentName: "Select",
 
     key: "coll",
   },
@@ -47,18 +47,18 @@ export const collectionAttr = [
     key: "disabled",
   },
   {
-    componentName: "TagBox",
+    componentName: "MultiSelect",
     key: "hidden",
   },
   {
-    componentName: "TagBox",
+    componentName: "MultiSelect",
     key: "disabled",
   },
   {
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
-        componentName: "SelectBox",
+        componentName: "Select",
 
         displayExpr: "::'P.key'",
         key: "key",
@@ -78,7 +78,7 @@ export const collectionAttr = [
     attributes: [
       {
         collection: "g:'Role'",
-        componentName: "SelectBox",
+        componentName: "Select",
 
         key: "role",
       },
@@ -86,7 +86,7 @@ export const collectionAttr = [
         attributes: [
           {
             collection: "g:'Perm'",
-            componentName: "TagBox",
+            componentName: "MultiSelect",
 
             key: "perm",
           },

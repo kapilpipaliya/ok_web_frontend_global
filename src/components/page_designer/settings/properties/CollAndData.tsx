@@ -48,7 +48,7 @@ function createFieldAttributes(
   return [
     {
       collection: "g:'ALL_LABELS'",
-      componentName: "SelectBox",
+      componentName: "Select",
       displayName: "Collection",
       key: "collection",
       saveValue: true,
@@ -58,7 +58,7 @@ function createFieldAttributes(
         graph.vertexes[layoutStore.selectedId]?.P?.collection
           ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'`
           : "",
-      componentName: "SelectBox",
+      componentName: "Select",
       key: "data",
     },
     {
@@ -156,7 +156,7 @@ export function CollAndData() {
         store={repeaterStore1}
       >
         <SelectField
-          componentName={"SelectBox"}
+          componentName={"Select"}
           disabled={false}
           isRealTime={false}
           onChange={onCollectionChange}
@@ -171,7 +171,7 @@ export function CollAndData() {
         store={repeaterStore2}
       >
         <SelectField
-          componentName={"TagBox"}
+          componentName={"MultiSelect"}
           disabled={false}
           isRealTime={false}
           title={"Select Data"}

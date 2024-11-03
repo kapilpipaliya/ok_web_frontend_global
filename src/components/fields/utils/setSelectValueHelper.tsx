@@ -19,10 +19,10 @@ export function setSelectValueHelper(
 ) {
   let data: Id | Id[];
   let vertexes: Vertex[];
-  if (isRemove && componentName === "SelectBox") {
+  if (isRemove && componentName === "Select") {
     data = [];
     vertexes = [];
-  } else if (componentName === "SelectBox") {
+  } else if (componentName === "Select") {
     // @ts-expect-error ignore
     data = value[0].id;
     vertexes = [value[0]] as Vertex[];

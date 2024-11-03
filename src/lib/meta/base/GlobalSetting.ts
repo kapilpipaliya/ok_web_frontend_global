@@ -6,7 +6,7 @@ export const GlobalSetting: IFormMetaData = {
   attributes: [
     {
       collection: "g:'Theme'",
-      componentName: "SelectBox",
+      componentName: "Select",
       key: "Theme",
     },
     {

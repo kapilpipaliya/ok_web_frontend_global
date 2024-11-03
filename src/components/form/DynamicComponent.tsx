@@ -419,8 +419,8 @@ export function DynamicComponent(
           <Match
             when={
               (componentName()?.startsWith("System") ||
-                componentName() === "SelectBox" ||
-                componentName() === "TagBox") &&
+                componentName() === "Select" ||
+                componentName() === "MultiSelect") &&
               !props.noLabel &&
               !props.meta.P.noLabel
             }
@@ -514,7 +514,7 @@ const _inputTypes = {
   week: "week",
 };
 /*
-        <Match when={componentName() === "SelectBox"}>
+        <Match when={componentName() === "Select"}>
           <MultiSelectField
             disable={props.disabled}
             displayValueKey="::'P.displayName'||::'P.key'||::'P.id'"

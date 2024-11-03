@@ -57,7 +57,7 @@ export const Page: IFormMetaData = {
         },
         // {
         //   collection: "g:'Dashboard'",
-        //   componentName: "TagBox",
+        //   componentName: "MultiSelect",
         //   inward: true,
         //   key: "dashboard",
         //   parentLabel: "Dashboard",
@@ -66,7 +66,7 @@ export const Page: IFormMetaData = {
         /*{ componentName: "SystemBoolean", key: "isRealTime" },
         {
           collection: "g:'Form'",
-          componentName: "SelectBox",
+          componentName: "Select",
           displayName: "Collection",
           
             key: "coll",
@@ -76,7 +76,7 @@ export const Page: IFormMetaData = {
         },
         {
           collection: `g:'{{->$0Coll::'P.key'}}'`,
-          componentName: "SelectBox",
+          componentName: "Select",
             key: "data",
         },*/
         {
@@ -91,7 +91,7 @@ export const Page: IFormMetaData = {
         {
           hidden: true,
           collection: "->$0Perm",
-          componentName: "TagBox",
+          componentName: "MultiSelect",
           key: "globalPerm",
         },
       ],

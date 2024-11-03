@@ -29,7 +29,7 @@ export function getExportCode(
     const metaVertexes = getSublistRowsForType(graph, "Attr", meta);
     // const props = meta.P;
     const selectMetaVertexes = metaVertexes.filter((meta) =>
-      ["SelectBox", "TagBox"].includes(meta.P.componentName),
+      ["Select", "MultiSelect"].includes(meta.P.componentName),
     );
     const tableMetaVertexes = metaVertexes.filter((meta) =>
       ["Table"].includes(meta.P.componentName),

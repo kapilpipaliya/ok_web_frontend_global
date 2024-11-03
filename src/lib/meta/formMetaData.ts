@@ -68,7 +68,7 @@ FormMetaData.Form = {
     ...FormMetaData.Page.attributes,
     {
       collection: "g:'FormCategory'",
-      componentName: "SelectBox",
+      componentName: "Select",
       displayName: "Form Category",
       inward: true,
       key: "form",
@@ -77,7 +77,7 @@ FormMetaData.Form = {
     {
       attributes: [
         {
-          componentName: "TagBox",
+          componentName: "MultiSelect",
           key: "key",
         },
       ],
@@ -96,7 +96,7 @@ FormMetaData.CompExample = {
     // TODO: Fix this. It will select Parent Comp.
     {
       collection: "g:'Comp'",
-      componentName: "SelectBox",
+      componentName: "Select",
       displayName: "Parent Component",
       key: "Comp",
       // validation: { required: true },

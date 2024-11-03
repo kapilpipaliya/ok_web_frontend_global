@@ -38,7 +38,7 @@ export function setGridHeaders(
       return (
         <Switch>
           <Match
-            when={attribute.componentName === "SelectBox" && !attribute.options}
+            when={attribute.componentName === "Select" && !attribute.options}
           >
             {getSelectNameValue({
               attribute: attribute,
@@ -49,7 +49,7 @@ export function setGridHeaders(
           </Match>
 
           <Match
-            when={attribute.componentName === "TagBox" && !attribute.options}
+            when={attribute.componentName === "MultiSelect" && !attribute.options}
           >
             {getTagValue({
               attribute: attribute,

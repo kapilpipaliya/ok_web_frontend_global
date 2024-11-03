@@ -54,7 +54,7 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "g:'CollCategory'",
-      componentName: "SelectBox",
+      componentName: "Select",
 
       inward: true,
       key: "category",
@@ -62,7 +62,7 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "g:'Dashboard'",
-      componentName: "TagBox",
+      componentName: "MultiSelect",
 
       inward: true,
       key: "dashboard",
@@ -80,7 +80,7 @@ export const Coll: IFormMetaData = {
     // { key: "supportDeletedRecordSearch", componentName: "SystemBoolean" },
     {
       collection: "->Attr",
-      componentName: "TagBox",
+      componentName: "MultiSelect",
       displayName: "Primary Key",
 
       key: "pk",
@@ -90,7 +90,7 @@ export const Coll: IFormMetaData = {
     },
     {
       collection: "->Attr",
-      componentName: "TagBox",
+      componentName: "MultiSelect",
 
       key: "nameKey",
       // TODO: add validation
@@ -121,7 +121,7 @@ export const Coll: IFormMetaData = {
         {
           attributes: [
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Paren",
               key: "leftParen",
 
@@ -130,7 +130,7 @@ export const Coll: IFormMetaData = {
 (((`,
             },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Field",
               key: "leftField",
               // collection: "g:'DataType'",
@@ -141,14 +141,14 @@ export const Coll: IFormMetaData = {
             //   key: "leftValue",
             // },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Operator",
               key: "operator",
               options: `${Object.keys(unaryOperatorsInitial).join("\n")}
 ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Field",
               key: "rightField",
               // collection: "g:'DataType'",
@@ -160,7 +160,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
               collection: "g:'DataType'",
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "DataType",
               
                 key: "dataType",
@@ -168,7 +168,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
             },
             {
               collection: "->$0DataType->$0Comp||Comp",
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Component",
               
                 key: "comp",
@@ -181,7 +181,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
               meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
             },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "Paren",
               key: "rightParen",
 
@@ -190,7 +190,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
 )))`,
             },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               displayName: "AndOr",
               key: "andOr",
 
@@ -218,7 +218,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                   attributes: [
                     {
                       key: "coll",
-                      componentName: "SelectBox",
+                      componentName: "Select",
                       
  
                         collection: "g:'Coll'",
@@ -237,7 +237,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                     },
                     {
                       key: "tab",
-                      componentName: "SelectBox",
+                      componentName: "Select",
                       
  
                         collection: "-CollChild->$0Tab",
@@ -245,7 +245,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                     },
                     {
                       key: "group",
-                      componentName: "SelectBox",
+                      componentName: "Select",
                       
                         collection: "-CollChild->$0Group",
  
@@ -258,7 +258,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                       attributes: [
                         {
                           key: "key",
-                          componentName: "SelectBox",
+                          componentName: "Select",
                           
                             displayExpr: "::'P.key'",
                             collection: "g:'Comp[Table]'->$0Prop",
@@ -277,7 +277,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
       attributes: [
         {
           collection: "g:'Coll'",
-          componentName: "SelectBox",
+          componentName: "Select",
 
           key: "coll",
         },
@@ -293,7 +293,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
           attributes: [
             {
               collection: "g:'Comp[Table]'->$0Prop",
-              componentName: "SelectBox",
+              componentName: "Select",
 
               displayExpr: "::'P.key'",
               key: "key",
@@ -323,12 +323,12 @@ ${Object.keys(binopsInitial).join("\n")}`,
         },
         {
           collection: "g:'Role'",
-          componentName: "TagBox",
+          componentName: "MultiSelect",
           key: "role",
         },
         {
           collection: "g:'Perm'",
-          componentName: "TagBox",
+          componentName: "MultiSelect",
           key: "perm",
         },
         {
@@ -344,7 +344,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
       attributes: [
         {
           collection: "<-$0->Attr",
-          componentName: "TagBox",
+          componentName: "MultiSelect",
           displayName: "Unique Constrain Keys",
 
           key: "pk",

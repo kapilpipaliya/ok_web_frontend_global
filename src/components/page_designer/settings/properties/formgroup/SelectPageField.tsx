@@ -37,7 +37,7 @@ export function SelectPageField(
     P: {
       class: "flex:1",
       collection: `g:'ThankYouPage'`,
-      componentName: "SelectBox",
+      componentName: "Select",
       displayName: props.meta.P.displayName,
       key: props.meta.P.key,
       renderLabel: RenderLabel,
@@ -47,7 +47,7 @@ export function SelectPageField(
   const SelectThankYouPage = () => {
     return (
       <DynamicComponent
-        componentName={"SelectBox"}
+        componentName={"Select"}
         data={props.selectedLayout}
         isNoPermissionCheck={true}
         isRealTime={false}

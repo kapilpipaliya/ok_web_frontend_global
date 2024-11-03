@@ -14,7 +14,7 @@ export const User = {
     },
     {
       collection: "g:'Role'",
-      componentName: "TagBox",
+      componentName: "MultiSelect",
       key: "role",
     },
   ],

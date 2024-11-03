@@ -62,7 +62,7 @@ export const Nav = {
           key: "expanded",
         },
         {
-          componentName: "SelectBox",
+          componentName: "Select",
           items: `Table
 Form
 Url`,
@@ -71,7 +71,7 @@ Url`,
         },
         {
           collection: "g:'Form'",
-          componentName: "SelectBox",
+          componentName: "Select",
 
           key: "Form",
         },
@@ -83,7 +83,7 @@ Url`,
           attributes: [
             {
               collection: "g:'Role'",
-              componentName: "SelectBox",
+              componentName: "Select",
 
               key: "role",
             },
@@ -91,7 +91,7 @@ Url`,
               attributes: [
                 {
                   collection: "g:'Perm'",
-                  componentName: "SelectBox",
+                  componentName: "Select",
 
                   key: "perm",
                 },
@@ -121,7 +121,7 @@ Url`,
               key: "expanded",
             },
             {
-              componentName: "SelectBox",
+              componentName: "Select",
               items: `Table
 Form
 Url`,
@@ -130,7 +130,7 @@ Url`,
             },
             {
               collection: "g:'Form'",
-              componentName: "SelectBox",
+              componentName: "Select",
 
               key: "Form",
             },
@@ -142,7 +142,7 @@ Url`,
               attributes: [
                 {
                   collection: "g:'Role'",
-                  componentName: "SelectBox",
+                  componentName: "Select",
 
                   key: "role",
                 },
@@ -150,7 +150,7 @@ Url`,
                   attributes: [
                     {
                       collection: "g:'Perm'",
-                      componentName: "SelectBox",
+                      componentName: "Select",
 
                       key: "perm",
                     },
@@ -180,7 +180,7 @@ Url`,
                   key: "expanded",
                 },
                 {
-                  componentName: "SelectBox",
+                  componentName: "Select",
                   items: `Table
 Form
 Url`,
@@ -189,7 +189,7 @@ Url`,
                 },
                 {
                   collection: "g:'Form'",
-                  componentName: "SelectBox",
+                  componentName: "Select",
 
                   key: "Form",
                 },
@@ -201,7 +201,7 @@ Url`,
                   attributes: [
                     {
                       collection: "g:'Role'",
-                      componentName: "SelectBox",
+                      componentName: "Select",
 
                       key: "role",
                     },
@@ -209,7 +209,7 @@ Url`,
                       attributes: [
                         {
                           collection: "g:'Perm'",
-                          componentName: "SelectBox",
+                          componentName: "Select",
 
                           key: "perm",
                         },
@@ -239,7 +239,7 @@ Url`,
                       key: "expanded",
                     },
                     {
-                      componentName: "SelectBox",
+                      componentName: "Select",
                       items: `Table
 Form
 Url`,
@@ -248,7 +248,7 @@ Url`,
                     },
                     {
                       collection: "g:'Form'",
-                      componentName: "SelectBox",
+                      componentName: "Select",
 
                       key: "Form",
                     },
@@ -260,7 +260,7 @@ Url`,
                       attributes: [
                         {
                           collection: "g:'Role'",
-                          componentName: "SelectBox",
+                          componentName: "Select",
 
                           key: "role",
                         },
@@ -268,7 +268,7 @@ Url`,
                           attributes: [
                             {
                               collection: "g:'Perm'",
-                              componentName: "SelectBox",
+                              componentName: "Select",
 
                               key: "perm",
                             },

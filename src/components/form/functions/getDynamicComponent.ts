@@ -9,7 +9,7 @@ import Tooltip from "@corvu/tooltip";
 
 import { componentMap } from "~/components/css_properties/components/componentMap";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
-import { RadioGroupField } from "~/components/fields/RadioGroupField";
+// import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { Repeater } from "~/components/page_attr_render/Repeater";
@@ -34,24 +34,22 @@ export const corvuComponents = {
 
 export const componentsMap: Record<string, any> = {
   Box: BoxField,
-  Button: ButtonField, // usen kobalte button
+  Button: ButtonField,
   // https://ark-ui.com/solid/docs/components/color-picker
-  // ColorBox: KobalteTextField,
   DynamicTable: TableInputField,
-  ErrorPage: PageField,
+  // ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
   // HtmlEditor: KobalteTextField,
-  ImageUploader: FileUploader,
+  MultiSelect: SelectField,
   // Link: Link,
   Page: PageField,
-  RadioGroup: RadioGroupField,
+  // RadioGroup: RadioGroupField,
   Repeater: Repeater,
-  SelectBox: SelectField,
-  TagBox: SelectField,
-  TemplatePage: PageField,
+  Select: SelectField,
+  // TemplatePage: PageField,
   Text: TextField,
-  ThankYouPage: PageField,
+  // ThankYouPage: PageField,
 };
 
 export function getDynamicComponent(component: string) {

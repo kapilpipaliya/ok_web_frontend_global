@@ -3,14 +3,14 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 export const pageAttr = [
   {
     collection: "g:'ALL_LABELS'",
-    componentName: "SelectBox",
+    componentName: "Select",
     displayName: "Collection",
     key: "collection",
     saveValue: true,
   },
   {
     // collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
-    componentName: "SelectBox",
+    componentName: "Select",
     // displayExpr: "P.displayName||P.key",
     displayExpr: "$P.displayName ($P.key)",
     displayName: "Data",
@@ -23,7 +23,7 @@ export const pageAttr = [
   },
   // to load initial data
   {
-    componentName: "TagBox",
+    componentName: "MultiSelect",
     key: "All",
     type: "'*'",
   },
@@ -31,7 +31,7 @@ export const pageAttr = [
     attributes: [
       {
         collection: "<-$0->$0Comp->$0Prop",
-        componentName: "SelectBox",
+        componentName: "Select",
 
         displayExpr: "::'P.key'",
         key: "key",
@@ -51,7 +51,7 @@ export const pageAttr = [
     attributes: [
       {
         collection: "g:'Role'",
-        componentName: "SelectBox",
+        componentName: "Select",
 
         key: "role",
       },
@@ -59,7 +59,7 @@ export const pageAttr = [
         attributes: [
           {
             collection: "g:'Perm'",
-            componentName: "SelectBox",
+            componentName: "Select",
 
             key: "perm",
           },

@@ -98,7 +98,7 @@ export function FileUploader(props: FileUploaderProps) {
             txnId,
             props.meta!,
             props.data as Vertex,
-            "TagBox",
+            "MultiSelect",
             data.result,
             false,
             graph,

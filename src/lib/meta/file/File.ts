@@ -8,7 +8,7 @@ import { PROPERTIES } from "~/components/constants/constant";
 export const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.
   collection: "g:'Folder'",
-  componentName: "SelectBox",
+  componentName: "Select",
   displayName: "Parent Folder",
   key: "ParentFolder",
   type: "ParentFolder",
@@ -74,7 +74,7 @@ export const File: IFormMetaData = {
     },
     // Tags or categories assigned to the file, which can help in organizing and searching files.
     {
-      componentName: "TagBox",
+      componentName: "MultiSelect",
       disabled: true,
       displayName: "Tags",
       key: "tags",
@@ -143,7 +143,7 @@ export const Folder: IFormMetaData = {
       key: "description",
     },
     // Tags or categories assigned to the directory.
-    { componentName: "TagBox", displayName: "Tags", key: "fileTag" },
+    { componentName: "MultiSelect", displayName: "Tags", key: "fileTag" },
     // The number of files in the directory.
     {
       componentName: "NumberBox",

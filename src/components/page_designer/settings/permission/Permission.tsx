@@ -39,7 +39,7 @@ export function Permission() {
 
       <div class="mt:.5rem px:0.25rem">
         <DynamicComponent
-          componentName={"TagBox"}
+          componentName={"MultiSelect"}
           data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}

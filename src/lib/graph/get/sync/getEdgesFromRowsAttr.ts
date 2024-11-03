@@ -18,8 +18,8 @@ export function getEdgesFromRowsAttr(
 
   for (const attribute of metaAttrs) {
     if (
-      attribute.componentName === "SelectBox" ||
-      attribute.componentName === "TagBox"
+      attribute.componentName === "Select" ||
+      attribute.componentName === "MultiSelect"
     ) {
       if (attribute.inward) {
         incoming.push({

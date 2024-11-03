@@ -3,7 +3,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { PROPERTIES } from "~/components/constants/constant";
 export const parentCompAttribute = {
   collection: "g:'Comp'",
-  componentName: "SelectBox",
+  componentName: "Select",
   displayName: "Parent Component",
   key: "ParentComp",
   type: "ParentComp",
@@ -13,7 +13,7 @@ export const Comp: IFormMetaData = {
   attributes: [
     {
       collection: "g:'CompCategory'",
-      componentName: "SelectBox",
+      componentName: "Select",
 
       inward: true,
       key: "category",
@@ -30,7 +30,7 @@ export const Comp: IFormMetaData = {
     {
       childLabel: "Child",
       collection: "g:'Comp'",
-      componentName: "SelectBox",
+      componentName: "Select",
 
       displayName: "Parent Component",
       inward: true,
@@ -39,7 +39,7 @@ export const Comp: IFormMetaData = {
     },
     {
       collection: "g:'DataType'",
-      componentName: "TagBox",
+      componentName: "MultiSelect",
       displayName: "DataType",
 
       inward: true,
@@ -79,19 +79,19 @@ export const Comp: IFormMetaData = {
         },
         // {
         //   collection: "g:'DataType'",
-        //   componentName: "SelectBox",
+        //   componentName: "Select",
         //   key: "dataType",
         //   onchange: '["Comp",null]',
         // },
         // {
         //   collection: "->$0DataType->$0Comp",
-        //   componentName: "SelectBox",
+        //   componentName: "Select",
         //   displayName: "Component",
         //   key: "Comp",
         // },
         // {
         //   collection: "g:'CompExample'",
-        //   componentName: "SelectBox",
+        //   componentName: "Select",
         //   displayName: "Comp Example",
         //   key: "CompExample",
         // },
@@ -99,7 +99,7 @@ export const Comp: IFormMetaData = {
         //   attributes: [
         //     {
         //       collection: "<-$0->$0Comp->$0Prop",
-        //       componentName: "SelectBox",
+        //       componentName: "Select",
         //       displayExpr: "::'P.key'",
         //       key: "key",
         //     },

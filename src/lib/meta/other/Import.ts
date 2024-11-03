@@ -34,7 +34,7 @@ export const Import = {
         },
         // {
         //  key: "column",
-        //  componentName: "SelectBox",
+        //  componentName: "Select",
         //
         //   displayExpr: "key",
         //   collection: "Update Dynamically on meta based on first row",
@@ -47,7 +47,7 @@ export const Import = {
         },
         {
           collection: "g:'Form'",
-          componentName: "SelectBox",
+          componentName: "Select",
           displayExpr: "key",
 
           displayName: "Lookup Collection",
@@ -72,7 +72,7 @@ export const Import = {
         {
           collection:
             '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
-          componentName: "SelectBox",
+          componentName: "Select",
           displayExpr: "key",
 
           displayName: "Function",

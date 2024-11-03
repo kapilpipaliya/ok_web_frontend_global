@@ -14,7 +14,7 @@ export function PrimaryKey() {
       <span class="f:15 flex:.5">Primary Key</span>
       <span class="f:15 flex:1">
         <DynamicComponent
-          componentName={"TagBox"}
+          componentName={"MultiSelect"}
           data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}

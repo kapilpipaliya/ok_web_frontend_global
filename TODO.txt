@@ -1,15 +1,12 @@
 - write own components and documentation
 - support for custom js code
-- 
-
-
+- support for custom condition in rules.
 
 Bugs:
 - fix css elements style
 - fix style for number input in properties editor.
 
-
 Feature:
 - user can always drag and drop on canvas
-
+- write the component properties sync logic.
 

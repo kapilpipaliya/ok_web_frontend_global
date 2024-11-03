@@ -66,7 +66,7 @@ export function HighlightSetValueContent(
         </Switch>
         {/* Select Rules: */}
         {/* <SelectInputField
-                      componentName={"SelectBox"}
+                      componentName={"Select"}
                       data={{ P: {} } as Vertex}
                       meta={{
                         P: {
