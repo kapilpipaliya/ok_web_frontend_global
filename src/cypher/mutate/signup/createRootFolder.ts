@@ -8,7 +8,6 @@ export async function createRootFolder(
   const query = `
     MERGE (:Folder {key: 'Root'})
     MERGE (:Comp {key: 'Root'})
-    MERGE (:Comp {key: 'ArkUI'})
     MERGE (globalSetting:GlobalSetting {key: 'Default'})
     MERGE (theme:Theme {key: 'Default'})
     SET theme.data = $theme

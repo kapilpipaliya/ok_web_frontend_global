@@ -1,0 +1,15 @@
+- write own components and documentation
+- support for custom js code
+- 
+
+
+
+Bugs:
+- fix css elements style
+- fix style for number input in properties editor.
+
+
+Feature:
+- user can always drag and drop on canvas
+
+
