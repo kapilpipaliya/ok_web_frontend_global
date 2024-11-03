@@ -4,11 +4,11 @@ import { createMemo, Match, Switch } from "solid-js";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import {
-  arkUIComponents,
-  corvuComponents,
-  kobalteComponents,
-} from "../form/functions/getDynamicComponent";
+// import {
+//   arkUIComponents,
+//   corvuComponents,
+//   kobalteComponents,
+// } from "../form/functions/getDynamicComponent";
 
 export function OpenComponentURL(
   props: Readonly<{ class?: string; meta: Vertex }>,
@@ -19,15 +19,15 @@ export function OpenComponentURL(
     findVertexByLabelAndUniqueId(graph, "Comp", "key", componentKey());
 
   const componentUrl = createMemo(() => {
-    if (kobalteComponents[componentKey() as keyof typeof kobalteComponents]) {
-      return `https://kobalte.dev/docs/core/components/${componentVertex()?.P.info}`;
-    }
-    if (corvuComponents[componentKey() as keyof typeof corvuComponents]) {
-      return `https://corvu.dev/docs/primitives/${componentVertex()?.P.info}/`;
-    }
-    if (arkUIComponents[componentKey() as keyof typeof arkUIComponents]) {
-      return `https://ark-ui.com/solid/docs/components/${componentVertex()?.P.info}`;
-    }
+    // if (kobalteComponents[componentKey() as keyof typeof kobalteComponents]) {
+    //   return `https://kobalte.dev/docs/core/components/${componentVertex()?.P.info}`;
+    // }
+    // if (corvuComponents[componentKey() as keyof typeof corvuComponents]) {
+    //   return `https://corvu.dev/docs/primitives/${componentVertex()?.P.info}/`;
+    // }
+    // if (arkUIComponents[componentKey() as keyof typeof arkUIComponents]) {
+    //   return `https://ark-ui.com/solid/docs/components/${componentVertex()?.P.info}`;
+    // }
     return null;
   });
 

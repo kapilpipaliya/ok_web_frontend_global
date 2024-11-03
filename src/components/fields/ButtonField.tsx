@@ -4,7 +4,6 @@ import { useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, Show, splitProps } from "solid-js";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
-import { Button } from "~/kobalte/packages/core/src/button";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/graph";
@@ -103,11 +102,10 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
   return (
     <Show when={!(previewStore.isViewOnly && meta().P.type === "submit")}>
-      {/* @ts-expect-error children is not a valid prop */}
-      <Button ref={setInternalRef} {...others} {...extraProps}>
+      <button ref={setInternalRef} {...others} {...extraProps}>
         {data()?.P?.[meta().P.key] ?? meta().P.text ?? meta().P.children}
         {local.children}
-      </Button>
+      </button>
     </Show>
   );
 }
