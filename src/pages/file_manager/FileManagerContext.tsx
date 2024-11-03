@@ -6,6 +6,7 @@ import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { DataGridStore } from "~/components/grid/DataGridContext";
 
+import { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { getFilesData } from "./sidebar/getFilesData";
@@ -20,7 +21,7 @@ const getInitialFileManagerStore = () => {
     gridStore: null as DataGridStore | null,
     parentVertexLabel: "Folder",
     root: null as null | Vertex[],
-    rootKeys: ["Root"],
+    rootKeys: { key: "Root" } as MongoFilter,
     selectedItem: null as null | Vertex,
     toParentEdgeType: "ParentFolder",
     treeItemHoverId: null as null | string,
@@ -42,7 +43,7 @@ export function FileManagerStoreProvider(
     fileId?: string;
     onFileSelected?: (file: Vertex) => void;
     parentVertexLabel: string;
-    rootKeys?: string[];
+    rootKeys?: MongoFilter;
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
     toParentEdgeType: string;
   }>,
@@ -55,7 +56,7 @@ export function FileManagerStoreProvider(
     get parentVertexLabel() {
       return props.parentVertexLabel;
     },
-    rootKeys: props.rootKeys || ["Root"],
+    rootKeys: props.rootKeys || { key: "Root" },
     get toParentEdgeType() {
       return props.toParentEdgeType;
     },
@@ -111,7 +112,7 @@ async function fetchRootData(
   setGraph: SetStoreFunction<GraphInterface>,
   toParentEdgeType: string,
   parentVertexLabel: string,
-  rootKeys: string[],
+  rootKeys: MongoFilter,
   folderId?: string,
   fileId?: string,
 ) {

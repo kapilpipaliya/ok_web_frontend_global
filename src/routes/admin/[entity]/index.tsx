@@ -11,7 +11,7 @@ export default function TablePage() {
       <Match when={params.entity === "Comp"}>
         <FileManager
           parentVertexLabel="Comp"
-          rootKeys={["Root", "ArkUI"]}
+          rootKeys={{ $or: [{ key: "Root" }, { key: "ArkUI" }] }}
           toParentEdgeType="ParentComp"
         />
       </Match>

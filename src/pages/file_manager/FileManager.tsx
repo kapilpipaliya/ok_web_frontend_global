@@ -2,6 +2,8 @@ import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
+
 import {
   type FileManagerObject,
   FileManagerStoreProvider,
@@ -14,7 +16,7 @@ export default function FileManager(
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
     parentVertexLabel: string;
-    rootKeys?: string[];
+    rootKeys?: MongoFilter;
     setFileManagerStore?: (fileManagerStore: FileManagerObject) => void;
     toParentEdgeType: string;
   }>,

@@ -2,16 +2,15 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
+import { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
 export async function getRootData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   parentVertexLabel: string,
-  rootKeys: string[],
+  filter: MongoFilter,
 ) {
-  const filter = rootKeys.map((key) => ({ key: key }));
-
   return await fetchAndSetGraphData(
     graph,
     setGraph,

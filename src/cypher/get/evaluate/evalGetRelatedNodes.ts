@@ -2,12 +2,11 @@ import { int, type Session, type Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { isObject } from "~/lib/data_structure/object/isObject";
-
 import type { ContextType } from "../../types/ContextType";
 
 import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
+import { mongoToCypher } from "./mongoToCypher";
 import { processResult } from "./processResult";
 
 export async function evalGetRelatedNodes(
@@ -124,36 +123,10 @@ function buildQuery(
       } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
-        if (Array.isArray(filter)) {
-          if (filter.length > 0) {
-            const filterConditions = filter
-              .map((condition, index) => {
-                if (typeof condition === "object" && condition !== null) {
-                  return Object.keys(condition)
-                    .map((key) => `n.${key} = $${key}_${index}`)
-                    .join(" AND ");
-                }
-              })
-              .join(" AND ");
-            query += ` WHERE ${filterConditions}`;
-            params = filter.reduce((acc, condition, index) => {
-              if (typeof condition === "object" && condition !== null) {
-                Object.keys(condition).forEach((key) => {
-                  acc[`${key}_${index}`] = condition[key];
-                });
-              }
-              return acc;
-            }, {});
-          }
-        } else if (isObject(filter)) {
-          if (Object.keys(filter).length > 0) {
-            const filterKeys = Object.keys(filter);
-            const filterConditions = filterKeys
-              .map((key) => `n.${key} = $${key}`)
-              .join(" AND ");
-            query += ` WHERE ${filterConditions}`;
-            params = filter;
-          }
+        const { params: filterParams, query: whereClause } = mongoToCypher(filter);
+        if (whereClause) {
+        query += ` WHERE ${whereClause}`;
+          params = { ...params, ...filterParams };
         }
 
         if (skip) {
