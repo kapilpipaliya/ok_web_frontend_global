@@ -45,7 +45,7 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'],
         // https://www.youtube.com/watch?v=uF5nCRI_uME
-        viewport: { width: 2048 - 20, height: 1280 - 20 }
+        viewport: { width: 2048 - 20 - 600, height: 1280 - 20 }
        },
     },
 

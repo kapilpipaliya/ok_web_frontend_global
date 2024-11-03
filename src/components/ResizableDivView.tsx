@@ -60,12 +60,13 @@ export function ResizableContainer(
   // };
 
   return (
-    <div class="grid overflow:auto" classList={{}}>
+    <div class="grid overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}" classList={{}}>
       <div
         class="scrollbar-color:lightgrey {scrollbar-width:thin} border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
-          [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
+          // [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
           // [`height:${height()}`]: !!height(),
+          [`height:100%`]: true,
           [`width:${width()}`]: !!width(),
         }}
       >

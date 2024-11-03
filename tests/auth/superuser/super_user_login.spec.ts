@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { superUserData } from '../data/signUpData';
 import { logIn } from '../functions/logIn';
 
+test.use({ baseURL: 'http://localhost:3000' });
 
 test.describe('super user login', () => {
   test.beforeEach(async ({ page }) => {

@@ -238,3 +238,10 @@ https://github.com/alxnddr/solid-monaco
 
 DnD Solutions:
 https://discord.com/channels/722131463138705510/722131463889223772/1279381710412316702
+
+
+get percentage-bar component:
+https://github.com/kavindu-mane/react-percentage-bar/tree/main
+
+A collection of common utilities 
+https://github.com/samualtnorman/lib/tree/main

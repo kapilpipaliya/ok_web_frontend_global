@@ -3,7 +3,6 @@ import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 
 import { FormContext } from "~/components/form/FormContext";
 import { HeaderWithDescription } from "~/components/HeaderWithDescription";
-import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";
@@ -14,26 +13,41 @@ import { Permission } from "./permission/Permission";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { FormStatusWrapper } from "./status/FormStatusWrapper";
+import { FormStatus } from "./status/FormStatus";
+import { TabButton } from "./TabButton";
+import { TabsContainer, TabStickyContainer } from "../form_elements/TabsContainer";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
 
   const tabs = createMemo(() => {
-    const baseTabs = ["settings", "layers"];
-    if (layoutStore.formStore[0]?.formData?.L[0] === "Form") {
+    const baseTabs = ["settings", "status", "layers"];
+    const formType = layoutStore.formStore[0]?.formData?.L[0];
+    if (formType === "Form") {
       baseTabs.push("Keys");
     }
-    if (
-      layoutStore.formStore[0]?.formData?.L[0] === "Form" ||
-      layoutStore.formStore[0]?.formData?.L[0] === "Page"
-    ) {
+    if (formType === "Form" || formType === "Page") {
       baseTabs.push("Rules", "Permission", "SEO");
     }
     return baseTabs;
   });
 
+  const TabList = () => (
+    <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
+    <For each={tabs()}>
+      {(data) => (
+        <TabButton
+          data={data}
+          isSelected={layoutStore.selectedTab === data}
+          onClick={() => setLayoutStore("selectedTab", data)}
+        />
+      )}
+    </For>
+  </ul>
+  )
+
   const Tabs = () => (
-    <div class="bg:white position:sticky top:0">
+    <TabStickyContainer>
       <Icon
         class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
@@ -41,31 +55,10 @@ export function SettingTabs() {
         onClick={() => setLayoutStore("isRightOpen", false)}
         width={30}
       />
-
-      <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128)  f:0.875rem  font-weight:500  mb:10  text-align:center ">
-        <ul class="overflow-x-auto flex {scrollbar-width:thin} jc:space-around  margin-bottom:-1px ">
-          <For each={tabs()}>
-            {(data) => (
-              <li class="me-2 cursor:pointer">
-                <button
-                  class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px"
-                  classList={{
-                    "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover":
-                      layoutStore.selectedTab !== data,
-                    "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)":
-                      layoutStore.selectedTab === data,
-                  }}
-                  onclick={() => setLayoutStore("selectedTab", data)}
-                  type="button"
-                >
-                  {capitalizeFirstLetter(data)}
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
-      </div>
-    </div>
+      <TabsContainer>
+       <TabList />
+      </TabsContainer>
+    </TabStickyContainer>
   );
 
   return (
@@ -76,15 +69,14 @@ export function SettingTabs() {
         classList={{ "display:none": layoutStore.selectedTab !== "settings" }}
       >
         <FormConfig />
-        <Show when={layoutStore.formStore[0]}>
-          <FormContext.Provider value={layoutStore.formStore}>
-            <FormStatusWrapper />
-          </FormContext.Provider>
-        </Show>
       </div>
 
       <Show when={layoutStore.formStore[0]}>
         <FormContext.Provider value={layoutStore.formStore}>
+          <Show when={layoutStore.selectedTab === "status"}>
+            <FormStatus />
+          </Show>
+          {/* Keep Display:none to keep expanded state */}
           <div classList={{ "display:none": layoutStore.selectedTab !== "layers" }}>
             <LayoutTree />
           </div>

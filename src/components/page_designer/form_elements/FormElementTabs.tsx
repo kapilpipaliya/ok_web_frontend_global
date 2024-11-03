@@ -1,7 +1,9 @@
-import { createSignal, For, Match, Switch } from "solid-js";
+import { createSignal, For, Match, ParentProps, Switch } from "solid-js";
 
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
+import { TabButton } from "../settings/TabButton";
+import { TabStickyContainer, TabsContainer } from "./TabsContainer";
 
 export function FormElementTabs() {
   const leftMenuTabs = [
@@ -15,37 +17,28 @@ export function FormElementTabs() {
   ];
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
-  const Tabs = () => (
-    <div class={"bg:white p:4 position:sticky top:0"}>
-      <div class="lh:1rem border-bottom-width:1px border-color:rgb(229,231,235) color:rgb(107,114,128) f:0.875rem font-weight:500 mb:10 text-align:center">
-        <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
-          <For each={leftMenuTabs}>
-            {(data) => (
-              <li class="me-2 cursor:pointer">
-                <button
-                  class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px white-space:nowrap"
-                  classList={{
-                    "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover":
-                      selectedTab() !== data,
-                    "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)":
-                      selectedTab() === data,
-                  }}
-                  onClick={() => setSelectedTab(data)}
-                  type="button"
-                >
-                  {data.title}
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
-      </div>
-    </div>
+  const TabList = () => (
+    <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
+      <For each={leftMenuTabs}>
+        {(data) => (
+          <TabButton
+            data={data.title}
+            isSelected={selectedTab() === data}
+            onClick={() => setSelectedTab(data)}
+          />
+        )}
+      </For>
+    </ul>
   );
 
   return (
     <>
-      <Tabs />
+      <TabStickyContainer>
+        <TabsContainer>
+          <TabList />
+        </TabsContainer>
+      </TabStickyContainer>
+
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList />

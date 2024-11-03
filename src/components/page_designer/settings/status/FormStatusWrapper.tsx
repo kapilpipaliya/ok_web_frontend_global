@@ -8,6 +8,9 @@ import { CustomModal } from "~/components/CustomModal";
 
 import { FormStatus } from "./FormStatus";
 
+/**
+ * @deprecated This function is deprecated and will be deleted in future versions.
+ */
 export function FormStatusWrapper() {
   const [isOpen, setIsOpen] = createSignal(false);
   return (

@@ -55,13 +55,13 @@ export const Page: IFormMetaData = {
           componentName: "SystemTextArea",
           key: "description",
         },
-        {
-          collection: "g:'Dashboard'",
-          componentName: "TagBox",
-          inward: true,
-          key: "dashboard",
-          parentLabel: "Dashboard",
-        },
+        // {
+        //   collection: "g:'Dashboard'",
+        //   componentName: "TagBox",
+        //   inward: true,
+        //   key: "dashboard",
+        //   parentLabel: "Dashboard",
+        // },
         { componentName: "SystemBoolean", key: "public" },
         /*{ componentName: "SystemBoolean", key: "isRealTime" },
         {

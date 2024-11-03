@@ -269,6 +269,7 @@ export function DynamicComponent(
       if (descriptor) {
         // Handle properties with getters
         if (descriptor.get) {
+          // TODO: there is issue here, why use class compore on if and else both conditions?
           if (key.toLowerCase().endsWith("class")) {
             const value = customMetaProps[key];
             if (value !== null) {
