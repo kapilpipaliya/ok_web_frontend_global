@@ -1,5 +1,5 @@
-import { autoUpdate } from "@floating-ui/dom";
-import { useFloating } from "solid-floating-ui";
+import createFloating from "@corvu/utils/create/floating";
+import { Strategy } from "@floating-ui/dom";
 import {
   type Accessor,
   createEffect,
@@ -74,10 +74,15 @@ export function BorderOverlay(
     // }
     // updateInitial();
 
-    const position = useFloating(props.reference, floating, {
-      placement: "bottom-start",
-      strategy: "fixed",
-      whileElementsMounted: autoUpdate,
+    const strategy = () => "fixed" as Strategy;
+
+    const floatingState = createFloating({
+      enabled: true,
+      floating: floating,
+      options: () => ({}),
+      placement: () => "bottom-start",
+      reference: () => props.reference() ?? null,
+      strategy,
     });
 
     const updatePos = () => {
@@ -85,12 +90,12 @@ export function BorderOverlay(
       setStore({
         maxHeight: rect.height + 2,
         maxWidth: rect.width + 2,
-        x: (position.x ?? 0) - 1,
-        y: (position.y ?? 0) - rect.height - 1,
+        x: (floatingState().x ?? 0) - 1,
+        y: (floatingState().y ?? 0) - rect.height - 1,
       });
     };
 
-    createEffect(on([() => position.x, () => position.y], updatePos));
+    createEffect(on([() => floatingState().x, () => floatingState().y], updatePos));
 
     return (
       <Portal>

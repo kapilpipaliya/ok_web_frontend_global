@@ -1,11 +1,8 @@
+import createFloating from "@corvu/utils/create/floating";
 import {
-  autoPlacement,
-  autoUpdate,
-  flip,
   type Placement,
-  shift,
+  Strategy,
 } from "@floating-ui/dom";
-import { useFloating } from "solid-floating-ui";
 import { createSignal, type JSX, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
@@ -28,16 +25,20 @@ export function DropdownMenu(
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [graph, setGraph] = useGraph();
   const zIndex = useZIndex();
+  const strategy = () => "fixed" as Strategy;
 
-  const position = useFloating(reference, floating, {
-    middleware: [
-      props.useFlip ?? true ? flip() : undefined, // Automatically flip the dropdown if it doesn't fit
-      props.useShift ?? true ? shift({ padding: 8 }) : undefined, // Adjust the dropdown to stay within the viewport with a padding of 8px
-      props.useAutoPlacement ?? false ? autoPlacement() : undefined, // Automatically choose the best placement for the dropdown
-    ],
-    placement: props.placement ?? "bottom-start",
-    strategy: "fixed",
-    whileElementsMounted: autoUpdate,
+  const floatingState = createFloating({
+    // arrow: arrowEl,
+    enabled: true,
+    floating: floating,
+    options: () => ({
+      flip: props.useFlip, // Automatically flip the dropdown if it doesn't fit
+      offset: props.offset,
+      shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
+    }),
+    placement: () => props.placement ?? "bottom-start",
+    reference: () => reference() ?? null,
+    strategy,
   });
 
   onMount(() => {
@@ -67,9 +68,9 @@ export function DropdownMenu(
         }}
         role="menu"
         style={{
-          left: `${position.x ?? 0}px`,
-          position: position.strategy,
-          top: `${position.y ?? 0}px`,
+          left: `${floatingState().x ?? 0}px`,
+          position: strategy(),
+          top: `${floatingState().y ?? 0}px`,
         }}
         {...rest}
       />

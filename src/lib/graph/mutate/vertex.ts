@@ -1,4 +1,3 @@
-import { pipe } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { batch } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
@@ -263,17 +262,16 @@ export function deleteVertex(
 
   const data = klona(vertex);
   batch(() => {
-    graph.vertexes[actualVertexId].L.forEach((label) =>
+    for (const label of graph.vertexes[actualVertexId].L) {
       // @ts-expect-error ignore
-      setGraph("vertexLabelIdMap", label, (vertexIds) =>
-        Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)
-          ? pipe(
-              vertexIds.filter((vId) => vId !== actualVertexId),
-              (fIds) => (fIds.length ? fIds : undefined),
-            )
-          : vertexIds,
-      ),
-    );
+      setGraph("vertexLabelIdMap", label, (vertexIds) => {
+        if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
+          const filteredIds = vertexIds.filter((vId) => vId !== actualVertexId);
+          return filteredIds.length ? filteredIds : undefined;
+        }
+        return vertexIds;
+      });
+    }
     // @ts-expect-error ignore
     setGraph("vertexes", actualVertexId, undefined);
   });
