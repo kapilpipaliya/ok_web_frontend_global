@@ -2,9 +2,6 @@ import { int, type Session, type Transaction } from "neo4j-driver";
 
 import type { ComponentNode } from "./ComponentTreeType";
 
-import { corvuComponentUrls } from "../component_properties/corvu-components";
-import { kobalteComponentUrls } from "../component_properties/kobalte-components";
-
 async function addEdgeIfNotExists(
   dbSession: Session | Transaction,
   parentId: number | string,
@@ -35,16 +32,6 @@ export async function insertComponentTree(
   parentId: null | number | string = null,
 ): Promise<{ success: boolean }> {
   for (const component of components) {
-    // Get the component URL from corvu or kobalte
-    const componentUrl =
-      corvuComponentUrls[
-        component.Component as keyof typeof corvuComponentUrls
-      ] ||
-      kobalteComponentUrls[
-        component.Component as keyof typeof kobalteComponentUrls
-      ] ||
-      null;
-
     // Check if the node already exists
     const findNodeResult = await dbSession.run(
       "MATCH (n:Comp {key: $key}) RETURN id(n) AS id",
@@ -60,7 +47,7 @@ export async function insertComponentTree(
       const createNodeResult = await dbSession.run(
         `CREATE (n:Comp {key: $key, info: $info})
          RETURN id(n) AS id`,
-        { info: componentUrl, key: component.Component },
+        { info: "", key: component.Component },
       );
       nodeId = createNodeResult.records[0].get("id");
     }

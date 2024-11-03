@@ -84,7 +84,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               },
             });
           }}
-          isShowPagination={false}
+          isShowPagination={true}
           tableId={
             fileManagerStore.parentVertexLabel === "Folder"
               ? "File"
