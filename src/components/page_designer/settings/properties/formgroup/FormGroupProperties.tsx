@@ -15,7 +15,6 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/components/page_designer/constant";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
-import { getComponentForCollRow } from "~/lib/graph/get/sync/getComponentForCollRow";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
@@ -275,7 +274,7 @@ interface PropertyFieldProps {
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
   const componentName = createMemo(() =>
-    getComponentForCollRow(props.meta, props.meta, graph, setGraph),
+    props.meta.P.type || "TextInput",
   );
   const metaProps = getPropsFromMetaExpression(
     graph,
