@@ -1,5 +1,5 @@
 import { klona } from "klona";
-import { batch } from "solid-js";
+import { batch, untrack } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
@@ -17,7 +17,7 @@ export function newVertex(
   labels: string[],
   properties?: { [key: string]: any },
 ): Vertex {
-  return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
+    return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
 }
 
 // add a new vertex to the graph
@@ -30,49 +30,51 @@ export function addNewVertex(
   error: boolean | string;
   txnDetailIndex?: number;
 } {
-  const actualVertexId = vertexOldIdToNewIdMap.get(vertex.id) || vertex.id;
-  if (graph.vertexes[actualVertexId]) {
-    return { error: "Vertex ID Already exist" };
-  }
-  const existedVertexes = vertex.L.filter(
-    (label) =>
-      Array.isArray(graph.vertexLabelIdMap[label]) &&
-      graph.vertexLabelIdMap[label].includes(actualVertexId),
-  );
-  if (existedVertexes.length) {
-    return { error: "vertex ID already exist while adding new vertex" };
-  }
-  setGraph("vertexes", actualVertexId, updateVertex(klona(vertex)));
-  vertex.L.forEach((label) =>
-    setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
-      Array.isArray(vertexIds)
-        ? [...vertexIds, actualVertexId]
-        : [actualVertexId],
-    ),
-  );
-  const data = updateVertex(klona(vertex));
-  transactionDetailAdd(
-    txnId,
-    {
-      data,
-      insert: () => {
-        return updateVertex(data);
+  return untrack(() => {
+    const actualVertexId = vertexOldIdToNewIdMap.get(vertex.id) || vertex.id;
+    if (graph.vertexes[actualVertexId]) {
+      return { error: "Vertex ID Already exist" };
+    }
+    const existedVertexes = vertex.L.filter(
+      (label) =>
+        Array.isArray(graph.vertexLabelIdMap[label]) &&
+        graph.vertexLabelIdMap[label].includes(actualVertexId),
+    );
+    if (existedVertexes.length) {
+      return { error: "vertex ID already exist while adding new vertex" };
+    }
+    setGraph("vertexes", actualVertexId, updateVertex(klona(vertex)));
+    vertex.L.forEach((label) =>
+      setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
+        Array.isArray(vertexIds)
+          ? [...vertexIds, actualVertexId]
+          : [actualVertexId],
+      ),
+    );
+    const data = updateVertex(klona(vertex));
+    transactionDetailAdd(
+      txnId,
+      {
+        data,
+        insert: () => {
+          return updateVertex(data);
+        },
+        redo: () => {
+          return addNewVertex(0, updateVertex(data), graph, setGraph);
+        },
+        revert: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return deleteVertex(0, actualVertexId2, graph, setGraph);
+        },
       },
-      redo: () => {
-        return addNewVertex(0, updateVertex(data), graph, setGraph);
-      },
-      revert: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return deleteVertex(0, actualVertexId2, graph, setGraph);
-      },
-    },
-    graph,
-  );
-  return {
-    error: false,
-    txnDetailIndex: getLastTxnIndex(txnId, graph),
-  };
+      graph,
+    );
+    return {
+      error: false,
+      txnDetailIndex: getLastTxnIndex(txnId, graph),
+    };
+  });
 }
 
 // replace a vertex properties
@@ -83,47 +85,49 @@ export function replaceVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
-  const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
-  if (!graph.vertexes[actualVertexId]) {
-    return { error: "Vertex ID is not valid" };
-  }
-  const originalProperties = klona(graph.vertexes[actualVertexId].P);
-  setGraph("vertexes", actualVertexId, "P", reconcile(klona(properties)));
-  const data = updateVertex(klona(graph.vertexes[actualVertexId]));
-  transactionDetailAdd(
-    txnId,
-    {
-      data,
-      redo: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return replaceVertexProperties(
-          0,
-          actualVertexId2,
-          graph,
-          setGraph,
-          data.P,
-        );
+  return untrack(() => {
+    const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
+    if (!graph.vertexes[actualVertexId]) {
+      return { error: "Vertex ID is not valid" };
+    }
+    const originalProperties = klona(graph.vertexes[actualVertexId].P);
+    setGraph("vertexes", actualVertexId, "P", reconcile(klona(properties)));
+    const data = updateVertex(klona(graph.vertexes[actualVertexId]));
+    transactionDetailAdd(
+      txnId,
+      {
+        data,
+        redo: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return replaceVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            data.P,
+          );
+        },
+        replace: () => updateVertex(data),
+        revert: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return replaceVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            originalProperties,
+          );
+        },
       },
-      replace: () => updateVertex(data),
-      revert: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return replaceVertexProperties(
-          0,
-          actualVertexId2,
-          graph,
-          setGraph,
-          originalProperties,
-        );
-      },
-    },
-    graph,
-  );
-  return {
-    error: false,
-    txnDetailIndex: getLastTxnIndex(txnId, graph),
-  };
+      graph,
+    );
+    return {
+      error: false,
+      txnDetailIndex: getLastTxnIndex(txnId, graph),
+    };
+  });
 }
 
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
@@ -135,58 +139,60 @@ export function mergeVertexProperties(
   properties: { [key: string]: any },
   _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
-  const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
-  const vertex = graph.vertexes[actualVertexId];
-  if (!vertex) {
-    return { error: `Vertex ID is not valid ${actualVertexId}` };
-  }
-  const originalProperties = {} as { [key: string]: any };
-  for (const property in properties) {
-    // clonning json will remove undefined value, so used null as default.
-    originalProperties[property] = vertex.P[property] ?? null;
-  }
-  const clonedProperties = klona(properties);
-  // It will only merge top level properties.
-  setGraph("vertexes", actualVertexId, "P", clonedProperties);
-  const data = updateVertex(klona(vertex));
-  data.P = clonedProperties;
+  return untrack(() => {
+    const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
+    const vertex = graph.vertexes[actualVertexId];
+    if (!vertex) {
+      return { error: `Vertex ID is not valid ${actualVertexId}` };
+    }
+    const originalProperties = {} as { [key: string]: any };
+    for (const property in properties) {
+      // clonning json will remove undefined value, so used null as default.
+      originalProperties[property] = vertex.P[property] ?? null;
+    }
+    const clonedProperties = klona(properties);
+    // It will only merge top level properties.
+    setGraph("vertexes", actualVertexId, "P", clonedProperties);
+    const data = updateVertex(klona(vertex));
+    data.P = clonedProperties;
 
-  transactionDetailAdd(
-    txnId,
-    {
-      data: clonedProperties,
-      merge: () => {
-        return updateVertex(data);
+    transactionDetailAdd(
+      txnId,
+      {
+        data: clonedProperties,
+        merge: () => {
+          return updateVertex(data);
+        },
+        redo: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return mergeVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            clonedProperties,
+          );
+        },
+        revert: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return mergeVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            klona(originalProperties),
+          );
+        },
       },
-      redo: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return mergeVertexProperties(
-          0,
-          actualVertexId2,
-          graph,
-          setGraph,
-          clonedProperties,
-        );
-      },
-      revert: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return mergeVertexProperties(
-          0,
-          actualVertexId2,
-          graph,
-          setGraph,
-          klona(originalProperties),
-        );
-      },
-    },
-    graph,
-  );
-  return {
-    error: false,
-    txnDetailIndex: getLastTxnIndex(txnId, graph),
-  };
+      graph,
+    );
+    return {
+      error: false,
+      txnDetailIndex: getLastTxnIndex(txnId, graph),
+    };
+  });
 }
 
 // delete a vertex
@@ -199,119 +205,123 @@ export function deleteVertex(
   error: boolean | string;
   txnDetailIndex?: number;
 } {
-  const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
+  return untrack(() => {
+    const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
 
-  if (!graph.vertexes[actualVertexId]) {
-    return { error: "Vertex ID is not valid" };
-  }
-  // TODO:
-  //  this must check
-  //  if the in and out edges are empty else not allow to delete.
+    if (!graph.vertexes[actualVertexId]) {
+      return { error: "Vertex ID is not valid" };
+    }
+    // TODO:
+    //  this must check
+    //  if the in and out edges are empty else not allow to delete.
 
-  const vertex = graph.vertexes[actualVertexId];
+    const vertex = graph.vertexes[actualVertexId];
 
-  if (
-    Object.keys(vertex.OUT).filter((label) => label !== "AttrInst").length > 0
-  ) {
-    alert(
-      `there are multiple children exist when deleting ${vertex.L[0]} (${actualVertexId})`,
-    );
-    return { error: "Vertex Children Exist When deleting vertex" };
-  }
+    if (
+      Object.keys(vertex.OUT).filter((label) => label !== "AttrInst").length > 0
+    ) {
+      alert(
+        `there are multiple children exist when deleting ${vertex.L[0]} (${actualVertexId})`,
+      );
+      return { error: "Vertex Children Exist When deleting vertex" };
+    }
 
-  if (Object.keys(vertex.IN).length > 0) {
-    const parentInfo = Object.entries(vertex.IN)
-      .map(([edgeType, edgeIds]) => {
-        const parents = edgeIds.map((id) => graph.vertexes[graph.edges[id].S]);
-        return `${edgeType}: ${parents.map((p) => JSON.stringify(p)).join(", ")}`;
-      })
-      .join(", ");
+    if (Object.keys(vertex.IN).length > 0) {
+      const parentInfo = Object.entries(vertex.IN)
+        .map(([edgeType, edgeIds]) => {
+          const parents = edgeIds.map((id) => graph.vertexes[graph.edges[id].S]);
+          return `${edgeType}: ${parents.map((p) => JSON.stringify(p)).join(", ")}`;
+        })
+        .join(", ");
 
-    console.error(
-      `Multiple parents exist when deleting ${vertex.L[0]} (${actualVertexId}):`,
-      "\nVertex:",
-      vertex,
-      "\nParents:",
-      parentInfo,
-    );
-    return { error: "Vertex Children Exist When deleting vertex" };
-  }
+      console.error(
+        `Multiple parents exist when deleting ${vertex.L[0]} (${actualVertexId}):`,
+        "\nVertex:",
+        vertex,
+        "\nParents:",
+        parentInfo,
+      );
+      return { error: "Vertex Children Exist When deleting vertex" };
+    }
 
-  // this should be handled by TableInput Wrapper component
-  /*for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
-    const attrInstEdge = graph.edges[attrInstEdgeId];
-    if (attrInstEdge) {
-      const endVertex = graph.vertexes[attrInstEdge.E];
-      deleteEdge(0, attrInstEdgeId, graph, setGraph);
-      if (endVertex) {
-        for (const metaAttrEdgeId of endVertex.OUT.Attr || []) {
-          const metaAttrEdge = graph.edges[metaAttrEdgeId];
-          if (metaAttrEdge) {
-            const endVertex = graph.vertexes[metaAttrEdge.E];
-            deleteEdge(0, metaAttrEdgeId, graph, setGraph);
-            if (endVertex) {
-              deleteVertex(0, metaAttrEdge.E, graph, setGraph);
+    // this should be handled by TableInput Wrapper component
+    /*for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
+      const attrInstEdge = graph.edges[attrInstEdgeId];
+      if (attrInstEdge) {
+        const endVertex = graph.vertexes[attrInstEdge.E];
+        deleteEdge(0, attrInstEdgeId, graph, setGraph);
+        if (endVertex) {
+          for (const metaAttrEdgeId of endVertex.OUT.Attr || []) {
+            const metaAttrEdge = graph.edges[metaAttrEdgeId];
+            if (metaAttrEdge) {
+              const endVertex = graph.vertexes[metaAttrEdge.E];
+              deleteEdge(0, metaAttrEdgeId, graph, setGraph);
+              if (endVertex) {
+                deleteVertex(0, metaAttrEdge.E, graph, setGraph);
+              }
             }
           }
-        }
 
-        deleteVertex(0, attrInstEdge.E, graph, setGraph);
+          deleteVertex(0, attrInstEdge.E, graph, setGraph);
+        }
       }
-    }
-  }*/
+    }*/
 
-  const data = klona(vertex);
-  batch(() => {
-    for (const label of graph.vertexes[actualVertexId].L) {
+    const data = klona(vertex);
+    batch(() => {
+      for (const label of graph.vertexes[actualVertexId].L) {
+        // @ts-expect-error ignore
+        setGraph("vertexLabelIdMap", label, (vertexIds) => {
+          if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
+            const filteredIds = vertexIds.filter((vId) => vId !== actualVertexId);
+            return filteredIds.length ? filteredIds : undefined;
+          }
+          return vertexIds;
+        });
+      }
       // @ts-expect-error ignore
-      setGraph("vertexLabelIdMap", label, (vertexIds) => {
-        if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
-          const filteredIds = vertexIds.filter((vId) => vId !== actualVertexId);
-          return filteredIds.length ? filteredIds : undefined;
-        }
-        return vertexIds;
-      });
-    }
-    // @ts-expect-error ignore
-    setGraph("vertexes", actualVertexId, undefined);
-  });
+      setGraph("vertexes", actualVertexId, undefined);
+    });
 
-  transactionDetailAdd(
-    txnId,
-    {
-      data,
-      deleteVertex: () => updateVertex(data),
-      redo: () => {
-        const actualVertexId2 =
-          vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-        return deleteVertex(0, actualVertexId2, graph, setGraph);
+    transactionDetailAdd(
+      txnId,
+      {
+        data,
+        deleteVertex: () => updateVertex(data),
+        redo: () => {
+          const actualVertexId2 =
+            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+          return deleteVertex(0, actualVertexId2, graph, setGraph);
+        },
+        revert: () => {
+          return addNewVertex(0, updateVertex(data), graph, setGraph);
+        },
       },
-      revert: () => {
-        return addNewVertex(0, updateVertex(data), graph, setGraph);
-      },
-    },
-    graph,
-  );
-  return {
-    error: false,
-    txnDetailIndex: getLastTxnIndex(txnId, graph),
-  };
+      graph,
+    );
+    return {
+      error: false,
+      txnDetailIndex: getLastTxnIndex(txnId, graph),
+    };
+  });
 }
 
 function updateVertex(vertex: Vertex) {
-  vertex.id = vertexOldIdToNewIdMap.get(vertex.id) || vertex.id;
-  Object.entries(vertex.IN).forEach(([edgeType, edgeIds]) => {
-    vertex.IN[edgeType] = edgeIds.map(
-      (id) => edgeOldIdToNewIdMap.get(id) || id,
-    );
-  });
+  return untrack(() => {
+    vertex.id = vertexOldIdToNewIdMap.get(vertex.id) || vertex.id;
+    Object.entries(vertex.IN).forEach(([edgeType, edgeIds]) => {
+      vertex.IN[edgeType] = edgeIds.map(
+        (id) => edgeOldIdToNewIdMap.get(id) || id,
+      );
+    });
 
-  Object.entries(vertex.OUT).forEach(([edgeType, edgeIds]) => {
-    vertex.OUT[edgeType] = edgeIds.map(
-      (id) => edgeOldIdToNewIdMap.get(id) || id,
-    );
+    Object.entries(vertex.OUT).forEach(([edgeType, edgeIds]) => {
+      vertex.OUT[edgeType] = edgeIds.map(
+        (id) => edgeOldIdToNewIdMap.get(id) || id,
+      );
+    });
+    return vertex;
   });
-  return vertex;
 }
 
 // update vertex id when we receive new id from api response
@@ -321,37 +331,39 @@ export function updateVertexId(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (!graph.vertexes[oldVertexId]) {
-    return { error: "Vertex ID is not valid" };
-  }
-  if (graph.vertexes[newVertexId]) {
-    return { error: "new Vertex ID is not valid" };
-  }
-  setGraph("vertexes", newVertexId, graph.vertexes[oldVertexId]);
-  setGraph("vertexes", newVertexId, "id", newVertexId);
-  // @ts-ignore
-  setGraph("vertexes", oldVertexId, undefined);
-  // TODO: replace id exactly at same position
-  graph.vertexes[newVertexId].L.forEach((label) =>
-    setGraph("vertexLabelIdMap", label, (ids) =>
-      ids.filter((id) => id !== oldVertexId),
-    ),
-  );
-  graph.vertexes[newVertexId].L.forEach((label) =>
-    setGraph("vertexLabelIdMap", label, (vertexIds) =>
-      Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
-    ),
-  );
-  // v->E--in->V-out-->E->v
-  Object.entries(graph.vertexes[newVertexId].OUT).forEach(
-    ([_edgeType, edgeIds]) => {
-      setGraph("edges", edgeIds, "S", newVertexId);
-    },
-  );
-  Object.entries(graph.vertexes[newVertexId].IN).forEach(
-    ([_edgeType, edgeIds]) => {
-      setGraph("edges", edgeIds, "E", newVertexId);
-    },
-  );
-  return { error: "" };
+  return untrack(() => {
+    if (!graph.vertexes[oldVertexId]) {
+      return { error: "Vertex ID is not valid" };
+    }
+    if (graph.vertexes[newVertexId]) {
+      return { error: "new Vertex ID is not valid" };
+    }
+    setGraph("vertexes", newVertexId, graph.vertexes[oldVertexId]);
+    setGraph("vertexes", newVertexId, "id", newVertexId);
+    // @ts-ignore
+    setGraph("vertexes", oldVertexId, undefined);
+    // TODO: replace id exactly at same position
+    graph.vertexes[newVertexId].L.forEach((label) =>
+      setGraph("vertexLabelIdMap", label, (ids) =>
+        ids.filter((id) => id !== oldVertexId),
+      ),
+    );
+    graph.vertexes[newVertexId].L.forEach((label) =>
+      setGraph("vertexLabelIdMap", label, (vertexIds) =>
+        Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
+      ),
+    );
+    // v->E--in->V-out-->E->v
+    Object.entries(graph.vertexes[newVertexId].OUT).forEach(
+      ([_edgeType, edgeIds]) => {
+        setGraph("edges", edgeIds, "S", newVertexId);
+      },
+    );
+    Object.entries(graph.vertexes[newVertexId].IN).forEach(
+      ([_edgeType, edgeIds]) => {
+        setGraph("edges", edgeIds, "E", newVertexId);
+      },
+    );
+    return { error: "" };
+  });
 }

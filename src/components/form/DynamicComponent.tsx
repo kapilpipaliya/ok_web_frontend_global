@@ -2,13 +2,19 @@ import { createLazyMemo } from "@solid-primitives/memo";
 import { toTitle } from "case-switcher-js";
 import {
   createMemo,
+  createSignal,
   ErrorBoundary,
+  getOwner,
   Match,
+  onCleanup,
+  onMount,
+  runWithOwner,
   Show,
   splitProps,
   Switch,
+  untrack,
 } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
@@ -38,6 +44,9 @@ import { Label } from "../solid_blocks/Label";
 import { useToast } from "../Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { useZIndex } from "../ZIndex";
+import { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
 
 export function getText(
   graph: GraphInterface,
@@ -79,22 +88,31 @@ export function DynamicComponent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [formStore] = useFormContext();
+  const [formStore, setFormStore] = useFormContext();
   const { showErrorToast } = useToast();
+  const [ref, setRef] = createSignal(null);
+  const [mounted, setMounted] = createSignal(false);
+  const zIndex = useZIndex();
 
-  const componentName = () => props.componentName ?? props.meta.P.componentName;
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
+  
+  const parentRenderItems = usePageRenderContext() || [];
+  const parentRenderContext = () => getLastItem(parentRenderItems)?.[0];
+  const parentMeta = () => parentRenderContext()?.meta;
+  const [previewStore] = usePreviewContext();
+  const owner = getOwner();
 
-  const component = createMemo(
-    () => getDynamicComponent(componentName()) || NotFoundComponent,
-  );
-
-  const [selectedProps, customMetaProps] = splitProps(props.meta.P, [
-    "validation",
-    "labelClass",
-  ]);
-
+  const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
+    return runWithOwner(owner, () => {
+      return fn();
+    });
+  };
+  const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
+    return runWithOwner(parentRenderContext()!.context.owner, () => {
+      return fn();
+    });
+  };
   // Should also use repeaterContext
   // const repeaterContext = useRepeaterVertexContext();
 
@@ -116,8 +134,6 @@ export function DynamicComponent(
     return propertyRuleMap;
   });
 
-  const parentRenderItems = usePageRenderContext();
-  const [previewStore] = usePreviewContext();
 
   const allConfiguredPermission = createLazyMemo(() =>
     getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph),
@@ -159,6 +175,40 @@ export function DynamicComponent(
     !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const isDisabledPermission = () => {
     return isNoPermissionCheck() ? undefined : hasPermission();
+  }
+
+  const getFunctionArgumentBase = () =>
+    ({
+      // formInitialValues,
+      // formSchema,
+      formStore,
+      meta: props.meta,
+      mounted,
+      onChange,
+      owner,
+      parentItems: parentRenderItems,
+      get parentMeta() {
+        return parentMeta();
+      },
+      ref,
+      runWithOwner: runWithOwnerFunction,
+      runWithParentOwner: runWithParentOwnerFunction,
+      setFormStore,
+      get isViewMode() {
+        return isViewMode();
+      },
+      get readOnly() {
+        return isReadOnly();
+      },
+      zIndex,
+
+    }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
+
+  const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
+    const baseArguments = getFunctionArgumentBase();
+
+    return Object.assign({}, baseArguments, {
+    });
   };
 
   const onChange = (value: unknown) => {
@@ -260,18 +310,37 @@ export function DynamicComponent(
 
     return values;
   });
+
+  const ignoreMetaKeys = [
+    "hidden",
+    "children",
+    "onChange",
+    "projections",
+    "otherProps",
+    "onMount",
+    "beforeMount",
+    "mounted",
+    "hideLabel",
+
+    "validation",
+    "labelClass",
+  ];
+
   const deNullifyAndMergeCSS = createMemo(() => {
     const result: Record<string, any> = {};
 
-    for (const key in customMetaProps) {
-      const descriptor = Object.getOwnPropertyDescriptor(customMetaProps, key);
+    for (const key in props.meta.P) {
+      if (ignoreMetaKeys.includes(key)) {
+        continue;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(props.meta.P, key);
 
       if (descriptor) {
         // Handle properties with getters
         if (descriptor.get) {
           // TODO: there is issue here, why use class compore on if and else both conditions?
           if (key.toLowerCase().endsWith("class")) {
-            const value = customMetaProps[key];
+            const value = props.meta.P[key];
             if (value !== null) {
               result[key] = mergeCSS(
                 "",
@@ -304,8 +373,132 @@ export function DynamicComponent(
 
     return result;
   });
+
+  const DisplayError = () => (
+    <Show when={props.meta.P.error}>
+      <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
+    </Show>
+  );
+
+  const value = createMemo(() => {
+    return ifNotNull(props.data?.P[props.meta.P[IdAttr]]);
+  });
+
+
+  const getFunctionArgumentWithValue = () => {
+    return untrack(() => {
+      const functionArgumentDescriptors = Object.getOwnPropertyDescriptors(
+        getFunctionArgument(),
+      );
+      const valueDescriptor = Object.getOwnPropertyDescriptors({
+        value: value(),
+      });
+      return Object.defineProperties(
+        {},
+        { ...functionArgumentDescriptors, ...valueDescriptor },
+      ) as FunctionArgumentType;
+    });
+  };
+
+  const componentName = createMemo(() => {
+    if (props.componentName) {
+      return props.componentName;
+    }
+    const { componentName } = props.meta.P;
+    if (!componentName) {
+      return "NotFoundComponent";
+    }
+    if (typeof componentName === "string") {
+      return componentName;
+    }
+    return typeof componentName === "function"
+      ? (componentName as ComponentNameType)(getFunctionArgumentWithValue())
+      : componentName;
+  });
+
+  const component = createMemo(
+    () => getDynamicComponent(componentName()) || NotFoundComponent,
+  );
+
+  const getMetaProps = (
+    meta: Record<string, any>,
+    ignoreKeys: string[],
+  ): Record<string, any> => {
+    const result = {} as Record<string, any>;
+
+    for (const key in meta) {
+      if (ignoreKeys.includes(key)) {
+        continue;
+      }
+
+      const value = meta[key];
+      if (typeof value === "function") {
+        result[key] = (...args: unknown[]) =>
+          runWithOwner(owner, () => {
+            const functionArgs = getFunctionArgumentWithValue();
+            return (meta[key] as (...args: unknown[]) => unknown)(
+              Object.assign(functionArgs, { args }),
+            );
+          });
+      } else if (value !== null) {
+        result[key] = value;
+      }
+    }
+    return result;
+  };
+
+  const dynamicProps = createMemo(() => {
+    if (typeof props.meta.P.otherProps === "function") {
+      const dynamicPropsObj =
+        (props.meta.P.otherProps!(
+          getFunctionArgumentWithValue(),
+        )) || {};
+      return getMetaProps(dynamicPropsObj, []);
+    } else if (typeof props.meta.P.otherProps === "string") {
+      try {
+        const otherPropsFunction = new Function(
+          "args",
+          props.meta.P.otherProps
+        );
+        const dynamicPropsObj = otherPropsFunction(getFunctionArgumentWithValue()) || {};
+        return getMetaProps(dynamicPropsObj, []);
+      } catch (error) {
+        console.error("Error evaluating otherProps function:", error);
+        return {};
+      }
+    }
+    return {};
+  });
+
+  const isHidden = () => {
+    const hiddenProp =
+      dynamicProps().hidden ?? props.meta.P.hidden;
+    const result =
+      typeof hiddenProp === "function"
+        ? hiddenProp(getFunctionArgumentWithValue())
+        : hiddenProp;
+    return result;
+  };
+
+
+  const isViewMode = () =>
+    // @ts-ignore
+    props.isViewMode ??
+    props.meta.P.isViewMode ??
+    parentRenderContext()?.isViewMode;
+
+  const isReadOnly = () =>
+    // @ts-ignore
+    props.isReadOnly ??
+    (dynamicProps()).readOnly ??
+    props.meta.P.readOnly ??
+    parentRenderContext()?.readOnly;
+
   const repeterStore = createStore({
     data: [] as Vertex[],
+    get context() {
+      return getFunctionArgumentWithValue();
+    },
     get hasDeletePermission() {
       return hasDeletePermission();
     },
@@ -323,27 +516,34 @@ export function DynamicComponent(
     },
     vertexes: [] as Vertex[],
   });
-  const isCheckbox = () => {
-    return (
-      componentName() === "Checkbox" ||
-      componentName() === "Switch" ||
-      componentName() === "MenubarCheckboxItem"
-    );
-  };
-  const DisplayError = () => (
-    <Show when={props.meta.P.error}>
-      <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
-    </Show>
-  );
-  const noOnChangePassedComponent = () => {
-    const key = componentName();
-    const specialComponents = [
-      "TextFieldTextArea",
-      "TextFieldInput",
-      "DynamicTable",
-    ];
-    return specialComponents.includes(key);
-  };
+
+  if (dynamicProps().beforeMount) {
+    runWithOwner(owner, () => {
+      dynamicProps().beforeMount!(getFunctionArgumentWithValue());
+    });
+  }
+
+  onMount(() => {
+    setMounted(true);
+    // props.meta.mounted = true;
+    runWithOwner(owner, () => {
+      const onMountResult = dynamicProps().onMount?.(
+        getFunctionArgumentWithValue(),
+      );
+      if (typeof onMountResult === "function") {
+        onCleanup(onMountResult);
+      }
+    });
+  });
+  onCleanup(() => {
+    setMounted(false);
+    if (dynamicProps().onUnmount) {
+      // props.meta.mounted = false;
+      runWithOwner(owner, () => {
+        dynamicProps().onUnmount!(getFunctionArgumentWithValue());
+      });
+    }
+  });
   const Content = () => (
     <>
       <ErrorBoundary
@@ -354,35 +554,39 @@ export function DynamicComponent(
       >
         <Dynamic
           {...deNullifyAndMergeCSS()}
-          checked={
-            isCheckbox() ? props.data?.P[props.meta.P[IdAttr]] : undefined
-          }
           component={component()}
-          componentName={componentName()}
+          // componentName={componentName()}
           isNoPermissionCheck={isNoPermissionCheck()}
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
-          onChange={noOnChangePassedComponent() ? undefined : onChange}
+          onChange={onChange}
           txnId={props.txnId}
-          value={
-            isCheckbox()
-              ? undefined
-              : ifNotNull(props.data?.P[props.meta.P[IdAttr]])
-          }
+          value={value()}
+          ref={setRef}
           {...expressionProperties()}
           disabled={
             isNoPermissionCheck()
-              ? customMetaProps.disabled
+              ? props.meta.P.disabled
               : props.disabled ??
                 previewStore.isViewOnly ??
                 isDisabledPermission() ??
                 expressionProperties().disabled ??
-                customMetaProps.disabled
+                props.meta.P.disabled
           }
+          // added:
+          isViewMode={isViewMode()}
+          readOnly={isReadOnly()}
+          {...dynamicProps()}
         >
-          <Show when={props.meta.id}>
-            {props.meta.P.text}
-            <PageAttrRender data={props.data} metaVertex={props.meta} />
+          <Show
+            fallback={<Show when={props.meta.id}>
+              <PageAttrRender data={props.data} metaVertex={props.meta} />
+            </Show>}
+            // @ts-ignore
+            when={props.children}
+          >
+            {/* @ts-ignore */}
+            {props.children}
           </Show>
         </Dynamic>
       </ErrorBoundary>
@@ -415,7 +619,7 @@ export function DynamicComponent(
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
           {/* @ts-ignore */}
-          <Match when={props.meta.P.hidden === true}></Match>
+          <Match when={isHidden()}></Match>
           <Match
             when={
               (componentName()?.startsWith("System") ||
@@ -428,12 +632,13 @@ export function DynamicComponent(
             <Label
               class={mergeCSS(
                 "",
-                selectedProps.labelClass,
+                props.meta.P.labelClass,
                 { P: { key: "labelClass" } } as unknown as Vertex,
                 props.data!,
                 graph,
               )}
               label={
+                // @ts-ignore
                 props.label ||
                 expressionProperties().label ||
                 props.meta.P.label ||
@@ -469,7 +674,7 @@ export function DynamicComponent(
                 <Label
                   class={mergeCSS(
                     "",
-                    selectedProps.labelClass,
+                    props.meta.P.labelClass,
                     { P: { key: "labelClass" } } as unknown as Vertex,
                     props.meta,
                     graph,

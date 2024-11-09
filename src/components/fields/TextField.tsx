@@ -7,9 +7,7 @@ import type { GenericComponentProps } from "./FieldType";
 
 import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
 
-export function TextField(props: Readonly<GenericComponentProps>) {
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
+export function TextField(props: Readonly<{ as?: string; text?: string } & GenericComponentProps>) {
   const [local, others] = splitProps(props, [
     "componentName",
     "onChange",
@@ -18,11 +16,14 @@ export function TextField(props: Readonly<GenericComponentProps>) {
     "isTableInside",
     "txnId",
     "children",
+    "text",
+    "as",
   ]);
 
   return (
-    <Dynamic component={meta().P.as ?? "span"} {...others}>
-      {meta().P.text}
+    <Dynamic component={local.as ?? "span"} {...others}>
+      {local.text}
+      {local.value}
       {local.children}
     </Dynamic>
   );
