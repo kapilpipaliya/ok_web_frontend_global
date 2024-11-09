@@ -17,8 +17,8 @@ export function PageField(props: Readonly<GenericComponentProps>) {
     "txnId",
     "children",
   ]);
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
+  const [parentContext] = usePageRenderContext();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
 
   return (
     <PageViewWrapper

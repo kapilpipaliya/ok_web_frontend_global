@@ -17,7 +17,7 @@ import { usePageRenderContext } from "./PageRenderContext";
 export function PageAttrRender(
   props: Readonly<{ data?: Vertex; metaVertex: Vertex }>,
 ) {
-  const [parentItems] = usePageRenderContext();
+  const [parentContext] = usePageRenderContext();
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const [previewStore] = usePreviewContext();
@@ -32,7 +32,7 @@ export function PageAttrRender(
         );
         const parentComponent = createMemo(() => {
           return getCompFallbackToString(
-            getLastItem(parentItems?.vertexes || [], 1),
+            getLastItem(parentContext?.vertexes || [], 1),
             graph,
           )?.P[IdAttr];
         });
@@ -42,7 +42,7 @@ export function PageAttrRender(
         const _parentData = () => {
           return getDataVertex(
             graph,
-            getLastItem(parentItems?.vertexes || [], 1),
+            getLastItem(parentContext?.vertexes || [], 1),
           );
         };
 
@@ -99,7 +99,7 @@ export function PageAttrRender(
                 </Show>
               </TabContainer>
             </Match> */}
-            <Match when={parentComponent() === "TreeViewChild"}>
+            {/* <Match when={parentComponent() === "TreeViewChild"}>
               <li>
                 <Show fallback={<Content />} when={previewStore.isDesignMode}>
                   <PageAttrDnDWrapper item={item}>
@@ -107,7 +107,7 @@ export function PageAttrRender(
                   </PageAttrDnDWrapper>
                 </Show>
               </li>
-            </Match>
+            </Match> */}
             <Match when={true}>
               <Show fallback={<Content />} when={previewStore.isDesignMode}>
                 <PageAttrDnDWrapper item={item}>

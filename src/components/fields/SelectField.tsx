@@ -41,9 +41,9 @@ export function SelectField(
 ) {
   const [graph, setGraph] = useGraph();
   const formStore = useFormContext();
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
-  const data = () => getLastItem(parentItems!.data)!;
+  const [parentContext] = usePageRenderContext();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const data = () => getLastItem(parentContext?.data || [])!;
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
 

@@ -5,8 +5,6 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type { GenericComponentProps } from "./FieldType";
 
-import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
-
 export function TextField(props: Readonly<{ as?: string; text?: string } & GenericComponentProps>) {
   const [local, others] = splitProps(props, [
     "componentName",

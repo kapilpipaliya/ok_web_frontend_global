@@ -5,10 +5,12 @@ import { createContext, type JSX, useContext } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { InitialPermissions } from "./InitialPermissions";
+import { FunctionArgumentType } from "../form/FieldSchemaType";
 
 export function getInitialPageRenderStore() {
   return {
-    ...InitialPermissions,
+    // ...InitialPermissions,
+    context: {} as FunctionArgumentType,
     data: [] as Vertex[],
     vertexes: [] as Vertex[],
   };
@@ -19,6 +21,7 @@ export type PageRenderStore = ReturnType<typeof createStore<PageRenderObject>>;
 export const PageRenderContext = createContext<PageRenderStore>();
 
 export function usePageRenderContext() {
+  // this can be undefined too
   return useContext(PageRenderContext) || [];
 }
 export const PageRenderContextProvider = (props: {

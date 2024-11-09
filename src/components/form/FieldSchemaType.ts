@@ -5,6 +5,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { FormStoreObject } from "./FormContext";
 import { Vertex } from "~/lib/graph/graph";
 import { RenderStore } from "../css_properties/RenderContext";
+import { PageRenderStore } from "../page_attr_render/PageRenderContext";
 
 
 export interface RegexValidation {
@@ -28,7 +29,7 @@ export interface FunctionArgumentBaseType {
   mounted: Accessor<boolean>;
   onChange: (value: any) => void;
   owner: Owner;
-  parentItems: [] | RenderStore[];
+  parentItems: PageRenderStore;
   parentMeta: Vertex;
   ref: Accessor<HTMLDivElement | null>;
   runWithOwner: <T>(fn: () => T) => T | undefined;
@@ -36,6 +37,13 @@ export interface FunctionArgumentBaseType {
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   zIndex: number;
+  hasDeletePermission: boolean | null | undefined;
+  hasEditPermission: boolean | null | undefined;
+  hasInsertPermission: boolean | null | undefined;
+  hasViewPermission: boolean | null | undefined;
+  isNoPermissionCheck: boolean | null | undefined;
+  readOnly: boolean | null | undefined;
+  isViewMode: boolean | null | undefined;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

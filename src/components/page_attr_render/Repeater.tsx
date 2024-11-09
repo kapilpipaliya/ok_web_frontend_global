@@ -20,9 +20,9 @@ import {
 
 export const Repeater = () => {
   const [graph, setGraph] = useGraph();
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
-  const data = () => getLastItem(parentItems!.data)!;
+  const [parentContext] = usePageRenderContext();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const data = () => getLastItem(parentContext?.data || [])!;
 
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);

@@ -39,9 +39,9 @@ export function TableInputField(
   >,
 ) {
   const [graph, setGraph] = useGraph();
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
-  const data = () => getLastItem(parentItems!.data)!;
+  const [parentContext] = usePageRenderContext();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const data = () => getLastItem(parentContext?.data || [])!;
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
@@ -52,7 +52,7 @@ export function TableInputField(
   );
 
   const parentData = createMemo(() =>
-    getDataVertex(graph, getLastItem(parentItems?.vertexes || [], 1)),
+    getDataVertex(graph, getLastItem(parentContext?.vertexes || [], 1)),
   );
 
   // load data:

@@ -25,9 +25,9 @@ export function FormField(
 ) {
   const [graph, setGraph] = useGraph();
   const [previewStore] = usePreviewContext();
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
-  const data = () => getLastItem(parentItems!.data)!;
+  const [parentContext] = usePageRenderContext();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const data = () => getLastItem(parentContext?.data || [])!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 

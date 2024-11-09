@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { createEffect, createMemo, Show, splitProps } from "solid-js";
+import { createEffect, createMemo, getOwner, runWithOwner, Show, splitProps } from "solid-js";
 
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -18,23 +18,57 @@ import { isAnyFieldInvalid } from "../page_designer/functions/getChildrenAttrs";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";
 import { useToast } from "../Toast";
+import { GenericComponentProps } from "./FieldType";
+import { FunctionArgumentType } from "../form/FieldSchemaType";
+import { Dynamic } from "solid-js/web";
+import { createLongPress } from "~/lib/hooks/createLongPress";
+import { mergeRefs, Ref } from "@solid-primitives/refs";
 
-interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps
+  extends Omit<
+      JSX.ButtonHTMLAttributes<HTMLButtonElement>,
+      "onChange" | "onClick" | "value"
+    >,
+    GenericComponentProps {
   as?: string;
-  children?: JSX.Element;
+  buttonType: "cancel" | "reset" | "submit";
+  href?: string;
+  longPressDuration?: number;
+  onClick?: (options: FunctionArgumentType) => void;
+  onLongPress?: (event: Event) => void;
+  text?: string;
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
-  const [local, others] = splitProps(props, ["ref", "children", "onChange"]);
-  const [parentItems] = usePageRenderContext();
-  const meta = () => getLastItem(parentItems!.vertexes)!;
-  const data = () => getLastItem(parentItems!.data)!;
+  const [parentContext] = usePageRenderContext();
+  const owner = getOwner();
+  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const data = () => getLastItem(parentContext?.data || [])!;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const [formStore] = useFormContext();
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
   const [internalRef, setInternalRef] = createForwardRef(props);
+
+  const [local, others] = splitProps(props, [
+    "as",
+    "ref",
+    "children",
+    "value",
+    "text",
+    "onClick",
+    "onChange",
+    "onLongPress",
+    "longPressDuration",
+    "onMouseDown",
+    "onMouseUp",
+    "onMouseLeave",
+    "onTouchStart",
+    "onTouchEnd",
+    "onTouchCancel",
+    "buttonType",
+  ]);
 
   createEffect(() => {
     const current = internalRef();
@@ -45,7 +79,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
           switch (e.key) {
             case "Enter":
             case " ": {
-              current.click();
+              onClick();
               break;
             }
           }
@@ -81,31 +115,69 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     }
     revertTransactionUpToIndex(formStore!.txnId, initialIndex - 1, graph);
   };
-  const extraProps = createMemo(() => {
-    return {
-      onClick: () => {
+  const onClick = () => {
+    runWithOwner(owner, () => {
         if (previewStore.isDesignMode) {
           return;
         }
-        if (meta().P.type === "submit") {
+        if (local.buttonType === "submit") {
           if (previewStore.isViewOnly) {
             return;
           }
           onSubmit();
-        } else if (meta().P.type === "cancel") {
+        } else if (local.buttonType === "cancel") {
           onCancel();
-        } else if (meta().P.type === "reset") {
+        } else if (local.buttonType === "reset") {
           onReset();
+        } else if (local.onClick) {
+          local.onClick(parentContext?.context ?? {} as FunctionArgumentType);
         }
-      },
-    };
-  });
+      }
+    );
+  };
+
+  const { handlePressEnd, handlePressStart } = createLongPress(local);
+
   return (
-    <Show when={!(previewStore.isViewOnly && meta().P.type === "submit")}>
-      <button ref={setInternalRef} {...others} {...extraProps}>
-        {data()?.P?.[meta().P.key] ?? meta().P.text ?? meta().P.children}
+    // <Show when={!(previewStore.isViewOnly && local.type === "submit")}>
+    <Show fallback={
+      <Dynamic
+        component={local.as ?? (others.href ? "a" : "button")}
+        tabIndex={props.disabled ? -1 : undefined}
+        ref={mergeRefs(props.ref, setInternalRef)}
+        {...others}
+        onClick={onClick}
+        onMouseDown={local.onMouseDown}
+        onMouseLeave={local.onMouseLeave}
+        onMouseUp={local.onMouseUp}
+        onTouchCancel={local.onTouchCancel}
+        onTouchEnd={local.onTouchEnd}
+        onTouchStart={local.onTouchStart}
+      >
+        {local.text}
         {local.children}
-      </button>
+      </Dynamic>
+    } when={props.onLongPress}>
+      <Dynamic
+        component={local.as ?? (others.href ? "a" : "button")}
+        tabIndex={props.disabled ? -1 : undefined}
+        ref={mergeRefs(props.ref, setInternalRef)}
+        {...others}
+        onClick={onClick}
+        // setting event handlers here like {...getEventHandlers()} re-renders the childrens! not sure why that behaves that way, used <Show> to not set dynamic event handlers here
+        // {...getEventHandlers()}
+        onMouseDown={handlePressStart}
+        onMouseLeave={handlePressEnd}
+        onMouseUp={handlePressEnd}
+        onTouchCancel={handlePressEnd}
+        onTouchEnd={handlePressEnd}
+        onTouchStart={handlePressStart}
+      >
+        {local.text}
+        {local.value}
+        {local.children}
+      </Dynamic>
     </Show>
+    // </Show>
   );
 }
