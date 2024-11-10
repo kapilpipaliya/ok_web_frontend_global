@@ -26,6 +26,7 @@ export interface FunctionArgumentBaseType {
   // formInitialValues: FormStoreObject;
   // formValueStore: FormStoreObject;
   meta: Vertex;
+  data: Vertex;
   mounted: Accessor<boolean>;
   onChange: (value: any) => void;
   owner: Owner;

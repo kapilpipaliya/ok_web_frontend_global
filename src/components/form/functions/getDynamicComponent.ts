@@ -20,6 +20,23 @@ import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
+import { ZIndex } from "~/components/ZIndex";
+import { Portal } from "solid-js/web";
+import { CheckboxField } from "~/components/fields/CheckboxField";
+import { FormError } from "~/components/fields/FormError";
+import { FragmentField } from "~/components/fields/FragmentField";
+import { ImageField } from "~/components/fields/ImageField";
+import { IconField } from "~/components/fields/IconField";
+import { KeyedContext } from "~/components/fields/KeyedContext";
+import { TextInputField } from "~/components/fields/TextInputField";
+import { TextAreaField } from "~/components/fields/TextArea";
+import { PullToRefresh } from "~/components/fields/PullToRefresh";
+import { RadioField } from "~/components/fields/RadioField";
+import { RadioGroupField } from "~/components/fields/RadioGroupField";
+import { Transition, TransitionGroup } from "solid-transition-group";
+import { StepsRoot } from "~/components/fields/steps/StepsRoot";
+import { Step } from "../form_stepper/Step";
+import { StepsContent } from "~/components/fields/steps/ActiveStepContent";
 
 export const corvuComponents = {
   Accordion,
@@ -50,6 +67,24 @@ export const componentsMap: Record<string, any> = {
   // TemplatePage: PageField,
   Text: TextField,
   // ThankYouPage: PageField,
+  ZIndex,
+  Portal,
+  Checkbox: CheckboxField,
+  FormError,
+  Fragment: FragmentField,
+  Image: ImageField,
+  Icon: IconField,
+  KeyedContext: KeyedContext,
+  TextInput: TextInputField,
+  TextArea: TextAreaField,
+  PullToRefresh,
+  Radio: RadioField,
+  RadioGroup: RadioGroupField,
+  Transition,
+  TransitionGroup,
+  StepsRoot,
+  Step,
+  ActiveStep: StepsContent,
 };
 
 export function getDynamicComponent(component: string) {
@@ -66,3 +101,12 @@ export function getDynamicComponent(component: string) {
 
   return componentsMap[componentKey];
 }
+
+/*
+Alert,
+Calendar...,
+Dialog...,
+Disclosure...,
+Select,...
+Tooltip,...
+*/

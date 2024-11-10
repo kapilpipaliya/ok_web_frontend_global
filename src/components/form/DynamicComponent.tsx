@@ -184,7 +184,12 @@ export function DynamicComponent(
       // formInitialValues,
       // formSchema,
       formStore,
-      meta: props.meta,
+      get meta() {
+        return props.meta;
+      },
+      get data() {
+        return props.data;
+      },
       mounted,
       onChange,
       owner,
