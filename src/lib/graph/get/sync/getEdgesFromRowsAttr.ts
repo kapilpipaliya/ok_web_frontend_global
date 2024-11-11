@@ -16,46 +16,54 @@ export function getEdgesFromRowsAttr(
   const outgoing = [] as NestedExpression[];
   const incoming = [] as NestedExpression[];
 
-  for (const attribute of metaAttrs) {
-    if (
-      attribute.componentName === "Select" ||
-      attribute.componentName === "MultiSelect"
-    ) {
-      if (attribute.inward) {
-        incoming.push({
-          expression: `<-${getInEdge(
-            { P: attribute } as unknown as Vertex,
-            { L: ["$0"] } as unknown as Vertex,
-          )}`,
-        }); // `<-${capitalizedName}$0`
-      } else {
-        outgoing.push({
+  function processAttributes(attributes: FieldAttribute[]) {
+    for (const attribute of attributes) {
+      if (
+        attribute.componentName === "Select" ||
+        attribute.componentName === "MultiSelect"
+      ) {
+        if (attribute.inward) {
+          incoming.push({
+            expression: `<-${getInEdge(
+              { P: attribute } as unknown as Vertex,
+              { L: ["$0"] } as unknown as Vertex,
+            )}`,
+          }); // `<-${capitalizedName}$0`
+        } else {
+          outgoing.push({
+            expression: `->${getToEdge(
+              { P: attribute } as unknown as Vertex,
+              { L: ["$0"] } as unknown as Vertex,
+            )}`,
+          }); // `->$0${capitalizedName}`
+        }
+      } else if (
+        !ignoreTables &&
+        (attribute.componentName === "Table" ||
+          attribute.componentName === "DynamicTable")
+      ) {
+        const expression: NestedExpression = {
           expression: `->${getToEdge(
             { P: attribute } as unknown as Vertex,
             { L: ["$0"] } as unknown as Vertex,
           )}`,
-        }); // `->$0${capitalizedName}`
-      }
-    } else if (
-      !ignoreTables &&
-      (attribute.componentName === "Table" ||
-        attribute.componentName === "DynamicTable")
-    ) {
-      const expression: NestedExpression = {
-        expression: `->${getToEdge(
-          { P: attribute } as unknown as Vertex,
-          { L: ["$0"] } as unknown as Vertex,
-        )}`,
-      };
+        };
 
-      if (attribute.attributes) {
+        if (attribute.attributes) {
         const nested = getEdgesFromRowsAttr(attribute.attributes);
         expression.incoming = nested.incoming;
         expression.outgoing = nested.outgoing;
+        }
+        outgoing.push(expression);
+      } else {
+        if (attribute.attributes) {
+          processAttributes(attribute.attributes);
+        }
       }
-      outgoing.push(expression);
     }
   }
+
+  processAttributes(metaAttrs);
 
   return { incoming, outgoing };
 }
