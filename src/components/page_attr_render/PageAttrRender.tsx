@@ -3,7 +3,7 @@ import { createMemo, For, Match, Show, Switch } from "solid-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useRepeaterVertexContext } from "~/components/page_attr_render/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
@@ -15,15 +15,20 @@ import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 import { usePageRenderContext } from "./PageRenderContext";
 
 export function PageAttrRender(
-  props: Readonly<{ data?: Vertex; metaVertex: Vertex }>,
+  props: Readonly<{ data?: Vertex; metaVertex: Vertex; filter?: (vertex: Vertex) => boolean }>,
 ) {
   const [parentContext] = usePageRenderContext();
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const [previewStore] = usePreviewContext();
 
+  const childrenAttrs = createMemo(() => {
+    const attrs = getChildrenAttrs(graph, setGraph, props.metaVertex);
+    return props.filter ? attrs.filter(props.filter) : attrs;
+  });
+
   return (
-    <For each={getChildrenAttrs(graph, setGraph, props.metaVertex)}>
+    <For each={childrenAttrs()}>
       {(item, _index) => {
         const componentName = createMemo(
           () =>

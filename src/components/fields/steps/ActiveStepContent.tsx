@@ -1,7 +1,5 @@
 import { Match, type ParentProps, splitProps, Switch } from "solid-js";
 
-
-
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 import { useStepsContext } from "./StepsContext";
@@ -14,7 +12,7 @@ export function StepsContent(props: ParentProps<{}>) {
       .stepsWithName()
       .findIndex(
         (step) =>
-          (step as StepField).stepName === stepsContext.currentNamedStep(),
+          step.P.stepName === stepsContext.currentNamedStep(),
       );
 
   return (

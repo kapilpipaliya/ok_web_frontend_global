@@ -14,6 +14,7 @@ export interface StepsContextValue {
   goToPreviousStep: () => void;
   isGoingToPreviousStep: Accessor<boolean>;
   meta: Vertex;
+  data?: Vertex;
   setCurrentNamedStep(stepName: string): void;
   setCurrentStepIndex(index: number): void;
   steps: Accessor<Vertex[]>;

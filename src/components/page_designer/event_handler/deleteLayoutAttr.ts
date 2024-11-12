@@ -11,7 +11,7 @@ import {
   getAllFieldsUsedInAllRules,
   getAllFieldsUsedInRootLevelSetting,
   isAttrUsedInRules,
-} from "../functions/getChildrenAttrs";
+} from "../functions/generateFormMetaAttributes";
 
 function validateLayoutDeletion(
   layoutStore: Store<PageLayoutObject>,

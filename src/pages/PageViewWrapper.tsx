@@ -29,7 +29,6 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/components/page_attr_render/permissions";
-import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import PreviewPage from "~/components/PreviewPage";
@@ -48,6 +47,7 @@ import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );

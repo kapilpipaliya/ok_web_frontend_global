@@ -34,7 +34,7 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "../page_attr_render/permissions";
-import { generateFormMetaAttributes } from "../page_designer/functions/getChildrenAttrs";
+import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 import {
   DataGridProvider,
   type DataGridState,

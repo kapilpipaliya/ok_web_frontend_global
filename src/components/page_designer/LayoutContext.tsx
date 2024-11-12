@@ -5,7 +5,7 @@ import { createContext, useContext } from "solid-js";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import type { FormStoreObject } from "../form/FormContext";
-import type { IDToRuleMap } from "./functions/getChildrenAttrs";
+import type { IDToRuleMap } from "./functions/generateFormMetaAttributes";
 
 export function getInitialDesignerLayoutStore() {
   return {

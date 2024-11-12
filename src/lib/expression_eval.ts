@@ -386,6 +386,9 @@ addBinaryOp(
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {
+      if (!currentVertex) {
+        continue;
+      }
       const type = edgeType.replace("$0", currentVertex.L[0]);
 
       const edgeIds = currentVertex.OUT[type] || [];
@@ -463,6 +466,9 @@ addBinaryOp(
     const stepVertexes = new Map<number, Vertex>();
 
     for (const currentVertex of vertexes) {
+      if (!currentVertex) {
+        continue;
+      }
       const type = edgeType.replace("$0", currentVertex.L[0]);
 
       const edgeIds = currentVertex.IN[type];

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createMemo } from "solid-js";
 
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";

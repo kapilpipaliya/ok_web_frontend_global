@@ -35,8 +35,8 @@ import { RadioField } from "~/components/fields/RadioField";
 import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { Transition, TransitionGroup } from "solid-transition-group";
 import { StepsRoot } from "~/components/fields/steps/StepsRoot";
-import { Step } from "../form_stepper/Step";
 import { StepsContent } from "~/components/fields/steps/ActiveStepContent";
+import { Step } from "~/components/fields/steps/Step";
 
 export const corvuComponents = {
   Accordion,

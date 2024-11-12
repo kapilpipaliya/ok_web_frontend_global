@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { generateFormMetaAttributes } from "~/components/page_designer/functions/getChildrenAttrs";
+
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
@@ -13,6 +13,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { FormContext, type FormStoreObject } from "../form/FormContext";
 import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
+import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 
 export function FormField(
   props: Readonly<

@@ -47,6 +47,7 @@ import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useZIndex } from "../ZIndex";
 import { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
+import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
 
 export function getText(
   graph: GraphInterface,
@@ -422,19 +423,26 @@ export function DynamicComponent(
   };
 
   const componentName = createMemo(() => {
+    let componentLabel: string | undefined;
     if (props.componentName) {
-      return props.componentName;
+      componentLabel = props.componentName;
     }
     const { componentName } = props.meta.P;
-    if (!componentName) {
+    if (componentName) {
+      componentLabel = componentName;
+    }
+    if (!componentLabel) {
+      componentLabel = getComponentLabel(graph, props.meta);
+    }
+    if (!componentLabel) {
       return "NotFoundComponent";
     }
-    if (typeof componentName === "string") {
-      return componentName;
+    if (typeof componentLabel === "string") {
+      return componentLabel;
     }
-    return typeof componentName === "function"
-      ? (componentName as ComponentNameType)(getFunctionArgumentWithValue())
-      : componentName;
+    return typeof componentLabel === "function"
+      ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
+      : componentLabel;
   });
 
   const component = createMemo(
