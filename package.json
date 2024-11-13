@@ -20,6 +20,7 @@
     "@master/css-server": "^2.0.0-rc.45",
     "@master/eslint-plugin-css": "^2.0.0-rc.45",
     "@memgraph/orb": "^0.4.3",
+    "@microlink/react-json-view": "^1.23.4",
     "@neodrag/solid": "^2.0.4",
     "@orbit/data": "^0.17.0",
     "@orbit/memory": "^0.17.2",
@@ -54,7 +55,6 @@
     "isows": "^1.0.6",
     "jju": "^1.4.0",
     "jsep": "^1.4.0",
-    "jsoneditor": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
     "klona": "^2.0.6",
     "madge": "^8.0.0",
@@ -102,6 +102,7 @@
     "tldjs": "^2.3.1",
     "ulid": "^2.3.0",
     "uuid": "^11.0.2",
+    "vanilla-jsoneditor": "^2.0.2",
     "vinxi": "^0.4.3",
     "yaml": "^2.6.0"
   },

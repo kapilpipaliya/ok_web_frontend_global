@@ -26,8 +26,8 @@ export function TreeItemContent(
   return (
     <div
       classList={{
-        "bl:1px|dashed|black pl:10": !children().length,
-        "d:flex ai:center": true,
+        "pl:27": !children().length, // bl:1px|dashed|black 
+        "d:flex gap:4 ai:center": true,
       }}
     >
       <TreeItemExpandButton
@@ -44,7 +44,6 @@ export function TreeItemContent(
         }
         width={17}
       />
-      &nbsp;&nbsp;
       {nameExpr(props.metaVertex, getComponent())}
     </div>
   );

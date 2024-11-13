@@ -9,6 +9,7 @@ import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { PROPERTIES } from "~/components/constants/constant";
+import { JsonEditorField } from "~/components/fields/JsonEditorField";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -83,13 +84,14 @@ export function PropertiesBody() {
       <CollAndData />
       <label class="mt:5">
         Properties JSON
-        <textarea
+        {/* <textarea
           placeholder="Enter value here"
           value={JSON.stringify(graph.vertexes[layoutStore.selectedId].P, null, 2)}
           onChange={(e) => replacePropertyValue(e.currentTarget.value)}
           class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:red-50' : ''}`}
           style={{ height: "200px" }}
-        />
+        /> */}
+        <JsonEditorField json={graph.vertexes[layoutStore.selectedId].P} onChange={(updatedContent: any) => replacePropertyValue(updatedContent)} />
         {!isJsonValid() && <span class="fg:red-50">Invalid JSON</span>}
       </label>
       <label class="mt:5">
