@@ -24,7 +24,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                 <input
                   checked={props.value === option.value}
                   class={"hidden"}
-                  key={props.key}
+                  name={props.key}
                   onChange={(e) => handleChange(e, option)}
                   type="radio"
                 />

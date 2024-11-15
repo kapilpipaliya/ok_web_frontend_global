@@ -12,10 +12,11 @@ import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
 import { FieldWithCustomBox } from "./FieldWithCustomBox";
+import { PROPERTIES } from "~/components/constants/constant";
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);
 
-  return <input onChange={local.onChange} type="number" {...others} />;
+  return <input onChange={local.onChange} class={PROPERTIES.Css.TextField} type="number" {...others} />;
 };
 export const componentMap: Record<string, any> = {
   array: ArrayComponent,
