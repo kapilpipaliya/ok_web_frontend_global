@@ -591,6 +591,14 @@ export function DynamicComponent(
           isViewMode={isViewMode()}
           readOnly={isReadOnly()}
           {...dynamicProps()}
+          // merged class
+          {...([...Object.keys(deNullifyAndMergeCSS()).filter((key) => key.toLowerCase().endsWith("class")),
+              ...Object.keys(expressionProperties()).filter((key) => key.toLowerCase().endsWith("class")),
+              ...Object.keys(dynamicProps()).filter((key) => key.toLowerCase().endsWith("class"))
+            ].reduce((acc, key) => {
+              acc[key] = `${deNullifyAndMergeCSS()[key] || ''} ${expressionProperties()[key] || ''} ${dynamicProps()[key] || ''}`.trim();
+              return acc;
+            }, {} as Record<string, any>))}
         >
           <Show
             fallback={<Show when={props.meta.id}>
