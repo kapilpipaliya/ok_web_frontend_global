@@ -65,7 +65,6 @@ export interface TextFieldOptionsField extends FormField {
   leftIcon?: JSXElement;
   options: OptionType;
   placeholder?: string;
-  showInside?: boolean;
   type?: string;
   unitOptions?: string[];
   showFilePicker?: boolean;

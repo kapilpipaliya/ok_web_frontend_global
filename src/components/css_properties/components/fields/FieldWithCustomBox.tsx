@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 
@@ -6,11 +6,14 @@ import type {
   ButtonGroupField,
   FieldWithCustomProperty,
   GenericField,
+  TextFieldOptionsField,
 } from "../../constants/FieldSchemaType";
 
 import { useCssEditor } from "../../context/CssEditorContext";
 import { useCssState } from "../../context/CssStateContext";
 import { ButtonGroups } from "./ButtonGroups";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { useRenderContext } from "../../context/RenderContext";
 
 export const FieldWithCustomBox = (
   props: Readonly<FieldWithCustomProperty>,
@@ -18,6 +21,8 @@ export const FieldWithCustomBox = (
   const [optionType, setOptionType] = createSignal("all");
   const [cssState] = useCssEditor();
   const [state] = useCssState();
+  const [parentContext] = useRenderContext();
+  const meta = () => parentContext?.[0].context.meta as unknown as GenericField;
 
   createEffect(() => {
     if (props.customProperty && props.customProperty.length > 0) {
@@ -32,14 +37,13 @@ export const FieldWithCustomBox = (
       }
     }
   });
-
   return (
     <div>
       <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
         <DynamicCSSComponent
           meta={
             {
-              ...props,
+              ...meta(),
               componentName: props.mainFieldType ?? "string",
               hideLabel: true,
               type: props.type ?? "text",
@@ -47,33 +51,26 @@ export const FieldWithCustomBox = (
           }
         />
         <ButtonGroups
-          {...({
-            componentName: "buttonGroups",
-            isLabelOnTop: false,
-            key: props.key,
-            label: "",
-            onChangeInput: () => {
-              if (optionType() === "all") {
-                setOptionType("custom");
-              } else {
-                setOptionType("all");
-              }
+          value={optionType()}
+          componentName="buttonGroups"
+          key={props.key}
+          onChange={(value) => {
+            setOptionType(value);
+          }}
+          options={[
+            {
+              icon: "radix-icons:box",
+              key: "allCustom",
+              tooltip: "All",
+              value: "all",
             },
-            options: [
-              {
-                icon: "radix-icons:box",
-                key: "allCustom",
-                tooltip: "All",
-                value: "all",
-              },
-              {
-                icon: "lucide:box-select",
-                key: "customIcon",
-                tooltip: "Custom",
-                value: "custom",
-              },
-            ],
-          } as ButtonGroupField)}
+            {
+              icon: "lucide:box-select",
+              key: "customIcon",
+              tooltip: "Custom",
+              value: "custom",
+            },
+          ]}
         />
       </div>
       <Show when={optionType() === "custom"}>
@@ -86,7 +83,7 @@ export const FieldWithCustomBox = (
                 <DynamicCSSComponent
                   meta={
                     {
-                      ...props,
+                      ...meta(),
                       componentName: props.mainFieldType ?? "string",
                       type: props.type ?? "text",
                       ...item,

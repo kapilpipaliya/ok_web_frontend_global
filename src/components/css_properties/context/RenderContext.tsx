@@ -1,18 +1,26 @@
 import type { createStore } from "solid-js/store";
 
-import { type Accessor, createContext, type JSX, useContext } from "solid-js";
-
-import type { GenericField } from "../constants/FieldSchemaType";
+import type { FunctionArgumentType } from "../../form/FieldSchemaType";
+import { createContext, type JSX, useContext } from "solid-js";
+import { GenericField } from "../constants/FieldSchemaType";
 
 export function getInitialPageRenderStore() {
   return {
-    meta: [] as Accessor<GenericField>[],
+    context: {} as FunctionArgumentType,
+    isViewMode: undefined as boolean | undefined,
+    meta: {} as GenericField,
+    mounted: false,
+    onChange: (() => {}) as (value: any) => void,
+    parentOnChange: (() => {}) as (value: any) => void,
+    parentOnMerge: (() => {}) as (value: any) => void,
+    projections: [] as string[],
+    readOnly: undefined as boolean | undefined,
   };
 }
 
 export type RenderObject = ReturnType<typeof getInitialPageRenderStore>;
 export type RenderStore = ReturnType<typeof createStore<RenderObject>>;
-export const RenderContext = createContext<RenderStore>();
+export const RenderContext = createContext<RenderStore[]>();
 
 export function useRenderContext() {
   return useContext(RenderContext) || [];
@@ -21,14 +29,12 @@ export function useRenderContext() {
 // Save each parent field in the context
 export const RenderContextProvider = (props: {
   children: JSX.Element;
-  meta: Accessor<GenericField>;
   store: RenderStore;
 }) => {
-  const [parentItems] = useRenderContext();
-  props.store[1]("meta", [...(parentItems?.meta || []), props.meta]);
+  const parentItems = useRenderContext();
 
   return (
-    <RenderContext.Provider value={props.store}>
+    <RenderContext.Provider value={[...parentItems, props.store]}>
       {props.children}
     </RenderContext.Provider>
   );

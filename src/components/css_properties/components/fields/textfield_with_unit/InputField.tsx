@@ -7,7 +7,6 @@ import { getValueWithoutUnits } from "../../../../../lib/data_structure/number/g
 interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
   value: string;
-  showInside?: boolean;
   label?: string;
   type?: string;
   placeholder?: string;
@@ -19,7 +18,6 @@ export function InputField(props: Readonly<InputFieldProps>) {
     "class",
     "value",
     "handleChange",
-    "showInside",
     "label",
     "type",
     "placeholder",
@@ -28,7 +26,7 @@ export function InputField(props: Readonly<InputFieldProps>) {
 
   const InnerInput = () => (
     <input
-      class={`${local.class ?? ""} ${local.showInside ?? true ? "outline:none p:5" : ""} f:14 w:100%`}
+      class={`${local.class ?? ""} outline:none p:5 f:14 w:100%`}
       onInput={local.handleChange}
       placeholder={
         local.type === "number" ? "0" : local.placeholder ?? ""
@@ -38,7 +36,7 @@ export function InputField(props: Readonly<InputFieldProps>) {
       value={
         local.type === "number"
           ? getValueWithoutUnits(local.value)
-          : local.value
+          : local.value || ""
       }
       {...local.inputProps}
       {...others}
@@ -46,16 +44,6 @@ export function InputField(props: Readonly<InputFieldProps>) {
   );
 
   return (
-    <Show
-      fallback={
-        <label>
-          {local.label}
-          <InnerInput />
-        </label>
-      }
-      when={local.showInside ?? true}
-    >
-      <InnerInput />
-    </Show>
+    <InnerInput />
   );
 }

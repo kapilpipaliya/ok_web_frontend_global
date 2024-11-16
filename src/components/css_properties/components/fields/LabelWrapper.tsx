@@ -2,19 +2,14 @@ import { type Accessor, createMemo } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import type { ColorPickerField } from "../../constants/FieldSchemaType";
+import type { ColorPickerField, GenericField } from "../../constants/FieldSchemaType";
 
 import { useRenderContext } from "../../context/RenderContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(
-  props: Readonly<{ onResetIconClick?: () => void; value?: any }>,
+  props: Readonly<{ onResetIconClick?: () => void; value?: any, meta: GenericField }>,
 ) {
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(
-    parentItems?.meta || [],
-  ) as Accessor<ColorPickerField>;
-
   const isValueConfigured = createMemo(() => {
     if (Array.isArray(props.value)) {
       return props.value.length > 0;
@@ -23,11 +18,11 @@ export function LabelWrapper(
   });
   return (
     <ContainerLabel
-      hashName={meta().hashName}
-      info={meta().info ?? meta().key}
+      hashName={props.meta.hashName}
+      info={props.meta.info ?? props.meta.key}
       onResetIconClick={props.onResetIconClick}
       showResetIcon={isValueConfigured()}
-      title={meta().label}
+      title={props.meta.label}
     />
   );
 }

@@ -26,10 +26,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   let fileManagerStore: FileManagerObject;
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(
-    parentItems?.meta || [],
-  ) as Accessor<TextFieldOptionsField>;
+  const [parentContext] = useRenderContext();
+  const meta = () => parentContext?.[0].context.meta as unknown as TextFieldOptionsField;
   const cssEditorProps = useCssEditorProps();
   const [formStore] = useFormContext();
   const { showErrorToast } = useToast();

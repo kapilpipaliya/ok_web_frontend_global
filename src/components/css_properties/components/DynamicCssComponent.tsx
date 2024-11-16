@@ -1,5 +1,5 @@
 import { path } from "rambda";
-import { type Accessor, createMemo, Match, splitProps, Switch } from "solid-js";
+import { type Accessor, createMemo, getOwner, Match, runWithOwner, splitProps, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
@@ -12,11 +12,13 @@ import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
-import { RenderContextProvider } from "../context/RenderContext";
+import { RenderContextProvider, RenderStore, useRenderContext } from "../context/RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(
@@ -33,7 +35,7 @@ export function DynamicCSSComponent(
     props.meta as { children: GenericField[] } & FormField,
     ["children", "projections"],
   );
-  const [, otherProps] = splitProps(props, ["meta"]);
+  const [, otherProps] = splitProps(props, ["meta", "projections"]);
 
   const [cssState, setCssState] = useCssEditor();
 
@@ -41,32 +43,96 @@ export function DynamicCSSComponent(
   const [formStore] = useFormContext();
   const cssEditorProps = useCssEditorProps();
 
-  const projections = createMemo(
-    () => props.projections ?? [...(props.meta.projections ?? [])],
-  );
+  const parentRenderItems = useRenderContext() || [];
+  const parentRenderContext = () => getLastItem(parentRenderItems)?.[0];
+  const parentMeta = () => parentRenderContext()?.meta;
+  const owner = getOwner();
+
+  const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
+    return runWithOwner(owner, () => {
+      return fn();
+    });
+  };
+
+  const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
+    return runWithOwner(parentRenderContext()!.context.owner, () => {
+      return fn();
+    });
+  };
+
+  const getFunctionArgumentBase = () =>
+    ({
+      meta: props.meta,
+      onChange,
+      owner,
+      parentItems: parentRenderItems,
+      get parentMeta() {
+        return parentMeta();
+      },
+      runWithOwner: runWithOwnerFunction,
+      runWithParentOwner: runWithParentOwnerFunction,
+    }) as unknown as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
+
+  const getProjections = () =>
+    props.projections ??
+    props.meta.projections ??
+    parentRenderContext()?.projections;
+
+  const projections = createMemo(getProjections);
+  const parentValue = () => path([...(projections() || [])], cssState);
+
+  const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
+    const baseArguments = getFunctionArgumentBase();
+
+    return Object.assign({}, baseArguments, {
+      get parentValue() {
+        return parentValue();
+      },
+      get projections() {
+        return getProjections();
+      },
+    });
+  };
 
   const value = createMemo(() => {
     return (
-      path([...projections(), (props.meta as FormField).key || ""], cssState) ||
-      ""
+      path([...(projections() || []), (props.meta as FormField).key || ""], cssState)
     );
   });
 
   const onChange = (data: any) => {
-    if ((props.meta as FormField).onChangeInput) {
-      (props.meta as FormField).onChangeInput!(data);
-    } else {
-      // @ts-expect-error projections type is dynamic
-      setCssState(...projections(), {
-        [(props.meta as FormField).key]: data,
-      });
-    }
+    // @ts-expect-error projections type is dynamic
+    setCssState(...projections(), {
+      [(props.meta as FormField).key]: data,
+    });
 
     // (props.meta as FormField).onChange?.(data, formStore, setFormStore);
 
     // props.meta.error = "";
 
     props.onChange?.(data);
+  };
+  
+  const parentOnChange = (data: any) => {
+    // @ts-expect-error projections type is dynamic
+    setFormValueStore(...(projections() || []), reconcile(data));
+  };
+  const parentOnMerge = (data: any) => {
+    // @ts-expect-error projections type is dynamic
+    setFormValueStore(...(projections() || []), data);
+  };
+
+  const getFunctionArgumentWithValue = () => {
+    const functionArgumentDescriptors = Object.getOwnPropertyDescriptors(
+      getFunctionArgument(),
+    );
+    const valueDescriptor = Object.getOwnPropertyDescriptors({
+      value: value(),
+    });
+    return Object.defineProperties(
+      {},
+      { ...functionArgumentDescriptors, ...valueDescriptor },
+    ) as FunctionArgumentType;
   };
 
   const Content = () => {
@@ -102,7 +168,7 @@ export function DynamicCSSComponent(
         type: getCssSelectedFileEdgeName(
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.key,
-          props.projections[0] || "Default",
+          props.projections?.[0] as string || "Default",
           props.meta.key!,
         ),
       },
@@ -122,11 +188,22 @@ export function DynamicCSSComponent(
     // setSelectedOption(determineSelectedOption());
     clearFileSelection();
   };
-  const repeterStore = createStore({
-    meta: [] as Accessor<GenericField>[],
+  const repeaterStore = createStore({
+    get context() {
+      return getFunctionArgumentWithValue();
+    },
+    get meta() {
+      return props.meta;
+    },
+    onChange,
+    parentOnChange,
+    parentOnMerge,
+    get projections() {
+      return projections();
+    },
   });
   return (
-    <RenderContextProvider meta={() => props.meta} store={repeterStore}>
+    <RenderContextProvider store={repeaterStore as RenderStore}>
       <Switch>
         {/* <Match when={isHidden()} /> */}
         <Match when={props.meta.hideLabel}>
@@ -134,13 +211,13 @@ export function DynamicCSSComponent(
         </Match>
         <Match when={props.meta.isLabelOnTop}>
           <div class={"w:full"}>
-            <LabelWrapper onResetIconClick={resetValue} value={value()} />
+            <LabelWrapper onResetIconClick={resetValue} value={value()} meta={props.meta}/>
             <Content />
           </div>
         </Match>
         <Match when={props.meta.label}>
           <div class={"flex ai:center jc:space-between w:full"}>
-            <LabelWrapper onResetIconClick={resetValue} value={value()} />
+            <LabelWrapper onResetIconClick={resetValue} value={value()} meta={props.meta}/>
             <Content />
           </div>
         </Match>

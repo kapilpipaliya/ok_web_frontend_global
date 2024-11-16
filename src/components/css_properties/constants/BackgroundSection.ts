@@ -43,6 +43,7 @@ export const BackgroundSection = {
   backgroundPosition: {
     componentName: "fieldWithCustomProperty",
     label: "Position",
+    isLabelOnTop: true,
     key: "background-position",
     options: ["top", "bottom", "left", "right", "center", ...CSSWideKeywords],
     customProperty: [

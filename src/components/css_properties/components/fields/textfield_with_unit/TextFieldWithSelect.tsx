@@ -161,20 +161,10 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
     document.removeEventListener("mousemove", moveIncrement);
     document.removeEventListener("mouseup", upIncrement);
   });
-  createEffect(() => {
-    console.log(props.value);
-  });
 
   return (
-    // <div
-    //   class={`
-    //     ${props.showInside ?? true ? "b:1px|solid|#ccc p:0|5|0|5" : ""}
-    //     ${props.isLabelOnTop ? "" : "max-w:50% w:50%"}
-    //     flex rel ai:center jc:space-between r:5
-    //   `}
-    // >
     <>
-      <div class={`${local.containerClass ?? ""} flex ai:center`} ref={setReference}>
+      <div class={`${local.containerClass ?? ""} b:1px|solid|#ccc p:0|5|0|5 flex rel ai:center jc:space-between r:5 ${props.isLabelOnTop ? "" : "max-w:50% w:50%"}`} ref={setReference}>
         <Show when={props.leftIcon || props.type === "number"}>
           <Show
             fallback={<IncrementButton downIncrement={downIncrement} />}
@@ -187,7 +177,6 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
           handleChange={handleInputChange}
           onFocus={handleInputFocus}
           value={props.value}
-          showInside={props.showInside}
           inputProps={props.inputProps}
           type={props.type}
           placeholder={props.placeholder}

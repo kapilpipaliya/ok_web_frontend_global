@@ -19,10 +19,8 @@ import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [, setCssState] = useCssEditor();
   const [state] = useCssState();
-  const [parentItems] = useRenderContext();
-  const meta = getLastItem(
-    parentItems?.meta || [],
-  ) as Accessor<DataEditorField>;
+  const [parentContext] = useRenderContext();
+  const meta = () => parentContext?.[0].context.meta as unknown as DataEditorField;
 
   type Value =
     | FilterAttributes[]
@@ -54,7 +52,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
             : ""
         } flex ai:center jc:space-between mb:6px`}
       >
-        <LabelWrapper />
+        <LabelWrapper meta={meta()} />
         <Icon
           class={"cursor:pointer"}
           icon={"lets-icons:add-round"}
