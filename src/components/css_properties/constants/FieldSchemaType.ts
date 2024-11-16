@@ -18,7 +18,6 @@ export interface FormField extends Field {
   info?: string;
   key: string;
   onChange?: (value: any) => void;
-  onChangeInput?: (value: string) => void;
   value?: any;
 }
 
@@ -69,6 +68,7 @@ export interface TextFieldOptionsField extends FormField {
   showInside?: boolean;
   type?: string;
   unitOptions?: string[];
+  showFilePicker?: boolean;
   // value?: string; // depricated
 }
 
@@ -98,8 +98,6 @@ export interface SelectField extends FormField {
 
 export interface ButtonGroupField extends FormField {
   componentName: "buttonGroups";
-  isLabelOnTop: boolean;
-  label: string;
   options: {
     icon?: string;
     key: string;

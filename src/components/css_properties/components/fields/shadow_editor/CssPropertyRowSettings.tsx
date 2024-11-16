@@ -4,6 +4,7 @@ import { DynamicCSSComponent } from "~/components/css_properties/components/Dyna
 import { IconButton } from "~/components/IconButton";
 
 import type { DataEditorField } from "../../../constants/FieldSchemaType";
+import { useCssState } from "~/components/css_properties/context/CssStateContext";
 
 export interface CssPropertyRowSettingsProps {
   children?: JSX.Element;
@@ -16,6 +17,7 @@ export interface CssPropertyRowSettingsProps {
 export function CssPropertyRowSettings(
   props: Readonly<CssPropertyRowSettingsProps>,
 ) {
+  const [state] = useCssState();
   const Header = () => {
     const closeMenu = () => {
       props.openMenu[1](false);
@@ -47,7 +49,7 @@ export function CssPropertyRowSettings(
               <DynamicCSSComponent
                 meta={{
                   ...meta,
-                  projections: [props.meta.key, props.rowIndex],
+                  projections: [state(), props.meta.key, props.rowIndex],
                 }}
               />
             );

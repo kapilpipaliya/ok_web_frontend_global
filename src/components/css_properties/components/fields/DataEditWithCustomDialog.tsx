@@ -32,17 +32,13 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
     | TransitionAttributes[];
 
   const addOption = () => {
-    setCssState(state(), ...(props.projections ?? []), {
-      [props.key]: [...props.value, {}],
-    });
+    setCssState(state(), props.key, [...(props.value || []), {}]);
   };
 
   const deleteOption = (index: number) => {
     const currentOptions = [...(props.value as Value)];
     currentOptions.splice(index, 1);
-    setCssState(state(), ...(props.projections ?? []), {
-      [props.key]: currentOptions,
-    });
+    setCssState(state(), props.key, currentOptions);
   };
 
   return (

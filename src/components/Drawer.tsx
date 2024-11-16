@@ -118,7 +118,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
       </Show>
       <ResizerBorder>
         <div
-          class={`${props.drawerClass} {scrollbar-width:thin} h:100% overflow:auto`}
+          class={`${props.drawerClass} h:100% overflow:auto`}
         >
           {props.children}
         </div>

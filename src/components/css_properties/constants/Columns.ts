@@ -8,15 +8,12 @@ import { createSelectOptions } from "./FieldSchemaType";
 export const ColumnsSection = {
   columnCount: {
     componentName: "string",
-    isLabelOnTop: true,
     label: "Column Count",
     key: "column-count",
-    unitOptions: sizeTypes,
     type: "number",
   } as TextFieldOptionsField,
   columnGap: {
     componentName: "string",
-    isLabelOnTop: true,
     label: "Column Gap",
     key: "column-gap",
     unitOptions: sizeTypes,

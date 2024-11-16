@@ -9,6 +9,7 @@ import { ensureDirectoryExists } from "~/server/upload/utils/ensureDirectoryExis
 import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
 import { saveFileMetadataToNeo4j } from "~/server/upload/utils/saveFileMetadataToNeo4j";
 import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
+import { getBaseDir } from "./getBaseDir";
 
 export async function replaceFiles(
   request: Request,
@@ -18,7 +19,8 @@ export async function replaceFiles(
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
-  const userDir = path.join("/Users/ankit", subDomain, year, month, day);
+  const baseDir = getBaseDir();
+  const userDir = path.join(baseDir, subDomain, year, month, day);
 
   ensureDirectoryExists(userDir);
 

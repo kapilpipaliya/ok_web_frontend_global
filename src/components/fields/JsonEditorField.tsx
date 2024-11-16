@@ -35,7 +35,7 @@ export function JsonEditorField(props: { json: any, onChange: (updatedContent: a
   });
 
   return (
-    <div {...divProps} style={{ height: "400px" }} ref={el => containerRef = el}>
+    <div {...divProps} class="overflow:auto h:400px" ref={el => containerRef = el}>
     </div>
   );
 }

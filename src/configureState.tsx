@@ -28,7 +28,7 @@ export function configureState() {
       // ?mergeVertexProperties(0, navBarVertexId, graph, setGraph, { title }),
     },
     globalThemeId: "",
-    isDevelopment: false,
+    isDevelopment: true,
     isLoadingPage: false,
     isSideBarOpen: false,
     isSubSideBarOpen: false,

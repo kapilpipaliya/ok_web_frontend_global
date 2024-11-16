@@ -1,5 +1,5 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { type Component, createSignal, JSX, onCleanup, Show, splitProps } from "solid-js";
+import { type Component, createEffect, createSignal, JSX, onCleanup, Show, splitProps } from "solid-js";
 
 import type { OptionType, TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 
@@ -12,51 +12,46 @@ import { UnitsDropdown } from "./UnitsDropdown";
 import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
 
 export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
-    // input will automatically display value without units, if its number field.
+  // input will automatically display value without units, if its number field.
 
-    const [selectedOption, _setSelectedOption] = createWritableMemo(() =>
-      determineSelectedOption(),
+  function determineSelectedOption(): string {
+    return (
+      sizeTypes.find((unit) => props.value?.includes(unit)) ??
+      props.unitOptions?.[0] ??
+      ""
     );
-  
-    function determineSelectedOption(): string {
-      return (
-        sizeTypes.find((unit) => props.value?.includes(unit)) ??
-        props.unitOptions?.[0] ??
-        ""
-      );
-    }
-    const [local, others] = splitProps(props, ["componentName", "onChange", "containerClass", "showFilePicker"]);
-  
-    function changeValue(value?: string) {
-      local.onChange?.(value);
-    }
-  
-    function handleNumberInputChange(value: string) {
-      const numericValue = Number.parseFloat(value);
-      if (Number.isNaN(numericValue)) {
-        return;
-      }
-  
-      if (
-        props.inputProps?.min !== undefined &&
-        numericValue < props.inputProps.min
-      ) {
-        return;
-      }
-      if (
-        props.inputProps?.max !== undefined &&
-        numericValue > props.inputProps.max
-      ) {
-        return;
-      }
-  
-      changeValue(
-        props.unitOptions
-          ? `${numericValue}${selectedOption()}`
-          : `${numericValue}`,
-      );
+  }
+  const [local, others] = splitProps(props, ["componentName", "onChange", "containerClass", "showFilePicker"]);
+
+  function changeValue(value?: string) {
+    local.onChange?.(value);
+  }
+
+  function handleNumberInputChange(value: string) {
+    const numericValue = Number.parseFloat(value);
+    if (Number.isNaN(numericValue)) {
+      return;
     }
 
+    if (
+      props.inputProps?.min !== undefined &&
+      numericValue < props.inputProps.min
+    ) {
+      return;
+    }
+    if (
+      props.inputProps?.max !== undefined &&
+      numericValue > props.inputProps.max
+    ) {
+      return;
+    }
+
+    changeValue(
+      props.unitOptions
+        ? `${numericValue}${selectedUnitOption()}`
+        : `${numericValue}`,
+    );
+  }
 
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
@@ -166,6 +161,9 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
     document.removeEventListener("mousemove", moveIncrement);
     document.removeEventListener("mouseup", upIncrement);
   });
+  createEffect(() => {
+    console.log(props.value);
+  });
 
   return (
     // <div
@@ -176,7 +174,7 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
     //   `}
     // >
     <>
-      <div class={`${local.containerClass} flex ai:center`} ref={setReference}>
+      <div class={`${local.containerClass ?? ""} flex ai:center`} ref={setReference}>
         <Show when={props.leftIcon || props.type === "number"}>
           <Show
             fallback={<IncrementButton downIncrement={downIncrement} />}
@@ -201,16 +199,16 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
             value={props.value}
           />
         </Show>
+        <UnitsDropdown
+          unitOptions={props.unitOptions ?? []}
+          isDropdownOpen={isDropdownOpen}
+          reference={reference}
+          selectedOption={selectedUnitOption}
+          selectOption={selectOption}
+          setIsDropdownOpen={setIsDropdownOpen}
+          toggleDropdown={toggleDropdown}
+        />
       </div>
-      <UnitsDropdown
-        unitOptions={props.options as unknown as string[]}
-        isDropdownOpen={isDropdownOpen}
-        reference={reference}
-        selectedOption={selectedUnitOption}
-        selectOption={selectOption}
-        setIsDropdownOpen={setIsDropdownOpen}
-        toggleDropdown={toggleDropdown}
-      />
       <Show when={isAnotherDropdownOpen() && filteredOptions().length > 0}>
         <SuggestionsDropdown
           isDropdownOpen={isAnotherDropdownOpen}

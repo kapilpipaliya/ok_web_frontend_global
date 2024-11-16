@@ -8,6 +8,7 @@ import { calculateChecksum } from "~/server/upload/utils/calculateChecksum";
 import { ensureDirectoryExists } from "~/server/upload/utils/ensureDirectoryExists";
 import { saveFileMetadataToNeo4j } from "~/server/upload/utils/saveFileMetadataToNeo4j";
 import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
+import { getBaseDir } from "./getBaseDir";
 
 export async function uploadFiles(
   data: MultiPartData[],
@@ -16,7 +17,8 @@ export async function uploadFiles(
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
-  const userDir = path.join("/Users/ankit", subDomain, year, month, day);
+  const baseDir = getBaseDir();
+  const userDir = path.join(baseDir, subDomain, year, month, day);
 
   ensureDirectoryExists(userDir);
 
@@ -26,7 +28,8 @@ export async function uploadFiles(
         return null;
       }
       const { ext, name } = path.parse(file.filename);
-      const newFilename = `${name}_${currentDate}${ext}`;
+      const timestamp = currentDate.replace(/[:.]/g, "-"); // Replace colons and dots with dashes for filename
+      const newFilename = `${name}_${timestamp}${ext}`;
       const filePath = saveFileToDisk(userDir, newFilename, file.data);
       const fileSize = file.data.length;
       const mimeType = file.type;
