@@ -5,7 +5,7 @@ import type { FormField, GenericField } from "../constants/FieldSchemaType";
 import { DynamicCSSComponent } from "./DynamicCssComponent";
 
 export function RenderChildren(
-  props: Readonly<{ meta: GenericField; projections?: string[] }>,
+  props: Readonly<{ meta: GenericField; projections?: (number | string)[] }>,
 ) {
   return (
     <For

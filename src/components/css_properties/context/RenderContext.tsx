@@ -2,7 +2,7 @@ import type { createStore } from "solid-js/store";
 
 import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 
-import type { GenericField } from "./constants/FieldSchemaType";
+import type { GenericField } from "../constants/FieldSchemaType";
 
 export function getInitialPageRenderStore() {
   return {

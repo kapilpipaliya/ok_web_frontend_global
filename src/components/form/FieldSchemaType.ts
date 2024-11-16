@@ -4,7 +4,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "./FormContext";
 import { Vertex } from "~/lib/graph/graph";
-import { RenderStore } from "../css_properties/RenderContext";
+import { RenderStore } from "../css_properties/context/RenderContext";
 import { PageRenderStore } from "../page_attr_render/PageRenderContext";
 
 

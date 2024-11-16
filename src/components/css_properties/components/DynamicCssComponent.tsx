@@ -10,19 +10,20 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
-import { useCssEditor } from "../CssEditorContext";
-import { useCssEditorProps } from "../CSSEditorPropsContext";
-import { RenderContextProvider } from "../RenderContext";
+import { useCssEditor } from "../context/CssEditorContext";
+import { useCssEditorProps } from "../context/CSSEditorPropsContext";
+import { RenderContextProvider } from "../context/RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
 
+// similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(
   props: Readonly<{
     [key: string]: any;
     meta: GenericField;
-    projections?: string[];
+    projections?: (number | string)[];
   }>,
 ) {
   const Component = () =>
@@ -52,10 +53,9 @@ export function DynamicCSSComponent(
   });
 
   const onChange = (data: any) => {
-    if (props.meta.onChangeInput) {
-      props.meta.onChangeInput!(data);
-    }
-    if (props.meta.isAddToClass ?? true) {
+    if ((props.meta as FormField).onChangeInput) {
+      (props.meta as FormField).onChangeInput!(data);
+    } else {
       // @ts-expect-error projections type is dynamic
       setCssState(...projections(), {
         [(props.meta as FormField).key]: data,

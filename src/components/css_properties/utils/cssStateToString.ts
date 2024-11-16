@@ -3,7 +3,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 
-import type { CSSStore } from "../CssEditorContext";
+import type { CSSStore } from "../context/CssEditorContext";
 
 import { arrayToString } from "./arrayToString";
 import { getCssSelectedFileEdgeName } from "./getCssSelectedFileEdgeName";

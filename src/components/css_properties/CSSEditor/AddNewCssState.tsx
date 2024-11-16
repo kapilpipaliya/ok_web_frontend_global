@@ -4,9 +4,9 @@ import { createSignal } from "solid-js";
 import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
 import { MultiSelectField, type Option } from "~/components/MultiSelect";
 
-import { PROPERTIES } from "../constants/constant";
-import { useCssEditor } from "./CssEditorContext";
-import { useCssState } from "./CssStateContext";
+import { PROPERTIES } from "../../constants/constant";
+import { useCssEditor } from "../context/CssEditorContext";
+import { useCssState } from "../context/CssStateContext";
 
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);

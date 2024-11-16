@@ -2,7 +2,7 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
-import { SearchBar } from "~/components/css_properties/SearchBar";
+import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";

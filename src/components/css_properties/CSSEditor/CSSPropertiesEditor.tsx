@@ -2,25 +2,25 @@ import { Icon } from "@iconify-icon/solid";
 import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { StyleEditor } from "~/components/css_properties/StyleEditor";
-import { TextEditor } from "~/components/css_properties/TextEditor";
+import { StyleEditor } from "~/components/css_properties/StyleEditor/StyleEditor";
+import { TextEditor } from "~/components/css_properties/CSSEditor/TextEditor";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
-import type { CSSStore } from "./CssEditorContext";
+import type { CSSStore } from "../context/CssEditorContext";
 
-import { DropdownMenu } from "../DropdownMenu";
-import { DynamicComponent } from "../form/DynamicComponent";
-import { useFormContext } from "../form/FormContext";
-import { MultiSelectField } from "../MultiSelect";
-import { ZIndex } from "../ZIndex";
+import { DropdownMenu } from "../../DropdownMenu";
+import { DynamicComponent } from "../../form/DynamicComponent";
+import { useFormContext } from "../../form/FormContext";
+import { MultiSelectField } from "../../MultiSelect";
+import { ZIndex } from "../../ZIndex";
 import { AddNewCssState } from "./AddNewCssState";
-import { useCssEditor } from "./CssEditorContext";
-import { useCssState } from "./CssStateContext";
+import { useCssEditor } from "../context/CssEditorContext";
+import { useCssState } from "../context/CssStateContext";
 import { ResetButton } from "./ResetButton";
-import { cssStateToString } from "./utils/cssStateToString";
-import { getCssSelectedFileEdgeName } from "./utils/getCssSelectedFileEdgeName";
-import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+import { cssStateToString } from "../utils/cssStateToString";
+import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
+import { useCssEditorProps } from "../context/CSSEditorPropsContext";
 
 const defaultStateLabel = "Default State";
 
@@ -48,12 +48,9 @@ function getOptions(cssState: CSSStore) {
 }
 
 export function CSSPropertiesEditor(
-  props: Readonly<{
-    data: Vertex;
-    meta: Vertex;
-    onChange?: (data: CSSStore) => void;
-  }>,
+  props: Readonly<{}>,
 ) {
+  const cssEditorProps = useCssEditorProps();
   const [graph, setGraph] = useGraph();
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
@@ -69,11 +66,6 @@ export function CSSPropertiesEditor(
     return [{ id: state(), label }];
   }
 
-  const handleCSSStateChange = (valueString: string) => {
-    setCssState(reconcile(parseAndApplyCssRules(valueString)));
-    props.onChange?.(JSON.parse(JSON.stringify(cssState)));
-  };
-
   const handleAddNewClick = () => {
     setShowDropdown(!showDropdown());
   };
@@ -83,18 +75,18 @@ export function CSSPropertiesEditor(
     if (!txnId) {
       return;
     }
-    if (!(props.meta && props.data)) {
+    if (!(cssEditorProps!.meta && cssEditorProps!.data)) {
       return;
     }
     const edgesPrefixToRemove = getCssSelectedFileEdgeName(
-      props.data.L[0],
-      props.meta.P.key,
+      cssEditorProps!.data.L[0],
+      cssEditorProps!.meta.P.key,
       currentState,
       "",
     );
-    for (const edgeName in props.data.OUT) {
+    for (const edgeName in cssEditorProps!.data.OUT) {
       if (edgeName.startsWith(edgesPrefixToRemove)) {
-        for (const edgeId of props.data.OUT[edgeName]) {
+        for (const edgeId of cssEditorProps!.data.OUT[edgeName]) {
           deleteEdge(txnId, edgeId, graph, setGraph);
         }
       }
@@ -123,7 +115,7 @@ export function CSSPropertiesEditor(
           componentName={formStore!.formData.P.key}
           data={formStore!.formData}
           isNoPermissionCheck
-          meta={{ P: { class: props.data.P.value } } as unknown as Vertex}
+          meta={{ P: { class: cssEditorProps!.data.P.value } } as unknown as Vertex}
         />
         <br />
       </Show>
@@ -131,8 +123,12 @@ export function CSSPropertiesEditor(
       <ResetButton onReset={resetCssState} />
       <TextEditor
         disabled={true}
-        onValueChange={handleCSSStateChange}
-        value={cssStateToString(cssState, props.meta, props.data, graph)}
+        value={cssStateToString(
+          cssState,
+          cssEditorProps!.meta,
+          cssEditorProps!.data,
+          graph,
+        )}
       />
       Current State
       <div class="flex" ref={buttonRef!}>

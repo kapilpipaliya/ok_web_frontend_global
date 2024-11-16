@@ -1,8 +1,8 @@
 import { Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { IconButton } from "../IconButton";
-import { type CSSStore, useCssEditor } from "./CssEditorContext";
+import { IconButton } from "../../IconButton";
+import { type CSSStore, useCssEditor } from "../context/CssEditorContext";
 
 function isNonEmptyObject(obj: any): boolean {
   return typeof obj === "object" && obj !== null && Object.keys(obj).length > 0;

@@ -11,10 +11,10 @@ import {
 import type {
   CSSJSONSchemaSearchType,
   GenericField,
-} from "./constants/FieldSchemaType";
+} from "../constants/FieldSchemaType";
 
-import { DynamicCSSComponent } from "./components/DynamicCssComponent";
-import { useCssState } from "./CssStateContext";
+import { DynamicCSSComponent } from "../components/DynamicCssComponent";
+import { useCssState } from "../context/CssStateContext";
 
 export const CollapsibleSection = (
   props: Readonly<{

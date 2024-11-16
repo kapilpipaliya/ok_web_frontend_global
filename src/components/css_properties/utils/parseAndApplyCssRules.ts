@@ -1,4 +1,4 @@
-import type { CSSStore } from "../CssEditorContext";
+import type { CSSStore } from "../context/CssEditorContext";
 
 export const parseAndApplyCssRules = (valueString: string) => {
   const cssRules = { "": {} } as CSSStore;

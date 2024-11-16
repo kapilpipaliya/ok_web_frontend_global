@@ -6,23 +6,19 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 
-import type { CSSStore } from "./CssEditorContext";
+import type { CSSStore } from "../context/CssEditorContext";
 
-import { CssEditorContext } from "./CssEditorContext";
-import { CssEditorPropsProvider } from "./CSSEditorPropsContext";
+import { CssEditorContext } from "../context/CssEditorContext";
+import { CssEditorPropsProvider } from "../context/CSSEditorPropsContext";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
-import { CssStateContext } from "./CssStateContext";
-import { parseAndApplyCssRules } from "./utils/parseAndApplyCssRules";
+import { CssStateContext } from "../context/CssStateContext";
+import { parseAndApplyCssRules } from "../utils/parseAndApplyCssRules";
 
 export function CSSPropertiesEditorWrapper(
   props: Readonly<{
     data?: Vertex;
-    disabled?: boolean;
-    isRealTime?: boolean;
     meta: Vertex;
     onChange?: (data: CSSStore) => void;
-    title?: string;
-    txnId?: number;
   }>,
 ) {
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
@@ -72,11 +68,7 @@ export function CSSPropertiesEditorWrapper(
         ],
       ]}
     >
-      <CSSPropertiesEditor
-        data={props.data!}
-        meta={props.meta}
-        onChange={props.onChange}
-      />
+      <CSSPropertiesEditor />
     </MultiProvider>
   );
 }

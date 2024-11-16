@@ -3,9 +3,9 @@ import { type Accessor, createMemo, createSignal, type JSX } from "solid-js";
 import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
-import { useCssEditorProps } from "~/components/css_properties/CSSEditorPropsContext";
-import { useCssState } from "~/components/css_properties/CssStateContext";
-import { useRenderContext } from "~/components/css_properties/RenderContext";
+import { useCssEditorProps } from "~/components/css_properties/context/CSSEditorPropsContext";
+import { useCssState } from "~/components/css_properties/context/CssStateContext";
+import { useRenderContext } from "~/components/css_properties/context/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
 import { CustomModal } from "~/components/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";

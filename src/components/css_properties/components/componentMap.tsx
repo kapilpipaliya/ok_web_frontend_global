@@ -2,7 +2,7 @@ import { splitProps } from "solid-js";
 
 import { BoxField } from "~/components/fields/BoxField";
 
-import { DataEditWithCustomDialog } from "./DataEditWithCustomDialog";
+import { DataEditWithCustomDialog } from "./fields/DataEditWithCustomDialog";
 import { ArrayComponent } from "./fields/ArrayComponent";
 import { ButtonGroups } from "./fields/ButtonGroups";
 import { CheckboxField } from "./fields/CheckboxField";
@@ -11,7 +11,7 @@ import { Select } from "./fields/Select";
 import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
-import { FieldWithCustomBox } from "./FieldWithCustomBox";
+import { FieldWithCustomBox } from "./fields/FieldWithCustomBox";
 import { PROPERTIES } from "~/components/constants/constant";
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);

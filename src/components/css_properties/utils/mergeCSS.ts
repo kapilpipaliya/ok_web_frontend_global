@@ -2,7 +2,7 @@ import { recursive } from "merge";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import type { CSSStore } from "../CssEditorContext";
+import type { CSSStore } from "../context/CssEditorContext";
 
 import { cssStateToString } from "./cssStateToString";
 import { parseAndApplyCssRules } from "./parseAndApplyCssRules";

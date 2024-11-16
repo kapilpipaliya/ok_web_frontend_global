@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, type Setter, Show } from "solid-js";
 
-import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
+import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { Drawer } from "~/components/Drawer";
 import { ZIndex } from "~/components/ZIndex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { useLocation } from "@solidjs/router";
 import { type Accessor, For, type Setter, Show } from "solid-js";
 
-import { SearchBar } from "~/components/css_properties/SearchBar";
+import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 
 type MainSideBarProps = {
   activeSection: Accessor<string>;

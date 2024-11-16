@@ -7,7 +7,7 @@ import {
   Switch,
 } from "solid-js";
 
-import { SearchBar } from "~/components/css_properties/SearchBar";
+import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { useToast } from "~/components/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";

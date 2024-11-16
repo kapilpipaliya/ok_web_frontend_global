@@ -4,7 +4,7 @@ import { createWritableMemo } from "@solid-primitives/memo";
 
 interface TextAreaProps
   extends JSX.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  onValueChange: (valueString: string) => void;
+  onValueChange?: (valueString: string) => void;
   value: string;
 }
 

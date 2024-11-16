@@ -6,11 +6,11 @@ import type {
   ButtonGroupField,
   FieldWithCustomProperty,
   GenericField,
-} from "../constants/FieldSchemaType";
+} from "../../constants/FieldSchemaType";
 
-import { useCssEditor } from "../CssEditorContext";
-import { useCssState } from "../CssStateContext";
-import { ButtonGroups } from "./fields/ButtonGroups";
+import { useCssEditor } from "../../context/CssEditorContext";
+import { useCssState } from "../../context/CssStateContext";
+import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = (
   props: Readonly<FieldWithCustomProperty>,
@@ -49,7 +49,6 @@ export const FieldWithCustomBox = (
         <ButtonGroups
           {...({
             componentName: "buttonGroups",
-            isAddToClass: false,
             isLabelOnTop: false,
             key: props.key,
             label: "",

@@ -4,7 +4,7 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type { ColorPickerField } from "../../constants/FieldSchemaType";
 
-import { useRenderContext } from "../../RenderContext";
+import { useRenderContext } from "../../context/RenderContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(

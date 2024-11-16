@@ -3,18 +3,18 @@ import { type Accessor, For } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import type { DataEditorField } from "../constants/FieldSchemaType";
-import type { ShadowAttributes } from "../utils/generate/generateBoxShadow";
-import type { FilterAttributes } from "../utils/generate/generateFilter";
-import type { TextShadowAttributes } from "../utils/generate/generateTextShadow";
-import type { TransformAttributes } from "../utils/generate/generateTransform";
-import type { TransitionAttributes } from "../utils/generate/generateTransition";
+import type { DataEditorField } from "../../constants/FieldSchemaType";
+import type { ShadowAttributes } from "../../utils/generate/generateBoxShadow";
+import type { FilterAttributes } from "../../utils/generate/generateFilter";
+import type { TextShadowAttributes } from "../../utils/generate/generateTextShadow";
+import type { TransformAttributes } from "../../utils/generate/generateTransform";
+import type { TransitionAttributes } from "../../utils/generate/generateTransition";
 
-import { useCssEditor } from "../CssEditorContext";
-import { useCssState } from "../CssStateContext";
-import { useRenderContext } from "../RenderContext";
-import { LabelWrapper } from "./fields/LabelWrapper";
-import { CssPropertyRow } from "./fields/shadow_editor/CssPropertyRow";
+import { useCssEditor } from "../../context/CssEditorContext";
+import { useCssState } from "../../context/CssStateContext";
+import { useRenderContext } from "../../context/RenderContext";
+import { LabelWrapper } from "./LabelWrapper";
+import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 
 export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [, setCssState] = useCssEditor();

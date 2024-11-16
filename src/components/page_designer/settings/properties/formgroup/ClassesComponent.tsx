@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 
-import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSPropertiesEditorWrapper";
+import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { TabsWithUnderline } from "~/components/SimpleTabs";
@@ -49,7 +49,6 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
           onChange={(data) =>
             props.onChange(metaClasses[selectedIndex()], data)
           }
-          txnId={props.txnId}
         />
       </Show>
     </>

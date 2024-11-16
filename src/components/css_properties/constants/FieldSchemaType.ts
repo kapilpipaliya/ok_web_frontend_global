@@ -18,6 +18,7 @@ export interface FormField extends Field {
   info?: string;
   key: string;
   onChange?: (value: any) => void;
+  onChangeInput?: (value: string) => void;
   value?: any;
 }
 
@@ -38,10 +39,8 @@ export interface FieldWithCustomProperty extends FormField {
 
 export interface ColorPickerField extends FormField {
   componentName: "colorPicker";
-  isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  onChangeInput?: (value: string) => void;
 }
 
 export interface BoxField extends Field {
@@ -62,11 +61,9 @@ export interface TextFieldOptionsField extends FormField {
   componentName: "string";
   containerClass?: string;
   inputProps?: any;
-  isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
   leftIcon?: JSXElement;
-  onChangeInput?: (value: string) => void;
   options: OptionType;
   placeholder?: string;
   showInside?: boolean;
@@ -77,10 +74,8 @@ export interface TextFieldOptionsField extends FormField {
 
 export interface ToggleField extends FormField {
   componentName: "toggleButton";
-  isAddToClass?: boolean;
   isLabelOnTop?: boolean;
   label: string;
-  onChangeInput?: (value: string) => void;
   options: { icon?: string; key: string; value: string }[];
 }
 
@@ -95,20 +90,16 @@ export interface DataEditorField extends FormField {
 
 export interface SelectField extends FormField {
   componentName: "select";
-  isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  onChangeInput?: (label: string, value: string) => void;
   options: ({ label: string; value: string } | string)[] | string[];
   value?: string;
 }
 
 export interface ButtonGroupField extends FormField {
   componentName: "buttonGroups";
-  isAddToClass?: boolean;
   isLabelOnTop: boolean;
   label: string;
-  onChangeInput?: (value: string) => void;
   options: {
     icon?: string;
     key: string;
