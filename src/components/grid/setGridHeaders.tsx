@@ -15,7 +15,7 @@ import type { DataGridState } from "./DataGridContext";
 
 import { IconButton } from "../styled/IconButton";
 
-export function setGridHeaders(
+export function SetGridHeaders(
   gridState: DataGridState,
   formNew: IFormMetaData,
   graph: Store<GraphInterface>,

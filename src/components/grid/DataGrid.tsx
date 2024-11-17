@@ -44,7 +44,7 @@ import {
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
-import { setGridHeaders } from "./SetGridHeaders";
+import { SetGridHeaders } from "./setGridHeaders";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {
@@ -227,7 +227,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         ? [...gridState.tableStore.data, ...resultData]
         : resultData;
     graph.events?.setTitle?.(formMetaData()!.title);
-    const tableColumns = setGridHeaders(
+    const tableColumns = SetGridHeaders(
       gridState,
       formMetaData()!,
       graph,
