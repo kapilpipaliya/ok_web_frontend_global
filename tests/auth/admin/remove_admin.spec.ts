@@ -1,18 +1,16 @@
 import { expect, test } from '@playwright/test';
 
 import { getDriver } from "~/cypher/driver";
-import { removeDockerContainer } from '~/server/docker/removeDockerContainer';
-import { stopDockerContainer } from '~/server/docker/stopDockerContainer';
 
 import { signUpData } from '../data/signUpData';
+import { removeDockerComposeDirectory } from '~/server/docker_compose/remove';
 test.describe('remove admin', () => {
   test.afterEach(async () => {
   });
 
   test('remove admin and container', async () => {
     await removeAdmin();
-    await stopDockerContainer(signUpData.subDomain);
-    await removeDockerContainer(signUpData.subDomain);
+    await removeDockerComposeDirectory(signUpData.subDomain);
   });
 });
 

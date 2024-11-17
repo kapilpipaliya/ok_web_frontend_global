@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-import { removeDockerContainer } from '~/server/docker/removeDockerContainer';
-
 import { signUpData } from '../data/signUpData';
 import { fillSignUpForm } from '../functions/fillSignUpForm';
 import { logIn } from '../functions/logIn';

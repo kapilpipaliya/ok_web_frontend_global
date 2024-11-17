@@ -2,9 +2,6 @@ import { expect, test } from '@playwright/test';
 import Docker from 'dockerode';
 
 import { waitForDockerCreate } from '~/cypher/mutate/signup/waitForDockerCreate';
-// import { removeDockerContainer } from '~/server/docker/removeDockerContainer';
-// import { stopDockerContainer } from '~/server/docker/stopDockerContainer';
-
 
 test.describe('super user setup', () => {
   let docker: Docker;
@@ -27,8 +24,7 @@ test.describe('super user setup', () => {
   });
 
   test.afterEach(async ({ page }) => {
-    // await stopDockerContainer("super");
-    // await removeDockerContainer("super");
+    // await removeDockerComposeDirectory("super");
   });
 
   test('super user setup', async ({ page }) => {

@@ -20,7 +20,7 @@ export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
   // Get ports for the user's database
   const { driverPort, labPort, logsPort } = await getNewPortsForUser(tx);
 
-  await waitForDockerCreate(data.username, driverPort, logsPort, labPort);
+  await waitForDockerCreate(data.subDomain, driverPort, logsPort, labPort);
   await updatePortForNewUser(tx, driverPort, logsPort, labPort);
 
   // Create a new user in the database according to subDomain

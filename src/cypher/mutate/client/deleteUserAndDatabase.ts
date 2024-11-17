@@ -1,8 +1,7 @@
 import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
-import { removeDockerContainer } from "~/server/docker/removeDockerContainer";
-import { stopDockerContainer } from "~/server/docker/stopDockerContainer";
+import { removeDockerComposeDirectory } from "~/server/docker_compose/remove";
 import { getSubDomain } from "~/server/getSubDomain";
 
 // unused function, To be used in the future
@@ -13,18 +12,17 @@ export async function deleteUserAndDatabase(userName: string) {
   const subDomain = await getSubDomain(host);
 
   const dbSessionSource = (await getDriver(subDomain)).session();
+  const subDomainForUser = subDomain + "-user"; // TODO Fix this
 
   try {
-    const stopDockerRes = await stopDockerContainer(userName);
-    if (!stopDockerRes.error) {
-      const removeDockerRes = await removeDockerContainer(userName);
-      if (!removeDockerRes.error) {
-        return {
+    const removeDockerComposeRes = await removeDockerComposeDirectory(subDomainForUser);
+    if (!removeDockerComposeRes) {
+      return {
           error: false,
           message: "Docker Removed successfully",
-        };
-      }
+      };
     }
+    
     // TODO: delete user from super user database too
     return {
       error: false,

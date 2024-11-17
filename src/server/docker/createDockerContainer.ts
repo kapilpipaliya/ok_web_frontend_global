@@ -1,6 +1,6 @@
 import Docker from "dockerode";
 
-import { startDockerContainer } from "~/server/docker/startDockerContainer";
+import { startDockerContainer } from "./startDockerContainer";
 
 // Docker API Reference: https://docs.docker.com/engine/api/v1.24/
 
