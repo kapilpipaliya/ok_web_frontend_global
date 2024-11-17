@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 
 export function resetDragDropState(
   setLayoutStore: SetStoreFunction<PageLayoutObject>,

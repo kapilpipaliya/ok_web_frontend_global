@@ -13,7 +13,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
-import { uniqueNameKey } from "~/components/page_designer/constant";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -30,7 +29,7 @@ import { PROPERTIES } from "../../../../styled/constants/constant";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
-} from "../../../LayoutContext";
+} from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
@@ -39,6 +38,7 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import { uniqueNameKey } from "~/components/page_designer/constants/constant";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {

@@ -9,7 +9,7 @@ import {
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 
 export function PreviewCSSMenu(
   props: Readonly<{

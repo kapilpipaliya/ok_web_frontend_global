@@ -5,7 +5,7 @@ import logo from "~/assets/graphics/sidebarLogo.svg";
 import { IconButton } from "~/components/styled/IconButton";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftToggleButton } from "./LeftToggleButton";
 
 export const LeftIcons = () => {

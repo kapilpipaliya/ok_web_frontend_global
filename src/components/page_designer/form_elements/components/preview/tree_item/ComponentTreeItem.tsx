@@ -1,7 +1,7 @@
 import { createMemo, For, Show } from "solid-js";
 
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { TreeItemContainer } from "~/components/page_designer/settings/layout/TreeItemContainer";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 

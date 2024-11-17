@@ -1,7 +1,7 @@
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { CloseIconTopRight } from "./CloseIconTopRight";
 import { FormElementTabs } from "./FormElementTabs";
 

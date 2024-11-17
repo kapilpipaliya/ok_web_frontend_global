@@ -2,7 +2,7 @@ import { createSignal, Show } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 

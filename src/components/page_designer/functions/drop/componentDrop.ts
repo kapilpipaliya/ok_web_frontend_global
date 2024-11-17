@@ -12,7 +12,7 @@ import { useToast } from "~/components/styled/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";
-import { uniqueNameKey } from "../../constant";
+import { uniqueNameKey } from "../../constants/constant";
 import { getUniqueName } from "../generateFormMetaAttributes";
 import { PageDesignerLabels } from "../PageDesignerLabels";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";

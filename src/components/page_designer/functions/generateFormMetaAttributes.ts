@@ -12,7 +12,7 @@ import type {
 } from "../../../lib/meta/FormMetadataType";
 
 import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
-import { uniqueNameKey } from "../constant";
+import { uniqueNameKey } from "../constants/constant";
 import { getChildrenAttrs } from "./getChildrenAttrs";
 import { getComponentLabel } from "./getComponentLabel";
 

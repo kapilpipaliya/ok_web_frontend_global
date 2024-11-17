@@ -3,7 +3,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
 
 export function NameKey() {

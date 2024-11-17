@@ -2,7 +2,7 @@ import { createSignal, For, Show } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {

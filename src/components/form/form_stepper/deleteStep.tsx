@@ -4,7 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 
-import type { PageLayoutObject } from "../../page_designer/LayoutContext";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 
 export function deleteStep(
   graph: Store<GraphInterface>,

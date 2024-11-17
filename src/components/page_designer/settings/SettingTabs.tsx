@@ -4,7 +4,7 @@ import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 import { FormContext } from "~/components/form/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";

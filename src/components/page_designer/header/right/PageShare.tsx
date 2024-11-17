@@ -3,7 +3,7 @@ import { createEffect, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function ShareSection() {
   const [layoutStore] = useDesignerLayoutStore() || [];
@@ -84,8 +84,8 @@ export function ShareSection() {
           <button
             class={
               access() === type
-                ? "bg:#554FDC border:none color:white cursor:pointer mr:10px p:10px_20px r:6px"
-                : "bg:rgb(245,245,245) border:none cursor:pointer mr:10px p:10px_20px r:6px"
+                ? "bg:#554FDC border:none color:white cursor:pointer mr:10px p:10px|20px r:6px"
+                : "bg:rgb(245,245,245) border:none cursor:pointer mr:10px p:10px|20px r:6px"
             }
             onClick={() => handleAccessChange(type)}
           >

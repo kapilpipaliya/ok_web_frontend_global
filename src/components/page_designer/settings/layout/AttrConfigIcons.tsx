@@ -9,7 +9,7 @@ import { useToast } from "~/components/styled/Toast";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();

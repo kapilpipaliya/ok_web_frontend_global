@@ -4,8 +4,8 @@ import { createContext, type JSX, useContext } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { InitialPermissions } from "./InitialPermissions";
-import { FunctionArgumentType } from "../form/FieldSchemaType";
+import { InitialPermissions } from "../InitialPermissions";
+import { FunctionArgumentType } from "../../form/FieldSchemaType";
 
 export function getInitialPageRenderStore() {
   return {

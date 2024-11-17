@@ -11,7 +11,7 @@ import { DialogFooter } from "../../styled/dialog/DialogFooter";
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "../../styled/DropdownMenu";
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 
 export function SaveAsTemplateMenu(

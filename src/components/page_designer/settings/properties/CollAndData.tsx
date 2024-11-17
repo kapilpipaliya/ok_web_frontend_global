@@ -5,7 +5,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
@@ -18,7 +18,7 @@ import { PROPERTIES } from "../../../styled/constants/constant";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
-} from "../../LayoutContext";
+} from "../../context/LayoutContext";
 
 function initializeMetaVertex(
   graph: GraphInterface,

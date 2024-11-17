@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { generateFormMetaAttributes } from "../../functions/generateFormMetaAttributes";

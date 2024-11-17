@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormConfig() {
   const params = useParams();

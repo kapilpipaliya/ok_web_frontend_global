@@ -3,7 +3,7 @@ import { type Accessor, createMemo } from "solid-js";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";

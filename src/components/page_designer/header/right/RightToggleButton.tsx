@@ -1,6 +1,6 @@
 import { IconButton } from "~/components/styled/IconButton";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function RightToggleButton() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();

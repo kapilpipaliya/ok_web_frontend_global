@@ -1,11 +1,12 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { uniqueNameKey } from "~/components/page_designer/constant";
+
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore } from "../../../LayoutContext";
+import { useDesignerLayoutStore } from "../../../context/LayoutContext";
 import { Label } from "./Label";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/generateFormMetaAttributes";
+import { uniqueNameKey } from "~/components/page_designer/constants/constant";
 
 export function UniqueNameField(
   props: Readonly<{

@@ -2,7 +2,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 
 export function DeleteButton(props: {

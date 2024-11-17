@@ -3,7 +3,7 @@ import type { JSX } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, getOwner, runWithOwner, Show, splitProps } from "solid-js";
 
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/graph";
@@ -13,7 +13,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 
 import { useFormContext } from "../form/FormContext";
-import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
+import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";

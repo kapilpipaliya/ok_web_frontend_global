@@ -15,8 +15,8 @@ import { AddNewButton } from "~/components/grid/AddNew";
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/PageAttrContext";
-import { usePageRenderContext } from "~/components/page_attr_render/PageRenderContext";
+} from "~/components/page_attr_render/context/PageAttrContext";
+import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";

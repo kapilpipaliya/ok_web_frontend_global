@@ -17,7 +17,7 @@ import {
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import {
@@ -34,7 +34,7 @@ import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
-} from "../page_attr_render/PageRenderContext";
+} from "../page_attr_render/context/PageRenderContext";
 import {
   getConfiguredPermissions,
   hasPermissions,

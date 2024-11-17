@@ -3,7 +3,7 @@ import { createSelector, Match, Switch } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 

@@ -4,8 +4,8 @@ import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
 import { useZIndex } from "~/components/fields/ZIndex";

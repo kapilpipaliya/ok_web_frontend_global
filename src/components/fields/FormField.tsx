@@ -5,14 +5,14 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { FormContext, type FormStoreObject } from "../form/FormContext";
-import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
+import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 
 export function FormField(

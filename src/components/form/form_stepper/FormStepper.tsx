@@ -3,7 +3,7 @@ import { createMemo, For, Show } from "solid-js";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";

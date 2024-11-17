@@ -11,7 +11,7 @@ import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { handleDragOver } from "../../event_handler/handleDragOver";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";

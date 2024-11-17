@@ -9,8 +9,8 @@ import {
   type FormStoreObject,
   useFormContext,
 } from "~/components/form/FormContext";
-import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { useZIndex } from "~/components/fields/ZIndex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";

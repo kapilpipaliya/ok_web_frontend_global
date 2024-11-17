@@ -13,10 +13,10 @@ import { handleDrop } from "~/components/page_designer/event_handler/handleDrop"
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";

@@ -6,13 +6,13 @@ import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex
 import {
   PreviewContext,
   type PreviewStoreObject,
-} from "~/components/page_designer/PreviewContext";
+} from "~/components/page_designer/context/PreviewContext";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
-} from "./PageAttrContext";
+} from "./context/PageAttrContext";
 
 export function PageView(
   props: Readonly<{

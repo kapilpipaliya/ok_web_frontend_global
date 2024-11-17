@@ -1,7 +1,7 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../../LayoutContext";
+import { useDesignerLayoutStore } from "../../../context/LayoutContext";
 
 export function DefaultValueContent(
   props: Readonly<{

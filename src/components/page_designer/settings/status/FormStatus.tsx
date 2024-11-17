@@ -10,7 +10,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();

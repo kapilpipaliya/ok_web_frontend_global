@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { OpenComponentURL } from "../../OpenComponentURL";
 

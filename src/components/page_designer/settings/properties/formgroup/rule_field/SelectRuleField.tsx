@@ -1,4 +1,4 @@
-import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { RulesModal } from "~/components/page_designer/rules/RulesModal";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 

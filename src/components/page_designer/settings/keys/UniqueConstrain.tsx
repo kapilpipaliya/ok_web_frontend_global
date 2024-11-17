@@ -2,11 +2,11 @@ import { klona } from "klona";
 import { createStore } from "solid-js/store";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { useGraph } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
 

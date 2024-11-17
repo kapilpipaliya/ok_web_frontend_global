@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
-} from "~/components/page_attr_render/PageAttrContext";
+} from "~/components/page_attr_render/context/PageAttrContext";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
@@ -16,7 +16,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import {
   getInitialPageRenderStore,
   usePageRenderContext,
-} from "./PageRenderContext";
+} from "./context/PageRenderContext";
 
 export const Repeater = () => {
   const [graph, setGraph] = useGraph();

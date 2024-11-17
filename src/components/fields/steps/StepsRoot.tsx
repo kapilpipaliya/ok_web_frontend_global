@@ -2,7 +2,7 @@ import { createMemo, createSignal, type ParentProps } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { StepsContext, type StepsContextValue } from "./StepsContext";
-import { usePageRenderContext } from "~/components/page_attr_render/PageRenderContext";
+import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { GenericComponentProps } from "../FieldType";

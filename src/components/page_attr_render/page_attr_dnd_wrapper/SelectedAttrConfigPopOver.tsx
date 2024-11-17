@@ -4,7 +4,7 @@ import { useZIndex } from "~/components/fields/ZIndex";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";

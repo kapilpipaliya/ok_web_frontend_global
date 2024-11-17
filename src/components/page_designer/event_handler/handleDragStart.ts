@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 export function handleDragStart(

@@ -7,7 +7,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
 import { SimpleWithDismissButton } from "../../../styled/SimpleModal";
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 
 export function RulesList() {

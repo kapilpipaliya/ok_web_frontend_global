@@ -3,7 +3,7 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 
 export function ParentButton(props: { item: Vertex }) {
   const [graph, setGraph] = useGraph();

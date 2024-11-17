@@ -5,7 +5,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { addComponentAttrInPage } from "~/components/page_designer/functions/drop/addComponentAttrInForm";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
-import type { PageLayoutObject } from "../../page_designer/LayoutContext";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 
 export function addStepBefore(
   graph: Store<GraphInterface>,

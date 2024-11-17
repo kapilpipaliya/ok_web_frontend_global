@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 
 import { getComponentFromLayoutRow } from "~/components/page_designer/functions/drop/getComponentFromLayoutRow";

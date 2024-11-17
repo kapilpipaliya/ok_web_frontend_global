@@ -1,6 +1,6 @@
 import type { useGraph, Vertex } from "~/lib/graph/graph";
 
-import type { useDesignerLayoutStore } from "../../LayoutContext";
+import type { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function onCompDragStart(
   e: DragEvent,

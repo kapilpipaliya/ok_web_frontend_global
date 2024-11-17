@@ -4,7 +4,7 @@ import { reconcile } from "solid-js/store";
 import { type GraphInterface, type Id, useGraph } from "~/lib/graph/graph";
 
 import { SimpleWithDismissButton } from "../../styled/SimpleModal";
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../context/LayoutContext";
 
 const getAttributeNames = (
   graph: GraphInterface,

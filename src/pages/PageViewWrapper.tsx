@@ -30,7 +30,7 @@ import {
   hasPermissions,
 } from "~/components/page_attr_render/permissions";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
-import { usePreviewContext } from "~/components/page_designer/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import PreviewPage from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";

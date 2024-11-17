@@ -10,7 +10,7 @@ import { getChildrenAttrs } from "../getChildrenAttrs";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
-import { uniqueNameKey } from "../../constant";
+import { uniqueNameKey } from "../../constants/constant";
 import { getUniqueName } from "../generateFormMetaAttributes";
 
 export function getRowProps(

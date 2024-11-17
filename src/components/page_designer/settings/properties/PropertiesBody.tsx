@@ -4,7 +4,7 @@ import { setPropertyValueGlobal } from "~/components/page_designer/functions/set
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";

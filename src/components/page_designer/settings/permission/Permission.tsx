@@ -6,11 +6,11 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
+import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
 
 export function Permission() {

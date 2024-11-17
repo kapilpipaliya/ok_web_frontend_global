@@ -18,7 +18,7 @@ import { generateBoxShadow } from "~/components/css_properties/utils/generate/ge
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,

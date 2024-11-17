@@ -8,7 +8,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 import { CommonAddComponent } from "./CommonAddComponent";
 

@@ -2,7 +2,7 @@ import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export const MiddleSectionButtons = () => {
   const [_, setLayoutStore] = useDesignerLayoutStore();

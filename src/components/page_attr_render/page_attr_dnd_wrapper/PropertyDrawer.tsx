@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSelector, Show } from "solid-js";
 
-import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
+import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 
 export const PropertyDrawer = (
   props: Readonly<{ itemId: number | string }>,

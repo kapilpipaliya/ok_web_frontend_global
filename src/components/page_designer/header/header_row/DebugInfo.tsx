@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function DebugInfo() {
   const [graph] = useGraph();

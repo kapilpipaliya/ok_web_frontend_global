@@ -9,7 +9,7 @@ import { onClickAddComponent } from "~/components/page_designer/functions/onClic
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function PageItem(
   props: Readonly<{

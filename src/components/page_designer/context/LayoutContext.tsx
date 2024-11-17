@@ -4,8 +4,8 @@ import { createContext, useContext } from "solid-js";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import type { FormStoreObject } from "../form/FormContext";
-import type { IDToRuleMap } from "./functions/generateFormMetaAttributes";
+import type { FormStoreObject } from "../../form/FormContext";
+import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
 
 export function getInitialDesignerLayoutStore() {
   return {
@@ -14,11 +14,9 @@ export function getInitialDesignerLayoutStore() {
     formStore: [] as unknown as ReturnType<typeof createStore<FormStoreObject>>,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
-    inputBackground: "white",
     isLeftOpen: true,
     isRightOpen: true,
     isSmallScreen: false,
-    labelColor: "black", // Default label color
     multiHighlight: [] as Array<Id | number>,
     // this propes may required on preview too
     position: null as "after" | "before" | "center" | "left" | "right" | null,

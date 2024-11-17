@@ -1,6 +1,6 @@
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../LayoutContext";
+import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { SettingTabs } from "./SettingTabs";
 
 export function SettingsWrapper() {

@@ -4,7 +4,7 @@ import { FormContext } from "~/components/form/FormContext";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
-import { useDesignerLayoutStore } from "../../LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
 import { MiddleSectionButtons } from "../middle/MiddleSectionButtons";
 import { ResizeViewButtons } from "../middle/ResizeViewButtons";
