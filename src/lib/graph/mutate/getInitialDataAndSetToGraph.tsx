@@ -5,7 +5,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
-import { setGraphData } from "./lib/graph/mutate/setGraphData";
+import { setGraphData } from "./setGraphData";
 
 export function getInitialDataAndSetToGraph(
   graph: [get: GraphInterface, set: SetStoreFunction<GraphInterface>],

@@ -45,7 +45,7 @@ import { useToast } from "../styled/Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useZIndex } from "../ZIndex";
+import { useZIndex } from "../fields/ZIndex";
 import { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
 import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
 

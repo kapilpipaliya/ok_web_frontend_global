@@ -8,7 +8,7 @@ import { PageRenderContextProvider } from "~/components/page_attr_render/PageRen
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
-import { useZIndex } from "~/components/ZIndex";
+import { useZIndex } from "~/components/fields/ZIndex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";

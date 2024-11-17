@@ -5,7 +5,7 @@ import { FormContext } from "~/components/form/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";

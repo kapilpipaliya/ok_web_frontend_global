@@ -15,6 +15,8 @@ type MainSideBarProps = {
   setSearchTerm: Setter<string>;
   toggleSection: (sectionName: string) => void;
 };
+
+/* deprecated */
 export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
   const location = useLocation();
   const activeLinks = () =>

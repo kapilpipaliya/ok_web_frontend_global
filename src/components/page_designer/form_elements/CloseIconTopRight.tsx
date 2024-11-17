@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 
-import { useZIndex } from "~/components/ZIndex";
+import { useZIndex } from "~/components/fields/ZIndex";
 
 export function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
   const zIndex = useZIndex();

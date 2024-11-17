@@ -11,6 +11,7 @@ export async function insertComponents(superTx: Session | Transaction) {
     return response;
   }
 
+  /* Now we not need this:
   const componentTree = {
     children: Object.keys(componentsMap).map((key) => ({
       children: [],
@@ -22,6 +23,7 @@ export async function insertComponents(superTx: Session | Transaction) {
   if (!response2.success) {
     return response2;
   }
+  */
 
   return { success: true };
 }

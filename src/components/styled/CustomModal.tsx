@@ -9,7 +9,7 @@ import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
 
-import { useZIndex } from "../ZIndex";
+import { useZIndex } from "../fields/ZIndex";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 interface CustomModalProps {

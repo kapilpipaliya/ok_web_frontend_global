@@ -1,6 +1,6 @@
-import type { GraphInterface, Vertex } from "./lib/graph/graph";
+import type { GraphInterface, Vertex } from "../../graph";
 
-import { evalExpression } from "./lib/expression_eval";
+import { evalExpression } from "../../../expression_eval";
 
 export function getGlobalSettingVertex(graph: GraphInterface): Vertex | undefined {
   const globalSettingId = graph.vertexLabelIdMap.GlobalSetting?.[0];

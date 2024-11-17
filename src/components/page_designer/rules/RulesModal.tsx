@@ -11,7 +11,7 @@ import {
 } from "~/components/form/FormContext";
 import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { useZIndex } from "~/components/ZIndex";
+import { useZIndex } from "~/components/fields/ZIndex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";

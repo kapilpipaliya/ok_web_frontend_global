@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 
 import { RulesModal } from "../../rules/RulesModal";
 

@@ -1,7 +1,7 @@
 import { createSignal, For, Show, onMount } from "solid-js";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { useToast } from "~/components/styled/Toast";
-import { getGlobalSettingVertex, getGlobalThemeVertex } from "~/getGlobalThemeVertex";
+import { getGlobalSettingVertex, getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
 import { useGraph, Vertex, type Id } from "~/lib/graph/graph";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";

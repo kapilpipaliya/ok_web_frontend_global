@@ -10,7 +10,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
-import { useZIndex, ZIndex } from "../ZIndex";
+import { useZIndex, ZIndex } from "../fields/ZIndex";
 
 export type Option =
   | {

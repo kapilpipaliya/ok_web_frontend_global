@@ -13,7 +13,7 @@ import { DropdownMenu } from "../../styled/DropdownMenu";
 import { DynamicComponent } from "../../form/DynamicComponent";
 import { useFormContext } from "../../form/FormContext";
 import { MultiSelectField } from "../../styled/MultiSelect";
-import { ZIndex } from "../../ZIndex";
+import { ZIndex } from "../../fields/ZIndex";
 import { AddNewCssState } from "./AddNewCssState";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";

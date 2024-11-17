@@ -10,7 +10,7 @@ import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
 } from "~/components/page_designer/LayoutContext";
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph } from "~/lib/graph/graph";

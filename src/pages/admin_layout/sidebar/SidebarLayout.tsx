@@ -18,6 +18,7 @@ export interface navbarDataI {
   key: string;
 }
 
+/* deprecated */
 export function Sidebar() {
   const [searchData, setSearchData] = createSignal<any>([]);
   const [navData, setNavData] = createSignal<any>([]);

@@ -6,7 +6,7 @@ import { signUpData, superUserData } from '../data/signUpData';
 import { fillSignUpForm } from '../functions/fillSignUpForm';
 import { logIn } from '../functions/logIn';
 import { signOut } from '../functions/signOut';
-import { generate401RedirectUrl } from '~/generate401RedirectUrl';
+import { generate401RedirectUrl } from "~/lib/api/endpoints";
 
 
 

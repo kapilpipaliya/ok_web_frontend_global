@@ -4,7 +4,7 @@ import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";

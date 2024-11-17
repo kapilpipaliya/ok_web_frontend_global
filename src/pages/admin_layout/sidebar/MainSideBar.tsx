@@ -12,6 +12,7 @@ type MainSideBarProps = {
   toggleCollapse: () => void;
 };
 
+/* deprecated */
 export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
   return (
     <nav class="flex rel align-items:center bg:#E5EAFE flex-direction:column flex:1 min-h:100vh pt:0.5rem r:0|15|15|0 w:4rem">

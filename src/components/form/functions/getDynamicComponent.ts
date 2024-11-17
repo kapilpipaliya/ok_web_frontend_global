@@ -20,7 +20,7 @@ import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 import { Portal } from "solid-js/web";
 import { CheckboxField } from "~/components/fields/CheckboxField";
 import { FormError } from "~/components/fields/FormError";
@@ -82,7 +82,7 @@ export const componentsMap: Record<string, any> = {
   RadioGroup: RadioGroupField,
   Transition,
   TransitionGroup,
-  StepsRoot,
+  Steps: StepsRoot,
   Step,
   ActiveStep: StepsContent,
 };

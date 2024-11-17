@@ -11,7 +11,7 @@ import { Portal } from "solid-js/web";
 import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
-import { useZIndex } from "../ZIndex";
+import { useZIndex } from "../fields/ZIndex";
 
 interface DrawerProps {
   children: JSX.Element;

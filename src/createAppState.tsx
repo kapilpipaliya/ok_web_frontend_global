@@ -10,9 +10,9 @@ import type {
 } from "~/lib/graph/graph";
 
 import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
-import { saveUserSetting } from "~/saveUserSetting";
+import { saveUserSetting } from "~/lib/api/saveUserSetting";
 
-export function configureState() {
+export function createAppState() {
   let newVertexId = -500000;
   let txnId = 0;
 
@@ -30,8 +30,6 @@ export function configureState() {
     globalThemeId: "",
     isDevelopment: false,
     isLoadingPage: false,
-    isSideBarOpen: false,
-    isSubSideBarOpen: false,
     member: { P: {} } as Vertex,
     navBarHeight: 45,
     navigationData: [],

@@ -4,18 +4,18 @@ import { FileRoutes } from "@solidjs/start/router";
 import { createSignal, Show, Suspense } from "solid-js";
 
 import "~/base.css";
-import { configureState } from "~/configureState";
+import { createAppState } from "~/createAppState";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
-import { getGlobalThemeVertex } from "./getGlobalThemeVertex";
+import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
 import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const loadingSite = createSignal(false);
-  const graph = configureState();
+  const graph = createAppState();
   const themeConfig = () => {
     const themeConfig = getGlobalThemeVertex(graph[0])?.P?.data;
     return themeConfig ? JSON.parse(themeConfig) : {};

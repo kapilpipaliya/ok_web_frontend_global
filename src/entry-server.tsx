@@ -1,18 +1,9 @@
 // @refresh reload
-// import { MasterCSS } from '@master/css'
-// import { parseHTML } from '@master/css-server'
 import { createHandler, StartServer } from "@solidjs/start/server";
-// import { JSX } from 'solid-js';
-
-// import masterConfig from "./master.css";
 
 export default createHandler(() => (
   <StartServer
-    document={({ assets, children, scripts }) => {
-      // const context = parseHTML(((children as JSX.ArrayElement)?.[0] as unknown as { t: string })?.t ?? "");
-      // const { classes } = context
-      // const css = new MasterCSS(masterConfig);
-      // classes.forEach(eachClass => css.add(eachClass));
+    document={({ assets, children, scripts }) => {;
       return (
         <html lang="en">
           <head>
@@ -43,7 +34,6 @@ export default createHandler(() => (
 
             {assets}
 
-            {/* <style id="master">{css.text}</style> */}
           </head>
           <body>
             <div id="app">{children}</div>

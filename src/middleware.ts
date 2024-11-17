@@ -3,7 +3,7 @@ import { createMiddleware } from "@solidjs/start/middleware";
 
 import { getHttpsSession } from "~/server/getHttpsSession";
 
-import { generate401RedirectUrl } from "./generate401RedirectUrl";
+import { generate401RedirectUrl } from "./lib/api/endpoints";
 
 export default createMiddleware({
   onRequest: [

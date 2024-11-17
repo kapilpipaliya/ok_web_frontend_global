@@ -5,7 +5,7 @@ import { Portal } from "solid-js/web";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
 

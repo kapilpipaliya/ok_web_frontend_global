@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { useZIndex } from "~/components/ZIndex";
+import { useZIndex } from "~/components/fields/ZIndex";
 
 import { CompPreviewTreeItem } from "./tree_item/ComponentTreeItem";
 

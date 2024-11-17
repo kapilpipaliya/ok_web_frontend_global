@@ -1,6 +1,6 @@
 import { createContext, type JSX, Show, useContext } from "solid-js";
 
-import { useZIndex } from "~/components/ZIndex";
+import { useZIndex } from "~/components/fields/ZIndex";
 
 interface SimpleWithDismissButtonProps {
   children?: JSX.Element;

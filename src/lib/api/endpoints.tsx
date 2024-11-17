@@ -8,3 +8,7 @@ export const API = {
   signUpUrl: "/api/auth/signup",
   submitDataUrl: "/api/mutate/submit_data",
 };
+
+export function generate401RedirectUrl(pathname: string): string {
+  return `/auth/login?redirectUrl=${encodeURIComponent(pathname)}`;
+}

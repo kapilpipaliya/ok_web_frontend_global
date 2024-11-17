@@ -1,4 +1,4 @@
-import { ZIndex } from "~/components/ZIndex";
+import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
