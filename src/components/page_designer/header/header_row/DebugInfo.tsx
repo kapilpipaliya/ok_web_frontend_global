@@ -8,7 +8,7 @@ export function DebugInfo() {
   const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   return (
-    <Show when={layoutStore.formStore[0]?.txnId}>
+    <Show when={layoutStore.formStore[0]?.txnId && graph.isDevelopment}>
       <div class="flex flex:row gap:2">
         <span>Txn ID: {layoutStore.formStore[0].txnId}</span>
         <span>

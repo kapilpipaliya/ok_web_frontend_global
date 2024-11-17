@@ -60,7 +60,7 @@ export function ResizableContainer(
   // };
 
   return (
-    <div class="grid overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}" classList={{}}>
+    <div class="grid overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} mt:28">
       <div
         class="scrollbar-color:lightgrey {scrollbar-width:thin} border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{

@@ -36,13 +36,14 @@ export function filterPropertyFieldMap(
 }
 
 function shouldIncludeProperty(field: GenericField, query: string): boolean {
+  if (query === "") return true;
   if (
-    field.componentName !== "grid" &&
+    field.componentName !== "box" &&
     field.label?.toLowerCase().includes(query.toLowerCase())
   ) {
     return true;
   }
-  if (field.componentName === "grid" && field.children?.length > 0) {
+  if (field.componentName === "box" && field.children?.length > 0) {
     const matchingChildren = field.children.filter((child) =>
       shouldIncludeProperty(child, query),
     );

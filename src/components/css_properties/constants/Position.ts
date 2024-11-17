@@ -7,7 +7,7 @@ import {
 } from "./FieldSchemaType";
 
 export const PositionSection = {
-  dimentions: createGridOptions("grid", "Dimention", [
+  dimentions: createGridOptions("grid", "Position", [
     {
       componentName: "string",
       isLabelOnTop: true,

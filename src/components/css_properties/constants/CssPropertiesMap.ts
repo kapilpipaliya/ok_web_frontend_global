@@ -19,6 +19,7 @@ import { MarginAndPaddingSection } from "./SpaceSection";
 import { TextShadow } from "./TextShadow";
 import { Transition } from "./Transition";
 import { TypographySection } from "./TypographySection";
+import { EffectsSection } from "./EffectsSection";
 
 export const JSONSchema: CSSJSONSchemaType = {
   Display: DisplaySection,
@@ -28,7 +29,7 @@ export const JSONSchema: CSSJSONSchemaType = {
   Background: BackgroundSection,
   Shadow: { ...BoxShadow, ...TextShadow },
   Border: BorderSection,
-  // "Effects": EffectsSection,
+  "Effects": EffectsSection,
   Dimension: DimentionSection,
   "Margin And Padding": MarginAndPaddingSection,
   Typography: TypographySection,
