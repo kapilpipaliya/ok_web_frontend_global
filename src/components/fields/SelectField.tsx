@@ -16,7 +16,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { IdAttr, useGraph } from "~/lib/graph/graph";
+import { IdAttr, useGraph, Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -36,14 +36,17 @@ export function SelectField(
       isRealTime?: boolean;
       title: string;
       txnId?: number;
+      meta?: Vertex;
+      data?: Vertex;
     } & GenericComponentProps
   >,
 ) {
   const [graph, setGraph] = useGraph();
   const formStore = useFormContext();
-  const [parentContext] = usePageRenderContext();
-  const meta = () => getLastItem(parentContext?.vertexes || [])!;
-  const data = () => getLastItem(parentContext?.data || [])!;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => props.meta ?? parentRenderContext()?.context.meta!;
+  const data = () => props.data ?? parentRenderContext()?.context.data!;
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
 

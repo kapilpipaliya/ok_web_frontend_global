@@ -126,8 +126,6 @@ export function CollAndData() {
     collMetaVertex.vertexes,
   );
 
-  const repeaterStore1 = createStore({});
-  const repeaterStore2 = createStore({});
   return (
     <>
       <div class="flex">
@@ -150,11 +148,6 @@ export function CollAndData() {
 
       <div class="text-center mb:2 mt:2">OR</div>
       <span class="flex:.5 mt:5">Collection:</span>
-      <PageRenderContextProvider
-        data={graph.vertexes[layoutStore.selectedId]}
-        meta={collMetaVertex.vertexes![0]}
-        store={repeaterStore1}
-      >
         <SelectField
           componentName={"Select"}
           disabled={false}
@@ -162,22 +155,19 @@ export function CollAndData() {
           onChange={onCollectionChange}
           title={"Select Collection"}
           txnId={layoutStore.formStore[0].txnId}
+          data={graph.vertexes[layoutStore.selectedId]}
+          meta={collMetaVertex.vertexes![0]}
         />
-      </PageRenderContextProvider>
       <span class="flex:.5 mt:5">Data:</span>
-      <PageRenderContextProvider
-        data={graph.vertexes[layoutStore.selectedId]}
-        meta={collMetaVertex.vertexes![1]}
-        store={repeaterStore2}
-      >
         <SelectField
           componentName={"MultiSelect"}
           disabled={false}
           isRealTime={false}
           title={"Select Data"}
           txnId={layoutStore.formStore[0].txnId}
+          data={graph.vertexes[layoutStore.selectedId]}
+          meta={collMetaVertex.vertexes![1]}
         />
-      </PageRenderContextProvider>
     </>
   );
 }

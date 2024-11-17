@@ -11,14 +11,12 @@ export function getInitialPageRenderStore() {
   return {
     // ...InitialPermissions,
     context: {} as FunctionArgumentType,
-    data: [] as Vertex[],
-    vertexes: [] as Vertex[],
   };
 }
 
 export type PageRenderObject = ReturnType<typeof getInitialPageRenderStore>;
 export type PageRenderStore = ReturnType<typeof createStore<PageRenderObject>>;
-export const PageRenderContext = createContext<PageRenderStore>();
+export const PageRenderContext = createContext<PageRenderStore[]>();
 
 export function usePageRenderContext() {
   // this can be undefined too
@@ -26,18 +24,12 @@ export function usePageRenderContext() {
 }
 export const PageRenderContextProvider = (props: {
   children: JSX.Element;
-  data: Vertex;
-  meta: Vertex;
   store: PageRenderStore;
 }) => {
   const parentItems = usePageRenderContext();
-  props.store[1]("vertexes", [...(parentItems[0]?.vertexes || []), props.meta]);
-  if (props.data) {
-    props.store[1]("data", [...(parentItems[0]?.data || []), props.data]);
-  }
 
   return (
-    <PageRenderContext.Provider value={props.store}>
+    <PageRenderContext.Provider value={[...parentItems, props.store]}>
       {props.children}
     </PageRenderContext.Provider>
   );

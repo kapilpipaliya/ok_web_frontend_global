@@ -26,9 +26,10 @@ export function FormField(
 ) {
   const [graph, setGraph] = useGraph();
   const [previewStore] = usePreviewContext();
-  const [parentContext] = usePageRenderContext();
-  const meta = () => getLastItem(parentContext?.vertexes || [])!;
-  const data = () => getLastItem(parentContext?.data || [])!;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta!;
+  const data = () => parentRenderContext()?.context.data!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
 
@@ -83,7 +84,7 @@ export function FormField(
   return (
     <FormContext.Provider value={formFieldStore}>
       <div class="">
-        <PageAttrRender data={formData.formData} metaVertex={meta()} />
+        <PageAttrRender data={formData.formData} metaVertex={meta()!} />
       </div>
       <div />
     </FormContext.Provider>

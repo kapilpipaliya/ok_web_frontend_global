@@ -40,10 +40,11 @@ interface ButtonProps
 }
 
 export function ButtonField(props: Readonly<ButtonProps>) {
-  const [parentContext] = usePageRenderContext();
   const owner = getOwner();
-  const meta = () => getLastItem(parentContext?.vertexes || [])!;
-  const data = () => getLastItem(parentContext?.data || [])!;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta!;
+  const data = () => parentRenderContext()?.context.data!;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const [formStore] = useFormContext();
@@ -130,7 +131,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
         } else if (local.buttonType === "reset") {
           onReset();
         } else if (local.onClick) {
-          local.onClick(parentContext?.context ?? {} as FunctionArgumentType);
+          local.onClick(parentRenderContext()?.context ?? {} as FunctionArgumentType);
         }
       }
     );

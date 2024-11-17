@@ -21,8 +21,9 @@ export const FieldWithCustomBox = (
   const [optionType, setOptionType] = createSignal("all");
   const [cssState] = useCssEditor();
   const [state] = useCssState();
-  const [parentContext] = useRenderContext();
-  const meta = () => parentContext?.[0].context.meta as unknown as GenericField;
+  const parentItems = useRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta as unknown as GenericField;
 
   createEffect(() => {
     if (props.customProperty && props.customProperty.length > 0) {

@@ -35,24 +35,27 @@ export function TableInputField(
       isRealTime?: boolean;
       isTableInside?: boolean;
       txnId?: number;
+      meta?: Vertex;
+      data?: Vertex;
     } & GenericComponentProps
   >,
 ) {
   const [graph, setGraph] = useGraph();
-  const [parentContext] = usePageRenderContext();
-  const meta = () => getLastItem(parentContext?.vertexes || [])!;
-  const data = () => getLastItem(parentContext?.data || [])!;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => props.meta ?? parentRenderContext()?.context.meta;
+  const data = () => props.data ?? parentRenderContext()?.context.data;
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
     sortVertexesByPosition(
-      getSelectionOptions(graph, setGraph, "->Attr", [meta()]).vertexes || [],
+      getSelectionOptions(graph, setGraph, "->Attr", [meta()!]).vertexes || [],
     ),
   );
 
   const parentData = createMemo(() =>
-    getDataVertex(graph, getLastItem(parentContext?.vertexes || [], 1)),
+    getDataVertex(graph, getLastItem(parentItems, 1)?.[0].context.data),
   );
 
   // load data:
@@ -60,7 +63,7 @@ export function TableInputField(
   createEffect(() => {
     // if a parent has data vertex use it,
     // TODO: else if it has a parent Form Container(Record) use it.
-    const vertexes = getSublistRows(graph, meta(), data() || parentData());
+    const vertexes = getSublistRows(graph, meta()!, data() || parentData());
     setSortedVertexes(vertexes);
   });
 
@@ -101,7 +104,7 @@ export function TableInputField(
           onClick={() =>
             insertNewRow(
               props.txnId || 0,
-              meta(),
+              meta()!,
               data()!,
               props.isRealTime ?? false,
               graph,
@@ -173,7 +176,7 @@ export function TableInputField(
                       isNoPermissionCheck={props.isNoPermissionCheck}
                       isRealTime={props.isRealTime ?? false}
                       joinVertex={vertex}
-                      meta={meta()}
+                      meta={meta()!}
                       onChange={props.onChange}
                       rowIndex={index()}
                       setDragFromIndex={setDragFromIndex}

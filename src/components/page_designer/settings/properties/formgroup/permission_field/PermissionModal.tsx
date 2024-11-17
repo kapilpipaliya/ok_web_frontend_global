@@ -99,21 +99,17 @@ export function PermissionModal(
                     :
                   </h3>
                   <div class="mt:0.5rem">
-                    <PageRenderContextProvider
-                      data={
-                        props.selectedAttr
-                          ? props.selectedAttr
-                          : layoutStore.formStore[0].formData
-                      }
-                      meta={graph.vertexes[metaVertexId]}
-                      store={repeaterStore}
-                    >
                       <TableInputField
                         isNoPermissionCheck={true}
                         isRealTime={false}
                         txnId={layoutStore.formStore[0].txnId}
+                        data={
+                          props.selectedAttr
+                            ? props.selectedAttr
+                            : layoutStore.formStore[0].formData
+                        }
+                        meta={graph.vertexes[metaVertexId]}
                       />
-                    </PageRenderContextProvider>
                   </div>
                 </div>
               </div>

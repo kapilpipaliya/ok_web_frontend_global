@@ -61,17 +61,13 @@ export function Permission() {
         title="All Form Permissions"
       />
       <div class="mt:.5rem px:0.25rem">
-        <PageRenderContextProvider
-          data={layoutStore.formStore[0]?.formData}
-          meta={graph.vertexes[metaVertexId]}
-          store={repeaterStore}
-        >
           <TableInputField
             isNoPermissionCheck={true}
             isRealTime={false}
             txnId={layoutStore.formStore[0].txnId}
+            data={layoutStore.formStore[0]?.formData}
+            meta={graph.vertexes[metaVertexId]}
           />
-        </PageRenderContextProvider>
       </div>
     </div>
   );

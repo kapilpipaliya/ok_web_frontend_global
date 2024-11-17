@@ -8,7 +8,6 @@ export function getInitialPageRenderStore() {
   return {
     context: {} as FunctionArgumentType,
     isViewMode: undefined as boolean | undefined,
-    meta: {} as GenericField,
     mounted: false,
     onChange: (() => {}) as (value: any) => void,
     parentOnChange: (() => {}) as (value: any) => void,

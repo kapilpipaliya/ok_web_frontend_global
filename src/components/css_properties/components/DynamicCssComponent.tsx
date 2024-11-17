@@ -45,7 +45,7 @@ export function DynamicCSSComponent(
 
   const parentRenderItems = useRenderContext() || [];
   const parentRenderContext = () => getLastItem(parentRenderItems)?.[0];
-  const parentMeta = () => parentRenderContext()?.meta;
+  const parentMeta = () => parentRenderContext()?.context.meta;
   const owner = getOwner();
 
   const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
@@ -62,7 +62,9 @@ export function DynamicCSSComponent(
 
   const getFunctionArgumentBase = () =>
     ({
-      meta: props.meta,
+      get meta() {
+        return props.meta;
+      },
       onChange,
       owner,
       parentItems: parentRenderItems,
@@ -191,9 +193,6 @@ export function DynamicCSSComponent(
   const repeaterStore = createStore({
     get context() {
       return getFunctionArgumentWithValue();
-    },
-    get meta() {
-      return props.meta;
     },
     onChange,
     parentOnChange,

@@ -17,12 +17,14 @@ export function PageField(props: Readonly<GenericComponentProps>) {
     "txnId",
     "children",
   ]);
-  const [parentContext] = usePageRenderContext();
-  const meta = () => getLastItem(parentContext?.vertexes || [])!;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta;
+  const data = () => parentRenderContext()?.context.data;
 
   return (
     <PageViewWrapper
-      expression={meta().P.data}
+      expression={meta()?.P.data}
       pageVertexLabel={local.componentName}
     />
   );

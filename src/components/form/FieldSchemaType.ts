@@ -30,7 +30,7 @@ export interface FunctionArgumentBaseType {
   mounted: Accessor<boolean>;
   onChange: (value: any) => void;
   owner: Owner;
-  parentItems: PageRenderStore;
+  parentItems: PageRenderStore[];
   parentMeta: Vertex;
   ref: Accessor<HTMLDivElement | null>;
   runWithOwner: <T>(fn: () => T) => T | undefined;

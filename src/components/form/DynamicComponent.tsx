@@ -97,10 +97,10 @@ export function DynamicComponent(
 
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
-  const pareentContext = usePageRenderContext();
-  const [parentRenderContext] = pareentContext;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
-  const parentMeta = () => parentRenderContext?.context.meta;
+  const parentMeta = () => parentRenderContext()?.context.meta;
   const [previewStore] = usePreviewContext();
   const owner = getOwner();
 
@@ -110,8 +110,8 @@ export function DynamicComponent(
     });
   };
   const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
-    if (parentRenderContext) {
-      return runWithOwner(parentRenderContext?.context.owner, () => {
+    if (parentRenderContext()) {
+      return runWithOwner(parentRenderContext()?.context.owner!, () => {
         return fn();
       });
     }
@@ -144,25 +144,25 @@ export function DynamicComponent(
   const hasInsertPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "insert", graph, setGraph) ??
-      parentRenderContext?.context.hasInsertPermission
+      parentRenderContext()?.context.hasInsertPermission
     );
   });
   const hasEditPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "edit", graph, setGraph) ??
-      parentRenderContext?.context.hasEditPermission
+      parentRenderContext()?.context.hasEditPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "view", graph, setGraph) ??
-      parentRenderContext?.context.hasViewPermission
+      parentRenderContext()?.context.hasViewPermission
     );
   });
   const hasDeletePermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "delete", graph, setGraph) ??
-      parentRenderContext?.context.hasDeletePermission
+      parentRenderContext()?.context.hasDeletePermission
     );
   });
 
@@ -194,7 +194,7 @@ export function DynamicComponent(
       mounted,
       onChange,
       owner,
-      parentItems: pareentContext,
+      parentItems,
       get parentMeta() {
         return parentMeta();
       },
@@ -514,14 +514,14 @@ export function DynamicComponent(
     // @ts-ignore
     props.isViewMode ??
     props.meta.P.isViewMode ??
-    parentRenderContext?.context.isViewMode;
+    parentRenderContext()?.context.isViewMode;
 
   const isReadOnly = () =>
     // @ts-ignore
     props.isReadOnly ??
     (dynamicProps()).readOnly ??
     props.meta.P.readOnly ??
-    parentRenderContext?.context.readOnly;
+    parentRenderContext()?.context.readOnly;
 
   const repeterStore = createStore({
     data: [] as Vertex[],
@@ -634,8 +634,6 @@ export function DynamicComponent(
         />
       </Show> */}
       <PageRenderContextProvider
-        data={props.data!}
-        meta={props.meta}
         store={repeterStore}
       >
         <Switch>

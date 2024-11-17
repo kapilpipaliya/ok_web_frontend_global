@@ -8,6 +8,7 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { GenericComponentProps } from "../FieldType";
 import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 interface StepsRootProps extends Readonly<GenericComponentProps> {
   defaultStepIndex?: number;
@@ -15,9 +16,10 @@ interface StepsRootProps extends Readonly<GenericComponentProps> {
 
 export function StepsRoot(props: StepsRootProps) {
   const [graph, setGraph] = useGraph();
-  const [parentContext] = usePageRenderContext();
-  const meta = () => parentContext?.context.meta;
-  const data = () => parentContext?.context.data;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta!;
+  const data = () => parentRenderContext()?.context.data!;
 
   const [currentStepIndex, setCurrentStepIndex] = createSignal(
     props.defaultStepIndex ?? 0,

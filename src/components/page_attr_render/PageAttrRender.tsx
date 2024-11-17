@@ -17,7 +17,8 @@ import { usePageRenderContext } from "./context/PageRenderContext";
 export function PageAttrRender(
   props: Readonly<{ data?: Vertex; metaVertex: Vertex; filter?: (vertex: Vertex) => boolean }>,
 ) {
-  const [parentContext] = usePageRenderContext();
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const [previewStore] = usePreviewContext();
@@ -37,7 +38,7 @@ export function PageAttrRender(
         );
         const parentComponent = createMemo(() => {
           return getCompFallbackToString(
-            getLastItem(parentContext?.vertexes || [], 1),
+            getLastItem(parentItems, 1)?.[0].context.meta,
             graph,
           )?.P[IdAttr];
         });
@@ -47,7 +48,7 @@ export function PageAttrRender(
         const _parentData = () => {
           return getDataVertex(
             graph,
-            getLastItem(parentContext?.vertexes || [], 1),
+            getLastItem(parentItems, 1)?.[0].context.meta,
           );
         };
 

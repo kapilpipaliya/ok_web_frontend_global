@@ -19,8 +19,9 @@ import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
 export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [, setCssState] = useCssEditor();
   const [state] = useCssState();
-  const [parentContext] = useRenderContext();
-  const meta = () => parentContext?.[0].context.meta as unknown as DataEditorField;
+  const parentItems = useRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta as unknown as DataEditorField;
 
   type Value =
     | FilterAttributes[]

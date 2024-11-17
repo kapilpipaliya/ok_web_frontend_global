@@ -26,8 +26,9 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   let fileManagerStore: FileManagerObject;
-  const [parentContext] = useRenderContext();
-  const meta = () => parentContext?.[0].context.meta as unknown as TextFieldOptionsField;
+  const parentItems = useRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const meta = () => parentRenderContext()?.context.meta as unknown as TextFieldOptionsField;
   const cssEditorProps = useCssEditorProps();
   const [formStore] = useFormContext();
   const { showErrorToast } = useToast();
@@ -85,7 +86,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       selectedFile.id,
     );
 
-    if (!props.value.includes("$1")) {
+    if (!(props.value ?? "").includes("$1")) {
       const newValue = `url($1)${props.value ?? ""}`;
       const event = new Event("input", { bubbles: true });
       Object.defineProperty(event, "target", { value: { value: newValue } });
