@@ -1,6 +1,6 @@
 import { createSignal, For, Show, onMount } from "solid-js";
-import { DialogHeader } from "~/components/dialog/DialogHeader";
-import { useToast } from "~/components/Toast";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { useToast } from "~/components/styled/Toast";
 import { getGlobalSettingVertex, getGlobalThemeVertex } from "~/getGlobalThemeVertex";
 import { useGraph, Vertex, type Id } from "~/lib/graph/graph";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";

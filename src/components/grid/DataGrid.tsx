@@ -18,9 +18,9 @@ import { createStore } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DialogWithButtons } from "~/components/DeleteDialog";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { CommonTable } from "~/components/Table";
+import { DialogWithButtons } from "~/components/styled/DeleteDialog";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { CommonTable } from "~/components/styled/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";

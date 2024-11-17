@@ -14,7 +14,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { PROPERTIES } from "../../../constants/constant";
+import { PROPERTIES } from "../../../styled/constants/constant";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,

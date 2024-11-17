@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import type { Vertex } from "~/lib/graph/graph";
 import { ThemeConfigDialog } from "./ThemeConfigDialog";
 

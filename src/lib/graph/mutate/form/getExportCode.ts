@@ -4,7 +4,7 @@ import { klona } from "klona/json";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { findVertexByLabelAndUniqueId } from "../../get/sync/findVertex";

@@ -1,4 +1,4 @@
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 

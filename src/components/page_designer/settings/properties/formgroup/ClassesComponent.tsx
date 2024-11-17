@@ -3,7 +3,7 @@ import { createSignal, Show } from "solid-js";
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { TabsWithUnderline } from "~/components/SimpleTabs";
+import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { createVertexIds } from "./FormGroupProperties";

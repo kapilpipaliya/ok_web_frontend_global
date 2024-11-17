@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { Show } from "solid-js";
 
 import logo from "~/assets/graphics/sidebarLogo.svg";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { resetPasswordCall } from "~/lib/api/service/user/resetPasswordCall";
 import { useGraph } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validation/validatePassword";

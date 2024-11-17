@@ -17,7 +17,7 @@ import { usePageRenderContext } from "../page_attr_render/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";
-import { useToast } from "../Toast";
+import { useToast } from "../styled/Toast";
 import { GenericComponentProps } from "./FieldType";
 import { FunctionArgumentType } from "../form/FieldSchemaType";
 import { Dynamic } from "solid-js/web";

@@ -4,7 +4,7 @@ import { createSignal } from "solid-js";
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus;
 
-import { CustomModal } from "~/components/CustomModal";
+import { CustomModal } from "~/components/styled/CustomModal";
 
 import { FormStatus } from "./FormStatus";
 

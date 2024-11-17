@@ -5,7 +5,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { PageRenderContextProvider } from "~/components/page_attr_render/PageRenderContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";

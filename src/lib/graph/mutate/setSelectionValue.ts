@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 
 import { getToEdge } from "../get/sync/getToEdge";

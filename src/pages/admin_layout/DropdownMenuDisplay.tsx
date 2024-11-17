@@ -1,7 +1,7 @@
 import { createSignal, type JSX, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
-import { useToast } from "~/components/Toast";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { useToast } from "~/components/styled/Toast";
 import { ZIndex } from "~/components/ZIndex";
 import { signOutCall } from "~/lib/api/service/user/signOutCall";
 import { useGraph } from "~/lib/graph/graph";

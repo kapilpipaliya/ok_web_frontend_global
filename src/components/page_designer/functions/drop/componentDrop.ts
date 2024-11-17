@@ -8,7 +8,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { createAttrCompMetaVertex } from "~/components/page_designer/functions/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/components/page_designer/functions/drop/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/components/page_designer/functions/drop/processChildrenAttrs";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";

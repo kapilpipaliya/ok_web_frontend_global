@@ -17,7 +17,7 @@ import { createStore } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DialogWithButtons } from "~/components/DeleteDialog";
+import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import {
   FormContext,
   type FormStore,
@@ -31,8 +31,8 @@ import {
 } from "~/components/page_attr_render/permissions";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { usePreviewContext } from "~/components/page_designer/PreviewContext";
-import PreviewPage from "~/components/PreviewPage";
-import { SimpleWarningAlert } from "~/components/SimpleWarningAlert";
+import PreviewPage from "~/components/styled/PreviewPage";
+import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";

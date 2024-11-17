@@ -7,7 +7,7 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 
 import type { GraphInterface, Vertex } from "../../graph";
 

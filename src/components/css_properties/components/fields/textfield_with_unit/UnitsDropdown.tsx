@@ -3,7 +3,7 @@ import { type Accessor, createSignal, For, Show } from "solid-js";
 
 import type { OptionType, TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
 interface DropDownProps {

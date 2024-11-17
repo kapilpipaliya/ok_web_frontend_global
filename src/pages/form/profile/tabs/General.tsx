@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { equals } from "rambda";
 import { createSignal, type JSX, Show } from "solid-js";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";

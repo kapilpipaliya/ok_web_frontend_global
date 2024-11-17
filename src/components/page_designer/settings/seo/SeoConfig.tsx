@@ -10,7 +10,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { PROPERTIES } from "../../../constants/constant";
+import { PROPERTIES } from "../../../styled/constants/constant";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { Label } from "../properties/formgroup/Label";
 

@@ -7,10 +7,10 @@ import { useCssEditorProps } from "~/components/css_properties/context/CSSEditor
 import { useCssState } from "~/components/css_properties/context/CssStateContext";
 import { useRenderContext } from "~/components/css_properties/context/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
-import { CustomModal } from "~/components/CustomModal";
+import { CustomModal } from "~/components/styled/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";
-import { IconButton } from "~/components/IconButton";
-import { useToast } from "~/components/Toast";
+import { IconButton } from "~/components/styled/IconButton";
+import { useToast } from "~/components/styled/Toast";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";

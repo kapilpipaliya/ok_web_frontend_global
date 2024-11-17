@@ -1,9 +1,9 @@
 import { createSignal, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import PageView from "~/components/page_attr_render/PageView";
-import PreviewPage from "~/components/PreviewPage";
+import PreviewPage from "~/components/styled/PreviewPage";
 import { useZIndex, ZIndex } from "~/components/ZIndex";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";

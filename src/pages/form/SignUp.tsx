@@ -3,7 +3,7 @@ import { useNavigate } from "@solidjs/router";
 import { createSignal, type JSX } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";

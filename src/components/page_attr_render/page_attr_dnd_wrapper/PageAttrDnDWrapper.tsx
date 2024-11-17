@@ -17,7 +17,7 @@ import { usePreviewContext } from "~/components/page_designer/PreviewContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { useToast } from "../../Toast";
+import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";

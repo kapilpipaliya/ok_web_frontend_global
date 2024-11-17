@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerLayoutStore } from "../../LayoutContext";
 

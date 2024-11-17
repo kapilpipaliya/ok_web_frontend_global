@@ -4,11 +4,11 @@ import {
   dialogCancelButtonClass,
   DialogFooter,
   dialogOkButtonClass,
-} from "~/components/dialog/DialogFooter";
-import { DialogHeader } from "~/components/dialog/DialogHeader";
-import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
-import { DropdownMenu } from "~/components/DropdownMenu";
-import { useToast } from "~/components/Toast";
+} from "~/components/styled/dialog/DialogFooter";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { useToast } from "~/components/styled/Toast";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

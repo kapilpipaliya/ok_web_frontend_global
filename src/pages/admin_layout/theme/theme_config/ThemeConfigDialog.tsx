@@ -1,14 +1,14 @@
 import { createSignal, Show } from "solid-js";
-import { PROPERTIES } from "~/components/constants/constant";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 
 import {
   dialogCancelButtonClass,
   DialogFooter,
   dialogOkButtonClass,
-} from "~/components/dialog/DialogFooter";
-import { DialogHeader } from "~/components/dialog/DialogHeader";
-import { DropdownMenu } from "~/components/DropdownMenu";
-import { useToast } from "~/components/Toast";
+} from "~/components/styled/dialog/DialogFooter";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

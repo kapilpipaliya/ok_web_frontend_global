@@ -9,10 +9,10 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 
-import { DropdownMenu } from "../../DropdownMenu";
+import { DropdownMenu } from "../../styled/DropdownMenu";
 import { DynamicComponent } from "../../form/DynamicComponent";
 import { useFormContext } from "../../form/FormContext";
-import { MultiSelectField } from "../../MultiSelect";
+import { MultiSelectField } from "../../styled/MultiSelect";
 import { ZIndex } from "../../ZIndex";
 import { AddNewCssState } from "./AddNewCssState";
 import { useCssEditor } from "../context/CssEditorContext";

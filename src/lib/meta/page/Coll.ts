@@ -1,7 +1,7 @@
 import type { IFormContext } from "~/components/form/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/constants/constant";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";

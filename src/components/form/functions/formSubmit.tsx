@@ -9,7 +9,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
-import { useToast } from "../../Toast";
+import { useToast } from "../../styled/Toast";
 
 export function formSubmit(closePopUp?: () => void) {
   const _navigate = useNavigate();

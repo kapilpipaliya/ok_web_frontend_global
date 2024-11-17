@@ -12,7 +12,7 @@ import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
 import { FieldWithCustomBox } from "./fields/FieldWithCustomBox";
-import { PROPERTIES } from "~/components/constants/constant";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);
 

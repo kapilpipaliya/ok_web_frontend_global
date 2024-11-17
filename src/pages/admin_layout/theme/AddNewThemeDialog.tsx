@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { DialogFooter } from "~/components/dialog/DialogFooter";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { ThemeConfigDialog } from "./theme_config/ThemeConfigDialog";
 
 

@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 
-import { CustomModal } from "~/components/CustomModal";
-import { IconButton } from "~/components/IconButton";
+import { CustomModal } from "~/components/styled/CustomModal";
+import { IconButton } from "~/components/styled/IconButton";
 
 import { ShareSection } from "./PageShare";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";

@@ -5,7 +5,7 @@ import type {
   OptionType,
 } from "~/components/css_properties/constants/FieldSchemaType";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { ZIndex } from "~/components/ZIndex";
 
 interface SuggestionsDropdownProps {

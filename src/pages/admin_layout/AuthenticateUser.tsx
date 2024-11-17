@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { useNavigate } from "@solidjs/router";
 import { type JSX, Match, onMount, Switch } from "solid-js";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";

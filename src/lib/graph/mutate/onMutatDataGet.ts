@@ -4,7 +4,7 @@ import { batch } from "solid-js";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/edge";
 import { updateVertexId } from "~/lib/graph/mutate/vertex";
 

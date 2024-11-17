@@ -1,10 +1,10 @@
 import { type Setter, Show } from "solid-js";
 
-import { Drawer } from "~/components/Drawer";
+import { Drawer } from "~/components/styled/Drawer";
 import { FormContext } from "~/components/form/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
-import { ResizableContainer } from "~/components/ResizableDivView";
+import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { ZIndex } from "~/components/ZIndex";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";

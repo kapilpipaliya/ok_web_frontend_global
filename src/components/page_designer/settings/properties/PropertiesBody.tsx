@@ -8,7 +8,7 @@ import { useDesignerLayoutStore } from "../../LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { PROPERTIES } from "~/components/constants/constant";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import { JsonEditorField } from "~/components/fields/JsonEditorField";
 
 export function PropertiesBody() {

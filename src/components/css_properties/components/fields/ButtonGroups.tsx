@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, splitProps } from "solid-js";
 
-import { CustomTooltip } from "~/components/Tooltip";
+import { CustomTooltip } from "~/components/styled/Tooltip";
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 

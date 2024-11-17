@@ -2,8 +2,8 @@ import { createSignal, type JSX, onMount } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { PROPERTIES } from "~/components/constants/constant";
-import { IconButton } from "~/components/IconButton";
+import { PROPERTIES } from "~/components/styled/constants/constant";
+import { IconButton } from "~/components/styled/IconButton";
 
 export function CommonAddComponent(
   props: Readonly<{

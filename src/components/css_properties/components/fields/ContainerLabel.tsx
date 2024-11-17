@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
-import { CustomTooltip } from "~/components/Tooltip";
+import { IconButton } from "~/components/styled/IconButton";
+import { CustomTooltip } from "~/components/styled/Tooltip";
 
 /*
 ┌───────────┐

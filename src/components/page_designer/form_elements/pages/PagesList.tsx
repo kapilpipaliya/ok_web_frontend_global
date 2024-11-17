@@ -8,8 +8,8 @@ import {
 } from "solid-js";
 
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { useToast } from "~/components/Toast";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { useToast } from "~/components/styled/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { type Id, useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";

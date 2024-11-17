@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/undo";

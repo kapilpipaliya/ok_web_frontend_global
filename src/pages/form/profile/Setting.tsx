@@ -10,9 +10,9 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { useToast } from "~/components/Toast";
+import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";

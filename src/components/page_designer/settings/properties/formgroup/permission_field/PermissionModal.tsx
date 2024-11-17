@@ -8,11 +8,11 @@ import { PageRenderContextProvider } from "~/components/page_attr_render/PageRen
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
-import { useActiveClickOutside } from "~/components/useActiveClickOutside";
 import { useZIndex } from "~/components/ZIndex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
+import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
@@ -39,7 +39,7 @@ export function PermissionModal(
 ) {
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
-  useActiveClickOutside(graph, setGraph);
+  createActiveClickOutside(graph, setGraph);
   const [layoutStore] = useDesignerLayoutStore();
 
   const prevTxnIndex =

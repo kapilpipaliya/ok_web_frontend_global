@@ -26,7 +26,7 @@ import {
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { PROPERTIES } from "../../../../constants/constant";
+import { PROPERTIES } from "../../../../styled/constants/constant";
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,

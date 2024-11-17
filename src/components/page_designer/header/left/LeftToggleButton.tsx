@@ -1,4 +1,4 @@
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function LeftToggleButton() {

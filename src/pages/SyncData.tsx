@@ -2,8 +2,8 @@ import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { Breadcrumb } from "~/components/Breadcrumb";
-import { useToast } from "~/components/Toast";
+import { Breadcrumb } from "~/components/styled/Breadcrumb";
+import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 

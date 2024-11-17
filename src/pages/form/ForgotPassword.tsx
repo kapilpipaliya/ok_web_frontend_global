@@ -3,7 +3,7 @@ import { A } from "@solidjs/router";
 import { createSignal, type JSX, Match, Show, Switch } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/sendEmail";
 

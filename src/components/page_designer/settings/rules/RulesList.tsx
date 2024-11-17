@@ -1,12 +1,12 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
-import { SimpleWithDismissButton } from "../../../SimpleModal";
+import { SimpleWithDismissButton } from "../../../styled/SimpleModal";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 

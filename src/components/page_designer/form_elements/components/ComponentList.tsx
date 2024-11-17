@@ -3,8 +3,8 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { useToast } from "~/components/Toast";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { useToast } from "~/components/styled/Toast";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";

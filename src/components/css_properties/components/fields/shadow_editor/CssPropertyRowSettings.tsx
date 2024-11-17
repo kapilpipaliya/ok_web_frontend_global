@@ -1,7 +1,7 @@
 import { type Accessor, For, type JSX, type Setter, Show } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 
 import type { DataEditorField } from "../../../constants/FieldSchemaType";
 import { useCssState } from "~/components/css_properties/context/CssStateContext";

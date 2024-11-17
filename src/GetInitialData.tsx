@@ -1,6 +1,6 @@
 import { createSignal, type JSX, Match, onMount, Switch } from "solid-js";
 
-import { LoaderNew } from "~/components/LoaderSimple";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 
 import { useGraph } from "./lib/graph/graph";

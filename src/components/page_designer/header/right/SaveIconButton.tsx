@@ -2,7 +2,7 @@ import { createMemo } from "solid-js";
 
 import { useFormContext } from "~/components/form/FormContext";
 import { formSubmit } from "~/components/form/functions/formSubmit";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";

@@ -1,4 +1,4 @@
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 
 export function IncrementButton(
   props: Readonly<{ downIncrement: (event: MouseEvent) => void }>,

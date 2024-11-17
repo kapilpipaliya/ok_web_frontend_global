@@ -1,5 +1,5 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 

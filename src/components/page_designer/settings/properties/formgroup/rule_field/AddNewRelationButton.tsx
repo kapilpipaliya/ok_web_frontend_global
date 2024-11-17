@@ -1,8 +1,8 @@
 import { type Component, createSignal, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
-import { IconButton } from "~/components/IconButton";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { IconButton } from "~/components/styled/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

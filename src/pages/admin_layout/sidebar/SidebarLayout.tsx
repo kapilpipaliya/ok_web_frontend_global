@@ -1,7 +1,7 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 
-import { LoaderNew } from "~/components/LoaderSimple";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph } from "~/lib/graph/graph";

@@ -4,7 +4,7 @@ import { createSignal, onCleanup, Show } from "solid-js";
 
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";

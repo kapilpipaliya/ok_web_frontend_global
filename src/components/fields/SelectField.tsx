@@ -10,7 +10,7 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
-import { MultiSelectField, type Option } from "~/components/MultiSelect";
+import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";

@@ -1,6 +1,6 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
@@ -10,9 +10,9 @@ import {
   dialogCancelButtonClass,
   DialogFooter,
   dialogOkButtonClass,
-} from "../../dialog/DialogFooter";
-import { DialogHeader } from "../../dialog/DialogHeader";
-import { DialogSubTitle } from "../../dialog/DialogSubTitle";
+} from "../../styled/dialog/DialogFooter";
+import { DialogHeader } from "../../styled/dialog/DialogHeader";
+import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
 
 export function ImportMenu(

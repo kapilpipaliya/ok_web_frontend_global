@@ -1,4 +1,4 @@
-import { AdminDashBoard } from "../../components/card/RecentClients";
+import { AdminDashBoard } from "../../components/styled/card/RecentClients";
 
 export default function Admin() {
   return <AdminDashBoard />;

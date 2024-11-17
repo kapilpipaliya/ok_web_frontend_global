@@ -1,11 +1,11 @@
 import { createSelector, createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { CommonAddComponent } from "~/components/page_designer/settings/rules/CommonAddComponent";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { ZIndex } from "~/components/ZIndex";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

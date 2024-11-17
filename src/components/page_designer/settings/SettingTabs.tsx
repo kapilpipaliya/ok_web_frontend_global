@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
 
 import { FormContext } from "~/components/form/FormContext";
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
 import { useDesignerLayoutStore } from "../LayoutContext";
 import { FormConfig } from "./form/FormConfig";

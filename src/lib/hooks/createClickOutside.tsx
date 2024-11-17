@@ -1,0 +1,25 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import { makeEventListener } from "@solid-primitives/event-listener";
+
+import type { GraphInterface } from "~/lib/graph/graph";
+import { createActiveClickOutside } from "./createActiveClickOutside";
+
+export function createClickOutside(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  callback: (event: MouseEvent) => void,
+) {
+  const activeClickOutside = createActiveClickOutside(graph, setGraph);
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      activeClickOutside !==
+      graph.activeClickOutside[graph.activeClickOutside.length - 1]
+    ) {
+      return;
+    }
+    callback(event);
+  };
+  makeEventListener(window, "mousedown", handleClickOutside);
+  return activeClickOutside;
+}

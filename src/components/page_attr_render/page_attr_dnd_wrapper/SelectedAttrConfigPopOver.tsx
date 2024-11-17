@@ -1,4 +1,4 @@
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { useZIndex } from "~/components/ZIndex";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";

@@ -1,8 +1,8 @@
 import { createSignal, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 import { ZIndex } from "~/components/ZIndex";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";

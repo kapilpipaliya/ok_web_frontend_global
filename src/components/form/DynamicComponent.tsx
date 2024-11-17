@@ -41,7 +41,7 @@ import {
 } from "../page_attr_render/permissions";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
-import { useToast } from "../Toast";
+import { useToast } from "../styled/Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";

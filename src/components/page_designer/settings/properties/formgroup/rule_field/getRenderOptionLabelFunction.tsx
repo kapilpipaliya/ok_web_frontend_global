@@ -4,7 +4,7 @@ import { Dynamic } from "solid-js/web";
 import type { RulesModal } from "~/components/page_designer/rules/RulesModal";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { IconButton } from "~/components/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { ZIndex } from "~/components/ZIndex";
 
 export function getRenderOptionLabelFunction(component: typeof RulesModal) {

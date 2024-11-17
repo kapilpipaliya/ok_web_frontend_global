@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { createSignal, type JSX } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { contactUsCall } from "~/lib/api/service/support/contactUsCall";
 import { validateEmail } from "~/lib/validation/validateEmail";
 

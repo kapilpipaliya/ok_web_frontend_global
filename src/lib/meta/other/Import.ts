@@ -1,4 +1,4 @@
-import { PROPERTIES } from "~/components/constants/constant";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 
 export const Import = {
   attributes: [

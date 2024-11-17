@@ -2,7 +2,7 @@ import type { JSX } from "solid-js";
 
 import { A, useNavigate } from "@solidjs/router";
 
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
 
 export interface AuthenticatedMenuProps {

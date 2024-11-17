@@ -1,4 +1,4 @@
-import { HeaderWithDescription } from "~/components/HeaderWithDescription";
+import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
 import { AddNewRuleButton } from "./AddNewRuleButton";
 import { DisplayAllRules } from "./DisplayAllRules";

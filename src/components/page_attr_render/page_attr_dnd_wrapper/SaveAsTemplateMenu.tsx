@@ -7,12 +7,12 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { DialogFooter } from "../../dialog/DialogFooter";
-import { DialogHeader } from "../../dialog/DialogHeader";
-import { DialogSubTitle } from "../../dialog/DialogSubTitle";
-import { DropdownMenu } from "../../DropdownMenu";
+import { DialogFooter } from "../../styled/dialog/DialogFooter";
+import { DialogHeader } from "../../styled/dialog/DialogHeader";
+import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
+import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useDesignerLayoutStore } from "../../page_designer/LayoutContext";
-import { useToast } from "../../Toast";
+import { useToast } from "../../styled/Toast";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{

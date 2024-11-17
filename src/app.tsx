@@ -7,8 +7,8 @@ import "~/base.css";
 import { configureState } from "~/configureState";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
-import { LoaderNew } from "./components/LoaderSimple";
-import { Toaster } from "./components/solid-toast/src";
+import { LoaderNew } from "./components/styled/LoaderSimple";
+import { Toaster } from "./components/styled/solid-toast/src";
 import { getGlobalThemeVertex } from "./getGlobalThemeVertex";
 import { GraphContext } from "./lib/graph/graph";
 

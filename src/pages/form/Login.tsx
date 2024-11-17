@@ -5,7 +5,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { createSignal, onMount, Show } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
-import { useToast } from "~/components/Toast";
+import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { signInCall } from "~/lib/api/service/user/signInCall";

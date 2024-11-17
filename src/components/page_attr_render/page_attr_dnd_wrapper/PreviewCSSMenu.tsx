@@ -5,10 +5,10 @@ import type { Vertex } from "~/lib/graph/graph";
 import {
   DialogFooter,
   dialogOkButtonClass,
-} from "~/components/dialog/DialogFooter";
-import { DialogHeader } from "~/components/dialog/DialogHeader";
-import { DialogSubTitle } from "~/components/dialog/DialogSubTitle";
-import { DropdownMenu } from "~/components/DropdownMenu";
+} from "~/components/styled/dialog/DialogFooter";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function PreviewCSSMenu(
