@@ -13,9 +13,9 @@ import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFir
 
 import type { DataGridState } from "./DataGridContext";
 
-import { IconButton } from "../IconButton";
+import { IconButton } from "../styled/IconButton";
 
-export function setGridHeaders(
+export function CreateGridHeaders(
   gridState: DataGridState,
   formNew: IFormMetaData,
   graph: Store<GraphInterface>,
