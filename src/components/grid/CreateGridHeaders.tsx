@@ -116,7 +116,7 @@ export function CreateGridHeaders(
                 if (formNew.isInlineEditable) {
                   setIsEditModelOpen(true);
                 } else {
-                  return navigate(`./${info.row.original.id}`);
+                  return navigate(`/admin/${tableId}/${info.row.original.id}`);
                 }
               }}
               size={21}

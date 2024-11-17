@@ -1,6 +1,6 @@
 import { SimpleCard } from "./SimpleCard";
 
-export function AdminDashBoard() {
+export function CardGrids() {
   return (
     <div class="max-width:80rem mx:auto px:1rem px:1.5rem@sm px:2rem@lg">
       <div class="max-width:42rem max-width:none@lg mx:auto mx:0@lg">

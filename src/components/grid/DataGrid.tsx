@@ -63,7 +63,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
 
-  const gridStore = createStore<DataGridState>(getInitialGridState(graph));
+  const gridStore = createStore<DataGridState>({
+    ...getInitialGridState(graph),
+    get tableId() {
+      return props.tableId;
+    },
+  });
   const [gridState, setGridState] = gridStore;
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(
     null,
@@ -105,9 +110,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     hasEditPermission: hasEditPermission,
     hasInsertPermission: hasInsertPermission,
     hasViewPermission: hasViewPermission,
-    get tableId() {
-      return props.tableId;
-    },
   });
 
   createEffect(

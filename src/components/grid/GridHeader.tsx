@@ -21,7 +21,7 @@ interface GridHeaderProps {
 export function GridHeader(props: Readonly<GridHeaderProps>) {
   const [gridState, setGridState] = useDataGridContext();
   const navigate = useNavigate();
-  const onAddNew = () => navigate("new");
+  const onAddNew = () => navigate(`/admin/${gridState.tableId}/new`);
 
   return (
     <div class="flex ai:center jc:space-between p:4|10">
