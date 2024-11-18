@@ -9,13 +9,13 @@ export default function PageShareView() {
 
   return (
     <GetInitialData>
-      {/* <AuthenticateUser> */}
+      <AuthenticateUser dontRedirectToLogin={true}>
         <PageViewWrapper
           pageId={""}
           pageVertexLabel={"Page"}
           pageVertexName={params.pageName}
         />
-      {/* </AuthenticateUser> */}
+      </AuthenticateUser>
     </GetInitialData>
   );
 }

@@ -9,7 +9,7 @@ export default function PageShareView() {
 
   return (
     <GetInitialData>
-      <AuthenticateUser>
+      <AuthenticateUser dontRedirectToLogin={true}>
         <PageViewWrapper
           pageId={params.formId}
           pageVertexLabel={params.entity}

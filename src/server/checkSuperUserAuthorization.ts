@@ -10,6 +10,7 @@ export async function checkSuperUserAuthorization(
   isMutate = false,
 ) {
   if (subDomain === "super") {
+    return null; // return null because now email is not required
     const email = await getUserEmailFromSession();
     if (!email) {
       return {

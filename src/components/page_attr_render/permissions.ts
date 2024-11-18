@@ -16,7 +16,7 @@ export function getConfiguredPermissions(
   const configuredPermissions: Vertex[] = [];
 
   const allRolePermissions: Vertex[] =
-    evalExpression(`->$0${vertex.L?.[0] !== "Attr" ? "Global" : ""}Perm`, {
+    evalExpression(`->$0${vertex.L?.[0] !== "Attr" ? "" : ""}Perm`, {
       graph,
       setGraph,
       vertexes: [vertex],

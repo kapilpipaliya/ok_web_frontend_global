@@ -44,7 +44,7 @@ export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
     true,
   );
 
-  await createRootFolder(userDbSession);
+  await createRootFolder(userDbSession, user.P.uuid);
 
   // await insertDataTypes(userDbSession);
 

@@ -317,7 +317,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "key",
           validation: { required: true },
         },
@@ -332,7 +332,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
           key: "perm",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "scope",
         },
       ],

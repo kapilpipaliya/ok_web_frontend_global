@@ -68,14 +68,14 @@ export function PageViewWrapper(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const pageFormStore = createStore(getInitialFormStore(graph));
-  const [formStore, setFormStore] = pageFormStore;
-
-  setFormStore({
+  const pageFormStore = createStore({
+    ...getInitialFormStore(graph),
     get formId() {
       return props.pageVertexName;
-    },
+    }
   });
+  const [formStore, setFormStore] = pageFormStore;
+
   let onConfirmExit: () => void;
   const metaTxnId = graph.newTxnId;
   const id = createMemo(() =>
@@ -86,6 +86,7 @@ export function PageViewWrapper(
   const isNoPermissionCheck = createMemo(
     () =>
       props.isNoPermissionCheck ||
+      // @ts-expect-error ignore
       formStore.formMetaData?.isNoPermissionCheck ||
       previewStore.isNoPermissionCheck,
   );
@@ -239,7 +240,7 @@ export function PageViewWrapper(
         return;
       }
 
-      setGraphData(graph, setGraph, data.graph);
+      setGraphData(graph, setGraph, data.graph!);
       setFormStore({
         get formData() {
           return graph.vertexes[data.result[0].id];
@@ -257,7 +258,7 @@ export function PageViewWrapper(
       !isNoPermissionCheck() &&
       !formStore.formMeta.P.public
     ) {
-      setFormStore("error", `${props.pageVertexName} is not authorized`);
+      setFormStore("error", `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`);
       return;
     }
     if (!formStore.formMeta?.P.key) {

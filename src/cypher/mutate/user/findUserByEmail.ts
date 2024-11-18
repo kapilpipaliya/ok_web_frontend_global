@@ -7,16 +7,38 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { createUserSetting } from "./createUserSetting";
 
 interface UserResult {
-  globalTheme: null | Vertex;
+  // globalTheme: null | Vertex;
   roles: Vertex[];
   user: null | Vertex;
   userSetting: null | Vertex;
 }
 
+async function getGuestRole(dbSession: Session): Promise<Vertex> {
+  const guestQuery = `
+    MATCH (r:Role {key: 'Guest'})
+    RETURN r
+  `;
+  const guestResult = await dbSession.run(guestQuery);
+  return convertNodeToJson(guestResult.records[0].get('r') as Node);
+}
+
+async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
+  const guestRole = await getGuestRole(dbSession);
+  return {
+    roles: [guestRole],
+    user: null,
+    userSetting: null
+  };
+}
+
 export async function findUserByEmail(
   dbSession: Session,
-  email: string,
+  email?: string | null,
 ): Promise<UserResult> {
+  if (!email) {
+    return getGuestOnlyResult(dbSession);
+  }
+
   const query = `
     MATCH (u:User)
     WHERE u.email = $email OR u.username = $email
@@ -28,7 +50,7 @@ export async function findUserByEmail(
   const result = await dbSession.run(query, { email });
 
   if (result.records.length === 0) {
-    throw new Error(`User with email or username "${email}" not found.`);
+    return getGuestOnlyResult(dbSession);
   }
 
   const record = result.records[0];

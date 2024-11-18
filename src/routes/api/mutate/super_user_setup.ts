@@ -25,7 +25,12 @@ export async function GET({ request }: APIEvent) {
       superUserData.password,
       dbSession,
     );
-    await createRootFolder(dbSession);
+
+    if ('error' in user) {
+      return new Response(JSON.stringify(user), { status: 400 });
+    }
+    
+    await createRootFolder(dbSession, user.P.uuid);
 
     return user;
   } catch (error: unknown) {
