@@ -245,3 +245,9 @@ https://github.com/kavindu-mane/react-percentage-bar/tree/main
 
 A collection of common utilities 
 https://github.com/samualtnorman/lib/tree/main
+
+
+very good article about oklch color model:
+https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
+we can hire them too.
+

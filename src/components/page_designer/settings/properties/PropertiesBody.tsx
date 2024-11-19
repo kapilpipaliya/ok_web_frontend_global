@@ -77,7 +77,7 @@ export function PropertiesBody() {
   };
 
   return (
-    <Show when={layoutStore.selectedId !== -1}>
+    <Show when={layoutStore.selectedId !== -1 && graph.vertexes[layoutStore.selectedId]}>
       <div class="flex gap:2 jc:start">
         {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       </div>

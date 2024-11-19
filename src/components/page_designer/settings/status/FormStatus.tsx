@@ -52,7 +52,7 @@ export function FormStatus() {
           <h2 class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.75rem">
             Form Properties
           </h2>
-          <div class="display:grid gap-x:1.5rem gap-y:2rem grid-cols:1 grid-cols:6@sm mt:2.5rem">
+          <div class="display:grid gap-x:1.5rem gap-y:2rem grid-cols:1 mt:2.5rem">
             <For each={metaAttributes()}>
               {(metaVertex) => {
                 return (
