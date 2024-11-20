@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, createMemo } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
@@ -19,17 +19,17 @@ interface ClassesComponentProps {
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
-  const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
-  const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
-  const isFormField = isForm && genericInputComponents.includes(componentName);
-  const classVertices = props.metaAttributes.filter((vertex) =>
-    vertex.P.key.endsWith("Class"),
-  );
-  const metaClasses = [
+
+  const getComponentName = () => graph.vertexes[layoutStore.selectedComponent].P.key;
+  const checkIsForm = () => layoutStore.formStore[0]?.formData.L[0] === "Form";
+  const checkIsFormField = () => checkIsForm() && genericInputComponents.includes(getComponentName());
+  const getClassVertices = () => props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class"));
+
+  const metaClasses = createMemo(() => [
     graph.vertexes[props.vertexIds.class],
-    ...(isFormField ? [graph.vertexes[props.vertexIds.labelClass]] : []),
-    ...classVertices,
-  ];
+    ...(checkIsFormField() ? [graph.vertexes[props.vertexIds.labelClass]] : []),
+    ...getClassVertices(),
+  ]);
 
   const [selectedIndex, setSelectedIndex] = createSignal(0);
   const handleTabClick = (index: number) => setSelectedIndex(index);
@@ -40,14 +40,14 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
         displayValueKey="::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         onTabClick={handleTabClick}
         selectedIndex={selectedIndex()}
-        tabs={metaClasses as unknown as { key: string }[]}
+        tabs={metaClasses() as unknown as { key: string }[]}
       />
       <Show keyed when={selectedIndex() + 1}>
         <CSSPropertiesEditorWrapper
           data={props.selectedLayout}
-          meta={metaClasses[selectedIndex()]}
+          meta={metaClasses()[selectedIndex()]}
           onChange={(data) =>
-            props.onChange(metaClasses[selectedIndex()], data)
+            props.onChange(metaClasses()[selectedIndex()], data)
           }
         />
       </Show>

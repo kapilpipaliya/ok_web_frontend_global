@@ -18,7 +18,7 @@ export const MarginAndPaddingSection: {
     key: "margin",
     label: "Margin",
     mainFieldType: "string",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   },
 
@@ -35,7 +35,7 @@ export const MarginAndPaddingSection: {
     key: "padding",
     label: "Padding",
     mainFieldType: "string",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   },
 };

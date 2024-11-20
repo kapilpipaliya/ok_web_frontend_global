@@ -31,6 +31,7 @@ export interface FieldWithCustomProperty extends FormField {
   isLabelOnTop: boolean;
   label: string;
   mainFieldType: ComponentKeyType;
+  unitOptions?: string[];
   options?: { label: string; value: string }[] | string[];
   padding?: string;
   type?: string;

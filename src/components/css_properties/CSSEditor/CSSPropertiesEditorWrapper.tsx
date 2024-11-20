@@ -1,6 +1,6 @@
 import { MultiProvider } from "@solid-primitives/context";
-import { createSignal } from "solid-js";
-import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
+import { createEffect, createSignal, on } from "solid-js";
+import { createStore, reconcile, unwrap, type SetStoreFunction } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -24,7 +24,7 @@ export function CSSPropertiesEditorWrapper(
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const cssValue = (props.data?.P[props.meta.P.key] as string) || "";
+  const cssValue = () => (props.data?.P[props.meta.P.key] as string) || "";
 
   const initializeState = (
     value: string,
@@ -37,7 +37,12 @@ export function CSSPropertiesEditorWrapper(
     }
   };
 
-  initializeState(cssValue, setCssState);
+  createEffect(on(() => cssValue(), () => {
+    if(JSON.stringify(cssValue()) === JSON.stringify(cssState)) {
+      return;
+    }
+    initializeState(cssValue(), setCssState);
+  }));
 
   const onCSSStateChange = (
     ...args: Parameters<SetStoreFunction<CSSStore>>

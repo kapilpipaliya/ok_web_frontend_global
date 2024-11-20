@@ -32,7 +32,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     key: "border-radius",
     label: "Border Radius",
     mainFieldType: "string",
-    options: sizeTypes,
+    unitOptions: sizeTypes,
     type: "number",
   },
   borderStyle: {
@@ -64,7 +64,7 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     key: "border-width",
     label: "Border Width",
     mainFieldType: "string",
-    options: defaultPixelSizeTypes,
+    unitOptions: defaultPixelSizeTypes,
     type: "number",
     // TODO: Add support for options
     // options: extraPropertyValues["border-width"].values,

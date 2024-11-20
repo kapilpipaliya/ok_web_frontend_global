@@ -136,25 +136,32 @@ function DeleteConfirmation() {
 export function RenderMainContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
+
   const getGridTemplateColumns = () => {
+    const leftPanelWidth = "300px";
+    const centerPanelWidth = "1fr";
+    const settingsPanelWidth = "450px";
+    const propertiesPanelWidth = window.innerWidth > 2600 || (!layoutStore.isLeftOpen  || !layoutStore.isRightOpen) ? "900px" : "450px";
+
     if (!(layoutStore.isLeftOpen || layoutStore.isRightOpen)) {
-      return "1,1fr,450px";
+      return `${centerPanelWidth}|${settingsPanelWidth}`;
     }
     if (layoutStore.isLeftOpen && layoutStore.isRightOpen) {
-      return "4,400px|calc(53%-8px)|450px|450px";
+      return `${leftPanelWidth}|${centerPanelWidth}|${propertiesPanelWidth}|${settingsPanelWidth}`;
     }
-    return `3,${layoutStore.isLeftOpen ? "450px|1fr|450px" : "1fr|450px|450px"}`;
+    return `${layoutStore.isLeftOpen ? `${leftPanelWidth}|${centerPanelWidth}|${propertiesPanelWidth}` : `${centerPanelWidth}|${propertiesPanelWidth}|${settingsPanelWidth}`}`;
   };
+
   return (
     <div
-      class={`grid gap:4px grid-template-columns:repeat(${getGridTemplateColumns()})`}
+      class={`grid gap:4px grid-template-columns:${getGridTemplateColumns()}`}
     >
       <FormElements  />
       <PageViewComponent />
-      <Show when={(layoutStore.selectedId !== -1) && graph.vertexes[layoutStore.selectedId] && (layoutStore.selectedId)} keyed fallback={<div class="pl:8 pt:8 bl:1|solid|lightgrey">Element is not selected</div>}>
-      <div class={`bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} p:5`}>
-        <PropertiesContent />
-      </div>
+      <Show when={(layoutStore.selectedId !== -1) && graph.vertexes[layoutStore.selectedId] && (layoutStore.selectedId)} fallback={<div class="pl:8 pt:8 bl:1|solid|lightgrey">Element is not selected</div>}>
+        <div class={`bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} p:5`}>
+          <PropertiesContent />
+        </div>
       </Show>
       <Settings />
       <Properties />

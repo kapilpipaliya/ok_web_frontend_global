@@ -1,4 +1,4 @@
-import { Show, createSignal } from "solid-js";
+import { Show, createEffect, createSignal, on } from "solid-js";
 
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
@@ -44,10 +44,10 @@ export function PropertiesBody() {
   };
 
   const evaluateOtherProps = (value: string) => {
-    setPropertyValue({P: {key: "otherProps"}} as unknown as Vertex, value);
     try {
       if (!value) {
         setIsFunctionValid(true);
+        setPropertyValue({P: {key: "otherProps"}} as unknown as Vertex, value);
         return;
       }
       const func = new Function('args', `${value}`);
@@ -55,7 +55,7 @@ export function PropertiesBody() {
         const result = func({});
         if (typeof result === 'object') {
           setIsFunctionValid(true);
-          // Do something with the result if needed
+          setPropertyValue({P: {key: "otherProps"}} as unknown as Vertex, value);
         } else {
           throw new Error("Function did not return an object");
         }
@@ -75,6 +75,12 @@ export function PropertiesBody() {
     }
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
+  createEffect(on(() => layoutStore.selectedComponent, () => {
+    if (layoutStore.selectedComponent !== -1) {
+      setIsJsonValid(true);
+      setIsFunctionValid(true);
+    }
+  }, { defer: true }));
 
   return (
     <Show when={layoutStore.selectedId !== -1 && graph.vertexes[layoutStore.selectedId]}>

@@ -8,7 +8,6 @@ import { BoxShadow } from "./meta/BoxShadow";
 import { ColumnsSection } from "./meta/Columns";
 import { DimentionSection } from "./meta/DimentionSection";
 import { DisplaySection } from "./meta/DisplaySection";
-// import { EffectsSection } from "./EffectsSection";
 import { FlexChild } from "./meta/FlexChild";
 import { FlexContainer } from "./meta/FlexContainer";
 import { GridChild } from "./meta/GridChild";
@@ -20,21 +19,26 @@ import { TextShadow } from "./meta/TextShadow";
 import { Transition } from "./meta/Transition";
 import { TypographySection } from "./meta/TypographySection";
 import { EffectsSection } from "./meta/EffectsSection";
+import { Transform } from "./meta/Transform";
+
+// CSS usage metrics
+// https://chromestatus.com/metrics/css/popularity
 
 export const JSONSchema: CSSJSONSchemaType = {
+  Display: DisplaySection,
   Dimension: DimentionSection,
   "Margin And Padding": MarginAndPaddingSection,
   Border: BorderSection,
   Background: BackgroundSection,
-  Display: DisplaySection,
+  Typography: TypographySection,
+  Transform: Transform,
+  Position: PositionSection,
+  Shadow: { ...BoxShadow, ...TextShadow },
   "Flex Container": FlexContainer,
   "Flex Child": FlexChild,
-  Shadow: { ...BoxShadow, ...TextShadow },
-  "Effects": EffectsSection,
-  Typography: TypographySection,
-  Position: PositionSection,
   "Grid Container": GridContainer,
   "Grid Child": GridChild,
+  "Effects": EffectsSection,
   Columns: ColumnsSection,
   List: ListSection,
   Transition: Transition,
