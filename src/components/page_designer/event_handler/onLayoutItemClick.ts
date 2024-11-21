@@ -14,10 +14,7 @@ export function onLayoutItemClick(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   batch(() => {
-    setLayoutStore("selectedId", -1);
-    setLayoutStore("selectedComponent", -1);
-
-    setLayoutStore("selectedId", layoutVertexId);
+    setLayoutStore("selectedId", layoutVertexId ?? -1);
 
     const componentVertex = getComponentFromLayoutRow(
       layoutVertexId,

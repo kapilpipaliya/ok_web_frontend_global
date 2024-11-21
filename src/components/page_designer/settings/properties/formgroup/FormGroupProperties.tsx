@@ -39,6 +39,7 @@ import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { uniqueNameKey } from "~/components/page_designer/constants/constant";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -282,13 +283,15 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
     props.meta,
     props.meta,
   );
-  mergeVertexProperties(
-    props.metaTxnId,
-    props.meta.id,
-    graph,
-    setGraph,
-    metaProps,
-  );
+  if (isObject(metaProps) && Object.keys(metaProps).length > 0) {
+    mergeVertexProperties(
+      props.metaTxnId,
+      props.meta.id,
+      graph,
+      setGraph,
+      metaProps,
+    );
+  }
 
   return (
     <div>

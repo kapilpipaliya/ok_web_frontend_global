@@ -24,7 +24,7 @@ export function CSSPropertiesEditorWrapper(
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const cssValue = () => (props.data?.P[props.meta.P.key] as string) || "";
+  const cssValue = () => JSON.parse(JSON.stringify(props.data?.P[props.meta.P.key] as string || { "": {} }));
 
   const initializeState = (
     value: string,
