@@ -1,7 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, splitProps } from "solid-js";
-
-import { CustomTooltip } from "~/components/styled/Tooltip";
+import Tooltip from "@corvu/tooltip";
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
@@ -9,7 +8,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
   const handleChange = (
     _e: Event,
-    option: { key: JSX.Element; value: string },
+    option: { key: JSX.Element; value: string }
   ) => {
     local.onChange?.(option.value);
   };
@@ -20,24 +19,53 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
         {(option) => {
           return (
             <label class="flex:1 text:center">
-              <CustomTooltip message={option.tooltip ?? option.value}>
-                <input
-                  checked={props.value === option.value}
-                  class={"hidden"}
-                  name={props.key}
-                  onChange={(e) => handleChange(e, option)}
-                  type="radio"
-                />
-                <span
-                  class={`${props.value === option.value ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)" : ""} flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+              <Tooltip
+                placement="top"
+                openDelay={200}
+                floatingOptions={{
+                  offset: 13,
+                  flip: true,
+                  shift: true,
+                }}
+              >
+                <Tooltip.Trigger
+                  as="span"
+                  class="transform:translateY(0.125rem):active"
                 >
-                  {option.icon ? (
-                    <Icon height={23} icon={option.icon} width={23} />
-                  ) : (
-                    option.key
-                  )}
-                </span>
-              </CustomTooltip>
+                  <input
+                    checked={props.value === option.value}
+                    class={"hidden"}
+                    name={props.key}
+                    onChange={(e) => handleChange(e, option)}
+                    type="radio"
+                  />
+                  <span
+                    class={`${
+                      props.value === option.value
+                        ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)"
+                        : ""
+                    } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+                  >
+                    {option.icon ? (
+                      <Icon height={23} icon={option.icon} width={23} />
+                    ) : (
+                      option.key
+                    )}
+                  </span>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
+                    <div
+                      class={
+                        "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
+                      }
+                    >
+                      {option.tooltip ?? option.value}
+                    </div>
+                    <Tooltip.Arrow class="" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip>
             </label>
           );
         }}

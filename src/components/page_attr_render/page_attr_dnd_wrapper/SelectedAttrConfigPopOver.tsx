@@ -11,7 +11,7 @@ import { DuplicateButton } from "./DuplicateButton";
 import { ImportHtmlButton } from "./ImportHtmlButton";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
-import { PropertyDrawer } from "./PropertyDrawer";
+// import { PropertyDrawer } from "./PropertyDrawer";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
 
 interface SelectedAttrConfigPopOverProps {
@@ -42,7 +42,7 @@ export function SelectedAttrConfigPopOver(
           title="Move"
         />
         <ComponentName componentName={getComponentName()} />
-        <PropertyDrawer itemId={props.item.id} />
+        {/* <PropertyDrawer itemId={props.item.id} /> */}
         <ParentButton item={props.item} />
         <DuplicateButton item={props.item} />
         <SaveAsTemplateButton item={props.item} size={20} />

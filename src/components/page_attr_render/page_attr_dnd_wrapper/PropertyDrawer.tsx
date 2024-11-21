@@ -3,6 +3,7 @@ import { createSelector, Show } from "solid-js";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 
+// DEPRECATED, Delete this file
 export const PropertyDrawer = (
   props: Readonly<{ itemId: number | string }>,
 ) => {

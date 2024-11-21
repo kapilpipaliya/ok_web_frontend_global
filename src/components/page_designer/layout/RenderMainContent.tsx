@@ -141,7 +141,7 @@ export function RenderMainContent() {
     const leftPanelWidth = "300px";
     const centerPanelWidth = "1fr";
     const settingsPanelWidth = "450px";
-    const propertiesPanelWidth = window.innerWidth > 2600 || (!layoutStore.isLeftOpen  || !layoutStore.isRightOpen) ? "900px" : "450px";
+    const propertiesPanelWidth = "450px";
 
     if (!(layoutStore.isLeftOpen || layoutStore.isRightOpen)) {
       return `${centerPanelWidth}|${settingsPanelWidth}`;

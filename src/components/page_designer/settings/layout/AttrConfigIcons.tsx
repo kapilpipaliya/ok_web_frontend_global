@@ -3,6 +3,7 @@ import { createSelector, Show } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { ImportHtmlButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ImportHtmlButton";
 import { SaveAsTemplateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
+import { InsertButtons } from "~/components/page_attr_render/page_attr_dnd_wrapper/InsertButtons";
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { useToast } from "~/components/styled/Toast";
@@ -56,7 +57,9 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           isSelectedHoverId(props.metaVertex.id)
         }
       >
-        <IconButton
+        <InsertButtons item={props.metaVertex} />
+        {/* Now we are using the properties drawer for this
+         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
           icon="mingcute:settings-5-line"
           iconClass="transition:0.5s|ease-in-out"
@@ -68,10 +71,9 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           }}
           size={18}
           title="Properties"
-        />
+        /> */}
       </Show>
 
-      {/* <Show when={!rootVertexes().includes(props.metaVertex)}> */}
       <Show
         when={
           isSelectedLayoutId(props.metaVertex.id) ||
@@ -129,7 +131,6 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         />
         &nbsp;
       </Show>
-      {/* </Show> */}
     </div>
   );
 }
