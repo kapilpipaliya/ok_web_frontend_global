@@ -94,27 +94,6 @@ function PropertiesContent() {
   </Show>)
 }
 
-function Properties() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  return (
-    <Show when={layoutStore.showPropertiesDrawer}>
-      <ZIndex>
-        <Drawer
-          customButton={() => false}
-          drawerClass={"padding:10px"}
-          open={() => layoutStore.showPropertiesDrawer}
-          setIsOpen={
-            ((v: boolean) =>
-              setLayoutStore("showPropertiesDrawer", v)) as Setter<boolean>
-          }
-        >
-          <PropertiesContent />
-        </Drawer>
-      </ZIndex>
-    </Show>
-  );
-}
-
 function DeleteConfirmation() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   return (
@@ -164,7 +143,6 @@ export function RenderMainContent() {
         </div>
       </Show>
       <Settings />
-      <Properties />
       <DeleteConfirmation />
     </div>
   );

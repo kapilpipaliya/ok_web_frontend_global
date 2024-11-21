@@ -1,7 +1,8 @@
 import { createSignal, Show } from "solid-js";
+import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import type { Vertex } from "~/lib/graph/graph";
-import { InsertButtonsMenu } from "./SaveAsTemplateButton";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
   let insertBeforeButtonsRef: HTMLElement;
@@ -60,5 +61,24 @@ export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
           parentRef={insertInsideButtonsRef!} />
       </Show>
     </>
+  );
+}
+
+export function InsertButtonsMenu(
+  props: Readonly<{
+    item: Vertex;
+    onClose: () => void;
+    onMouseLeave: () => void;
+    parentRef: HTMLElement;
+  }>,
+) {
+  return (
+    <DropdownMenu
+      class="padding:0.50rem"
+      onMouseLeave={props.onMouseLeave}
+      parentRef={props.parentRef}
+    >
+      <ComponentList />
+    </DropdownMenu>
   );
 }

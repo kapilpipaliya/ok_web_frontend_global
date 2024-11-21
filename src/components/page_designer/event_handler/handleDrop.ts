@@ -47,7 +47,6 @@ export async function handleDrop(
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
       onLayoutItemClick(setLayoutStore, layoutId as string, graph, setGraph);
-      setLayoutStore("showPropertiesDrawer", true);
     }
   }
 }

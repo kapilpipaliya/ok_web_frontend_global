@@ -23,13 +23,6 @@ export function PropertiesHeader() {
           meta={graph.vertexes[layoutStore.selectedComponent]}
         />
       </div>
-      <Icon
-        class="bg:#ededed:hover color:lightgray cursor:pointer r:50%"
-        height={24}
-        icon={"iconamoon:close-light"}
-        onclick={() => setLayoutStore("showPropertiesDrawer", false)}
-        width={24}
-      />
     </div>
   );
 }

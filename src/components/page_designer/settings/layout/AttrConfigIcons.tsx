@@ -58,20 +58,6 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         }
       >
         <InsertButtons item={props.metaVertex} />
-        {/* Now we are using the properties drawer for this
-         <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mingcute:settings-5-line"
-          iconClass="transition:0.5s|ease-in-out"
-          onClick={() => {
-            setLayoutStore(
-              "showPropertiesDrawer",
-              !layoutStore.showPropertiesDrawer,
-            );
-          }}
-          size={18}
-          title="Properties"
-        /> */}
       </Show>
 
       <Show
