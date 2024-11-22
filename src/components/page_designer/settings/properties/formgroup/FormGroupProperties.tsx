@@ -13,6 +13,8 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
+import { uniqueNameKey } from "~/components/page_designer/constants/constant";
+import { isObject } from "~/lib/data_structure/object/isObject";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -38,8 +40,6 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
-import { uniqueNameKey } from "~/components/page_designer/constants/constant";
-import { isObject } from "~/lib/data_structure/object/isObject";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -274,9 +274,7 @@ interface PropertyFieldProps {
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
-  const componentName = createMemo(() =>
-    props.meta.P.type || "TextInput",
-  );
+  const componentName = createMemo(() => props.meta.P.type || "TextInput");
   const metaProps = getPropsFromMetaExpression(
     graph,
     setGraph,

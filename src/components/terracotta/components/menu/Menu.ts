@@ -40,10 +40,9 @@ export function Menu<T extends ValidConstructor = "ul">(
 
       useEventListener(current, "keydown", (e) => {
         switch (e.key) {
-          case "ArrowUp":
-          case "ArrowLeft": {
+          case " ":
+          case "Enter": {
             e.preventDefault();
-            controller.setPrevChecked(true);
             break;
           }
           case "ArrowDown":
@@ -52,9 +51,10 @@ export function Menu<T extends ValidConstructor = "ul">(
             controller.setNextChecked(true);
             break;
           }
-          case "Home": {
+          case "ArrowLeft":
+          case "ArrowUp": {
             e.preventDefault();
-            controller.setFirstChecked();
+            controller.setPrevChecked(true);
             break;
           }
           case "End": {
@@ -62,9 +62,9 @@ export function Menu<T extends ValidConstructor = "ul">(
             controller.setLastChecked();
             break;
           }
-          case " ":
-          case "Enter": {
+          case "Home": {
             e.preventDefault();
+            controller.setFirstChecked();
             break;
           }
           default: {

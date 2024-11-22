@@ -1,5 +1,4 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
-import { createStore } from "solid-js/store";
 
 import {
   RepeaterVertexContext,
@@ -12,14 +11,13 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-
-import {
-  getInitialPageRenderStore,
-  usePageRenderContext,
-} from "./context/PageRenderContext";
 import { isVertex } from "~/lib/graph/mutate/vertex";
 
-export const Repeater = (props: { data: string | any[] }) => {
+import {
+  usePageRenderContext,
+} from "./context/PageRenderContext";
+
+export const Repeater = (props: { data: any[] | string }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -33,21 +31,14 @@ export const Repeater = (props: { data: string | any[] }) => {
   const setInitialState = async (expression: string) => {
     setIsFetching(true);
 
-    const result = await getSelectionOptionsMGCall(
-      [data()],
-      expression,
-    );
+    const result = await getSelectionOptionsMGCall([data()], expression);
 
     if (result) {
       setGraphData(graph, setGraph, result.graph!, true);
       setOptions(
         // data() ||
-        getSelectionOptions(
-          graph,
-          setGraph,
-          expression,
-          repeaterContext,
-        ).vertexes,
+        getSelectionOptions(graph, setGraph, expression, repeaterContext)
+          .vertexes,
       );
     }
 
@@ -84,22 +75,22 @@ export const Repeater = (props: { data: string | any[] }) => {
           return props.repeaterValue;
         }
         return target[key];
-      }
+      },
     });
-    return <RepeaterVertexContext.Provider value={repeaterStore}>
-      <PageAttrRender
-        data={isVertex(props.repeaterValue) ? props.repeaterValue : data()}
-        metaVertex={meta()}
-      />
-    </RepeaterVertexContext.Provider>
-  }
+    return (
+      <RepeaterVertexContext.Provider value={repeaterStore}>
+        <PageAttrRender
+          data={isVertex(props.repeaterValue) ? props.repeaterValue : data()}
+          metaVertex={meta()}
+        />
+      </RepeaterVertexContext.Provider>
+    );
+  };
   return (
     <Show when={!isFetching()}>
       <For each={options()}>
         {(vertex) => {
-          return (
-            <RepterInternal repeaterValue={vertex} />
-          );
+          return <RepterInternal repeaterValue={vertex} />;
         }}
       </For>
     </Show>

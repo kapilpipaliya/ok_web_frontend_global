@@ -1,11 +1,11 @@
-/* eslint-disable perfectionist/sort-objects */
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import {
   createSelectOptions,
   type TextFieldOptionsField,
   type ToggleField,
 } from "../FieldSchemaType";
 import { Icons } from "../Icons";
+/* eslint-disable perfectionist/sort-objects */
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const DisplaySection = {
   display: createSelectOptions("display", "Display", [

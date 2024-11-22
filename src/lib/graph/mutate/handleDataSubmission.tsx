@@ -1,6 +1,9 @@
-import { Store, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
+import type { GraphInterface } from "~/lib/graph/graph";
+
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { GraphInterface } from "~/lib/graph/graph";
+
 import { commitTxn } from "../transaction/commitTxn";
 export async function handleDataSubmission(
   newFormTxnId: number,
@@ -9,26 +12,33 @@ export async function handleDataSubmission(
   showErrorToast: (message: string) => void,
   showSuccessToast: (message: string) => void,
   options: {
-    errorMessage?: string;
-    successMessage?: string | null;
     commitErrorMessage?: string;
-  } = {}
+    errorMessage?: string;
+    successMessage?: null | string;
+  } = {},
 ) {
   const commitData = commitTxn(newFormTxnId, graph);
 
   if (!commitData) {
-    showErrorToast(options.commitErrorMessage || "Failed to commit transaction");
+    showErrorToast(
+      options.commitErrorMessage || "Failed to commit transaction",
+    );
     return false;
   }
   try {
     await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
     if (options.successMessage !== null) {
-      showSuccessToast(options.successMessage || "Transaction committed successfully");
+      showSuccessToast(
+        options.successMessage || "Transaction committed successfully",
+      );
     }
     return true;
   } catch (_error) {
     if (options.errorMessage !== null) {
-      showErrorToast(options.errorMessage || "An error occurred while committing the transaction");
+      showErrorToast(
+        options.errorMessage ||
+          "An error occurred while committing the transaction",
+      );
     }
     return false;
   }

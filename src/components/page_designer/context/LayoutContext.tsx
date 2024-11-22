@@ -24,12 +24,12 @@ export function getInitialDesignerLayoutStore() {
     selectedComponent: -1 as Id | number,
     selectedId: -1 as Id | number,
     selectedSection: "build",
+    selectedTab: "settings",
     shouldContainAtLeastOneForm: false,
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
     view: "Tablet",
-    selectedTab: "settings",
   };
 }
 

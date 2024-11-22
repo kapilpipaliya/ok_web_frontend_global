@@ -1,16 +1,14 @@
-import { type JSX, Show, splitProps } from "solid-js";
-
-import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
+import { type JSX, splitProps } from "solid-js";
 
 import { getValueWithoutUnits } from "../../../../../lib/data_structure/number/getValueWithoutUnits";
 
 interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
-  value: string;
-  label?: string;
-  type?: string;
-  placeholder?: string;
   inputProps?: JSX.InputHTMLAttributes<HTMLInputElement>;
+  label?: string;
+  placeholder?: string;
+  type?: string;
+  value: string;
 }
 
 export function InputField(props: Readonly<InputFieldProps>) {
@@ -26,11 +24,9 @@ export function InputField(props: Readonly<InputFieldProps>) {
 
   const InnerInput = () => (
     <input
-      class={`${local.class ?? ""} outline:none p:5 f:14 w:100%`}
+      class={`${local.class ?? ""} f:14 outline:none p:5 w:100%`}
       onInput={local.handleChange}
-      placeholder={
-        local.type === "number" ? "0" : local.placeholder ?? ""
-      }
+      placeholder={local.type === "number" ? "0" : (local.placeholder ?? "")}
       step="any"
       type={local.type || "text"}
       value={
@@ -43,7 +39,5 @@ export function InputField(props: Readonly<InputFieldProps>) {
     />
   );
 
-  return (
-    <InnerInput />
-  );
+  return <InnerInput />;
 }

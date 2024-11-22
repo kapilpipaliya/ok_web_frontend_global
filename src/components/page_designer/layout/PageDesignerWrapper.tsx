@@ -5,12 +5,12 @@ import { type JSX, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
+import { ZIndex } from "~/components/fields/ZIndex";
 import { getTableData } from "~/components/grid/functions/getTableData";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
 } from "~/components/page_designer/context/LayoutContext";
-import { ZIndex } from "~/components/fields/ZIndex";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph } from "~/lib/graph/graph";

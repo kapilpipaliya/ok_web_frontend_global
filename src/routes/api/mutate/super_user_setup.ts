@@ -26,10 +26,10 @@ export async function GET({ request }: APIEvent) {
       dbSession,
     );
 
-    if ('error' in user) {
+    if ("error" in user) {
       return new Response(JSON.stringify(user), { status: 400 });
     }
-    
+
     await createRootFolder(dbSession, user.P.uuid);
 
     return user;

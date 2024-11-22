@@ -1,8 +1,7 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
+import type { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 import type { Vertex } from "~/lib/graph/graph";
-
-import { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 
 import {
   type FileManagerObject,

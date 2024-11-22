@@ -16,7 +16,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
-import { IdAttr, useGraph, Vertex } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
@@ -33,11 +33,11 @@ export function SelectField(
   props: Readonly<
     {
       componentName: string;
+      data?: Vertex;
       isRealTime?: boolean;
+      meta?: Vertex;
       title: string;
       txnId?: number;
-      meta?: Vertex;
-      data?: Vertex;
     } & GenericComponentProps
   >,
 ) {

@@ -1,17 +1,17 @@
 import { type Setter, Show } from "solid-js";
 
-import { Drawer } from "~/components/styled/Drawer";
+import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
-import { ZIndex } from "~/components/fields/ZIndex";
+import { useGraph } from "~/lib/graph/graph";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
-import { useGraph } from "~/lib/graph/graph";
 
 function FormElements() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -87,11 +87,19 @@ function Settings() {
 function PropertiesContent() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
-  return (<Show when={layoutStore.formStore[0] && layoutStore.selectedComponent !== -1 && graph.vertexes[layoutStore.selectedId]}>
-    <FormContext.Provider value={layoutStore.formStore}>
-      <PropertiesWrapper />
-    </FormContext.Provider>
-  </Show>)
+  return (
+    <Show
+      when={
+        layoutStore.formStore[0] &&
+        layoutStore.selectedComponent !== -1 &&
+        graph.vertexes[layoutStore.selectedId]
+      }
+    >
+      <FormContext.Provider value={layoutStore.formStore}>
+        <PropertiesWrapper />
+      </FormContext.Provider>
+    </Show>
+  );
 }
 
 function DeleteConfirmation() {
@@ -135,10 +143,23 @@ export function RenderMainContent() {
     <div
       class={`grid gap:4px grid-template-columns:${getGridTemplateColumns()}`}
     >
-      <FormElements  />
+      <FormElements />
       <PageViewComponent />
-      <Show when={(layoutStore.selectedId !== -1) && graph.vertexes[layoutStore.selectedId] && (layoutStore.selectedId)} fallback={<div class="pl:8 pt:8 bl:1|solid|lightgrey">Element is not selected</div>}>
-        <div class={`bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} p:5`}>
+      <Show
+        fallback={
+          <div class="bl:1|solid|lightgrey pl:8 pt:8">
+            Element is not selected
+          </div>
+        }
+        when={
+          layoutStore.selectedId !== -1 &&
+          graph.vertexes[layoutStore.selectedId] &&
+          layoutStore.selectedId
+        }
+      >
+        <div
+          class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5`}
+        >
           <PropertiesContent />
         </div>
       </Show>

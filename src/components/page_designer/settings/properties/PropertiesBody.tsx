@@ -1,15 +1,15 @@
-import { Show, createEffect, createSignal, on } from "solid-js";
+import { createEffect, createSignal, on, Show } from "solid-js";
 
+import { JsonEditorField } from "~/components/fields/JsonEditorField";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
-import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { PROPERTIES } from "~/components/styled/constants/constant";
-import { JsonEditorField } from "~/components/fields/JsonEditorField";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -19,7 +19,7 @@ export function PropertiesBody() {
 
   const setPropertyValue = (meta: Vertex, value: any) => {
     if (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) {
-      return setPropertyValueGlobal(  
+      return setPropertyValueGlobal(
         graph,
         setGraph,
         layoutStore.formStore[0].txnId,
@@ -34,7 +34,13 @@ export function PropertiesBody() {
     if (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) {
       try {
         const parsedValue = JSON.parse(value);
-        replaceVertexProperties(layoutStore.formStore[0].txnId, graph.vertexes[layoutStore.selectedId].id, graph, setGraph, parsedValue);
+        replaceVertexProperties(
+          layoutStore.formStore[0].txnId,
+          graph.vertexes[layoutStore.selectedId].id,
+          graph,
+          setGraph,
+          parsedValue,
+        );
         setIsJsonValid(true);
       } catch (error) {
         console.error("Error parsing value:", error);
@@ -47,15 +53,21 @@ export function PropertiesBody() {
     try {
       if (!value) {
         setIsFunctionValid(true);
-        setPropertyValue({P: {key: "otherProps"}} as unknown as Vertex, value);
+        setPropertyValue(
+          { P: { key: "otherProps" } } as unknown as Vertex,
+          value,
+        );
         return;
       }
-      const func = new Function('args', `${value}`);
-      if (typeof func === 'function') {
+      const func = new Function("args", `${value}`);
+      if (typeof func === "function") {
         const result = func({});
-        if (typeof result === 'object') {
+        if (typeof result === "object") {
           setIsFunctionValid(true);
-          setPropertyValue({P: {key: "otherProps"}} as unknown as Vertex, value);
+          setPropertyValue(
+            { P: { key: "otherProps" } } as unknown as Vertex,
+            value,
+          );
         } else {
           throw new Error("Function did not return an object");
         }
@@ -75,15 +87,25 @@ export function PropertiesBody() {
     }
     return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
   };
-  createEffect(on(() => layoutStore.selectedComponent, () => {
-    if (layoutStore.selectedComponent !== -1) {
-      setIsJsonValid(true);
-      setIsFunctionValid(true);
-    }
-  }, { defer: true }));
+  createEffect(
+    on(
+      () => layoutStore.selectedComponent,
+      () => {
+        if (layoutStore.selectedComponent !== -1) {
+          setIsJsonValid(true);
+          setIsFunctionValid(true);
+        }
+      },
+      { defer: true },
+    ),
+  );
 
   return (
-    <Show when={layoutStore.selectedId !== -1 && graph.vertexes[layoutStore.selectedId]}>
+    <Show
+      when={
+        layoutStore.selectedId !== -1 && graph.vertexes[layoutStore.selectedId]
+      }
+    >
       <div class="flex gap:2 jc:start">
         {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       </div>
@@ -97,17 +119,22 @@ export function PropertiesBody() {
           class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:red-50' : ''}`}
           style={{ height: "200px" }}
         /> */}
-        <JsonEditorField json={graph.vertexes[layoutStore.selectedId].P} onChange={(updatedContent: any) => replacePropertyValue(updatedContent)} />
+        <JsonEditorField
+          json={graph.vertexes[layoutStore.selectedId].P}
+          onChange={(updatedContent: any) =>
+            replacePropertyValue(updatedContent)
+          }
+        />
         {!isJsonValid() && <span class="fg:red-50">Invalid JSON</span>}
       </label>
       <label class="mt:5">
         Other Props (JavaScript Function)
         <textarea
-          placeholder="Enter JavaScript function here"
-          value={graph.vertexes[layoutStore.selectedId].P.otherProps ?? ""}
+          class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
           onChange={(e) => evaluateOtherProps(e.currentTarget.value)}
-          class={`${PROPERTIES.Css.TextField} ${!isFunctionValid() ? 'b:red-50' : ''}`}
+          placeholder="Enter JavaScript function here"
           style={{ height: "200px" }}
+          value={graph.vertexes[layoutStore.selectedId].P.otherProps ?? ""}
         />
         {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
       </label>

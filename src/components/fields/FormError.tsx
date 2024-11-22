@@ -1,7 +1,7 @@
 import { Show, useContext } from "solid-js";
 import { For, Match, Switch } from "solid-js";
 
-  import { FormContext } from "../form/FormContext";
+import { FormContext } from "../form/FormContext";
 
 export function FormError(props: { class?: string }) {
   const formSchema = useContext(FormContext);

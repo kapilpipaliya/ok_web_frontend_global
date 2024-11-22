@@ -1,8 +1,6 @@
+import type { Placement, Strategy } from "@floating-ui/dom";
+
 import createFloating from "@corvu/utils/create/floating";
-import {
-  type Placement,
-  Strategy,
-} from "@floating-ui/dom";
 import { createSignal, type JSX, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 

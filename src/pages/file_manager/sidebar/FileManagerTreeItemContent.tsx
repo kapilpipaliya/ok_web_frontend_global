@@ -1,7 +1,7 @@
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { IconButton } from "~/components/styled/IconButton";
 import { TreeItemExpandButton } from "~/components/page_designer/settings/layout/TreeItemExpandButton";
+import { IconButton } from "~/components/styled/IconButton";
 
 import { useFileManagerStore } from "../FileManagerContext";
 

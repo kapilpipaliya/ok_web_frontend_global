@@ -117,9 +117,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <ResizerBorder>
-        <div
-          class={`${props.drawerClass} h:100% overflow:auto`}
-        >
+        <div class={`${props.drawerClass} h:100% overflow:auto`}>
           {props.children}
         </div>
         <Resizer />

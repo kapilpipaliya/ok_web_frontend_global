@@ -1,10 +1,12 @@
 import { createSignal, Show } from "solid-js";
+
+import type { Vertex } from "~/lib/graph/graph";
+
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
-import type { Vertex } from "~/lib/graph/graph";
 
-export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
+export function InsertButtons(props: Readonly<{ item: Vertex }>) {
   let insertBeforeButtonsRef: HTMLElement;
   let insertAfterButtonsRef: HTMLElement;
   let insertInsideButtonsRef: HTMLElement;
@@ -18,15 +20,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
         icon="gg:insert-before-o"
         iconClass="transition:0.5s|ease-in-out"
         onClick={() => setShowBeforeMenu(true)}
-        size={18}
         ref={(el) => (insertBeforeButtonsRef = el)}
-        title="Add Before" />
+        size={18}
+        title="Add Before"
+      />
       <Show when={showBeforeMenu()}>
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowBeforeMenu(false)}
           onMouseLeave={() => setShowBeforeMenu(false)}
-          parentRef={insertBeforeButtonsRef!} />
+          parentRef={insertBeforeButtonsRef!}
+        />
       </Show>
 
       <IconButton
@@ -34,15 +38,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
         icon="gg:insert-after-o"
         iconClass="transition:0.5s|ease-in-out"
         onClick={() => setShowAfterMenu(true)}
+        ref={(el) => (insertAfterButtonsRef = el)}
         size={18}
         title="Add After"
-        ref={(el) => (insertAfterButtonsRef = el)} />
+      />
       <Show when={showAfterMenu()}>
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowAfterMenu(false)}
           onMouseLeave={() => setShowAfterMenu(false)}
-          parentRef={insertAfterButtonsRef!} />
+          parentRef={insertAfterButtonsRef!}
+        />
       </Show>
 
       <IconButton
@@ -50,15 +56,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex; }>) {
         icon="material-symbols:add-circle-outline"
         iconClass="transition:0.5s|ease-in-out"
         onClick={() => setShowInsideMenu(true)}
+        ref={(el) => (insertInsideButtonsRef = el)}
         size={18}
         title="Add Inside"
-        ref={(el) => (insertInsideButtonsRef = el)} />
+      />
       <Show when={showInsideMenu()}>
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowInsideMenu(false)}
           onMouseLeave={() => setShowInsideMenu(false)}
-          parentRef={insertInsideButtonsRef!} />
+          parentRef={insertInsideButtonsRef!}
+        />
       </Show>
     </>
   );

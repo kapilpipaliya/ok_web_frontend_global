@@ -1,9 +1,12 @@
-import * as path from "path";
-import * as fs from "fs";
-import { getBaseDir } from "../upload/getBaseDir";
 import * as compose from "docker-compose";
+import * as fs from "fs";
+import * as path from "path";
 
-export async function deleteDockerComposeDirectory(subdomain: string): Promise<string> {
+import { getBaseDir } from "../upload/getBaseDir";
+
+export async function deleteDockerComposeDirectory(
+  subdomain: string,
+): Promise<string> {
   const dir: string = getBaseDir();
   const mgplatDir: string = path.join(dir, subdomain, "memgraph-platform");
   const mgplatComposePath: string = path.join(mgplatDir, "docker-compose.yml");
@@ -11,8 +14,8 @@ export async function deleteDockerComposeDirectory(subdomain: string): Promise<s
   try {
     // Stop Docker Compose
     await compose.downAll({
-      cwd: mgplatDir,
       config: mgplatComposePath,
+      cwd: mgplatDir,
     });
 
     // Remove docker-compose file

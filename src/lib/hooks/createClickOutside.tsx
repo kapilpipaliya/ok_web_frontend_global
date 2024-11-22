@@ -3,6 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { makeEventListener } from "@solid-primitives/event-listener";
 
 import type { GraphInterface } from "~/lib/graph/graph";
+
 import { createActiveClickOutside } from "./createActiveClickOutside";
 
 export function createClickOutside(

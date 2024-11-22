@@ -1,22 +1,27 @@
-import { createSignal, For, Show, onMount } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
+
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { useToast } from "~/components/styled/Toast";
-import { getGlobalSettingVertex, getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
-import { useGraph, Vertex, type Id } from "~/lib/graph/graph";
+import {
+  getGlobalSettingVertex,
+  getGlobalThemeVertex,
+} from "~/lib/graph/get/sync/getGlobalThemeVertex";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
+import { handleDataSubmission } from "~/lib/graph/mutate/handleDataSubmission";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
+
+import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
-import { AddNewThemeDialog } from "./AddNewThemeDialog";
-import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { handleDataSubmission } from "~/lib/graph/mutate/handleDataSubmission";
-import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 
 export function SelectThemeMenu() {
   const [graph, setGraph] = useGraph();
   const [selectedTheme, setSelectedTheme] = createSignal<Id>();
   const [loading, setLoading] = createSignal(true);
   const { showErrorToast, showSuccessToast } = useToast();
-  const [error, setError] = createSignal<string | null>(null);
+  const [error, setError] = createSignal<null | string>(null);
 
   const loadThemes = async () => {
     const result = await fetchAndSetGraphData(graph, setGraph, "g:'Theme'");
@@ -42,7 +47,9 @@ export function SelectThemeMenu() {
 
     const newFormTxnId = graph.newTxnId;
 
-    const themeMetaAttribute = GlobalSetting.attributes.find((attr) => attr.key === "Theme");
+    const themeMetaAttribute = GlobalSetting.attributes.find(
+      (attr) => attr.key === "Theme",
+    );
     if (!themeMetaAttribute) {
       return;
     }
@@ -64,10 +71,17 @@ export function SelectThemeMenu() {
       themeId,
     );
 
-    const isSuccess = await handleDataSubmission(newFormTxnId, graph, setGraph, showErrorToast, showSuccessToast, {
-      successMessage: null,
-      errorMessage: "An error occurred while selecting the theme",
-    });
+    const isSuccess = await handleDataSubmission(
+      newFormTxnId,
+      graph,
+      setGraph,
+      showErrorToast,
+      showSuccessToast,
+      {
+        errorMessage: "An error occurred while selecting the theme",
+        successMessage: null,
+      },
+    );
   };
 
   return (
@@ -83,7 +97,8 @@ export function SelectThemeMenu() {
         <ul class="width:100%">
           <For each={graph.vertexLabelIdMap.Theme}>
             {(theme) => {
-              const isSelected = () => getGlobalThemeVertex(graph)?.id === theme;
+              const isSelected = () =>
+                getGlobalThemeVertex(graph)?.id === theme;
               return (
                 <li
                   class={`${
@@ -91,7 +106,7 @@ export function SelectThemeMenu() {
                   } flex ai:center bg:lightblue:hover jc:space-between p:0.25rem`}
                   onClick={() => handleThemeSelect(theme)}
                 >
-                  <span >
+                  <span>
                     <Show when={isSelected()}>
                       <span>✔️</span>
                     </Show>

@@ -3,10 +3,10 @@ import { type Component, createEffect, For, onCleanup } from "solid-js";
 import type { ToasterProps } from "..";
 import type { Toast } from "../types";
 
+import { ToastContainer } from ".";
 import { defaultContainerStyle } from "../core";
 import { createTimers, store } from "../core";
 import { mergeContainerOptions } from "../util";
-import { ToastContainer } from ".";
 
 export const Toaster: Component<ToasterProps> = (props) => {
   createEffect(() => {

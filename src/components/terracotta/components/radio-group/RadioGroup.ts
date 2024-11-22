@@ -89,16 +89,16 @@ export function RadioGroup<V, T extends ValidConstructor = "div">(
       useEventListener(current, "keydown", (e) => {
         if (!state.disabled()) {
           switch (e.key) {
+            case "ArrowDown":
+            case "ArrowRight": {
+              e.preventDefault();
+              controller.setNextChecked(true);
+              break;
+            }
             case "ArrowLeft":
             case "ArrowUp": {
               e.preventDefault();
               controller.setPrevChecked(true);
-              break;
-            }
-            case "ArrowRight":
-            case "ArrowDown": {
-              e.preventDefault();
-              controller.setNextChecked(true);
               break;
             }
           }

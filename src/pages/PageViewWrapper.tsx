@@ -17,7 +17,6 @@ import { createStore } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import {
   FormContext,
   type FormStore,
@@ -29,8 +28,10 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/components/page_attr_render/permissions";
-import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
+import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
+import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import PreviewPage from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
@@ -47,7 +48,6 @@ import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -59,12 +59,12 @@ export function PageViewWrapper(
     enableSEO?: boolean;
     expression?: string;
     formId?: string;
+    hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStore: FormStore) => void;
     isNoPermissionCheck?: boolean;
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
-    hideSaveCancelButton?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -72,7 +72,7 @@ export function PageViewWrapper(
     ...getInitialFormStore(graph),
     get formId() {
       return props.pageVertexName;
-    }
+    },
   });
   const [formStore, setFormStore] = pageFormStore;
 
@@ -258,7 +258,10 @@ export function PageViewWrapper(
       !isNoPermissionCheck() &&
       !formStore.formMeta.P.public
     ) {
-      setFormStore("error", `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`);
+      setFormStore(
+        "error",
+        `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`,
+      );
       return;
     }
     if (!formStore.formMeta?.P.key) {

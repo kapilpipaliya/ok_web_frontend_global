@@ -121,6 +121,8 @@ const _distanceProperties = new Set<string>([
   "border-spacing",
   "bottom",
   "font-size",
+  "grid-column-gap",
+  "grid-row-gap",
   "height",
   "left",
   "letter-spacing",
@@ -129,13 +131,11 @@ const _distanceProperties = new Set<string>([
   "min-height",
   "min-width",
   "right",
+  "row-gap",
   "text-indent",
   "top",
   "width",
   "word-spacing",
-  "grid-row-gap",
-  "grid-column-gap",
-  "row-gap",
 ]);
 
 const _bezierAwareProperties = new Set<string>([
@@ -146,11 +146,11 @@ const _bezierAwareProperties = new Set<string>([
 ]);
 
 const _fontAwareProperties = new Set<string>([
-  "font-size",
-  "line-height",
-  "font-weight",
   "font-family",
+  "font-size",
+  "font-weight",
   "letter-spacing",
+  "line-height",
 ]);
 
 const _colorAwareProperties = new Set<string>([
@@ -159,25 +159,25 @@ const _colorAwareProperties = new Set<string>([
   "background-color",
   "background-image",
   "border",
+  "border-block-end",
+  "border-block-end-color",
+  "border-block-start",
+  "border-block-start-color",
+  "border-bottom",
+  "border-bottom-color",
   "border-color",
   "border-image",
   "border-image-source",
-  "border-bottom",
-  "border-bottom-color",
+  "border-inline-end",
+  "border-inline-end-color",
+  "border-inline-start",
+  "border-inline-start-color",
   "border-left",
   "border-left-color",
   "border-right",
   "border-right-color",
   "border-top",
   "border-top-color",
-  "border-block-end",
-  "border-block-end-color",
-  "border-block-start",
-  "border-block-start-color",
-  "border-inline-end",
-  "border-inline-end-color",
-  "border-inline-start",
-  "border-inline-start-color",
   "box-shadow",
   "caret-color",
   "color",
@@ -187,9 +187,9 @@ const _colorAwareProperties = new Set<string>([
   "fill",
   "list-style-image",
   "mask",
-  "mask-image",
   "mask-border",
   "mask-border-source",
+  "mask-image",
   "outline",
   "outline-color",
   "scrollbar-color",
@@ -201,15 +201,15 @@ const _colorAwareProperties = new Set<string>([
 
 // In addition to `_colorAwareProperties`, the following properties contain CSS <angle> units.
 const _angleAwareProperties = new Set<string>([
-  "transform",
-
-  "rotate",
-  "filter",
-
   "backdrop-filter",
+
+  "filter",
+  "font-style",
+
   "offset",
   "offset-rotate",
-  "font-style",
+  "rotate",
+  "transform",
 ]);
 
 const borderValues = [

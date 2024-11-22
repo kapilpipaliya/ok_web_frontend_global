@@ -103,6 +103,19 @@ export const dispatch = (action: Action) => {
 
       break;
     }
+    case ActionType.END_PAUSE: {
+      const pauseInterval = action.time - (store.pausedAt || 0);
+      setStore(
+        p((s) => {
+          s.pausedAt = undefined;
+          s.toasts.forEach((t) => {
+            t.pauseDuration += pauseInterval;
+            t.paused = false;
+          });
+        }),
+      );
+      break;
+    }
     case ActionType.REMOVE_TOAST: {
       if (!action.toastId) {
         setStore("toasts", []);
@@ -114,6 +127,16 @@ export const dispatch = (action: Action) => {
       });
       break;
     }
+    case ActionType.START_PAUSE:
+      setStore(
+        p((s) => {
+          s.pausedAt = Date.now();
+          s.toasts.forEach((t) => {
+            t.paused = true;
+          });
+        }),
+      );
+      break;
     case ActionType.UPDATE_TOAST: {
       if (action.toast.id) {
         unscheduleRemoval(action.toast.id);
@@ -137,29 +160,6 @@ export const dispatch = (action: Action) => {
         ? dispatch({ toast: action.toast, type: ActionType.UPDATE_TOAST })
         : dispatch({ toast: action.toast, type: ActionType.ADD_TOAST });
       break;
-    case ActionType.START_PAUSE:
-      setStore(
-        p((s) => {
-          s.pausedAt = Date.now();
-          s.toasts.forEach((t) => {
-            t.paused = true;
-          });
-        }),
-      );
-      break;
-    case ActionType.END_PAUSE: {
-      const pauseInterval = action.time - (store.pausedAt || 0);
-      setStore(
-        p((s) => {
-          s.pausedAt = undefined;
-          s.toasts.forEach((t) => {
-            t.pauseDuration += pauseInterval;
-            t.paused = false;
-          });
-        }),
-      );
-      break;
-    }
   }
 };
 

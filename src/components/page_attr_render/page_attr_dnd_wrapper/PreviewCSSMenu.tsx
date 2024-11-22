@@ -2,6 +2,7 @@ import { createSignal, type Setter } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import {
   DialogFooter,
   dialogOkButtonClass,
@@ -9,7 +10,6 @@ import {
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 
 export function PreviewCSSMenu(
   props: Readonly<{

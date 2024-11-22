@@ -1,7 +1,9 @@
 import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
 export function handleUserData(
@@ -21,7 +23,7 @@ export function handleUserData(
   if (data.roles) {
     setGraph(
       "userRoles",
-      data.roles.map((role: Vertex) => role.id)
+      data.roles.map((role: Vertex) => role.id),
     );
     for (const role of data.roles) {
       updateVertex(role.id, role, graph, setGraph, false);
@@ -33,7 +35,7 @@ export async function loadUser(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   navigate?: (path: string) => void,
-  showErrorToast?: (message: string) => void
+  showErrorToast?: (message: string) => void,
 ): Promise<boolean> {
   setGraph("isLoadingPage", true);
 

@@ -2,8 +2,8 @@
 import type { TextFieldOptionsField } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { CSSWideKeywords } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
+import { CSSWideKeywords } from "./CSSMetadata";
 
 export const ColumnsSection = {
   columnCount: {

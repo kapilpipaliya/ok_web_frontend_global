@@ -18,9 +18,9 @@ export function TreeItemExpandButton(
         icon="mingcute:down-fill"
         iconClassList={{
           "mx:4px": true,
-          "transform 2s ease-in-out": true,
           "transform:rotate(0deg)": props.isCollapsed,
           "transform:rotate(180deg)": !props.isCollapsed,
+          "transform 2s ease-in-out": true,
           "transition:transform 0.2s|linear": true,
         }}
         noCenter

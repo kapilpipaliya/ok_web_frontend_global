@@ -37,7 +37,7 @@ export function updateVertex(
   for (const label of vertexData.L) {
     setGraph("vertexLabelIdMap", label, (vertexIds) => {
       return Array.isArray(vertexIds)
-        ? [...new Set([...vertexIds, vertexData.id])]
+        ? [...new Set([vertexData.id, ...vertexIds])]
         : [vertexData.id];
     });
   }
@@ -59,7 +59,7 @@ function updateEdge(
   if (graph.vertexes[edge.S]) {
     setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
       Array.isArray(out_edges)
-        ? [...new Set([...out_edges, edge.id])]
+        ? [...new Set([edge.id, ...out_edges])]
         : [edge.id],
     );
   }
@@ -67,7 +67,7 @@ function updateEdge(
   if (graph.vertexes[edge.E]) {
     setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
       Array.isArray(in_edges)
-        ? [...new Set([...in_edges, edge.id])]
+        ? [...new Set([edge.id, ...in_edges])]
         : [edge.id],
     );
   }

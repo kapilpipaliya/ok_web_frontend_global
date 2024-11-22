@@ -5,8 +5,8 @@ import type {
   TextFieldOptionsField,
 } from "../FieldSchemaType";
 
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const BackgroundSection = {
   background: {

@@ -1,5 +1,6 @@
+import type { Strategy } from "@floating-ui/dom";
+
 import createFloating from "@corvu/utils/create/floating";
-import { Strategy } from "@floating-ui/dom";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
@@ -23,7 +24,7 @@ export function AttrConfigPopOverWrapper(
     enabled: true,
     floating: floating,
     options: () => ({}),
-    placement: () => props.isSelectedLayoutId ? "top-start" : "top-start",
+    placement: () => (props.isSelectedLayoutId ? "top-start" : "top-start"),
     reference: () => props.reference() ?? null,
     strategy,
   });

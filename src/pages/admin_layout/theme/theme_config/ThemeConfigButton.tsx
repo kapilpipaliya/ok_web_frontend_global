@@ -1,8 +1,10 @@
 import { createSignal, Show } from "solid-js";
-import { IconButton } from "~/components/styled/IconButton";
-import type { Vertex } from "~/lib/graph/graph";
-import { ThemeConfigDialog } from "./ThemeConfigDialog";
 
+import type { Vertex } from "~/lib/graph/graph";
+
+import { IconButton } from "~/components/styled/IconButton";
+
+import { ThemeConfigDialog } from "./ThemeConfigDialog";
 
 export function ThemeConfigButton(props: {
   class?: string;
@@ -16,16 +18,21 @@ export function ThemeConfigButton(props: {
       <IconButton
         class={`${props.class} cursor:pointer`}
         icon="ph:pencil-simple"
-        onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowModal(true);
+        }}
         ref={(el) => (saveAsTemplateRef = el)}
         size={props.size}
-        title="Edit Theme" />
+        title="Edit Theme"
+      />
       <Show when={showModal()}>
         <ThemeConfigDialog
           item={props.item}
           onClose={() => setShowModal(false)}
           onMouseLeave={() => setShowModal(false)}
-          parentRef={saveAsTemplateRef!} />
+          parentRef={saveAsTemplateRef!}
+        />
       </Show>
     </>
   );

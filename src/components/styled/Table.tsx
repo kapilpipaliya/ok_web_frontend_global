@@ -22,7 +22,11 @@ import {
   CardContainer,
   CardHeaderContainer,
 } from "~/components/styled/card/SimpleCard";
-import { Table, TableBodyCell, TableHeadCell } from "~/components/styled/SimpleTable";
+import {
+  Table,
+  TableBodyCell,
+  TableHeadCell,
+} from "~/components/styled/SimpleTable";
 
 import { CardGrid } from "./CardGrid";
 import { TableActions } from "./TableActions";

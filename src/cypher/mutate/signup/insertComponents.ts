@@ -1,7 +1,5 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import { componentsMap } from "~/components/form/functions/getDynamicComponent";
-
 import { getComponentTree } from "../sync/component_tree/convertToJson";
 import { insertComponentTree } from "../sync/component_tree/insertComonentTree";
 

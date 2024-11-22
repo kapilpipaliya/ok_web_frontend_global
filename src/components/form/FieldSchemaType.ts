@@ -1,12 +1,10 @@
-import type { OffsetOptions, Placement } from "@floating-ui/dom";
-import type { Accessor, JSXElement, Owner } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
 
+import type { Accessor, Owner } from "solid-js";
+
+import type { Vertex } from "~/lib/graph/graph";
+
+import type { PageRenderStore } from "../page_attr_render/context/PageRenderContext";
 import type { FormStoreObject } from "./FormContext";
-import { Vertex } from "~/lib/graph/graph";
-import { RenderStore } from "../css_properties/context/RenderContext";
-import { PageRenderStore } from "../page_attr_render/context/PageRenderContext";
-
 
 export interface RegexValidation {
   enabled: boolean;

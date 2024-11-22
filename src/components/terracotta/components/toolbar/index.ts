@@ -73,15 +73,15 @@ export function Toolbar<T extends ValidConstructor = "div">(
     if (current instanceof HTMLElement) {
       useEventListener(current, "keydown", (e) => {
         switch (e.key) {
-          case "ArrowLeft": {
-            if (isHorizontal()) {
+          case "ArrowDown": {
+            if (!isHorizontal()) {
               e.preventDefault();
-              getPrevFocusable();
+              getNextFocusable();
             }
             break;
           }
-          case "ArrowUp": {
-            if (!isHorizontal()) {
+          case "ArrowLeft": {
+            if (isHorizontal()) {
               e.preventDefault();
               getPrevFocusable();
             }
@@ -94,21 +94,21 @@ export function Toolbar<T extends ValidConstructor = "div">(
             }
             break;
           }
-          case "ArrowDown": {
+          case "ArrowUp": {
             if (!isHorizontal()) {
               e.preventDefault();
-              getNextFocusable();
-            }
-            break;
-          }
-          case "Home": {
-            if (focusFirst(getFocusableElements(current), false)) {
-              e.preventDefault();
+              getPrevFocusable();
             }
             break;
           }
           case "End": {
             if (focusLast(getFocusableElements(current), false)) {
+              e.preventDefault();
+            }
+            break;
+          }
+          case "Home": {
+            if (focusFirst(getFocusableElements(current), false)) {
               e.preventDefault();
             }
             break;

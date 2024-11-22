@@ -196,7 +196,6 @@
         "useValidTypeof": "error"
       },
       "nursery": {
-        "noDuplicateJsonKeys": "off",
         "useImportRestrictions": "off"
       }
     }

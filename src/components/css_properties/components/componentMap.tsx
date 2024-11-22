@@ -1,22 +1,29 @@
 import { splitProps } from "solid-js";
 
 import { BoxField } from "~/components/fields/BoxField";
+import { PROPERTIES } from "~/components/styled/constants/constant";
 
-import { DataEditWithCustomDialog } from "./fields/DataEditWithCustomDialog";
 import { ArrayComponent } from "./fields/ArrayComponent";
 import { ButtonGroups } from "./fields/ButtonGroups";
 import { CheckboxField } from "./fields/CheckboxField";
 import { ColorPickerInput } from "./fields/ColorPickerInput";
+import { DataEditWithCustomDialog } from "./fields/DataEditWithCustomDialog";
+import { FieldWithCustomBox } from "./fields/FieldWithCustomBox";
 import { Select } from "./fields/Select";
 import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
-import { FieldWithCustomBox } from "./fields/FieldWithCustomBox";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);
 
-  return <input onChange={local.onChange} class={PROPERTIES.Css.TextField} type="number" {...others} />;
+  return (
+    <input
+      class={PROPERTIES.Css.TextField}
+      onChange={local.onChange}
+      type="number"
+      {...others}
+    />
+  );
 };
 export const componentMap: Record<string, any> = {
   array: ArrayComponent,

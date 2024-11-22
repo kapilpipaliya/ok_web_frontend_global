@@ -1,8 +1,9 @@
-import { createMemo, ParentProps, Show } from "solid-js";
+import { type ParentProps, Show } from "solid-js";
+
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 export function FragmentField(_props: ParentProps) {
   const parentItems = usePageRenderContext();

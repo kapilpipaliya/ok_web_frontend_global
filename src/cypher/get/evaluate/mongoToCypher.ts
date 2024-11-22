@@ -1,9 +1,16 @@
-
 export type MongoFilter =
   | { $and?: MongoFilter[] }
   | { $not?: MongoFilter }
   | { $or?: MongoFilter[] }
-  | { [key: string]: { $gt?: any; $gte?: any; $lt?: any; $lte?: any; $ne?: any } }
+  | {
+      [key: string]: {
+        $gt?: any;
+        $gte?: any;
+        $lt?: any;
+        $lte?: any;
+        $ne?: any;
+      };
+    }
   | { [key: string]: any };
 
 export interface CypherQueryResult {
@@ -19,19 +26,19 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
     };
   }
 
-  const params: { [key: string]: any; } = {};
+  const params: { [key: string]: any } = {};
   let paramIndex = 0;
 
   const translateFilter = (filter: MongoFilter): string => {
     return Object.entries(filter)
       .map(([key, value]) => {
-        if (key === '$and' && Array.isArray(value)) {
-          return '(' + value.map(translateFilter).join(' AND ') + ')';
-        } else if (key === '$or' && Array.isArray(value)) {
-          return '(' + value.map(translateFilter).join(' OR ') + ')';
-        } else if (key === '$not' && typeof value === 'object') {
-          return 'NOT (' + translateFilter(value as MongoFilter) + ')';
-        } else if (typeof value === 'object' && !Array.isArray(value)) {
+        if (key === "$and" && Array.isArray(value)) {
+          return "(" + value.map(translateFilter).join(" AND ") + ")";
+        } else if (key === "$or" && Array.isArray(value)) {
+          return "(" + value.map(translateFilter).join(" OR ") + ")";
+        } else if (key === "$not" && typeof value === "object") {
+          return "NOT (" + translateFilter(value as MongoFilter) + ")";
+        } else if (typeof value === "object" && !Array.isArray(value)) {
           return handleOperators(key, value);
         } else {
           // Direct equality
@@ -40,30 +47,33 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
           return `n.${key} = $${paramName}`;
         }
       })
-      .join(' AND ');
+      .join(" AND ");
   };
 
-  const handleOperators = (field: string, conditions: { [operator: string]: any; }): string => {
+  const handleOperators = (
+    field: string,
+    conditions: { [operator: string]: any },
+  ): string => {
     return Object.entries(conditions)
       .map(([operator, value]) => {
         const paramName = `param${paramIndex++}`;
         params[paramName] = value;
         switch (operator) {
-          case '$gt':
+          case "$gt":
             return `n.${field} > $${paramName}`;
-          case '$gte':
+          case "$gte":
             return `n.${field} >= $${paramName}`;
-          case '$lt':
+          case "$lt":
             return `n.${field} < $${paramName}`;
-          case '$lte':
+          case "$lte":
             return `n.${field} <= $${paramName}`;
-          case '$ne':
+          case "$ne":
             return `n.${field} <> $${paramName}`;
           default:
             throw new Error(`Unsupported operator: ${operator}`);
         }
       })
-      .join(' AND ');
+      .join(" AND ");
   };
 
   const whereClause = translateFilter(filter);

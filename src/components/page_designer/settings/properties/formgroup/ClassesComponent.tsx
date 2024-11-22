@@ -1,4 +1,4 @@
-import { createSignal, Show, createMemo } from "solid-js";
+import { createMemo, createSignal, Show } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
@@ -20,10 +20,13 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
-  const getComponentName = () => graph.vertexes[layoutStore.selectedComponent].P.key;
+  const getComponentName = () =>
+    graph.vertexes[layoutStore.selectedComponent].P.key;
   const checkIsForm = () => layoutStore.formStore[0]?.formData.L[0] === "Form";
-  const checkIsFormField = () => checkIsForm() && genericInputComponents.includes(getComponentName());
-  const getClassVertices = () => props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class"));
+  const checkIsFormField = () =>
+    checkIsForm() && genericInputComponents.includes(getComponentName());
+  const getClassVertices = () =>
+    props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class"));
 
   const metaClasses = createMemo(() => [
     graph.vertexes[props.vertexIds.class],

@@ -72,7 +72,7 @@ export type MediaQueryItem =
           | "contrast"
           | "reduced-motion"
           | "reduced-transparency"}`}: ${string})`;
-export type MediaQueryOperator = " and " | " not " | " only " | ", ";
+export type MediaQueryOperator = ", " | " and " | " not " | " only ";
 export type MediaQueryString =
   | `${MediaQueryItem}${MediaQueryOperator}${MediaQueryItem}`
   | MediaQueryItem;
@@ -92,7 +92,7 @@ function parseStorage<T extends any | string>(
   data: null | string | undefined,
   useJson: boolean,
 ): T | undefined {
-  return useJson ? (data ? JSON.parse(data) : undefined) : data ?? undefined;
+  return useJson ? (data ? JSON.parse(data) : undefined) : (data ?? undefined);
 }
 
 function putStorage<T extends any | string>(key: string, data: T): void {

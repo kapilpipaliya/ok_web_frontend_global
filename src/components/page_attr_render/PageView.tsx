@@ -9,11 +9,6 @@ import {
 } from "~/components/page_designer/context/PreviewContext";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import {
-  RepeaterVertexContext,
-  useRepeaterVertexContext,
-} from "./context/PageAttrContext";
-
 export function PageView(
   props: Readonly<{
     data?: Vertex;
@@ -78,10 +73,7 @@ export function PageView(
       <Switch>
         <Match when={true}>
           <PreviewContext.Provider value={previewStore}>
-              <PageAttrRender
-                data={props.data}
-                metaVertex={props.metaVertex!}
-              />
+            <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
           </PreviewContext.Provider>
         </Match>
       </Switch>

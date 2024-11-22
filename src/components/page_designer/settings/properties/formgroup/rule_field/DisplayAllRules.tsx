@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 
-import { IconButton } from "~/components/styled/IconButton";
 import { ZIndex } from "~/components/fields/ZIndex";
+import { IconButton } from "~/components/styled/IconButton";
 
 import { RulesModal } from "../../../../rules/RulesModal";
 

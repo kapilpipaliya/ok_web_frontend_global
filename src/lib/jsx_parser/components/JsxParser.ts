@@ -428,26 +428,6 @@ export default class JsxParser {
     scope?: Scope,
   ): any => {
     switch (expression.type) {
-      case "JSXAttribute": {
-        if (expression.value === null) {
-          return true;
-        }
-        return this.#parseExpression(graph, setGraph, expression.value, scope);
-      }
-      case "JSXElement":
-      case "JSXFragment":
-        return this.#parseElement(graph, setGraph, expression, scope);
-      case "JSXExpressionContainer":
-        return this.#parseExpression(
-          graph,
-          setGraph,
-          expression.expression,
-          scope,
-        );
-      case "JSXText": {
-        const _key = this.props.disableKeyGeneration ? undefined : randomHash();
-        return expression.value;
-      }
       // return this.props.disableFragments
       // 	? expression.value
       // 	: <Fragment key={key}>{expression.value}</Fragment>
@@ -455,13 +435,27 @@ export default class JsxParser {
         return expression.elements.map((ele) =>
           this.#parseExpression(graph, setGraph, ele, scope),
         ) as ParsedTree;
+      case "ArrowFunctionExpression": {
+        if (expression.async || expression.generator) {
+          this.props.onError?.(
+            new Error("Async and generator arrow functions are not supported."),
+          );
+        }
+        return (...args: any[]): any => {
+          const functionScope: Record<string, any> = {};
+          expression.params.forEach((param, idx) => {
+            functionScope[param.name] = args[idx];
+          });
+          return this.#parseExpression(
+            graph,
+            setGraph,
+            expression.body,
+            functionScope,
+          );
+        };
+      }
       case "BinaryExpression": {
         switch (expression.operator) {
-          case "-":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) -
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
           case "!=":
             return (
               this.#parseExpression(graph, setGraph, expression.left) !==
@@ -470,6 +464,11 @@ export default class JsxParser {
           case "!==":
             return (
               this.#parseExpression(graph, setGraph, expression.left) !==
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "%":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) %
               this.#parseExpression(graph, setGraph, expression.right)
             );
           case "*":
@@ -482,19 +481,14 @@ export default class JsxParser {
               this.#parseExpression(graph, setGraph, expression.left) **
               this.#parseExpression(graph, setGraph, expression.right)
             );
-          case "/":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) /
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
-          case "%":
-            return (
-              this.#parseExpression(graph, setGraph, expression.left) %
-              this.#parseExpression(graph, setGraph, expression.right)
-            );
           case "+":
             return (
               this.#parseExpression(graph, setGraph, expression.left) +
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "/":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) /
               this.#parseExpression(graph, setGraph, expression.right)
             );
           case "<":
@@ -525,6 +519,11 @@ export default class JsxParser {
           case ">=":
             return (
               this.#parseExpression(graph, setGraph, expression.left) >=
+              this.#parseExpression(graph, setGraph, expression.right)
+            );
+          case "-":
+            return (
+              this.#parseExpression(graph, setGraph, expression.left) -
               this.#parseExpression(graph, setGraph, expression.right)
             );
         }
@@ -562,7 +561,27 @@ export default class JsxParser {
         }
         return this.props.bindings?.[expression.name];
       }
+      case "JSXAttribute": {
+        if (expression.value === null) {
+          return true;
+        }
+        return this.#parseExpression(graph, setGraph, expression.value, scope);
+      }
+      case "JSXElement":
+      case "JSXFragment":
+        return this.#parseElement(graph, setGraph, expression, scope);
+      case "JSXExpressionContainer":
+        return this.#parseExpression(
+          graph,
+          setGraph,
+          expression.expression,
+          scope,
+        );
 
+      case "JSXText": {
+        const _key = this.props.disableKeyGeneration ? undefined : randomHash();
+        return expression.value;
+      }
       case "Literal":
         return expression.value;
       case "LogicalExpression": {
@@ -605,33 +624,14 @@ export default class JsxParser {
           .join("");
       case "UnaryExpression": {
         switch (expression.operator) {
+          case "!":
+            return !expression.argument.value;
           case "+":
             return expression.argument.value;
           case "-":
             return -expression.argument.value;
-          case "!":
-            return !expression.argument.value;
         }
         return undefined;
-      }
-      case "ArrowFunctionExpression": {
-        if (expression.async || expression.generator) {
-          this.props.onError?.(
-            new Error("Async and generator arrow functions are not supported."),
-          );
-        }
-        return (...args: any[]): any => {
-          const functionScope: Record<string, any> = {};
-          expression.params.forEach((param, idx) => {
-            functionScope[param.name] = args[idx];
-          });
-          return this.#parseExpression(
-            graph,
-            setGraph,
-            expression.body,
-            functionScope,
-          );
-        };
       }
     }
   };

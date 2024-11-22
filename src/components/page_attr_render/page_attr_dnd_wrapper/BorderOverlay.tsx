@@ -1,5 +1,6 @@
+import type { Strategy } from "@floating-ui/dom";
+
 import createFloating from "@corvu/utils/create/floating";
-import { Strategy } from "@floating-ui/dom";
 import {
   type Accessor,
   createEffect,
@@ -17,8 +18,8 @@ import type { Vertex } from "~/lib/graph/graph";
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
-import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
@@ -95,7 +96,9 @@ export function BorderOverlay(
       });
     };
 
-    createEffect(on([() => floatingState().x, () => floatingState().y], updatePos));
+    createEffect(
+      on([() => floatingState().x, () => floatingState().y], updatePos),
+    );
 
     return (
       <Portal>

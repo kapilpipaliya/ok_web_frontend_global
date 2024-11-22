@@ -1,18 +1,18 @@
 import { createSelector, createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { IconButton } from "~/components/styled/IconButton";
-import { CommonAddComponent } from "~/components/page_designer/settings/rules/CommonAddComponent";
-import { useToast } from "~/components/styled/Toast";
 import { ZIndex } from "~/components/fields/ZIndex";
+import { QuickEditModal } from "~/components/grid/QuickEditModal";
+import { CommonAddComponent } from "~/components/page_designer/settings/rules/CommonAddComponent";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { IconButton } from "~/components/styled/IconButton";
+import { useToast } from "~/components/styled/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
-import { QuickEditModal } from "~/components/grid/QuickEditModal";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,

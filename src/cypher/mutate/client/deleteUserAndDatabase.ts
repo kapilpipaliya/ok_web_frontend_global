@@ -15,14 +15,15 @@ export async function deleteUserAndDatabase(userName: string) {
   const subDomainForUser = subDomain + "-user"; // TODO Fix this
 
   try {
-    const removeDockerComposeRes = await removeDockerComposeDirectory(subDomainForUser);
+    const removeDockerComposeRes =
+      await removeDockerComposeDirectory(subDomainForUser);
     if (!removeDockerComposeRes) {
       return {
-          error: false,
-          message: "Docker Removed successfully",
+        error: false,
+        message: "Docker Removed successfully",
       };
     }
-    
+
     // TODO: delete user from super user database too
     return {
       error: false,

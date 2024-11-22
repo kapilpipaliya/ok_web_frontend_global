@@ -31,10 +31,10 @@ export interface FieldWithCustomProperty extends FormField {
   isLabelOnTop: boolean;
   label: string;
   mainFieldType: ComponentKeyType;
-  unitOptions?: string[];
   options?: { label: string; value: string }[] | string[];
   padding?: string;
   type?: string;
+  unitOptions?: string[];
 }
 
 export interface ColorPickerField extends FormField {
@@ -66,9 +66,9 @@ export interface TextFieldOptionsField extends FormField {
   leftIcon?: JSXElement;
   options: OptionType;
   placeholder?: string;
+  showFilePicker?: boolean;
   type?: string;
   unitOptions?: string[];
-  showFilePicker?: boolean;
   // value?: string; // depricated
 }
 

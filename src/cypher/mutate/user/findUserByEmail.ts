@@ -19,7 +19,7 @@ async function getGuestRole(dbSession: Session): Promise<Vertex> {
     RETURN r
   `;
   const guestResult = await dbSession.run(guestQuery);
-  return convertNodeToJson(guestResult.records[0].get('r') as Node);
+  return convertNodeToJson(guestResult.records[0].get("r") as Node);
 }
 
 async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
@@ -27,13 +27,13 @@ async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
   return {
     roles: [guestRole],
     user: null,
-    userSetting: null
+    userSetting: null,
   };
 }
 
 export async function findUserByEmail(
   dbSession: Session,
-  email?: string | null,
+  email?: null | string,
 ): Promise<UserResult> {
   if (!email) {
     return getGuestOnlyResult(dbSession);

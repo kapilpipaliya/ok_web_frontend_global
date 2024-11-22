@@ -14,7 +14,12 @@ export async function waitForDockerCreate(
     [labPort]: "3000",
     [logsPort]: "7444",
   });*/
-  const dockerError = await executeDockerCompose(subdomain, driverPort, logsPort, labPort);
+  const dockerError = await executeDockerCompose(
+    subdomain,
+    driverPort,
+    logsPort,
+    labPort,
+  );
   if (dockerError) {
     throw Error(dockerError);
   }

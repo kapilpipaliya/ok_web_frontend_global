@@ -1,7 +1,7 @@
 export const CONSTANTS = {
+  fullWidth: "w:100%",
   inputBorderRadius: "r:6",
   inputFieldBorder: "border:1px|solid|#ccc",
-  fullWidth: "w:100%",
   inputFieldPadding: "p:2",
 };
 

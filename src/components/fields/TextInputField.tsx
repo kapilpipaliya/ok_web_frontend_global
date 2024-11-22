@@ -45,7 +45,7 @@ export interface TextInputFieldMeta extends FormInputField {
   unitOptions?: string[];
 }
 // import { TextFieldWithSelect } from "./TextFieldWithSelect";
-import { JSXElement } from "solid-js";
+import type { JSXElement } from "solid-js";
 
 interface TextInputFieldProps
   extends Omit<

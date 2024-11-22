@@ -449,6 +449,11 @@ export function parser(source, recover) {
       case "variable":
         symbol = symbol_table["(name)"];
         break;
+      case "number":
+      case "string":
+      case "value":
+        symbol = symbol_table["(literal)"];
+        break;
       case "operator": {
         symbol = symbol_table[value];
         if (!symbol) {
@@ -461,11 +466,6 @@ export function parser(source, recover) {
         }
         break;
       }
-      case "string":
-      case "number":
-      case "value":
-        symbol = symbol_table["(literal)"];
-        break;
       case "regex": {
         type = "regex";
         symbol = symbol_table["(regex)"];
@@ -932,6 +932,16 @@ export function parser(source, recover) {
 
   const seekParent = (node, slot) => {
     switch (node.type) {
+      case "block":
+        // look in last expression in the block
+        if (node.expressions.length > 0) {
+          node.tuple = true;
+          slot = seekParent(
+            node.expressions[node.expressions.length - 1],
+            slot,
+          );
+        }
+        break;
       case "name":
       case "wildcard": {
         slot.level--;
@@ -949,16 +959,6 @@ export function parser(source, recover) {
       }
       case "parent":
         slot.level++;
-        break;
-      case "block":
-        // look in last expression in the block
-        if (node.expressions.length > 0) {
-          node.tuple = true;
-          slot = seekParent(
-            node.expressions[node.expressions.length - 1],
-            slot,
-          );
-        }
         break;
       case "path": {
         // last step in path
@@ -1041,6 +1041,30 @@ export function parser(source, recover) {
     switch (expr.type) {
       case "binary":
         switch (expr.value) {
+          case "#": {
+            result = processAST(expr.lhs);
+            step = result;
+            if (result.type === "path") {
+              step = result.steps[result.steps.length - 1];
+            } else {
+              result = { steps: [result], type: "path" };
+              if (typeof step.predicate !== "undefined") {
+                step.stages = step.predicate;
+                delete step.predicate;
+              }
+            }
+            if (typeof step.stages === "undefined") {
+              step.index = expr.rhs.value;
+            } else {
+              step.stages.push({
+                position: expr.position,
+                type: "index",
+                value: expr.rhs.value,
+              });
+            }
+            step.tuple = true;
+            break;
+          }
           case ".": {
             const lstep = processAST(expr.lhs);
 
@@ -1109,88 +1133,6 @@ export function parser(source, recover) {
             resolveAncestry(result);
             break;
           }
-          case "[": {
-            // predicated step
-            // LHS is a step or a predicated step
-            // RHS is the predicate expr
-            result = processAST(expr.lhs);
-            let step = result;
-            let type = "predicate";
-            if (result.type === "path") {
-              step = result.steps[result.steps.length - 1];
-              type = "stages";
-            }
-            if (typeof step.group !== "undefined") {
-              throw {
-                code: "S0209",
-                position: expr.position,
-                stack: new Error().stack,
-              };
-            }
-            if (typeof step[type] === "undefined") {
-              step[type] = [];
-            }
-            const predicate = processAST(expr.rhs);
-            if (typeof predicate.seekingParent !== "undefined") {
-              predicate.seekingParent.forEach((slot) => {
-                if (slot.level === 1) {
-                  seekParent(step, slot);
-                } else {
-                  slot.level--;
-                }
-              });
-              pushAncestry(step, predicate);
-            }
-            step[type].push({
-              expr: predicate,
-              position: expr.position,
-              type: "filter",
-            });
-            break;
-          }
-          case "{": {
-            // group-by
-            // LHS is a step or a predicated step
-            // RHS is the object constructor expr
-            result = processAST(expr.lhs);
-            if (typeof result.group !== "undefined") {
-              throw {
-                code: "S0210",
-                position: expr.position,
-                stack: new Error().stack,
-              };
-            }
-            // object constructor - process each pair
-            result.group = {
-              lhs: expr.rhs.map((pair) => [
-                processAST(pair[0]),
-                processAST(pair[1]),
-              ]),
-              position: expr.position,
-            };
-            break;
-          }
-          case "^": {
-            // order-by
-            // LHS is the array to be ordered
-            // RHS defines the terms
-            result = processAST(expr.lhs);
-            if (result.type !== "path") {
-              result = { steps: [result], type: "path" };
-            }
-            const sortStep = { position: expr.position, type: "sort" };
-            sortStep.terms = expr.rhs.map((terms) => {
-              const expression = processAST(terms.expression);
-              pushAncestry(sortStep, expression);
-              return {
-                descending: terms.descending,
-                expression: expression,
-              };
-            });
-            result.steps.push(sortStep);
-            resolveAncestry(result);
-            break;
-          }
           case ":=": {
             result = {
               position: expr.position,
@@ -1235,28 +1177,86 @@ export function parser(source, recover) {
             step.tuple = true;
             break;
           }
-          case "#": {
+          case "[": {
+            // predicated step
+            // LHS is a step or a predicated step
+            // RHS is the predicate expr
             result = processAST(expr.lhs);
-            step = result;
+            let step = result;
+            let type = "predicate";
             if (result.type === "path") {
               step = result.steps[result.steps.length - 1];
-            } else {
-              result = { steps: [result], type: "path" };
-              if (typeof step.predicate !== "undefined") {
-                step.stages = step.predicate;
-                delete step.predicate;
-              }
+              type = "stages";
             }
-            if (typeof step.stages === "undefined") {
-              step.index = expr.rhs.value;
-            } else {
-              step.stages.push({
+            if (typeof step.group !== "undefined") {
+              throw {
+                code: "S0209",
                 position: expr.position,
-                type: "index",
-                value: expr.rhs.value,
-              });
+                stack: new Error().stack,
+              };
             }
-            step.tuple = true;
+            if (typeof step[type] === "undefined") {
+              step[type] = [];
+            }
+            const predicate = processAST(expr.rhs);
+            if (typeof predicate.seekingParent !== "undefined") {
+              predicate.seekingParent.forEach((slot) => {
+                if (slot.level === 1) {
+                  seekParent(step, slot);
+                } else {
+                  slot.level--;
+                }
+              });
+              pushAncestry(step, predicate);
+            }
+            step[type].push({
+              expr: predicate,
+              position: expr.position,
+              type: "filter",
+            });
+            break;
+          }
+          case "^": {
+            // order-by
+            // LHS is the array to be ordered
+            // RHS defines the terms
+            result = processAST(expr.lhs);
+            if (result.type !== "path") {
+              result = { steps: [result], type: "path" };
+            }
+            const sortStep = { position: expr.position, type: "sort" };
+            sortStep.terms = expr.rhs.map((terms) => {
+              const expression = processAST(terms.expression);
+              pushAncestry(sortStep, expression);
+              return {
+                descending: terms.descending,
+                expression: expression,
+              };
+            });
+            result.steps.push(sortStep);
+            resolveAncestry(result);
+            break;
+          }
+          case "{": {
+            // group-by
+            // LHS is a step or a predicated step
+            // RHS is the object constructor expr
+            result = processAST(expr.lhs);
+            if (typeof result.group !== "undefined") {
+              throw {
+                code: "S0210",
+                position: expr.position,
+                stack: new Error().stack,
+              };
+            }
+            // object constructor - process each pair
+            result.group = {
+              lhs: expr.rhs.map((pair) => [
+                processAST(pair[0]),
+                processAST(pair[1]),
+              ]),
+              position: expr.position,
+            };
             break;
           }
           case "~>": {
@@ -1282,6 +1282,128 @@ export function parser(source, recover) {
           }
         }
         break;
+      case "block": {
+        result = { position: expr.position, type: expr.type };
+        // array of expressions - process each one
+        result.expressions = expr.expressions.map((item) => {
+          const part = processAST(item);
+          pushAncestry(result, part);
+          if (
+            part.consarray ||
+            (part.type === "path" && part.steps[0].consarray)
+          ) {
+            result.consarray = true;
+          }
+          return part;
+        });
+        // TODO scan the array of expressions to see if any of them assign variables
+        // if so, need to mark the block as one that needs to create a new frame
+        break;
+      }
+      case "condition": {
+        result = { position: expr.position, type: expr.type };
+        result.condition = processAST(expr.condition);
+        pushAncestry(result, result.condition);
+        result.then = processAST(expr.then);
+        pushAncestry(result, result.then);
+        if (typeof expr.else !== "undefined") {
+          result.else = processAST(expr.else);
+          pushAncestry(result, result.else);
+        }
+        break;
+      }
+      case "descendant":
+      case "number":
+      case "regex":
+      case "string":
+      case "value":
+      case "variable":
+      case "wildcard":
+        result = expr;
+        break;
+      case "error": {
+        result = expr;
+        if (expr.lhs) {
+          result = processAST(expr.lhs);
+        }
+        break;
+      }
+      case "function":
+      case "partial": {
+        result = {
+          name: expr.name,
+          position: expr.position,
+          type: expr.type,
+          value: expr.value,
+        };
+        result.arguments = expr.arguments.map((arg) => {
+          const argAST = processAST(arg);
+          pushAncestry(result, argAST);
+          return argAST;
+        });
+        result.procedure = processAST(expr.procedure);
+        break;
+      }
+      case "lambda": {
+        result = {
+          arguments: expr.arguments,
+          position: expr.position,
+          signature: expr.signature,
+          type: expr.type,
+        };
+        const body = processAST(expr.body);
+        result.body = tailCallOptimize(body);
+        break;
+      }
+      case "name": {
+        result = { steps: [expr], type: "path" };
+        if (expr.keepArray) {
+          result.keepSingletonArray = true;
+        }
+        break;
+      }
+      case "operator":
+        // the tokens 'and' and 'or' might have been used as a name rather than an operator
+        if (
+          expr.value === "and" ||
+          expr.value === "or" ||
+          expr.value === "in"
+        ) {
+          expr.type = "name";
+          result = processAST(expr);
+        } /* istanbul ignore else */ else if (expr.value === "?") {
+          // partial application
+          result = expr;
+        } else {
+          throw {
+            code: "S0201",
+            position: expr.position,
+            stack: new Error().stack,
+            token: expr.value,
+          };
+        }
+        break;
+      case "parent": {
+        result = {
+          slot: {
+            index: ancestorIndex++,
+            label: "!" + ancestorLabel++,
+            level: 1,
+          },
+          type: "parent",
+        };
+        ancestry.push(result);
+        break;
+      }
+      case "transform": {
+        result = { position: expr.position, type: expr.type };
+        result.pattern = processAST(expr.pattern);
+        result.update = processAST(expr.update);
+        if (typeof expr.delete !== "undefined") {
+          result.delete = processAST(expr.delete);
+        }
+        break;
+      }
       case "unary": {
         result = {
           position: expr.position,
@@ -1314,128 +1436,6 @@ export function parser(source, recover) {
           } else {
             pushAncestry(result, result.expression);
           }
-        }
-        break;
-      }
-      case "function":
-      case "partial": {
-        result = {
-          name: expr.name,
-          position: expr.position,
-          type: expr.type,
-          value: expr.value,
-        };
-        result.arguments = expr.arguments.map((arg) => {
-          const argAST = processAST(arg);
-          pushAncestry(result, argAST);
-          return argAST;
-        });
-        result.procedure = processAST(expr.procedure);
-        break;
-      }
-      case "lambda": {
-        result = {
-          arguments: expr.arguments,
-          position: expr.position,
-          signature: expr.signature,
-          type: expr.type,
-        };
-        const body = processAST(expr.body);
-        result.body = tailCallOptimize(body);
-        break;
-      }
-      case "condition": {
-        result = { position: expr.position, type: expr.type };
-        result.condition = processAST(expr.condition);
-        pushAncestry(result, result.condition);
-        result.then = processAST(expr.then);
-        pushAncestry(result, result.then);
-        if (typeof expr.else !== "undefined") {
-          result.else = processAST(expr.else);
-          pushAncestry(result, result.else);
-        }
-        break;
-      }
-      case "transform": {
-        result = { position: expr.position, type: expr.type };
-        result.pattern = processAST(expr.pattern);
-        result.update = processAST(expr.update);
-        if (typeof expr.delete !== "undefined") {
-          result.delete = processAST(expr.delete);
-        }
-        break;
-      }
-      case "block": {
-        result = { position: expr.position, type: expr.type };
-        // array of expressions - process each one
-        result.expressions = expr.expressions.map((item) => {
-          const part = processAST(item);
-          pushAncestry(result, part);
-          if (
-            part.consarray ||
-            (part.type === "path" && part.steps[0].consarray)
-          ) {
-            result.consarray = true;
-          }
-          return part;
-        });
-        // TODO scan the array of expressions to see if any of them assign variables
-        // if so, need to mark the block as one that needs to create a new frame
-        break;
-      }
-      case "name": {
-        result = { steps: [expr], type: "path" };
-        if (expr.keepArray) {
-          result.keepSingletonArray = true;
-        }
-        break;
-      }
-      case "parent": {
-        result = {
-          slot: {
-            index: ancestorIndex++,
-            label: "!" + ancestorLabel++,
-            level: 1,
-          },
-          type: "parent",
-        };
-        ancestry.push(result);
-        break;
-      }
-      case "string":
-      case "number":
-      case "value":
-      case "wildcard":
-      case "descendant":
-      case "variable":
-      case "regex":
-        result = expr;
-        break;
-      case "operator":
-        // the tokens 'and' and 'or' might have been used as a name rather than an operator
-        if (
-          expr.value === "and" ||
-          expr.value === "or" ||
-          expr.value === "in"
-        ) {
-          expr.type = "name";
-          result = processAST(expr);
-        } /* istanbul ignore else */ else if (expr.value === "?") {
-          // partial application
-          result = expr;
-        } else {
-          throw {
-            code: "S0201",
-            position: expr.position,
-            stack: new Error().stack,
-            token: expr.value,
-          };
-        }
-        break;
-      case "error": {
-        result = expr;
-        if (expr.lhs) {
-          result = processAST(expr.lhs);
         }
         break;
       }

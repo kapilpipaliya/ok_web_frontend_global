@@ -66,11 +66,11 @@ export function parseSignature(signature) {
     };
 
     switch (symbol) {
-      case "s": // string
-      case "n": // number
       case "b": // boolean
       case "l": // not so sure about expecting null?
-      case "o": {
+      case "n": // number
+      case "o":
+      case "s": // string {
         // object
         param.regex = "[" + symbol + "m]";
         param.type = symbol;
@@ -114,8 +114,8 @@ export function parseSignature(signature) {
         prevParam.regex += "?";
         break;
       }
-      case "?": // optional param
-      case "+": // one or more
+      case "+":
+      case "?": // optional param // one or more
         prevParam.regex += symbol;
         break;
       case "(": {

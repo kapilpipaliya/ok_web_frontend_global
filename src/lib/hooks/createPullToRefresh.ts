@@ -1,16 +1,16 @@
 // https://github.com/Senbonzakura1234/use-pull-to-refresh/blob/main/src/index.ts
-import { createSignal, onCleanup, createEffect, Accessor } from "solid-js";
+import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 
 export const DEFAULT_MAXIMUM_PULL_LENGTH = 240;
 export const DEFAULT_REFRESH_THRESHOLD = 180;
 
 export type CreatePullToRefreshParams = {
-  onRefresh: () => void | Promise<void>;
+  isDisabled?: () => boolean;
   // default value is 240
   maximumPullLength?: number;
+  onRefresh: () => Promise<void> | void;
   // default value is 180
   refreshThreshold?: number;
-  isDisabled?: () => boolean;
 };
 export type CreatePullToRefreshReturn = {
   isRefreshing: Accessor<boolean>;
@@ -21,10 +21,10 @@ const isValid = (maximumPullLength: number, refreshThreshold: number) =>
   maximumPullLength >= refreshThreshold;
 
 export function createPullToRefresh({
-  onRefresh,
-  maximumPullLength = DEFAULT_MAXIMUM_PULL_LENGTH,
-  refreshThreshold = DEFAULT_REFRESH_THRESHOLD,
   isDisabled = () => false,
+  maximumPullLength = DEFAULT_MAXIMUM_PULL_LENGTH,
+  onRefresh,
+  refreshThreshold = DEFAULT_REFRESH_THRESHOLD,
 }: CreatePullToRefreshParams): CreatePullToRefreshReturn {
   const [pullStartPosition, setPullStartPosition] = createSignal(0);
   const [pullPosition, setPullPosition] = createSignal(0);

@@ -7,20 +7,20 @@ import {
   Show,
 } from "solid-js";
 
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;

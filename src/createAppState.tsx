@@ -9,8 +9,8 @@ import type {
   VertexMap,
 } from "~/lib/graph/graph";
 
-import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
+import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
 
 export function createAppState() {
   let newVertexId = -500000;

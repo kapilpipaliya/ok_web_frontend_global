@@ -46,13 +46,13 @@ export function CommandBarPanel<T extends ValidConstructor = "div">(
         useEventListener(current, "keydown", (e) => {
           if (!props.disabled) {
             switch (e.key) {
+              case "Escape": {
+                state.close();
+                break;
+              }
               case "Tab": {
                 e.preventDefault();
                 lockFocus(current, e.shiftKey, false);
-                break;
-              }
-              case "Escape": {
-                state.close();
                 break;
               }
               default:

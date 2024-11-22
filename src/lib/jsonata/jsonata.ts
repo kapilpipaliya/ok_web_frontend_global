@@ -53,61 +53,61 @@ function evaluate(expr, input, environment) {
   }
 
   switch (expr.type) {
-    case "path":
-      result = evaluatePath(expr, input, environment);
+    case "apply":
+      result = evaluateApplyExpression(expr, input, environment);
       break;
     case "binary":
       result = evaluateBinary(expr, input, environment);
       break;
-    case "unary":
-      result = evaluateUnary(expr, input, environment);
-      break;
-    case "name":
-      result = evaluateName(expr, input, environment);
-      break;
-    case "string":
-    case "number":
-    case "value":
-      result = evaluateLiteral(expr, input, environment);
-      break;
-    case "wildcard":
-      result = evaluateWildcard(expr, input, environment);
-      break;
-    case "descendant":
-      result = evaluateDescendants(expr, input, environment);
-      break;
-    case "parent":
-      result = environment.lookup(expr.slot.label);
-      break;
-    case "condition":
-      result = evaluateCondition(expr, input, environment);
+    case "bind":
+      result = evaluateBindExpression(expr, input, environment);
       break;
     case "block":
       result = evaluateBlock(expr, input, environment);
       break;
-    case "bind":
-      result = evaluateBindExpression(expr, input, environment);
+    case "condition":
+      result = evaluateCondition(expr, input, environment);
       break;
-    case "regex":
-      result = evaluateRegex(expr, input, environment);
+    case "descendant":
+      result = evaluateDescendants(expr, input, environment);
       break;
     case "function":
       result = evaluateFunction(expr, input, environment);
       break;
-    case "variable":
-      result = evaluateVariable(expr, input, environment);
-      break;
     case "lambda":
       result = evaluateLambda(expr, input, environment);
+      break;
+    case "name":
+      result = evaluateName(expr, input, environment);
+      break;
+    case "number":
+    case "string":
+    case "value":
+      result = evaluateLiteral(expr, input, environment);
+      break;
+    case "parent":
+      result = environment.lookup(expr.slot.label);
       break;
     case "partial":
       result = evaluatePartialApplication(expr, input, environment);
       break;
-    case "apply":
-      result = evaluateApplyExpression(expr, input, environment);
+    case "path":
+      result = evaluatePath(expr, input, environment);
+      break;
+    case "regex":
+      result = evaluateRegex(expr, input, environment);
       break;
     case "transform":
       result = evaluateTransformExpression(expr, input, environment);
+      break;
+    case "unary":
+      result = evaluateUnary(expr, input, environment);
+      break;
+    case "variable":
+      result = evaluateVariable(expr, input, environment);
+      break;
+    case "wildcard":
+      result = evaluateWildcard(expr, input, environment);
       break;
   }
 
@@ -536,23 +536,6 @@ function evaluateUnary(expr, input, environment) {
   let result;
 
   switch (expr.value) {
-    case "-": {
-      result = evaluate(expr.expression, input, environment);
-      if (typeof result === "undefined") {
-        result = undefined;
-      } else if (isNumeric(result)) {
-        result = -result;
-      } else {
-        throw {
-          code: "D1002",
-          position: expr.position,
-          stack: new Error().stack,
-          token: expr.value,
-          value: result,
-        };
-      }
-      break;
-    }
     case "[": {
       // array constructor - evaluate each item
       result = [];
@@ -585,6 +568,23 @@ function evaluateUnary(expr, input, environment) {
       // object constructor - apply grouping
       result = evaluateGroupExpression(expr, input, environment);
       break;
+    case "-": {
+      result = evaluate(expr.expression, input, environment);
+      if (typeof result === "undefined") {
+        result = undefined;
+      } else if (isNumeric(result)) {
+        result = -result;
+      } else {
+        throw {
+          code: "D1002",
+          position: expr.position,
+          stack: new Error().stack,
+          token: expr.value,
+          value: result,
+        };
+      }
+      break;
+    }
   }
   return result;
 }

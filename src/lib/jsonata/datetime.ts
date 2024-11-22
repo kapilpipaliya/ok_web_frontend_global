@@ -798,11 +798,8 @@ const deltaWeeks = (start, end) => (end - start) / (millisInADay * 7) + 1;
 const getDateTimeFragment = (date, component) => {
   let componentValue;
   switch (component) {
-    case "Y": // year
-      componentValue = date.getUTCFullYear();
-      break;
-    case "M": // month in year
-      componentValue = date.getUTCMonth() + 1;
+    case "C": // calendar name
+      componentValue = "ISO";
       break;
     case "D": // day in month
       componentValue = date.getUTCDate();
@@ -820,6 +817,9 @@ const getDateTimeFragment = (date, component) => {
       componentValue = (today - firstJan) / millisInADay + 1;
       break;
     }
+    case "E": // era
+      componentValue = "ISO";
+      break;
     case "F": {
       // day of week
       componentValue = date.getUTCDay();
@@ -829,6 +829,33 @@ const getDateTimeFragment = (date, component) => {
       }
       break;
     }
+    case "f": // fractional seconds
+      componentValue = date.getUTCMilliseconds();
+      break;
+    case "H": // hour in day (24 hours)
+      componentValue = date.getUTCHours();
+      break;
+    case "h": {
+      // hour in half-day (12 hours)
+      componentValue = date.getUTCHours();
+      componentValue %= 12;
+      if (componentValue === 0) {
+        componentValue = 12;
+      }
+      break;
+    }
+    case "M": // month in year
+      componentValue = date.getUTCMonth() + 1;
+      break;
+    case "m": // minute in hour
+      componentValue = date.getUTCMinutes();
+      break;
+    case "P": // am/pm marker
+      componentValue = date.getUTCHours() >= 12 ? "pm" : "am";
+      break;
+    case "s": // second in minute
+      componentValue = date.getUTCSeconds();
+      break;
     case "W": {
       // week in year
       const thisYear = yearMonth(date.getUTCFullYear(), 0);
@@ -918,39 +945,12 @@ const getDateTimeFragment = (date, component) => {
       }
       break;
     }
-    case "H": // hour in day (24 hours)
-      componentValue = date.getUTCHours();
-      break;
-    case "h": {
-      // hour in half-day (12 hours)
-      componentValue = date.getUTCHours();
-      componentValue %= 12;
-      if (componentValue === 0) {
-        componentValue = 12;
-      }
-      break;
-    }
-    case "P": // am/pm marker
-      componentValue = date.getUTCHours() >= 12 ? "pm" : "am";
-      break;
-    case "m": // minute in hour
-      componentValue = date.getUTCMinutes();
-      break;
-    case "s": // second in minute
-      componentValue = date.getUTCSeconds();
-      break;
-    case "f": // fractional seconds
-      componentValue = date.getUTCMilliseconds();
+    case "Y": // year
+      componentValue = date.getUTCFullYear();
       break;
     case "Z": // timezone
     case "z":
       // since the date object is constructed from epoch millis, the TZ component is always be UTC.
-      break;
-    case "C": // calendar name
-      componentValue = "ISO";
-      break;
-    case "E": // era
-      componentValue = "ISO";
       break;
   }
   return componentValue;

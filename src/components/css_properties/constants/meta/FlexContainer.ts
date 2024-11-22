@@ -2,8 +2,8 @@
 import type { TextFieldOptionsField } from "../FieldSchemaType";
 
 import { defaultPixelSizeTypes } from "../csseditor_constants";
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const gapFields = {
   gap: {

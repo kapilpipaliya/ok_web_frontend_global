@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For } from "solid-js";
+import { For } from "solid-js";
 
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
@@ -21,7 +21,8 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [state] = useCssState();
   const parentItems = useRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta as unknown as DataEditorField;
+  const meta = () =>
+    parentRenderContext()?.context.meta as unknown as DataEditorField;
 
   type Value =
     | FilterAttributes[]

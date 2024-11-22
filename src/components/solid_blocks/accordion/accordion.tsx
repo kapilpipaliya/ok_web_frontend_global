@@ -25,6 +25,7 @@ declare module "solid-js" {
 export type _C = JSX.Directives["closeAccordion"];
 
 const accordionContext = createContext<
+  | []
   | [
       options: { allowMultiple?: boolean; allowToggle?: boolean },
       /** get the index of the current accordion */
@@ -36,7 +37,6 @@ const accordionContext = createContext<
       opened: () => number,
       setOpened: (opened: number) => void,
     ]
-  | []
 >([]);
 
 export type AccordionProps = {

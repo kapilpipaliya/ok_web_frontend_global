@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import {
   dialogCancelButtonClass,
   DialogFooter,
@@ -22,16 +22,16 @@ export function ThemeConfigDialog(
     onClose: () => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
-  }>
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const { showSuccessToast, showWarningToast } = useToast();
   const [error, setError] = createSignal("");
   const [themeData, setThemeData] = createSignal(
-    props.item ? props.item.P.data : ""
+    props.item ? props.item.P.data : "",
   );
   const [themeName, setThemeName] = createSignal(
-    props.item ? props.item.P.key : "New"
+    props.item ? props.item.P.key : "New",
   );
 
   const handleChange = (value: string) => {
@@ -85,7 +85,7 @@ export function ThemeConfigDialog(
       props.item!.id,
       graph,
       setGraph,
-      { data: themeData() }
+      { data: themeData() },
     );
     if (mergeResult.error) {
       setError(mergeResult.error as string);
@@ -108,17 +108,15 @@ export function ThemeConfigDialog(
 
   return (
     <DropdownMenu class="padding:0.50rem" parentRef={props.parentRef}>
-      <DialogHeader
-        title={`Configure Theme [${themeName()}]`}
-      />
+      <DialogHeader title={`Configure Theme [${themeName()}]`} />
       <div class="flex flex:col gap:0.50rem w:400px">
         <Show when={!props.item}>
           <label>Theme Name</label>
           <input
             class={PROPERTIES.Css.TextField}
+            onInput={(e) => handleNameChange(e.target.value)}
             type="text"
             value={themeName()}
-            onInput={(e) => handleNameChange(e.target.value)}
           />
         </Show>
         <label>Theme Configuration</label>

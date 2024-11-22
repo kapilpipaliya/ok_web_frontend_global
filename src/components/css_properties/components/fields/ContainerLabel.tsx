@@ -1,11 +1,11 @@
+import Tooltip from "@corvu/tooltip";
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
-import { IconButton } from "~/components/styled/IconButton";
-import Tooltip from "@corvu/tooltip";
-import { Vertex } from "~/lib/graph/graph";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import type { Vertex } from "~/lib/graph/graph";
+
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 /*
 ┌───────────┐
 │Title x ?  │
@@ -36,16 +36,21 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
       {props.title}
       <Show when={props.info}>
         <Tooltip
-          placement="top"
-          openDelay={200}
           floatingOptions={{
-            offset: 13,
             flip: true,
+            offset: 13,
             shift: true,
           }}
+          openDelay={200}
+          placement="top"
         >
-          <Tooltip.Trigger as="a" href={getUrl()} target="_blank" class="flex ai:center">
-            <Icon icon="mdi:information-outline" width={14} height={14} />
+          <Tooltip.Trigger
+            as="a"
+            class="flex ai:center"
+            href={getUrl()}
+            target="_blank"
+          >
+            <Icon height={14} icon="mdi:information-outline" width={14} />
           </Tooltip.Trigger>
           <Tooltip.Portal>
             <Tooltip.Content class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
@@ -67,10 +72,10 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
       <Show when={props.showResetIcon ?? false}>
         <Icon
           class="cursor:pointer fg:purple"
+          height={20}
           icon="mdi:close"
           onClick={props.onResetIconClick}
           width={20}
-          height={20}
         />
       </Show>
     </span>

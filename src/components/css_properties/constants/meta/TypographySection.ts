@@ -6,8 +6,8 @@ import type {
 } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const TypographySection = {
   fontFamily: createSelectOptions("font-family", "Font family", [

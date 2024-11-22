@@ -35,6 +35,7 @@ import {
   hasPermissions,
 } from "../page_attr_render/permissions";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
+import { CreateGridHeaders } from "./CreateGridHeaders";
 import {
   DataGridProvider,
   type DataGridState,
@@ -44,7 +45,6 @@ import {
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
-import { CreateGridHeaders } from "./CreateGridHeaders";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {

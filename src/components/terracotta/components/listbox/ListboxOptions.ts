@@ -90,19 +90,20 @@ export function ListboxOptions<V, T extends ValidConstructor = "ul">(
         useEventListener(current, "keydown", (e) => {
           if (!selectState.disabled()) {
             switch (e.key) {
-              case "Escape": {
-                disclosureState.close();
+              case " ":
+              case "Enter": {
+                e.preventDefault();
+                break;
+              }
+              case "ArrowDown": {
+                if (!context.horizontal) {
+                  e.preventDefault();
+                  controller.setNextChecked(true);
+                }
                 break;
               }
               case "ArrowLeft": {
                 if (context.horizontal) {
-                  e.preventDefault();
-                  controller.setPrevChecked(true);
-                }
-                break;
-              }
-              case "ArrowUp": {
-                if (!context.horizontal) {
                   e.preventDefault();
                   controller.setPrevChecked(true);
                 }
@@ -115,16 +116,11 @@ export function ListboxOptions<V, T extends ValidConstructor = "ul">(
                 }
                 break;
               }
-              case "ArrowDown": {
+              case "ArrowUp": {
                 if (!context.horizontal) {
                   e.preventDefault();
-                  controller.setNextChecked(true);
+                  controller.setPrevChecked(true);
                 }
-                break;
-              }
-              case "Home": {
-                e.preventDefault();
-                controller.setFirstChecked();
                 break;
               }
               case "End": {
@@ -132,9 +128,13 @@ export function ListboxOptions<V, T extends ValidConstructor = "ul">(
                 controller.setLastChecked();
                 break;
               }
-              case " ":
-              case "Enter": {
+              case "Escape": {
+                disclosureState.close();
+                break;
+              }
+              case "Home": {
                 e.preventDefault();
+                controller.setFirstChecked();
                 break;
               }
               default: {

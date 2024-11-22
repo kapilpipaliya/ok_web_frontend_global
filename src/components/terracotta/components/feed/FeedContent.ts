@@ -40,14 +40,14 @@ export function FeedContent<T extends ValidConstructor = "div">(
       useEventListener(current, "keydown", (e) => {
         if (e.ctrlKey) {
           switch (e.key) {
-            case "Home": {
-              e.preventDefault();
-              context.focusPrev();
-              break;
-            }
             case "End": {
               e.preventDefault();
               context.focusNext();
+              break;
+            }
+            case "Home": {
+              e.preventDefault();
+              context.focusPrev();
               break;
             }
             default:
@@ -55,14 +55,14 @@ export function FeedContent<T extends ValidConstructor = "div">(
           }
         }
         switch (e.key) {
-          case "PageUp": {
-            e.preventDefault();
-            controller.setPrevChecked(false);
-            break;
-          }
           case "PageDown": {
             e.preventDefault();
             controller.setNextChecked(false);
+            break;
+          }
+          case "PageUp": {
+            e.preventDefault();
+            controller.setPrevChecked(false);
             break;
           }
           default:

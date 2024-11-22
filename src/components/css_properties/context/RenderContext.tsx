@@ -1,8 +1,8 @@
 import type { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "../../form/FieldSchemaType";
 import { createContext, type JSX, useContext } from "solid-js";
-import { GenericField } from "../constants/FieldSchemaType";
+
+import type { FunctionArgumentType } from "../../form/FieldSchemaType";
 
 export function getInitialPageRenderStore() {
   return {

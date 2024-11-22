@@ -8,9 +8,9 @@ import type {
 } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { extraPropertyValues } from "./CSSMetadata";
 import { createGridOptions } from "../FieldSchemaType";
 import { Icons } from "../Icons";
+import { extraPropertyValues } from "./CSSMetadata";
 
 export const EffectsSection = {
   filter: {

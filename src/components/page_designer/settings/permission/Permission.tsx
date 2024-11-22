@@ -6,7 +6,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -61,13 +60,13 @@ export function Permission() {
         title="All Form Permissions"
       />
       <div class="mt:.5rem px:0.25rem">
-          <TableInputField
-            isNoPermissionCheck={true}
-            isRealTime={false}
-            txnId={layoutStore.formStore[0].txnId}
-            data={layoutStore.formStore[0]?.formData}
-            meta={graph.vertexes[metaVertexId]}
-          />
+        <TableInputField
+          data={layoutStore.formStore[0]?.formData}
+          isNoPermissionCheck={true}
+          isRealTime={false}
+          meta={graph.vertexes[metaVertexId]}
+          txnId={layoutStore.formStore[0].txnId}
+        />
       </div>
     </div>
   );

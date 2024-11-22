@@ -1,4 +1,4 @@
-import { ParentProps } from "solid-js";
+import type { ParentProps } from "solid-js";
 
 export function TabStickyContainer(props: ParentProps) {
   return (

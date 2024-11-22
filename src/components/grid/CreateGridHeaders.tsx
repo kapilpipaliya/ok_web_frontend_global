@@ -49,7 +49,9 @@ export function CreateGridHeaders(
           </Match>
 
           <Match
-            when={attribute.componentName === "MultiSelect" && !attribute.options}
+            when={
+              attribute.componentName === "MultiSelect" && !attribute.options
+            }
           >
             {getTagValue({
               attribute: attribute,

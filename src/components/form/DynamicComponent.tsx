@@ -10,15 +10,16 @@ import {
   onMount,
   runWithOwner,
   Show,
-  splitProps,
   Switch,
   untrack,
 } from "solid-js";
-import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
+import { evalExpression } from "~/lib/expression_eval";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import {
   type GraphInterface,
@@ -28,28 +29,27 @@ import {
 } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
+import type { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
+
 import { mergeCSS } from "../css_properties/utils/mergeCSS";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
-import { PageAttrRender } from "../page_attr_render/PageAttrRender";
+import { useZIndex } from "../fields/ZIndex";
+import { useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
 } from "../page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 import {
   getConfiguredPermissions,
   hasPermissions,
 } from "../page_attr_render/permissions";
+import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useToast } from "../styled/Toast";
 import { useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useZIndex } from "../fields/ZIndex";
-import { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
-import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
-import { useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
-import { evalExpression } from "~/lib/expression_eval";
 
 export function getText(
   graph: GraphInterface,
@@ -139,7 +139,6 @@ export function DynamicComponent(
     return propertyRuleMap;
   });
 
-
   const allConfiguredPermission = createLazyMemo(() =>
     getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph),
   );
@@ -180,7 +179,7 @@ export function DynamicComponent(
     !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const isDisabledPermission = () => {
     return isNoPermissionCheck() ? undefined : hasPermission();
-  }
+  };
 
   const getFunctionArgumentBase = () =>
     ({
@@ -235,8 +234,7 @@ export function DynamicComponent(
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
     const baseArguments = getFunctionArgumentBase();
 
-    return Object.assign(baseArguments, {
-    });
+    return Object.assign(baseArguments, {});
   };
 
   const onChange = (value: unknown) => {
@@ -412,7 +410,6 @@ export function DynamicComponent(
     return ifNotNull(props.data?.P[props.meta.P[IdAttr]]);
   });
 
-
   const getFunctionArgumentWithValue = () => {
     return untrack(() => {
       const functionArgumentDescriptors = Object.getOwnPropertyDescriptors(
@@ -485,17 +482,16 @@ export function DynamicComponent(
   const dynamicProps = createMemo(() => {
     if (typeof props.meta.P.otherProps === "function") {
       const dynamicPropsObj =
-        (props.meta.P.otherProps!(
-          getFunctionArgumentWithValue(),
-        )) || {};
+        props.meta.P.otherProps!(getFunctionArgumentWithValue()) || {};
       return getMetaProps(dynamicPropsObj, []);
     } else if (typeof props.meta.P.otherProps === "string") {
       try {
         const otherPropsFunction = new Function(
           "args",
-          props.meta.P.otherProps
+          props.meta.P.otherProps,
         );
-        const dynamicPropsObj = otherPropsFunction(getFunctionArgumentWithValue()) || {};
+        const dynamicPropsObj =
+          otherPropsFunction(getFunctionArgumentWithValue()) || {};
         return getMetaProps(dynamicPropsObj, []);
       } catch (error) {
         console.error("Error evaluating otherProps function:", error);
@@ -506,15 +502,13 @@ export function DynamicComponent(
   });
 
   const isHidden = () => {
-    const hiddenProp =
-      dynamicProps().hidden ?? props.meta.P.hidden;
+    const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;
     const result =
       typeof hiddenProp === "function"
         ? hiddenProp(getFunctionArgumentWithValue())
         : hiddenProp;
     return result;
   };
-
 
   const isViewMode = () =>
     // @ts-ignore
@@ -525,15 +519,15 @@ export function DynamicComponent(
   const isReadOnly = () =>
     // @ts-ignore
     props.isReadOnly ??
-    (dynamicProps()).readOnly ??
+    dynamicProps().readOnly ??
     props.meta.P.readOnly ??
     parentRenderContext()?.context.readOnly;
 
   const repeterStore = createStore({
-    data: [] as Vertex[],
     get context() {
       return getFunctionArgumentWithValue();
     },
+    data: [] as Vertex[],
     vertexes: [] as Vertex[],
   });
 
@@ -580,36 +574,49 @@ export function DynamicComponent(
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
           onChange={onChange}
+          ref={setRef}
           txnId={props.txnId}
           value={value()}
-          ref={setRef}
           {...expressionProperties()}
           disabled={
             isNoPermissionCheck()
               ? props.meta.P.disabled
-              : props.disabled ??
+              : (props.disabled ??
                 previewStore.isViewOnly ??
                 isDisabledPermission() ??
                 expressionProperties().disabled ??
-                props.meta.P.disabled
+                props.meta.P.disabled)
           }
           // added:
           isViewMode={isViewMode()}
           readOnly={isReadOnly()}
           {...dynamicProps()}
           // merged class
-          {...([...Object.keys(deNullifyAndMergeCSS()).filter((key) => key.toLowerCase().endsWith("class")),
-              ...Object.keys(expressionProperties()).filter((key) => key.toLowerCase().endsWith("class")),
-              ...Object.keys(dynamicProps()).filter((key) => key.toLowerCase().endsWith("class"))
-            ].reduce((acc, key) => {
-              acc[key] = `${deNullifyAndMergeCSS()[key] || ''} ${expressionProperties()[key] || ''} ${dynamicProps()[key] || ''}`.trim();
+          {...[
+            ...Object.keys(deNullifyAndMergeCSS()).filter((key) =>
+              key.toLowerCase().endsWith("class"),
+            ),
+            ...Object.keys(expressionProperties()).filter((key) =>
+              key.toLowerCase().endsWith("class"),
+            ),
+            ...Object.keys(dynamicProps()).filter((key) =>
+              key.toLowerCase().endsWith("class"),
+            ),
+          ].reduce(
+            (acc, key) => {
+              acc[key] =
+                `${deNullifyAndMergeCSS()[key] || ""} ${expressionProperties()[key] || ""} ${dynamicProps()[key] || ""}`.trim();
               return acc;
-            }, {} as Record<string, any>))}
+            },
+            {} as Record<string, any>,
+          )}
         >
           <Show
-            fallback={<Show when={props.meta.id}>
-              <PageAttrRender data={props.data} metaVertex={props.meta} />
-            </Show>}
+            fallback={
+              <Show when={props.meta.id}>
+                <PageAttrRender data={props.data} metaVertex={props.meta} />
+              </Show>
+            }
             // @ts-ignore
             when={props.children}
           >
@@ -639,9 +646,7 @@ export function DynamicComponent(
           userRoles={graph.userRoles}
         />
       </Show> */}
-      <PageRenderContextProvider
-        store={repeterStore}
-      >
+      <PageRenderContextProvider store={repeterStore}>
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
           {/* @ts-ignore */}
@@ -688,7 +693,7 @@ export function DynamicComponent(
               component() &&
               (isNoPermissionCheck() || !hasNoPermission())
             }
-          > 
+          >
             <Switch>
               {/* <Match
                 when={

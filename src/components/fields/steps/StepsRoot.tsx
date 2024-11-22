@@ -1,14 +1,16 @@
-import { createMemo, createSignal, type ParentProps } from "solid-js";
+import { createMemo, createSignal, } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { StepsContext, type StepsContextValue } from "./StepsContext";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import type { GenericComponentProps } from "../FieldType";
-import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import type { GenericComponentProps } from "../FieldType";
+
+import { StepsContext, type StepsContextValue } from "./StepsContext";
 
 interface StepsRootProps extends Readonly<GenericComponentProps> {
   defaultStepIndex?: number;
@@ -29,11 +31,14 @@ export function StepsRoot(props: StepsRootProps) {
   );
   const [isGoingToPreviousStep, setIsGoingToPreviousStep] = createSignal(false);
 
-  const childrenAttrs = createMemo(() => getChildrenAttrs(graph, setGraph, meta()!));
+  const childrenAttrs = createMemo(() =>
+    getChildrenAttrs(graph, setGraph, meta()!),
+  );
 
   const steps = () =>
     childrenAttrs().filter(
-      (child) => getComponentLabel(graph, child) === "Step" && !child.P.stepName,
+      (child) =>
+        getComponentLabel(graph, child) === "Step" && !child.P.stepName,
     ) ?? [];
   const stepsWithName = () =>
     childrenAttrs().filter(
@@ -76,14 +81,14 @@ export function StepsRoot(props: StepsRootProps) {
     canGoToPreviousStep,
     currentNamedStep,
     currentStepIndex,
+    get data() {
+      return data();
+    },
     goToNextStep,
     goToPreviousStep,
     isGoingToPreviousStep,
     get meta() {
       return meta()!;
-    },
-    get data() {
-      return data();
     },
     setCurrentNamedStep,
     setCurrentStepIndex,
@@ -94,9 +99,13 @@ export function StepsRoot(props: StepsRootProps) {
 
   return (
     <StepsContext.Provider value={stepsStore}>
-      <PageAttrRender data={data()} metaVertex={meta()!} filter={(child) => {
-        return getComponentLabel(graph, child) !== "Step";
-      }}/>
+      <PageAttrRender
+        data={data()}
+        filter={(child) => {
+          return getComponentLabel(graph, child) !== "Step";
+        }}
+        metaVertex={meta()!}
+      />
     </StepsContext.Provider>
   );
 }

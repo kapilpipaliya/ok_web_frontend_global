@@ -1,5 +1,6 @@
-import * as path from "path";
 import * as compose from "docker-compose";
+import * as path from "path";
+
 import { getBaseDir } from "../upload/getBaseDir";
 
 export async function startMemgraphService(subdomain: string): Promise<string> {
@@ -8,7 +9,7 @@ export async function startMemgraphService(subdomain: string): Promise<string> {
   const mgplatComposePath: string = path.join(mgplatDir, "docker-compose.yml");
 
   console.log(
-    `Starting Memgraph service using docker-compose file from: ${mgplatComposePath}`
+    `Starting Memgraph service using docker-compose file from: ${mgplatComposePath}`,
   );
 
   try {
@@ -21,4 +22,3 @@ export async function startMemgraphService(subdomain: string): Promise<string> {
 
   return "";
 }
-

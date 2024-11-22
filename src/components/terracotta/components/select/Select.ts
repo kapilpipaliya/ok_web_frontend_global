@@ -143,10 +143,15 @@ export function Select<V, T extends ValidConstructor = "ul">(
         useEventListener(current, "keydown", (e) => {
           if (!state.disabled()) {
             switch (e.key) {
-              case "ArrowUp": {
+              case " ":
+              case "Enter": {
+                e.preventDefault();
+                break;
+              }
+              case "ArrowDown": {
                 if (!props.horizontal) {
                   e.preventDefault();
-                  controller.setPrevChecked(true);
+                  controller.setNextChecked(true);
                 }
                 break;
               }
@@ -157,13 +162,6 @@ export function Select<V, T extends ValidConstructor = "ul">(
                 }
                 break;
               }
-              case "ArrowDown": {
-                if (!props.horizontal) {
-                  e.preventDefault();
-                  controller.setNextChecked(true);
-                }
-                break;
-              }
               case "ArrowRight": {
                 if (props.horizontal) {
                   e.preventDefault();
@@ -171,9 +169,11 @@ export function Select<V, T extends ValidConstructor = "ul">(
                 }
                 break;
               }
-              case "Home": {
-                e.preventDefault();
-                controller.setFirstChecked();
+              case "ArrowUp": {
+                if (!props.horizontal) {
+                  e.preventDefault();
+                  controller.setPrevChecked(true);
+                }
                 break;
               }
               case "End": {
@@ -181,9 +181,9 @@ export function Select<V, T extends ValidConstructor = "ul">(
                 controller.setLastChecked();
                 break;
               }
-              case " ":
-              case "Enter": {
+              case "Home": {
                 e.preventDefault();
+                controller.setFirstChecked();
                 break;
               }
               default: {

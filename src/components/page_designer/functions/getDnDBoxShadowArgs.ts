@@ -15,19 +15,19 @@ export function getDnDBoxShadowArgs(
   };
 
   switch (position) {
-    case "center":
-      boxShadowProps.spread = "2px";
-      break;
-    case "before": {
-      boxShadowProps["offset-y"] = "8px";
-      boxShadowProps.spread = "-6px";
-      break;
-    }
     case "after": {
       boxShadowProps["offset-y"] = "-8px";
       boxShadowProps.spread = "-6px";
       break;
     }
+    case "before": {
+      boxShadowProps["offset-y"] = "8px";
+      boxShadowProps.spread = "-6px";
+      break;
+    }
+    case "center":
+      boxShadowProps.spread = "2px";
+      break;
     case "left": {
       boxShadowProps["offset-x"] = "8px";
       boxShadowProps.spread = "-6px";

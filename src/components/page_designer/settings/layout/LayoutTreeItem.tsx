@@ -5,13 +5,13 @@ import { handleDragStart } from "~/components/page_designer/event_handler/handle
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
 import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { handleDragOver } from "../../event_handler/handleDragOver";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { handleDragOver } from "../../event_handler/handleDragOver";
+import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";

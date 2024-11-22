@@ -11,6 +11,7 @@ export function FormConfig() {
   return (
     <PageViewWrapper
       dataId={params.id}
+      hideSaveCancelButton={true}
       initializeFormStoreParent={(formStore) => {
         // direct assignment not make it reactive
         setLayoutStore?.({
@@ -21,7 +22,6 @@ export function FormConfig() {
       }}
       isNoPermissionCheck={true}
       pageVertexName={params.entity}
-      hideSaveCancelButton={true}
     />
   );
 }

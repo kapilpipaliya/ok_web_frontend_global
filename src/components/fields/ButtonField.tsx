@@ -1,7 +1,15 @@
 import type { JSX } from "solid-js";
 
+import { mergeRefs, } from "@solid-primitives/refs";
 import { useNavigate } from "@solidjs/router";
-import { createEffect, createMemo, getOwner, runWithOwner, Show, splitProps } from "solid-js";
+import {
+  createEffect,
+  getOwner,
+  runWithOwner,
+  Show,
+  splitProps,
+} from "solid-js";
+import { Dynamic } from "solid-js/web";
 
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -11,18 +19,17 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
+import { createLongPress } from "~/lib/hooks/createLongPress";
+
+import type { FunctionArgumentType } from "../form/FieldSchemaType";
+import type { GenericComponentProps } from "./FieldType";
 
 import { useFormContext } from "../form/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
+import { useToast } from "../styled/Toast";
 import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";
-import { useToast } from "../styled/Toast";
-import { GenericComponentProps } from "./FieldType";
-import { FunctionArgumentType } from "../form/FieldSchemaType";
-import { Dynamic } from "solid-js/web";
-import { createLongPress } from "~/lib/hooks/createLongPress";
-import { mergeRefs, Ref } from "@solid-primitives/refs";
 
 interface ButtonProps
   extends Omit<
@@ -78,8 +85,8 @@ export function ButtonField(props: Readonly<ButtonProps>) {
       if (current.tagName !== "BUTTON") {
         useEventListener(current, "keydown", (e) => {
           switch (e.key) {
-            case "Enter":
-            case " ": {
+            case " ":
+            case "Enter": {
               onClick();
               break;
             }
@@ -118,51 +125,55 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   };
   const onClick = () => {
     runWithOwner(owner, () => {
-        if (previewStore.isDesignMode) {
+      if (previewStore.isDesignMode) {
+        return;
+      }
+      if (local.buttonType === "submit") {
+        if (previewStore.isViewOnly) {
           return;
         }
-        if (local.buttonType === "submit") {
-          if (previewStore.isViewOnly) {
-            return;
-          }
-          onSubmit();
-        } else if (local.buttonType === "cancel") {
-          onCancel();
-        } else if (local.buttonType === "reset") {
-          onReset();
-        } else if (local.onClick) {
-          local.onClick(parentRenderContext()?.context ?? {} as FunctionArgumentType);
-        }
+        onSubmit();
+      } else if (local.buttonType === "cancel") {
+        onCancel();
+      } else if (local.buttonType === "reset") {
+        onReset();
+      } else if (local.onClick) {
+        local.onClick(
+          parentRenderContext()?.context ?? ({} as FunctionArgumentType),
+        );
       }
-    );
+    });
   };
 
   const { handlePressEnd, handlePressStart } = createLongPress(local);
 
   return (
     // <Show when={!(previewStore.isViewOnly && local.type === "submit")}>
-    <Show fallback={
+    <Show
+      fallback={
+        <Dynamic
+          component={local.as ?? (others.href ? "a" : "button")}
+          ref={mergeRefs(props.ref, setInternalRef)}
+          tabIndex={props.disabled ? -1 : undefined}
+          {...others}
+          onClick={onClick}
+          onMouseDown={local.onMouseDown}
+          onMouseLeave={local.onMouseLeave}
+          onMouseUp={local.onMouseUp}
+          onTouchCancel={local.onTouchCancel}
+          onTouchEnd={local.onTouchEnd}
+          onTouchStart={local.onTouchStart}
+        >
+          {local.text}
+          {local.children}
+        </Dynamic>
+      }
+      when={props.onLongPress}
+    >
       <Dynamic
         component={local.as ?? (others.href ? "a" : "button")}
-        tabIndex={props.disabled ? -1 : undefined}
         ref={mergeRefs(props.ref, setInternalRef)}
-        {...others}
-        onClick={onClick}
-        onMouseDown={local.onMouseDown}
-        onMouseLeave={local.onMouseLeave}
-        onMouseUp={local.onMouseUp}
-        onTouchCancel={local.onTouchCancel}
-        onTouchEnd={local.onTouchEnd}
-        onTouchStart={local.onTouchStart}
-      >
-        {local.text}
-        {local.children}
-      </Dynamic>
-    } when={props.onLongPress}>
-      <Dynamic
-        component={local.as ?? (others.href ? "a" : "button")}
         tabIndex={props.disabled ? -1 : undefined}
-        ref={mergeRefs(props.ref, setInternalRef)}
         {...others}
         onClick={onClick}
         // setting event handlers here like {...getEventHandlers()} re-renders the childrens! not sure why that behaves that way, used <Show> to not set dynamic event handlers here

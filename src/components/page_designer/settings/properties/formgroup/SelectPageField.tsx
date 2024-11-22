@@ -1,6 +1,6 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { IconButton } from "~/components/styled/IconButton";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { Label } from "./Label";

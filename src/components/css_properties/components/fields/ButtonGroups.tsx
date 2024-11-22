@@ -1,6 +1,6 @@
+import Tooltip from "@corvu/tooltip";
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, splitProps } from "solid-js";
-import Tooltip from "@corvu/tooltip";
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
@@ -8,7 +8,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);
   const handleChange = (
     _e: Event,
-    option: { key: JSX.Element; value: string }
+    option: { key: JSX.Element; value: string },
   ) => {
     local.onChange?.(option.value);
   };
@@ -20,13 +20,13 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
           return (
             <label class="flex:1 text:center">
               <Tooltip
-                placement="top"
-                openDelay={200}
                 floatingOptions={{
-                  offset: 13,
                   flip: true,
+                  offset: 13,
                   shift: true,
                 }}
+                openDelay={200}
+                placement="top"
               >
                 <Tooltip.Trigger
                   as="span"

@@ -9,7 +9,11 @@ import { ChipDropDown } from "~/components/styled/Chip";
 import { CustomModal } from "~/components/styled/CustomModal";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { IconButton } from "~/components/styled/IconButton";
-import { Table, TableBodyCell, TableHeadCell } from "~/components/styled/SimpleTable";
+import {
+  Table,
+  TableBodyCell,
+  TableHeadCell,
+} from "~/components/styled/SimpleTable";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";

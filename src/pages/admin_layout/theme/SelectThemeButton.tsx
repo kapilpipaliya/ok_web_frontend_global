@@ -27,7 +27,7 @@ export function SelectThemeButton() {
           onClickOutside={() => setIsThemeOptionsOpen(false)}
           parentRef={buttonRef()!}
         >
-          <SelectThemeMenu/>
+          <SelectThemeMenu />
         </DropdownMenu>
       </Show>
     </>

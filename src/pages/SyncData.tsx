@@ -101,7 +101,7 @@ export function SyncData() {
         );
       } else {
         setSelectedUsers((prev) => [
-          ...new Set([...prev, ...displayedUsers().map((user) => user)]),
+          ...new Set([...displayedUsers().map((user) => user), ...prev]),
         ]);
       }
     };

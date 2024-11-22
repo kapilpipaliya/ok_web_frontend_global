@@ -1,7 +1,7 @@
 import fs from "node:fs";
-import nodemailer from "nodemailer"; // Use the Node.js fs module to read HTML files
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import nodemailer from "nodemailer"; // Use the Node.js fs module to read HTML files
 
 // Define an async function to send emails
 export async function sendEmail(to: string, username: any) {

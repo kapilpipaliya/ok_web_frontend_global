@@ -1,12 +1,12 @@
 import { type Accessor, createMemo } from "solid-js";
 
+import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 
 export function Step(
   props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[] }>,

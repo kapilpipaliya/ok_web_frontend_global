@@ -1,11 +1,12 @@
-import { execSync } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
-import { getBaseDir } from "../upload/getBaseDir";
+
 import * as compose from "docker-compose";
+import * as fs from "fs";
+import * as path from "path";
+
+import { getBaseDir } from "../upload/getBaseDir";
 
 export async function removeDockerComposeDirectory(
-  subdomain: string
+  subdomain: string,
 ): Promise<string> {
   const dir: string = getBaseDir();
   const mgplatDir: string = path.join(dir, subdomain, "memgraph-platform");
@@ -14,8 +15,8 @@ export async function removeDockerComposeDirectory(
   try {
     // Stop Docker Compose
     await compose.downAll({
-      cwd: mgplatDir,
       config: mgplatComposePath,
+      cwd: mgplatDir,
     });
 
     // Remove directory

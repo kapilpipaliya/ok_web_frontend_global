@@ -1,8 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
+import type { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
 export async function getRootData(

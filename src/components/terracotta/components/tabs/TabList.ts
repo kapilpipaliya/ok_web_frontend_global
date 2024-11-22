@@ -48,10 +48,10 @@ export function TabList<V, T extends ValidConstructor = "div">(
       useEventListener(current, "keydown", (e) => {
         if (!state.disabled()) {
           switch (e.key) {
-            case "ArrowUp": {
+            case "ArrowDown": {
               if (!rootContext.horizontal) {
                 e.preventDefault();
-                controller.setPrevChecked(true);
+                controller.setNextChecked(true);
               }
               break;
             }
@@ -62,13 +62,6 @@ export function TabList<V, T extends ValidConstructor = "div">(
               }
               break;
             }
-            case "ArrowDown": {
-              if (!rootContext.horizontal) {
-                e.preventDefault();
-                controller.setNextChecked(true);
-              }
-              break;
-            }
             case "ArrowRight": {
               if (rootContext.horizontal) {
                 e.preventDefault();
@@ -76,14 +69,21 @@ export function TabList<V, T extends ValidConstructor = "div">(
               }
               break;
             }
-            case "Home": {
-              e.preventDefault();
-              controller.setFirstChecked();
+            case "ArrowUp": {
+              if (!rootContext.horizontal) {
+                e.preventDefault();
+                controller.setPrevChecked(true);
+              }
               break;
             }
             case "End": {
               e.preventDefault();
               controller.setLastChecked();
+              break;
+            }
+            case "Home": {
+              e.preventDefault();
+              controller.setFirstChecked();
               break;
             }
           }

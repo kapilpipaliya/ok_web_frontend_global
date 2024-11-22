@@ -1,21 +1,23 @@
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useRepeaterVertexContext } from "~/components/page_attr_render/context/PageAttrContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFormContext } from "../form/FormContext";
-import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
+import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
+import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 
 export function PageAttrRender(
-  props: Readonly<{ data?: Vertex; metaVertex: Vertex; filter?: (vertex: Vertex) => boolean }>,
+  props: Readonly<{
+    data?: Vertex;
+    filter?: (vertex: Vertex) => boolean;
+    metaVertex: Vertex;
+  }>,
 ) {
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];

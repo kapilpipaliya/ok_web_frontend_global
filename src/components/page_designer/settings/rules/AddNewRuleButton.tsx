@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { ZIndex } from "~/components/fields/ZIndex";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 
 import { AddNewRule } from "./AddNewRule";
 

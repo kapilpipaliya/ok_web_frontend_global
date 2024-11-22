@@ -2,8 +2,9 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getChildrenAttrs } from "./getChildrenAttrs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import { getChildrenAttrs } from "./getChildrenAttrs";
 
 export function sortChildren(
   graph: Store<GraphInterface>,

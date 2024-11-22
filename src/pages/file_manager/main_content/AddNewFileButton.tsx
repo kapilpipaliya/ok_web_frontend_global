@@ -3,11 +3,10 @@ import { useToast } from "~/components/styled/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentDirectory } from "~/lib/meta/file/File";
 
-import { useFileManagerStore } from "../FileManagerContext";
 import { handleDataSubmission } from "../../../lib/graph/mutate/handleDataSubmission";
+import { useFileManagerStore } from "../FileManagerContext";
 export function AddNewFileButton() {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore] = useFileManagerStore();
@@ -45,10 +44,17 @@ export function AddNewFileButton() {
       folder.id,
     );
 
-      const isSuccess = await handleDataSubmission(newFormTxnId, graph, setGraph, showErrorToast, showSuccessToast, {
-        successMessage: "File uploaded successfully",
+    const isSuccess = await handleDataSubmission(
+      newFormTxnId,
+      graph,
+      setGraph,
+      showErrorToast,
+      showSuccessToast,
+      {
         errorMessage: "An error occurred while uploading the file",
-      });
+        successMessage: "File uploaded successfully",
+      },
+    );
     if (isSuccess) {
       fileManagerStore.gridStore?.[0].fetchTableData();
     }

@@ -1,6 +1,18 @@
-import { JSX, splitProps, onCleanup, onMount, createEffect, on } from "solid-js";
+import {
+  createEffect,
+  type JSX,
+  on,
+  onCleanup,
+  onMount,
+  splitProps,
+} from "solid-js";
 
-export function JsonEditorField(props: { json: any, onChange: (updatedContent: any) => void } & JSX.HTMLAttributes<HTMLDivElement>) {
+export function JsonEditorField(
+  props: {
+    json: any;
+    onChange: (updatedContent: any) => void;
+  } & JSX.HTMLAttributes<HTMLDivElement>,
+) {
   const [local, divProps] = splitProps(props, ["json", "onChange"]);
   let containerRef: HTMLDivElement | undefined;
   let root: any;
@@ -10,12 +22,12 @@ export function JsonEditorField(props: { json: any, onChange: (updatedContent: a
   };
 
   const renderReactComponent = async () => {
-    const ReactJsonView = await import('@microlink/react-json-view');
+    const ReactJsonView = await import("@microlink/react-json-view");
     if (containerRef) {
       // @ts-ignore
-      const { createRoot } = await import('react-dom/client');
+      const { createRoot } = await import("react-dom/client");
       // @ts-ignore
-      const React = await import('react');
+      const React = await import("react");
       const ReactJsonViewComponent = ReactJsonView.default;
 
       if (!root) {
@@ -23,11 +35,13 @@ export function JsonEditorField(props: { json: any, onChange: (updatedContent: a
       }
       root.render(
         React.createElement(ReactJsonViewComponent, {
-          src: local.json,
-          onEdit: (edit: any) => handleOnChange(JSON.stringify(edit.updated_src)),
           onAdd: (add: any) => handleOnChange(JSON.stringify(add.updated_src)),
-          onDelete: (del: any) => handleOnChange(JSON.stringify(del.updated_src)),
-        })
+          onDelete: (del: any) =>
+            handleOnChange(JSON.stringify(del.updated_src)),
+          onEdit: (edit: any) =>
+            handleOnChange(JSON.stringify(edit.updated_src)),
+          src: local.json,
+        }),
       );
     }
   };
@@ -36,9 +50,15 @@ export function JsonEditorField(props: { json: any, onChange: (updatedContent: a
     renderReactComponent();
   });
 
-  createEffect(on(() => JSON.parse(JSON.stringify(local.json)), () => {
-    renderReactComponent();
-  }, { defer: true }));
+  createEffect(
+    on(
+      () => JSON.parse(JSON.stringify(local.json)),
+      () => {
+        renderReactComponent();
+      },
+      { defer: true },
+    ),
+  );
 
   onCleanup(() => {
     if (containerRef) {
@@ -47,7 +67,10 @@ export function JsonEditorField(props: { json: any, onChange: (updatedContent: a
   });
 
   return (
-    <div {...divProps} class="overflow:auto h:400px" ref={el => containerRef = el}>
-    </div>
+    <div
+      {...divProps}
+      class="h:400px overflow:auto"
+      ref={(el) => (containerRef = el)}
+    ></div>
   );
 }

@@ -1,9 +1,9 @@
-import { createSignal, For, Match, ParentProps, Switch } from "solid-js";
+import { createSignal, For, Match, Switch } from "solid-js";
 
+import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
-import { TabButton } from "../settings/TabButton";
-import { TabStickyContainer, TabsContainer } from "./TabsContainer";
+import { TabsContainer, TabStickyContainer } from "./TabsContainer";
 
 export function FormElementTabs() {
   const leftMenuTabs = [

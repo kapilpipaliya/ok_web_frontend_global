@@ -1,15 +1,24 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { type Component, createEffect, createSignal, JSX, onCleanup, Show, splitProps } from "solid-js";
+import {
+  createSignal,
+  onCleanup,
+  Show,
+  splitProps,
+} from "solid-js";
 
-import type { OptionType, TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
+import type {
+  OptionType,
+  TextFieldOptionsField,
+} from "~/components/css_properties/constants/FieldSchemaType";
 
-import { FilePickerButton } from "./FilePickerButton";
+import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
+
 import { getValueWithoutUnits } from "../../../../../lib/data_structure/number/getValueWithoutUnits";
+import { FilePickerButton } from "./FilePickerButton";
 import { IncrementButton } from "./IncrementButton";
 import { InputField } from "./InputField";
 import { SuggestionsDropdown } from "./SuggestionsDropdown";
 import { UnitsDropdown } from "./UnitsDropdown";
-import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
 
 export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
   // input will automatically display value without units, if its number field.
@@ -21,7 +30,12 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
       ""
     );
   }
-  const [local, others] = splitProps(props, ["componentName", "onChange", "containerClass", "showFilePicker"]);
+  const [local, others] = splitProps(props, [
+    "componentName",
+    "onChange",
+    "containerClass",
+    "showFilePicker",
+  ]);
 
   function changeValue(value?: string) {
     local.onChange?.(value);
@@ -117,7 +131,6 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
   }
 
   const handleInputChange = (event: Event) => {
- 
     const target = event.target as HTMLInputElement;
     const value = target.value;
 
@@ -164,7 +177,10 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
 
   return (
     <>
-      <div class={`${local.containerClass ?? ""} b:1px|solid|#ccc p:0|5|0|5 flex rel ai:center jc:space-between r:5 ${props.isLabelOnTop ? "" : "max-w:50% w:50%"}`} ref={setReference}>
+      <div
+        class={`${local.containerClass ?? ""} ${props.isLabelOnTop ? "" : "max-w:50% w:50%"} flex rel ai:center b:1px|solid|#ccc jc:space-between p:0|5|0|5 r:5`}
+        ref={setReference}
+      >
         <Show when={props.leftIcon || props.type === "number"}>
           <Show
             fallback={<IncrementButton downIncrement={downIncrement} />}
@@ -175,12 +191,12 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
         </Show>
         <InputField
           handleChange={handleInputChange}
-          onFocus={handleInputFocus}
-          value={props.value}
           inputProps={props.inputProps}
-          type={props.type}
-          placeholder={props.placeholder}
           label={props.label}
+          onFocus={handleInputFocus}
+          placeholder={props.placeholder}
+          type={props.type}
+          value={props.value}
         />
         <Show when={props.showFilePicker}>
           <FilePickerButton
@@ -189,13 +205,13 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
           />
         </Show>
         <UnitsDropdown
-          unitOptions={props.unitOptions ?? []}
           isDropdownOpen={isDropdownOpen}
           reference={reference}
           selectedOption={selectedUnitOption}
           selectOption={selectOption}
           setIsDropdownOpen={setIsDropdownOpen}
           toggleDropdown={toggleDropdown}
+          unitOptions={props.unitOptions ?? []}
         />
       </div>
       <Show when={isAnotherDropdownOpen() && filteredOptions().length > 0}>

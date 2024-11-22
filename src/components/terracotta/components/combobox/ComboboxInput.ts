@@ -56,8 +56,13 @@ export function ComboboxInput<T extends ValidConstructor = "input">(
       useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case "Escape": {
-              disclosureState.close();
+            case "ArrowDown": {
+              e.preventDefault();
+              if (disclosureState.isOpen()) {
+                context.controller.setNextChecked(true);
+              } else {
+                disclosureState.open();
+              }
               break;
             }
             case "ArrowUp": {
@@ -69,20 +74,15 @@ export function ComboboxInput<T extends ValidConstructor = "input">(
               }
               break;
             }
-            case "ArrowDown": {
-              e.preventDefault();
-              if (disclosureState.isOpen()) {
-                context.controller.setNextChecked(true);
-              } else {
-                disclosureState.open();
-              }
-              break;
-            }
             case "Enter": {
               e.preventDefault();
               if (disclosureState.isOpen()) {
                 context.selectedDescendant = context.activeDescendant;
               }
+              break;
+            }
+            case "Escape": {
+              disclosureState.close();
               break;
             }
             default:

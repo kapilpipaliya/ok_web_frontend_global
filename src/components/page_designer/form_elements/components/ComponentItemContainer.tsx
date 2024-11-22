@@ -2,8 +2,8 @@ import type { JSX } from "solid-js";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { onCompDragStart } from "./onCompDragStart";
 
 export function ComponentItemContainer(props: {

@@ -12,10 +12,6 @@ import {
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { AddNewButton } from "~/components/grid/AddNew";
-import {
-  RepeaterVertexContext,
-  useRepeaterVertexContext,
-} from "~/components/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -31,12 +27,12 @@ import { SortableRow } from "./SortableRow";
 export function TableInputField(
   props: Readonly<
     {
+      data?: Vertex;
       isNoPermissionCheck?: boolean;
       isRealTime?: boolean;
       isTableInside?: boolean;
-      txnId?: number;
       meta?: Vertex;
-      data?: Vertex;
+      txnId?: number;
     } & GenericComponentProps
   >,
 ) {
@@ -166,21 +162,21 @@ export function TableInputField(
             <tbody>
               <For each={sortedVertexes()}>
                 {(vertex, index) => (
-                    <SortableRow
-                      dragFromIndex={dragFromIndex}
-                      dragToIndex={dragToIndex}
-                      handleDrop={handleDrop}
-                      isNoPermissionCheck={props.isNoPermissionCheck}
-                      isRealTime={props.isRealTime ?? false}
-                      joinVertex={vertex}
-                      meta={meta()!}
-                      onChange={props.onChange}
-                      rowIndex={index()}
-                      setDragFromIndex={setDragFromIndex}
-                      setDragToIndex={setDragToIndex}
-                      tableColumnsTemplate={tableColumnsTemplate}
-                      txnId={props.txnId ?? 0}
-                    />
+                  <SortableRow
+                    dragFromIndex={dragFromIndex}
+                    dragToIndex={dragToIndex}
+                    handleDrop={handleDrop}
+                    isNoPermissionCheck={props.isNoPermissionCheck}
+                    isRealTime={props.isRealTime ?? false}
+                    joinVertex={vertex}
+                    meta={meta()!}
+                    onChange={props.onChange}
+                    rowIndex={index()}
+                    setDragFromIndex={setDragFromIndex}
+                    setDragToIndex={setDragToIndex}
+                    tableColumnsTemplate={tableColumnsTemplate}
+                    txnId={props.txnId ?? 0}
+                  />
                 )}
               </For>
             </tbody>

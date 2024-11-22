@@ -1,10 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
+import { createMemo, For, type JSX, Show } from "solid-js";
 
 import { FormContext } from "~/components/form/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
+import {
+  TabsContainer,
+  TabStickyContainer,
+} from "../form_elements/TabsContainer";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
@@ -12,10 +16,8 @@ import { LayoutTree } from "./layout/LayoutTree";
 import { Permission } from "./permission/Permission";
 import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
-import { FormStatusWrapper } from "./status/FormStatusWrapper";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
-import { TabsContainer, TabStickyContainer } from "../form_elements/TabsContainer";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -34,17 +36,17 @@ export function SettingTabs() {
 
   const TabList = () => (
     <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
-    <For each={tabs()}>
-      {(data) => (
-        <TabButton
-          data={data}
-          isSelected={layoutStore.selectedTab === data}
-          onClick={() => setLayoutStore("selectedTab", data)}
-        />
-      )}
-    </For>
-  </ul>
-  )
+      <For each={tabs()}>
+        {(data) => (
+          <TabButton
+            data={data}
+            isSelected={layoutStore.selectedTab === data}
+            onClick={() => setLayoutStore("selectedTab", data)}
+          />
+        )}
+      </For>
+    </ul>
+  );
 
   const Tabs = () => (
     <TabStickyContainer>
@@ -56,7 +58,7 @@ export function SettingTabs() {
         width={30}
       />
       <TabsContainer>
-       <TabList />
+        <TabList />
       </TabsContainer>
     </TabStickyContainer>
   );
@@ -77,7 +79,9 @@ export function SettingTabs() {
             <FormStatus />
           </Show>
           {/* Keep Display:none to keep expanded state */}
-          <div classList={{ "display:none": layoutStore.selectedTab !== "layers" }}>
+          <div
+            classList={{ "display:none": layoutStore.selectedTab !== "layers" }}
+          >
             <LayoutTree />
           </div>
 

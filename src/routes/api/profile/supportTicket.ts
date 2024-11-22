@@ -78,16 +78,6 @@ export async function supportTicket(
   async function chat(payload: any, dbSession: Session, _subDomain: string) {
     const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
-      case "send": {
-        // deleted this function intentionally, use mutation handler instead
-        /*const data = await newRowMGCall(
-          parentVertexId,
-          "SupportUser",
-          "",
-          newMessage,
-        );
-        return data;*/
-      }
       case "get": {
         const query = "MATCH (v) WHERE id(v) = $id RETURN v";
         const result = await dbSession.run(query, { id: parentVertexId });
@@ -99,6 +89,16 @@ export async function supportTicket(
           10,
         );
         return messagesResult.result;
+      }
+      case "send": {
+        // deleted this function intentionally, use mutation handler instead
+        /*const data = await newRowMGCall(
+          parentVertexId,
+          "SupportUser",
+          "",
+          newMessage,
+        );
+        return data;*/
       }
     }
   }

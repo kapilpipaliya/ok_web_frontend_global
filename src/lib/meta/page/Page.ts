@@ -1,29 +1,25 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
-import { useGraph } from "../../graph/graph";
 import { pageAttr } from "./pageAttr";
 
 export const Page: IFormMetaData = {
   attributes: [
     {
-      componentName: "Box",
-      class: "d:flex flex:col gap:8",
       attributes: [
         {
           componentName: "SystemString",
-          key: "title",
           containerClass: PROPERTIES.Css.TextField,
+          key: "title",
           // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
         },
         {
-          containerClass: PROPERTIES.Css.TextField,
           componentName: "SystemString",
+          containerClass: PROPERTIES.Css.TextField,
           key: "key",
           validation: { required: true },
-    
+
           validationRules: [
             {
               message: "ID is required",
@@ -82,19 +78,21 @@ export const Page: IFormMetaData = {
         {
           attributes: pageAttr,
           componentName: "DynamicTable",
+          hidden: true,
           key: "Attr",
           label: "Attr",
           tab: "Attribute",
           type: "Attr",
-          hidden: true,
         },
         {
-          hidden: true,
           collection: "->$0Perm",
           componentName: "MultiSelect",
+          hidden: true,
           key: "globalPerm",
         },
       ],
+      class: "d:flex flex:col gap:8",
+      componentName: "Box",
       key: "box",
     },
   ],

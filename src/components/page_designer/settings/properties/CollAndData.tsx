@@ -1,11 +1,11 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { onCleanup } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
@@ -148,26 +148,26 @@ export function CollAndData() {
 
       <div class="text-center mb:2 mt:2">OR</div>
       <span class="flex:.5 mt:5">Collection:</span>
-        <SelectField
-          componentName={"Select"}
-          disabled={false}
-          isRealTime={false}
-          onChange={onCollectionChange}
-          title={"Select Collection"}
-          txnId={layoutStore.formStore[0].txnId}
-          data={graph.vertexes[layoutStore.selectedId]}
-          meta={collMetaVertex.vertexes![0]}
-        />
+      <SelectField
+        componentName={"Select"}
+        data={graph.vertexes[layoutStore.selectedId]}
+        disabled={false}
+        isRealTime={false}
+        meta={collMetaVertex.vertexes![0]}
+        onChange={onCollectionChange}
+        title={"Select Collection"}
+        txnId={layoutStore.formStore[0].txnId}
+      />
       <span class="flex:.5 mt:5">Data:</span>
-        <SelectField
-          componentName={"MultiSelect"}
-          disabled={false}
-          isRealTime={false}
-          title={"Select Data"}
-          txnId={layoutStore.formStore[0].txnId}
-          data={graph.vertexes[layoutStore.selectedId]}
-          meta={collMetaVertex.vertexes![1]}
-        />
+      <SelectField
+        componentName={"MultiSelect"}
+        data={graph.vertexes[layoutStore.selectedId]}
+        disabled={false}
+        isRealTime={false}
+        meta={collMetaVertex.vertexes![1]}
+        title={"Select Data"}
+        txnId={layoutStore.formStore[0].txnId}
+      />
     </>
   );
 }

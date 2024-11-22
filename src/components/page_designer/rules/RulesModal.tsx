@@ -5,24 +5,24 @@ import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
+import { useZIndex } from "~/components/fields/ZIndex";
 import {
   type FormStoreObject,
   useFormContext,
 } from "~/components/form/FormContext";
 import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
-import { useZIndex } from "~/components/fields/ZIndex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
+import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { generateTableInputMeta } from "./functions/generateTableInputMeta";
 import { getConditionsExpression } from "./functions/getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./functions/modifyFieldMetaAllFields";
 import { Overlay } from "./Overlay";
-import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 
 const getMetaAttributes = (selectedRule?: null | Vertex) => {
   const [graph, setGraph] = useGraph();

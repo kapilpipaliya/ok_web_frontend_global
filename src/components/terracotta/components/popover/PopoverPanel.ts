@@ -51,13 +51,13 @@ export function PopoverPanel<T extends ValidConstructor = "div">(
       useEventListener(current, "keydown", (e) => {
         if (!state.disabled()) {
           switch (e.key) {
+            case "Escape": {
+              state.close();
+              break;
+            }
             case "Tab": {
               e.preventDefault();
               lockFocus(current, e.shiftKey, false);
-              break;
-            }
-            case "Escape": {
-              state.close();
               break;
             }
           }

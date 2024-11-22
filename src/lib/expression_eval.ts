@@ -574,7 +574,8 @@ function resolveProjection(projection: string, context: any): string {
   if (variableMatch) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (_match: string, p1: string, _offset: number, _string: string) => projectedValueUnOps(p1, context),
+      (_match: string, p1: string, _offset: number, _string: string) =>
+        projectedValueUnOps(p1, context),
     );
   }
   return projection;

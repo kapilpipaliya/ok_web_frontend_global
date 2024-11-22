@@ -4,13 +4,14 @@ import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
+import { isObject } from "~/lib/data_structure/object/isObject";
+
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { isObject } from "~/lib/data_structure/object/isObject";
 
 // return a new Vertex
 export function newVertex(
@@ -18,7 +19,7 @@ export function newVertex(
   labels: string[],
   properties?: { [key: string]: any },
 ): Vertex {
-    return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
+  return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
 }
 
 // add a new vertex to the graph
@@ -230,7 +231,9 @@ export function deleteVertex(
     if (Object.keys(vertex.IN).length > 0) {
       const parentInfo = Object.entries(vertex.IN)
         .map(([edgeType, edgeIds]) => {
-          const parents = edgeIds.map((id) => graph.vertexes[graph.edges[id].S]);
+          const parents = edgeIds.map(
+            (id) => graph.vertexes[graph.edges[id].S],
+          );
           return `${edgeType}: ${parents.map((p) => JSON.stringify(p)).join(", ")}`;
         })
         .join(", ");
@@ -274,7 +277,9 @@ export function deleteVertex(
         // @ts-expect-error ignore
         setGraph("vertexLabelIdMap", label, (vertexIds) => {
           if (Array.isArray(vertexIds) && vertexIds.includes(actualVertexId)) {
-            const filteredIds = vertexIds.filter((vId) => vId !== actualVertexId);
+            const filteredIds = vertexIds.filter(
+              (vId) => vId !== actualVertexId,
+            );
             return filteredIds.length ? filteredIds : undefined;
           }
           return vertexIds;
@@ -372,10 +377,8 @@ export function updateVertexId(
 export function isVertex(vertex: unknown): vertex is Vertex {
   return (
     isObject(vertex) &&
-    typeof vertex.id === 'string' &&
+    typeof vertex.id === "string" &&
     Array.isArray(vertex.L) &&
     isObject(vertex.P)
   );
 }
-
-

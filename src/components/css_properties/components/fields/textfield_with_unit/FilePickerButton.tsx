@@ -1,4 +1,4 @@
-import { type Accessor, createMemo, createSignal, type JSX } from "solid-js";
+import { createMemo, createSignal, type JSX } from "solid-js";
 
 import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
@@ -7,8 +7,8 @@ import { useCssEditorProps } from "~/components/css_properties/context/CSSEditor
 import { useCssState } from "~/components/css_properties/context/CssStateContext";
 import { useRenderContext } from "~/components/css_properties/context/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
-import { CustomModal } from "~/components/styled/CustomModal";
 import { useFormContext } from "~/components/form/FormContext";
+import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -28,7 +28,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   let fileManagerStore: FileManagerObject;
   const parentItems = useRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta as unknown as TextFieldOptionsField;
+  const meta = () =>
+    parentRenderContext()?.context.meta as unknown as TextFieldOptionsField;
   const cssEditorProps = useCssEditorProps();
   const [formStore] = useFormContext();
   const { showErrorToast } = useToast();

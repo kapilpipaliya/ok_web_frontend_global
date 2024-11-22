@@ -1,9 +1,9 @@
 /* eslint-disable perfectionist/sort-objects */
 import type { TextFieldOptionsField } from "../FieldSchemaType";
 
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
 import { Icons } from "../Icons";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const FlexChild = {
   // Do we need to imporove this?

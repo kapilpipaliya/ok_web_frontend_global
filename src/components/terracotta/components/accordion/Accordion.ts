@@ -121,24 +121,24 @@ export function Accordion<V, T extends ValidConstructor = "div">(
         useEventListener(current, "keydown", (e) => {
           if (!state.disabled()) {
             switch (e.key) {
-              case "ArrowUp": {
-                e.preventDefault();
-                controller.setPrevChecked(true);
-                break;
-              }
               case "ArrowDown": {
                 e.preventDefault();
                 controller.setNextChecked(true);
                 break;
               }
-              case "Home": {
+              case "ArrowUp": {
                 e.preventDefault();
-                controller.setFirstChecked();
+                controller.setPrevChecked(true);
                 break;
               }
               case "End": {
                 e.preventDefault();
                 controller.setLastChecked();
+                break;
+              }
+              case "Home": {
+                e.preventDefault();
+                controller.setFirstChecked();
                 break;
               }
               default:

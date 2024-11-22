@@ -1,7 +1,7 @@
 /* eslint-disable perfectionist/sort-objects */
 
-import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 import { createSelectOptions } from "../FieldSchemaType";
+import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const ListSection = {
   listStyleType: createSelectOptions("list-style-type", "List Style Type", [

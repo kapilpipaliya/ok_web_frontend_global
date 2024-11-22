@@ -60,8 +60,8 @@ export function ListboxButton<T extends ValidConstructor = "button">(
       useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case "ArrowUp":
-            case "ArrowDown": {
+            case "ArrowDown":
+            case "ArrowUp": {
               e.preventDefault();
               disclosureState.toggle();
               break;

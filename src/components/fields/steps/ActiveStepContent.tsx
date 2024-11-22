@@ -10,19 +10,14 @@ export function StepsContent(props: ParentProps<{}>) {
   const namedStepIndex = () =>
     stepsContext
       .stepsWithName()
-      .findIndex(
-        (step) =>
-          step.P.stepName === stepsContext.currentNamedStep(),
-      );
+      .findIndex((step) => step.P.stepName === stepsContext.currentNamedStep());
 
   return (
     <Switch>
       <Match keyed when={stepsContext.currentNamedStep()}>
         {(_) => (
           <DynamicComponent
-            meta={
-              stepsContext.stepsWithName()[namedStepIndex()]
-            }
+            meta={stepsContext.stepsWithName()[namedStepIndex()]}
             {...others}
           />
         )}
@@ -37,11 +32,7 @@ export function StepsContent(props: ParentProps<{}>) {
       >
         {(_) => (
           <DynamicComponent
-            meta={
-              stepsContext.steps()[
-                stepsContext.currentStepIndex()!
-              ]
-            }
+            meta={stepsContext.steps()[stepsContext.currentStepIndex()!]}
             {...others}
           />
         )}

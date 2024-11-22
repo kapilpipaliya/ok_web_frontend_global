@@ -11,6 +11,8 @@ export const parseStyle = (
   style: Style,
 ): Partial<CSSStyleDeclaration> | undefined => {
   switch (typeof style) {
+    case "object":
+      return style;
     case "string":
       return style
         .split(";")
@@ -24,8 +26,6 @@ export const parseStyle = (
             [camelCase(name)]: value,
           };
         }, {});
-    case "object":
-      return style;
 
     default:
       return undefined;

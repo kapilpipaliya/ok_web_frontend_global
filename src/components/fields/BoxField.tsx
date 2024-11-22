@@ -1,8 +1,9 @@
-import { JSX, Show, splitProps } from "solid-js";
+import { type JSX, Show, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import type { GenericComponentProps } from "./FieldType";
 import { createLongPress } from "~/lib/hooks/createLongPress";
+
+import type { GenericComponentProps } from "./FieldType";
 
 export function BoxField(
   props: {
@@ -36,19 +37,22 @@ export function BoxField(
   const { handlePressEnd, handlePressStart } = createLongPress(local);
 
   return (
-    <Show fallback={
-      <Dynamic
-        class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
-        component={local.as || "div"}
-        {...others}
-        onMouseDown={local.onMouseDown}
-        onMouseLeave={local.onMouseLeave}
-        onMouseUp={local.onMouseUp}
-        onTouchCancel={local.onTouchCancel}
-        onTouchEnd={local.onTouchEnd}
-        onTouchStart={local.onTouchStart}
-      />
-    } when={props.onLongPress}>
+    <Show
+      fallback={
+        <Dynamic
+          class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
+          component={local.as || "div"}
+          {...others}
+          onMouseDown={local.onMouseDown}
+          onMouseLeave={local.onMouseLeave}
+          onMouseUp={local.onMouseUp}
+          onTouchCancel={local.onTouchCancel}
+          onTouchEnd={local.onTouchEnd}
+          onTouchStart={local.onTouchStart}
+        />
+      }
+      when={props.onLongPress}
+    >
       <Dynamic
         class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
         component={local.as || "div"}

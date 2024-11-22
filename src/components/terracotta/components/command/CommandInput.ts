@@ -52,14 +52,14 @@ export function CommandInput<T extends ValidConstructor = "input">(
       useEventListener(current, "keydown", (e) => {
         if (!isDisabled()) {
           switch (e.key) {
-            case "ArrowUp": {
-              e.preventDefault();
-              context.controller.setPrevChecked(true);
-              break;
-            }
             case "ArrowDown": {
               e.preventDefault();
               context.controller.setNextChecked(true);
+              break;
+            }
+            case "ArrowUp": {
+              e.preventDefault();
+              context.controller.setPrevChecked(true);
               break;
             }
             case "Enter": {

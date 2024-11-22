@@ -123,9 +123,10 @@ function buildQuery(
       } = getLabelFilterSkipLimit(label, context);
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
-        const { params: filterParams, query: whereClause } = mongoToCypher(filter);
+        const { params: filterParams, query: whereClause } =
+          mongoToCypher(filter);
         if (whereClause) {
-        query += ` WHERE ${whereClause}`;
+          query += ` WHERE ${whereClause}`;
           params = { ...params, ...filterParams };
         }
 

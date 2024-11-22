@@ -1,10 +1,20 @@
 import { path } from "rambda";
-import { type Accessor, createMemo, getOwner, Match, runWithOwner, splitProps, Switch } from "solid-js";
+import {
+  createMemo,
+  getOwner,
+  Match,
+  runWithOwner,
+  splitProps,
+  Switch,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { useFormContext } from "~/components/form/FormContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
@@ -12,13 +22,15 @@ import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
-import { RenderContextProvider, RenderStore, useRenderContext } from "../context/RenderContext";
+import {
+  RenderContextProvider,
+  type RenderStore,
+  useRenderContext,
+} from "../context/RenderContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(
@@ -73,7 +85,10 @@ export function DynamicCSSComponent(
       },
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
-    }) as unknown as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
+    }) as unknown as Omit<
+      FunctionArgumentType,
+      "parentValue" | "projections" | "value"
+    >;
 
   const getProjections = () =>
     props.projections ??
@@ -97,8 +112,9 @@ export function DynamicCSSComponent(
   };
 
   const value = createMemo(() => {
-    return (
-      path([...(projections() || []), (props.meta as FormField).key || ""], cssState)
+    return path(
+      [...(projections() || []), (props.meta as FormField).key || ""],
+      cssState,
     );
   });
 
@@ -114,7 +130,7 @@ export function DynamicCSSComponent(
 
     props.onChange?.(data);
   };
-  
+
   const parentOnChange = (data: any) => {
     // @ts-expect-error projections type is dynamic
     setFormValueStore(...(projections() || []), reconcile(data));
@@ -170,7 +186,7 @@ export function DynamicCSSComponent(
         type: getCssSelectedFileEdgeName(
           cssEditorProps.data.L[0],
           cssEditorProps.meta.P.key,
-          props.projections?.[0] as string || "Default",
+          (props.projections?.[0] as string) || "Default",
           props.meta.key!,
         ),
       },
@@ -210,13 +226,21 @@ export function DynamicCSSComponent(
         </Match>
         <Match when={props.meta.isLabelOnTop}>
           <div class={"w:full"}>
-            <LabelWrapper onResetIconClick={resetValue} value={value()} meta={props.meta}/>
+            <LabelWrapper
+              meta={props.meta}
+              onResetIconClick={resetValue}
+              value={value()}
+            />
             <Content />
           </div>
         </Match>
         <Match when={props.meta.label}>
           <div class={"flex ai:center jc:space-between w:full"}>
-            <LabelWrapper onResetIconClick={resetValue} value={value()} meta={props.meta}/>
+            <LabelWrapper
+              meta={props.meta}
+              onResetIconClick={resetValue}
+              value={value()}
+            />
             <Content />
           </div>
         </Match>

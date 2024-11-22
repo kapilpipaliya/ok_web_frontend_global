@@ -1,20 +1,20 @@
 import type { createStore } from "solid-js/store";
 
+import { createKeyedContext } from "@corvu/utils/create/keyedContext";
 import { type Accessor, createContext, useContext } from "solid-js";
 
-import { createKeyedContext } from "@corvu/utils/create/keyedContext";
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 export interface StepsContextValue {
   canGoToNextStep: () => boolean;
   canGoToPreviousStep: () => boolean;
   currentNamedStep: Accessor<null | string>;
   currentStepIndex: Accessor<number | undefined>;
+  data?: Vertex;
   goToNextStep: () => void;
   goToPreviousStep: () => void;
   isGoingToPreviousStep: Accessor<boolean>;
   meta: Vertex;
-  data?: Vertex;
   setCurrentNamedStep(stepName: string): void;
   setCurrentStepIndex(index: number): void;
   steps: Accessor<Vertex[]>;

@@ -1,4 +1,5 @@
 import { createSignal, Show } from "solid-js";
+
 import { DataGrid } from "~/components/grid/DataGrid";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 
@@ -22,12 +23,12 @@ export default function AdminDashboard() {
         selectedIndex={selectedIndex()}
         tabs={tabs}
       />
-      <Show when={selectedIndex() + 1} keyed>
+      <Show keyed when={selectedIndex() + 1}>
         <DataGrid
           isShowPagination={true}
           tableId={selectedIndex() === 0 ? "Page" : "Form"}
-      />  
-      </Show>  
+        />
+      </Show>
     </div>
   );
 }

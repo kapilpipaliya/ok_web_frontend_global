@@ -1,14 +1,17 @@
-import { type Accessor, createMemo } from "solid-js";
+import { createMemo } from "solid-js";
 
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import type {
+  GenericField,
+} from "../../constants/FieldSchemaType";
 
-import type { ColorPickerField, GenericField } from "../../constants/FieldSchemaType";
-
-import { useRenderContext } from "../../context/RenderContext";
 import { ContainerLabel } from "./ContainerLabel";
 
 export function LabelWrapper(
-  props: Readonly<{ onResetIconClick?: () => void; value?: any, meta: GenericField }>,
+  props: Readonly<{
+    meta: GenericField;
+    onResetIconClick?: () => void;
+    value?: any;
+  }>,
 ) {
   const isValueConfigured = createMemo(() => {
     if (Array.isArray(props.value)) {

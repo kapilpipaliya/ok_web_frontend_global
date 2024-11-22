@@ -1,14 +1,15 @@
-import { execSync } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
-import { getBaseDir } from "../upload/getBaseDir";
+
 import * as compose from "docker-compose";
+import * as fs from "fs";
+import * as path from "path";
+
+import { getBaseDir } from "../upload/getBaseDir";
 
 export async function executeDockerCompose(
   subdomain: string,
   driverPort: number,
   logsPort: number,
-  labPort: number
+  labPort: number,
 ): Promise<string> {
   const dir: string = getBaseDir();
   const mgplatDir: string = path.join(dir, subdomain, "memgraph-platform");
@@ -19,7 +20,7 @@ export async function executeDockerCompose(
     mgplatDir,
     driverPort,
     logsPort,
-    labPort
+    labPort,
   );
   if (yamlError) {
     return yamlError;
@@ -38,7 +39,7 @@ export function createYamlFile(
   mgplatDir: string,
   driverPort: number,
   logsPort: number,
-  labPort: number
+  labPort: number,
 ): string {
   const dockerComposeContent = `
 services:
@@ -67,7 +68,7 @@ services:
   // Ensure directory exists
   if (fs.existsSync(mgplatComposePath)) {
     console.log(
-      `Overwriting docker-compose file found at: ${mgplatComposePath}`
+      `Overwriting docker-compose file found at: ${mgplatComposePath}`,
     );
   } else if (!fs.existsSync(mgplatDir)) {
     try {
@@ -90,10 +91,10 @@ services:
 
 export async function startDockerCompose(
   mgplatDir: string,
-  mgplatComposePath: string
+  mgplatComposePath: string,
 ): Promise<string> {
   console.log(
-    `Spinning up Memgraph Lab and Memgraph with MAGE using docker-compose file from: ${mgplatComposePath}`
+    `Spinning up Memgraph Lab and Memgraph with MAGE using docker-compose file from: ${mgplatComposePath}`,
   );
 
   try {

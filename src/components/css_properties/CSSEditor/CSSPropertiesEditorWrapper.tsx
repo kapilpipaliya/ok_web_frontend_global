@@ -1,6 +1,10 @@
 import { MultiProvider } from "@solid-primitives/context";
 import { createEffect, createSignal, on } from "solid-js";
-import { createStore, reconcile, unwrap, type SetStoreFunction } from "solid-js/store";
+import {
+  createStore,
+  reconcile,
+  type SetStoreFunction,
+} from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -10,9 +14,9 @@ import type { CSSStore } from "../context/CssEditorContext";
 
 import { CssEditorContext } from "../context/CssEditorContext";
 import { CssEditorPropsProvider } from "../context/CSSEditorPropsContext";
-import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 import { CssStateContext } from "../context/CssStateContext";
 import { parseAndApplyCssRules } from "../utils/parseAndApplyCssRules";
+import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 
 export function CSSPropertiesEditorWrapper(
   props: Readonly<{
@@ -24,7 +28,10 @@ export function CSSPropertiesEditorWrapper(
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const cssValue = () => JSON.parse(JSON.stringify(props.data?.P[props.meta.P.key] as string || { "": {} }));
+  const cssValue = () =>
+    JSON.parse(
+      JSON.stringify((props.data?.P[props.meta.P.key] as string) || { "": {} }),
+    );
 
   const initializeState = (
     value: string,
@@ -37,12 +44,17 @@ export function CSSPropertiesEditorWrapper(
     }
   };
 
-  createEffect(on(() => cssValue(), () => {
-    if(JSON.stringify(cssValue()) === JSON.stringify(cssState)) {
-      return;
-    }
-    initializeState(cssValue(), setCssState);
-  }));
+  createEffect(
+    on(
+      () => cssValue(),
+      () => {
+        if (JSON.stringify(cssValue()) === JSON.stringify(cssState)) {
+          return;
+        }
+        initializeState(cssValue(), setCssState);
+      },
+    ),
+  );
 
   const onCSSStateChange = (
     ...args: Parameters<SetStoreFunction<CSSStore>>

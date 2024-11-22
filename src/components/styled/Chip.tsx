@@ -5,12 +5,12 @@ export function StatusChip(props: Readonly<{ status: string }>) {
 
   const getStatusStyles = () => {
     switch (status()) {
-      case "pending":
-        return "color: orange; background-color: white;border: 1px solid orange; ";
-      case "completed":
-        return "color: rgba(1, 130, 1); background-color: white;border: 1px solid rgba(1, 130, 1); ";
       case "cancelled":
         return "color: red; background-color: white;border: 1px solid red; ";
+      case "completed":
+        return "color: rgba(1, 130, 1); background-color: white;border: 1px solid rgba(1, 130, 1); ";
+      case "pending":
+        return "color: orange; background-color: white;border: 1px solid orange; ";
       default:
         return "color: gray; background-color: white;border: 1px solid gray; ";
     }

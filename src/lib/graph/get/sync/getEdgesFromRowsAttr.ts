@@ -50,16 +50,14 @@ export function getEdgesFromRowsAttr(
         };
 
         if (attribute.attributes) {
-        const nested = getEdgesFromRowsAttr(attribute.attributes);
-        expression.incoming = nested.incoming;
-        expression.outgoing = nested.outgoing;
+          const nested = getEdgesFromRowsAttr(attribute.attributes);
+          expression.incoming = nested.incoming;
+          expression.outgoing = nested.outgoing;
         }
         outgoing.push(expression);
-      } else {
-        if (attribute.attributes) {
+      } else if (attribute.attributes) {
           processAttributes(attribute.attributes);
         }
-      }
     }
   }
 

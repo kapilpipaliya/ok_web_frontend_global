@@ -1,19 +1,17 @@
-import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type {
-  ButtonGroupField,
   FieldWithCustomProperty,
   GenericField,
-  TextFieldOptionsField,
 } from "../../constants/FieldSchemaType";
 
 import { useCssEditor } from "../../context/CssEditorContext";
 import { useCssState } from "../../context/CssStateContext";
-import { ButtonGroups } from "./ButtonGroups";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useRenderContext } from "../../context/RenderContext";
+import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = (
   props: Readonly<FieldWithCustomProperty>,
@@ -23,7 +21,8 @@ export const FieldWithCustomBox = (
   const [state] = useCssState();
   const parentItems = useRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta as unknown as GenericField;
+  const meta = () =>
+    parentRenderContext()?.context.meta as unknown as GenericField;
 
   createEffect(() => {
     if (props.customProperty && props.customProperty.length > 0) {
@@ -52,7 +51,6 @@ export const FieldWithCustomBox = (
           }
         />
         <ButtonGroups
-          value={optionType()}
           componentName="buttonGroups"
           key={props.key}
           onChange={(value) => {
@@ -72,6 +70,7 @@ export const FieldWithCustomBox = (
               value: "custom",
             },
           ]}
+          value={optionType()}
         />
       </div>
       <Show when={optionType() === "custom"}>

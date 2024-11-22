@@ -3,7 +3,7 @@ import { createHandler, StartServer } from "@solidjs/start/server";
 
 export default createHandler(() => (
   <StartServer
-    document={({ assets, children, scripts }) => {;
+    document={({ assets, children, scripts }) => {
       return (
         <html lang="en">
           <head>
@@ -33,7 +33,6 @@ export default createHandler(() => (
             <meta content="#da532c" name="msapplication-TileColor" />
 
             {assets}
-
           </head>
           <body>
             <div id="app">{children}</div>
