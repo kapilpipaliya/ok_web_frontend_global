@@ -251,3 +251,12 @@ very good article about oklch color model:
 https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
 we can hire them too.
 
+CASL is an isomorphic authorization JavaScript library which restricts what resources a given user is allowed to access
+https://github.com/stalniy/casl
+
+
+Start Web Server, open mac terminal and run:
+sudo apachectl start
+
+# Testing
+make sure app is running at port 3000

@@ -23,28 +23,30 @@ export type HiddenFnType =
   | boolean;
 
 export interface FunctionArgumentBaseType {
-  // formInitialValues: FormStoreObject;
-  // formValueStore: FormStoreObject;
-  meta: Vertex;
   data: Vertex;
-  mounted: Accessor<boolean>;
-  onChange: (value: any) => void;
-  owner: Owner;
-  parentItems: PageRenderStore[];
-  parentMeta: Vertex;
-  ref: Accessor<HTMLDivElement | null>;
-  runWithOwner: <T>(fn: () => T) => T | undefined;
-  runWithParentOwner: <T>(fn: () => T) => T | undefined;
-  // setFormValueStore: SetStoreFunction<FormStoreObject>;
-  // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
-  zIndex: number;
+  evalExpression: (expression: string, options: object) => any;
   hasDeletePermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
   hasInsertPermission: boolean | null | undefined;
   hasViewPermission: boolean | null | undefined;
   isNoPermissionCheck: boolean | null | undefined;
-  readOnly: boolean | null | undefined;
   isViewMode: boolean | null | undefined;
+  // formInitialValues: FormStoreObject;
+  // formValueStore: FormStoreObject;
+  meta: Vertex;
+  mounted: Accessor<boolean>;
+  onChange: (value: any) => void;
+  owner: Owner;
+  parentItems: PageRenderStore[];
+  parentMeta: Vertex;
+  readOnly: boolean | null | undefined;
+  ref: Accessor<HTMLDivElement | null>;
+  repeaterContext: Record<string | symbol, any>;
+  runWithOwner: <T>(fn: () => T) => T | undefined;
+  runWithParentOwner: <T>(fn: () => T) => T | undefined;
+  // setFormValueStore: SetStoreFunction<FormStoreObject>;
+  // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
+  zIndex: number;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

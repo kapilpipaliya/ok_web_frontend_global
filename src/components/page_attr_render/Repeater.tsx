@@ -17,8 +17,9 @@ import {
   getInitialPageRenderStore,
   usePageRenderContext,
 } from "./context/PageRenderContext";
+import { isVertex } from "~/lib/graph/mutate/vertex";
 
-export const Repeater = () => {
+export const Repeater = (props: { data: string | any[] }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -29,12 +30,12 @@ export const Repeater = () => {
   const [isFetching, setIsFetching] = createSignal(false);
   const repeaterContext = useRepeaterVertexContext();
 
-  const setInitialState = async (expression?: string, collection?: string) => {
+  const setInitialState = async (expression: string) => {
     setIsFetching(true);
 
     const result = await getSelectionOptionsMGCall(
       [data()],
-      expression ?? `g:'${collection}'`,
+      expression,
     );
 
     if (result) {
@@ -44,7 +45,7 @@ export const Repeater = () => {
         getSelectionOptions(
           graph,
           setGraph,
-          expression ?? `g:'${collection}'`,
+          expression,
           repeaterContext,
         ).vertexes,
       );
@@ -53,9 +54,13 @@ export const Repeater = () => {
     setIsFetching(false);
   };
   createEffect(() => {
-    const expression = meta().P.data;
-    if (expression) {
+    const expression = props.data;
+    if (typeof expression === "string") {
       setInitialState(expression);
+      return;
+    }
+    if (Array.isArray(expression)) {
+      setOptions(expression);
       return;
     }
     const data = getSelectionOptions(graph, setGraph, "->$0Data", [
@@ -66,23 +71,36 @@ export const Repeater = () => {
     } else {
       const collection = getCollection(graph, meta());
       if (collection) {
-        setInitialState(undefined, collection);
+        setInitialState(`g:'${collection}'`);
       }
     }
   });
 
-  const _repeterStore = createStore(getInitialPageRenderStore());
-
+  const RepterInternal = (props: { repeaterValue: Vertex }) => {
+    const context = useRepeaterVertexContext();
+    const repeaterStore = new Proxy(context, {
+      get(target, key) {
+        if (key === meta().P.name) {
+          return props.repeaterValue;
+        }
+        return target[key];
+      }
+    });
+    return <RepeaterVertexContext.Provider value={repeaterStore}>
+      <PageAttrRender
+        data={isVertex(props.repeaterValue) ? props.repeaterValue : data()}
+        metaVertex={meta()}
+      />
+    </RepeaterVertexContext.Provider>
+  }
   return (
     <Show when={!isFetching()}>
       <For each={options()}>
-        {(vertex) => (
-          <RepeaterVertexContext.Provider
-            value={[vertex, ...useRepeaterVertexContext()]}
-          >
-            <PageAttrRender data={vertex} metaVertex={meta()} />
-          </RepeaterVertexContext.Provider>
-        )}
+        {(vertex) => {
+          return (
+            <RepterInternal repeaterValue={vertex} />
+          );
+        }}
       </For>
     </Show>
   );

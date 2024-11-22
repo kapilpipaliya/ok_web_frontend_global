@@ -10,3 +10,12 @@ Feature:
 - user can always drag and drop on canvas
 - write the component properties sync logic.
 
+
+
+- rename Repeater to Data.
+- only Data component should support setting Collection and Data expression.
+
+- dont allow item to be drop on itself.
+- repeater nested not working.
+
+- rename 

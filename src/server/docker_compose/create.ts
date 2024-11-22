@@ -72,8 +72,8 @@ services:
   } else if (!fs.existsSync(mgplatDir)) {
     try {
       fs.mkdirSync(mgplatDir, { recursive: true });
-    } catch (error) {
-      return `Error: Failed to create directory ${mgplatDir}`;
+    } catch (error: any) {
+      return `Error: Failed to create directory ${mgplatDir}: ${error.message}`;
     }
   }
 
@@ -81,8 +81,8 @@ services:
   try {
     console.log(`Writing docker-compose content to: ${mgplatComposePath}`);
     fs.writeFileSync(mgplatComposePath, dockerComposeContent);
-  } catch (error) {
-    return `Error: Failed to write docker-compose content to ${mgplatComposePath}`;
+  } catch (error: any) {
+    return `Error: Failed to write docker-compose content to ${mgplatComposePath}: ${error.message}`;
   }
 
   return "";

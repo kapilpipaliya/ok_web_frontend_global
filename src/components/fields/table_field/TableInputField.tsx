@@ -166,9 +166,6 @@ export function TableInputField(
             <tbody>
               <For each={sortedVertexes()}>
                 {(vertex, index) => (
-                  <RepeaterVertexContext.Provider
-                    value={[vertex, ...useRepeaterVertexContext()]}
-                  >
                     <SortableRow
                       dragFromIndex={dragFromIndex}
                       dragToIndex={dragToIndex}
@@ -184,7 +181,6 @@ export function TableInputField(
                       tableColumnsTemplate={tableColumnsTemplate}
                       txnId={props.txnId ?? 0}
                     />
-                  </RepeaterVertexContext.Provider>
                 )}
               </For>
             </tbody>

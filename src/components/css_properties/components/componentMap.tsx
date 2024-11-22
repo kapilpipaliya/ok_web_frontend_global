@@ -28,6 +28,7 @@ export const componentMap: Record<string, any> = {
   fieldWithCustomProperty: FieldWithCustomBox,
   number: NumberF,
   select: Select,
+  // This trigger onInput event, so dont use it.
   string: TextFieldWithSelect,
   textArea: TextAreaField,
   textField: TextFieldWithSelect,

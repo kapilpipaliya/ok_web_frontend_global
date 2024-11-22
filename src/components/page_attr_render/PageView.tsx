@@ -78,18 +78,10 @@ export function PageView(
       <Switch>
         <Match when={true}>
           <PreviewContext.Provider value={previewStore}>
-            <RepeaterVertexContext.Provider
-              value={
-                props.data
-                  ? [props.data, ...useRepeaterVertexContext()]
-                  : useRepeaterVertexContext()
-              }
-            >
               <PageAttrRender
                 data={props.data}
                 metaVertex={props.metaVertex!}
               />
-            </RepeaterVertexContext.Provider>
           </PreviewContext.Provider>
         </Match>
       </Switch>

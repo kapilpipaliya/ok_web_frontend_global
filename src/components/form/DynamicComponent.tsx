@@ -48,6 +48,8 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useZIndex } from "../fields/ZIndex";
 import { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
 import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
+import { useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getText(
   graph: GraphInterface,
@@ -182,33 +184,13 @@ export function DynamicComponent(
 
   const getFunctionArgumentBase = () =>
     ({
-      // formInitialValues,
-      // formSchema,
-      formStore,
-      get meta() {
-        return props.meta;
-      },
       get data() {
         return props.data;
       },
-      mounted,
-      onChange,
-      owner,
-      parentItems,
-      get parentMeta() {
-        return parentMeta();
-      },
-      ref,
-      runWithOwner: runWithOwnerFunction,
-      runWithParentOwner: runWithParentOwnerFunction,
-      setFormStore,
-      get isViewMode() {
-        return isViewMode();
-      },
-      get readOnly() {
-        return isReadOnly();
-      },
-      zIndex,
+      evalExpression,
+      // formInitialValues,
+      // formSchema,
+      formStore,
       get hasDeletePermission() {
         return hasDeletePermission();
       },
@@ -224,6 +206,30 @@ export function DynamicComponent(
       get isNoPermissionCheck() {
         return isNoPermissionCheck();
       },
+      get isViewMode() {
+        return isViewMode();
+      },
+      get meta() {
+        return props.meta;
+      },
+      mounted,
+      onChange,
+      owner,
+      parentItems,
+      get parentMeta() {
+        return parentMeta();
+      },
+      get readOnly() {
+        return isReadOnly();
+      },
+      ref,
+      get repeaterContext() {
+        return runWithOwner(owner, () => useRepeaterVertexContext());
+      },
+      runWithOwner: runWithOwnerFunction,
+      runWithParentOwner: runWithParentOwnerFunction,
+      setFormStore,
+      zIndex,
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {

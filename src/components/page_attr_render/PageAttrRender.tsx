@@ -53,24 +53,12 @@ export function PageAttrRender(
         };
 
         const Content = () => {
-          const getData = createMemo(() => {
-            const data = getSelectionOptions(
-              graph,
-              setGraph,
-              item.P.data ?? "->$0Data",
-              [...useRepeaterVertexContext()],
-            ).vertexes;
-            if (!data || data.length === 0) {
-              return props.data;
-            }
-            return data;
-          });
           return (
             <DynamicComponent
               // NOTE: For repeater we cant use parentData
               componentName={componentName()}
-              // data={props.data || getSelectionOptions([...useRepeaterVertexContext()], item.P.data).vertexes || getDataVertex(item) || parentData()}
-              data={getData()}
+              // data={props.data || getDataVertex(item) || parentData()}
+              data={props.data}
               // onChange={props.onChange}
               meta={item}
               txnId={formStore?.txnId}

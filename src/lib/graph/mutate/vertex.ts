@@ -10,6 +10,7 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
+import { isObject } from "~/lib/data_structure/object/isObject";
 
 // return a new Vertex
 export function newVertex(
@@ -367,3 +368,14 @@ export function updateVertexId(
     return { error: "" };
   });
 }
+
+export function isVertex(vertex: unknown): vertex is Vertex {
+  return (
+    isObject(vertex) &&
+    typeof vertex.id === 'string' &&
+    Array.isArray(vertex.L) &&
+    isObject(vertex.P)
+  );
+}
+
+
