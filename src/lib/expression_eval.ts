@@ -567,23 +567,26 @@ addUnaryOp("T:", (value: any) => {
 });
 addUnaryOp("::", projectedValueUnOps);
 
-function projectedValueBinOps(vertexes1: any, projection: string): any {
-  if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
+function resolveProjection(projection: string, context: any): string {
+  // Check if the projection contains any variable references
+  // Example: If projection is "$variableName", it will be processed to retrieve its value.
+  const variableMatch = projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g);
+  if (variableMatch) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (_match, p1, _offset, _string) => projectedValueBinOps(vertexes1, p1),
+      (_match: string, p1: string, _offset: number, _string: string) => projectedValueUnOps(p1, context),
     );
   }
+  return projection;
+}
 
-  let vertex;
-  if (Array.isArray(vertexes1)) {
-    vertex = vertexes1[0] || {};
-  } else if (isObject(vertexes1)) {
-    vertex = vertexes1;
-  } else {
-    vertex = {};
+function getVertex(vertexes: any): any {
+  if (Array.isArray(vertexes)) {
+    return vertexes[0] || {};
+  } else if (isObject(vertexes)) {
+    return vertexes;
   }
-  return getTextValue(path(projection, vertex));
+  return {};
 }
 
 //
@@ -601,22 +604,16 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
 //     return idValue;
 // }
 
+function projectedValueBinOps(vertexes1: any, projection: string): any {
+  const resolvedProjection = resolveProjection(projection, vertexes1);
+  const vertex = getVertex(vertexes1);
+  return getTextValue(path(resolvedProjection, vertex));
+}
+
 function projectedValueUnOps(projection: any, context: any) {
-  if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
-    return projection.replace(
-      /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (_match, p1, _offset, _string) => projectedValueUnOps(p1, context),
-    );
-  }
-  let vertex;
-  if (Array.isArray(context.vertexes)) {
-    vertex = context.vertexes[0] || {};
-  } else if (isObject(context.vertexes)) {
-    vertex = context.vertexes;
-  } else {
-    vertex = context || {};
-  }
-  return getTextValue(path(projection, vertex));
+  const resolvedProjection = resolveProjection(projection, context);
+  const vertex = getVertex(context.vertexes);
+  return getTextValue(path(resolvedProjection, vertex));
 }
 
 export function evalExpression(expression: string, context: object) {

@@ -251,6 +251,9 @@ very good article about oklch color model:
 https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl
 we can hire them too.
 
+ROADMAP:
+Make Charts Support:
+https://dragee.github.io/#Chart
 CASL is an isomorphic authorization JavaScript library which restricts what resources a given user is allowed to access
 https://github.com/stalniy/casl
 
