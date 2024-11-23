@@ -6,7 +6,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { SearchBar } from "../css_properties/StyleEditor/SearchBar";
 import { IconButton } from "../styled/IconButton";
-import { AddNewButton } from "./AddNew";
+import { AddNewButton } from "./AddNewButton";
 import { useDataGridContext } from "./DataGridContext";
 
 interface GridHeaderProps {

@@ -7,7 +7,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { selectedValue } from "../../fields/utils/selectedValue";
-import { formNameDisplayExprFromVertex } from "../formNameDisplayExprFromVertex";
+import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
 
 export function getTagValue(
   props: Readonly<{

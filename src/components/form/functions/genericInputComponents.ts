@@ -15,4 +15,8 @@ export const genericInputComponents = [
   // "Switch",
   "TextField",
   // "TextInput",
+
+  "SystemString",
+  "SystemTextArea",
+  "SystemBoolean", 
 ];

@@ -11,7 +11,7 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
-import { AddNewButton } from "~/components/grid/AddNew";
+import { AddNewButton } from "~/components/grid/AddNewButton";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";

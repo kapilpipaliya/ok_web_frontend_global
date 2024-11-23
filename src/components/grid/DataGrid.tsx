@@ -29,6 +29,7 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr"
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInputFilteredFormMetaData";
 
 import {
   getConfiguredPermissions,
@@ -142,7 +143,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
     const updatedForm = gridState.metaVertex
       ? generateFormMetaAttributes(graph, setGraph, gridState.metaVertex)
-      : FormMetaData[props.tableId];
+      : createInputFilteredFormMetaData(FormMetaData[props.tableId]);
     setFormMetaData(updatedForm);
     // when hardcoded form is used, no permission check is used currently, but this is a temporary solution
     setGridState("isNoPermissionCheck", !isDynamicForm);

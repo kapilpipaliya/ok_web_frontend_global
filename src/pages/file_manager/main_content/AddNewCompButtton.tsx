@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 
-import { AddNewButton } from "~/components/grid/AddNew";
+import { AddNewButton } from "~/components/grid/AddNewButton";
 
 import { SaveNewComp } from "./SaveNewComp";
 
