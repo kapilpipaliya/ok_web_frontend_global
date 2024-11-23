@@ -23,12 +23,10 @@ export default function AdminDashboard() {
         selectedIndex={selectedIndex()}
         tabs={tabs}
       />
-      <Show keyed when={selectedIndex() + 1}>
         <DataGrid
           isShowPagination={true}
           tableId={selectedIndex() === 0 ? "Page" : "Form"}
         />
-      </Show>
     </div>
   );
 }

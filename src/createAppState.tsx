@@ -23,10 +23,7 @@ export function createAppState() {
     APP_BASE_URL: "/admin",
     componentIdMap: {},
     edges: {} as EdgeMap,
-    events: {
-      // setTitle: (title:string) =>
-      // ?mergeVertexProperties(0, navBarVertexId, graph, setGraph, { title }),
-    },
+    events: {},
     globalThemeId: "",
     isDevelopment: false,
     isLoadingPage: false,
