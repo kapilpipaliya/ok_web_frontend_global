@@ -124,7 +124,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   const loadMetaData = async () => {
     const form = FormMetaData[props.tableId] || FormMetaData.Form;
-    if (props.tableId !== "Form" && form === FormMetaData.Form) {
+    const isDynamicForm = props.tableId !== "Form" && form === FormMetaData.Form;
+    if (isDynamicForm) {
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromMG({
         expression: `g:'Form[${props.tableId}]'`,
@@ -143,7 +144,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       ? generateFormMetaAttributes(graph, setGraph, gridState.metaVertex)
       : FormMetaData[props.tableId];
     setFormMetaData(updatedForm);
-    setGridState("isNoPermissionCheck", !gridState.metaVertex);
+    // when hardcoded form is used, no permission check is used currently, but this is a temporary solution
+    setGridState("isNoPermissionCheck", !isDynamicForm);
   };
 
   const initializeMetaData = (data: ServerResult) => {

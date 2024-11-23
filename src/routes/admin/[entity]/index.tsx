@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { Match, Switch } from "solid-js";
 
-import { GridWrapper } from "~/components/grid/GridWrapper";
+import { DataGrid } from "~/components/grid/DataGrid";
 import FileManager from "~/pages/file_manager/FileManager";
 
 export default function TablePage() {
@@ -16,7 +16,7 @@ export default function TablePage() {
         />
       </Match>
       <Match when={true}>
-        <GridWrapper tableId={params.entity} />
+        <DataGrid isShowPagination tableId={params.entity} />
       </Match>
     </Switch>
   );
