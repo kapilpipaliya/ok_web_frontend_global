@@ -1,6 +1,8 @@
+import { toTitle } from "case-switcher-js";
 import { createSignal, Show } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
+import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 
 export default function AdminDashboard() {
@@ -9,11 +11,10 @@ export default function AdminDashboard() {
   const handleTabClick = (index: number) => {
     setSelectedIndex(index);
   };
-
-  const tabs = [
-    { key: "pages", label: "Pages" },
-    { key: "forms", label: "Forms" },
-  ];
+  const tabs = PageDesignerLabels.filter(label => label !== "CompExample").map((label) => ({
+    key: label,
+    label: toTitle(label) + 's',
+  }));
 
   return (
     <div>
@@ -23,10 +24,10 @@ export default function AdminDashboard() {
         selectedIndex={selectedIndex()}
         tabs={tabs}
       />
-        <DataGrid
-          isShowPagination={true}
-          tableId={selectedIndex() === 0 ? "Page" : "Form"}
-        />
+      <DataGrid
+        isShowPagination={true}
+        tableId={tabs[selectedIndex()].key}
+      />
     </div>
   );
 }

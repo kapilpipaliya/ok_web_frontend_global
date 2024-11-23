@@ -1,5 +1,6 @@
 import { createSignal, For, Match, Switch } from "solid-js";
 
+import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
@@ -45,14 +46,7 @@ export function FormElementTabs() {
         </Match>
         <Match
           keyed
-          when={[
-            "Page",
-            "TemplatePage",
-            "Form",
-            "ThankYouPage",
-            "ErrorPage",
-            "EmailTemplate",
-          ].find((v) => v === selectedTab().collection)}
+          when={PageDesignerLabels.find((v) => v === selectedTab().collection)}
         >
           <PagesList coll={selectedTab().collection} />
         </Match>
