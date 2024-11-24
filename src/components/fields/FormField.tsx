@@ -1,4 +1,4 @@
-import { onCleanup } from "solid-js";
+import { createMemo, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
@@ -7,16 +7,20 @@ import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph } from "~/lib/graph/graph";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { FormContext, type FormStoreObject } from "../form/FormContext";
+import { FormContext, type FormStoreObject, useFormContext } from "../form/FormContext";
+import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 
+// TODO: make this update when props.id and props.label changes
 export function FormField(
   props: Readonly<
     {
+      id?: string;
       // For Root Level Forms we use Parent vertex label as form key
       label?: string;
       submitButton?: any;
@@ -31,9 +35,7 @@ export function FormField(
   const data = () => parentRenderContext()?.context.data!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = graph.newTxnId;
-
-  // const [dataVertex, setDataVertex] = createSignal<Vertex>();
-  // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
+  const [formStore] = useFormContext();
 
   const formFieldStore = createStore({
     cleanUpConfig: () => cleanUpConfig,
@@ -41,14 +43,13 @@ export function FormField(
   } as unknown as FormStoreObject);
   const [formData, setFormData] = formFieldStore;
 
-  if (data()?.id) {
-    setFormData({
-      formData: data(),
-      formMeta: meta(),
-      txnId,
-    });
-  } else {
-    const form = generateFormMetaAttributes(graph, () => {}, meta());
+  const id = createMemo(() => props.id ?? formStore?.id());
+  const label = createMemo(() => props.label ?? previewStore.previewMeta?.P[IdAttr] ?? meta().P[IdAttr]);
+  
+  const form = generateFormMetaAttributes(graph, () => {}, meta());
+  setFormData("formMetaData", form);
+
+  if (!id()) {
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
         acc[attr.key] = attr.defaultValue;
@@ -56,24 +57,53 @@ export function FormField(
       },
       {} as { [key: string]: any },
     );
-    const createResult = createForm(
+    const createResult = createFormVertex(
       graph,
       setGraph,
-      txnId,
-      props.label ?? previewStore.previewMeta?.P[IdAttr] ?? meta().P[IdAttr],
+      formData.txnId,
+      label(),
       defaultValues,
     );
     if (createResult.error) {
-      return createResult.error;
+      setFormData("error", createResult.error);
+      return;
     }
     setFormData({
-      formData: createResult.vertex!,
+      get formData() {
+        return createResult.vertex;
+      },
       formMeta: meta(),
       txnId,
     });
+  } else {
+    loadData();
+  }
+  async function loadData() {
+    if (!id()) {
+      return;
+    }
+    try {
+      const { data, error } = await getFormData(
+        formData.formMetaData!.attributes,
+        id()!
+      );
+
+      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
+        setFormData("error", `No ${label()} found`);
+        return;
+      }
+
+      setGraphData(graph, setGraph, data!.graph!);
+      setFormData({
+        get formData() {
+          return graph.vertexes[data!.result[0].id];
+        },
+      });
+    } catch (e: any) {
+      setFormData("error", `Error When Loading Form: ${e.message}`);
+    }
   }
 
-  // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   onCleanup(() => {
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
       revertTransaction(rowMetaTxnId, graph);

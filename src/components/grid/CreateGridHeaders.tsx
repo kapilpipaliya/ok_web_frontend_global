@@ -28,7 +28,7 @@ export function CreateGridHeaders(
 
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.componentName === "Table") {
+    if (attribute.componentName === "Table" || attribute.componentName === "DynamicTable") {
       continue;
     }
     // @ts-ignore
@@ -153,6 +153,18 @@ export function CreateGridHeaders(
               iconClass="color:rgb(255,0,0)"
               onClick={() => setDeleteRowId(info.row.original.id)}
               size={22}
+            />
+          </Show>
+
+          <Show when={tableId === "Form"}>
+            <IconButton
+              icon="bxs:data"
+              iconClass="color:#3477CC"
+              onClick={() => {
+                const newUrl = `/admin/${info.row.original.P.key}`;
+                window.open(newUrl, '_blank');
+              }}
+              size={21}
             />
           </Show>
         </div>

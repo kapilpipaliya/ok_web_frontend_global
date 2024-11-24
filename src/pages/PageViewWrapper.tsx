@@ -23,6 +23,7 @@ import {
   getInitialFormStore,
 } from "~/components/form/FormContext";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
+import { getFormData } from "~/components/form/functions/getFormData";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import {
   getConfiguredPermissions,
@@ -39,6 +40,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { type Id, useGraph } from "~/lib/graph/graph";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -68,19 +70,21 @@ export function PageViewWrapper(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
+  const id = createMemo(() =>
+    props.dataId === "new" ? undefined : props.dataId,
+  );
   const pageFormStore = createStore({
     ...getInitialFormStore(graph),
     get formId() {
       return props.pageVertexName;
     },
+    id,
   });
   const [formStore, setFormStore] = pageFormStore;
 
   let onConfirmExit: () => void;
   const metaTxnId = graph.newTxnId;
-  const id = createMemo(() =>
-    props.dataId === "new" ? undefined : props.dataId,
-  );
+
   const [previewStore] = usePreviewContext();
 
   const isNoPermissionCheck = createMemo(
@@ -225,25 +229,20 @@ export function PageViewWrapper(
       return;
     }
     try {
-      const { incoming, outgoing } = getEdgesFromRowsAttr(
+      const { data, error } = await getFormData(
         formStore.formMetaData!.attributes,
-        false,
+        id()!
       );
-      const data = await fetchDataFromMG({
-        expression: `id:'${id()}'`,
-        incoming,
-        outgoing,
-      });
 
-      if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
+      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} found`);
         return;
       }
 
-      setGraphData(graph, setGraph, data.graph!);
+      setGraphData(graph, setGraph, data!.graph!);
       setFormStore({
         get formData() {
-          return graph.vertexes[data.result[0].id];
+          return graph.vertexes[data!.result[0].id];
         },
       });
     } catch (e: any) {
@@ -269,25 +268,20 @@ export function PageViewWrapper(
       return;
     }
     if (!id()) {
-      const newVertexObj = newVertex(
-        graph.newVertexId,
-        [formStore.formMeta.P.key],
-        {},
-      );
-      // TODO: Do Create Transformation for the vertex
-      const addNewVertexResult = addNewVertex(
-        formStore.txnId,
-        newVertexObj,
+      const createResult = createFormVertex(
         graph,
         setGraph,
+        formStore.txnId,
+        formStore.formMeta.P.key,
+        {},
       );
-      if (addNewVertexResult.error) {
-        setFormStore("error", "Error when creating new vertex");
+      if (createResult.error) {
+        setFormStore("error", createResult.error);
         return;
       }
       setFormStore({
         get formData() {
-          return graph.vertexes[newVertexObj.id];
+          return createResult.vertex!;
         },
       });
     }

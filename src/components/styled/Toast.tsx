@@ -7,6 +7,8 @@ import {
   Show,
 } from "solid-js";
 
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+
 import toast, { type Renderable } from "./solid-toast/src";
 
 const DismissButton: Component<{
@@ -78,7 +80,7 @@ export function useToast() {
         onError?.(e);
         return (
           <span>
-            {errorMessage ?? e.message ?? "Oops! Something went wrong"}
+            {errorMessage ?? getErrorMessage(e) ?? "Oops! Something went wrong"}
           </span>
         );
       },

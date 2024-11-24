@@ -1,6 +1,6 @@
 import type { createStore } from "solid-js/store";
 
-import { createContext, useContext } from "solid-js";
+import { Accessor, createContext, useContext } from "solid-js";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -19,6 +19,7 @@ export function getInitialFormStore(graph: GraphInterface) {
     formId: undefined as string | undefined,
     formMeta: undefined as unknown as Vertex,
     formMetaData: null as IFormMetaData | null,
+    id: (() => undefined) as Accessor<string | undefined>,
     isPreview: false,
     mounted: false,
     txnId: graph.newTxnId,

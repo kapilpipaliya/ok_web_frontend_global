@@ -4,7 +4,7 @@ import { cloneLayoutAndChildren } from "~/components/page_designer/functions/clo
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
@@ -31,7 +31,7 @@ export function SaveAsTemplateMenu(
 
   const saveTemplate = async () => {
     const newFormTxnId = graph.newTxnId;
-    const createResult = createForm(
+    const createResult = createFormVertex(
       graph,
       setGraph,
       newFormTxnId,

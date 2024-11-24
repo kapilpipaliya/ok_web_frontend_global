@@ -12,7 +12,7 @@ import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
@@ -44,7 +44,7 @@ export function ThemeConfigDialog(
 
   const saveNewTheme = async () => {
     const newFormTxnId = graph.newTxnId;
-    const createResult = createForm(graph, setGraph, newFormTxnId, "Theme", {
+    const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
       data: themeData(),
       key: themeName(),
     });

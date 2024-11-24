@@ -29,7 +29,7 @@ export function addNewVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
-  error: boolean | string;
+  error: string;
   txnDetailIndex?: number;
 } {
   return untrack(() => {
@@ -73,7 +73,7 @@ export function addNewVertex(
       graph,
     );
     return {
-      error: false,
+      error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
     };
   });

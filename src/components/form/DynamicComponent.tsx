@@ -177,8 +177,20 @@ export function DynamicComponent(
     hasInsertPermission() || hasViewPermission() || hasEditPermission();
   const hasNoPermission = () =>
     !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
-  const isDisabledPermission = () => {
-    return isNoPermissionCheck() ? undefined : hasPermission();
+  const isDisabledByPermissions = () => {
+    if (isNoPermissionCheck()) {
+        return undefined;
+    // TODO: use correct permission for view, edit and insert, currently if any permission is true, it will return true
+    // } else if (props.isViewMode) {
+    //     return true;
+    // } else if (props.isEditMode) {
+    //     return hasEditPermission();
+    // } else if (props.isInsertMode) {
+    //     return hasInsertPermission();
+    } else {
+      const permission = hasInsertPermission() || hasEditPermission();
+      return !permission ? true : undefined;
+    }
   };
 
   const getFunctionArgumentBase = () =>
@@ -583,7 +595,7 @@ export function DynamicComponent(
               ? props.meta.P.disabled
               : (props.disabled ??
                 previewStore.isViewOnly ??
-                isDisabledPermission() ??
+                isDisabledByPermissions() ??
                 expressionProperties().disabled ??
                 props.meta.P.disabled)
           }

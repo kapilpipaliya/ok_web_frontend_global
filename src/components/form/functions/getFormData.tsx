@@ -2,31 +2,30 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export const getFormData = async (
-  formId: string,
+  metaAttrs: FieldAttribute[],
   id: Id,
-): Promise<{ error: string; graph?: ServerResult["graph"] }> => {
+): Promise<{ data?: ServerResult; error: string }> => {
   try {
-    const form = FormMetaData[formId];
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(metaAttrs);
     const result = await fetchDataFromMG({
       expression: `id:'${id}'`,
       incoming,
       outgoing,
     });
 
-    // @ts-ignore
-    if (result.error || !result.graph) {
-      // @ts-ignore
-      return { error: result.error || "Error When Loading Form" };
+    if (!isValidResponse(result) || !result.graph) {
+      return { error: getErrorMessage(result) || "Error When Loading Form" };
     }
 
-    return { error: "", graph: result.graph };
+    return { data: result, error: "" };
   } catch (e: any) {
     console.error("error", e);
-    return { error: `Error When Loading Form1: ${e.message}` };
+    return { error: `Error When Loading Form: ${e.message}` };
   }
 };

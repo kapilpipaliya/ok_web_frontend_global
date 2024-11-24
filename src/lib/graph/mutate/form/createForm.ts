@@ -6,7 +6,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { commitTxn } from "../../transaction/commitTxn";
 
-export function createForm(
+export function createFormVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -15,7 +15,7 @@ export function createForm(
     [key: string]: any;
   },
 ): {
-  error: boolean | string;
+  error: string;
   vertex?: Vertex;
 } {
   if (!label) {
@@ -37,7 +37,7 @@ export function createForm(
   }
   const vertex = graph.vertexes[newVertexObj.id];
   return {
-    error: false,
+    error: "",
     vertex: vertex,
   };
 }

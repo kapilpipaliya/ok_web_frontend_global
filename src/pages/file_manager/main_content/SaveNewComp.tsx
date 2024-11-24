@@ -12,7 +12,7 @@ import { useToast } from "~/components/styled/Toast";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentCompAttribute } from "~/lib/meta/base/Comp";
@@ -39,7 +39,7 @@ export function SaveNewComp(
 
     const newFormTxnId = graph.newTxnId;
 
-    const createResult = createForm(graph, setGraph, newFormTxnId, "Comp", {
+    const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Comp", {
       key: componentName(),
     });
     const dataVertex = createResult.vertex!;

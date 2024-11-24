@@ -17,6 +17,8 @@ export async function handleMerge(
     const result = await tx.run(query, { id: int(id), properties: merge.P });
     if (result.records.length > 0) {
       txnResult.push({ merge: { error: false, id } });
+    } else {
+      throw new Error(`Vertex with id ${id} not found.`);
     }
   } catch (error: any) {
     throw new Error(
