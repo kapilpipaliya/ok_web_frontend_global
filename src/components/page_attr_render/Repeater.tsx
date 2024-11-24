@@ -68,7 +68,9 @@ export const Repeater = (props: { data: any[], expression: string }) => {
     const collection = getCollection(graph, meta());
     if (collection) {
       setInitialState(`g:'${collection}'`);
+      return;
     }
+    setOptions([]);
   });
 
   const RepterInternal = (props: { repeaterValue: Vertex }) => {

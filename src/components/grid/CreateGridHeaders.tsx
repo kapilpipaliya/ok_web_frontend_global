@@ -10,10 +10,12 @@ import { getSelectNameValue } from "~/components/grid/functions/getSelectNameVal
 import { getTagValue } from "~/components/grid/functions/getTagValue";
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import type { DataGridState } from "./DataGridContext";
 
 import { IconButton } from "../styled/IconButton";
+import { ModifyJsonButton } from "./ModifyJsonButton";
 
 export function CreateGridHeaders(
   gridState: DataGridState,
@@ -164,6 +166,13 @@ export function CreateGridHeaders(
                 const newUrl = `/admin/${info.row.original.P.key}`;
                 window.open(newUrl, '_blank');
               }}
+              size={21}
+            />
+          </Show>
+          <Show when={!FormMetaData[tableId]}>
+            <ModifyJsonButton
+              class="color:#FFA500"
+              item={info.row.original}
               size={21}
             />
           </Show>
