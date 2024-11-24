@@ -581,13 +581,23 @@ function resolveProjection(projection: string, context: any): string {
   return projection;
 }
 
-function getVertex(vertexes: any): any {
-  if (Array.isArray(vertexes)) {
-    return vertexes[0] || {};
-  } else if (isObject(vertexes)) {
-    return vertexes;
+function getVertexBinOps(context: any): any {
+  if (Array.isArray(context)) {
+    return context[0] || {};
+  } else if (isObject(context)) {
+    return context;  
+  } else {
+    return {};
   }
-  return {};
+}
+function getVertexUnOps(context: any): any {
+  if (Array.isArray(context?.vertexes)) {
+    return context.vertexes[0] || {};
+  } 
+  if (isObject(context?.vertexes)) {
+    return context.vertexes;
+  } 
+  return context || {};
 }
 
 //
@@ -607,13 +617,13 @@ function getVertex(vertexes: any): any {
 
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   const resolvedProjection = resolveProjection(projection, vertexes1);
-  const vertex = getVertex(vertexes1);
+  const vertex = getVertexBinOps(vertexes1);
   return getTextValue(path(resolvedProjection, vertex));
 }
 
 function projectedValueUnOps(projection: any, context: any) {
   const resolvedProjection = resolveProjection(projection, context);
-  const vertex = getVertex(context.vertexes);
+  const vertex = getVertexUnOps(context);
   return getTextValue(path(resolvedProjection, vertex));
 }
 

@@ -64,7 +64,7 @@ function createFieldAttributes(
     {
       class: PROPERTIES.Css.TextField,
       componentName: "TextInput",
-      key: "data",
+      key: "expression",
     },
   ];
 }

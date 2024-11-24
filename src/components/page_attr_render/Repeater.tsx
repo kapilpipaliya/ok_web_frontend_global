@@ -7,17 +7,17 @@ import {
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { isVertex } from "~/lib/graph/mutate/vertex";
 
-import {
-  usePageRenderContext,
-} from "./context/PageRenderContext";
+import { usePageRenderContext } from "./context/PageRenderContext";
 
-export const Repeater = (props: { data: any[] | string }) => {
+export const Repeater = (props: { data: any[], expression: string }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -26,32 +26,36 @@ export const Repeater = (props: { data: any[] | string }) => {
 
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
+  const [errorMessage, setErrorMessage] = createSignal("");
   const repeaterContext = useRepeaterVertexContext();
 
   const setInitialState = async (expression: string) => {
     setIsFetching(true);
+    setErrorMessage("");
 
     const result = await getSelectionOptionsMGCall([data()], expression);
 
-    if (result) {
+    if (isValidResponse(result)) {
       setGraphData(graph, setGraph, result.graph!, true);
       setOptions(
-        // data() ||
         getSelectionOptions(graph, setGraph, expression, repeaterContext)
           .vertexes,
       );
+    } else {
+      setOptions([]);
+      setErrorMessage(getErrorMessage(result)); 
     }
 
     setIsFetching(false);
   };
+
   createEffect(() => {
-    const expression = props.data;
-    if (typeof expression === "string") {
-      setInitialState(expression);
+    if (props.data) {
+      setOptions(props.data);
       return;
     }
-    if (Array.isArray(expression)) {
-      setOptions(expression);
+    if (props.expression && typeof props.expression === "string") {
+      setInitialState(props.expression);
       return;
     }
     const data = getSelectionOptions(graph, setGraph, "->$0Data", [
@@ -59,11 +63,11 @@ export const Repeater = (props: { data: any[] | string }) => {
     ]).vertexes;
     if (data) {
       setOptions(data);
-    } else {
-      const collection = getCollection(graph, meta());
-      if (collection) {
-        setInitialState(`g:'${collection}'`);
-      }
+      return;
+    }
+    const collection = getCollection(graph, meta());
+    if (collection) {
+      setInitialState(`g:'${collection}'`);
     }
   });
 
@@ -93,6 +97,9 @@ export const Repeater = (props: { data: any[] | string }) => {
           return <RepterInternal repeaterValue={vertex} />;
         }}
       </For>
+      <Show when={errorMessage()}>
+        <div class="bg:red-50">{errorMessage()}</div>
+      </Show>
     </Show>
   );
 };

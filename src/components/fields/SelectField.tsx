@@ -95,7 +95,7 @@ export function SelectField(
   };
 
   const loadOptions = async () => {
-    let parsedOptions = [];
+    let parsedOptions: any[] = [];
     if (memoizedOptions()) {
       parsedOptions = getStaticOptions(memoizedOptions());
     } else if (props.disabled) {
@@ -121,9 +121,13 @@ export function SelectField(
           parsedOptions = res.result || [];
         }
       }
-      setLoading(false);
+      runWithOwner(outerOwner, () => {
+        setOptions(parsedOptions);
+        setLoading(false);
+      });
+      return;
     }
-    setOptions(parsedOptions);
+    runWithOwner(outerOwner, () => setOptions(parsedOptions));
   };
 
   function getComponent() {

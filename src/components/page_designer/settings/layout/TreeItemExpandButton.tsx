@@ -15,11 +15,11 @@ export function TreeItemExpandButton(
   return (
     <Show when={props.hasChildren}>
       <IconButton
-        icon="mingcute:down-fill"
+        icon={props.isCollapsed ? "mingcute:right-fill" : "mingcute:down-fill"}
         iconClassList={{
           "mx:4px": true,
-          "transform:rotate(0deg)": props.isCollapsed,
-          "transform:rotate(180deg)": !props.isCollapsed,
+          // "transform:rotate(0deg)": props.isCollapsed,
+          // "transform:rotate(180deg)": !props.isCollapsed,
           "transform 2s ease-in-out": true,
           "transition:transform 0.2s|linear": true,
         }}
