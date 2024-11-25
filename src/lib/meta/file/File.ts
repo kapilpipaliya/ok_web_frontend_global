@@ -21,7 +21,7 @@ export const File: IFormMetaData = {
     {
       componentName: "SystemString",
       displayName: "File Name",
-      key: "key",
+      key: "fileName",
     },
     // The size of the file in bytes, kilobytes, megabytes, etc.
     {
@@ -52,12 +52,12 @@ export const File: IFormMetaData = {
       key: "uploader",
     },
     // The location of the file in your storage system, which could be a file path (for on-premises storage) or a URL (for cloud storage).
-    {
-      componentName: "SystemString",
-      disabled: true,
-      displayName: "File Path",
-      key: "filePath",
-    },
+    // {
+    //   componentName: "SystemString",
+    //   disabled: true,
+    //   displayName: "File Path",
+    //   key: "filePath",
+    // },
     // A brief description or notes about the file, which can provide context or additional details.
     {
       class: PROPERTIES.Css.TextField,
@@ -66,12 +66,12 @@ export const File: IFormMetaData = {
       key: "description",
     },
     // A checksum or hash value (e.g., MD5, SHA-256) for verifying the file's integrity. This can ensure the file hasn't been altered or corrupted.
-    {
-      componentName: "SystemString",
-      disabled: true,
-      displayName: "Checksum",
-      key: "checksum",
-    },
+    // {
+    //   componentName: "SystemString",
+    //   disabled: true,
+    //   displayName: "Checksum",
+    //   key: "checksum",
+    // },
     // Tags or categories assigned to the file, which can help in organizing and searching files.
     {
       componentName: "MultiSelect",

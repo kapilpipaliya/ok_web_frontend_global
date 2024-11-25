@@ -4,10 +4,10 @@ import path from "node:path";
 
 export function saveFileToDisk(
   directory: string,
-  filename: string,
+  fileName: string,
   data: Buffer,
 ) {
-  const filePath = path.join(directory, filename);
+  const filePath = path.join(directory, fileName);
   fs.writeFileSync(filePath, data);
   return filePath;
 }

@@ -16,7 +16,7 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
   }
 
   try {
-    const filePath = fileMetadata.P.filepath;
+    const filePath = fileMetadata.P.filePath;
     await fs.unlink(filePath); // Delete the file from the disk
 
     await deleteFileMetadataFromNeo4j(neo4jSession, fileId);
@@ -28,8 +28,8 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
         status: 200,
       },
     );
-  } catch (_error) {
-    return new Response(JSON.stringify({ error: "Error deleting file" }), {
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: `Error deleting file ${error.message}` }), {
       headers: { "Content-Type": "application/json" },
       status: 500,
     });

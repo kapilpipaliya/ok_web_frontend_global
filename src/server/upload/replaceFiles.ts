@@ -52,11 +52,11 @@ export async function replaceFiles(
 
       const newMetadata = {
         checksum,
-        filename: newFilename,
-        filepath: filePath,
+        fileName: newFilename,
+        filePath: filePath,
         fileSize,
         mimeType,
-        originalFilename: file.filename,
+        originalFileName: file.filename,
         subDomain,
         version: newVersion,
       };

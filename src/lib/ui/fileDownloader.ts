@@ -1,7 +1,7 @@
 export function fileDownloader(opt: {
   bom?: string;
   data: ArrayBuffer | ArrayBufferView | Blob | string;
-  filename: string;
+  fileName: string;
   mime?: string;
   title: string;
 }) {
@@ -11,7 +11,7 @@ export function fileDownloader(opt: {
 
   const data = opt.data || throwError("data");
   const title = opt.title || throwError("title");
-  const filename = opt.filename || throwError("filename");
+  const fileName = opt.fileName || throwError("fileName");
 
   const anchor = document.createElement("a");
   anchor.style.display = "none";
@@ -29,8 +29,8 @@ export function fileDownloader(opt: {
     anchor.href = blobURL;
   };
 
-  const setFilename = (filename: string) => {
-    anchor.setAttribute("download", filename);
+  const setFilename = (fileName: string) => {
+    anchor.setAttribute("download", fileName);
   };
 
   const setTitle = (title: string) => {
@@ -46,7 +46,7 @@ export function fileDownloader(opt: {
   }
 
   attachDataAsOctetStream(data);
-  setFilename(filename);
+  setFilename(fileName);
   setTitle(title);
 
   document.body.appendChild(anchor);

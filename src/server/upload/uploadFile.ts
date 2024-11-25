@@ -38,12 +38,12 @@ export async function uploadFiles(
 
       const metadata = {
         checksum,
-        filename: newFilename,
-        filepath: filePath,
+        fileName: newFilename,
+        filePath: filePath,
         // fileId,
         fileSize,
         mimeType,
-        originalFilename: file.filename,
+        originalFileName: file.filename,
         subDomain,
         // username,
       };

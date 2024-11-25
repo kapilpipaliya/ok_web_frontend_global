@@ -357,6 +357,14 @@ export function PageViewWrapper(
     };
   });
 
+  // handle page reload
+  window.addEventListener("beforeunload", (event) => {
+    if (!isDisabledTxn(formStore.txnId, graph)) {
+      event.preventDefault();
+      event.returnValue = ''; // Chrome requires returnValue to be set
+    }
+  });
+
   const Content = () => (
     <PageView
       data={formStore.formData}

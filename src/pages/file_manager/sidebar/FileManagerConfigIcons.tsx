@@ -13,6 +13,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
+import { getDownloadLink, openInNewTab } from "./getDownloadLink";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,
@@ -114,12 +115,7 @@ export function FileManagerConfigIcons(
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="ic:round-download"
             iconClass="transition:0.5s|ease-in-out"
-            onClick={() => {
-              window.open(
-                `/api/file/download?fileId=${props.metaVertex.id}`,
-                "_blank",
-              );
-            }}
+            onClick={() => openInNewTab(getDownloadLink(props.metaVertex))}
             size={18}
             title="Download"
           />
