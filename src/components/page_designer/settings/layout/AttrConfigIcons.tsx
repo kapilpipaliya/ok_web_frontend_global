@@ -57,7 +57,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           isSelectedHoverId(props.metaVertex.id)
         }
       >
-        <InsertButtons item={props.metaVertex} />
+        {/* <InsertButtons item={props.metaVertex} /> */}
       </Show>
 
       <Show

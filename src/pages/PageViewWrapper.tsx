@@ -1,3 +1,4 @@
+import { makeEventListener } from "@solid-primitives/event-listener";
 import { Meta, Title } from "@solidjs/meta";
 import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
@@ -356,14 +357,14 @@ export function PageViewWrapper(
       e.retry(true);
     };
   });
-
-  // handle page reload
-  window.addEventListener("beforeunload", (event) => {
+  
+  const beforeunload = (event: BeforeUnloadEvent) => {
     if (!isDisabledTxn(formStore.txnId, graph)) {
       event.preventDefault();
-      event.returnValue = ''; // Chrome requires returnValue to be set
+      event.returnValue = ""; // Chrome requires returnValue to be set
     }
-  });
+  };
+  makeEventListener(window, "beforeunload", beforeunload);
 
   const Content = () => (
     <PageView

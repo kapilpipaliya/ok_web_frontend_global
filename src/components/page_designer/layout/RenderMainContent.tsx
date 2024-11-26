@@ -127,8 +127,8 @@ export function RenderMainContent() {
   const getGridTemplateColumns = () => {
     const leftPanelWidth = "300px";
     const centerPanelWidth = "1fr";
-    const settingsPanelWidth = "450px";
-    const propertiesPanelWidth = "450px";
+    const settingsPanelWidth = "400px";
+    const propertiesPanelWidth = "400px";
 
     if (!(layoutStore.isLeftOpen || layoutStore.isRightOpen)) {
       return `${centerPanelWidth}|${settingsPanelWidth}`;
