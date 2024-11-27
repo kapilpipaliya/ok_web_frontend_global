@@ -85,7 +85,7 @@ function createVertices(
       id: vertexIds.seoTitle,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "SEO Title",
         key: "seoTitle",
       },
@@ -94,7 +94,7 @@ function createVertices(
       id: vertexIds.seoDescription,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemTextArea",
+        componentName: "TextArea",
         displayName: "SEO Description",
         key: "seoDescription",
       },

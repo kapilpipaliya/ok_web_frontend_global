@@ -9,13 +9,13 @@ export const Page: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           containerClass: PROPERTIES.Css.TextField,
           key: "title",
           // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           containerClass: PROPERTIES.Css.TextField,
           key: "key",
           validation: { required: true },
@@ -48,7 +48,7 @@ export const Page: IFormMetaData = {
         },
         {
           class: PROPERTIES.Css.TextField,
-          componentName: "SystemTextArea",
+          componentName: "TextArea",
           key: "description",
         },
         // {
@@ -58,8 +58,8 @@ export const Page: IFormMetaData = {
         //   key: "dashboard",
         //   parentLabel: "Dashboard",
         // },
-        { componentName: "SystemBoolean", key: "public" },
-        /*{ componentName: "SystemBoolean", key: "isRealTime" },
+        { componentName: "CheckBox", key: "public" },
+        /*{ componentName: "CheckBox", key: "isRealTime" },
         {
           collection: "g:'Form'",
           componentName: "Select",

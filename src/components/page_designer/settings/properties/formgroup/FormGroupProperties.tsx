@@ -1,5 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
+import htmlTags from 'html-tags';
 import {
   createMemo,
   createUniqueId,
@@ -138,14 +139,20 @@ function createVertices(
       id: vertexIds.key,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "Unique Name",
         key: uniqueNameKey,
       },
     },
     {
       id: vertexIds.as,
-      P: { componentName: "SystemString", displayName: "As", key: "as" },
+      P: {
+        componentName: "Select",
+        displayName: "As",
+        key: "as",
+        options: htmlTags.map((element) => ({ id: element, label: element })),
+        saveValue: true,
+      },
     },
     {
       id: vertexIds.perm,
@@ -154,7 +161,7 @@ function createVertices(
     {
       id: vertexIds.calculatedValue,
       P: {
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "Calculated Value Expr",
         key: "calculatedValue",
       },

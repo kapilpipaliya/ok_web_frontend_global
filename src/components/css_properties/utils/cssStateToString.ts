@@ -21,6 +21,9 @@ export function cssStateToString(
   if (!cssStore) {
     return "";
   }
+  if (typeof cssStore === "string") {
+    return cssStore;
+  }
 
   return Object.entries(cssStore)
     .map(([state, value]) => {

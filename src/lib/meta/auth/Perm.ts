@@ -1,7 +1,7 @@
 export const Perm = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
     },
   ],

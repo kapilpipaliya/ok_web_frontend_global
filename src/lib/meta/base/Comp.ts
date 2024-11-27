@@ -20,11 +20,11 @@ export const Comp: IFormMetaData = {
       parentLabel: "CompCategory",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "label",
     },
     {
@@ -47,18 +47,18 @@ export const Comp: IFormMetaData = {
       parentLabel: "DataType",
     },
     {
-      componentName: "SystemBoolean",
+      componentName: "CheckBox",
       displayName: "Children",
       key: "child",
     },
     // {
-    //   componentName: "SystemBoolean",
+    //   componentName: "CheckBox",
     //   displayName: "Hidden",
     //   key: "hide",
     // },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
     parentCompAttribute,
@@ -66,15 +66,15 @@ export const Comp: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "key",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "type",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "default",
         },
         // {
@@ -125,7 +125,7 @@ export const Comp: IFormMetaData = {
         // },
         {
           class: PROPERTIES.Css.TextField,
-          componentName: "SystemTextArea",
+          componentName: "TextArea",
           key: "description",
           // autoResizeEnabled: true,
           width: "550px",
@@ -149,16 +149,16 @@ export const Comp: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "key",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "label",
         },
         {
           class: PROPERTIES.Css.TextField,
-          componentName: "SystemTextArea",
+          componentName: "TextArea",
           key: "description",
 
           // autoResizeEnabled: true,

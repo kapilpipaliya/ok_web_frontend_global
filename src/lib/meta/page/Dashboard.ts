@@ -3,12 +3,12 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 export const Dashboard = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
     },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
   ],

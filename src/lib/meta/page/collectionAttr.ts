@@ -4,18 +4,18 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 
 export const collectionAttr = [
   {
-    componentName: "SystemString",
+    componentName: "TextInput",
     key: "displayName",
     onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
   },
   {
-    componentName: "SystemString",
+    componentName: "TextInput",
     displayName: "ID",
     key: "key",
   },
   {
     class: PROPERTIES.Css.TextField,
-    componentName: "SystemTextArea",
+    componentName: "TextArea",
     key: "definition",
   },
   {
@@ -39,11 +39,11 @@ export const collectionAttr = [
     key: "coll",
   },
   {
-    componentName: "SystemBoolean",
+    componentName: "CheckBox",
     key: "required",
   },
   {
-    componentName: "SystemBoolean",
+    componentName: "CheckBox",
     key: "disabled",
   },
   {
@@ -91,10 +91,10 @@ export const collectionAttr = [
             key: "perm",
           },
           {
-            componentName: "SystemString",
+            componentName: "TextInput",
             key: "scope",
             attributes: [
-              SystemString
+              TextInput
             ],
           },
         ],

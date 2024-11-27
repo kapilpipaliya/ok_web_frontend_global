@@ -31,7 +31,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import type { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
 
-import { mergeCSS } from "../css_properties/utils/mergeCSS";
+import { cssStateToString } from "../css_properties/utils/cssStateToString";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
 import { useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
@@ -118,8 +118,6 @@ export function DynamicComponent(
       });
     }
   };
-  // Should also use repeaterContext
-  // const repeaterContext = useRepeaterVertexContext();
 
   // Extra properties to be added
   const extraRuleProperties = createMemo(() => {
@@ -331,8 +329,7 @@ export function DynamicComponent(
             setGraph,
           );
           if (property.toLowerCase().endsWith("class")) {
-            values[property] = mergeCSS(
-              "",
+            values[property] = cssStateToString(
               values[property],
               { P: { key: property } } as unknown as Vertex,
               props.meta,
@@ -380,8 +377,7 @@ export function DynamicComponent(
           if (key.toLowerCase().endsWith("class")) {
             const value = props.meta.P[key];
             if (value !== null) {
-              result[key] = mergeCSS(
-                "",
+              result[key] = cssStateToString(
                 value,
                 { P: { key: key } } as unknown as Vertex,
                 props.meta,
@@ -396,8 +392,7 @@ export function DynamicComponent(
           const value = descriptor.value;
           if (value !== null) {
             result[key] = key.toLowerCase().endsWith("class")
-              ? mergeCSS(
-                  "",
+              ? cssStateToString(
                   value,
                   { P: { key: key } } as unknown as Vertex,
                   props.meta,
@@ -673,8 +668,7 @@ export function DynamicComponent(
             }
           >
             <Label
-              class={mergeCSS(
-                "",
+              class={cssStateToString(
                 props.meta.P.labelClass,
                 { P: { key: "labelClass" } } as unknown as Vertex,
                 props.data!,

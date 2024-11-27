@@ -3,11 +3,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 export const SignUp: IFormMetaData = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "email",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "pass",
       mode: "password",
     },

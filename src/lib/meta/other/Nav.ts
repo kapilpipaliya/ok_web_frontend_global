@@ -6,12 +6,12 @@ import { useGraph } from "../../graph/graph";
 export const Nav = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "title",
       onchange: '{"new": ["key","id"]}',
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
       validationRules: [
         {
@@ -42,23 +42,23 @@ export const Nav = {
     },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           displayName: "ID",
           key: "key",
         },
         {
           class: PROPERTIES.Css.TextField,
-          componentName: "SystemTextArea",
+          componentName: "TextArea",
           key: "definition",
         },
         {
-          componentName: "SystemBoolean",
+          componentName: "CheckBox",
           key: "expanded",
         },
         {
@@ -76,7 +76,7 @@ Url`,
           key: "Form",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "url",
         },
         {
@@ -107,17 +107,17 @@ Url`,
         {
           attributes: [
             {
-              componentName: "SystemString",
+              componentName: "TextInput",
               displayName: "ID",
               key: "key",
             },
             {
               class: PROPERTIES.Css.TextField,
-              componentName: "SystemTextArea",
+              componentName: "TextArea",
               key: "definition",
             },
             {
-              componentName: "SystemBoolean",
+              componentName: "CheckBox",
               key: "expanded",
             },
             {
@@ -135,7 +135,7 @@ Url`,
               key: "Form",
             },
             {
-              componentName: "SystemString",
+              componentName: "TextInput",
               key: "url",
             },
             {
@@ -166,17 +166,17 @@ Url`,
             {
               attributes: [
                 {
-                  componentName: "SystemString",
+                  componentName: "TextInput",
                   displayName: "ID",
                   key: "key",
                 },
                 {
                   class: PROPERTIES.Css.TextField,
-                  componentName: "SystemTextArea",
+                  componentName: "TextArea",
                   key: "definition",
                 },
                 {
-                  componentName: "SystemBoolean",
+                  componentName: "CheckBox",
                   key: "expanded",
                 },
                 {
@@ -194,7 +194,7 @@ Url`,
                   key: "Form",
                 },
                 {
-                  componentName: "SystemString",
+                  componentName: "TextInput",
                   key: "url",
                 },
                 {
@@ -225,17 +225,17 @@ Url`,
                 {
                   attributes: [
                     {
-                      componentName: "SystemString",
+                      componentName: "TextInput",
                       displayName: "ID",
                       key: "key",
                     },
                     {
                       class: PROPERTIES.Css.TextField,
-                      componentName: "SystemTextArea",
+                      componentName: "TextArea",
                       key: "definition",
                     },
                     {
-                      componentName: "SystemBoolean",
+                      componentName: "CheckBox",
                       key: "expanded",
                     },
                     {
@@ -253,7 +253,7 @@ Url`,
                       key: "Form",
                     },
                     {
-                      componentName: "SystemString",
+                      componentName: "TextInput",
                       key: "url",
                     },
                     {

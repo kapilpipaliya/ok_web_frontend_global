@@ -11,7 +11,7 @@ export const GlobalSetting: IFormMetaData = {
     },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
   ],

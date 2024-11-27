@@ -5,16 +5,16 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 export const FormCategory: IFormMetaData = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "label",
     },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
   ],

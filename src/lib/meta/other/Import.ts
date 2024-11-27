@@ -4,32 +4,32 @@ export const Import = {
   attributes: [
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       height: 500,
       key: "csv",
       width: 600,
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "label",
     },
-    { componentName: "SystemBoolean", key: "dry" },
+    { componentName: "CheckBox", key: "dry" },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "lookup",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "lookupId",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "lookupChild",
     },
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "column",
         },
         // {
@@ -41,7 +41,7 @@ export const Import = {
         //  },
         // },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           displayName: "Attribute ID",
           key: "attrId",
         },
@@ -54,18 +54,18 @@ export const Import = {
           key: "coll",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           displayName: "Lookup Label",
           key: "collLabel",
         },
-        { componentName: "SystemBoolean", key: "inward" },
+        { componentName: "CheckBox", key: "inward" },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           displayName: "Lookup Collection ID",
           key: "collId",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           displayName: "Edge Type",
           key: "edge",
         },
@@ -79,10 +79,10 @@ export const Import = {
           key: "func",
           saveValue: true,
         },
-        { componentName: "SystemBoolean", key: "skip" },
+        { componentName: "CheckBox", key: "skip" },
         {
           class: PROPERTIES.Css.TextField,
-          componentName: "SystemTextArea",
+          componentName: "TextArea",
           key: "skipRow",
         },
       ],

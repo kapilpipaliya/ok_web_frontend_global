@@ -12,12 +12,12 @@ import { collectionAttr } from "./collectionAttr";
 export const Coll: IFormMetaData = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "title",
       onchange: '{"new": ["key","id"]}',
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
       validationRules: [
         {
@@ -70,14 +70,14 @@ export const Coll: IFormMetaData = {
     },
     {
       class: PROPERTIES.Css.TextField,
-      componentName: "SystemTextArea",
+      componentName: "TextArea",
       key: "description",
     },
-    { componentName: "SystemBoolean", key: "public" },
-    { componentName: "SystemBoolean", key: "isInlineEditable" },
-    // { key: "supportCustomFields", componentName: "SystemBoolean" },
-    // { key: "searchOnly", componentName: "SystemBoolean" },
-    // { key: "supportDeletedRecordSearch", componentName: "SystemBoolean" },
+    { componentName: "CheckBox", key: "public" },
+    { componentName: "CheckBox", key: "isInlineEditable" },
+    // { key: "supportCustomFields", componentName: "CheckBox" },
+    // { key: "searchOnly", componentName: "CheckBox" },
+    // { key: "supportDeletedRecordSearch", componentName: "CheckBox" },
     {
       collection: "->Attr",
       componentName: "MultiSelect",
@@ -111,11 +111,11 @@ export const Coll: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "key",
         },
         // {
-        //   componentName: "SystemString",
+        //   componentName: "TextInput",
         //   key: "label",
         // },
         {
@@ -136,7 +136,7 @@ export const Coll: IFormMetaData = {
               // collection: "g:'DataType'",
             },
             // {
-            //   componentName: "SystemString",
+            //   componentName: "TextInput",
             //   displayName: "Value",
             //   key: "leftValue",
             // },
@@ -154,7 +154,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
               // collection: "g:'DataType'",
             },
             /*{
-              componentName: "SystemString",
+              componentName: "TextInput",
               displayName: "Value",
               key: "rightValue",
             },
@@ -226,14 +226,14 @@ ${Object.keys(binopsInitial).join("\n")}`,
                     },
                     {
                       key: "displayName",
-                      componentName: "SystemString",
+                      componentName: "TextInput",
                       
                         onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
                       
                     },
                     {
                       key: "key",
-                      componentName: "SystemString",
+                      componentName: "TextInput",
                     },
                     {
                       key: "tab",
@@ -282,11 +282,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
           key: "coll",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "displayName",
         },
         {
-          componentName: "SystemString",
+          componentName: "TextInput",
           key: "fieldDefaults",
         },
         {

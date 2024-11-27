@@ -233,7 +233,7 @@ function createVertices(
       id: vertexIds.formStatus,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "Form Status",
         key: "formStatus",
       },
@@ -260,7 +260,7 @@ function createVertices(
       id: vertexIds.submissionLimit,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "Submission Limit",
         key: "submissionLimit",
       },
@@ -269,7 +269,7 @@ function createVertices(
       id: vertexIds.warningMessage,
       P: {
         class: PROPERTIES.Css.TextField,
-        componentName: "SystemString",
+        componentName: "TextInput",
         displayName: "Warning Message",
         key: "warningMessage",
       },

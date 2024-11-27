@@ -1,15 +1,15 @@
 export const User = {
   attributes: [
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "key",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "email",
     },
     {
-      componentName: "SystemString",
+      componentName: "TextInput",
       key: "pass",
     },
     {
