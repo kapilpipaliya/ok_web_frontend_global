@@ -29,6 +29,7 @@ export function FilePickerModal(props: {
           </div>
         </div>
       )}
+      isCloseOnOutsideClick={false}
       open={props.open}
       setOpen={props.setOpen}
       title="File Manager"

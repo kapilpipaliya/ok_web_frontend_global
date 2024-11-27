@@ -31,7 +31,7 @@ export function TableBodyCell(
 ) {
   return (
     <div
-      class={`${props.class ?? ""} @fade|.4s align-content:center h:50px padding:7px text:center`}
+      class={`${props.class ?? ""} @fade|.4s align-content:center p:2 text:center`}
       classList={{
         "bg:#3478cc0d": props.index ? props.index % 2 !== 0 : false,
         "bg:white": props.index ? props.index % 2 === 0 : false,
