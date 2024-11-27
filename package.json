@@ -51,7 +51,6 @@
     "dockerode": "^4.0.2",
     "fast-memoize": "^2.5.2",
     "formidable": "^3.5.2",
-    "html-tags": "^4.0.0",
     "idb-keyval": "^6.2.1",
     "is-empty": "^1.2.0",
     "isows": "^1.0.6",

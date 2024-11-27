@@ -134,8 +134,6 @@ export function RulesModal(
     }
   });
 
-  const repeaterStore = createStore({});
-
   return (
     <Portal>
       <div
@@ -163,21 +161,18 @@ export function RulesModal(
                     :
                   </h3>
                   <div class="mt:0.5rem">
-                    <PageRenderContextProvider
-                      data={
-                        props.selectedRule
-                          ? props.selectedRule
-                          : formStore!.formData
-                      }
-                      meta={graph.vertexes[metaVertexId]}
-                      store={repeaterStore}
-                    >
+
                       <TableInputField
+                        data={
+                          props.selectedRule
+                            ? props.selectedRule
+                            : formStore!.formData
+                        }
                         isNoPermissionCheck={true}
                         isRealTime={false}
+                        meta={graph.vertexes[metaVertexId]}
                         txnId={formStore!.txnId}
                       />
-                    </PageRenderContextProvider>
                   </div>
                 </div>
               </div>

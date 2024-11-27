@@ -5,6 +5,7 @@ import { setPropertyValueGlobal } from "~/components/page_designer/functions/set
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
@@ -15,9 +16,24 @@ export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
 
+  const clearFileSelection = (meta: Vertex) => {
+    const txnId = layoutStore.formStore[0].txnId;
+    if (!txnId) {
+      return;
+    }
+
+    setSelectionValue(
+      txnId,
+      graph.vertexes[layoutStore.selectedId],
+      graph,
+      setGraph,
+      meta,
+    );
+  };
+
   const setPropertyValue = (meta: Vertex, value: any) => {
     if (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) {
-      return setPropertyValueGlobal(
+      setPropertyValueGlobal(
         graph,
         setGraph,
         layoutStore.formStore[0].txnId,
@@ -26,6 +42,9 @@ export function PropertiesBody() {
         graph.vertexes[layoutStore.selectedComponent],
         value,
       );
+      if (value === null) {
+        clearFileSelection(meta);
+      }
     }
   };
 

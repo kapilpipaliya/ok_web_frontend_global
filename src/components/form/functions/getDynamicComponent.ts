@@ -53,7 +53,7 @@ export const componentsMap: Record<string, any> = {
   ActiveStep: StepsContent,
   Box: BoxField,
   Button: ButtonField,
-  Checkbox: CheckboxField,
+  CheckBox: CheckboxField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
   // ErrorPage: PageField,

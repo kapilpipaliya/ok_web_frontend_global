@@ -1,22 +1,45 @@
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 
 import { pageAttr } from "./pageAttr";
 
+export const wrapWithTitle = (title: string, required: boolean, children: any) => {
+  return {
+    attributes: [
+      {
+        attributes: required ? [{
+          class: "color:red",
+          componentName: "Text",
+          key: `required_${title}`,
+          text: " *",
+        }] : [],
+        class: "flex:.5",
+        componentName: "Text",
+        key: `title_${title}`,
+        text: title
+      },
+      children,
+    ],
+    class: "flex ai:center gap:2 justify-content:space-between mt:6",
+    componentName: "Box",
+    key: "box1"
+  }
+};
+
 export const Page: IFormMetaData = {
   attributes: [
     {
       attributes: [
-        {
+        wrapWithTitle("Title", false, {
+              class: `${PROPERTIES.Css.TextField} flex:1`,
+              componentName: "TextInput",
+              key: "title",
+              // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
+            }),
+        wrapWithTitle("Key", true, {
+          class: `${PROPERTIES.Css.TextField} flex:1`,
           componentName: "TextInput",
-          containerClass: PROPERTIES.Css.TextField,
-          key: "title",
-          // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
-        },
-        {
-          componentName: "TextInput",
-          containerClass: PROPERTIES.Css.TextField,
           key: "key",
           validation: { required: true },
 
@@ -45,12 +68,12 @@ export const Page: IFormMetaData = {
               // },
             },
           ],
-        },
-        {
-          class: PROPERTIES.Css.TextField,
+        }),
+        wrapWithTitle("Description", false, {
+          class: `${PROPERTIES.Css.TextField} flex:1`,
           componentName: "TextArea",
           key: "description",
-        },
+        }),
         // {
         //   collection: "g:'Dashboard'",
         //   componentName: "MultiSelect",
@@ -58,7 +81,10 @@ export const Page: IFormMetaData = {
         //   key: "dashboard",
         //   parentLabel: "Dashboard",
         // },
-        { componentName: "CheckBox", key: "public" },
+        wrapWithTitle("Public", false, {
+          componentName: "CheckBox",
+          key: "public",
+        }),
         /*{ componentName: "CheckBox", key: "isRealTime" },
         {
           collection: "g:'Form'",

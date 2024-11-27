@@ -29,21 +29,15 @@ export function UniqueConstrains() {
     uniqueConstrainsMetaAttribute,
   );
 
-  const repeaterStore = createStore({});
-
   return (
     <div class="mt:6">
-      <PageRenderContextProvider
-        data={layoutStore.formStore[0]?.formData}
-        meta={graph.vertexes[metaVertexId]}
-        store={repeaterStore}
-      >
         <TableInputField
+          data={layoutStore.formStore[0]?.formData}
           isNoPermissionCheck={true}
           isRealTime={false}
+          meta={graph.vertexes[metaVertexId]}
           txnId={layoutStore.formStore[0].txnId}
         />
-      </PageRenderContextProvider>
     </div>
   );
 }

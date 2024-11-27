@@ -8,20 +8,21 @@ import { useCssState } from "~/components/css_properties/context/CssStateContext
 import { useRenderContext } from "~/components/css_properties/context/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
 import { useFormContext } from "~/components/form/FormContext";
-import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import FileManager from "~/pages/file_manager/FileManager";
+
+import { FilePickerModal } from "./FilePickerModal";
 
 interface FilePickerButtonProps
   extends JSX.InputHTMLAttributes<HTMLInputElement> {
   handleChange: (event: Event) => void;
   value: string;
 }
+
 export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
@@ -109,33 +110,13 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
         onClick={() => setOpenDialog(true)}
         size={16}
       />
-      <CustomModal
-        dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
-        footer={() => (
-          <div class="flex ai:center jc:center mt:auto">
-            <div class="b:1.5px|solid|lightseagreen ml:auto r:5">
-              <button class="" onClick={onFileSelected} type="button">
-                Select
-              </button>
-            </div>
-          </div>
-        )}
+      <FilePickerModal
+        onFileSelected={onFileSelected}
         open={openDialog}
+        selectedFileVertex={selectedFileVertex()}
+        setFileManagerStore={setFileManagerStore}
         setOpen={setOpenDialog}
-        title="File Manager"
-      >
-        <div>
-          <FileManager
-            enableRowSelection={(vertex) =>
-              (vertex as unknown as Vertex).L[0] === "File"
-            }
-            fileId={selectedFileVertex()[0]?.id}
-            parentVertexLabel="Folder"
-            setFileManagerStore={setFileManagerStore}
-            toParentEdgeType="ParentFolder"
-          />
-        </div>
-      </CustomModal>
+      />
     </>
   );
 }

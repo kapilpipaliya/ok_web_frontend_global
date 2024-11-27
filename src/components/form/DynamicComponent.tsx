@@ -534,8 +534,6 @@ export function DynamicComponent(
     get context() {
       return getFunctionArgumentWithValue();
     },
-    data: [] as Vertex[],
-    vertexes: [] as Vertex[],
   });
 
   if (dynamicProps().beforeMount) {

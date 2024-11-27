@@ -1,7 +1,9 @@
 import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
+import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -19,6 +21,9 @@ export function HighlightSetValueContent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
+  const [layoutStore] = useDesignerLayoutStore();
+  const selectedComponentName = () => graph.vertexes[layoutStore.selectedComponent];
+  const selectedAttr = () => graph.vertexes[layoutStore.selectedId];
   const componentExample = createMemo(
     () =>
       evalExpression("->$0CompExample", {
@@ -50,6 +55,31 @@ export function HighlightSetValueContent(
               data={props.selectedLayout}
               metaVertex={componentExample()[0]}
             />
+          </Match>
+          <Match
+            when={
+              selectedComponentName().P.key === "Image" && props.meta.P.key === "src"
+            }
+          >
+            <div>
+              <div class={`flex gap:2`}>
+                <DynamicComponent
+                  componentName={props.componentName()}
+                  data={props.selectedLayout}
+                  isNoPermissionCheck={true}
+                  isRealTime={false}
+                  meta={props.meta}
+                  noLabel
+                  onChange={(data) => props.onChange(props.meta, data)}                  // @ts-expect-error ignore
+                  txnId={props.txnId}
+                />
+                <FilePickerButton
+                  handleChange={(value) => props.onChange(props.meta, value)}
+                  meta={props.selectedLayout}
+                  value={props.selectedLayout.P.src}
+                />
+              </div>
+            </div>
           </Match>
           <Match when={true}>
             <DynamicComponent

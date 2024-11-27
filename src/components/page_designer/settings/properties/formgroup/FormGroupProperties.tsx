@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import htmlTags from 'html-tags';
 import {
   createMemo,
   createUniqueId,
@@ -15,6 +14,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/components/page_designer/constants/constant";
+import { IconButton } from "~/components/styled/IconButton";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
@@ -36,11 +36,13 @@ import {
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
+import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -122,6 +124,7 @@ export function createVertexIds() {
     key: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
+    src: `srcVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
   };
 }
@@ -135,186 +138,75 @@ function createVertices(
   const vertices: ({
     attributes?: FieldAttribute[];
   } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
-    {
-      id: vertexIds.key,
-      P: {
-        class: PROPERTIES.Css.TextField,
-        componentName: "TextInput",
-        displayName: "Unique Name",
-        key: uniqueNameKey,
+      {
+        id: vertexIds.key,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Unique Name",
+          key: uniqueNameKey,
+        },
       },
-    },
-    {
-      id: vertexIds.as,
-      P: {
-        componentName: "Select",
-        displayName: "As",
-        key: "as",
-        // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
-        options: [
-          "a",
-          "abbr",
-          "address",
-          "area",
-          "article",
-          "aside",
-          "audio",
-          "b",
-          "base",
-          "bdi",
-          "bdo",
-          "blockquote",
-          "body",
-          "br",
-          "button",
-          "canvas",
-          "caption",
-          "cite",
-          "code",
-          "col",
-          "colgroup",
-          "data",
-          "datalist",
-          "dd",
-          "del",
-          "details",
-          "dfn",
-          "dialog",
-          "div",
-          "dl",
-          "dt",
-          "em",
-          "embed",
-          "fieldset",
-          "figcaption",
-          "figure",
-          "footer",
-          "form",
-          "h1",
-          "h2",
-          "h3",
-          "h4",
-          "h5",
-          "h6",
-          "head",
-          "header",
-          "hgroup",
-          "hr",
-          "html",
-          "i",
-          "iframe",
-          "img",
-          "input",
-          "ins",
-          "kbd",
-          "label",
-          "legend",
-          "li",
-          "link",
-          "main",
-          "map",
-          "mark",
-          "math",
-          "menu",
-          "menuitem",
-          "meta",
-          "meter",
-          "nav",
-          "noscript",
-          "object",
-          "ol",
-          "optgroup",
-          "option",
-          "output",
-          "p",
-          "param",
-          "picture",
-          "pre",
-          "progress",
-          "q",
-          "rb",
-          "rp",
-          "rt",
-          "rtc",
-          "ruby",
-          "s",
-          "samp",
-          "script",
-          "search",
-          "section",
-          "select",
-          "slot",
-          "small",
-          "source",
-          "span",
-          "strong",
-          "style",
-          "sub",
-          "summary",
-          "sup",
-          "svg",
-          "table",
-          "tbody",
-          "td",
-          "template",
-          "textarea",
-          "tfoot",
-          "th",
-          "thead",
-          "time",
-          "title",
-          "tr",
-          "track",
-          "u",
-          "ul",
-          "var",
-          "video",
-          "wbr"
-        ].map((element) => ({ id: element, label: element })),
-        saveValue: true,
+      {
+        id: vertexIds.as,
+        P: {
+          componentName: "Select",
+          displayName: "As",
+          key: "as",
+          options: htmlTags.map((element) => ({ id: element, label: element })),
+          saveValue: true,
+        },
       },
-    },
-    {
-      id: vertexIds.perm,
-      P: { displayName: "Permission", key: "perm" },
-    },
-    {
-      id: vertexIds.calculatedValue,
-      P: {
-        componentName: "TextInput",
-        displayName: "Calculated Value Expr",
-        key: "calculatedValue",
+      {
+        id: vertexIds.perm,
+        P: { displayName: "Permission", key: "perm" },
       },
-    },
-    {
-      id: vertexIds.class,
-      P: { displayName: "Class", key: "class" },
-    },
-    {
-      id: vertexIds.errorClass,
-      P: { displayName: "Error Class", key: "errorClass" },
-    },
-    {
-      id: vertexIds.defaultValue,
-      P: { displayName: "Default Value", key: "defaultValue" },
-    },
-    {
-      id: vertexIds.required,
-      P: { displayName: "Required Expr", key: "required" },
-    },
-    {
-      id: vertexIds.hidden,
-      P: { displayName: "Hidden Expr", key: "hidden" },
-    },
-    {
-      id: vertexIds.disabled,
-      P: { displayName: "Disabled Expr", key: "disabled" },
-    },
-    {
-      id: vertexIds.thankYouPage,
-      P: { displayName: "Thank You Page", key: "thankYouPage" },
-    },
-  ];
+      {
+        id: vertexIds.calculatedValue,
+        P: {
+          componentName: "TextInput",
+          displayName: "Calculated Value Expr",
+          key: "calculatedValue",
+        },
+      },
+      {
+        id: vertexIds.class,
+        P: { displayName: "Class", key: "class" },
+      },
+      {
+        id: vertexIds.errorClass,
+        P: { displayName: "Error Class", key: "errorClass" },
+      },
+      {
+        id: vertexIds.defaultValue,
+        P: { displayName: "Default Value", key: "defaultValue" },
+      },
+      {
+        id: vertexIds.required,
+        P: { displayName: "Required Expr", key: "required" },
+      },
+      {
+        id: vertexIds.hidden,
+        P: { displayName: "Hidden Expr", key: "hidden" },
+      },
+      {
+        id: vertexIds.disabled,
+        P: { displayName: "Disabled Expr", key: "disabled" },
+      },
+      {
+        id: vertexIds.thankYouPage,
+        P: { displayName: "Thank You Page", key: "thankYouPage" },
+      },
+      {
+        id: vertexIds.src,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Source",
+          key: "src",
+        },
+      },
+    ];
 
   vertices.forEach((vertex) => {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -382,11 +274,13 @@ function moveClassToLast(
     graph.vertexes[vertexIds.perm],
     // Default value can be only entered when it is in Form Builder
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
+    // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],
     graph.vertexes[vertexIds.as],
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hidden],
     graph.vertexes[vertexIds.disabled],
+    ...(componentName === "Image" ? [graph.vertexes[vertexIds.src]] : []),
     ...nonCssVertices,
   ];
 }
@@ -417,7 +311,6 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
       metaProps,
     );
   }
-
   return (
     <div>
       <Switch>

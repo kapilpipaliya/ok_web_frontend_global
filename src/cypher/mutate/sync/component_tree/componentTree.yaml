@@ -1,7 +1,7 @@
 - Root:
   - Box
   - Button
-  - Checkbox
+  - CheckBox
   - DynamicTable
   - FileUploader
   - Form

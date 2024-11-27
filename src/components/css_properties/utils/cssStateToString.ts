@@ -12,6 +12,30 @@ export function getUrl(data: Vertex) {
   return `/api/file/download?fileId=${data.id}`;
 }
 
+export function replacePlaceholderWithUrl(
+  value: string,
+  edgeName: string,
+  data: Vertex,
+  graph: GraphInterface,
+): string {
+  if (!value.includes("$1")) {
+    return value;
+  }
+  
+  const files = evalExpression(`->${edgeName}`, {
+    graph,
+    setGraph: () => {},
+    vertexes: [data],
+  }) || [];
+  
+  if (files.length === 0) {
+    return value;
+  }
+  
+  const file = files[0];
+  return value.replaceAll("$1", getUrl(file));
+}
+
 export function cssStateToString(
   cssStore: CSSStore,
   meta: Vertex,
@@ -46,17 +70,7 @@ export function cssStateToString(
                 selector || "Default",
                 key,
               );
-              const files =
-                evalExpression(`->${edgeName}`, {
-                  graph,
-                  setGraph: () => {},
-                  vertexes: [data],
-                }) || [];
-              if (files.length === 0) {
-                return "";
-              }
-              const file = files[0];
-              stateValue = stateValue.replaceAll("$1", getUrl(file));
+              stateValue = replacePlaceholderWithUrl(stateValue, edgeName, data, graph);
             }
             return `${key}:${stateValue}${selector}`;
           })
