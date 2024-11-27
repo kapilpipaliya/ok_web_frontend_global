@@ -23,7 +23,7 @@ export function AuthenticatedMenu(
       <li class="m:5|10 mt:5px">
         <A
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={`${graph.APP_BASE_URL}/setting`}
+          href={`${graph.APP_BASE_URL}/settings`}
           onclick={props.onClose}
         >
           Account Setting
