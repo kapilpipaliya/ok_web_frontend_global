@@ -26,7 +26,11 @@ export async function executeDockerCompose(
     return yamlError;
   }
 
-  const composeError = await startDockerCompose(mgplatDir, mgplatComposePath);
+  const composeError = await startDockerCompose(
+    mgplatDir,
+    mgplatComposePath,
+    subdomain,
+  );
   if (composeError) {
     return composeError;
   }
@@ -45,7 +49,6 @@ export function createYamlFile(
 services:
   memgraph:
     image: memgraph/memgraph-mage:latest
-    container_name: memgraph-mage
     pull_policy: always
     ports:
       - "${driverPort}:7687"
@@ -54,7 +57,6 @@ services:
 
   lab:
     image: memgraph/lab:latest
-    container_name: memgraph-lab
     pull_policy: always
     ports:
       - "${labPort}:3000"
@@ -92,13 +94,18 @@ services:
 export async function startDockerCompose(
   mgplatDir: string,
   mgplatComposePath: string,
+  projectName: string,
 ): Promise<string> {
   console.log(
     `Spinning up Memgraph Lab and Memgraph with MAGE using docker-compose file from: ${mgplatComposePath}`,
   );
 
   try {
-    await compose.upOne("memgraph", { cwd: path.join(mgplatDir), log: true });
+    await compose.upOne("memgraph", {
+      composeOptions: ["--project-name", projectName],
+      cwd: path.join(mgplatDir),
+      log: true,
+    });
     console.log("done");
   } catch (err: any) {
     console.log("something went wrong:", err.message);
