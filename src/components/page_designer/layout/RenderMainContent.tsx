@@ -1,3 +1,4 @@
+import Resizable from '@corvu/resizable'
 import { type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
@@ -121,50 +122,80 @@ function DeleteConfirmation() {
 }
 
 export function RenderMainContent() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  return <ResizableAltKey />
+}
+
+
+export function ResizableAltKey() {
+  const [layoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
-
-  const getGridTemplateColumns = () => {
-    const leftPanelWidth = "300px";
-    const centerPanelWidth = "1fr";
-    const settingsPanelWidth = "400px";
-    const propertiesPanelWidth = "400px";
-
-    if (!(layoutStore.isLeftOpen || layoutStore.isRightOpen)) {
-      return `${centerPanelWidth}|${settingsPanelWidth}`;
-    }
-    if (layoutStore.isLeftOpen && layoutStore.isRightOpen) {
-      return `${leftPanelWidth}|${centerPanelWidth}|${propertiesPanelWidth}|${settingsPanelWidth}`;
-    }
-    return `${layoutStore.isLeftOpen ? `${leftPanelWidth}|${centerPanelWidth}|${propertiesPanelWidth}` : `${centerPanelWidth}|${propertiesPanelWidth}|${settingsPanelWidth}`}`;
-  };
-
   return (
-    <div
-      class={`grid gap:4px grid-template-columns:${getGridTemplateColumns()}`}
-    >
-      <FormElements />
-      <PageViewComponent />
-      <Show
-        fallback={
-          <div class="bl:1|solid|lightgrey pl:8 pt:8">
-            Element is not selected
-          </div>
-        }
-        when={
-          layoutStore.selectedId !== -1 &&
-          graph.vertexes[layoutStore.selectedId] &&
-          layoutStore.selectedId
-        }
-      >
-        <div
-          class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5`}
+    <div class="size-full p-4">
+      <Resizable class="size-full">
+        <Resizable.Panel
+          class=""
+          initialSize={0.2}
+          minSize={0.1}
         >
-          <PropertiesContent />
-        </div>
-      </Show>
-      <Settings />
+          <FormElements />
+        </Resizable.Panel>
+        <Resizable.Handle
+          aria-label="Resize Handle"
+          class="px:3"
+        >
+          <div class="" />
+        </Resizable.Handle>
+        <Resizable.Panel
+          class="flex-col items-center justify-center space-y-2 overflow-hidden rounded-lg bg-corvu-100 px-4 flex"
+          initialSize={0.4}
+          minSize={0.2}
+        >
+          <PageViewComponent />
+        </Resizable.Panel>
+        <Resizable.Handle
+          aria-label="Resize Handle"
+          class="px:3"
+        >
+          <div class="" />
+        </Resizable.Handle>
+        <Resizable.Panel
+          initialSize={0.2}
+          minSize={0.1}
+        >
+          <Show
+            fallback={
+              <div class="bl:1|solid|lightgrey pl:8 pt:8">
+                Element is not selected
+              </div>
+            }
+            when={
+              layoutStore.selectedId !== -1 &&
+              graph.vertexes[layoutStore.selectedId] &&
+              layoutStore.selectedId
+            }
+          >
+            <div
+              class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5`}
+            >
+              <PropertiesContent />
+            </div>
+          </Show>
+        </Resizable.Panel>
+        <Resizable.Handle
+          aria-label="Resize Handle"
+          class="px:3"
+        >
+          <div class="" />
+        </Resizable.Handle>
+        <Resizable.Panel
+          class=""
+          initialSize={0.2}
+          minSize={0.1}
+        >
+          <Settings />
+        </Resizable.Panel>
+      </Resizable>
       <DeleteConfirmation />
     </div>
-  );
+  )
 }

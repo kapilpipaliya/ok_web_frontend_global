@@ -5,6 +5,7 @@ import { FormContext } from "~/components/form/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
+import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
   TabStickyContainer,
@@ -35,7 +36,7 @@ export function SettingTabs() {
   });
 
   const TabList = () => (
-    <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
+    <UlContainer>
       <For each={tabs()}>
         {(data) => (
           <TabButton
@@ -45,7 +46,7 @@ export function SettingTabs() {
           />
         )}
       </For>
-    </ul>
+    </UlContainer>
   );
 
   const Tabs = () => (

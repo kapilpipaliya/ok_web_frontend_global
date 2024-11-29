@@ -101,7 +101,7 @@ async function authenticateSuperUser(superUser: Vertex, password: string) {
     });
 
     if (superDbResult.records.length === 0) {
-      throw new Error("Not Authorized Email or Username.");
+      throw new Error(`Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`);
     }
     const user = convertNodeToJson(superDbResult.records[0].get("u"));
     return comparePassword(user, password);

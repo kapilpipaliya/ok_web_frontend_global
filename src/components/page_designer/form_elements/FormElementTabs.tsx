@@ -1,10 +1,16 @@
-import { createSignal, For, Match, Switch } from "solid-js";
+import { createSignal, For, Match, ParentProps, Switch } from "solid-js";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
+
+export const UlContainer = (props: ParentProps) => (
+  <ul class="flex {scrollbar-width:thin} flex:wrap jc:space-around margin-bottom:-1px overflow-x:auto">
+    {props.children}
+  </ul>
+);
 
 export function FormElementTabs() {
   const leftMenuTabs = [
@@ -19,7 +25,7 @@ export function FormElementTabs() {
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
   const TabList = () => (
-    <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto">
+    <UlContainer>
       <For each={leftMenuTabs}>
         {(data) => (
           <TabButton
@@ -29,7 +35,7 @@ export function FormElementTabs() {
           />
         )}
       </For>
-    </ul>
+    </UlContainer>
   );
 
   return (
