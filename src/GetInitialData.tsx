@@ -1,11 +1,11 @@
-import { createSignal, type JSX, Match, onMount, Switch } from "solid-js";
+import { createSignal, type JSX, Match, onMount, ParentProps, Switch } from "solid-js";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/lib/graph/mutate/getInitialDataAndSetToGraph";
 
 import { useGraph } from "./lib/graph/graph";
 
-export function GetInitialData(props: Readonly<{ children: JSX.Element }>) {
+export function GetInitialData(props: ParentProps) {
   const graph = useGraph();
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);
   const [error, setError] = createSignal<null | string>(null);
