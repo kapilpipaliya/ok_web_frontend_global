@@ -24,7 +24,7 @@ export function getInitialDataAndSetToGraph(
 
   const getData = async () => {
     try {
-      const data = await getAPI(API.getInitialDataUrl);
+      const data = await getAPI(`${graph[0].url}${API.getInitialDataUrl}`);
       setGraphData(graph[0], graph[1], data as any);
       setComponentIdMap(data.vertexes);
       return data;

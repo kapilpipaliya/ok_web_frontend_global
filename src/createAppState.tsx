@@ -53,6 +53,7 @@ export function createAppState() {
     userSettingId: "",
     vertexes: {} as VertexMap,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
+    url: "",
   });
 
   return graph;

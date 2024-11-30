@@ -72,6 +72,7 @@ export interface GraphInterface {
   userSettingId: Id;
   vertexes: VertexMap;
   vertexLabelIdMap: { [key: string]: Id[] };
+  url: string;
 
   // isAuthenticated: false,
   // theme: "light" as "light" | "dark",
