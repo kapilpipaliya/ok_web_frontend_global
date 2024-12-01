@@ -1,9 +1,12 @@
 import { toTitle } from "case-switcher-js";
-import { createSignal, Show } from "solid-js";
+import { createSignal } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
 import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
+
+import { UserDropdownMenuDisplay } from "../admin_layout/DropdownMenuDisplay";
+import { SelectThemeButton } from "../admin_layout/theme/SelectThemeButton";
 
 export default function AdminDashboard() {
   const [selectedIndex, setSelectedIndex] = createSignal(0);
@@ -18,6 +21,10 @@ export default function AdminDashboard() {
 
   return (
     <div>
+        <div class="flex gap:4 position:fixed right:1rem">
+        <SelectThemeButton />
+        <UserDropdownMenuDisplay />
+      </div>
       <TabsWithUnderline
         displayValueKey="label"
         onTabClick={handleTabClick}

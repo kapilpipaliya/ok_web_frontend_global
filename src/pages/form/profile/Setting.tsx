@@ -119,7 +119,7 @@ export function Settings(): JSX.Element {
         description="Manage your account settings and preferences."
         title="Account Settings"
       />
-      <div class="position:fixed right:1rem top:1rem">
+      <div class="position:fixed right:1rem top:1rem flex gap:4">
         <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>

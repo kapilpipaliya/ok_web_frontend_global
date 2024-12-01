@@ -72,10 +72,10 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
       <Show when={props.showResetIcon ?? false}>
         <Icon
           class="cursor:pointer fg:purple"
-          height={20}
+          height={26}
           icon="mdi:close"
           onClick={props.onResetIconClick}
-          width={20}
+          width={26}
         />
       </Show>
     </span>

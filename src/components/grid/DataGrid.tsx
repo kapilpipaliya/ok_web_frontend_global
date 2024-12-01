@@ -119,6 +119,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     if (!props.tableId) {
       setGridState("error", "No tableId provided");
     } else {
+      setGridState("error", undefined);
       initializeDataGrid();
     }
   });

@@ -11,13 +11,22 @@ import { LeftToggleButton } from "./LeftToggleButton";
 export const LeftIcons = () => {
   const navigate = useNavigate();
   const [layoutStore] = useDesignerLayoutStore();
+  
+  const handleBackClick = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate(removeLastPathSegment());
+    }
+  };
+
   return (
     <div class="flex ai:center">
       <IconButton
         class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer jc:center r:5|5|5|5"
         icon="flowbite:caret-left-outline"
         iconClass={"color:lightgrey color:black:hover"}
-        onClick={() => navigate(removeLastPathSegment())}
+        onClick={handleBackClick}
         size={30}
         title="Back"
       />
