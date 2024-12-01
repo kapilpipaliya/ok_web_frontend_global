@@ -1,6 +1,7 @@
 import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
 import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
+import { IconPicker } from "~/components/css_properties/components/fields/textfield_with_unit/IconPicker";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
@@ -70,7 +71,7 @@ export function HighlightSetValueContent(
                   isRealTime={false}
                   meta={props.meta}
                   noLabel
-                  onChange={(data) => props.onChange(props.meta, data)}                  // @ts-expect-error ignore
+                  onChange={(data) => props.onChange(props.meta, data)}
                   txnId={props.txnId}
                 />
                 <FilePickerButton
@@ -78,6 +79,27 @@ export function HighlightSetValueContent(
                   meta={props.selectedLayout}
                   value={props.selectedLayout.P.src}
                 />
+              </div>
+            </div>
+          </Match>
+          <Match
+            when={
+              selectedComponentName().P.key === "Icon" && props.meta.P.key === "icon"
+            }
+          >
+            <div>
+              <div class={`flex gap:2`}>
+                <DynamicComponent
+                  componentName={props.componentName()}
+                  data={props.selectedLayout}
+                  isNoPermissionCheck={true}
+                  isRealTime={false}
+                  meta={props.meta}
+                  noLabel
+                  onChange={(data) => props.onChange(props.meta, data)}
+                  txnId={props.txnId}
+                />
+                <IconPicker />
               </div>
             </div>
           </Match>
@@ -125,3 +147,4 @@ export function HighlightSetValueContent(
     </div>
   );
 }
+

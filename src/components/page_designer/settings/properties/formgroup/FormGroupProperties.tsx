@@ -14,7 +14,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/components/page_designer/constants/constant";
-import { IconButton } from "~/components/styled/IconButton";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
@@ -28,6 +27,7 @@ import {
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { PROPERTIES } from "../../../../styled/constants/constant";
 import {
   type PageLayoutObject,
@@ -36,13 +36,11 @@ import {
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
-import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
-import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -120,12 +118,15 @@ export function createVertexIds() {
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
+    height: `heightVertex${createUniqueId()}`,
     hidden: `hiddenVertex${createUniqueId()}`,
+    icon: `iconVertex${createUniqueId()}`,
     key: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
     src: `srcVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
+    width: `widthVertex${createUniqueId()}`,
   };
 }
 
@@ -206,6 +207,37 @@ function createVertices(
           key: "src",
         },
       },
+      // New vertices for icon, width, and height
+        {
+          id: vertexIds.icon,
+          P: {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            displayName: "Icon",
+            key: "icon",
+          },
+        },
+        {
+          id: vertexIds.width,
+          P: {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            displayName: "Width",
+            key: "width",
+            type: "number",
+          },
+        },
+        {
+          id: vertexIds.height,
+          P: {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            displayName: "Height",
+            key: "height",
+            type: "number",
+          },
+        },
+
     ];
 
   vertices.forEach((vertex) => {
@@ -281,6 +313,7 @@ function moveClassToLast(
     graph.vertexes[vertexIds.hidden],
     graph.vertexes[vertexIds.disabled],
     ...(componentName === "Image" ? [graph.vertexes[vertexIds.src]] : []),
+    ...(componentName === "Icon" ? [graph.vertexes[vertexIds.icon], graph.vertexes[vertexIds.width], graph.vertexes[vertexIds.height]] : []),
     ...nonCssVertices,
   ];
 }
@@ -374,11 +407,12 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
           />
-          <SelectRuleField
+          {/* Temporary disabled */}
+          {/* <SelectRuleField
             meta={modifyMetaVertexExpr(props.meta)}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
-          />
+          /> */}
         </Match>
       </Switch>
     </div>
