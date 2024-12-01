@@ -2,11 +2,16 @@ import { createSignal, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
+import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import { useGraph } from "~/lib/graph/graph";
 
 export function InsertButtons(props: Readonly<{ item: Vertex }>) {
+  const [graph, setGraph] = useGraph();
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   let insertBeforeButtonsRef: HTMLElement;
   let insertAfterButtonsRef: HTMLElement;
   let insertInsideButtonsRef: HTMLElement;
@@ -28,6 +33,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowBeforeMenu(false)}
+          onDoubleClick={async (fromVertex) => {
+            await handleDropAtPosition(
+              graph,
+              setGraph,
+              layoutStore.formStore[0].txnId,
+              layoutStore.formStore[0].formData,
+              fromVertex,
+              props.item,
+              "before",
+            );
+          }}
           onMouseLeave={() => setShowBeforeMenu(false)}
           parentRef={insertBeforeButtonsRef!}
         />
@@ -46,6 +62,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowAfterMenu(false)}
+          onDoubleClick={async (fromVertex) => {
+            await handleDropAtPosition(
+              graph,
+              setGraph,
+              layoutStore.formStore[0].txnId,
+              layoutStore.formStore[0].formData,
+              fromVertex,
+              props.item,
+              "after",
+            );
+          }}
           onMouseLeave={() => setShowAfterMenu(false)}
           parentRef={insertAfterButtonsRef!}
         />
@@ -64,6 +91,17 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowInsideMenu(false)}
+          onDoubleClick={async (fromVertex) => {
+            await handleDropAtPosition(
+              graph,
+              setGraph,
+              layoutStore.formStore[0].txnId,
+              layoutStore.formStore[0].formData,
+              fromVertex,
+              props.item,
+              "center",
+            );
+          }}
           onMouseLeave={() => setShowInsideMenu(false)}
           parentRef={insertInsideButtonsRef!}
         />
@@ -76,6 +114,7 @@ export function InsertButtonsMenu(
   props: Readonly<{
     item: Vertex;
     onClose: () => void;
+    onDoubleClick: (fromVertex: Vertex) => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
   }>,
@@ -86,7 +125,9 @@ export function InsertButtonsMenu(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <ComponentList />
+      <ComponentList
+        onDoubleClick={props.onDoubleClick}
+      />
     </DropdownMenu>
   );
 }

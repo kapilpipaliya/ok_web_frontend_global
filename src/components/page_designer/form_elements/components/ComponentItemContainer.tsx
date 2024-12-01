@@ -11,6 +11,7 @@ export function ComponentItemContainer(props: {
   children: JSX.Element;
   isHovered: boolean;
   onClick?: (el: MouseEvent) => void;
+  onDoubleClick?: (fromVertex: Vertex) => void;
   onMouseEnter?: (el: MouseEvent) => void;
   onMouseLeave?: (el: MouseEvent) => void;
   ref: (el: HTMLDivElement) => void;
@@ -37,6 +38,7 @@ export function ComponentItemContainer(props: {
       class={itemStyle()}
       draggable={true}
       onClick={props.onClick}
+      onDblClick={() => props.onDoubleClick?.(props.child)}
       onDragEnd={onDragEnd}
       onDragStart={(e) =>
         onCompDragStart(

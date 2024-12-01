@@ -32,11 +32,38 @@ function cleanFormat(data: ComponentNode[]): ComponentNode[] {
 }
 
 export function getComponentTree(): ComponentNode[] {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const yamlFilePath = path.resolve(__dirname, "componentTree.yaml");
 
-  const yamlContent = fs.readFileSync(yamlFilePath, "utf8");
+
+  const yamlContent = `- Root:
+  - Box
+  - Button
+  - CheckBox
+  - DynamicTable
+  - FileUploader
+  - Form
+  - FormError
+  - Fragment
+  - Icon
+  - Image
+  - KeyedContext
+  - MultiSelect
+  - Page
+  - Portal
+  - PullToRefresh
+  - RadioGroup:
+    - Radio
+  - Repeater
+  - Select
+  - Steps:
+    - Step
+    - ActiveStep
+  - Text
+  - TextArea
+  - TextInput
+  - Transition
+  - TransitionGroup
+  - ZIndex
+`
 
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));

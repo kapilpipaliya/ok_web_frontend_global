@@ -13,7 +13,9 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { ComonentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
 
-export function ComponentList() {
+export function ComponentList(props: {
+  onDoubleClick?: (fromVertex: Vertex) => void;
+}) {
   const [graph, setGraph] = useGraph();
   const [searchQuery, setSearchQuery] = createSignal("");
   const [isFetchingData, setIsFetchingData] = createSignal(true);
@@ -92,6 +94,7 @@ export function ComponentList() {
                   <ComonentItem
                     child={item}
                     expandedComponent={expandedComponent()}
+                    onDoubleClick={props.onDoubleClick}
                     setExpandedComponent={setExpandedComponent}
                   />
                 </div>

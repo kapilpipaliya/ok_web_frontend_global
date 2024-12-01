@@ -159,6 +159,7 @@ export function ResizableAltKey() {
           <div class="" />
         </Resizable.Handle>
         <Resizable.Panel
+          class="bl:1|solid|lightgrey"
           initialSize={0.2}
           minSize={0.1}
         >
@@ -171,7 +172,7 @@ export function ResizableAltKey() {
             when={
               layoutStore.selectedId !== -1 &&
               graph.vertexes[layoutStore.selectedId] &&
-              layoutStore.selectedId
+              graph.vertexes[layoutStore.selectedId].L?.[0]?.endsWith("Attr")
             }
           >
             <div

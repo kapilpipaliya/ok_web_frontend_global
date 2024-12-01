@@ -14,6 +14,7 @@ export function ComonentItem(
   props: Readonly<{
     child: Vertex;
     expandedComponent?: Vertex;
+    onDoubleClick?: (fromVertex: Vertex) => void;
     setExpandedComponent: (component?: Vertex) => void;
   }>,
 ) {
@@ -69,6 +70,7 @@ export function ComonentItem(
             props.child === props.expandedComponent ? undefined : props.child,
           );
         }}
+        onDoubleClick={props.onDoubleClick}
         // onMouseEnter={() => {
         //   // setIsHovered(true);
         //   handlePreviewMouseEnter();

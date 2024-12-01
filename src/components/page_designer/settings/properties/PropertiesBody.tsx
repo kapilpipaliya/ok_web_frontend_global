@@ -188,7 +188,21 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       <textarea
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
         onChange={(e) => evaluateOtherProps(e.currentTarget.value)}
-        placeholder="Enter JavaScript function here"
+        placeholder={`Enter JavaScript function body here:
+access following variables in the args:
+  data: Vertex;
+  evalExpression: (expression: string, options: object) => any;
+  meta: Vertex;
+  onChange: (value: any) => void;
+  owner: Owner;
+  parentItems: PageRenderStore[];
+  parentMeta: Vertex;
+  readOnly: boolean | null | undefined;
+  ref: Accessor<HTMLDivElement | null>;
+  repeaterContext: Record<string | symbol, any>;
+  runWithOwner: <T>(fn: () => T) => T | undefined;
+  runWithParentOwner: <T>(fn: () => T) => T | undefined;
+`}
         style={{ height: "200px" }}
         value={graph.vertexes[layoutStore.selectedId].P.otherProps ?? ""}
       />

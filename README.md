@@ -265,5 +265,4 @@ sudo apachectl start
 make sure app is running at port 3000
 
 Super User Setup:
-cp src/cypher/mutate/sync/component_tree/componentTree.yaml .output/server/componentTree.yaml
 npx playwright test tests/auth/superuser/super_user_setup.spec.ts --project=chromium
