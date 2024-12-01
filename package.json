@@ -6,7 +6,7 @@
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host",
     "build": "vinxi build",
-    "start": "vinxi start --port 3001"
+    "start": "NODE_OPTIONS='--import ./public/instrument.server.mjs' vinxi start --port 3001"
   },
   "dependencies": {
     "@bedrock-layout/solid": "^1.7.2",
@@ -26,6 +26,7 @@
     "@orbit/memory": "^0.17.2",
     "@orbit/record-cache": "^0.17.2",
     "@orbit/records": "^0.17.0",
+    "@sentry/solidstart": "^8.41.0",
     "@solid-aria/primitives": "^0.4.0",
     "@solid-bricks/barcode": "^1.0.1",
     "@solid-primitives/autofocus": "^0.0.111",

@@ -1,9 +1,12 @@
+import { withSentryRouterRouting } from "@sentry/solidstart/solidrouter";
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense } from "solid-js";
 
 import "~/base.css";
+
+import { createSignal, Show, Suspense } from "solid-js";
+
 import { createAppState } from "~/createAppState";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
@@ -11,6 +14,8 @@ import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
 import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
 import { GraphContext } from "./lib/graph/graph";
+
+const SentryRouter = withSentryRouterRouting(Router);
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -21,7 +26,7 @@ export default function App() {
     return themeConfig ? JSON.parse(themeConfig) : {};
   };
   return (
-    <Router
+    <SentryRouter
       root={(props) => {
         return (
           <CSSRuntimeProvider config={themeConfig()}>
@@ -45,7 +50,7 @@ export default function App() {
         );
       }}
     >
-      <FileRoutes />
-    </Router>
+        <FileRoutes />
+    </SentryRouter>
   );
 }
