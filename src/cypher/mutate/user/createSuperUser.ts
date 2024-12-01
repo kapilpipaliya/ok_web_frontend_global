@@ -31,6 +31,7 @@ export async function createSuperUser(
         uuid: uuid
       })
       CREATE (s:SubDomain {
+        key: "super",
         driverPort: 1102,
         labPort: 1104,
         logsPort: 1103

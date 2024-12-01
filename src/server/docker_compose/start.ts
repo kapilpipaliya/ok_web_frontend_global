@@ -4,6 +4,7 @@ import * as path from "path";
 import { getBaseDir } from "../upload/getBaseDir";
 
 export async function startMemgraphService(subdomain: string): Promise<string> {
+  'use server';
   const dir: string = getBaseDir();
   const mgplatDir: string = path.join(dir, subdomain, "memgraph-platform");
   const mgplatComposePath: string = path.join(mgplatDir, "docker-compose.yml");
@@ -13,7 +14,11 @@ export async function startMemgraphService(subdomain: string): Promise<string> {
   );
 
   try {
-    await compose.upOne("memgraph", { cwd: path.join(mgplatDir), log: true });
+    await compose.upOne("memgraph", {
+      composeOptions: ["--project-name", subdomain],
+      cwd: path.join(mgplatDir),
+      log: true,
+    });
     console.log("Memgraph service started successfully");
   } catch (err: any) {
     console.log("Failed to start Memgraph service:", err.message);

@@ -14,6 +14,7 @@ export async function deleteDockerComposeDirectory(
   try {
     // Stop Docker Compose
     await compose.downAll({
+      composeOptions: ["--project-name", subdomain],
       config: mgplatComposePath,
       cwd: mgplatDir,
     });
