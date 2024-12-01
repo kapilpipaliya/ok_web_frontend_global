@@ -38,10 +38,10 @@ export function getEdgesFromRowsAttr(
           }); // `->$0${capitalizedName}`
         }
       } else if (
-        !ignoreTables &&
         (attribute.componentName === "Table" ||
           attribute.componentName === "DynamicTable")
       ) {
+        if (ignoreTables) continue;
         const expression: NestedExpression = {
           expression: `->${getToEdge(
             { P: attribute } as unknown as Vertex,
