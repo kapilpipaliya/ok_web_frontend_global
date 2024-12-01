@@ -98,6 +98,14 @@ export function getDynamicComponent(component: string) {
     const lowerCaseKey = key.charAt(0).toLowerCase() + key.slice(1);
     return componentMap[lowerCaseKey] || NotFoundComponent;
   }
+  if (corvuComponents[componentKey as keyof typeof corvuComponents]) {
+    return subComponent
+      ? // @ts-expect-error ignore
+      corvuComponents[componentKey as keyof typeof corvuComponents][
+        subComponent
+        ] || NotFoundComponent
+      : corvuComponents[componentKey as keyof typeof corvuComponents];
+  }
 
   return componentsMap[componentKey];
 }

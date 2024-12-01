@@ -35,9 +35,32 @@ export function getComponentTree(): ComponentNode[] {
 
 
   const yamlContent = `- Root:
+  - Accordion:
+    - Accordion.Item:
+      - Accordion.Trigger
+      - Accordion.Content
   - Box
   - Button
   - CheckBox
+  - Dialog:
+      - Dialog.Trigger
+      - Dialog.Portal:
+          - Dialog.Overlay
+          - Dialog.Content:
+              - Dialog.Close
+              - Dialog.Label
+              - Dialog.Description
+  - Disclosure:
+    - Disclosure.Trigger
+    - Disclosure.Content
+  - Drawer:
+    - Drawer.Trigger
+    - Drawer.Portal:
+        - Drawer.Overlay
+        - Drawer.Content:
+            - Drawer.Close
+            - Drawer.Label
+            - Drawer.Description
   - DynamicTable
   - FileUploader
   - Form
@@ -47,12 +70,27 @@ export function getComponentTree(): ComponentNode[] {
   - Image
   - KeyedContext
   - MultiSelect
+  - OtpField:
+    - OtpField.Input
   - Page
   - Portal
+  - Popover:
+    - Popover.Anchor:
+      - Popover.Trigger
+    - Popover.Portal:
+        - Popover.Overlay
+        - Popover.Content:
+            - Popover.Arrow
+            - Popover.Close
+            - Popover.Label
+            - Popover.Description
   - PullToRefresh
   - RadioGroup:
     - Radio
   - Repeater
+  - Resizable:
+    - Resizable.Handle
+    - Resizable.Panel
   - Select
   - Steps:
     - Step
@@ -60,6 +98,13 @@ export function getComponentTree(): ComponentNode[] {
   - Text
   - TextArea
   - TextInput
+  - Tooltip:
+    - Tooltip.Anchor:
+      - Tooltip.Trigger
+    - Tooltip.Portal:
+      - Tooltip.Content:
+        - Tooltip.Arrow
+      - Tooltip.Overlay
   - Transition
   - TransitionGroup
   - ZIndex

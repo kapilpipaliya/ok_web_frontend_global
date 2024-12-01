@@ -24,7 +24,8 @@ export function PreviewButton() {
     return (
       <PreviewPage>
         <PageView
-          isDesignMode={true}
+          isDesignMode={false}
+          isNoPermissionCheck={true}
           // data={layoutStore.formStore[0].formData}
           metaVertex={layoutStore.formStore[0].formData}
         />
