@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 

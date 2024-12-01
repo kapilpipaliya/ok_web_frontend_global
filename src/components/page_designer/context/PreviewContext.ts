@@ -8,6 +8,7 @@ import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
 export function getInitialPreviewStore() {
   return {
     ...InitialPermissions,
+    context: undefined as any | undefined,
     id: undefined as Id | undefined,
     isDesignMode: false as boolean | undefined,
     isViewOnly: false as boolean | null | undefined,

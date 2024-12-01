@@ -1,9 +1,13 @@
+import { Store } from "solid-js/store";
+
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { GraphInterface } from "~/lib/graph/graph";
 
 export async function getTableData(
+  graph: Store<GraphInterface>,
   form: IFormMetaData,
   tableId: string,
   skip?: number,
@@ -19,6 +23,7 @@ export async function getTableData(
     const result = await fetchDataFromMG(
       {
         expression: `g:'${tableId}[$1]'`,
+        [graph.url]: true,
         incoming,
         outgoing,
       },

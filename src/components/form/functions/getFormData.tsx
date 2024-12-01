@@ -1,5 +1,7 @@
+import { Store } from "solid-js/store";
+
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id } from "~/lib/graph/graph";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
@@ -8,6 +10,7 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr"
 import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export const getFormData = async (
+  graph: Store<GraphInterface>,
   metaAttrs: FieldAttribute[],
   id: Id,
 ): Promise<{ data?: ServerResult; error: string }> => {
@@ -15,6 +18,7 @@ export const getFormData = async (
     const { incoming, outgoing } = getEdgesFromRowsAttr(metaAttrs);
     const result = await fetchDataFromMG({
       expression: `id:'${id}'`,
+      [graph.url]: true,
       incoming,
       outgoing,
     });

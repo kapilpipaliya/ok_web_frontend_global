@@ -14,7 +14,7 @@ export const Coll: IFormMetaData = {
     {
       componentName: "TextInput",
       key: "title",
-      onchange: '{"new": ["key","id"]}',
+      // onchange: '{"new": ["key","id"]}', // TODO: fix now its giving error Error: Failed to execute 'addEventListener' on 'EventTarget': parameter 2 is not of type 'Object'.
     },
     {
       componentName: "TextInput",

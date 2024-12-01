@@ -4,14 +4,24 @@ import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
+
+// TODO: This should not throw error, else its not captured by the API error handler and sent to the client, or either handle erroor in API Endpoints.
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
-  const host = request
-    ? request.headers.get("host")!
-    : getRequestURL().hostname;
-  if (!host) {
-    throw new Error("Host header is missing");
-  }
-  const subDomain = await getSubDomain(host);
+  const url = getURL(request);
+  const subDomain = await determineSubDomain(url);
   const dbSession = (await getDriver(subDomain)).session();
   return { dbSession, subDomain };
+}
+
+function getURL(request?: APIEvent["request"]): URL {
+  const url = request ? new URL(request.url) : getRequestURL();
+  if (!url) {
+    throw new Error("URL is missing");
+  }
+  return url;
+}
+
+async function determineSubDomain(url: URL): Promise<string> {
+  const fetchTemplate = url.searchParams.get("fetchTemplate");
+  return fetchTemplate === "true" ? "adminpaneluicomponents" : await getSubDomain(url.hostname);
 }

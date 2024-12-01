@@ -51,6 +51,7 @@ export function PageDesignerWrapper(): JSX.Element {
   const fetchCompExamples = async () => {
     // setGridState("isLoading", true);
     const data = await getTableData(
+      graph,
       FormMetaData.CompExample,
       "CompExample",
       undefined,

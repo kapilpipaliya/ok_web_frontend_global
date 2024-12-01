@@ -14,7 +14,10 @@ export async function fetchAndSetGraphData(
     [key: string]: any;
   },
 ) {
-  const result = await fetchDataFromMG({ expression }, context);
+  const result = await fetchDataFromMG(
+    { expression, [graph.url]: true },
+    context,
+  );
 
   if (!isValidResponse(result)) {
     // @ts-expect-error ignore

@@ -84,6 +84,7 @@ export function FormField(
     }
     try {
       const { data, error } = await getFormData(
+        graph,
         formData.formMetaData!.attributes,
         id()!
       );

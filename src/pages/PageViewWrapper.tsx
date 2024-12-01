@@ -58,6 +58,7 @@ const PageView = clientOnly(
 export function PageViewWrapper(
   props: Readonly<{
     closePopUp?: () => void;
+    context?: any;
     dataId?: Id;
     enableSEO?: boolean;
     expression?: string;
@@ -187,6 +188,7 @@ export function PageViewWrapper(
           (props.formId
             ? `id:'${props.formId}'`
             : `g:'${props.pageVertexLabel ?? "Form"}[${props.pageVertexName}]'`),
+        [graph.url]: true,
         incoming,
         outgoing,
       });
@@ -231,6 +233,7 @@ export function PageViewWrapper(
     }
     try {
       const { data, error } = await getFormData(
+        graph,
         formStore.formMetaData!.attributes,
         id()!
       );
@@ -368,6 +371,7 @@ export function PageViewWrapper(
 
   const Content = () => (
     <PageView
+      context={props.context}
       data={formStore.formData}
       hasDeletePermission={permissions.delete()}
       hasEditPermission={permissions.edit()}

@@ -36,9 +36,9 @@ export async function getInitialData(dbSession: Session) {
       relationshipObj,
     );
 
-    await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj);
-    await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj);
-    await fetchAndSaveFormMetaData("GlobalSetting", nodeObj, relationshipObj);
+    await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
+    await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
+    await fetchAndSaveFormMetaData("GlobalSetting", nodeObj, relationshipObj, dbSession);
   } catch (error: any) {
     return { error: error.message };
   }
@@ -54,6 +54,7 @@ async function fetchAndSaveFormMetaData(
   formName: string,
   nodeObj: Record<string, Vertex>,
   relationshipObj: Record<string, Edge>,
+  dbSession: Session,
 ) {
   const form = FormMetaData[formName];
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
@@ -63,7 +64,7 @@ async function fetchAndSaveFormMetaData(
       incoming,
       outgoing,
     },
-    undefined,
+    { dbSession, nodes: nodeObj, relationships: relationshipObj },
     false,
   );
 

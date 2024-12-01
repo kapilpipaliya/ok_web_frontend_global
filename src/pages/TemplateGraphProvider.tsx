@@ -7,7 +7,7 @@ import { GraphContext } from "~/lib/graph/graph";
 
 export const TemplateGraphProvider = (props: ParentProps) => {
   const graph = createAppState();
-  graph[1]("url", "https://admin_panel_ui_components.easyformforge.in/");
+  graph[1]("url", "fetchTemplate");
 
   return (
     <KeyedContext context={graph} name="templateGraph">

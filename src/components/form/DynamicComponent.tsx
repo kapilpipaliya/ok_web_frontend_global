@@ -193,6 +193,9 @@ export function DynamicComponent(
 
   const getFunctionArgumentBase = () =>
     ({
+      get context() {
+        return previewStore.context;
+      },
       get data() {
         return props.data;
       },

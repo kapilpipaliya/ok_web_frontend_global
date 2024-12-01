@@ -21,6 +21,7 @@ export async function loadPageData(
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
   const result = await fetchDataFromMG({
     expression: `id:'${fromVertex.id}'`,
+    [graph.url]: true,
     incoming,
     outgoing,
   });

@@ -1,5 +1,7 @@
+import { Session } from "neo4j-driver";
+
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
 import { checkSuperUserAuthorization } from "~/server/checkSuperUserAuthorization";
@@ -11,15 +13,31 @@ import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,
-  context: ContextType = {
-    nodes: {} as { [key: string]: any },
-    relationships: {} as { [key: string]: any },
+  context: { fetchTemplate?: boolean } & ContextType = {
+    nodes: {} as { [key: string]: Vertex },
+    relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,
   },
   permissionCheck = true,
 ): Promise<ServerResult> {
   "use server";
-  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+  let dbSession: Session;
+  let subDomain: string = "";
+  // @ts-expect-error ignore
+  if (expression.fetchTemplate) {
+    context.fetchTemplate = true;
+  }
+
+  if (context.dbSession) {
+    dbSession = context.dbSession;
+  } else {
+    ({ dbSession, subDomain } = await getDBSessionForSubdomain(
+      context.fetchTemplate
+        ? { url: "http://localhost/?fetchTemplate=true" } as Request
+        : undefined,
+    ));
+    context.dbSession = dbSession;
+  }
 
   if (permissionCheck) {
     const authorizationError = await checkSuperUserAuthorization(

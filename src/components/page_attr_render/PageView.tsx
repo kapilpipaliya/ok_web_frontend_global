@@ -11,6 +11,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 export function PageView(
   props: Readonly<{
+    context?: any;
     data?: Vertex;
     hasDeletePermission?: boolean | null;
     hasEditPermission?: boolean | null;
@@ -36,6 +37,9 @@ export function PageView(
   });
 
   const previewStore = createStore<PreviewStoreObject>({
+    get context() {
+      return props.context;
+    },
     get hasDeletePermission() {
       return props.hasDeletePermission;
     },

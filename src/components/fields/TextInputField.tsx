@@ -1,3 +1,4 @@
+import { mergeRefs } from "@solid-primitives/refs";
 import {
   createSignal,
   type JSX,
@@ -113,7 +114,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
             autocomplete="off"
             class={`${others.class || ""} ${local.error && local.errorClass ? local.errorClass : ""}`}
             onChange={handleChange}
-            ref={setReference}
+            ref={mergeRefs(setReference, others.ref)}
             value={local.value ?? ""}
           />
         </Match>

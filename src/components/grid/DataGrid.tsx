@@ -130,6 +130,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromMG({
         expression: `g:'Form[${props.tableId}]'`,
+        [graph.url]: true,
         incoming,
         outgoing,
       });
@@ -186,6 +187,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   async function fetchTableData(skip?: number, limit?: number, isLoadMore?: boolean) {
     setGridState("isLoading", true);
     const data = await (props.getTableData || defaultGetTableData)(
+      graph,
       formMetaData()!,
       props.tableId,
       skip,
