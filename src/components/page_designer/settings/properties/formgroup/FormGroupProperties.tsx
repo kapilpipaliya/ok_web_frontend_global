@@ -243,8 +243,8 @@ function createVertices(
         P: {
           class: PROPERTIES.Css.TextField,
           componentName: "TextInput",
-          displayName: "Attribute Name",
-          key: "attrName",
+          displayName: "Attribute Label",
+          key: "attrLabel",
         },
       },
     ];
