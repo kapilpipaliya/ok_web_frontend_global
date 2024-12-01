@@ -73,6 +73,7 @@ export function ComponentList(props: {
           setSearchQuery(value);
         }}
         placeholder="Search Component..."
+        ref={el => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
         value={searchQuery()}
       />
       <div class="scrollbar-color:lightgrey {scrollbar-width:thin} h:full overflow:auto">

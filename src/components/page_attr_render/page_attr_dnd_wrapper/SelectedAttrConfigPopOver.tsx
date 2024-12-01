@@ -9,6 +9,7 @@ import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
 import { ImportHtmlButton } from "./ImportHtmlButton";
+import { InsertButtons } from "./InsertButtons";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
@@ -40,6 +41,7 @@ export function SelectedAttrConfigPopOver(
           size={20}
           title="Move"
         />
+        <InsertButtons item={props.item} />
         <ComponentName componentName={getComponentName()} />
         <ParentButton item={props.item} />
         <DuplicateButton item={props.item} />
