@@ -113,6 +113,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
 export function createVertexIds() {
   return {
     as: `asVertex${createUniqueId()}`,
+    attrLabel: `attrNameVertex${createUniqueId()}`,
     calculatedValue: `calculatedValueVertex${createUniqueId()}`,
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
@@ -207,40 +208,47 @@ function createVertices(
           key: "src",
         },
       },
-      // New vertices for icon, width, and height
-        {
-          id: vertexIds.icon,
-          P: {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            displayName: "Icon",
-            key: "icon",
-          },
+      // New vertices for icon, width, height, and attrName
+      {
+        id: vertexIds.icon,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Icon",
+          key: "icon",
         },
-        {
-          id: vertexIds.width,
-          P: {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            displayName: "Width",
-            key: "width",
-            type: "number",
-          },
+      },
+      {
+        id: vertexIds.width,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Width",
+          key: "width",
+          type: "number",
         },
-        {
-          id: vertexIds.height,
-          P: {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            displayName: "Height",
-            key: "height",
-            type: "number",
-          },
+      },
+      {
+        id: vertexIds.height,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Height",
+          key: "height",
+          type: "number",
         },
-
+      },
+      {
+        id: vertexIds.attrLabel,
+        P: {
+          class: PROPERTIES.Css.TextField,
+          componentName: "TextInput",
+          displayName: "Attribute Name",
+          key: "attrName",
+        },
+      },
     ];
-
-  vertices.forEach((vertex) => {
+  for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
     addNewVertex(txnId, newVertexInstance, graph, setGraph);
     if (vertex.attributes) {
@@ -252,7 +260,7 @@ function createVertices(
         vertex.attributes,
       );
     }
-  });
+  }
 }
 
 function clonePropAttributes(
@@ -299,6 +307,7 @@ function moveClassToLast(
   );
 
   return [
+    graph.vertexes[vertexIds.attrLabel],
     graph.vertexes[vertexIds.key],
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
