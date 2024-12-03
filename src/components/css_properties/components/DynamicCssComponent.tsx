@@ -4,8 +4,10 @@ import {
   getOwner,
   Match,
   runWithOwner,
+  Show,
   splitProps,
   Switch,
+  useContext,
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
@@ -27,6 +29,7 @@ import {
   type RenderStore,
   useRenderContext,
 } from "../context/RenderContext";
+import { ShowConfiguredOnlyContext } from "../context/ShowConfiguredOnlyContext";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
@@ -58,6 +61,7 @@ export function DynamicCSSComponent(
   const parentRenderItems = useRenderContext() || [];
   const parentRenderContext = () => getLastItem(parentRenderItems)?.[0];
   const parentMeta = () => parentRenderContext()?.context.meta;
+  const showConfiguredOnly = useContext(ShowConfiguredOnlyContext);
   const owner = getOwner();
 
   const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
@@ -217,6 +221,13 @@ export function DynamicCSSComponent(
       return projections();
     },
   });
+  const isValueConfigured = createMemo(() => {
+    const value_ = value();
+    if (Array.isArray(value_)) {
+      return value_.length > 0;
+    }
+    return !!value_;
+  });
   return (
     <RenderContextProvider store={repeaterStore as RenderStore}>
       <Switch>
@@ -225,24 +236,28 @@ export function DynamicCSSComponent(
           <Content />
         </Match>
         <Match when={props.meta.isLabelOnTop}>
-          <div class={"w:full"}>
-            <LabelWrapper
-              meta={props.meta}
-              onResetIconClick={resetValue}
-              value={value()}
-            />
-            <Content />
-          </div>
+          <Show when={!showConfiguredOnly() || isValueConfigured()}>
+            <div class={"w:full"}>
+              <LabelWrapper
+                meta={props.meta}
+                onResetIconClick={resetValue}
+                value={value()}
+              />
+              <Content />
+            </div>
+          </Show>
         </Match>
         <Match when={props.meta.label}>
-          <div class={"flex ai:center jc:space-between w:full"}>
-            <LabelWrapper
-              meta={props.meta}
-              onResetIconClick={resetValue}
-              value={value()}
-            />
-            <Content />
-          </div>
+          <Show when={!showConfiguredOnly() || isValueConfigured()}>
+            <div class={"flex ai:center jc:space-between w:full"}>
+              <LabelWrapper
+                meta={props.meta}
+                onResetIconClick={resetValue}
+                value={value()}
+              />
+              <Content />
+            </div>
+          </Show>
         </Match>
         <Match when={true}>
           <Content />

@@ -15,6 +15,7 @@ import type {
 
 import { DynamicCSSComponent } from "../components/DynamicCssComponent";
 import { useCssState } from "../context/CssStateContext";
+import { ShowConfiguredOnlyContext } from "../context/ShowConfiguredOnlyContext";
 
 export const CollapsibleSection = (
   props: Readonly<{
@@ -80,16 +81,30 @@ export const SectionList = (
     () => Object.keys(props.filteredSections()).length,
   );
   const [setAllOpen, setSetAllOpen] = createSignal<boolean | null>(null);
+  const [showConfiguredOnly, setShowConfiguredOnly] = createSignal(false);
 
   const collapseAll = () => setSetAllOpen(false);
   const expandAll = () => setSetAllOpen(true);
+  const toggleConfigured = () => setShowConfiguredOnly(prev => !prev);
 
   return (
-    <>
+    <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
       <div class="flex jc:end mb:2 w:100%">
-        <button class="btn" onClick={collapseAll} title="Collapse all">
+        <button 
+          class="btn" 
+          onClick={toggleConfigured} 
+          title={showConfiguredOnly() ? "Show all fields" : "Show configured fields only"}
+        >
           <Icon
-            class={" transition:transform|0.2s|linear"}
+            class="transition:transform|0.2s|linear"
+            height={25}
+            icon={showConfiguredOnly() ? "mdi:eye-off-outline" : "mdi:eye-outline"}
+            width={25}
+          />
+        </button>
+        <button class="btn ml:2" onClick={collapseAll} title="Collapse all">
+          <Icon
+            class="transition:transform|0.2s|linear"
             height={25}
             icon="mdi:collapse-all-outline"
             width={25}
@@ -97,7 +112,7 @@ export const SectionList = (
         </button>
         <button class="btn ml:2" onClick={expandAll} title="Expand all">
           <Icon
-            class={" transition:transform|0.2s|linear"}
+            class="transition:transform|0.2s|linear"
             height={25}
             icon="mdi:expand-all-outline"
             width={25}
@@ -121,6 +136,6 @@ export const SectionList = (
           );
         }}
       </For>
-    </>
+    </ShowConfiguredOnlyContext.Provider>
   );
 };
