@@ -21,6 +21,7 @@ import { cssStateToString } from "../utils/cssStateToString";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 
 const defaultStateLabel = "Default State";
 
@@ -35,6 +36,10 @@ function getOptions(cssState: CSSStore) {
     ":focus-within",
     ":focus-visible",
     ":target",
+    "@xs",
+    "@sm",
+    "@md",
+    "@lg",
   ];
   const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
 
@@ -141,13 +146,20 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
           selectionLimit={1}
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
-          <button onClick={removeState} title="Remove State">
+          <button class="ai:center d:inline-flex" onClick={removeState} title="Remove State">
             <Icon height={21} icon="ic:round-remove" width={21} />
           </button>
         </Show>
-        <button onClick={handleAddNewClick} title="Add New State">
+        <button class="ai:center d:inline-flex" onClick={handleAddNewClick} title="Add New State">
           <Icon height={21} icon="ic:round-add" width={21} />
         </button>
+        <IframeHelpDialog
+          icon="material-symbols:help-outline"
+          iconSize={21}
+          iframeSrc="https://rc.css.master.co/guide/state-selectors"
+          iframeTitle="State Selectors"
+          title="State Selectors"
+        />
         <Show when={showDropdown()}>
           <ZIndex>
             <DropdownMenu

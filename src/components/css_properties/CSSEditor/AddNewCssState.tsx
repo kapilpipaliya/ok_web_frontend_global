@@ -7,6 +7,7 @@ import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { PROPERTIES } from "../../styled/constants/constant";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
@@ -38,6 +39,12 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
               placeholder="Enter State Name"
               ref={inputRef!}
               value={stateName()}
+            />
+            <IframeHelpDialog
+              icon="material-symbols:help-outline"
+              iframeSrc="https://rc.css.master.co/guide/state-selectors"
+              iframeTitle="State Selectors"
+              title="State Selectors"
             />
           </div>
         </label>

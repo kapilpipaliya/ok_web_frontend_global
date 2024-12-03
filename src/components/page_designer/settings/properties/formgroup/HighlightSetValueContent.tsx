@@ -1,11 +1,11 @@
 import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 
 import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
-import { IconPicker } from "~/components/css_properties/components/fields/textfield_with_unit/IconPicker";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
@@ -99,7 +99,12 @@ export function HighlightSetValueContent(
                   onChange={(data) => props.onChange(props.meta, data)}
                   txnId={props.txnId}
                 />
-                <IconPicker />
+                <IframeHelpDialog
+                  icon="arcticons:pickme"
+                  iframeSrc="https://icon-sets.iconify.design"
+                  iframeTitle="Icon Sets"
+                  title="Icon Picker"
+                />
               </div>
             </div>
           </Match>

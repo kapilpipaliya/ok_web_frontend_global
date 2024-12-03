@@ -40,7 +40,7 @@ export function CSSPropertiesEditorWrapper(
     if (typeof value === "string") {
       setStateFunction(reconcile(parseAndApplyCssRules(value)));
     } else if (isObject(value)) {
-      setStateFunction(value);
+      setStateFunction(reconcile(JSON.parse(JSON.stringify(value))));
     }
   };
 
