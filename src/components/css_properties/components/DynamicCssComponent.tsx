@@ -105,7 +105,7 @@ export function DynamicCSSComponent(
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
     const baseArguments = getFunctionArgumentBase();
 
-    return Object.assign({}, baseArguments, {
+    return Object.assign(baseArguments, {
       get parentValue() {
         return parentValue();
       },

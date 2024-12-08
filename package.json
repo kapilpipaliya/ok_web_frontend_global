@@ -5,7 +5,7 @@
     "check-errors": "npx tsc --noEmit && npx eslint . --ext .ts,.tsx && npm run build",
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host",
-    "build": "vinxi build",
+    "build": "vinxi build --no-minify",
     "start": "NODE_OPTIONS='--import ./public/instrument.server.mjs' vinxi start --port 3001"
   },
   "dependencies": {

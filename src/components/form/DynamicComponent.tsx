@@ -231,6 +231,7 @@ export function DynamicComponent(
       get parentMeta() {
         return parentMeta();
       },
+      parentRenderContext: parentRenderContext(),
       get readOnly() {
         return isReadOnly();
       },

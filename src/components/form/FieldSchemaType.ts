@@ -3,7 +3,7 @@ import type { Accessor, Owner } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import type { PageRenderStore } from "../page_attr_render/context/PageRenderContext";
+import type { PageRenderObject, PageRenderStore } from "../page_attr_render/context/PageRenderContext";
 import type { FormStoreObject } from "./FormContext";
 
 export interface RegexValidation {
@@ -37,6 +37,7 @@ export interface FunctionArgumentBaseType {
   owner: Owner;
   parentItems: PageRenderStore[];
   parentMeta: Vertex;
+  parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
   ref: Accessor<HTMLDivElement | null>;
   repeaterContext: Record<string | symbol, any>;
