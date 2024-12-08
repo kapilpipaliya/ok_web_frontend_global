@@ -1,5 +1,5 @@
 import Resizable from '@corvu/resizable'
-import { type Setter, Show } from "solid-js";
+import { createSignal, type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/FormContext";
@@ -13,6 +13,7 @@ import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
+import { makePersisted } from '@solid-primitives/storage';
 
 function FormElements() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -128,13 +129,16 @@ export function RenderMainContent() {
 
 export function ResizableAltKey() {
   const [layoutStore] = useDesignerLayoutStore();
+  const [sizes, setSizes] = makePersisted(createSignal<number[]>([]), {
+    name: 'resizable-sizes',
+  })
   const [graph] = useGraph();
   return (
     <div class="size-full p-4">
-      <Resizable class="size-full">
+      <Resizable class="size-full" sizes={sizes()} onSizesChange={setSizes}>
         <Resizable.Panel
           class=""
-          initialSize={"300px"}
+          initialSize={sizes()[0] ?? "300px"}
           minSize={"200px"}
         >
           <FormElements />
@@ -147,7 +151,7 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class="flex-col items-center justify-center space-y-2 overflow-hidden rounded-lg bg-corvu-100 px-4 flex"
-          initialSize={0.7}
+          initialSize={sizes()[1] ?? 0.7}
           minSize={0.2}
         >
           <PageViewComponent />
@@ -160,7 +164,7 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class="bl:1|solid|lightgrey"
-          initialSize={"350px"}
+          initialSize={sizes()[2] ?? "350px"}
           minSize={"200px"}
         >
           <Show
@@ -190,7 +194,7 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class=""
-          initialSize={"400px"}
+          initialSize={sizes()[3] ?? "400px"}
           minSize={"200px"}
         >
           <Settings />

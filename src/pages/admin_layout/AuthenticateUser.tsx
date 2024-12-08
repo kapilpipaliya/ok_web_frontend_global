@@ -29,8 +29,8 @@ export function AuthenticateUser(props: Readonly<AuthenticateUserProps>) {
 
   return (
     <Switch>
-      <Match when={graph.isLoadingPage}>Loading</Match>
-      <Match when={!graph.isLoadingPage}>{props.children}</Match>
+      <Match when={!graph.member?.id}>Loading</Match>
+      <Match when={graph.member?.id}>{props.children}</Match>
     </Switch>
   );
 }

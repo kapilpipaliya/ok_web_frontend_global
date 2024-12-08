@@ -29,7 +29,7 @@ export function getInitialDesignerLayoutStore() {
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
-    view: "Tablet",
+    view: "Desktop",
   };
 }
 
