@@ -30,7 +30,7 @@ export function DropdownMenu(
     enabled: true,
     floating: floating,
     options: () => ({
-      flip: props.useFlip, // Automatically flip the dropdown if it doesn't fit
+      flip: props.useFlip ?? true, // Automatically flip the dropdown if it doesn't fit
       offset: props.offset,
       shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
     }),

@@ -134,8 +134,8 @@ export function ResizableAltKey() {
       <Resizable class="size-full">
         <Resizable.Panel
           class=""
-          initialSize={0.2}
-          minSize={0.1}
+          initialSize={"300px"}
+          minSize={"200px"}
         >
           <FormElements />
         </Resizable.Panel>
@@ -147,7 +147,7 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class="flex-col items-center justify-center space-y-2 overflow-hidden rounded-lg bg-corvu-100 px-4 flex"
-          initialSize={0.4}
+          initialSize={0.7}
           minSize={0.2}
         >
           <PageViewComponent />
@@ -160,8 +160,8 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class="bl:1|solid|lightgrey"
-          initialSize={0.2}
-          minSize={0.1}
+          initialSize={"350px"}
+          minSize={"200px"}
         >
           <Show
             fallback={
@@ -190,8 +190,8 @@ export function ResizableAltKey() {
         </Resizable.Handle>
         <Resizable.Panel
           class=""
-          initialSize={0.2}
-          minSize={0.1}
+          initialSize={"400px"}
+          minSize={"200px"}
         >
           <Settings />
         </Resizable.Panel>
