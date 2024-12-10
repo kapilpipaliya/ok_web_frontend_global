@@ -2,7 +2,6 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { handleComponentDrag } from "~/components/page_designer/functions/handleComponentDrag";
 import { handlePageDrag } from "~/components/page_designer/functions/handlePageDrag";
 import { handleParentChange } from "~/components/page_designer/functions/handleParentChange";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
@@ -11,6 +10,7 @@ import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 import { PageDesignerLabels } from "./PageDesignerLabels";
+import { componentDrop } from "./drop/componentDrop";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,
@@ -40,16 +40,35 @@ export async function handleDropAtPosition(
       : getParentVertex(["Attr"], toVertex, graph).vertex;
 
   if (fromVertex.L[0] === "Comp") {
-    return await handleComponentDrag(
+    const layoutRowId = componentDrop (
+      formData,
+      txnId,
+      fromVertex,
+      toParentVertex || formData,
+      graph,
+      setGraph,
+      undefined,
+      undefined,
+    );
+    if (layoutRowId === -1) {
+      return layoutRowId;
+    }
+  
+    fromVertex = graph.vertexes[layoutRowId];
+  
+    sortChildren(
       graph,
       setGraph,
       txnId,
       fromVertex,
-      toVertex,
       toParentVertex!,
-      formData,
+      toVertex,
       position,
     );
+
+    saveUndoPoint(txnId, graph);
+
+    return layoutRowId;
   }
   if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return await handlePageDrag(

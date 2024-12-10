@@ -11,6 +11,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { uniqueNameKey } from "../../constants/constant";
 import { getUniqueName } from "../generateFormMetaAttributes";
 import { getChildrenAttrs } from "../getChildrenAttrs";
+import { sortChildren } from "../sortChildren";
 
 export function getRowProps(
   fromVertex: Vertex,
@@ -72,5 +73,15 @@ export function processChildrenAttrs(
     );
     results.push(rowResult.vertexId!);
   }
+  // Sort children vertices in their parent
+  sortChildren(
+    graph,
+    setGraph,
+    txnId,
+    undefined,
+    toVertex,
+    undefined,
+    "center",
+  );
   return results;
 }

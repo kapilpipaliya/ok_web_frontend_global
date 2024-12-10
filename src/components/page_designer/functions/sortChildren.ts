@@ -10,22 +10,25 @@ export function sortChildren(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  fromVertex: Vertex,
+  fromVertex: Vertex | undefined,
   toParentVertex: Vertex,
-  toVertex: Vertex,
+  toVertex: Vertex | undefined,
   position: string,
 ) {
   let pos = 1;
   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
   for (const child of childrenAttrs) {
-    if (child.id === fromVertex?.id) {
+    if (child.id === fromVertex?.id && position !== "center") {
       continue;
     }
     // const childIndex = child.P.pos;
     // if (childIndex === undefined) {
     //  alert ('childIndex Pos should not be undefined.');
     // }
-    if (child.id === toVertex.id) {
+    if (child.id === toVertex?.id) {
+      if (!fromVertex) {
+        continue;
+      }
       // childIndex === toIndex, childIndex may be undefined.
       if (position === "before" || position === "left") {
         if (fromVertex?.P.pos !== pos) {

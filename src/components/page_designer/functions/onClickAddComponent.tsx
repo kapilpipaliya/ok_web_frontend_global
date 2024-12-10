@@ -2,9 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { handleComponentDrag } from "~/components/page_designer/functions/handleComponentDrag";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
+import { sortChildren } from "./sortChildren";
+import { componentDrop } from "./drop/componentDrop";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,
@@ -21,14 +23,33 @@ export function onClickAddComponent(
   }
   const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
 
-  handleComponentDrag(
+  const layoutRowId = componentDrop(
+    formData,
+    txnId,
+    fromVertex,
+    toParentVertex || formData,
+    graph,
+    setGraph,
+    undefined,
+    undefined,
+  );
+  if (layoutRowId === -1) {
+    return layoutRowId;
+  }
+
+  fromVertex = graph.vertexes[layoutRowId];
+
+  sortChildren(
     graph,
     setGraph,
     txnId,
     fromVertex,
-    toVertex,
     toParentVertex!,
-    formData,
+    toVertex,
     "999999",
   );
+
+  saveUndoPoint(txnId, graph);
+
+  return layoutRowId;
 }
