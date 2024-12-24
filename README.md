@@ -18,11 +18,6 @@ find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
 Note: When the page is loaded server side, the client side will not run this again,
 so set state inside it will not set when page is reloaded.
 
-problem with conflicts in transactions:
-https://stackoverflow.com/questions/77824245/problem-with-cannot-resolve-conflicting-transactions-error-in-memgraph
-https://memgraph.com/docs/help-center/errors/transactions#conflicting-transaction
-
-
 Great hooks:
 https://primitives.solidjs.community/package/memo#createLatest
 

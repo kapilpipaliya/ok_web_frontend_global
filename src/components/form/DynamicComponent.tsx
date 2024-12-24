@@ -613,6 +613,9 @@ export function DynamicComponent(
             ),
           ].reduce(
             (acc, key) => {
+              if (acc[key]) {
+                return acc;
+              }
               acc[key] =
                 `${deNullifyAndMergeCSS()[key] || ""} ${expressionProperties()[key] || ""} ${dynamicProps()[key] || ""}`.trim();
               return acc;
