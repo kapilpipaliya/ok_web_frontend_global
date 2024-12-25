@@ -1,5 +1,21 @@
-## Building
+##Development
+# Getting Started Neo4j
+https://neo4j.com/docs/getting-started/whats-neo4j/
 
+# Neo4j Browser
+To access the Neo4j Browser, navigate to: [http://localhost:7474/browser/](http://localhost:7474/browser/)
+
+# Cypher Manual
+https://neo4j.com/docs/getting-started/cypher-intro/resources/
+
+# JavaScript Driver Manual
+https://neo4j.com/docs/javascript-manual/current/
+
+# Neo4j Multiple database in community edition
+https://github.com/neo4j/neo4j/issues/12920
+https://dozerdb.org
+
+## Building
 Solid apps are built with _presets_, which optimise your project for deployment to different environments.
 
 By default, `npm run build` will generate a Node app that you can run with `npm start`. To use a different preset, add it to the `devDependencies` in `package.json` and specify in your `app.config.js`.
