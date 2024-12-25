@@ -16,31 +16,11 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
 
-// Utility Functions
-function validateFormData(email: string, password: string): boolean {
-  const { showErrorToast } = useToast();
-
-  if (email.includes("@")) {
-    const emailError = validateEmail(email);
-    if (emailError) {
-      showErrorToast("Please enter a valid email address or username");
-      return false;
-    }
-  } else {
-    const usernameError = validateUsername(email);
-    if (usernameError) {
-      showErrorToast("Please enter a valid email address or username");
-      return false;
-    }
-  }
-
-  const passwordError = validatePassword(password);
-  if (passwordError) {
-    showErrorToast(passwordError);
-    return false;
-  }
-
-  return true;
+// LoginForm Component
+interface LoginFormProps {
+  formData: any;
+  onSubmit: (event: MouseEvent) => void;
+  setFormData: (data: any) => void;
 }
 
 // PasswordInput Component
@@ -49,45 +29,105 @@ interface PasswordInputProps {
   value: string;
 }
 
-function PasswordInput(props: PasswordInputProps): JSX.Element {
-  const [showPassword, setShowPassword] = createSignal(false);
+// Main Login Component
+export function Login(): JSX.Element {
+  const [graph, setGraph] = useGraph();
+  const navigate = useNavigate();
+  const { showErrorToast, showLoadingToast } = useToast();
+  const [formData, setFormData] = createSignal({
+    email: "",
+    loginType: "login",
+    password: "",
+    profileImage: "",
+    username: "",
+  });
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword());
+  const getAll = async () => {
+    const data = await postAPI(API.getSubDomainInfo, {});
+    setFormData({
+      ...formData(),
+      // TODO: rename profileImage to companyLogo
+      profileImage: data.P?.profileImage,
+      // TODO: why set username?
+      username: data.P?.username,
+    });
+  };
+
+  onMount(() => {
+    getAll();
+  });
+
+  const handleSubmit = async (event: MouseEvent) => {
+    event.preventDefault();
+    if (!validateFormData(formData().email, formData().password)) {
+      return;
+    }
+
+    setGraph("isLoadingPage", true);
+    await showLoadingToast({
+      loadMessage: "Logging In...",
+      onError(_error) {
+        setGraph("isLoadingPage", false);
+      },
+      onSuccess: (value) => {
+        setGraph("isLoadingPage", false);
+        handleLoginRedirect(value as Vertex, graph, navigate);
+      },
+      promise: signInCall(formData),
+      successMessage: "Logged In Successfully",
+    });
   };
 
   return (
-    <div class="rel">
-      <input
-        autocomplete="password"
-        name="password"
-        onInput={(e) => props.onChange(e.currentTarget.value)}
-        placeholder="Your Password"
-        required
-        style={{
-          border: "1px solid #ccc",
-          "border-radius": "4px",
-          padding: "8px",
-          width: "100%",
-        }}
-        type={`${showPassword() ? "text" : "password"}`}
-        value={props.value}
-      />
-      <Icon
-        aria-label="Toggle password visibility"
-        class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
-        icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-        onClick={togglePasswordVisibility}
+    <div
+      class="@fade|.5s"
+      style={{
+        "align-items": "center",
+        "background-color": "rgb(239,235,233)",
+        "background-image":
+          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-size": "cover",
+        display: "flex",
+        flex: "auto",
+        "flex-direction": "column",
+        "grid-row-gap": "50px",
+        height: "100vh",
+        "justify-content": "center",
+      }}
+    >
+      <Show
+        fallback={
+          <img
+            alt="logo"
+            class="@fade|.5s"
+            src={logo}
+            style={{ height: "70px", "justify-self": "center" }}
+          />
+        }
+        when={formData().profileImage}
+      >
+        <div class="text-align:-webkit-center">
+          <img
+            alt="logo"
+            class="@fade|.5s bg:white p:2 r:10"
+            src={formData().profileImage}
+            style={{ height: "130px", "justify-self": "center" }}
+          />
+          <div class="m:10">
+            <span>Welcome Back,</span>
+            <span class="color:rgb(226,65,75) font-weight:bold font:19">
+              {formData().username}
+            </span>
+          </div>
+        </div>
+      </Show>
+      <LoginForm
+        formData={formData}
+        onSubmit={handleSubmit}
+        setFormData={setFormData}
       />
     </div>
   );
-}
-
-// LoginForm Component
-interface LoginFormProps {
-  formData: any;
-  onSubmit: (event: MouseEvent) => void;
-  setFormData: (data: any) => void;
 }
 
 function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
@@ -190,9 +230,9 @@ function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
         <div class="flex f:15 justify-content:center mt:20">
           <span>
             Don't have an account?{" "}
-            <A href={"/auth/signup"}>
+            <a href={"/auth/signup"}>
               <u class="text-fill:black font:bolder">Sign Up</u>
-            </A>
+            </a>
           </span>
         </div>
       </div>
@@ -200,103 +240,63 @@ function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
   );
 }
 
-// Main Login Component
-export function Login(): JSX.Element {
-  const [graph, setGraph] = useGraph();
-  const navigate = useNavigate();
-  const { showErrorToast, showLoadingToast } = useToast();
-  const [formData, setFormData] = createSignal({
-    email: "",
-    loginType: "login",
-    password: "",
-    profileImage: "",
-    username: "",
-  });
+function PasswordInput(props: PasswordInputProps): JSX.Element {
+  const [showPassword, setShowPassword] = createSignal(false);
 
-  const getAll = async () => {
-    const data = await postAPI(API.getSubDomainInfo, {});
-    setFormData({
-      ...formData(),
-      // TODO: rename profileImage to companyLogo
-      profileImage: data.P?.profileImage,
-      // TODO: why set username?
-      username: data.P?.username,
-    });
-  };
-
-  onMount(() => {
-    getAll();
-  });
-
-  const handleSubmit = async (event: MouseEvent) => {
-    event.preventDefault();
-    if (!validateFormData(formData().email, formData().password)) {
-      return;
-    }
-
-    setGraph("isLoadingPage", true);
-    await showLoadingToast({
-      loadMessage: "Logging In...",
-      onError(_error) {
-        setGraph("isLoadingPage", false);
-      },
-      onSuccess: (value) => {
-        setGraph("isLoadingPage", false);
-        handleLoginRedirect(value as Vertex, graph, navigate);
-      },
-      promise: signInCall(formData),
-      successMessage: "Logged In Successfully",
-    });
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword());
   };
 
   return (
-    <div
-      class="@fade|.5s"
-      style={{
-        "align-items": "center",
-        "background-color": "rgb(239,235,233)",
-        "background-image":
-          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
-        "background-size": "cover",
-        display: "flex",
-        flex: "auto",
-        "flex-direction": "column",
-        "grid-row-gap": "50px",
-        height: "100vh",
-        "justify-content": "center",
-      }}
-    >
-      <Show
-        fallback={
-          <img
-            alt="logo"
-            class="@fade|.5s"
-            src={logo}
-            style={{ height: "70px", "justify-self": "center" }}
-          />
-        }
-        when={formData().profileImage}
-      >
-        <div class="text-align:-webkit-center">
-          <img
-            alt="logo"
-            class="@fade|.5s bg:white p:2 r:10"
-            src={formData().profileImage}
-            style={{ height: "130px", "justify-self": "center" }}
-          />
-          <div class="m:10">
-            <span>Welcome Back,</span>
-            <span class="color:rgb(226,65,75) font-weight:bold font:19">
-              {formData().username}
-            </span>
-          </div>
-        </div>
-      </Show>
-      <LoginForm
-        formData={formData}
-        onSubmit={handleSubmit}
-        setFormData={setFormData}
+    <div class="rel">
+      <input
+        autocomplete="password"
+        name="password"
+        onInput={(e) => props.onChange(e.currentTarget.value)}
+        placeholder="Your Password"
+        required
+        style={{
+          border: "1px solid #ccc",
+          "border-radius": "4px",
+          padding: "8px",
+          width: "100%",
+        }}
+        type={`${showPassword() ? "text" : "password"}`}
+        value={props.value}
+      />
+      <Icon
+        aria-label="Toggle password visibility"
+        class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
+        icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+        onClick={togglePasswordVisibility}
       />
     </div>
   );
+}
+
+// Utility Functions
+function validateFormData(email: string, password: string): boolean {
+  const { showErrorToast } = useToast();
+
+  if (email.includes("@")) {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      showErrorToast("Please enter a valid email address or username");
+      return false;
+    }
+  } else {
+    const usernameError = validateUsername(email);
+    if (usernameError) {
+      showErrorToast("Please enter a valid email address or username");
+      return false;
+    }
+  }
+
+  const passwordError = validatePassword(password);
+  if (passwordError) {
+    showErrorToast(passwordError);
+    return false;
+  }
+
+  return true;
 }

@@ -1,11 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
-import { A } from "@solidjs/router";
 import { createSignal, type JSX, Match, Show, Switch } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/styled/Toast";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/sendEmail";
+
+// Reusable Form Component
+interface FormProps {
+  children: JSX.Element;
+  description: string;
+  onSubmit: (event: Event) => void;
+  title: string;
+}
 
 // Reusable Input Field Component
 interface InputFieldProps {
@@ -18,67 +25,6 @@ interface InputFieldProps {
   toggleValue?: boolean;
   type: string;
   value: string;
-}
-
-function InputField(props: Readonly<InputFieldProps>): JSX.Element {
-  return (
-    <div class="rel" style={{ margin: "10px 0" }}>
-      <label class="f:14" style={{ display: "block", "margin-bottom": "5px" }}>
-        {props.label}
-      </label>
-      <input
-        maxLength={props.maxLength}
-        onInput={(e) => props.onInput(e.currentTarget.value)}
-        placeholder={props.placeholder}
-        required
-        style={{
-          border: "1px solid #ccc",
-          "border-radius": "4px",
-          padding: "8px",
-          width: "100%",
-        }}
-        type={props.type}
-        value={props.value}
-      />
-      {props.showToggle && props.onToggle && (
-        <Icon
-          aria-label="Toggle password visibility"
-          class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
-          icon={props.toggleValue ? "iconamoon:eye-light" : "iconamoon:eye-off"}
-          onClick={props.onToggle}
-        />
-      )}
-    </div>
-  );
-}
-
-// Reusable Form Component
-interface FormProps {
-  children: JSX.Element;
-  description: string;
-  onSubmit: (event: Event) => void;
-  title: string;
-}
-
-function Form(props: Readonly<FormProps>): JSX.Element {
-  return (
-    <form
-      class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
-      onSubmit={props.onSubmit}
-      style={{
-        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
-        display: "grid",
-        "max-width": "600px",
-        padding: "20px 30px",
-      }}
-    >
-      <div class="flex f:20 font-weight:bold jc:left mb:5">{props.title}</div>
-      <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-        {props.description}
-      </div>
-      {props.children}
-    </form>
-  );
 }
 
 export function ForgotPassword(): JSX.Element {
@@ -188,9 +134,9 @@ export function ForgotPassword(): JSX.Element {
                 <div class="flex f:15 justify-content:center mt:20">
                   <span>
                     Return to&nbsp;
-                    <A href={"/auth/login"}>
+                    <a href={"/auth/login"}>
                       <u class="text-fill:black font:bolder">Log In</u>
-                    </A>
+                    </a>
                   </span>
                 </div>
               </>
@@ -229,9 +175,9 @@ export function ForgotPassword(): JSX.Element {
                 <div class="flex f:15 justify-content:center mt:20">
                   <span>
                     Return to&nbsp;
-                    <A href={"/auth/login"}>
+                    <a href={"/auth/login"}>
                       <u class="text-fill:black font:bolder">Log In</u>
-                    </A>
+                    </a>
                   </span>
                 </div>
               </>
@@ -283,15 +229,68 @@ export function ForgotPassword(): JSX.Element {
                 </button>
                 <div class="flex f:15 mt:20" style={{ "text-align": "center" }}>
                   Return to&nbsp;
-                  <A href={"/auth/login"}>
+                  <a href={"/auth/login"}>
                     <u class="text-fill:black font:bolder">Log In</u>
-                  </A>
+                  </a>
                 </div>
               </>
             </Form>
           </Show>
         </Match>
       </Switch>
+    </div>
+  );
+}
+
+function Form(props: Readonly<FormProps>): JSX.Element {
+  return (
+    <form
+      class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+      onSubmit={props.onSubmit}
+      style={{
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
+        display: "grid",
+        "max-width": "600px",
+        padding: "20px 30px",
+      }}
+    >
+      <div class="flex f:20 font-weight:bold jc:left mb:5">{props.title}</div>
+      <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
+        {props.description}
+      </div>
+      {props.children}
+    </form>
+  );
+}
+
+function InputField(props: Readonly<InputFieldProps>): JSX.Element {
+  return (
+    <div class="rel" style={{ margin: "10px 0" }}>
+      <label class="f:14" style={{ display: "block", "margin-bottom": "5px" }}>
+        {props.label}
+      </label>
+      <input
+        maxLength={props.maxLength}
+        onInput={(e) => props.onInput(e.currentTarget.value)}
+        placeholder={props.placeholder}
+        required
+        style={{
+          border: "1px solid #ccc",
+          "border-radius": "4px",
+          padding: "8px",
+          width: "100%",
+        }}
+        type={props.type}
+        value={props.value}
+      />
+      {props.showToggle && props.onToggle && (
+        <Icon
+          aria-label="Toggle password visibility"
+          class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
+          icon={props.toggleValue ? "iconamoon:eye-light" : "iconamoon:eye-off"}
+          onClick={props.onToggle}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import type { JSX } from "solid-js";
 
-import { A, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
@@ -21,22 +21,22 @@ export function AuthenticatedMenu(
   return (
     <>
       <li class="m:5|10 mt:5px">
-        <A
+        <a
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
           href={`${graph.APP_BASE_URL}/settings`}
           onclick={props.onClose}
         >
           Account Setting
-        </A>
+        </a>
       </li>
       <li class="m:5|10 mt:5px">
-        <A
+        <a
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
           href="/contact-us"
           onclick={props.onClose}
         >
           Help
-        </A>
+        </a>
       </li>
       <hr class="color:rgb(223,223,223)" />
       <li class="m:5|10 mt:5px">
