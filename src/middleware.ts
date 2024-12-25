@@ -1,4 +1,3 @@
-import { sentryBeforeResponseMiddleware } from '@sentry/solidstart';
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 
@@ -7,10 +6,6 @@ import { getHttpsSession } from "~/server/getHttpsSession";
 import { generate401RedirectUrl } from "./lib/api/endpoints";
 
 export default createMiddleware({
-  onBeforeResponse: [
-    sentryBeforeResponseMiddleware(),
-    // Add your other middleware handlers after `sentryBeforeResponseMiddleware`
-  ],
   onRequest: [
     async (event) => {
       const url = new URL(event.request.url);
