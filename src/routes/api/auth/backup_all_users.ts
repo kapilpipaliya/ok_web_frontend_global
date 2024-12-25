@@ -9,7 +9,7 @@ import { getSubDomain } from "~/server/getSubDomain";
 
 export async function saveGraphToCypherQL() {
   const subDomain = "default"; // Adjust this as needed
-  const dbSession = (await getDriver(subDomain)).session();
+  const dbSession = (await getDriver()).session({database: subDomain});
 
   try {
     const query = "MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m";
@@ -51,7 +51,7 @@ export async function saveGraphToCypherQL() {
       const relationshipId = relationship.elementId;
       const startNodeId = relationship.startNodeElementId;
       const endNodeId = relationship.endNodeElementId;
-      const relationshipCypherQL = `MATCH (a), (b) WHERE id(a) = ${startNodeId} AND id(b) = ${endNodeId} CREATE (a)-[r:${relationship.type} ${JSON.stringify(relationship.properties)}]->(b)`;
+      const relationshipCypherQL = `MATCH (a), (b) WHERE elementId(a) = ${startNodeId} AND elementId(b) = ${endNodeId} CREATE (a)-[r:${relationship.type} ${JSON.stringify(relationship.properties)}]->(b)`;
       writeFileSync(
         `${folderPath}/relationship_${relationshipId}.cypherql`,
         relationshipCypherQL,

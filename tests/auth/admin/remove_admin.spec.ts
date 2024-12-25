@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 import { getDriver } from "~/cypher/driver";
+import { removeDockerComposeDirectory } from '~/server/docker_compose/remove';
 
 import { signUpData } from '../data/signUpData';
-import { removeDockerComposeDirectory } from '~/server/docker_compose/remove';
 test.describe('remove admin', () => {
   test.afterEach(async () => {
   });
@@ -15,7 +15,7 @@ test.describe('remove admin', () => {
 });
 
 export async function removeAdmin() {
-  const dbSession = (await getDriver("super")).session();
+  const dbSession = (await getDriver()).session({database: "super"});
   const getSubDomainQuery = `MATCH (s:SubDomain { key: $subDomain })-[:UserSubDomain]-(u:User)
         RETURN u`
   try {
@@ -30,7 +30,7 @@ export async function removeAdmin() {
     // Check if the user has multiple subDomains
     const checkMultipleSubDomainsQuery = `
     MATCH (u:User)-[:UserSubDomain]->(s:SubDomain)
-    WHERE id(u) = $id
+    WHERE elementId(u) = $id
     RETURN count(s) as subDomainCount
     `;
     const subDomainCountResult = await dbSession.run(
@@ -44,7 +44,7 @@ export async function removeAdmin() {
     // Delete the edge between User and SubDomain
     const deleteEdgeQuery = `
     MATCH (u:User)-[r:UserSubDomain]->(s:SubDomain { key: $subDomain })
-    WHERE id(u) = $id
+    WHERE elementId(u) = $id
     DELETE r
     `;
     await dbSession.run(
@@ -55,7 +55,7 @@ export async function removeAdmin() {
     // Delete the User
     const deleteUserQuery = `
     MATCH (u:User)
-    WHERE id(u) = $id
+    WHERE elementId(u) = $id
     DETACH DELETE u
     `;
     const deleteResult = await dbSession.run(

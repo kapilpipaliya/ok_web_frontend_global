@@ -17,8 +17,8 @@ export async function handleMutationData(
   }
   const newId = mutationResult.clientToServerVertexIdMap.get(vertex[0].id);
   if (newId) {
-    const query = "MATCH (v) WHERE id(v) = $id RETURN v";
-    const params = { id: int(newId) };
+    const query = "MATCH (v) WHERE elementId(v) = $id RETURN v";
+    const params = { id: newId };
     const result = await tx.run(query, params);
     if (result.records.length === 0) {
       return true;

@@ -64,7 +64,7 @@ function buildQuery(
   relationType: "child" | "g" | "id" | "parent",
   context: ContextType,
 ) {
-  const ids = vertexes.map((v) => int(v.id));
+  const ids = vertexes.map((v) => v.id);
   let query = "";
   let params: { [key: string]: unknown } | undefined;
 
@@ -73,20 +73,20 @@ function buildQuery(
     if (type === "*") {
       query = `
         MATCH (parent)-[r]->(n)
-        WHERE id(parent) IN $ids
+        WHERE elementId(parent) IN $ids
         RETURN r, n
       `;
     } else if (type.includes("|")) {
       query = `
         MATCH (parent)-[r]->(n)
-        WHERE id(parent) IN $ids AND type(r) IN $types
+        WHERE elementId(parent) IN $ids AND type(r) IN $types
         RETURN r, n
       `;
       params = { ids, types: type.split("|") };
     } else {
       query = `
         MATCH (parent)-[r:${type}]->(n)
-        WHERE id(parent) IN $ids
+        WHERE elementId(parent) IN $ids
         RETURN r, n
       `;
     }
@@ -95,14 +95,14 @@ function buildQuery(
     if (type.includes("|")) {
       query = `
         MATCH (n)-[r]->(child)
-        WHERE id(child) IN $ids AND type(r) IN $types
+        WHERE elementId(child) IN $ids AND type(r) IN $types
         RETURN r, n
       `;
       params = { ids, types: type.split("|") };
     } else {
       query = `
         MATCH (n)-[r:${type}]->(child)
-        WHERE id(child) IN $ids
+        WHERE elementId(child) IN $ids
         RETURN r, n
       `;
     }
@@ -142,8 +142,8 @@ function buildQuery(
       }
     }
   } else if (relationType === "id") {
-    const ids = edgeType.split(",").map((id) => int(id.trim()));
-    query = "MATCH (n) WHERE id(n) IN $ids RETURN n";
+    const ids = edgeType.split(",").map((id) => id.trim());
+    query = "MATCH (n) WHERE elementId(n) IN $ids RETURN n";
     params = { ids };
   }
 

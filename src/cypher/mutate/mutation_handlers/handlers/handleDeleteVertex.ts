@@ -7,10 +7,10 @@ export async function handleDeleteVertex(
   txnResult: any[],
 ) {
   const id = clientToServerVertexIdMap.get(deleteVertex.id) || deleteVertex.id;
-  const query = "MATCH (n) WHERE id(n) = $id DELETE n";
+  const query = "MATCH (n) WHERE elementId(n) = $id DELETE n";
 
   try {
-    await tx.run(query, { id: int(id) });
+    await tx.run(query, { id: id });
     txnResult.push({ deleteVertex: { error: false, id } });
   } catch (error: any) {
     throw new Error(

@@ -21,14 +21,12 @@ export async function createSuperUser(
     if (checkUserResult.records.length > 0) {
       return { error: "User with the same username already exists." };
     }
-
     const query = `
-      CALL uuid_generator.get() YIELD uuid
       CREATE (u:User {
         email: $email,
         password: $password,
         username: $username,
-        uuid: uuid
+        uuid: randomUUID()
       })
       CREATE (s:SubDomain {
         key: "super",

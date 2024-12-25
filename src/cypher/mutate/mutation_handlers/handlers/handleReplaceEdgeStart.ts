@@ -15,9 +15,9 @@ export async function handleReplaceEdgeStart(
     clientToServerVertexIdMap.get(replaceEdgeStart.E) || replaceEdgeStart.E;
   const type = replaceEdgeStart.T;
   const query = `match ()-[r:${type}]->()
-                WHERE id(r) = $edgeId 
-                match (s) where id(s) = $newstart 
-                match (e) where id(e) = id(endNode(r)) 
+                WHERE elementId(r) = $edgeId 
+                match (s) where elementId(s) = $newstart 
+                match (e) where elementId(e) = elementId(endNode(r)) 
                 create (s)-[t:${type}]->(e)
                 set t = properties(r)
                 SET t.updatedAt = localDateTime()
@@ -26,8 +26,8 @@ export async function handleReplaceEdgeStart(
 
   try {
     const result = await tx.run(query, {
-      edgeId: int(id),
-      newstart: int(startId),
+      edgeId: id,
+      newstart: startId,
     });
     if (result.records.length > 0) {
       const oldId = replaceEdgeStart.id;

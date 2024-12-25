@@ -1,7 +1,5 @@
 import type { Node, Session } from "neo4j-driver";
 
-import { int } from "neo4j-driver";
-
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
@@ -17,7 +15,7 @@ export async function createUserSetting(
       RETURN s
     `;
   const createResult = await dbSession.run(createUserSettingQuery, {
-    userId: int(userId),
+    userId: userId,
   });
   return createResult.records.length > 0
     ? convertNodeToJson(createResult.records[0].get("s") as Node)

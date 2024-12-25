@@ -7,8 +7,8 @@ export async function deleteFileMetadataFromNeo4j(
   fileId: string,
 ) {
   try {
-    const query = "MATCH (f:File) WHERE id(f) = $fileId DELETE f";
-    await dbSession.run(query, { fileId: int(fileId) });
+    const query = "MATCH (f:File) WHERE elementId(f) = $fileId DELETE f";
+    await dbSession.run(query, { fileId: fileId });
   } catch (error) {
     console.error("Error deleting file metadata from Neo4j:", error);
     throw error;

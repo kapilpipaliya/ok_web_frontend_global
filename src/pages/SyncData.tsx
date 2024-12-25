@@ -29,7 +29,7 @@ export function SyncData() {
   async function migrateNodes(element: Vertex, node: any) {
     const result = await syncNodesMGCall({
       nodesToTransfer: node,
-      userport: element.P.driverPort,
+      subDomain: element.P.subDomain,
     });
     return result; // Ensure result has the expected structure
   }

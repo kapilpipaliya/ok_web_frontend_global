@@ -1,5 +1,6 @@
 import neo4j, { type Driver } from "neo4j-driver";
 
+// depricated
 export async function connectToNeo4jWithRetry(
   uri: string,
   _username: string,

@@ -1,4 +1,4 @@
-import { int, type Session, type Transaction } from "neo4j-driver";
+import { type Session, type Transaction } from "neo4j-driver";
 
 import type { ComponentNode } from "./ComponentTreeType";
 
@@ -10,7 +10,7 @@ async function addEdgeIfNotExists(
   // Check if the edge already exists
   const findEdgeResult = await dbSession.run(
     `MATCH (parent:Comp)<-[r:ParentComp]-(child:Comp)
-     WHERE id(parent) = $parentId AND id(child) = $childId
+     WHERE elementId(parent) = $parentId AND elementId(child) = $childId
      RETURN r`,
     { childId: childId, parentId: parentId },
   );
@@ -19,9 +19,9 @@ async function addEdgeIfNotExists(
     // Create the edge if it doesn't exist
     await dbSession.run(
       `MATCH (parent:Comp), (child:Comp)
-       WHERE id(parent) = $parentId AND id(child) = $childId
+       WHERE elementId(parent) = $parentId AND elementId(child) = $childId
        CREATE (parent)<-[:ParentComp]-(child)`,
-      { childId: int(childId), parentId: int(parentId) },
+      { childId: childId, parentId: parentId },
     );
   }
 }
@@ -34,7 +34,7 @@ export async function insertComponentTree(
   for (const component of components) {
     // Check if the node already exists
     const findNodeResult = await dbSession.run(
-      "MATCH (n:Comp {key: $key}) RETURN id(n) AS id",
+      "MATCH (n:Comp {key: $key}) RETURN elementId(n) AS id",
       { key: component.Component },
     );
 
@@ -46,7 +46,7 @@ export async function insertComponentTree(
       // Create the node if it doesn't exist, including the 'info' property
       const createNodeResult = await dbSession.run(
         `CREATE (n:Comp {key: $key, info: $info})
-         RETURN id(n) AS id`,
+         RETURN elementId(n) AS id`,
         { info: "", key: component.Component },
       );
       nodeId = createNodeResult.records[0].get("id");

@@ -1,7 +1,5 @@
 import type { Session } from "neo4j-driver";
 
-import { int } from "neo4j-driver";
-
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getChildrenOrParentVertex(
@@ -13,10 +11,10 @@ export async function getChildrenOrParentVertex(
 ): Promise<any[]> {
   try {
     const query = inward
-      ? `MATCH (n${endLabel})<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`
-      : `MATCH (n)-[r:${edgeType}]->(m:${endLabel}) WHERE id(n) = $id RETURN m;`;
+      ? `MATCH (n${endLabel})<-[r:${edgeType}]-(m) WHERE elementId(n) = $id RETURN m;`
+      : `MATCH (n)-[r:${edgeType}]->(m:${endLabel}) WHERE elementId(n) = $id RETURN m;`;
 
-    const result = await dbSession.run(query, { id: int(id) });
+    const result = await dbSession.run(query, { id: id });
 
     return result.records.map((record) => convertNodeToJson(record.get("m")));
   } catch (error) {

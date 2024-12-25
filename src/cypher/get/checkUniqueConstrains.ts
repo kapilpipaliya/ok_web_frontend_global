@@ -68,7 +68,7 @@ async function doesNameExist(
   key: string,
   id?: string,
 ) {
-  const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND v.elementId != $id" : ""} RETURN v`;
+  const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND v.elementId <> $id" : ""} RETURN v`;
   const params = id ? { id, key } : { key };
   const result = await dbSession.run(query, params);
   return result.records.length > 0;
@@ -82,7 +82,7 @@ async function doesUniqueConstraintExist(
   vertex: Vertex,
 ) {
   const params: Record<string, any> = { id };
-  let query = `MATCH (v:${label}) WHERE ${id ? "v.elementId != $id AND " : ""}`;
+  let query = `MATCH (v:${label}) WHERE ${id ? "v.elementId <> $id AND " : ""}`;
 
   for (const key of keys) {
     query += `v.${key.P.key} = $${key.P.key} AND `;

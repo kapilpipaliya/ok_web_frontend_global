@@ -1,8 +1,6 @@
 // Function to add edges between nodes based on certain conditions.
 import type { Session } from "neo4j-driver";
 
-import { int } from "neo4j-driver";
-
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
@@ -38,12 +36,12 @@ export async function addNodeEdges(
 
     if (existingChild) {
       const query = `
-        MATCH (a) WHERE id(a) = $childId
+        MATCH (a) WHERE elementId(a) = $childId
         SET a += $props, a.updatedAt = localDateTime()
         RETURN a;
       `;
       const result = await sessionTarget.run(query, {
-        childId: int(existingChild.id),
+        childId: existingChild.id,
         props: superVertex.P,
       });
       result.records.forEach((v) =>
@@ -63,12 +61,12 @@ export async function addNodeEdges(
       const query = isGlobalCollection
         ? `
           MATCH (a), (b)
-          WHERE id(a) = $parentNodeId AND id(b) = $targetNodeId
+          WHERE elementId(a) = $parentNodeId AND elementId(b) = $targetNodeId
           CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b)
           RETURN b;
         `
         : `
-          MATCH (a) WHERE id(a) = $parentNodeId
+          MATCH (a) WHERE elementId(a) = $parentNodeId
           CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b:${superVertex.L[0]})
           SET b = $props, b.createdAt = localDateTime()
           RETURN b;
@@ -76,11 +74,11 @@ export async function addNodeEdges(
 
       const params = isGlobalCollection
         ? {
-            parentNodeId: int(parentVertex.id),
-            targetNodeId: int(targetNode!.id),
+            parentNodeId: parentVertex.id,
+            targetNodeId: targetNode!.id,
           }
         : {
-            parentNodeId: int(parentVertex.id),
+            parentNodeId: parentVertex.id,
             props: superVertex.P,
           };
 

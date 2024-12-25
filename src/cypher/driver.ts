@@ -1,46 +1,11 @@
-import { auth, driver as createDriver, type Driver } from "neo4j-driver";
+import { auth, driver as createDriver } from "neo4j-driver";
 
-const drivers = {} as { [port: string]: Driver };
+import { boltPort } from "./boltConstant";
 
-export async function getDriverWithPort(
-  port: number | string,
-  username?: string,
-  password?: string,
-) {
-  if (!drivers[port]) {
-    drivers[port] = createDriver(
-      `bolt://localhost:${port}`,
-      username && password ? auth.basic(username, password) : undefined,
-      { disableLosslessIntegers: true }, // undefined
-    );
-  }
-
-  return drivers[port];
-}
-
-const getSuperSession = async () => {
-  return getDriverWithPort(1102);
-};
-// Function to get a driver instance based on the database ID
-export async function getDriver(
-  subDomain: string,
-  username?: string,
-  password?: string,
-) {
-  let port;
-  if (subDomain === "super" || subDomain === "www") {
-    port = 1102;
-  } else {
-    const dbSession = (await getSuperSession()).session();
-    const query = `MATCH (n:SubDomain {key: '${subDomain}'}) RETURN n;`;
-    const res = await dbSession.run(query, { subDomain });
-    if (res.records.length > 0) {
-      port = res.records[0].get("n")?.properties.driverPort;
-    } else {
-      throw new Error(`Subdomain ${subDomain} Not Found!`);
-    }
-    await dbSession.close();
-  }
-
-  return getDriverWithPort(port, username, password);
+export async function getDriver() {
+  return createDriver(
+    `bolt://localhost:${boltPort}`,
+     auth.basic("neo4j", "12345678"),
+    { disableLosslessIntegers: true }, // undefined
+  );
 }

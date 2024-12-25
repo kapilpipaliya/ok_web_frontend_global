@@ -12,14 +12,14 @@ export async function handleDeleteEdge(
   const endId = clientToServerVertexIdMap.get(deleteEdge.E) || deleteEdge.E;
   const type = deleteEdge.T;
   const query = `match (n1)-[r:${type}]->(n2)
-                where id(n1) = $startId and id(n2) = $endId and id(r) = $id 
+                where elementId(n1) = $startId and elementId(n2) = $endId and elementId(r) = $id 
                 delete r;`;
 
   try {
     const result = await tx.run(query, {
-      endId: int(endId),
-      id: int(id),
-      startId: int(startId),
+      endId: endId,
+      id: id,
+      startId: startId,
     });
     if (result.records.length > 0) {
       const oldId = deleteEdge.id;

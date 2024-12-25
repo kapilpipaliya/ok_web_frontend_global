@@ -9,8 +9,13 @@ import { getSubDomain } from "~/server/getSubDomain";
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const url = getURL(request);
   const subDomain = await determineSubDomain(url);
-  const dbSession = (await getDriver(subDomain)).session();
+  const dbSession = (await getDriver()).session({database: subDomain});
   return { dbSession, subDomain };
+}
+
+async function determineSubDomain(url: URL): Promise<string> {
+  const fetchTemplate = url.searchParams.get("fetchTemplate");
+  return fetchTemplate === "true" ? "adminpaneluicomponents" : await getSubDomain(url.hostname);
 }
 
 function getURL(request?: APIEvent["request"]): URL {
@@ -19,9 +24,4 @@ function getURL(request?: APIEvent["request"]): URL {
     throw new Error("URL is missing");
   }
   return url;
-}
-
-async function determineSubDomain(url: URL): Promise<string> {
-  const fetchTemplate = url.searchParams.get("fetchTemplate");
-  return fetchTemplate === "true" ? "adminpaneluicomponents" : await getSubDomain(url.hostname);
 }

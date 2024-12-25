@@ -11,28 +11,30 @@ export async function deleteUserAndDatabase(userName: string) {
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
 
-  const dbSessionSource = (await getDriver(subDomain)).session();
-  const subDomainForUser = subDomain + "-user"; // TODO Fix this
-
+  const dbSessionSource = (await getDriver()).session({database: subDomain});
+  // const subDomainForUser = subDomain + "-user"; // TODO Fix this
   try {
-    const removeDockerComposeRes =
-      await removeDockerComposeDirectory(subDomainForUser);
-    if (!removeDockerComposeRes) {
-      return {
-        error: false,
-        message: "Docker Removed successfully",
-      };
-    }
+    // const removeDockerComposeRes =
+    //   await removeDockerComposeDirectory(subDomainForUser);
+    // if (!removeDockerComposeRes) {
+    //   return {
+    //     error: false,
+    //     message: "Docker Removed successfully",
+    //   };
+    // }
+
+    // Delete the Neo4j database named subDomain
+    await dbSessionSource.run(`DROP DATABASE ${subDomain}`);
 
     // TODO: delete user from super user database too
     return {
       error: false,
-      message: "User deleted successfully",
+      message: "User and database deleted successfully",
     };
   } catch (error) {
-    console.error("Error deleting user:", error);
+    console.error("Error deleting user and database:", error);
     return {
-      error: "Error deleting user",
+      error: "Error deleting user and database",
     };
   } finally {
     await dbSessionSource.close();

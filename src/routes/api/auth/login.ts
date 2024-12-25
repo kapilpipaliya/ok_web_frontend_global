@@ -56,6 +56,25 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
+async function authenticateSuperUser(superUser: Vertex, password: string) {
+  const superDbSession = (await getDriver()).session({database: "super"});
+
+  try {
+    const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
+    const superDbResult = await superDbSession.run(query, {
+      uuid: superUser.P.uuid,
+    });
+
+    if (superDbResult.records.length === 0) {
+      throw new Error(`Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`);
+    }
+    const user = convertNodeToJson(superDbResult.records[0].get("u"));
+    return comparePassword(user, password);
+  } finally {
+    await superDbSession.close();
+  }
+}
+
 async function authenticateUser(
   emailOrUsername: string,
   password: string,
@@ -89,23 +108,4 @@ function comparePassword(user: Vertex, password: string) {
   }
 
   return user;
-}
-
-async function authenticateSuperUser(superUser: Vertex, password: string) {
-  const superDbSession = (await getDriver("super")).session();
-
-  try {
-    const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
-    const superDbResult = await superDbSession.run(query, {
-      uuid: superUser.P.uuid,
-    });
-
-    if (superDbResult.records.length === 0) {
-      throw new Error(`Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`);
-    }
-    const user = convertNodeToJson(superDbResult.records[0].get("u"));
-    return comparePassword(user, password);
-  } finally {
-    await superDbSession.close();
-  }
 }

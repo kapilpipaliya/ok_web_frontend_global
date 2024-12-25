@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 
-import { getDriverWithPort } from "~/cypher/driver";
+import { getDriver } from "~/cypher/driver";
 import { getHttpsSession } from "~/server/getHttpsSession";
 
 export async function updateProfile(
@@ -62,9 +62,10 @@ export async function updateProfile(
   });
   const user = result.records[0]?.get("u");
 
+  // need to verify:
   const dbSession2 = (
-    await getDriverWithPort(user.properties.driverPort)
-  ).session();
+    await getDriver()
+  ).session({database: user.properties.subDomain});
   await dbSession2.run(query, {
     email,
     profileImage,

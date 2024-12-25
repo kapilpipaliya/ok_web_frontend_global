@@ -11,20 +11,20 @@ export async function handleReplaceEdge(
   const startId = clientToServerVertexIdMap.get(replaceEdge.S) || replaceEdge.S;
   const endId = clientToServerVertexIdMap.get(replaceEdge.E) || replaceEdge.E;
   const type = replaceEdge.T;
-  const query = `match (n1) where id(n1)=$startId
-                match (n2) where id(n2)=$endId
+  const query = `match (n1) where elementId(n1)=$startId
+                match (n2) where elementId(n2)=$endId
                 match (n1)-[r:${type}]->(n2)
-                where id(r) = $id
+                where elementId(r) = $id
                 set r = $properties
                 SET r.updatedAt = localDateTime()
                 return r`;
 
   try {
     const result = await tx.run(query, {
-      endId: int(endId),
-      id: int(id),
+      endId: endId,
+      id: id,
       properties: replaceEdge.P,
-      startId: int(startId),
+      startId: startId,
     });
     if (result.records.length > 0) {
       const oldId = replaceEdge.id;

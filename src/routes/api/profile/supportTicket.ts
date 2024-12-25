@@ -1,7 +1,5 @@
 import type { Session } from "neo4j-driver";
 
-import { int } from "neo4j-driver";
-
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 
@@ -68,8 +66,8 @@ export async function supportTicket(
     const { id, status } = payload;
 
     const query =
-      "MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
-    await dbSession.run(query, { id: int(id), status: status });
+      "MATCH (n) WHERE elementId(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
+    await dbSession.run(query, { id: id, status: status });
     return {
       message: "Status updated successfully",
     };
@@ -79,7 +77,7 @@ export async function supportTicket(
     const { newMessage, parentVertexId, subAction } = payload;
     switch (subAction) {
       case "get": {
-        const query = "MATCH (v) WHERE id(v) = $id RETURN v";
+        const query = "MATCH (v) WHERE elementId(v) = $id RETURN v";
         const result = await dbSession.run(query, { id: parentVertexId });
 
         const messagesResult = await getSelectionOptionsMGCall(

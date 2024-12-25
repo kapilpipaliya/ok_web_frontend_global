@@ -13,8 +13,8 @@ export async function handleInsertEdge(
   const startId = clientToServerVertexIdMap.get(insertEdge.S) || insertEdge.S;
   const endId = clientToServerVertexIdMap.get(insertEdge.E) || insertEdge.E;
   const type = insertEdge.T;
-  const query = `match (n1) where id(n1)=$startId
-                match (n2) where id(n2)=$endId
+  const query = `match (n1) where elementId(n1)=$startId
+                match (n2) where elementId(n2)=$endId
                 merge (n1)-[r:${type}]->(n2)
                 SET r += $properties
                 SET r.updatedAt = localDateTime()
@@ -22,9 +22,9 @@ export async function handleInsertEdge(
 
   try {
     const result = await tx.run(query, {
-      endId: int(endId),
+      endId: endId,
       properties: insertEdge.P,
-      startId: int(startId),
+      startId: startId,
     });
     if (result.records.length > 0) {
       const oldId = insertEdge.id;

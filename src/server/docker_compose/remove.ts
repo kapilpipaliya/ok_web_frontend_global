@@ -10,15 +10,15 @@ export async function removeDockerComposeDirectory(
 ): Promise<string> {
   const dir: string = getBaseDir();
   const mgplatDir: string = path.join(dir, subdomain, "memgraph-platform");
-  const mgplatComposePath: string = path.join(mgplatDir, "docker-compose.yml");
+  // const mgplatComposePath: string = path.join(mgplatDir, "docker-compose.yml");
 
   try {
     // Stop Docker Compose
-    await compose.downAll({
-      composeOptions: ["--project-name", subdomain],
-      config: mgplatComposePath,
-      cwd: mgplatDir,
-    });
+    // await compose.downAll({
+    //   composeOptions: ["--project-name", subdomain],
+    //   config: mgplatComposePath,
+    //   cwd: mgplatDir,
+    // });
 
     // Remove directory
     fs.rmdirSync(mgplatDir, { recursive: true });

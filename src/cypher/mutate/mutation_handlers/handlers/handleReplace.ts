@@ -12,9 +12,9 @@ export async function handleReplace(
   }
 
   const query =
-    "MATCH (n) WHERE id(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
+    "MATCH (n) WHERE elementId(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
   try {
-    const result = await tx.run(query, { id: int(id), properties: replace.P });
+    const result = await tx.run(query, { id: id, properties: replace.P });
     if (result.records.length > 0) {
       txnResult.push({ replace: { error: false, id } });
     }

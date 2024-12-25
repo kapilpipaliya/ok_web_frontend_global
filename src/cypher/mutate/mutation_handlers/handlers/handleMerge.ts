@@ -12,9 +12,9 @@ export async function handleMerge(
   }
 
   const query =
-    "MATCH (n) WHERE id(n) = $id SET n += $properties, n.updatedAt = localDateTime() RETURN n";
+    "MATCH (n) WHERE elementId(n) = $id SET n += $properties, n.updatedAt = localDateTime() RETURN n";
   try {
-    const result = await tx.run(query, { id: int(id), properties: merge.P });
+    const result = await tx.run(query, { id: id, properties: merge.P });
     if (result.records.length > 0) {
       txnResult.push({ merge: { error: false, id } });
     } else {
