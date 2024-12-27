@@ -1,6 +1,12 @@
-import Tooltip from "@corvu/tooltip";
+import { clientOnly } from "@solidjs/start";
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, splitProps } from "solid-js";
+
+const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
+const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
+const TooltipPortal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
+const TooltipContent = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
+const TooltipArrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
@@ -28,7 +34,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                 openDelay={200}
                 placement="top"
               >
-                <Tooltip.Trigger
+                <TooltipTrigger
                   as="span"
                   class="transform:translateY(0.125rem):active"
                 >
@@ -52,9 +58,9 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                       option.key
                     )}
                   </span>
-                </Tooltip.Trigger>
-                <Tooltip.Portal>
-                  <Tooltip.Content class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
                     <div
                       class={
                         "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
@@ -62,9 +68,9 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     >
                       {option.tooltip ?? option.value}
                     </div>
-                    <Tooltip.Arrow class="" />
-                  </Tooltip.Content>
-                </Tooltip.Portal>
+                    <TooltipArrow class="" />
+                  </TooltipContent>
+                </TooltipPortal>
               </Tooltip>
             </label>
           );

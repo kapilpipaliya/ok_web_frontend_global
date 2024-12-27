@@ -1,4 +1,9 @@
-import Tooltip from "@corvu/tooltip";
+import { clientOnly } from "@solidjs/start";
+const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
+const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
+const TooltipPortal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
+const TooltipContent = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
+const TooltipArrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
@@ -44,16 +49,16 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
           openDelay={200}
           placement="top"
         >
-          <Tooltip.Trigger
+          <TooltipTrigger
             as="a"
             class="flex ai:center"
             href={getUrl()}
             target="_blank"
           >
             <Icon height={14} icon="mdi:information-outline" width={14} />
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
+          </TooltipTrigger>
+          <TooltipPortal>
+            <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
               <div
                 class={
                   "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
@@ -64,9 +69,9 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
                 </Show>
                 {"Click for more Info"}
               </div>
-              <Tooltip.Arrow class="" />
-            </Tooltip.Content>
-          </Tooltip.Portal>
+              <TooltipArrow class="" />
+            </TooltipContent>
+          </TooltipPortal>
         </Tooltip>
       </Show>
       <Show when={props.showResetIcon ?? false}>
