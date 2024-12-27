@@ -19,7 +19,8 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
-import { RenderMainContent } from "./RenderMainContent";
+import { clientOnly } from "@solidjs/start";
+const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
   const pageDesignerStore = createStore(getInitialDesignerLayoutStore());

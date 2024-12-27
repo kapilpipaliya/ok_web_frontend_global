@@ -125,7 +125,7 @@ function DeleteConfirmation() {
 export function RenderMainContent() {
   return <ResizableAltKey />
 }
-
+export default RenderMainContent
 
 export function ResizableAltKey() {
   const [layoutStore] = useDesignerLayoutStore();

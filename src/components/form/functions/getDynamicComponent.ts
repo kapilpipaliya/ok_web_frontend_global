@@ -2,10 +2,12 @@ import Accordion from "@corvu/accordion";
 import Dialog from "@corvu/dialog";
 import Disclosure from "@corvu/disclosure";
 import Drawer from "@corvu/drawer";
-import OtpField from "@corvu/otp-field";
-import Popover from "@corvu/popover";
-import Resizable from "@corvu/resizable";
-import Tooltip from "@corvu/tooltip";
+// This will not work with server side rendering, because keys are lost
+const OtpField = clientOnly(() => import("@corvu/otp-field"));
+const Popover = clientOnly(() => import("@corvu/popover"));
+const Resizable = clientOnly(() => import("@corvu/resizable"));
+import { clientOnly } from "@solidjs/start";
+const Tooltip = clientOnly(() => import("@corvu/tooltip"));
 import { Portal } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
