@@ -18,10 +18,19 @@ export async function handleDrop(
   showErrorToast: (message: string) => void,
 ) {
   e.stopPropagation();
+  if (!layoutStore.activeItem) { // layoutVertex
+    showErrorToast("Active item not found when dropping");
+    return;
+  }
+  const toVertex = graph.vertexes[layoutStore.activeItem];
+  if (!toVertex) {
+    showErrorToast("Target vertex not found when dropping");
+    return;
+  }
+
   for (const vertex of layoutStore.draggedVertices) {
     const fromVertex = vertex;
 
-    const toVertex = graph.vertexes[layoutStore.activeItem!]; // layoutVertex;
     if (!fromVertex) {
       showErrorToast("from Vertex not found when dropping ");
       return;

@@ -12,6 +12,11 @@ export function validateDragOver(
   formData: Vertex,
   position: string,
 ) {
+  // If fromVertex and toVertex are the same, don't allow drop
+  if (fromVertex.id === toVertexId) {
+    return false;
+  }
+
   // Don't allow parent to move inside children.
   let parentVertex = graph.vertexes[toVertexId];
   while (true) {

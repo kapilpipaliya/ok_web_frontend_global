@@ -277,3 +277,4 @@ make sure app is running at port 3000
 
 Super User Setup:
 npx playwright test tests/auth/superuser/super_user_setup.spec.ts --project=chromium
+signup a account for adminpaneluicomponents subdomain.

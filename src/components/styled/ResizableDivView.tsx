@@ -1,6 +1,10 @@
 import { createEffect, createSignal, type JSX } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
+import { handleDrop } from "../page_designer/event_handler/handleDrop";
+import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
+import { useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
+import { useToast } from "./Toast";
 
 export function ResizableContainer(
   props: Readonly<{
@@ -9,7 +13,7 @@ export function ResizableContainer(
   }>,
 ) {
   const [width, setWidth] = createSignal("");
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const [_height, setHeight] = createSignal(
     `calc(100vh - ${graph.navBarHeight + 2}px)`,
   );
@@ -59,6 +63,9 @@ export function ResizableContainer(
   //     window.addEventListener("mouseup", handleMouseUp);
   // };
 
+  const [isDraggingOver, setIsDraggingOver] = createSignal(false);
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const { showErrorToast } = useToast();
   return (
     <div
       class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto width:100%"
@@ -69,6 +76,30 @@ export function ResizableContainer(
           [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
           // [`height:${height()}`]: !!height(), // resizable height
           [`width:${width()}`]: !!width(),
+          "bg:#f3f3f4": isDraggingOver(),
+        }}
+        onDragOver={(e) => {
+          e.preventDefault(); // Allow drop
+          setIsDraggingOver(true);
+          console.log("Drag over event");
+        }}
+        onDragLeave={() => {
+          setIsDraggingOver(false)
+        }}
+        onDrop={async (e) => {
+          setIsDraggingOver(false);
+          setLayoutStore("activeItem", layoutStore.formStore[0].formData.id);
+          setLayoutStore("position", "center");
+
+          await handleDrop(
+            e,
+            layoutStore,
+            setLayoutStore,
+            graph,
+            setGraph,
+            showErrorToast,
+          );
+          resetDragDropState(setLayoutStore);;
         }}
       >
         {/*<div
