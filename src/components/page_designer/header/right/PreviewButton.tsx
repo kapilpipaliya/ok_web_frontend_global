@@ -8,8 +8,10 @@ import PreviewPage from "~/components/styled/PreviewPage";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useGraph } from "~/lib/graph/graph";
 
 export function PreviewButton() {
+  const [ graph ] = useGraph();
   const [layoutStore] = useDesignerLayoutStore();
   const [isModalOpen, setIsModalOpen] = createSignal(false);
 
@@ -27,7 +29,7 @@ export function PreviewButton() {
           isDesignMode={false}
           isNoPermissionCheck={true}
           // data={layoutStore.formStore[0].formData}
-          metaVertex={layoutStore.formStore[0].formData}
+          metaVertex={graph.vertexes[layoutStore.formStore[0].formDataId!]}
         />
       </PreviewPage>
     );

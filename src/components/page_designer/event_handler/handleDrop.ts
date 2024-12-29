@@ -49,7 +49,7 @@ export async function handleDrop(
       graph,
       setGraph,
       layoutStore.formStore[0].txnId,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0].formDataId!],
       fromVertex,
       toVertex,
       layoutStore.position,

@@ -39,7 +39,7 @@ export function Permission() {
       <div class="mt:.5rem px:0.25rem">
         <DynamicComponent
           componentName={"MultiSelect"}
-          data={layoutStore.formStore[0]?.formData}
+          data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={
@@ -61,7 +61,7 @@ export function Permission() {
       />
       <div class="mt:.5rem px:0.25rem">
         <TableInputField
-          data={layoutStore.formStore[0]?.formData}
+          data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}

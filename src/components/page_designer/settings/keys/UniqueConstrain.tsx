@@ -32,7 +32,7 @@ export function UniqueConstrains() {
   return (
     <div class="mt:6">
         <TableInputField
-          data={layoutStore.formStore[0]?.formData}
+          data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}

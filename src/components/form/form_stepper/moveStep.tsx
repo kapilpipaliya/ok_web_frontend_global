@@ -23,7 +23,7 @@ export function moveStep(
     setGraph,
     layoutStore.formStore[0].txnId,
     fromVertex,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
     toVertex,
     position,
   );

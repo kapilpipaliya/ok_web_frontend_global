@@ -69,7 +69,7 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={pageDesignerStore}>
-        <Title>{getPageTitle(layoutStore.formStore[0]?.formData)}</Title>
+        <Title>{getPageTitle(graph.vertexes[layoutStore.formStore[0]?.formDataId!])}</Title>
         <HeaderRow />
         <div
           classList={{

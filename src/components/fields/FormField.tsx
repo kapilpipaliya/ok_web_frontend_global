@@ -69,10 +69,10 @@ export function FormField(
       return;
     }
     setFormData({
-      get formData() {
-        return createResult.vertex;
+      get formDataId() {
+        return createResult.vertex!.id;
       },
-      formMeta: meta(),
+      formMetaId: meta().id,
       txnId,
     });
   } else {
@@ -96,7 +96,7 @@ export function FormField(
 
       setGraphData(graph, setGraph, data!.graph!);
       setFormData({
-        get formData() {
+        get formDataId() {
           return graph.vertexes[data!.result[0].id];
         },
       });
@@ -114,7 +114,7 @@ export function FormField(
   return (
     <FormContext.Provider value={formFieldStore}>
       <div class="">
-        <PageAttrRender data={formData.formData} metaVertex={meta()!} />
+        <PageAttrRender data={graph.vertexes[formData.formDataId!]} metaVertex={meta()!} />
       </div>
       <div />
     </FormContext.Provider>

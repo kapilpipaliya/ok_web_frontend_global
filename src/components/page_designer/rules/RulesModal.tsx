@@ -166,7 +166,7 @@ export function RulesModal(
                         data={
                           props.selectedRule
                             ? props.selectedRule
-                            : formStore!.formData
+                            : graph.vertexes[formStore!.formDataId]
                         }
                         isNoPermissionCheck={true}
                         isRealTime={false}

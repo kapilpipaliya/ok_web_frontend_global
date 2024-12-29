@@ -13,7 +13,7 @@ export function FormStepper() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, layoutStore.formStore[0].formData),
+    getChildrenAttrs(graph, setGraph, graph.vertexes[layoutStore.formStore[0].formDataId!]),
   );
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {
@@ -23,7 +23,7 @@ export function FormStepper() {
       setGraph,
       layoutStore,
       setLayoutStore,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0].formDataId!],
       step,
     );
   };
@@ -35,7 +35,7 @@ export function FormStepper() {
       setGraph,
       layoutStore,
       setLayoutStore,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0].formDataId!],
       step,
     );
   };

@@ -88,7 +88,7 @@ export function ResizableContainer(
         }}
         onDrop={async (e) => {
           setIsDraggingOver(false);
-          setLayoutStore("activeItem", layoutStore.formStore[0].formData.id);
+          setLayoutStore("activeItem", layoutStore.formStore[0].formDataId);
           setLayoutStore("position", "center");
 
           await handleDrop(

@@ -17,12 +17,12 @@ export function RulesList() {
   const [selectedRuleToDelete, setSelectedRuleToDelete] =
     createSignal<null | Vertex>(null);
   const rules = createMemo(() => {
-    if (layoutStore.formStore[0]?.formData) {
+    if (layoutStore.formStore[0]?.formDataId) {
       return (
         evalExpression("->Rule", {
           graph,
           setGraph,
-          vertexes: [layoutStore.formStore[0].formData],
+          vertexes: [graph.vertexes[layoutStore.formStore[0]?.formDataId!]],
         }) || []
       ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
     }
@@ -51,7 +51,7 @@ export function RulesList() {
     const count: Id[] = [];
     for (const key in rule.IN) {
       for (const edge of rule.IN[key]) {
-        if (graph.edges[edge].S !== layoutStore.formStore[0].formData.id) {
+        if (graph.edges[edge].S !== layoutStore.formStore[0].formDataId) {
           count.push(graph.edges[edge].S);
         }
       }

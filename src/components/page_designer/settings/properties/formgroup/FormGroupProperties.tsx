@@ -299,7 +299,7 @@ function moveClassToLast(
     (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
   );
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
-  const isForm = layoutStore.formStore[0]?.formData.L[0] === "Form";
+  const isForm = graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(

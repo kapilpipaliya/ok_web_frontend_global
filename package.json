@@ -6,7 +6,7 @@
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host",
     "build": "vinxi build --no-minify",
-    "start": "vinxi start --port 3001"
+    "start": "vinxi start --port 3000"
   },
   "dependencies": {
     "@bedrock-layout/solid": "^1.7.2",
@@ -44,6 +44,7 @@
     "acorn": "^8.14.0",
     "acorn-jsx": "^5.3.2",
     "bcryptjs": "^2.4.3",
+    "broadcast-channel": "^7.0.0",
     "case-switcher-js": "^1.1.10",
     "corvu": "^0.7.1",
     "debounce": "^2.2.0",

@@ -23,7 +23,7 @@ function validateLayoutDeletion(
   const usedAttrs = getAllFieldsUsedInAllRules(
     graph,
     setGraph,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
   );
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
@@ -35,7 +35,7 @@ function validateLayoutDeletion(
   const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(
     graph,
     setGraph,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
     layoutVertex,
     "->$0Unique->$0Key",
   );
@@ -51,7 +51,7 @@ function validateLayoutDeletion(
   const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(
     graph,
     setGraph,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
     layoutVertex,
     "->$0NameKey",
   );
@@ -61,7 +61,7 @@ function validateLayoutDeletion(
     return true;
   }
 
-  if (layoutStore.formStore[0].formData.L[0] === "Form") {
+  if (graph.vertexes[layoutStore.formStore[0].formDataId!]?.L[0] === "Form") {
     const childContainsFormAttr = allFormAttrsInPageFromLevel(
       graph,
       layoutVertex,
@@ -71,7 +71,7 @@ function validateLayoutDeletion(
     if (childContainsFormAttr.length > 0) {
       const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(
         graph,
-        layoutStore.formStore[0].formData,
+        graph.vertexes[layoutStore.formStore[0].formDataId!],
         "Form",
         childContainsFormAttr,
       );

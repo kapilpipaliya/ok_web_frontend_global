@@ -15,7 +15,7 @@ export function NameKey() {
       <span class="f:15 flex:1">
         <DynamicComponent
           componentName={"MultiSelect"}
-          data={layoutStore.formStore[0]?.formData}
+          data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={

@@ -76,7 +76,7 @@ export function PageItem(
       layoutStore.formStore[0] || {},
       layoutStore.selectedId !== -1
         ? layoutStore.selectedId
-        : layoutStore.formStore[0].formData.id,
+        : layoutStore.formStore[0].formDataId,
     );
     setLayoutStore("draggedVertices", []);
   };

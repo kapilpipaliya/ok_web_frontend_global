@@ -102,7 +102,7 @@ export function PermissionModal(
                       data={
                         props.selectedAttr
                           ? props.selectedAttr
-                          : layoutStore.formStore[0].formData
+                          : graph.vertexes[layoutStore.formStore[0]?.formDataId!]
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}

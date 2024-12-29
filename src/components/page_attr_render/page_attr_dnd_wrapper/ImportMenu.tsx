@@ -45,7 +45,7 @@ export function ImportMenu(
 
   const onImport = () => {
     const jsxParser = new JsxParser({
-      formData: layoutStore.formStore[0].formData,
+      formData: graph.vertexes[layoutStore.formStore[0].formDataId!],
       jsx: htmlContent(),
       parent: graph.vertexes[layoutStore.selectedId],
       showWarnings: true,

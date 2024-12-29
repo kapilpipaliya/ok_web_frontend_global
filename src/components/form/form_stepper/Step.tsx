@@ -16,7 +16,7 @@ export function Step(
   const { showErrorToast, showSuccessToast } = useToast();
 
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, layoutStore.formStore[0].formData),
+    getChildrenAttrs(graph, setGraph, graph.vertexes[layoutStore.formStore[0].formDataId!]),
   );
 
   const handleDelete = (_e: MouseEvent) => {

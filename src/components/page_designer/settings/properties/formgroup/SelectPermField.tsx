@@ -56,7 +56,7 @@ export function SelectPermField(
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formStore[0].formData.id}'->Rule`,
+      collection: () => `id:'${layoutStore.formStore[0].formDataId}'->Rule`,
       componentName: "Select",
       displayName: props.metaVertex.P.displayName,
       key: props.metaVertex.P.key,

@@ -20,7 +20,7 @@ export function modifyFieldMetaAllFields(
     generateFormMetaAttributes(
       graph,
       setGraph,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0].formDataId!],
       ignoreTable,
     ).attributes;
   return attribute;

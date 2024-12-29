@@ -188,7 +188,7 @@ export function SelectField(
         }
         onChangeHandler(
           txnId,
-          formStore[0]!.formData!,
+          graph.vertexes[formStore[0]!.formDataId!],
           data(),
           meta(),
           graph,

@@ -168,7 +168,7 @@ export function DynamicComponent(
   const isNoPermissionCheck = () =>
     !previewStore ||
     props.isNoPermissionCheck ||
-    formStore?.formMeta?.P.isNoPermissionCheck ||
+    graph.vertexes[formStore?.formMetaId!]?.P.isNoPermissionCheck ||
     previewStore.isDesignMode ||
     previewStore.isNoPermissionCheck;
   const hasPermission = () =>
@@ -324,11 +324,11 @@ export function DynamicComponent(
       if (property === "hidden" && previewStore.isDesignMode) {
         continue;
       }
-      if (formStore?.formData && rule) {
+      if (formStore?.formDataId && rule) {
         try {
           values[property] = evaluateRule(
             rule,
-            formStore.formData,
+            graph.vertexes[formStore.formDataId!],
             graph,
             setGraph,
           );

@@ -17,7 +17,7 @@ export function addStepAfter(
 ) {
   const layoutRowId = addComponentAttrInPage(
     formVertex,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
     layoutStore.formStore[0].txnId,
     graph,
     setGraph,
@@ -35,7 +35,7 @@ export function addStepAfter(
     setGraph,
     layoutStore.formStore[0].txnId,
     fromVertex,
-    layoutStore.formStore[0].formData,
+    graph.vertexes[layoutStore.formStore[0].formDataId!],
     toVertex,
     "after",
   );

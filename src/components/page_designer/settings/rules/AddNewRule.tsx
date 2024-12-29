@@ -41,7 +41,7 @@ export function AddNewRule(
     const rowResult = insertNewRow(
       layoutStore.formStore[0].txnId,
       graph.vertexes[rulesMetaVertexId],
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0]?.formDataId!],
       false,
       graph,
       setGraph,

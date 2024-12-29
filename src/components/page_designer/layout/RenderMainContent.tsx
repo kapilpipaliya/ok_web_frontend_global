@@ -14,6 +14,7 @@ import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
+import { BroadcastChannel } from 'broadcast-channel';
 
 function FormElements() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -45,14 +46,35 @@ function FormElements() {
 }
 
 function PageViewComponent() {
+  const [graph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+
+  const IFrame = () => {
+    const channel = new BroadcastChannel('foobar');
+    const [graph] = useGraph();
+    
+    const onLoad = () => {
+      setTimeout(() => {
+        channel.postMessage(JSON.stringify({graph}));
+        channel.postMessage(JSON.stringify({layoutStore: layoutStore}));
+      }, 1000);
+    };
+    
+    {/* TODO: use unique id for each page */ }
+    return <iframe
+      src={`${window.location.origin}/page_design_preview?id=${layoutStore.formStore[0]?.formDataId}`}
+      style={{ width: "100%", height: "100%", border: "none" }}
+      onLoad={onLoad}
+    />
+  }
   return (
-    <Show when={layoutStore.formStore[0]}>
+    <Show when={layoutStore.formStore[0]?.id}>
       <ResizableContainer view={layoutStore.view}>
+        {/* <IFrame /> */}
         <PageView
           isDesignMode={true}
           isNoPermissionCheck={true}
-          metaVertex={layoutStore.formStore[0]?.formData}
+          metaVertex={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
         />
       </ResizableContainer>
     </Show>

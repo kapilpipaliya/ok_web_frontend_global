@@ -49,7 +49,7 @@ export function LayoutTreeItem(
       children,
       graph,
       setGraph,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0]?.formDataId!],
       (position) => {
         if (position === "center" && Date.now() - startTime > 1000) {
           if (props.collapsedKeys().includes(props.metaVertex.id)) {
@@ -148,7 +148,7 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <Show
-          when={layoutStore.formStore[0].formData.id !== props.metaVertex.id}
+          when={layoutStore.formStore[0].formDataId !== props.metaVertex.id}
         >
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>

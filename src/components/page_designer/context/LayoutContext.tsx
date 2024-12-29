@@ -1,14 +1,14 @@
 import type { createStore } from "solid-js/store";
-
 import { createContext, useContext } from "solid-js";
+import { v4 as uuidv4 } from "uuid";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
-
 import type { FormStoreObject } from "../../form/FormContext";
 import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
 
 export function getInitialDesignerLayoutStore() {
   return {
+    id: uuidv4(),
     activeItem: null as Id | null | number,
     draggedVertices: [] as Vertex[],
     formStore: [] as unknown as ReturnType<typeof createStore<FormStoreObject>>,

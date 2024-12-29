@@ -55,14 +55,14 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-        if (result.graph.vertexes[layoutStore.formStore[0].formData.id]) {
-          delete result.graph.vertexes[layoutStore.formStore[0].formData.id];
+        if (result.graph.vertexes[layoutStore.formStore[0].formDataId]) {
+          delete result.graph.vertexes[layoutStore.formStore[0].formDataId];
         }
         setGraphData(graph, setGraph, result.graph);
 
         const data2 = getTreeData(graph, setGraph, {
           collection: `g:'${props.coll}'`,
-        }).filter((item) => item.id !== layoutStore.formStore[0].formData.id);
+        }).filter((item) => item.id !== layoutStore.formStore[0].formDataId);
         originalData = data2;
         setFilteredData(data2);
         setIsFetchingData(false);

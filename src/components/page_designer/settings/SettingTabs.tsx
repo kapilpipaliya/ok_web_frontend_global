@@ -19,13 +19,15 @@ import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
+import { useGraph } from "~/lib/graph/graph";
 
 export function SettingTabs() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];
-    const formType = layoutStore.formStore[0]?.formData?.L[0];
+    const formType = graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0];
     if (formType === "Form") {
       baseTabs.push("Keys");
     }
@@ -86,7 +88,7 @@ export function SettingTabs() {
             <LayoutTree />
           </div>
 
-          <Show when={layoutStore.formStore[0]?.formData?.L[0] === "Form"}>
+          <Show when={graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form"}>
             <Show when={layoutStore.selectedTab === "Keys"}>
               {/* <PrimaryKey /> */}
               <NameKey />

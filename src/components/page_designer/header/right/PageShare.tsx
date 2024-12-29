@@ -4,8 +4,10 @@ import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import {useGraph} from "~/lib/graph/graph";
 
 export function ShareSection() {
+  const [graph] = useGraph();
   const [layoutStore] = useDesignerLayoutStore() || [];
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
@@ -22,7 +24,7 @@ export function ShareSection() {
     if (layoutStore) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
-      const { id, L, P } = layoutStore.formStore[0].formData;
+      const { id, L, P } = graph.vertexes[layoutStore.formStore[0].formDataId!];
 
       if (isNegative(id)) {
         setError(`Please save the ${L[0]} first.`);

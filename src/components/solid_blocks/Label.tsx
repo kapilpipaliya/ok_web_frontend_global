@@ -9,6 +9,7 @@ import {
 import { Dynamic } from "solid-js/web";
 
 import { useFormContext } from "../form/FormContext";
+import {useGraph} from "~/lib/graph/graph";
 
 interface LabeledFieldProps {
   children: JSX.Element;
@@ -27,10 +28,11 @@ export function Label(
   >,
 ) {
   const [formStore] = useFormContext();
+  const [graph] = useGraph();
 
   const position = createMemo(() =>
     !props.position || props.position === "system"
-      ? formStore?.formMeta?.P.position || "top"
+      ? graph.vertexes[formStore?.formMetaId!]!.P.position || "top"
       : props.position,
   );
 

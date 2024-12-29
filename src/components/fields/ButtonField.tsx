@@ -97,7 +97,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, meta(), formStore!.formData)) {
+    if (isAnyFieldInvalid(graph, setGraph, meta(), graph.vertexes[formStore!.formDataId!])) {
       return;
     }
     const data = commitTxn(formStore!.txnId, graph);

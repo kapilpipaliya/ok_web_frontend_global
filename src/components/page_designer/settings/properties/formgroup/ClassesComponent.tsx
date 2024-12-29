@@ -22,7 +22,7 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
 
   const getComponentName = () =>
     graph.vertexes[layoutStore.selectedComponent].P.key;
-  const checkIsForm = () => layoutStore.formStore[0]?.formData.L[0] === "Form";
+  const checkIsForm = () => graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form";
   const checkIsFormField = () =>
     checkIsForm() && genericInputComponents.includes(getComponentName());
   const getClassVertices = () =>

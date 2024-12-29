@@ -111,12 +111,12 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
 
   return (
     <>
-      <Show when={formStore?.formData?.L[0] === "Comp"}>
+      <Show when={graph.vertexes[formStore?.formDataId!]?.L[0] === "Comp"}>
         <span>Preview:</span>
         <br />
         <DynamicComponent
-          componentName={formStore!.formData.P.key}
-          data={formStore!.formData}
+          componentName={graph.vertexes[formStore!.formDataId]?.P.key}
+          data={graph.vertexes[formStore!.formDataId]}
           isNoPermissionCheck
           meta={
             { P: { class: cssEditorProps!.data.P.value } } as unknown as Vertex

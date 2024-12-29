@@ -22,7 +22,7 @@ export function formSubmit(closePopUp?: () => void) {
       // navigate(removeLastPathSegment());
     };
 
-    const label = formStore!.formData!.L[0].replace(/([A-Z])/g, " $1").trim();
+    const label = graph.vertexes[formStore!.formDataId!]?.L[0].replace(/([A-Z])/g, " $1").trim();
     if (graph.transactions.get(formStore!.txnId)?.steps.length === 0) {
       showWarningToast(`There is nothing to save for ${label}.`);
     } else if (isDisabledTxn(formStore!.txnId, graph)) {
@@ -47,9 +47,9 @@ export function formSubmit(closePopUp?: () => void) {
         return;
       }
 
-      const key = formStore!.formData!.P.key;
+      const key = graph.vertexes[formStore!.formDataId!]?.P.key;
 
-      const res = await checkUniqueConstrains(formStore!.formData!);
+      const res = await checkUniqueConstrains(graph.vertexes[formStore!.formDataId!]);
 
       if (!isValidResponse(res)) {
         showErrorToast(getErrorMessage(res));

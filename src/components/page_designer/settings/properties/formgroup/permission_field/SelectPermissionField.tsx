@@ -17,7 +17,7 @@ export function SelectPermissionField(props: SelectPermissionFieldProps) {
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formStore[0].formData.id}'->$0Perm`,
+      collection: () => `id:'${layoutStore.formStore[0].formDataId}'->$0Perm`,
       componentName: "MultiSelect",
       displayName: props.meta.P.displayName,
       key: props.meta.P.key,

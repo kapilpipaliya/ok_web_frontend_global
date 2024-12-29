@@ -46,7 +46,7 @@ export function SaveAsTemplateMenu(
       layoutStore.formStore[0].txnId,
       graph,
       setGraph,
-      layoutStore.formStore[0].formData,
+      graph.vertexes[layoutStore.formStore[0].formDataId!],
     );
     const data = commitTxn(newFormTxnId, graph);
 
