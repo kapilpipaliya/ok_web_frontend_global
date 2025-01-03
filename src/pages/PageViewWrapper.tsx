@@ -300,9 +300,9 @@ export function PageViewWrapper(
         return;
       }
     }
-    saveUndoPoint(formStore.txnId, graph);
-    setPreventUndoAtOrBeforeIndex(formStore.txnId, graph);
-    saveStepIndex(formStore.txnId, "initial", graph);
+    saveUndoPoint(formStore.txnId, graph, setGraph);
+    setPreventUndoAtOrBeforeIndex(formStore.txnId, graph, setGraph);
+    saveStepIndex(formStore.txnId, "initial", graph, setGraph);
     props.initializeFormStoreParent?.(pageFormStore);
     await loadData();
   });
@@ -327,7 +327,7 @@ export function PageViewWrapper(
     ),
   );
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
   onCleanup(() => {
     // TODO: Remove all the meta
@@ -338,7 +338,7 @@ export function PageViewWrapper(
     for (const rowMetaTxnId of (
       pageFormStore[0].cleanUpConfig().rowMetaTxnIds || []
     ).reverse()) {
-      revertTransaction(rowMetaTxnId, graph);
+      revertTransaction(rowMetaTxnId, graph, setGraph);
     }
     pageFormStore[0].cleanUpConfig().rowMetaTxnIds = [];
   });
@@ -454,7 +454,7 @@ export function PageViewWrapper(
           message="Discard unsaved changes - are you sure?"
           onCancel={() => setFormStore("discardPopup", false)}
           onConfirm={() => {
-            revertTransaction(formStore.txnId, graph);
+            revertTransaction(formStore.txnId, graph, setGraph);
             setFormStore("discardPopup", false);
             onConfirmExit();
           }}

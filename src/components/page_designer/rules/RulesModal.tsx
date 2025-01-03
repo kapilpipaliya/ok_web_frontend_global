@@ -1,7 +1,7 @@
 import jsep from "jsep";
 import { klona } from "klona";
 import { createMemo, createSignal, onCleanup } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
@@ -50,6 +50,7 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
 
 const cleanupRowMetaTxnIds = (
   graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
   formStore?: FormStoreObject,
   excludeIds?: number[],
 ) => {
@@ -58,7 +59,7 @@ const cleanupRowMetaTxnIds = (
       formStore.cleanUpConfig().rowMetaTxnIds || []
     ).reverse()) {
       if (!excludeIds?.includes(rowMetaTxnId)) {
-        revertTransaction(rowMetaTxnId, graph);
+        revertTransaction(rowMetaTxnId, graph, setGraph);
       }
     }
     formStore.cleanUpConfig().rowMetaTxnIds = excludeIds || [];
@@ -128,9 +129,9 @@ export function RulesModal(
   };
 
   onCleanup(() => {
-    cleanupRowMetaTxnIds(graph, formStore, excludeIds);
+    cleanupRowMetaTxnIds(graph, setGraph, formStore, excludeIds);
     if (revertChanges) {
-      revertTransactionUpToIndex(formStore!.txnId, prevTxnIndex - 1, graph);
+      revertTransactionUpToIndex(formStore!.txnId, prevTxnIndex - 1, graph, setGraph);
     }
   });
 

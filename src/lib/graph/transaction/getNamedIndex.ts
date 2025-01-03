@@ -7,9 +7,12 @@ export function getNamedIndex(
   key: string,
   graph: Store<GraphInterface>,
 ): number | undefined {
-  if (!(txnId && graph.transactions.has(txnId))) {
+  if (!txnId) {
     return;
   }
-  const txn = graph.transactions.get(txnId)!;
-  return txn.namedUndoStepIndexes[key];
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return;
+  }
+  return txnVertex.P.namedUndoStepIndexes?.[key];
 }

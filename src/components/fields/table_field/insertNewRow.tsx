@@ -33,7 +33,7 @@ export function insertNewRow(
     ),
   );
   if (!result?.error) {
-    saveUndoPoint(txnId, graph);
+    saveUndoPoint(txnId, graph, setGraph);
   }
 
   return result;

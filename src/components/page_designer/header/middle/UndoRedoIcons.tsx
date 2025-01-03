@@ -9,18 +9,18 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function UndoRedoIcons() {
   const [layoutStore] = useDesignerLayoutStore();
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const icons = [
     {
       disabled: () => !undoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
       icon: "ci:arrow-undo-up-left",
-      onClick: () => undo(layoutStore.formStore[0].txnId, graph),
+      onClick: () => undo(layoutStore.formStore[0].txnId, graph, setGraph),
       tooltip: "Undo",
     },
     {
       disabled: () => !redoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
       icon: "ci:arrow-undo-up-right",
-      onClick: () => redo(layoutStore.formStore[0].txnId, graph),
+      onClick: () => redo(layoutStore.formStore[0].txnId, graph, setGraph),
       tooltip: "Redo",
     },
   ];

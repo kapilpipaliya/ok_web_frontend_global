@@ -65,6 +65,7 @@ export function PermissionModal(
         layoutStore.formStore[0].txnId,
         prevTxnIndex - 1,
         graph,
+        setGraph,
       );
     }
     props.closeModal();

@@ -1,22 +1,24 @@
-import type { Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, TransactionDetail } from "../graph";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
+import { replaceVertexProperties } from "../mutate/vertex";
 
 export function undoAllowed(
   txnId: number,
   graph: Store<GraphInterface>,
   revertTransactionUpToIndex?: number,
 ): boolean {
-  if (!(txnId && graph.transactions.has(txnId))) {
+  if (!txnId) {
+    return false;
+  }
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
     return false;
   }
 
-  const txnValue = graph.transactions.get(txnId);
-  if (!txnValue) {
-    return false;
-  }
+  const txnValue = txnVertex.P as TransactionDetail;
   if (txnValue.steps.length === 0) {
     return false;
   }
@@ -41,6 +43,7 @@ export function undoAllowed(
 export function undo(
   txnId: number,
   graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   revertTransactionUpToIndex?: number,
   removeAfterSteps?: boolean,
 ) {
@@ -68,7 +71,7 @@ export function undo(
     );
   }
 
-  graph.transactions.set(txnId, txnValue);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, false);
 }
 
 function getNewUndoIndex(txnValue: TransactionDetail, activeUndoIndex: number) {

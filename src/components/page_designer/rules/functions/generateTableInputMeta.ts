@@ -26,7 +26,7 @@ export function generateTableInputMeta(metaAttribute: FieldAttribute) {
     metaAttribute.attributes!,
   );
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   return { metaVertexId };

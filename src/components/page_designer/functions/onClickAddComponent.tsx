@@ -49,7 +49,7 @@ export function onClickAddComponent(
     "999999",
   );
 
-  saveUndoPoint(txnId, graph);
+  saveUndoPoint(txnId, graph, setGraph);
 
   return layoutRowId;
 }

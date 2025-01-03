@@ -1,8 +1,17 @@
+import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
+import { replaceVertexProperties } from "../mutate/vertex";
 
-export function saveUndoPoint(txnId: number, graph: GraphInterface) {
+export function saveUndoPoint(
+  txnId: number,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  if (!txnId) {
+    return;
+  }
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
 
   let activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
@@ -20,5 +29,5 @@ export function saveUndoPoint(txnId: number, graph: GraphInterface) {
       txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
     }
   }
-  graph.transactions.set(txnId, txnValue);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, false);
 }

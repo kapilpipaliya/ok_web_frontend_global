@@ -50,5 +50,5 @@ export function cloneLayoutAndChildren(
     position,
   );
 
-  saveUndoPoint(txnId2, graph);
+  saveUndoPoint(txnId2, graph, setGraph);
 }

@@ -13,27 +13,19 @@ export function DebugInfo() {
         <span>Txn ID: {layoutStore.formStore[0].txnId}</span>
         <span>
           Steps:{" "}
-          {graph.transactions.get(layoutStore.formStore[0].txnId)?.steps.length}
+          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.steps.length}
         </span>
         <span>
           Submitted Step:{" "}
-          {
-            graph.transactions.get(layoutStore.formStore[0].txnId)
-              ?.submittedIndex
-          }
+          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.submittedIndex}
         </span>
         <span>
           Active Undo Point Index:{" "}
-          {
-            graph.transactions.get(layoutStore.formStore[0].txnId)
-              ?.activeUndoIndex
-          }
+          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.activeUndoIndex}
         </span>
         <span>
           Undo Points:{" "}
-          {graph.transactions
-            .get(layoutStore.formStore[0].txnId)
-            ?.undoStepIndexes.join(", ")}
+          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.undoStepIndexes.join(", ")}
         </span>
       </div>
     </Show>

@@ -23,7 +23,7 @@ export function formSubmit(closePopUp?: () => void) {
     };
 
     const label = graph.vertexes[formStore!.formDataId!]?.L[0].replace(/([A-Z])/g, " $1").trim();
-    if (graph.transactions.get(formStore!.txnId)?.steps.length === 0) {
+    if (graph.vertexes[`txn${formStore!.txnId}`]?.P.steps.length === 0) {
       showWarningToast(`There is nothing to save for ${label}.`);
     } else if (isDisabledTxn(formStore!.txnId, graph)) {
       showWarningToast(`${label} is already saved or not changed.`);

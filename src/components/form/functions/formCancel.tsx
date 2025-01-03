@@ -7,7 +7,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 export function formCancel(closePopUp?: () => void) {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const [formStore] = useFormContext();
   const navigate = useNavigate();
 
@@ -16,8 +16,8 @@ export function formCancel(closePopUp?: () => void) {
   };
 
   return () => {
-    revertTransaction(formStore!.txnId, graph);
-    deleteTxnId(formStore!.txnId, graph);
+    revertTransaction(formStore!.txnId, graph, setGraph);
+    deleteTxnId(formStore!.txnId, graph, setGraph);
     if (closePopUp) {
       closePopUp();
     } else {

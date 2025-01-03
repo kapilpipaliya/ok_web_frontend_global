@@ -73,7 +73,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   );
 
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   return (

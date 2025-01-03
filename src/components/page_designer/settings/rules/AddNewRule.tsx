@@ -22,7 +22,7 @@ export function AddNewRule(
   const metaTxnId = graph.newTxnId();
 
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   const addNewState = (key: string) => {

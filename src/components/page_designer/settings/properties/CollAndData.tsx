@@ -112,7 +112,7 @@ export function CollAndData() {
   );
 
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   const metaVertex = graph.vertexes[metaVertexId];

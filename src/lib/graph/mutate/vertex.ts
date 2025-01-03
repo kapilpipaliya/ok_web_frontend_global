@@ -72,8 +72,9 @@ export function addNewVertex(
         },
       },
       graph,
+      setGraph,
     );
-    channel.postMessage(JSON.stringify({addNewVertex: {txnId, vertex}}));
+    channel.postMessage(JSON.stringify({ addNewVertex: { txnId, vertex } }));
     return {
       error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -88,46 +89,51 @@ export function replaceVertexProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
+  // clonning will reduce performance, so we can use this flag to disable it.
+  cloneProperties: boolean = true,
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
     if (!graph.vertexes[actualVertexId]) {
       return { error: "Vertex ID is not valid" };
     }
-    const originalProperties = klona(graph.vertexes[actualVertexId].P);
-    setGraph("vertexes", actualVertexId, "P", reconcile(klona(properties)));
-    const data = updateVertex(klona(graph.vertexes[actualVertexId]));
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        redo: () => {
-          const actualVertexId2 =
-            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-          return replaceVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            data.P,
-          );
+    setGraph("vertexes", actualVertexId, "P", reconcile(cloneProperties ? klona(properties) : properties));
+    if (txnId) {
+      const originalProperties = klona(graph.vertexes[actualVertexId].P);
+      const data = updateVertex(klona(graph.vertexes[actualVertexId]));
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          redo: () => {
+            const actualVertexId2 =
+              vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+            return replaceVertexProperties(
+              0,
+              actualVertexId2,
+              graph,
+              setGraph,
+              data.P,
+            );
+          },
+          replace: () => updateVertex(data),
+          revert: () => {
+            const actualVertexId2 =
+              vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
+            return replaceVertexProperties(
+              0,
+              actualVertexId2,
+              graph,
+              setGraph,
+              originalProperties,
+            );
+          },
         },
-        replace: () => updateVertex(data),
-        revert: () => {
-          const actualVertexId2 =
-            vertexOldIdToNewIdMap.get(actualVertexId) || actualVertexId;
-          return replaceVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            originalProperties,
-          );
-        },
-      },
-      graph,
-    );
-    channel.postMessage(JSON.stringify({replaceVertexProperties: {txnId, vertexId, properties}}));
+        graph,
+        setGraph,
+      );
+    }
+    channel.postMessage(JSON.stringify({ replaceVertexProperties: { txnId, vertexId, properties } }));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -192,8 +198,9 @@ export function mergeVertexProperties(
         },
       },
       graph,
+      setGraph,
     );
-    channel.postMessage(JSON.stringify({mergeVertexProperties: {txnId, vertexId, properties}}));
+    channel.postMessage(JSON.stringify({ mergeVertexProperties: { txnId, vertexId, properties } }));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -308,8 +315,9 @@ export function deleteVertex(
         },
       },
       graph,
+      setGraph,
     );
-    channel.postMessage(JSON.stringify({deleteVertex: {txnId, vertexId}}));
+    channel.postMessage(JSON.stringify({ deleteVertex: { txnId, vertexId } }));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -375,7 +383,7 @@ export function updateVertexId(
         setGraph("edges", edgeIds, "E", newVertexId);
       },
     );
-    channel.postMessage(JSON.stringify({updateVertexId: {oldVertexId, newVertexId}}));
+    channel.postMessage(JSON.stringify({ updateVertexId: { oldVertexId, newVertexId } }));
     return { error: "" };
   });
 }

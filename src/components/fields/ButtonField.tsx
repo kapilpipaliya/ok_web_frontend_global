@@ -112,7 +112,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   };
 
   const onCancel = () => {
-    revertTransaction(formStore!.txnId, graph);
+    revertTransaction(formStore!.txnId, graph, setGraph);
     setTimeout(() => navigate(-1));
   };
 
@@ -121,7 +121,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     if (initialIndex === undefined) {
       return;
     }
-    revertTransactionUpToIndex(formStore!.txnId, initialIndex - 1, graph);
+    revertTransactionUpToIndex(formStore!.txnId, initialIndex - 1, graph, setGraph);
   };
   const onClick = () => {
     runWithOwner(owner, () => {

@@ -1,13 +1,18 @@
-import type { Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
 
+import { deleteVertex } from "../mutate/vertex";
 import { undo } from "./undo";
 
-export function revertTransaction(txnId: number, graph: Store<GraphInterface>) {
-  if (!(txnId && graph.transactions.has(txnId))) {
+export function revertTransaction(txnId: number, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) {
+  if (!txnId) {
     return;
   }
-  undo(txnId, graph, -1, true);
-  graph.transactions.delete(txnId);
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return;
+  }
+  undo(txnId, graph, setGraph, -1, true);
+  deleteVertex(0, `txn${txnId}`, graph, setGraph);
 }

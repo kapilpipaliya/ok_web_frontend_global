@@ -42,7 +42,7 @@ export function FormStatus() {
   }
 
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   return (

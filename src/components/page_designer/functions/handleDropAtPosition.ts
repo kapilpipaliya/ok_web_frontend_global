@@ -66,7 +66,7 @@ export async function handleDropAtPosition(
       position,
     );
 
-    saveUndoPoint(txnId, graph);
+    saveUndoPoint(txnId, graph, setGraph);
 
     return layoutRowId;
   }
@@ -95,7 +95,7 @@ export async function handleDropAtPosition(
       toVertex,
       position,
     );
-    saveUndoPoint(txnId, graph);
+    saveUndoPoint(txnId, graph, setGraph);
   } else {
     await handleParentChange(
       graph,
@@ -107,7 +107,7 @@ export async function handleDropAtPosition(
       position,
       toVertex,
     );
-    saveUndoPoint(txnId, graph);
+    saveUndoPoint(txnId, graph, setGraph);
     return;
   }
 }

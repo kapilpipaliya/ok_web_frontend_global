@@ -1,19 +1,21 @@
-import type { Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
 
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
+import { replaceVertexProperties } from "../mutate/vertex";
 import { getLastTxnIndex } from "./getLastTxnIndex";
 
 export function saveStepIndex(
   txnId: number,
   key: string,
   graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (!(txnId && graph.transactions.has(txnId))) {
+  if (!txnId) {
     return;
   }
-  const transaction = graph.transactions.get(txnId);
-  if (transaction) {
-    transaction.namedUndoStepIndexes[key] = getLastTxnIndex(txnId, graph);
-  }
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  txnValue.namedUndoStepIndexes[key] = getLastTxnIndex(txnId, graph);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, false);
 }

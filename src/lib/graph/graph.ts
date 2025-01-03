@@ -68,7 +68,6 @@ export interface GraphInterface {
   newTxnId: () => number;
   newVertexId: () => Id;
   saveUserSetting: (properties: { [key: string]: any }) => void;
-  transactions: Map<number, TransactionDetail>;
   userRoles: Id[];
   userSetting: Vertex;
   userSettingId: Id;

@@ -8,15 +8,16 @@ import type { TransactionValue } from "./TransactionType";
 import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "./TransactionType";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
-  if (!graph.transactions.has(txnId)) {
+  if(!txnId) {
     return;
   }
-  const txnValue = graph.transactions.get(txnId);
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return;
+  }
 
-  const submittedIndex = txnValue?.submittedIndex ?? -1;
-
-  const activeUndoIndex =
-    txnValue?.activeUndoIndex ?? txnValue!.steps.length - 1;
+  const submittedIndex = txnVertex.P.submittedIndex ?? -1;
+  const activeUndoIndex = txnVertex.P.activeUndoIndex ?? txnVertex.P.steps.length - 1;
 
   if (submittedIndex === activeUndoIndex) {
     return;
@@ -25,16 +26,16 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   let revertSteps: TransactionValue[] = [];
   let steps: TransactionValue[];
   if (activeUndoIndex < submittedIndex) {
-    const removedSteps = txnValue!.steps.slice(
+    const removedSteps = txnVertex.P.steps.slice(
       activeUndoIndex + 1,
       submittedIndex + 1,
     );
-    revertSteps = [...removedSteps, ...txnValue!.revertSteps];
+    revertSteps = [...removedSteps, ...txnVertex.P.revertSteps];
     steps = [];
   } else {
     const startFromNextStep = submittedIndex === 0 ? 0 : submittedIndex + 1;
-    steps = txnValue!.steps.slice(startFromNextStep, activeUndoIndex + 1);
-    revertSteps = txnValue?.revertSteps || [];
+    steps = txnVertex.P.steps.slice(startFromNextStep, activeUndoIndex + 1);
+    revertSteps = txnVertex.P.revertSteps || [];
   }
 
   const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
@@ -71,7 +72,7 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
     });
   });
 
-  if (stepsToCommit.length || txnValue!.revertSteps.length) {
+  if (stepsToCommit.length || txnVertex.P.revertSteps.length) {
     const data = {
       edgeIdMap: [...edgeOldIdToNewIdMap],
       transactions: [...reverseStepsToCommit, ...stepsToCommit],

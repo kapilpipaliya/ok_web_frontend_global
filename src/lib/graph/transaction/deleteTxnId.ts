@@ -1,10 +1,19 @@
-import type { Store } from "solid-js/store";
+import type { Store, SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
+import { deleteVertex } from "../mutate/vertex";
 
-export function deleteTxnId(txnId: number, graph: Store<GraphInterface>) {
-  if (!(txnId && graph.transactions.has(txnId))) {
+export function deleteTxnId(
+  txnId: number,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  if (!txnId) {
     return;
   }
-  graph.transactions.delete(txnId);
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return;
+  }
+  deleteVertex(0, `txn${txnId}`, graph, setGraph);
 }

@@ -1,7 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona/json";
-import { batch } from "solid-js";
+import { batch, untrack } from "solid-js";
 
 import {
   type GraphInterface,
@@ -53,7 +53,7 @@ export function newRow(
   properties?: { [key: string]: any },
   inward?: boolean,
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
-  return batch(() => {
+  return untrack(() => batch(() => {
     const vertexNew = newVertex(
       graph.newVertexId(),
       [label || edgeType!],
@@ -87,7 +87,7 @@ export function newRow(
       error: false,
       vertexId: vertexNew.id,
     };
-  });
+  }));
 }
 
 export function addNewRow(
@@ -99,28 +99,30 @@ export function addNewRow(
   properties: { [key: string]: any },
   isRealTime: boolean,
 ) {
-  if (isRealTime) {
-    txnId = graph.newTxnId();
-  }
-  const type = meta.P.inward
-    ? getInEdge(meta, parentVertex)
-    : getToEdge(meta, parentVertex);
-  const label = meta.P.label;
+  return untrack(() => {
+    if (isRealTime) {
+      txnId = graph.newTxnId();
+    }
+    const type = meta.P.inward
+      ? getInEdge(meta, parentVertex)
+      : getToEdge(meta, parentVertex);
+    const label = meta.P.label;
 
-  const newRowResult = newRow(
-    graph,
-    setGraph,
-    txnId,
-    parentVertex,
-    label,
-    type,
-    properties,
-    meta.P.inward,
-  );
-  if (isRealTime) {
-    commitTxn(txnId, graph);
-  }
-  return newRowResult;
+    const newRowResult = newRow(
+      graph,
+      setGraph,
+      txnId,
+      parentVertex,
+      label,
+      type,
+      properties,
+      meta.P.inward,
+    );
+    if (isRealTime) {
+      commitTxn(txnId, graph);
+    }
+    return newRowResult;
+  });
 }
 
 export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {

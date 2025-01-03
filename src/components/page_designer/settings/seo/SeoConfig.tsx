@@ -23,7 +23,7 @@ export function SEOFormGroupProperties() {
   const metaTxnId = graph.newTxnId();
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   onCleanup(() => {
-    revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   function metaAttributes() {

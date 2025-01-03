@@ -97,7 +97,7 @@ export function FormField(
       setGraphData(graph, setGraph, data!.graph!);
       setFormData({
         get formDataId() {
-          return graph.vertexes[data!.result[0].id];
+          return data!.result[0].id;
         },
       });
     } catch (e: any) {
@@ -107,7 +107,7 @@ export function FormField(
 
   onCleanup(() => {
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
-      revertTransaction(rowMetaTxnId, graph);
+      revertTransaction(rowMetaTxnId, graph, setGraph);
     }
   });
 

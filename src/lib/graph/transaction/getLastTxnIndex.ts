@@ -1,8 +1,8 @@
 import type { GraphInterface } from "../graph";
 
 export function getLastTxnIndex(txnId: number, graph: GraphInterface): number {
-  const txnValue = graph.transactions.get(txnId);
-  return txnValue?.steps && txnValue.steps.length > 0
-    ? txnValue.steps.length - 1
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  return txnVertex?.P.steps && txnVertex.P.steps.length > 0
+    ? txnVertex.P.steps.length - 1
     : 0;
 }

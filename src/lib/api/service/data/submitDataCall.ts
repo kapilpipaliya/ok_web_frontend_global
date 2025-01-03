@@ -18,6 +18,6 @@ export async function submitDataCall(
   const result = await postAPI(API.submitDataUrl, data);
   // @ts-expect-error ignore
   onMutatDataGet(graph, setGraph, result);
-  updateSubmittedIndex(txnId, graph);
+  updateSubmittedIndex(txnId, graph, setGraph);
   return result;
 }

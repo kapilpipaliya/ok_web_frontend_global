@@ -11,10 +11,9 @@ import type {
 
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
+import { addNewVertex } from "./lib/graph/mutate/vertex";
 
 export function createAppState() {
-  const transactions = new ReactiveMap() as GraphInterface["transactions"];
-
   const graph = createStore<GraphInterface>({
     activeClickOutside: [],
     APP_BASE_URL: "/admin",
@@ -31,10 +30,16 @@ export function createAppState() {
     txnId_: 0,
     newTxnId(): number {
       graph[1]("txnId_", (txnId: number) => txnId + 1);
-      transactions.set(graph[0].txnId_, {
-        ...getDefaultTxnValue(),
-        undoStepIndexes: [0],
-      });
+      addNewVertex(0, {
+        id: `txn${graph[0].txnId_}`,
+        L: ["Transaction"],
+        P: {
+          ...getDefaultTxnValue(),
+          undoStepIndexes: [0]
+        },
+        IN: {},
+        OUT: {}
+      }, graph[0], graph[1]);
       return graph[0].txnId_ as number;
     },
     newVertexId(): string {
@@ -44,7 +49,6 @@ export function createAppState() {
     saveUserSetting: (properties: { [key: string]: any }) => {
       saveUserSetting(properties, graph[0], graph[1]);
     },
-    transactions,
     userRoles: [],
     get userSetting() {
       return this.vertexes[this.userSettingId]; // NOSONAR

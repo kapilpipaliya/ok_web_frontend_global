@@ -1,51 +1,60 @@
-import type { Store } from "solid-js/store";
+import type { Store, SetStoreFunction } from "solid-js/store";
+import { untrack } from "solid-js";
+import { klona } from "klona";
 
-import type { GraphInterface } from "../graph";
+import type { GraphInterface, TransactionDetail } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
-import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
+import { replaceVertexProperties } from "../mutate/vertex";
 
 export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (!txnId) {
-    return;
-  }
-
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
-
-  const activeUndoIndex =
-    existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
-
-  if (activeUndoIndex < existingTxnValue.steps.length - 1) {
-    const activeUndoPointIndex = existingTxnValue.undoStepIndexes.findIndex(
-      (index) => index > activeUndoIndex,
-    );
-    existingTxnValue.undoStepIndexes = existingTxnValue.undoStepIndexes.slice(
-      0,
-      activeUndoPointIndex,
-    );
-
-    if (existingTxnValue.submittedIndex >= activeUndoIndex) {
-      const removedSteps = existingTxnValue.steps.slice(
-        activeUndoIndex + 1,
-        existingTxnValue.submittedIndex + 1,
-      );
-      existingTxnValue.revertSteps = [
-        ...removedSteps,
-        ...existingTxnValue.revertSteps,
-      ];
+  return untrack(() => {
+    if (!txnId) {
+      return;
     }
-    existingTxnValue.steps = existingTxnValue.steps.slice(
-      0,
-      activeUndoIndex + 1,
-    );
-  }
 
-  existingTxnValue.steps.push(txnValue);
-  existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
+    const txnVertex = graph.vertexes[`txn${txnId}`];
+    const existingTxnValue = txnVertex.P as TransactionDetail;
 
-  graph.transactions.set(txnId, existingTxnValue);
+    let steps = [...existingTxnValue.steps];
+    let undoStepIndexes = [...existingTxnValue.undoStepIndexes];
+    let revertSteps = [...existingTxnValue.revertSteps];
+    
+    const activeUndoIndex =
+      existingTxnValue.activeUndoIndex ?? steps.length - 1;
+
+    if (activeUndoIndex < steps.length - 1) {
+      const activeUndoPointIndex = undoStepIndexes.findIndex(
+        (index) => index > activeUndoIndex,
+      );
+      undoStepIndexes = undoStepIndexes.slice(0, activeUndoPointIndex);
+
+      if (existingTxnValue.submittedIndex >= activeUndoIndex) {
+        const removedSteps = steps.slice(
+          activeUndoIndex + 1,
+          existingTxnValue.submittedIndex + 1,
+        );
+        revertSteps = [...removedSteps, ...revertSteps];
+      }
+      steps = steps.slice(0, activeUndoIndex + 1);
+    }
+
+    steps.push(txnValue);
+    const newActiveUndoIndex = steps.length - 1;
+
+    const newTxnValue = {
+      ...existingTxnValue,
+      steps,
+      undoStepIndexes,
+      revertSteps,
+      activeUndoIndex: newActiveUndoIndex
+    };
+
+    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, false);
+  });
 }

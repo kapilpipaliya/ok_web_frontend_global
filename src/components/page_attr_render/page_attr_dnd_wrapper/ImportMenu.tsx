@@ -58,6 +58,7 @@ export function ImportMenu(
         layoutStore.formStore[0].txnId,
         prevTxnIndex,
         graph,
+        setGraph,
       );
     }
     props.onClose();
