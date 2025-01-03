@@ -32,7 +32,7 @@ export function AddNewRelationButton(props: AddNewRelationButtonProps) {
       const insertEdgeResult = addNewEdge(
         props.txnId,
         newEdge(
-          graph.newVertexId,
+          graph.newVertexId(),
           type,
           {},
           props.selectedLayout.id,

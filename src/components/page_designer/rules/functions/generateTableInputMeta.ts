@@ -9,8 +9,8 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 export function generateTableInputMeta(metaAttribute: FieldAttribute) {
   const [graph, setGraph] = useGraph();
-  const metaVertexId = graph.newVertexId;
-  const metaTxnId = graph.newTxnId;
+  const metaVertexId = graph.newVertexId();
+  const metaTxnId = graph.newTxnId();
 
   addNewVertex(
     metaTxnId,

@@ -25,7 +25,7 @@ export function AddNewFileButton() {
             setGraph,
             vertexes: [currentItem],
           })[0];
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
 
     const parentFolderMetaVertex = {
       id: "",

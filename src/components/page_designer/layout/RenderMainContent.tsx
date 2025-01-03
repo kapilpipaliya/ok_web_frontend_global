@@ -14,7 +14,7 @@ import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
-import { BroadcastChannel } from 'broadcast-channel';
+import { channel } from './channel';
 
 function FormElements() {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
@@ -44,19 +44,16 @@ function FormElements() {
     </Show>
   );
 }
-
 function PageViewComponent() {
   const [graph] = useGraph();
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
 
   const IFrame = () => {
-    const channel = new BroadcastChannel('foobar');
     const [graph] = useGraph();
     
     const onLoad = () => {
       setTimeout(() => {
-        channel.postMessage(JSON.stringify({graph}));
-        channel.postMessage(JSON.stringify({layoutStore: layoutStore}));
+        channel.postMessage(JSON.stringify({graph, layoutStore}));
       }, 1000);
     };
     
@@ -70,12 +67,12 @@ function PageViewComponent() {
   return (
     <Show when={layoutStore.formStore[0]?.id}>
       <ResizableContainer view={layoutStore.view}>
-        {/* <IFrame /> */}
-        <PageView
+        <IFrame />
+        {/* <PageView
           isDesignMode={true}
           isNoPermissionCheck={true}
           metaVertex={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
-        />
+        /> */}
       </ResizableContainer>
     </Show>
   );

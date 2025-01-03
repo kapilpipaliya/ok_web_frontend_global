@@ -21,7 +21,7 @@ export function rowMetaInitialize(
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   // when we delete the row, revertTransaction will not work, so used new metaTxnId.
   //const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
   const rows = rowMetaAttrInst.error
     ? {}
     : klona(rowMetaAttrInst.vertex?.P.rows);
@@ -149,7 +149,7 @@ function createAttributeRows(
       setGraph,
     );
     const edgeNew = newEdge(
-      graph.newVertexId,
+      graph.newVertexId(),
       "Attr",
       {},
       parentId,

@@ -85,7 +85,7 @@ export function PageViewWrapper(
   const [formStore, setFormStore] = pageFormStore;
 
   let onConfirmExit: () => void;
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
 
   const [previewStore] = usePreviewContext();
 

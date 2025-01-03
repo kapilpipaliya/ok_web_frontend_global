@@ -13,7 +13,7 @@ import type {
 
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-
+import { channel } from "~/components/page_designer/layout/channel";
 export function updateVertex(
   vertexId: string,
   vertexData: Vertex,
@@ -41,9 +41,10 @@ export function updateVertex(
         : [vertexData.id];
     });
   }
+  channel.postMessage(JSON.stringify({updateVertex: {vertexId, vertexData, skipExisting}}));
 }
 
-function updateEdge(
+export function updateEdge(
   edgeId: string,
   edge: Edge,
   graph: GraphInterface,
@@ -71,6 +72,7 @@ function updateEdge(
         : [edge.id],
     );
   }
+  channel.postMessage(JSON.stringify({updateEdge: {edgeId, edge, skipExisting}}));
 }
 
 function handleDeletions(

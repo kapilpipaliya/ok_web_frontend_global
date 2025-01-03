@@ -13,9 +13,6 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
 
 export function createAppState() {
-  let newVertexId = -500000;
-  let txnId = 0;
-
   const transactions = new ReactiveMap() as GraphInterface["transactions"];
 
   const graph = createStore<GraphInterface>({
@@ -30,17 +27,19 @@ export function createAppState() {
     member: { P: {} } as Vertex,
     navBarHeight: 45,
     navigationData: [],
-    get newTxnId() {
-      txnId += 1;
-      transactions.set(txnId, {
+    newVertexId_: -500000,
+    txnId_: 0,
+    newTxnId(): number {
+      graph[1]("txnId_", (txnId: number) => txnId + 1);
+      transactions.set(graph[0].txnId_, {
         ...getDefaultTxnValue(),
         undoStepIndexes: [0],
       });
-      return txnId;
+      return graph[0].txnId_ as number;
     },
-    get newVertexId() {
-      newVertexId += 1;
-      return newVertexId.toString();
+    newVertexId(): string {
+      graph[1]("newVertexId_", (newVertexId: number) => newVertexId + 1);
+      return graph[0].newVertexId_.toString();
     },
     saveUserSetting: (properties: { [key: string]: any }) => {
       saveUserSetting(properties, graph[0], graph[1]);

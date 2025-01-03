@@ -10,6 +10,7 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
+import { channel } from "~/components/page_designer/layout/channel";
 
 export function newEdge(
   edgeId: Id,
@@ -111,6 +112,7 @@ export function addNewEdge(
     },
     graph,
   );
+  channel.postMessage(JSON.stringify({addNewEdge: {txnId, edge}}));
   return {
     error: false,
     txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -156,6 +158,7 @@ export function replaceEdgeProperties(
     },
     graph,
   );
+  channel.postMessage(JSON.stringify({replaceEdgeProperties: {txnId, edgeId, properties}}));
   return {
     error: false,
     txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -219,6 +222,7 @@ export function replaceEdgeStart(
     },
     graph,
   );
+  channel.postMessage(JSON.stringify({replaceEdgeStart: {txnId, edgeId, newStartVertexId}}));
   return {
     error: false,
     txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -282,6 +286,7 @@ export function replaceEdgeEnd(
     },
     graph,
   );
+  channel.postMessage(JSON.stringify({replaceEdgeEnd: {txnId, edgeId, newEndVertexId}}));
   return {
     error: false,
     txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -336,6 +341,7 @@ export function deleteEdge(
     },
     graph,
   );
+  channel.postMessage(JSON.stringify({deleteEdge: {txnId, edgeId}}));
   return {
     error: false,
     txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -374,5 +380,7 @@ export function updateEdgeId(
   );
   // @ts-ignore
   setGraph("edges", oldEdgeId, undefined);
+  channel.postMessage(JSON.stringify({updateEdgeId: {oldEdgeId, newEdgeId}}));
   return { error: "" };
 }
+

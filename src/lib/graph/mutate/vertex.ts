@@ -12,6 +12,7 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
+import { channel } from "~/components/page_designer/layout/channel";
 
 // return a new Vertex
 export function newVertex(
@@ -72,6 +73,7 @@ export function addNewVertex(
       },
       graph,
     );
+    channel.postMessage(JSON.stringify({addNewVertex: {txnId, vertex}}));
     return {
       error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -125,6 +127,7 @@ export function replaceVertexProperties(
       },
       graph,
     );
+    channel.postMessage(JSON.stringify({replaceVertexProperties: {txnId, vertexId, properties}}));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -190,6 +193,7 @@ export function mergeVertexProperties(
       },
       graph,
     );
+    channel.postMessage(JSON.stringify({mergeVertexProperties: {txnId, vertexId, properties}}));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -305,6 +309,7 @@ export function deleteVertex(
       },
       graph,
     );
+    channel.postMessage(JSON.stringify({deleteVertex: {txnId, vertexId}}));
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -349,27 +354,28 @@ export function updateVertexId(
     // @ts-ignore
     setGraph("vertexes", oldVertexId, undefined);
     // TODO: replace id exactly at same position
-    graph.vertexes[newVertexId].L.forEach((label) =>
+    graph.vertexes[newVertexId as string].L.forEach((label) =>
       setGraph("vertexLabelIdMap", label, (ids) =>
         ids.filter((id) => id !== oldVertexId),
       ),
     );
-    graph.vertexes[newVertexId].L.forEach((label) =>
+    graph.vertexes[newVertexId as string].L.forEach((label) =>
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
         Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
       ),
     );
     // v->E--in->V-out-->E->v
-    Object.entries(graph.vertexes[newVertexId].OUT).forEach(
+    Object.entries(graph.vertexes[newVertexId as string].OUT).forEach(
       ([_edgeType, edgeIds]) => {
         setGraph("edges", edgeIds, "S", newVertexId);
       },
     );
-    Object.entries(graph.vertexes[newVertexId].IN).forEach(
+    Object.entries(graph.vertexes[newVertexId as string].IN).forEach(
       ([_edgeType, edgeIds]) => {
         setGraph("edges", edgeIds, "E", newVertexId);
       },
     );
+    channel.postMessage(JSON.stringify({updateVertexId: {oldVertexId, newVertexId}}));
     return { error: "" };
   });
 }

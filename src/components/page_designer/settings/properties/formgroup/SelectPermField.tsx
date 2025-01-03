@@ -88,7 +88,7 @@ export function SelectPermField(
         const insertEdgeResult = addNewEdge(
           props.txnId,
           newEdge(
-            graph.newVertexId,
+            graph.newVertexId(),
             type,
             {},
             props.selectedLayout.id,

@@ -14,7 +14,7 @@ export function cloneVertexWithEdges(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ): Vertex {
-  const vertexId = untrack(() => graph.newVertexId);
+  const vertexId = untrack(() => graph.newVertexId());
   untrack(() => {
     addNewVertex(
       txnId,
@@ -31,7 +31,7 @@ export function cloneVertexWithEdges(
     //   for (const inEdgeType of vertex.IN[edgeType]) {
     //     const inEdge = graph.edges[inEdgeType];
     //     const edgeNew = newEdge(
-    //       graph.newVertexId,
+    //       graph.newVertexId(),
     //       inEdge.T,
     //       inEdge.P,
     //       inEdge.S,
@@ -45,7 +45,7 @@ export function cloneVertexWithEdges(
       for (const outEdgeType of vertex.OUT[edgeType]) {
         const outEdge = graph.edges[outEdgeType];
         const edgeNew = newEdge(
-          graph.newVertexId,
+          graph.newVertexId(),
           outEdge.T,
           outEdge.P,
           vertexId,

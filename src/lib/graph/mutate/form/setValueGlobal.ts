@@ -24,7 +24,7 @@ export function setValueGlobal(
 
   // after commit, we can not use same txnId();
   if (isRealTime) {
-    txnId = graph.newTxnId;
+    txnId = graph.newTxnId();
   }
   let error = "" as string | undefined;
   batch(() => {
@@ -41,9 +41,10 @@ export function setValueGlobal(
 
     // we directly save the dataType on vertex:
     // @ts-ignore
-    setGraph("vertexes", dataVertex.id, "D", {
-      [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
-    });
+    // don't call setGraph directly.
+    // setGraph("vertexes", dataVertex.id, "D", {
+    //   [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
+    // });
 
     onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
   });

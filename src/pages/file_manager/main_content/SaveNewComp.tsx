@@ -37,7 +37,7 @@ export function SaveNewComp(
   const saveComponent = async () => {
     const currentItem = fileManagerStore.selectedItem;
 
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
 
     const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Comp", {
       key: componentName(),

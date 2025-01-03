@@ -14,6 +14,7 @@ import {
 } from "../../styled/dialog/DialogFooter";
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
+import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/vertex";
 
 export function ImportMenu(
   props: Readonly<{
@@ -31,16 +32,14 @@ export function ImportMenu(
   const [error] = createSignal("");
   const prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
 
-  const metaVertexId = graph.newVertexId;
-  const dataVertexId = graph.newVertexId;
+  const metaVertexId = graph.newVertexId();
+  const dataVertexId = graph.newVertexId();
 
-  setGraph("vertexes", dataVertexId, { id: dataVertexId, P: {} });
+  addNewVertex(0, { id: dataVertexId, IN: {}, L: [], OUT: {}, P: {} }, graph, setGraph);
 
   onCleanup(() => {
-    // @ts-expect-error ignore
-    setGraph("vertexes", metaVertexId, undefined);
-    // @ts-expect-error ignore
-    setGraph("vertexes", dataVertexId, undefined);
+    deleteVertex(0, metaVertexId, graph, setGraph);
+    deleteVertex(0, dataVertexId, graph, setGraph);
   });
 
   const onImport = () => {

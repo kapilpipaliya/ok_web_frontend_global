@@ -12,6 +12,10 @@ export function validateDragOver(
   formData: Vertex,
   position: string,
 ) {
+  // If fromVertex is not valid, don't allow drop
+  if (!fromVertex) {
+    return false;
+  }
   // If fromVertex and toVertex are the same, don't allow drop
   if (fromVertex.id === toVertexId) {
     return false;

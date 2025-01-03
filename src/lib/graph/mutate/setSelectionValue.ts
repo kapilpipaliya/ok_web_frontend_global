@@ -49,7 +49,7 @@ export function setSelectionValue(
     }
     const insertEdgeResult = addNewEdge(
       txnId,
-      newEdge(graph.newVertexId, type, {}, vertex.id, vertexId),
+      newEdge(graph.newVertexId(), type, {}, vertex.id, vertexId),
       graph,
       setGraph,
     );

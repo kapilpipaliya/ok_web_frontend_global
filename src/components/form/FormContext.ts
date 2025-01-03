@@ -22,7 +22,7 @@ export function getInitialFormStore(graph: GraphInterface) {
     id: (() => undefined) as Accessor<string | undefined>,
     isPreview: false,
     mounted: false,
-    txnId: graph.newTxnId,
+    txnId: graph.newTxnId(),
   };
 }
 

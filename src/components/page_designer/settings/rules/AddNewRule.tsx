@@ -19,14 +19,14 @@ export function AddNewRule(
   const [layoutStore] = useDesignerLayoutStore();
   const prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);
   });
 
   const addNewState = (key: string) => {
-    const rulesMetaVertexId = graph.newVertexId;
+    const rulesMetaVertexId = graph.newVertexId();
 
     const metaAttribute = FormMetaData.Form.attributes.find(
       (x) => x.key === "Rule",
@@ -50,7 +50,7 @@ export function AddNewRule(
 
     const rule = graph.vertexes[rowResult!.vertexId!];
 
-    const condMetaVertexId = graph.newVertexId;
+    const condMetaVertexId = graph.newVertexId();
     const condMetaAttribute = metaAttribute.attributes!.find(
       (x) => x.key === "cond",
     )!;

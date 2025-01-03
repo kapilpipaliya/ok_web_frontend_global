@@ -103,7 +103,6 @@ export function getUniqueName(
     uniqueId++;
   }
 
-  // setGraph('vertexes', formVertex.id, { P: { lastUniqueId: uniqueId } });
   mergeVertexProperties(txnId, formVertex.id, graph, setGraph, {
     lastUniqueId: uniqueId,
   });

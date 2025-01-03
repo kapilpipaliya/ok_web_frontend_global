@@ -45,7 +45,7 @@ export function SelectThemeMenu() {
       return;
     }
 
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
 
     const themeMetaAttribute = GlobalSetting.attributes.find(
       (attr) => attr.key === "Theme",

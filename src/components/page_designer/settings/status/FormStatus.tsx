@@ -18,7 +18,7 @@ export function FormStatus() {
 
   const vertexIds = createVertexIds();
 
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
   createVertices(vertexIds, metaTxnId, graph, setGraph);
 
   const [formStatus, setFormStatus] = createSignal(

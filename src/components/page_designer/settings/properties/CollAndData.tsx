@@ -24,8 +24,8 @@ function initializeMetaVertex(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const metaVertexId = graph.newVertexId;
-  const metaTxnId = graph.newTxnId;
+  const metaVertexId = graph.newVertexId();
+  const metaTxnId = graph.newTxnId();
 
   addNewVertex(
     metaTxnId,

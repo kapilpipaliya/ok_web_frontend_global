@@ -11,7 +11,7 @@ export function saveUserSetting(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const newTxn = graph.newTxnId;
+  const newTxn = graph.newTxnId();
   mergeVertexProperties(
     newTxn,
     graph.userSettingId,

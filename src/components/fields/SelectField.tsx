@@ -149,7 +149,7 @@ export function SelectField(
         }
         let txnId = props.txnId ?? 0;
         if (props.isRealTime) {
-          txnId = graph.newTxnId;
+          txnId = graph.newTxnId();
         }
         if (isStaticOptions(meta())) {
           let parsedValue;

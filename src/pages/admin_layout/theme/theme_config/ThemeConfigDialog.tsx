@@ -43,7 +43,7 @@ export function ThemeConfigDialog(
   };
 
   const saveNewTheme = async () => {
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
     const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
       data: themeData(),
       key: themeName(),
@@ -79,7 +79,7 @@ export function ThemeConfigDialog(
   };
 
   const saveExistingTheme = async () => {
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
     const mergeResult = mergeVertexProperties(
       newFormTxnId,
       props.item!.id,

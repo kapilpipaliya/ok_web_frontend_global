@@ -14,7 +14,7 @@ interface AdminLayoutProps {
 export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   const [graph, setGraph] = useGraph();
   const location = useLocation();
-  const navBarVertexId = graph.newVertexId;
+  const navBarVertexId = graph.newVertexId();
 
   // Add new vertex for the navbar
   addNewVertex(

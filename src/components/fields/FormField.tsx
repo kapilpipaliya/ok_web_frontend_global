@@ -34,7 +34,7 @@ export function FormField(
   const meta = () => parentRenderContext()?.context.meta!;
   const data = () => parentRenderContext()?.context.data!;
   const cleanUpConfig = {} as { [key: string]: any };
-  const txnId = graph.newTxnId;
+  const txnId = graph.newTxnId();
   const [formStore] = useFormContext();
 
   const formFieldStore = createStore({

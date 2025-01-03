@@ -65,7 +65,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [layoutStore] = useDesignerLayoutStore();
 
   const vertexIds = createVertexIds();
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedComp = () => graph.vertexes[layoutStore.selectedComponent];
   const propAttributes = createMemo(() =>

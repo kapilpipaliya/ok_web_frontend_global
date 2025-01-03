@@ -20,7 +20,7 @@ export function SEOFormGroupProperties() {
 
   const vertexIds = createVertexIds();
 
-  const metaTxnId = graph.newTxnId;
+  const metaTxnId = graph.newTxnId();
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   onCleanup(() => {
     revertTransaction(metaTxnId, graph);

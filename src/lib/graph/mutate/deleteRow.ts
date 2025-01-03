@@ -18,7 +18,7 @@ export function deleteRow(
 ) {
   batch(() => {
     if (isRealTime) {
-      txnId = graph.newTxnId;
+      txnId = graph.newTxnId();
     }
     // delete all vertex in edges
     const inEdges = vertex.IN;

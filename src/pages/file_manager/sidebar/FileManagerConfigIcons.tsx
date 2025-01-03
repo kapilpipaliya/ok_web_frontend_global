@@ -40,7 +40,7 @@ export function FileManagerConfigIcons(
 
   const handleCreateNewDirectory = async (key: string) => {
     try {
-      const newFormTxnId = graph.newTxnId;
+      const newFormTxnId = graph.newTxnId();
       const tableMetaVertex = {
         id: props.metaVertex.id,
         IN: {},

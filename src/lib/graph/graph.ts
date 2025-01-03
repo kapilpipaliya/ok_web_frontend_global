@@ -50,6 +50,8 @@ export interface TransactionDetail {
 }
 
 export interface GraphInterface {
+  txnId_: number;
+  newVertexId_: number;
   activeClickOutside: string[];
   APP_BASE_URL: string;
   componentIdMap: { [key: string]: string };
@@ -63,8 +65,8 @@ export interface GraphInterface {
   member?: Vertex;
   navBarHeight: number;
   navigationData?: AnyObject[];
-  newTxnId: number;
-  newVertexId: Id;
+  newTxnId: () => number;
+  newVertexId: () => Id;
   saveUserSetting: (properties: { [key: string]: any }) => void;
   transactions: Map<number, TransactionDetail>;
   userRoles: Id[];

@@ -55,7 +55,7 @@ export function newRow(
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
   return batch(() => {
     const vertexNew = newVertex(
-      graph.newVertexId,
+      graph.newVertexId(),
       [label || edgeType!],
       properties,
     );
@@ -68,7 +68,7 @@ export function newRow(
     }
 
     const edgeNew = newEdge(
-      graph.newVertexId,
+      graph.newVertexId(),
       edgeType || label!,
       {},
       inward ? vertexNew.id : parentVertex.id,
@@ -100,7 +100,7 @@ export function addNewRow(
   isRealTime: boolean,
 ) {
   if (isRealTime) {
-    txnId = graph.newTxnId;
+    txnId = graph.newTxnId();
   }
   const type = meta.P.inward
     ? getInEdge(meta, parentVertex)

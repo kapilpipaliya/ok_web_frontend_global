@@ -24,9 +24,9 @@ export function createFormVertex(
 
   const isRealTime = false;
   if (isRealTime) {
-    txnId = graph.newTxnId;
+    txnId = graph.newTxnId();
   }
-  const newVertexObj = newVertex(graph.newVertexId, [label], properties || {});
+  const newVertexObj = newVertex(graph.newVertexId(), [label], properties || {});
   // TODO: Do Create Transformation for the vertex
   const addNewVertexResult = addNewVertex(txnId, newVertexObj, graph, setGraph);
   if (addNewVertexResult.error) {

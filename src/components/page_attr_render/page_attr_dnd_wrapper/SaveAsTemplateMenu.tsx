@@ -30,7 +30,7 @@ export function SaveAsTemplateMenu(
   const { showSuccessToast, showWarningToast } = useToast();
 
   const saveTemplate = async () => {
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
     const createResult = createFormVertex(
       graph,
       setGraph,

@@ -21,7 +21,7 @@ export function useDeleteRowConfirm(gridState: DataGridState) {
       showErrorToast("You do not have permission to delete this row.");
       return;
     }
-    const txnId = graph.newTxnId;
+    const txnId = graph.newTxnId();
     const deleteResult = deleteVertex(
       txnId,
       gridState.deleteRowId,

@@ -25,7 +25,7 @@ export function ModifyJsonMenu(props: {
   const [jsonInputRef, setJsonInputRef] = createSignal<HTMLInputElement>();
 
   const updateVertexProperties = async (properties: { [key: string]: any; }) => {
-    const newFormTxnId = graph.newTxnId;
+    const newFormTxnId = graph.newTxnId();
     replaceVertexProperties(
       newFormTxnId,
       props.item.id,
