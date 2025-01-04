@@ -13,6 +13,8 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { getDefaultTxnValue } from "~/lib/graph/transaction/getDefaultTxnValue";
 import { addNewVertex } from "./lib/graph/mutate/vertex";
 
+// TODO make functions to global functions, store should not contain functions
+
 export function createAppState() {
   const graph = createStore<GraphInterface>({
     activeClickOutside: [],
@@ -28,6 +30,7 @@ export function createAppState() {
     navigationData: [],
     newVertexId_: -500000,
     txnId_: 0,
+    broadcastChannels: [],
     newTxnId(): number {
       graph[1]("txnId_", (txnId: number) => txnId + 1);
       addNewVertex(0, {

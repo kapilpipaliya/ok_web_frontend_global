@@ -5,13 +5,23 @@ import { addNewEdge, replaceEdgeProperties, replaceEdgeStart, replaceEdgeEnd, de
 import { updateVertex, updateEdge } from '~/lib/graph/mutate/setGraphData';
 import { addNewVertex, replaceVertexProperties, mergeVertexProperties, deleteVertex, updateVertexId } from '~/lib/graph/mutate/vertex';
 
-export const channel = new BroadcastChannel('foobar');
+const channels = new Map<string, BroadcastChannel>();
 
-export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+export function getChannel(name: string): BroadcastChannel {
+  if (!channels.has(name)) {
+    channels.set(name, new BroadcastChannel(name));
+  }
+  return channels.get(name)!;
+}
+
+export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, id?: string) {
   const data = JSON.parse(msg);
   // initial data:
   if (data.graph) {
     setGraph(reconcile(data.graph, { merge: true }));
+    if (id) {
+      setGraph("broadcastChannels", (channels) => channels.includes(id) ? channels : [...channels, id]);
+    }
   }
 
   // Vertex functions:
@@ -57,3 +67,12 @@ export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: 
     updateEdge(data.updateEdge.edgeId, data.updateEdge.edge, graph, setGraph, { ...(data.updateEdge.options ?? {}), skipPostMessage: true });
   }
 }
+
+export function broadcastToAllChannels(channels: string[], message: any) {
+  const messageString = JSON.stringify(message);
+  channels.forEach((channelName) => {
+    const channel = getChannel(channelName);
+    channel.postMessage(messageString);
+  });
+}
+

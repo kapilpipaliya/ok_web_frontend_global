@@ -10,7 +10,7 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { channel } from "~/components/page_designer/layout/channel";
+import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
 
 export function newEdge(
   edgeId: Id,
@@ -118,7 +118,7 @@ export function addNewEdge(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({addNewEdge: {txnId, edge}}));
+      broadcastToAllChannels(graph.broadcastChannels, {addNewEdge: {txnId, edge}});
     }
     return {
       error: false,
@@ -170,7 +170,7 @@ export function replaceEdgeProperties(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({replaceEdgeProperties: {txnId, edgeId, properties}}));
+      broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeProperties: {txnId, edgeId, properties}});
     }
     return {
       error: false,
@@ -240,7 +240,7 @@ export function replaceEdgeStart(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({replaceEdgeStart: {txnId, edgeId, newStartVertexId}}));
+      broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeStart: {txnId, edgeId, newStartVertexId}});
     }
     return {
       error: false,
@@ -310,7 +310,7 @@ export function replaceEdgeEnd(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({replaceEdgeEnd: {txnId, edgeId, newEndVertexId}}));
+      broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeEnd: {txnId, edgeId, newEndVertexId}});
     }
     return {
       error: false,
@@ -371,7 +371,7 @@ export function deleteEdge(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({deleteEdge: {txnId, edgeId}}));
+      broadcastToAllChannels(graph.broadcastChannels, {deleteEdge: {txnId, edgeId}});
     }
     return {
       error: false,
@@ -415,7 +415,7 @@ export function updateEdgeId(
     // @ts-ignore
     setGraph("edges", oldEdgeId, undefined);
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({updateEdgeId: {oldEdgeId, newEdgeId}}));
+      broadcastToAllChannels(graph.broadcastChannels, {updateEdgeId: {oldEdgeId, newEdgeId}});
     }
     return { error: "" };
   });

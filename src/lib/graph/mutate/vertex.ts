@@ -12,7 +12,7 @@ import {
   edgeOldIdToNewIdMap,
   vertexOldIdToNewIdMap,
 } from "../transaction/TransactionType";
-import { channel } from "~/components/page_designer/layout/channel";
+import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
 
 // return a new Vertex
 export function newVertex(
@@ -76,7 +76,7 @@ export function addNewVertex(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({ addNewVertex: { txnId, vertex } }));
+      broadcastToAllChannels(graph.broadcastChannels, { addNewVertex: { txnId, vertex } });
     }
     return {
       error: "",
@@ -138,7 +138,7 @@ export function replaceVertexProperties(
       );
     }
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({ replaceVertexProperties: { txnId, vertexId, properties } }));
+      broadcastToAllChannels(graph.broadcastChannels, { replaceVertexProperties: { txnId, vertexId, properties } });
     }
     return {
       error: false,
@@ -208,7 +208,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({ mergeVertexProperties: { txnId, vertexId, properties } }));
+      broadcastToAllChannels(graph.broadcastChannels, { mergeVertexProperties: { txnId, vertexId, properties } });
     }
     return {
       error: false,
@@ -328,7 +328,7 @@ export function deleteVertex(
       setGraph,
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({ deleteVertex: { txnId, vertexId } }));
+      broadcastToAllChannels(graph.broadcastChannels, { deleteVertex: { txnId, vertexId } });
     }
     return {
       error: false,
@@ -397,7 +397,7 @@ export function updateVertexId(
       },
     );
     if (!options?.skipPostMessage) {
-      channel.postMessage(JSON.stringify({ updateVertexId: { oldVertexId, newVertexId } }));
+      broadcastToAllChannels(graph.broadcastChannels, { updateVertexId: { oldVertexId, newVertexId } });
     }
     return { error: "" };
   });

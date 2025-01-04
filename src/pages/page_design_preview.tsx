@@ -3,7 +3,7 @@ import { useGraph, Vertex } from '~/lib/graph/graph';
 import { PageView } from "~/components/page_attr_render/PageView";
 import { DesignerLayoutStoreContext, getInitialDesignerLayoutStore, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
 import { Show } from 'solid-js';
-import { channel, handleChannelMessage } from '~/components/page_designer/layout/channel';
+import { channel, getChannel, handleChannelMessage } from '~/components/page_designer/layout/channel';
 import { FormStoreObject } from '~/components/form/FormContext';
 
 export default function PageShareView() {
@@ -15,7 +15,9 @@ export default function PageShareView() {
 
   const [graph, setGraph] = useGraph();
 
-  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph);
+  const channel = getChannel(id);
+
+  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, id);
 
   const layoutStore = () => graph.vertexes[id]?.P as PageLayoutObject || {};
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
