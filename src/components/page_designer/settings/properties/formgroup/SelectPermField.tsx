@@ -13,6 +13,7 @@ import { FormStoreObject } from "~/components/form/FormContext";
 import { RulesModal } from "../../../rules/RulesModal";
 import { AddNewRule } from "../../rules/AddNewRule";
 import { Label } from "./Label";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function SelectPermField(
   props: Readonly<{
@@ -92,7 +93,7 @@ export function SelectPermField(
         const insertEdgeResult = addNewEdge(
           props.txnId,
           newEdge(
-            graph.newVertexId(),
+            generateNewVertexId(graph, setGraph),
             type,
             {},
             props.selectedLayout.id,

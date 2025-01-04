@@ -15,6 +15,7 @@ import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SelectThemeMenu() {
   const [graph, setGraph] = useGraph();
@@ -45,7 +46,7 @@ export function SelectThemeMenu() {
       return;
     }
 
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
 
     const themeMetaAttribute = GlobalSetting.attributes.find(
       (attr) => attr.key === "Theme",

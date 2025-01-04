@@ -46,6 +46,7 @@ import {
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
+import { saveUserSetting } from "~/lib/api/saveUserSetting";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {
@@ -96,10 +97,10 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     on(
       [() => gridState.cardSize, () => gridState.layout],
       () => {
-        graph.saveUserSetting({
+        saveUserSetting({
           cardSize: gridState.cardSize,
           layout: gridState.layout,
-        });
+        }, graph, setGraph);
       },
       { defer: true }
     )

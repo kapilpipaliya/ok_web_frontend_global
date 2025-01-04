@@ -7,6 +7,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export interface AddNewRelationButtonProps {
   component: Component<{ onClose: (rowVertex?: Vertex) => void }>;
@@ -32,7 +33,7 @@ export function AddNewRelationButton(props: AddNewRelationButtonProps) {
       const insertEdgeResult = addNewEdge(
         props.txnId,
         newEdge(
-          graph.newVertexId(),
+          generateNewVertexId(graph, setGraph),
           type,
           {},
           props.selectedLayout.id,

@@ -14,6 +14,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,
@@ -40,7 +41,7 @@ export function FileManagerConfigIcons(
 
   const handleCreateNewDirectory = async (key: string) => {
     try {
-      const newFormTxnId = graph.newTxnId();
+      const newFormTxnId = generateNewTxnId(graph, setGraph);
       const tableMetaVertex = {
         id: props.metaVertex.id,
         IN: {},

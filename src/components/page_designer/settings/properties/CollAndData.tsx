@@ -20,13 +20,15 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 function initializeMetaVertex(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const metaVertexId = graph.newVertexId();
-  const metaTxnId = graph.newTxnId();
+  const metaVertexId = generateNewVertexId(graph, setGraph);
+  const metaTxnId = generateNewTxnId(graph, setGraph);
 
   addNewVertex(
     metaTxnId,

@@ -15,6 +15,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function ThemeConfigDialog(
   props: Readonly<{
@@ -43,7 +44,7 @@ export function ThemeConfigDialog(
   };
 
   const saveNewTheme = async () => {
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
     const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
       data: themeData(),
       key: themeName(),
@@ -79,7 +80,7 @@ export function ThemeConfigDialog(
   };
 
   const saveExistingTheme = async () => {
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
     const mergeResult = mergeVertexProperties(
       newFormTxnId,
       props.item!.id,

@@ -16,6 +16,7 @@ import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/FormContext";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function ImportMenu(
   props: Readonly<{
@@ -36,8 +37,8 @@ export function ImportMenu(
   const [error] = createSignal("");
   const prevTxnIndex = getLastTxnIndex(formStoreVertex().P.txnId, graph);
 
-  const metaVertexId = graph.newVertexId();
-  const dataVertexId = graph.newVertexId();
+  const metaVertexId = generateNewVertexId(graph, setGraph);
+  const dataVertexId = generateNewVertexId(graph, setGraph);
 
   addNewVertex(0, { id: dataVertexId, IN: {}, L: [], OUT: {}, P: {} }, graph, setGraph);
 

@@ -6,6 +6,7 @@ import type { GraphInterface, Vertex } from "../../graph";
 
 import { addNewEdge, newEdge } from "../../mutate/edge";
 import { addNewVertex, newVertex } from "../../mutate/vertex";
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 
 export function cloneVertexWithEdges(
   txnId: number,
@@ -14,7 +15,7 @@ export function cloneVertexWithEdges(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ): Vertex {
-  const vertexId = untrack(() => graph.newVertexId());
+  const vertexId = untrack(() => generateNewVertexId(graph, setGraph));
   untrack(() => {
     addNewVertex(
       txnId,
@@ -31,7 +32,7 @@ export function cloneVertexWithEdges(
     //   for (const inEdgeType of vertex.IN[edgeType]) {
     //     const inEdge = graph.edges[inEdgeType];
     //     const edgeNew = newEdge(
-    //       graph.newVertexId(),
+    //       generateNewVertexId(graph),
     //       inEdge.T,
     //       inEdge.P,
     //       inEdge.S,
@@ -45,7 +46,7 @@ export function cloneVertexWithEdges(
       for (const outEdgeType of vertex.OUT[edgeType]) {
         const outEdge = graph.edges[outEdgeType];
         const edgeNew = newEdge(
-          graph.newVertexId(),
+          generateNewVertexId(graph, setGraph),
           outEdge.T,
           outEdge.P,
           vertexId,

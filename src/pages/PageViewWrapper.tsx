@@ -52,6 +52,7 @@ import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -77,7 +78,7 @@ export function PageViewWrapper(
     props.dataId === "new" ? undefined : props.dataId,
   );
   const pageFormVertexObject = newVertex(uuidv4(), ["PageForm"], {
-    ...getInitialFormStore(graph),
+    ...getInitialFormStore(graph, setGraph),
     formId: props.pageVertexName,
     id: id()!,
   });
@@ -94,7 +95,7 @@ export function PageViewWrapper(
   })
 
   let onConfirmExit: () => void;
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
 
   const [previewStore] = usePreviewContext();
 

@@ -6,6 +6,7 @@ import { useToast } from "~/components/styled/Toast";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 
 import { getInEdge } from "../get/sync/getInEdge";
+import { generateNewVertexId } from "../transaction/generateNewVertexId";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(
@@ -54,7 +55,7 @@ export function setParentValue(
 
     const insertEdgeResult = addNewEdge(
       txnId,
-      newEdge(graph.newVertexId(), type, {}, vertexId, vertex.id),
+      newEdge(generateNewVertexId(graph, setGraph), type, {}, vertexId, vertex.id),
       graph,
       setGraph,
     );

@@ -14,6 +14,7 @@ import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useToast } from "../../styled/Toast";
 import { FormStoreObject } from "~/components/form/FormContext";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -34,7 +35,7 @@ export function SaveAsTemplateMenu(
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const saveTemplate = async () => {
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
     const createResult = createFormVertex(
       graph,
       setGraph,

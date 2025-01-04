@@ -1,4 +1,4 @@
-import type { createStore } from "solid-js/store";
+import type { createStore, SetStoreFunction } from "solid-js/store";
 
 import { Accessor, createContext, useContext } from "solid-js";
 
@@ -6,8 +6,9 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { InitialPermissions } from "../page_attr_render/InitialPermissions";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
-export function getInitialFormStore(graph: GraphInterface) {
+export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   const cleanUpConfigInitial = { rowMetaTxnIds: [] as number[] };
   return {
     ...InitialPermissions,
@@ -22,7 +23,7 @@ export function getInitialFormStore(graph: GraphInterface) {
     id: undefined as string | undefined,
     isPreview: false,
     mounted: false,
-    txnId: graph.newTxnId(),
+    txnId: generateNewTxnId(graph, setGraph),
   };
 }
 

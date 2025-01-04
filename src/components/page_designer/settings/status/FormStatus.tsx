@@ -10,13 +10,14 @@ import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/muta
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
 
   const vertexIds = createVertexIds();
 
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
 
   const [formStatus, setFormStatus] = createSignal(

@@ -17,6 +17,8 @@ import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { commitTxn } from "../../transaction/commitTxn";
 import { addNewEdge, newEdge } from "../edge";
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
+import { generateNewTxnId } from "../../transaction/generateNewTxnId";
 
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
@@ -55,7 +57,7 @@ export function newRow(
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
   return untrack(() => batch(() => {
     const vertexNew = newVertex(
-      graph.newVertexId(),
+      generateNewVertexId(graph, setGraph),
       [label || edgeType!],
       properties,
     );
@@ -68,7 +70,7 @@ export function newRow(
     }
 
     const edgeNew = newEdge(
-      graph.newVertexId(),
+      generateNewVertexId(graph, setGraph),
       edgeType || label!,
       {},
       inward ? vertexNew.id : parentVertex.id,
@@ -101,7 +103,7 @@ export function addNewRow(
 ) {
   return untrack(() => {
     if (isRealTime) {
-      txnId = graph.newTxnId();
+      txnId = generateNewTxnId(graph, setGraph);
     }
     const type = meta.P.inward
       ? getInEdge(meta, parentVertex)

@@ -7,6 +7,7 @@ import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import type { DataGridState } from "../DataGridContext";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function useDeleteRowConfirm(gridState: DataGridState) {
   const [graph, setGraph] = useGraph();
@@ -21,7 +22,7 @@ export function useDeleteRowConfirm(gridState: DataGridState) {
       showErrorToast("You do not have permission to delete this row.");
       return;
     }
-    const txnId = graph.newTxnId();
+    const txnId = generateNewTxnId(graph, setGraph);
     const deleteResult = deleteVertex(
       txnId,
       gridState.deleteRowId,

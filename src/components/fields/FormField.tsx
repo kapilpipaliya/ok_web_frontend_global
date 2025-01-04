@@ -17,6 +17,7 @@ import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(
@@ -36,7 +37,7 @@ export function FormField(
   const meta = () => parentRenderContext()?.context.meta!;
   const data = () => parentRenderContext()?.context.data!;
   const cleanUpConfig = {} as { [key: string]: any };
-  const txnId = graph.newTxnId();
+  const txnId = generateNewTxnId(graph, setGraph);
   const formId = useFormContext();
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
 

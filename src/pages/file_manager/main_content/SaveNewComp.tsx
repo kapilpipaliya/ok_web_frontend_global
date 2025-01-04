@@ -18,6 +18,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { parentCompAttribute } from "~/lib/meta/base/Comp";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SaveNewComp(
   props: Readonly<{
@@ -37,7 +38,7 @@ export function SaveNewComp(
   const saveComponent = async () => {
     const currentItem = fileManagerStore.selectedItem;
 
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
 
     const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Comp", {
       key: componentName(),

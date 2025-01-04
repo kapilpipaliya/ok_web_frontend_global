@@ -12,6 +12,8 @@ import { FormStoreObject } from "~/components/form/FormContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 import { CommonAddComponent } from "./CommonAddComponent";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function AddNewRule(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
@@ -24,14 +26,14 @@ export function AddNewRule(
 
   const prevTxnIndex = getLastTxnIndex(formStoreVertex().P.txnId, graph);
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
   });
 
   const addNewState = (key: string) => {
-    const rulesMetaVertexId = graph.newVertexId();
+    const rulesMetaVertexId = generateNewVertexId(graph, setGraph);
 
     const metaAttribute = FormMetaData.Form.attributes.find(
       (x) => x.key === "Rule",
@@ -55,7 +57,7 @@ export function AddNewRule(
 
     const rule = graph.vertexes[rowResult!.vertexId!];
 
-    const condMetaVertexId = graph.newVertexId();
+    const condMetaVertexId = generateNewVertexId(graph, setGraph);
     const condMetaAttribute = metaAttribute.attributes!.find(
       (x) => x.key === "cond",
     )!;

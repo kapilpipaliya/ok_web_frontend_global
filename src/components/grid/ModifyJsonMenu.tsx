@@ -10,6 +10,7 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function ModifyJsonMenu(props: {
   item: Vertex;
@@ -25,7 +26,7 @@ export function ModifyJsonMenu(props: {
   const [jsonInputRef, setJsonInputRef] = createSignal<HTMLInputElement>();
 
   const updateVertexProperties = async (properties: { [key: string]: any; }) => {
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
     replaceVertexProperties(
       newFormTxnId,
       props.item.id,

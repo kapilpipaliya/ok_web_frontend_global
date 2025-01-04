@@ -6,6 +6,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
 
 import { AuthenticateUser } from "./AuthenticateUser";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 interface AdminLayoutProps {
   children?: JSX.Element;
@@ -14,7 +15,7 @@ interface AdminLayoutProps {
 export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   const [graph, setGraph] = useGraph();
   const location = useLocation();
-  const navBarVertexId = graph.newVertexId();
+  const navBarVertexId = generateNewVertexId(graph, setGraph);
 
   // Add new vertex for the navbar
   addNewVertex(

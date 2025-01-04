@@ -28,6 +28,7 @@ import { isStaticOptions } from "./utils/isStaticOptions";
 import { selectedValue } from "./utils/selectedValue";
 import { setSelectValueHelper } from "./utils/setSelectValueHelper";
 import type { FormStoreObject } from "~/components/form/FormContext";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
@@ -151,7 +152,7 @@ export function SelectField(
         }
         let txnId = props.txnId ?? 0;
         if (props.isRealTime) {
-          txnId = graph.newTxnId();
+          txnId = generateNewTxnId(graph, setGraph);
         }
         if (isStaticOptions(meta())) {
           let parsedValue;

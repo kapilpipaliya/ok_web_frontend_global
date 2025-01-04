@@ -64,9 +64,6 @@ export interface GraphInterface {
   navBarHeight: number;
   navigationData?: AnyObject[];
   broadcastChannels: string[];
-  newTxnId: () => number;
-  newVertexId: () => Id;
-  saveUserSetting: (properties: { [key: string]: any }) => void;
   userRoles: Id[];
   userSetting: Vertex;
   userSettingId: Id;

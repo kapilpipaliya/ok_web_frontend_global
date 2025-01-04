@@ -5,6 +5,8 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { commitTxn } from "../../transaction/commitTxn";
+import { generateNewTxnId } from "../../transaction/generateNewTxnId";
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 
 export function createFormVertex(
   graph: Store<GraphInterface>,
@@ -24,9 +26,9 @@ export function createFormVertex(
 
   const isRealTime = false;
   if (isRealTime) {
-    txnId = graph.newTxnId();
+    txnId = generateNewTxnId(graph, setGraph);
   }
-  const newVertexObj = newVertex(graph.newVertexId(), [label], properties || {});
+  const newVertexObj = newVertex(generateNewVertexId(graph, setGraph), [label], properties || {});
   // TODO: Do Create Transformation for the vertex
   const addNewVertexResult = addNewVertex(txnId, newVertexObj, graph, setGraph);
   if (addNewVertexResult.error) {

@@ -10,6 +10,8 @@ import { getChildVertex } from "../../get/sync/getChildVertex";
 import { addNewEdge, newEdge } from "../edge";
 import { mergeVertexProperties } from "../vertex";
 import { getColumnProps, newRow } from "./addNewRow";
+import { generateNewTxnId } from "../../transaction/generateNewTxnId";
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,
@@ -21,7 +23,7 @@ export function rowMetaInitialize(
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   // when we delete the row, revertTransaction will not work, so used new metaTxnId.
   //const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
   const rows = rowMetaAttrInst.error
     ? {}
     : klona(rowMetaAttrInst.vertex?.P.rows);
@@ -149,7 +151,7 @@ function createAttributeRows(
       setGraph,
     );
     const edgeNew = newEdge(
-      graph.newVertexId(),
+      generateNewVertexId(graph, setGraph),
       "Attr",
       {},
       parentId,

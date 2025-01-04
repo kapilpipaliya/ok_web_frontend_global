@@ -38,8 +38,8 @@ export function componentDrop(
     return -1;
   }
 
-  const attrMetaVertex = createAttrMetaVertex(graph);
-  const attrCompMetaVertex = createAttrCompMetaVertex(graph);
+  const attrMetaVertex = createAttrMetaVertex(graph, setGraph);
+  const attrCompMetaVertex = createAttrCompMetaVertex(graph, setGraph);
 
   if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
@@ -98,7 +98,7 @@ export function componentDrop(
       false,
     );
 
-    const rowVertex = graph.vertexes[rowResult.vertexId!];
+    const rowVertex = graph.vertexes[rowResult.vertexId!];debugger
 
     if (["Comp"].includes(fromVertex.L[0])) {
       // set Component to the row

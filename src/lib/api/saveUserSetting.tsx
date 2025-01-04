@@ -5,13 +5,14 @@ import type { GraphInterface } from "../graph/graph";
 import { mergeVertexProperties } from "../graph/mutate/vertex";
 import { commitTxn } from "../graph/transaction/commitTxn";
 import { submitDataCall } from "./service/data/submitDataCall";
+import { generateNewTxnId } from "../graph/transaction/generateNewTxnId";
 
 export function saveUserSetting(
   properties: { [key: string]: any },
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const newTxn = graph.newTxnId();
+  const newTxn = generateNewTxnId(graph, setGraph);
   mergeVertexProperties(
     newTxn,
     graph.userSettingId,

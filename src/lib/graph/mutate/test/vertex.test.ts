@@ -17,7 +17,7 @@ describe("addNewVertex", () => {
   test("modifying vertex dont change store", async () => {
     // in solid when we set an object to the store, we can mutate store with original object reference
     // to prevent accidental behaviour we clone the object.
-    const vertex1 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex1 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
@@ -28,12 +28,12 @@ describe("addNewVertex", () => {
   });
 
   test("vertex revert transaction", async () => {
-    const vertex1 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex1 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex2 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -62,7 +62,7 @@ describe("replaceVertexProperties", () => {
     transactions.clear();
   });
   test("modifying properties dont change store", async () => {
-    const vertex1 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex1 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
@@ -78,12 +78,12 @@ describe("replaceVertexProperties", () => {
   });
 
   test("vertex revert replace Properties", async () => {
-    const vertex1 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex1 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex2 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],
@@ -113,12 +113,12 @@ describe("deleteVertex", () => {
     transactions.clear();
   });
   test("modifying properties dont change store", async () => {
-    const vertex1 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex1 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 1,
       b: 2,
       c: [3, 4, 5],
     });
-    const vertex2 = newVertex(graph.newVertexId(), ["hello"], {
+    const vertex2 = newVertex(generateNewVertexId(graph), ["hello"], {
       a: 6,
       b: 7,
       c: [8, 9, 10],

@@ -41,6 +41,7 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -68,7 +69,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!];
 
   const vertexIds = createVertexIds();
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedComp = () => graph.vertexes[layoutStore().selectedComponent];
   const propAttributes = createMemo(() =>

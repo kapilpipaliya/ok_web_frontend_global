@@ -7,6 +7,7 @@ import { parentDirectory } from "~/lib/meta/file/File";
 
 import { handleDataSubmission } from "../../../lib/graph/mutate/handleDataSubmission";
 import { useFileManagerStore } from "../FileManagerContext";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 export function AddNewFileButton() {
   const [graph, setGraph] = useGraph();
   const [fileManagerStore] = useFileManagerStore();
@@ -25,7 +26,7 @@ export function AddNewFileButton() {
             setGraph,
             vertexes: [currentItem],
           })[0];
-    const newFormTxnId = graph.newTxnId();
+    const newFormTxnId = generateNewTxnId(graph, setGraph);
 
     const parentFolderMetaVertex = {
       id: "",

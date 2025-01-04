@@ -8,6 +8,7 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
 import { commitTxn } from "../transaction/commitTxn";
+import { generateNewTxnId } from "../transaction/generateNewTxnId";
 
 export function deleteRow(
   vertex: Vertex,
@@ -18,7 +19,7 @@ export function deleteRow(
 ) {
   batch(() => {
     if (isRealTime) {
-      txnId = graph.newTxnId();
+      txnId = generateNewTxnId(graph, setGraph);
     }
     // delete all vertex in edges
     const inEdges = vertex.IN;

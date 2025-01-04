@@ -14,6 +14,7 @@ import { PROPERTIES } from "../../../styled/constants/constant";
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { Label } from "../properties/formgroup/Label";
 import { FormStoreObject } from "~/components/form/FormContext";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SEOFormGroupProperties() {
   const [graph, setGraph] = useGraph();
@@ -24,7 +25,7 @@ export function SEOFormGroupProperties() {
 
   const vertexIds = createVertexIds();
 
-  const metaTxnId = graph.newTxnId();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
