@@ -205,9 +205,19 @@ export function PageViewWrapper(
       return;
     }
     if (!formStore.formMetaId) {
-      const metaVertexResult = untrack(() =>
-        createMeta(form, metaTxnId, graph, setGraph),
-      );
+      const metaVertexResult = untrack(() => {
+        let formToUse = form;
+        if (form.key === "Page") {
+          formToUse = {
+            ...form,
+            attributes: form.attributes.map(attr => ({
+              ...attr,
+              attributes: attr.attributes?.filter(a => a.key !== "Attr")
+            }))
+          };
+        }
+        return createMeta(formToUse, metaTxnId, graph, setGraph);
+      });
 
       if (metaVertexResult.error) {
         return { error: "Meta Vertex Error" };
