@@ -6,7 +6,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import {
   dialogCancelButtonClass,
   DialogFooter,
@@ -15,6 +15,7 @@ import {
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/vertex";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function ImportMenu(
   props: Readonly<{
@@ -26,11 +27,14 @@ export function ImportMenu(
 ) {
   let nameInputRef: HTMLTextAreaElement;
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const [htmlContent, setHtmlContent] = createSignal("");
   const [error] = createSignal("");
-  const prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+  const prevTxnIndex = getLastTxnIndex(formStoreVertex().P.txnId, graph);
 
   const metaVertexId = graph.newVertexId();
   const dataVertexId = graph.newVertexId();
@@ -44,18 +48,18 @@ export function ImportMenu(
 
   const onImport = () => {
     const jsxParser = new JsxParser({
-      formData: graph.vertexes[layoutStore.formStore[0].formDataId!],
+      formData: graph.vertexes[formStoreVertex().P.formDataId!],
       jsx: htmlContent(),
-      parent: graph.vertexes[layoutStore.selectedId],
+      parent: graph.vertexes[layoutStore().selectedId],
       showWarnings: true,
-      txnId: layoutStore.formStore[0].txnId,
+      txnId: formStoreVertex().P.txnId,
     });
     jsxParser.render(graph, setGraph);
   };
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
-        layoutStore.formStore[0].txnId,
+        formStoreVertex().P.txnId,
         prevTxnIndex,
         graph,
         setGraph,

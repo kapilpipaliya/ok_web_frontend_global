@@ -8,6 +8,7 @@ import { useToast } from "~/components/styled/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import type { FormStoreObject } from "~/components/form/FormContext";
 
 import { FilePickerModal } from "./FilePickerModal";
 
@@ -22,7 +23,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   let fileManagerStore: FileManagerObject;
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const { showErrorToast } = useToast();
 
   const selectedFileVertex = createMemo((): Vertex[] => {
@@ -43,7 +45,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       showErrorToast("Please select a file");
       return;
     }
-    const txnId = formStore?.txnId;
+    const txnId = formVertex()?.P.txnId;
     if (!txnId) {
       showErrorToast("unable to select file");
       return;

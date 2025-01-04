@@ -15,7 +15,7 @@ import { Dynamic } from "solid-js/web";
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
-import { useFormContext } from "~/components/form/FormContext";
+import { FormStoreObject, useFormContext } from "~/components/form/FormContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
@@ -55,7 +55,9 @@ export function DynamicCSSComponent(
   const [cssState, setCssState] = useCssEditor();
 
   const [graph, setGraph] = useGraph();
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
+
   const cssEditorProps = useCssEditorProps();
 
   const parentRenderItems = useRenderContext() || [];
@@ -128,7 +130,7 @@ export function DynamicCSSComponent(
       [(props.meta as FormField).key]: data,
     });
 
-    // (props.meta as FormField).onChange?.(data, formStore, setFormStore);
+    // (props.meta as FormField).onChange?.(data, formId);
 
     // props.meta.error = "";
 
@@ -174,7 +176,7 @@ export function DynamicCSSComponent(
   };
 
   const clearFileSelection = () => {
-    const txnId = formStore?.txnId;
+    const txnId = formVertex()?.P.txnId;
     if (!txnId) {
       return;
     }

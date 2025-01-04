@@ -14,20 +14,25 @@ import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import type { Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
 ) {
-  const [layoutStore] = useDesignerLayoutStore();
-  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
-  const activeItemChanged = createSelector(() => layoutStore.activeItem);
+  const layoutStoreId = useDesignerLayoutStore();
+  const [graph] = useGraph();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
+  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
+  const activeItemChanged = createSelector(() => layoutStore().activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
 
   const getBorder = createMemo(() => {
@@ -35,7 +40,7 @@ export function BorderOverlay(
 
     if (isActiveTargetItem()) {
       const boxShadowProps = getDnDBoxShadowArgs(
-        layoutStore.position,
+        layoutStore().position,
         "green-60",
       );
       boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;

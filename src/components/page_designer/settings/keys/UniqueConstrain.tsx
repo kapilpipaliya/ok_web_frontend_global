@@ -3,16 +3,20 @@ import { createStore } from "solid-js/store";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function UniqueConstrains() {
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  
   const uniqueConstrainsMetaAttribute = klona(
     FormMetaData.Form.attributes,
   ).find((meta) => meta.key === "Unique")!;
@@ -22,7 +26,7 @@ export function UniqueConstrains() {
     )!,
     graph,
     setGraph,
-    layoutStore,
+    layoutStoreId,
     true,
   );
   const { metaVertexId } = generateTableInputMeta(
@@ -32,11 +36,11 @@ export function UniqueConstrains() {
   return (
     <div class="mt:6">
         <TableInputField
-          data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
+          data={formStoreVertex()}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
-          txnId={layoutStore.formStore[0].txnId}
+          txnId={formStoreVertex().P.txnId}
         />
     </div>
   );

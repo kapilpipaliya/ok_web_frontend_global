@@ -2,22 +2,27 @@ import { createSignal, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function InsertButtons(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
+  const layoutStoreId = useDesignerLayoutStore();
   let insertBeforeButtonsRef: HTMLElement;
   let insertAfterButtonsRef: HTMLElement;
   let insertInsideButtonsRef: HTMLElement;
   const [showBeforeMenu, setShowBeforeMenu] = createSignal(false);
   const [showAfterMenu, setShowAfterMenu] = createSignal(false);
   const [showInsideMenu, setShowInsideMenu] = createSignal(false);
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <>
       <IconButton
@@ -37,8 +42,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              layoutStore.formStore[0].txnId,
-              graph.vertexes[layoutStore.formStore[0].formDataId!],
+              formStoreVertex().P.txnId,
+              graph.vertexes[formStoreVertex().P.formDataId!],
               fromVertex,
               props.item,
               "before",
@@ -66,8 +71,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              layoutStore.formStore[0].txnId,
-              graph.vertexes[layoutStore.formStore[0].formDataId!],
+              formStoreVertex().P.txnId,
+              graph.vertexes[formStoreVertex().P.formDataId!],
               fromVertex,
               props.item,
               "after",
@@ -95,8 +100,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              layoutStore.formStore[0].txnId,
-              graph.vertexes[layoutStore.formStore[0].formDataId!],
+              formStoreVertex().P.txnId,
+              graph.vertexes[formStoreVertex().P.formDataId!],
               fromVertex,
               props.item,
               "center",

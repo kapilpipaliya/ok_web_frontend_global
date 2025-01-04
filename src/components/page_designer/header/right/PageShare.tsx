@@ -4,15 +4,20 @@ import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import {useGraph} from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { PageLayoutObject } from "../../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function ShareSection() {
   const [graph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore() || [];
+  const layoutStoreId = useDesignerLayoutStore();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   const [error, setError] = createSignal("");
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (access() === "everyone") {
@@ -21,10 +26,10 @@ export function ShareSection() {
   });
 
   const getLink = () => {
-    if (layoutStore) {
+    if (layoutStore()) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
-      const { id, L, P } = graph.vertexes[layoutStore.formStore[0].formDataId!];
+      const { id, L, P } = graph.vertexes[formStoreVertex().P.formDataId!];
 
       if (isNegative(id)) {
         setError(`Please save the ${L[0]} first.`);
@@ -106,7 +111,6 @@ export function ShareSection() {
         <input
           class="p:10 r:0|5|5|0 w:full"
           disabled={access() === "everyone"}
-          key="email"
           onInput={(e) => setEmail(e.target.value)}
           placeholder="Enter email, for multiple emails use ';' to separate"
           type="email"

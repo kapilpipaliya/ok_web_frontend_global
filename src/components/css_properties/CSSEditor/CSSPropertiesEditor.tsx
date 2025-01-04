@@ -11,7 +11,7 @@ import type { CSSStore } from "../context/CssEditorContext";
 
 import { ZIndex } from "../../fields/ZIndex";
 import { DynamicComponent } from "../../form/DynamicComponent";
-import { useFormContext } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/FormContext";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { MultiSelectField } from "../../styled/MultiSelect";
 import { useCssEditor } from "../context/CssEditorContext";
@@ -58,7 +58,8 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
   const [state, setState] = useCssState();
   const [cssState, setCssState] = useCssEditor();
   const [showDropdown, setShowDropdown] = createSignal(false);
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   let buttonRef: HTMLInputElement;
 
   function getSelectedValues() {
@@ -74,7 +75,7 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
   };
 
   const clearStateFileSelection = (currentState: string) => {
-    const txnId = formStore?.txnId;
+    const txnId = formVertex()?.P.txnId;
     if (!txnId) {
       return;
     }
@@ -111,12 +112,12 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
 
   return (
     <>
-      <Show when={graph.vertexes[formStore?.formDataId!]?.L[0] === "Comp"}>
+      <Show when={graph.vertexes[formVertex()?.P.formDataId!]?.L[0] === "Comp"}>
         <span>Preview:</span>
         <br />
         <DynamicComponent
-          componentName={graph.vertexes[formStore!.formDataId]?.P.key}
-          data={graph.vertexes[formStore!.formDataId]}
+          componentName={graph.vertexes[formVertex()!.P.formDataId]?.P.key}
+          data={graph.vertexes[formVertex()!.P.formDataId]}
           isNoPermissionCheck
           meta={
             { P: { class: cssEditorProps!.data.P.value } } as unknown as Vertex

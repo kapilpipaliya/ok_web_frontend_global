@@ -14,7 +14,7 @@ import { Dynamic } from "solid-js/web";
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -24,7 +24,7 @@ import { createLongPress } from "~/lib/hooks/createLongPress";
 import type { FunctionArgumentType } from "../form/FieldSchemaType";
 import type { GenericComponentProps } from "./FieldType";
 
-import { useFormContext } from "../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../form/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { useToast } from "../styled/Toast";
@@ -54,7 +54,8 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const data = () => parentRenderContext()?.context.data!;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
   const [internalRef, setInternalRef] = createForwardRef(props);
@@ -97,31 +98,31 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   });
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, meta(), graph.vertexes[formStore!.formDataId!])) {
+    if (isAnyFieldInvalid(graph, setGraph, meta(), graph.vertexes[formVertex()!.P.formDataId!])) {
       return;
     }
-    const data = commitTxn(formStore!.txnId, graph);
+    const data = commitTxn(formVertex()!.P.txnId, graph);
     await showLoadingToast({
       loadMessage: "Submitting Data...",
       onSuccess: (_data) => {
         // setTimeout(() => navigate(-1), 0);
       },
-      promise: submitDataCall(data, graph, setGraph, formStore!.txnId),
+      promise: submitDataCall(data, graph, setGraph, formVertex()!.P.txnId),
       successMessage: "Data submitted successfully",
     });
   };
 
   const onCancel = () => {
-    revertTransaction(formStore!.txnId, graph, setGraph);
+    revertTransaction(formVertex()!.P.txnId, graph, setGraph);
     setTimeout(() => navigate(-1));
   };
 
   const onReset = () => {
-    const initialIndex = getNamedIndex(formStore!.txnId, "initial", graph);
+    const initialIndex = getNamedIndex(formVertex()!.P.txnId, "initial", graph);
     if (initialIndex === undefined) {
       return;
     }
-    revertTransactionUpToIndex(formStore!.txnId, initialIndex - 1, graph, setGraph);
+    revertTransactionUpToIndex(formVertex()!.P.txnId, initialIndex - 1, graph, setGraph);
   };
   const onClick = () => {
     runWithOwner(owner, () => {

@@ -29,6 +29,7 @@ export function addNewVertex(
   vertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ): {
   error: string;
   txnDetailIndex?: number;
@@ -74,7 +75,9 @@ export function addNewVertex(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({ addNewVertex: { txnId, vertex } }));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({ addNewVertex: { txnId, vertex } }));
+    }
     return {
       error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -90,14 +93,15 @@ export function replaceVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
   // clonning will reduce performance, so we can use this flag to disable it.
-  cloneProperties: boolean = true,
+  options?: { cloneProperties?: boolean; skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId = vertexOldIdToNewIdMap.get(vertexId) || vertexId;
     if (!graph.vertexes[actualVertexId]) {
       return { error: "Vertex ID is not valid" };
     }
-    setGraph("vertexes", actualVertexId, "P", reconcile(cloneProperties ? klona(properties) : properties));
+    const shouldClone = options?.cloneProperties ?? true;
+    setGraph("vertexes", actualVertexId, "P", reconcile(shouldClone ? klona(properties) : properties));
     if (txnId) {
       const originalProperties = klona(graph.vertexes[actualVertexId].P);
       const data = updateVertex(klona(graph.vertexes[actualVertexId]));
@@ -133,7 +137,9 @@ export function replaceVertexProperties(
         setGraph,
       );
     }
-    channel.postMessage(JSON.stringify({ replaceVertexProperties: { txnId, vertexId, properties } }));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({ replaceVertexProperties: { txnId, vertexId, properties } }));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -142,12 +148,13 @@ export function replaceVertexProperties(
 }
 
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
-export function mergeVertexProperties(
+export function mergeVertexProperties<T extends { [key: string]: any }>(
   txnId: number,
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  properties: { [key: string]: any },
+  properties: Partial<T>,
+  options?: { skipPostMessage?: boolean },
   _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
@@ -200,7 +207,9 @@ export function mergeVertexProperties(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({ mergeVertexProperties: { txnId, vertexId, properties } }));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({ mergeVertexProperties: { txnId, vertexId, properties } }));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -214,6 +223,7 @@ export function deleteVertex(
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -317,7 +327,9 @@ export function deleteVertex(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({ deleteVertex: { txnId, vertexId } }));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({ deleteVertex: { txnId, vertexId } }));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -349,6 +361,7 @@ export function updateVertexId(
   newVertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ) {
   return untrack(() => {
     if (!graph.vertexes[oldVertexId]) {
@@ -383,7 +396,9 @@ export function updateVertexId(
         setGraph("edges", edgeIds, "E", newVertexId);
       },
     );
-    channel.postMessage(JSON.stringify({ updateVertexId: { oldVertexId, newVertexId } }));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({ updateVertexId: { oldVertexId, newVertexId } }));
+    }
     return { error: "" };
   });
 }

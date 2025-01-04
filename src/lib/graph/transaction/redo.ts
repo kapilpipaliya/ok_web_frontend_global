@@ -54,5 +54,5 @@ export function redo(
       }
     });
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, false);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
 }

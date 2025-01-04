@@ -4,13 +4,20 @@ import { Show } from "solid-js";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { IconButton } from "~/components/styled/IconButton";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftToggleButton } from "./LeftToggleButton";
 
 export const LeftIcons = () => {
   const navigate = useNavigate();
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   
   const handleBackClick = () => {
     if (window.history.length > 1) {
@@ -33,7 +40,7 @@ export const LeftIcons = () => {
       <a href="/admin">
         <img alt="logo" class="h:30px" src={logo} />
       </a>
-      <Show when={!layoutStore.isLeftOpen || layoutStore.isSmallScreen}>
+      <Show when={!layoutStore().isLeftOpen || layoutStore().isSmallScreen}>
         <LeftToggleButton />
       </Show>
     </div>

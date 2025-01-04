@@ -6,15 +6,13 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
-  const [_layoutStore] = useDesignerLayoutStore();
 
   const vertexIds = createVertexIds();
 

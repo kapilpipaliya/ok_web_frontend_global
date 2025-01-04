@@ -7,22 +7,27 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
 import { SimpleWithDismissButton } from "../../../styled/SimpleModal";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function RulesList() {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [selectedRule, setSelectedRule] = createSignal<null | Vertex>(null);
   const [selectedRuleToDelete, setSelectedRuleToDelete] =
     createSignal<null | Vertex>(null);
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   const rules = createMemo(() => {
-    if (layoutStore.formStore[0]?.formDataId) {
+    if (formStoreVertex().P.formDataId) {
       return (
         evalExpression("->Rule", {
           graph,
           setGraph,
-          vertexes: [graph.vertexes[layoutStore.formStore[0]?.formDataId!]],
+          vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]],
         }) || []
       ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
     }
@@ -44,14 +49,14 @@ export function RulesList() {
         incomingIds.push(graph.edges[edge].S);
       }
     }
-    setLayoutStore("multiHighlight", incomingIds);
+    graph.vertexes[layoutStoreId].P.multiHighlight = incomingIds;
   };
 
   const ruleUsageCount = (rule: Vertex) => {
     const count: Id[] = [];
     for (const key in rule.IN) {
       for (const edge of rule.IN[key]) {
-        if (graph.edges[edge].S !== layoutStore.formStore[0].formDataId) {
+        if (graph.edges[edge].S !== formStoreVertex().P.formDataId) {
           count.push(graph.edges[edge].S);
         }
       }
@@ -60,8 +65,9 @@ export function RulesList() {
   };
 
   const unhighlightRule = () => {
-    setLayoutStore("multiHighlight", []);
+    graph.vertexes[layoutStoreId].P.multiHighlight = [];
   };
+
   const removeAllConditions = (rule: Vertex) => {
     const conditions =
       evalExpression("->$0Cond", {
@@ -75,15 +81,17 @@ export function RulesList() {
         false,
         graph,
         setGraph,
-        layoutStore.formStore[0].txnId,
+        formStoreVertex().P.txnId,
       );
     }
   };
+
   const deleteRule = (rule: Vertex) => {
     removeAllConditions(rule);
-    deleteRow(rule, false, graph, setGraph, layoutStore.formStore[0].txnId);
+    deleteRow(rule, false, graph, setGraph, formStoreVertex().P.txnId);
     setSelectedRuleToDelete(null);
   };
+
   const DeleteConfirmDialog = () => {
     const ruleUsage = createMemo(() => ruleUsageCount(selectedRuleToDelete()!));
     return (
@@ -109,6 +117,7 @@ export function RulesList() {
       </ZIndex>
     );
   };
+
   return (
     <>
       <For each={rules()}>

@@ -1,25 +1,29 @@
 import type { Accessor } from "solid-js";
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { getIndicatorPosition } from "~/components/page_designer/functions/getIndicatorPosition";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,
-  layoutStore: Store<PageLayoutObject>,
-  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutStoreId: string,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
   collapsedKeys: Accessor<Id[]> | boolean,
-  children: () => Vertex[],
+  children: Accessor<Vertex[]>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
 ) {
-  setLayoutStore({ activeItem: layoutVertex.id, position: null });
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem: layoutVertex.id, position: null });
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
@@ -28,7 +32,7 @@ export function handleDragOverAndSetDropPosition(
     | "right"
     | null;
   if (!position) {
-    setLayoutStore({ activeItem: null, position: null });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem: null, position: null });
     return;
   }
 
@@ -57,7 +61,7 @@ export function handleDragOverAndSetDropPosition(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = layoutStore.draggedVertices[0];
+  const fromVertex = layoutStore().draggedVertices[0];
   const toVertexId = activeItem;
   if (
     !validateDragOver(
@@ -71,5 +75,5 @@ export function handleDragOverAndSetDropPosition(
   ) {
     return;
   }
-  setLayoutStore({ activeItem, position });
+  mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem, position });
 }

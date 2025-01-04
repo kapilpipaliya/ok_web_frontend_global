@@ -62,12 +62,15 @@ interface FormGroupPropertiesProps {
 
 export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!];
 
   const vertexIds = createVertexIds();
   const metaTxnId = graph.newTxnId();
   createVertices(vertexIds, metaTxnId, graph, setGraph);
-  const selectedComp = () => graph.vertexes[layoutStore.selectedComponent];
+  const selectedComp = () => graph.vertexes[layoutStore().selectedComponent];
   const propAttributes = createMemo(() =>
     clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
@@ -87,7 +90,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For
-        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore)}
+        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore())}
       >
         {(meta) => (
           <PropertyField
@@ -299,7 +302,7 @@ function moveClassToLast(
     (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
   );
   const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
-  const isForm = graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form";
+  const isForm = graph.vertexes[layoutStore.formId!]?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(

@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, For, type JSX, Show } from "solid-js";
 
-import { FormContext } from "~/components/form/FormContext";
+import { FormContext, FormStoreObject } from "~/components/form/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
-import { useDesignerLayoutStore } from "../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject } from "../context/LayoutContext";
 import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
@@ -19,15 +19,19 @@ import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function SettingTabs() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];
-    const formType = graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0];
+    const formType = graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0];
     if (formType === "Form") {
       baseTabs.push("Keys");
     }
@@ -43,8 +47,8 @@ export function SettingTabs() {
         {(data) => (
           <TabButton
             data={data}
-            isSelected={layoutStore.selectedTab === data}
-            onClick={() => setLayoutStore("selectedTab", data)}
+            isSelected={layoutStore().selectedTab === data}
+            onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { selectedTab: data })}
           />
         )}
       </For>
@@ -57,7 +61,7 @@ export function SettingTabs() {
         class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
         icon={"iconamoon:close-duotone"}
-        onClick={() => setLayoutStore("isRightOpen", false)}
+        onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: false })}
         width={30}
       />
       <TabsContainer>
@@ -71,25 +75,25 @@ export function SettingTabs() {
       <Tabs />
       <div
         class="p:5"
-        classList={{ "display:none": layoutStore.selectedTab !== "settings" }}
+        classList={{ "display:none": layoutStore().selectedTab !== "settings" }}
       >
         <FormConfig />
       </div>
 
-      <Show when={layoutStore.formStore[0]}>
-        <FormContext.Provider value={layoutStore.formStore}>
-          <Show when={layoutStore.selectedTab === "status"}>
+      <Show when={formStoreVertex()}>
+        <FormContext.Provider value={formStoreVertex().id}>
+          <Show when={layoutStore().selectedTab === "status"}>
             <FormStatus />
           </Show>
           {/* Keep Display:none to keep expanded state */}
           <div
-            classList={{ "display:none": layoutStore.selectedTab !== "layers" }}
+            classList={{ "display:none": layoutStore().selectedTab !== "layers" }}
           >
             <LayoutTree />
           </div>
 
-          <Show when={graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form"}>
-            <Show when={layoutStore.selectedTab === "Keys"}>
+          <Show when={graph.vertexes[formStoreVertex().P.formDataId!]?.L[0] === "Form"}>
+            <Show when={layoutStore().selectedTab === "Keys"}>
               {/* <PrimaryKey /> */}
               <NameKey />
               <Divider class="mt:10" />
@@ -100,13 +104,13 @@ export function SettingTabs() {
               <UniqueConstrains />
             </Show>
           </Show>
-          <Show when={layoutStore.selectedTab === "Permission"}>
+          <Show when={layoutStore().selectedTab === "Permission"}>
             <Permission />
           </Show>
-          <Show when={layoutStore.selectedTab === "Rules"}>
+          <Show when={layoutStore().selectedTab === "Rules"}>
             <Rules />
           </Show>
-          <Show when={layoutStore.selectedTab === "SEO"}>
+          <Show when={layoutStore().selectedTab === "SEO"}>
             <SEOFormGroupProperties />
           </Show>
         </FormContext.Provider>

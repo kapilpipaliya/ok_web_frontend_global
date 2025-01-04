@@ -8,6 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";
@@ -22,9 +23,13 @@ export function HighlightSetValueContent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
-  const selectedComponentName = () => graph.vertexes[layoutStore.selectedComponent];
-  const selectedAttr = () => graph.vertexes[layoutStore.selectedId];
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const selectedComponentName = () => graph.vertexes[layoutStore().selectedComponent];
+  const selectedAttr = () => graph.vertexes[layoutStore().selectedId];
   const componentExample = createMemo(
     () =>
       evalExpression("->$0CompExample", {
@@ -152,4 +157,3 @@ export function HighlightSetValueContent(
     </div>
   );
 }
-

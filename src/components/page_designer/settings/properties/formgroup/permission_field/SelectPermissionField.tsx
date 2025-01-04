@@ -1,5 +1,6 @@
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { Label } from "../Label";
 import { SelectRelation } from "../rule_field/SelectRelation";
@@ -12,12 +13,15 @@ interface SelectPermissionFieldProps {
 }
 
 export function SelectPermissionField(props: SelectPermissionFieldProps) {
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
 
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formStore[0].formDataId}'->$0Perm`,
+      collection: () => `id:'${formStoreVertex().P.formDataId}'->$0Perm`,
       componentName: "MultiSelect",
       displayName: props.meta.P.displayName,
       key: props.meta.P.key,

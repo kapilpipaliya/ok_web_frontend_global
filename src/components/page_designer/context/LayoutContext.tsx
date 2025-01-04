@@ -11,7 +11,7 @@ export function getInitialDesignerLayoutStore() {
     id: uuidv4(),
     activeItem: null as Id | null | number,
     draggedVertices: [] as Vertex[],
-    formStore: [] as unknown as ReturnType<typeof createStore<FormStoreObject>>,
+    formId: null as Id | null,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     isLeftOpen: true,
@@ -34,8 +34,8 @@ export function getInitialDesignerLayoutStore() {
 }
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
-type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>;
-export const DesignerLayoutStoreContext = createContext<PageLayoutStore>();
+
+export const DesignerLayoutStoreContext = createContext<Id>();
 
 export function useDesignerLayoutStore() {
   return useContext(DesignerLayoutStoreContext)!;

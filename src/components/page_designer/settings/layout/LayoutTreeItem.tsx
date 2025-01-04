@@ -8,8 +8,10 @@ import { resetDragDropState } from "~/components/page_designer/event_handler/res
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
 import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
@@ -24,11 +26,14 @@ export function LayoutTreeItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
+  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
   const { showErrorToast } = useToast();
-  const activeItemChanged = createSelector(() => layoutStore.activeItem);
+  const activeItemChanged = createSelector(() => layoutStore().activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
   const children = createMemo(() =>
@@ -41,15 +46,14 @@ export function LayoutTreeItem(
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
-      layoutStore,
-      setLayoutStore,
+      layoutStoreId,
       props.metaVertex,
       false,
       props.collapsedKeys,
       children,
       graph,
       setGraph,
-      graph.vertexes[layoutStore.formStore[0]?.formDataId!],
+      graph.vertexes[formStoreVertex().P.formDataId!],
       (position) => {
         if (position === "center" && Date.now() - startTime > 1000) {
           if (props.collapsedKeys().includes(props.metaVertex.id)) {
@@ -61,45 +65,52 @@ export function LayoutTreeItem(
   };
 
   const handleDragLeave = () => {
-    setLayoutStore({ activeItem: null, position: null });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      activeItem: null,
+      position: null
+    });
   };
 
   const handleDropEvent = async (e: DragEvent) => {
     await handleDrop(
       e,
-      layoutStore,
-      setLayoutStore,
+      layoutStoreId,
       graph,
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(setLayoutStore);
+    resetDragDropState(layoutStoreId, graph, setGraph);
   };
 
   const handleClick = () => {
-    onLayoutItemClick(setLayoutStore, props.metaVertex.id, graph, setGraph);
+    onLayoutItemClick(layoutStoreId, props.metaVertex.id, graph, setGraph);
   };
 
   const handleMouseOver = (e: MouseEvent) => {
     e.stopPropagation();
-    setLayoutStore("hoverId", props.metaVertex.id);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      hoverId: props.metaVertex.id
+    });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    setLayoutStore("hoverId", -1);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      hoverId: -1
+    });
   };
+
   const isAfter = createMemo(
-    () => isActiveTargetItem() && layoutStore.position === "after",
+    () => isActiveTargetItem() && layoutStore().position === "after",
   );
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
     if (isActiveTargetItem()) {
-      if (layoutStore.position !== "after") {
+      if (layoutStore().position !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
-          layoutStore.position,
+          layoutStore().position,
           "green-60",
         );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
@@ -132,7 +143,7 @@ export function LayoutTreeItem(
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
         onDragStart={(e) =>
-          handleDragStart(e, setLayoutStore, props.metaVertex)
+          handleDragStart(e, graph, setGraph, layoutStoreId, props.metaVertex)
         }
         onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}
@@ -148,7 +159,7 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <Show
-          when={layoutStore.formStore[0].formDataId !== props.metaVertex.id}
+          when={formStoreVertex().P.formDataId !== props.metaVertex.id}
         >
           <AttrConfigIcons metaVertex={props.metaVertex} />
         </Show>
@@ -163,7 +174,7 @@ export function LayoutTreeItem(
         <ul class="pl:8 pt:5">
           <For each={children()}>
             {(vertex) => (
-              <Show when={layoutStore.formStore[0]}>
+              <Show when={formStoreVertex()}>
                 <LayoutTreeItem
                   collapsedKeys={props.collapsedKeys}
                   metaVertex={vertex}

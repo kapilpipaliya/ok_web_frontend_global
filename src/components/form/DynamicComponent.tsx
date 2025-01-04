@@ -48,7 +48,7 @@ import { getComponentLabel } from "../page_designer/functions/getComponentLabel"
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useToast } from "../styled/Toast";
-import { useFormContext } from "./FormContext";
+import { FormStoreObject, useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 
 export function getText(
@@ -91,7 +91,8 @@ export function DynamicComponent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [formStore, setFormStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const { showErrorToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
@@ -168,7 +169,7 @@ export function DynamicComponent(
   const isNoPermissionCheck = () =>
     !previewStore ||
     props.isNoPermissionCheck ||
-    graph.vertexes[formStore?.formMetaId!]?.P.isNoPermissionCheck ||
+    graph.vertexes[formVertex()?.P.formMetaId!]?.P.isNoPermissionCheck ||
     previewStore.isDesignMode ||
     previewStore.isNoPermissionCheck;
   const hasPermission = () =>
@@ -202,7 +203,7 @@ export function DynamicComponent(
       evalExpression,
       // formInitialValues,
       // formSchema,
-      formStore,
+      formId,
       get hasDeletePermission() {
         return hasDeletePermission();
       },
@@ -241,7 +242,6 @@ export function DynamicComponent(
       },
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
-      setFormStore,
       zIndex,
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
@@ -324,11 +324,11 @@ export function DynamicComponent(
       if (property === "hidden" && previewStore.isDesignMode) {
         continue;
       }
-      if (formStore?.formDataId && rule) {
+      if (formVertex()?.P.formDataId && rule) {
         try {
           values[property] = evaluateRule(
             rule,
-            graph.vertexes[formStore.formDataId!],
+            graph.vertexes[formVertex()?.P.formDataId!],
             graph,
             setGraph,
           );

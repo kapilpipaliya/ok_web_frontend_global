@@ -8,14 +8,12 @@ export type Id = string;
 
 export const IdAttr = "key";
 
-export interface Vertex {
+export interface Vertex<P extends object = { [key: string]: any }> {
   id: Id;
   IN: { [key: string]: Id[] };
   L: string[];
   OUT: { [key: string]: Id[] };
-  P: {
-    [key: string]: any;
-  };
+  P: P;
 }
 
 export interface Edge {

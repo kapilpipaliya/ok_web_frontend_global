@@ -1,14 +1,15 @@
 import { useNavigate } from "@solidjs/router";
 
-import { useFormContext } from "~/components/form/FormContext";
-import { useGraph } from "~/lib/graph/graph";
+import { useFormContext, type FormStoreObject } from "~/components/form/FormContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 export function formCancel(closePopUp?: () => void) {
   const [graph, setGraph] = useGraph();
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const navigate = useNavigate();
 
   const navigateToParentRoute = () => {
@@ -16,8 +17,9 @@ export function formCancel(closePopUp?: () => void) {
   };
 
   return () => {
-    revertTransaction(formStore!.txnId, graph, setGraph);
-    deleteTxnId(formStore!.txnId, graph, setGraph);
+    if (!formVertex()) return;
+    revertTransaction(formVertex()?.P.txnId || 0, graph, setGraph);
+    deleteTxnId(formVertex()?.P.txnId || 0, graph, setGraph);
     if (closePopUp) {
       closePopUp();
     } else {

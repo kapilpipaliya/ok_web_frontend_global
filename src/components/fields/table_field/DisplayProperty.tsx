@@ -25,7 +25,7 @@ import { getColumnProps } from "~/lib/graph/mutate/form/addNewRow";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useFormContext } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 
@@ -57,9 +57,9 @@ export function DisplayProperty(
     txnId: number;
   }>,
 ) {
-  // if there is no parent FormContext, it should still work.
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
   const [graph, setGraph] = useGraph();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const metaVertex = createMemo(() => props.getMetaVertex(props.column.id));
   const outerOwner = getOwner();
 
@@ -78,9 +78,9 @@ export function DisplayProperty(
         async (v) => {
           if (metaVertex().P.meta) {
             let metaData;
-            if (formStore?.txnId) {
-              const mutationData = formStore.txnId
-                ? commitTxn(formStore.txnId, graph)
+            if (formVertex()?.P.txnId) {
+              const mutationData = formVertex()?.P.txnId
+                ? commitTxn(formVertex()!.P.txnId, graph)
                 : undefined;
               metaData = await getPropsFromMetaExpressionMGCall(
                 metaVertex(),
@@ -131,9 +131,9 @@ export function DisplayProperty(
             ).vertexes,
           async (vertexes) => {
             let componentName = "";
-            if (formStore?.txnId) {
-              const mutationData = formStore.txnId
-                ? commitTxn(formStore.txnId, graph)
+            if (formVertex()?.P.txnId) {
+              const mutationData = formVertex()?.P.txnId
+                ? commitTxn(formVertex()!.P.txnId, graph)
                 : undefined;
               const res = await getSelectionOptionsMGCall(
                 [props.joinVertex],

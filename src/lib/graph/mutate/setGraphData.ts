@@ -14,13 +14,21 @@ import type {
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { channel } from "~/components/page_designer/layout/channel";
+
+interface UpdateOptions {
+  skipExisting?: boolean;
+  skipPostMessage?: boolean;
+}
+
 export function updateVertex(
   vertexId: string,
   vertexData: Vertex,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  skipExisting: boolean,
+  options: UpdateOptions = {},
 ) {
+  const { skipExisting = false, skipPostMessage = false } = options;
+
   if (skipExisting && graph.vertexes[vertexId]) {
     return;
   }
@@ -41,7 +49,9 @@ export function updateVertex(
         : [vertexData.id];
     });
   }
-  channel.postMessage(JSON.stringify({updateVertex: {vertexId, vertexData, skipExisting}}));
+  if (!skipPostMessage) {
+    channel.postMessage(JSON.stringify({ updateVertex: { vertexId, vertexData, options } }));
+  }
 }
 
 export function updateEdge(
@@ -49,8 +59,10 @@ export function updateEdge(
   edge: Edge,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  skipExisting: boolean,
+  options: UpdateOptions = {},
 ) {
+  const { skipExisting = false, skipPostMessage = false } = options;
+
   if (skipExisting && graph.edges[edgeId]) {
     return;
   }
@@ -72,7 +84,9 @@ export function updateEdge(
         : [edge.id],
     );
   }
-  channel.postMessage(JSON.stringify({updateEdge: {edgeId, edge, skipExisting}}));
+  if (!skipPostMessage) {
+    channel.postMessage(JSON.stringify({ updateEdge: { edgeId, edge, options } }));
+  }
 }
 
 function handleDeletions(
@@ -80,13 +94,14 @@ function handleDeletions(
   deletedVertexes: string[] | undefined,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  options: UpdateOptions = {},
 ) {
   for (const edgeId of deletedEdges || []) {
-    deleteEdge(0, edgeId, graph, setGraph);
+    deleteEdge(0, edgeId, graph, setGraph, options);
   }
 
   for (const vertexId of deletedVertexes || []) {
-    deleteVertex(0, vertexId, graph, setGraph);
+    deleteVertex(0, vertexId, graph, setGraph, options);
   }
 }
 
@@ -101,7 +116,7 @@ export function setGraphData(
     vertexes: VertexMap;
     vertexLabelIdMap?: { [key: string]: Id[] };
   },
-  skipExisting = false,
+  options: UpdateOptions = {},
 ) {
   batch(() => {
     for (const vertexId in args.vertexes) {
@@ -110,14 +125,14 @@ export function setGraphData(
         args.vertexes[vertexId],
         graph,
         setGraph,
-        skipExisting,
+        options,
       );
     }
 
     for (const edgeId in args.edges) {
-      updateEdge(edgeId, args.edges[edgeId], graph, setGraph, skipExisting);
+      updateEdge(edgeId, args.edges[edgeId], graph, setGraph, options);
     }
 
-    handleDeletions(args.deleted_edges, args.deleted_vertexes, graph, setGraph);
+    handleDeletions(args.deleted_edges, args.deleted_vertexes, graph, setGraph, options);
   });
 }

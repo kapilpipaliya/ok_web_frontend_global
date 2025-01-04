@@ -1,7 +1,8 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { Label } from "./Label";
 
@@ -13,8 +14,12 @@ export function SelectPageField(
     txnId: number;
   }>,
 ) {
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     return (
@@ -53,7 +58,7 @@ export function SelectPageField(
         isRealTime={false}
         meta={meta}
         noLabel
-        txnId={layoutStore.formStore[0].txnId}
+        txnId={formStoreVertex().P.txnId}
       />
     );
   };

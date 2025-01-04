@@ -1,23 +1,30 @@
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph } from "~/lib/graph/graph";
+import type { PageLayoutObject } from "../context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { CloseIconTopRight } from "./CloseIconTopRight";
 import { FormElementTabs } from "./FormElementTabs";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function FormElementsWrapper() {
-  const [graph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+
   return (
     <aside
       class={"rel"}
       classList={{
-        hidden: !layoutStore.isLeftOpen,
+        hidden: !layoutStore().isLeftOpen,
       }}
     >
       <ZIndex>
         <CloseIconTopRight
-          onClick={() => setLayoutStore("isLeftOpen", false)}
+          onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isLeftOpen: false })}
         />
       </ZIndex>
       <div

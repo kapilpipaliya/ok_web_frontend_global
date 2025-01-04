@@ -10,12 +10,15 @@ import { getTableData } from "~/components/grid/functions/getTableData";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
+  PageLayoutObject,
 } from "~/components/page_designer/context/LayoutContext";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
@@ -23,17 +26,25 @@ import { clientOnly } from "@solidjs/start";
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
-  const pageDesignerStore = createStore(getInitialDesignerLayoutStore());
+  const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = pageDesignerStore;
+
+  const vertex = newVertex(initialStore.id, ["PageDesigner"], initialStore);
+  addNewVertex(0, vertex, graph, setGraph);
 
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;
-    setLayoutStore({
-      isLeftOpen: !isSmallScreen,
-      isRightOpen: !isSmallScreen,
-      isSmallScreen,
-    });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      initialStore.id,
+      graph,
+      setGraph,
+      {
+        isLeftOpen: !isSmallScreen,
+        isRightOpen: !isSmallScreen,
+        isSmallScreen,
+      }
+    );
   };
 
   const debouncedHandleResize = debounce(handleResize, 200);
@@ -60,20 +71,23 @@ export function PageDesignerWrapper(): JSX.Element {
       false,
     );
     if (isValidResponse(data)) {
-      setGraphData(graph, setGraph, data.graph);
+      setGraphData(graph, setGraph, data.graph!);
     } else {
       console.error("error", getErrorMessage(data));
     }
   };
 
+  const layoutStore = () => graph.vertexes[initialStore.id].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <ZIndex>
-      <DesignerLayoutStoreContext.Provider value={pageDesignerStore}>
-        <Title>{getPageTitle(graph.vertexes[layoutStore.formStore[0]?.formDataId!])}</Title>
+      <DesignerLayoutStoreContext.Provider value={initialStore.id}>
+        <Title>{getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}</Title>
         <HeaderRow />
         <div
           classList={{
-            "display:none": layoutStore.selectedSection === "setting",
+            "display:none": layoutStore().selectedSection === "setting",
           }}
         >
           <RenderMainContent />

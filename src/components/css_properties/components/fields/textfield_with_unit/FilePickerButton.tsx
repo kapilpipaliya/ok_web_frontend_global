@@ -14,6 +14,7 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import type { FormStoreObject } from "~/components/form/FormContext";
 
 import { FilePickerModal } from "./FilePickerModal";
 
@@ -32,7 +33,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   const meta = () =>
     parentRenderContext()?.context.meta as unknown as TextFieldOptionsField;
   const cssEditorProps = useCssEditorProps();
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const { showErrorToast } = useToast();
   const [state] = useCssState();
 
@@ -54,7 +56,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       showErrorToast("Please select a file");
       return;
     }
-    const txnId = formStore?.txnId;
+    const txnId = formVertex()?.P?.txnId;
     if (!txnId) {
       showErrorToast("unable to select file");
       return;

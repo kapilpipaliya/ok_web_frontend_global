@@ -11,12 +11,16 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { Label } from "../properties/formgroup/Label";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function SEOFormGroupProperties() {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const vertexIds = createVertexIds();
 
@@ -48,11 +52,11 @@ export function SEOFormGroupProperties() {
                 <Switch>
                   <Match when={true}>
                     <DynamicComponent
-                      data={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
+                      data={graph.vertexes[formStoreVertex().P.formDataId!]}
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={metaVertex}
-                      txnId={layoutStore.formStore[0].txnId}
+                      txnId={formStoreVertex().P.txnId}
                     />
                   </Match>
                 </Switch>

@@ -27,6 +27,7 @@ import { usePageRenderContext } from "../page_attr_render/context/PageRenderCont
 import { isStaticOptions } from "./utils/isStaticOptions";
 import { selectedValue } from "./utils/selectedValue";
 import { setSelectValueHelper } from "./utils/setSelectValueHelper";
+import type { FormStoreObject } from "~/components/form/FormContext";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
@@ -42,7 +43,8 @@ export function SelectField(
   >,
 ) {
   const [graph, setGraph] = useGraph();
-  const formStore = useFormContext();
+  const formId = useFormContext();
+  const formVertex = graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => props.meta ?? parentRenderContext()?.context.meta!;
@@ -188,7 +190,7 @@ export function SelectField(
         }
         onChangeHandler(
           txnId,
-          graph.vertexes[formStore[0]!.formDataId!],
+          graph.vertexes[formVertex.P.formDataId!],
           data(),
           meta(),
           graph,

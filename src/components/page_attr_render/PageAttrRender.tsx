@@ -7,7 +7,7 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useFormContext } from "../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../form/FormContext";
 import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
@@ -22,7 +22,8 @@ export function PageAttrRender(
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [graph, setGraph] = useGraph();
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const [previewStore] = usePreviewContext();
 
   const childrenAttrs = createMemo(() => {
@@ -63,7 +64,7 @@ export function PageAttrRender(
               data={props.data}
               // onChange={props.onChange}
               meta={item}
-              txnId={formStore?.txnId}
+              txnId={formVertex()?.P.txnId}
             />
           );
         };

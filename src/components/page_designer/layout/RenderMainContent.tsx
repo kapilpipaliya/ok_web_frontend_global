@@ -7,17 +7,22 @@ import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { PageLayoutObject } from "../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
-import { channel } from './channel';
+import { channel, handleChannelMessage } from './channel';
+import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 
 function FormElements() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   return (
     <Show
       fallback={
@@ -25,10 +30,10 @@ function FormElements() {
           <Drawer
             customButton={() => false}
             drawerClass={"padding:10px"}
-            open={() => layoutStore.isLeftOpen}
+            open={() => layoutStore().isLeftOpen}
             setIsOpen={
               ((v: boolean) =>
-                setLayoutStore("isLeftOpen", v)) as Setter<boolean>
+                mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isLeftOpen: v })) as Setter<boolean>
             }
             width="75%"
           >
@@ -36,9 +41,9 @@ function FormElements() {
           </Drawer>
         </ZIndex>
       }
-      when={!layoutStore.isSmallScreen}
+      when={!layoutStore().isSmallScreen}
     >
-      <Show when={layoutStore.isLeftOpen}>
+      <Show when={layoutStore().isLeftOpen}>
         <FormElementsWrapper />
       </Show>
     </Show>
@@ -46,32 +51,35 @@ function FormElements() {
 }
 function PageViewComponent() {
   const [graph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const IFrame = () => {
-    const [graph] = useGraph();
-    
+    const [graph, setGraph] = useGraph();
+
     const onLoad = () => {
       setTimeout(() => {
-        channel.postMessage(JSON.stringify({graph, layoutStore}));
+        channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph);
+        channel.postMessage(JSON.stringify({graph}));
       }, 1000);
     };
     
     {/* TODO: use unique id for each page */ }
     return <iframe
-      src={`${window.location.origin}/page_design_preview?id=${layoutStore.formStore[0]?.formDataId}`}
+      src={`${window.location.origin}/page_design_preview?id=${layoutStoreId}`}
       style={{ width: "100%", height: "100%", border: "none" }}
       onLoad={onLoad}
     />
   }
   return (
-    <Show when={layoutStore.formStore[0]?.id}>
-      <ResizableContainer view={layoutStore.view}>
+    <Show when={formStoreVertex()?.P.id}>
+      <ResizableContainer view={layoutStore().view}>
         <IFrame />
         {/* <PageView
           isDesignMode={true}
           isNoPermissionCheck={true}
-          metaVertex={graph.vertexes[layoutStore.formStore[0]?.formDataId!]}
+          metaVertex={graph.vertexes[formStoreVertex().P.formDataId!]}
         /> */}
       </ResizableContainer>
     </Show>
@@ -79,7 +87,9 @@ function PageViewComponent() {
 }
 
 function Settings() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   return (
     <Show
       fallback={
@@ -87,10 +97,10 @@ function Settings() {
           <Drawer
             customButton={() => false}
             drawerClass={"padding:10px"}
-            open={() => layoutStore.isRightOpen}
+            open={() => layoutStore().isRightOpen}
             setIsOpen={
               ((isOpen: boolean) =>
-                setLayoutStore("isRightOpen", isOpen)) as Setter<boolean>
+                mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: isOpen })) as Setter<boolean>
             }
             width="75%"
           >
@@ -98,7 +108,7 @@ function Settings() {
           </Drawer>
         </ZIndex>
       }
-      when={!layoutStore.isSmallScreen}
+      when={!layoutStore().isSmallScreen}
     >
       <SettingsWrapper />
     </Show>
@@ -106,17 +116,19 @@ function Settings() {
 }
 
 function PropertiesContent() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   return (
     <Show
       when={
-        layoutStore.formStore[0] &&
-        layoutStore.selectedComponent !== -1 &&
-        graph.vertexes[layoutStore.selectedId]
+        formStoreVertex().P &&
+        layoutStore().selectedComponent !== -1 &&
+        graph.vertexes[layoutStore().selectedId]
       }
     >
-      <FormContext.Provider value={layoutStore.formStore}>
+      <FormContext.Provider value={layoutStore().formId!}>
         <PropertiesWrapper />
       </FormContext.Provider>
     </Show>
@@ -124,14 +136,16 @@ function PropertiesContent() {
 }
 
 function DeleteConfirmation() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   return (
     <Show
       when={
-        Object.keys(layoutStore.usedAttrsInRules).length > 0 ||
-        layoutStore.usedAttrsInUniqueConstraints.length > 0 ||
-        layoutStore.usedAttrsInNameKeys.length > 0 ||
-        layoutStore.shouldContainAtLeastOneForm
+        Object.keys(layoutStore().usedAttrsInRules).length > 0 ||
+        layoutStore().usedAttrsInUniqueConstraints.length > 0 ||
+        layoutStore().usedAttrsInNameKeys.length > 0 ||
+        layoutStore().shouldContainAtLeastOneForm
       }
     >
       <ZIndex>
@@ -147,11 +161,12 @@ export function RenderMainContent() {
 export default RenderMainContent
 
 export function ResizableAltKey() {
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const [sizes, setSizes] = makePersisted(createSignal<number[]>([]), {
     name: 'resizable-sizes',
   })
-  const [graph] = useGraph();
   return (
     <div class="size-full p-4">
       <Resizable class="size-full" sizes={sizes()} onSizesChange={setSizes}>
@@ -193,9 +208,9 @@ export function ResizableAltKey() {
               </div>
             }
             when={
-              layoutStore.selectedId !== -1 &&
-              graph.vertexes[layoutStore.selectedId] &&
-              graph.vertexes[layoutStore.selectedId].L?.[0]?.endsWith("Attr")
+              layoutStore().selectedId !== -1 &&
+              graph.vertexes[layoutStore().selectedId] &&
+              graph.vertexes[layoutStore().selectedId].L?.[0]?.endsWith("Attr")
             }
           >
             <div

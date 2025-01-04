@@ -7,12 +7,13 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { DialogFooter } from "../../styled/dialog/DialogFooter";
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useToast } from "../../styled/Toast";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -23,11 +24,14 @@ export function SaveAsTemplateMenu(
   }>,
 ) {
   let nameInputRef: HTMLInputElement;
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
   const { showSuccessToast, showWarningToast } = useToast();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const saveTemplate = async () => {
     const newFormTxnId = graph.newTxnId();
@@ -43,10 +47,10 @@ export function SaveAsTemplateMenu(
       props.item,
       dataVertex,
       newFormTxnId,
-      layoutStore.formStore[0].txnId,
+      formStoreVertex().P.txnId,
       graph,
       setGraph,
-      graph.vertexes[layoutStore.formStore[0].formDataId!],
+      graph.vertexes[formStoreVertex().P.formDataId!],
     );
     const data = commitTxn(newFormTxnId, graph);
 

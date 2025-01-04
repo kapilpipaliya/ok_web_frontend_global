@@ -9,22 +9,30 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  
+  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
+  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
   const { showSuccessToast } = useToast();
 
   const toggleHidden = (itemId: Id) => {
-    setLayoutStore("hiddenNodes", (prev) =>
-      prev.includes(itemId)
-        ? prev.filter((item) => item !== itemId)
-        : [...prev, itemId],
-    );
+    const hiddenNodes = layoutStore().hiddenNodes || [];
+    const newHiddenNodes = hiddenNodes.includes(itemId)
+      ? hiddenNodes.filter((item) => item !== itemId)
+      : [...hiddenNodes, itemId];
+      
+    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+      hiddenNodes: newHiddenNodes
+    });
   };
 
   const getComponent = () =>
@@ -32,7 +40,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
 
   const HideShowIcon = () => {
     const isHiddenAttr = () =>
-      layoutStore.hiddenNodes.includes(props.metaVertex.id);
+      (layoutStore().hiddenNodes || []).includes(props.metaVertex.id);
     const icon = () =>
       isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline";
     const tooltipContent = () => (isHiddenAttr() ? "Show" : "Hide");
@@ -64,7 +72,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         when={
           isSelectedLayoutId(props.metaVertex.id) ||
           isSelectedHoverId(props.metaVertex.id) ||
-          layoutStore.hiddenNodes.includes(props.metaVertex.id)
+          (layoutStore().hiddenNodes || []).includes(props.metaVertex.id)
         }
       >
         <IconButton
@@ -76,10 +84,10 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               undefined,
               undefined,
-              layoutStore.formStore[0].txnId,
+              formStoreVertex().P.txnId,
               graph,
               setGraph,
-              graph.vertexes[layoutStore.formStore[0]?.formDataId!],
+              graph.vertexes[formStoreVertex().P.formDataId!],
             );
           }}
           size={18}
@@ -102,12 +110,11 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
             deleteLayoutAttr(
-              layoutStore,
-              setLayoutStore,
+              layoutStoreId,
               props.metaVertex,
               graph,
               setGraph,
-              layoutStore.formStore[0].txnId,
+              formStoreVertex().P.txnId,
               getComponent(),
               showSuccessToast,
             );

@@ -5,6 +5,7 @@ import { genericInputComponents } from "~/components/form/functions/genericInput
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import type { createVertexIds } from "./FormGroupProperties";
 
@@ -18,11 +19,14 @@ interface ClassesComponentProps {
 }
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const getComponentName = () =>
-    graph.vertexes[layoutStore.selectedComponent].P.key;
-  const checkIsForm = () => graph.vertexes[layoutStore.formStore[0]?.formDataId!]?.L[0] === "Form";
+    graph.vertexes[layoutStore().selectedComponent].P.key;
+  const checkIsForm = () => graph.vertexes[formStoreVertex().P.formDataId!]?.L[0] === "Form";
   const checkIsFormField = () =>
     checkIsForm() && genericInputComponents.includes(getComponentName());
   const getClassVertices = () =>

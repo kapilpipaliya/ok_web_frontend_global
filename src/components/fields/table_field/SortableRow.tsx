@@ -18,7 +18,7 @@ import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 
-import { useFormContext } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
 export const SortableRow = (
@@ -41,7 +41,8 @@ export const SortableRow = (
 ) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const [expanded, setExpanded] = createSignal(true);
   const [disabled] = createSignal(false);
 
@@ -54,8 +55,8 @@ export const SortableRow = (
         props.meta,
         tableColumnsTemplate,
       );
-      if (metaTxnId && formStore?.cleanUpConfig) {
-        const config = formStore.cleanUpConfig();
+      if (metaTxnId && formVertex()?.P.cleanUpConfig) {
+        const config = formVertex()!.P.cleanUpConfig();
         if (!config.rowMetaTxnIds) {
           config.rowMetaTxnIds = [];
         }

@@ -3,6 +3,9 @@ import { Show } from "solid-js";
 import { FormContext } from "~/components/form/FormContext";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
@@ -16,12 +19,17 @@ import { SaveIconButton } from "../right/SaveIconButton";
 import { DebugInfo } from "./DebugInfo";
 
 export function HeaderRow() {
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <header class="flex bg:#f3f3f4 jc:space-between r:7">
       <LeftIcons />
 
-      <Show when={layoutStore.selectedSection === "build"}>
+      <Show when={layoutStore().selectedSection === "build"}>
         <div class="flex ai:center gap:6">
           <UndoRedoIcons />
           <ResizeViewButtons />
@@ -29,18 +37,18 @@ export function HeaderRow() {
         </div>
       </Show>
       <DebugInfo />
-      <Show when={layoutStore.selectedSection === "setting"}>
+      <Show when={layoutStore().selectedSection === "setting"}>
         <div class="flex ai:center">
           <MiddleSectionButtons />
         </div>
       </Show>
 
       <div class="flex ai:center gap:5">
-        <Show when={!layoutStore.isRightOpen || layoutStore.isSmallScreen}>
+        <Show when={!layoutStore().isRightOpen || layoutStore().isSmallScreen}>
           <RightToggleButton />
         </Show>
-        <Show when={layoutStore.formStore[0]}>
-          <FormContext.Provider value={layoutStore.formStore}>
+        <Show when={formStoreVertex()}>
+          <FormContext.Provider value={layoutStore().formId!}>
             <SaveIconButton />
           </FormContext.Provider>
         </Show>

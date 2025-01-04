@@ -5,7 +5,7 @@ import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -13,10 +13,11 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   // const [graph, setGraph] = useGraph();
-  // const [layoutStore] = useDesignerLayoutStore();
+  // const layoutStoreId = useDesignerLayoutStore();
   const metaAttribute = klona(
     FormMetaData.Form.attributes.find((x) => x.key === "Perm")!,
   );
@@ -39,11 +40,14 @@ export function PermissionModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ??
-    getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+    getLastTxnIndex(formStoreVertex().P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedAttr),
@@ -62,7 +66,7 @@ export function PermissionModal(
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
-        layoutStore.formStore[0].txnId,
+        formStoreVertex().P.txnId,
         prevTxnIndex - 1,
         graph,
         setGraph,
@@ -103,12 +107,12 @@ export function PermissionModal(
                       data={
                         props.selectedAttr
                           ? props.selectedAttr
-                          : graph.vertexes[layoutStore.formStore[0]?.formDataId!]
+                          : graph.vertexes[formStoreVertex().P.formDataId!]
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={layoutStore.formStore[0].txnId}
+                      txnId={formStoreVertex().P.txnId}
                     />
                   </div>
                 </div>

@@ -1,26 +1,32 @@
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/undo";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function UndoRedoIcons() {
-  const [layoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   const icons = [
     {
-      disabled: () => !undoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
+      disabled: () => !undoAllowed(formStoreVertex()?.P.txnId, graph),
       icon: "ci:arrow-undo-up-left",
-      onClick: () => undo(layoutStore.formStore[0].txnId, graph, setGraph),
+      onClick: () => undo(formStoreVertex().P.txnId, graph, setGraph),
       tooltip: "Undo",
     },
     {
-      disabled: () => !redoAllowed(layoutStore.formStore?.[0]?.txnId, graph),
+      disabled: () => !redoAllowed(formStoreVertex()?.P.txnId, graph),
       icon: "ci:arrow-undo-up-right",
-      onClick: () => redo(layoutStore.formStore[0].txnId, graph, setGraph),
+      onClick: () => redo(formStoreVertex().P.txnId, graph, setGraph),
       tooltip: "Redo",
     },
   ];

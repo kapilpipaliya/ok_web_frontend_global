@@ -1,34 +1,37 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { loadPageData } from "~/components/page_designer/functions/loadPageData";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
-import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(
   e: DragEvent,
-  layoutStore: Store<PageLayoutObject>,
-  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutStoreId: string,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   showErrorToast: (message: string) => void,
 ) {
   e.stopPropagation();
-  if (!layoutStore.activeItem) { // layoutVertex
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  if (!layoutStore().activeItem) { // layoutVertex
     showErrorToast("Active item not found when dropping");
     return;
   }
-  const toVertex = graph.vertexes[layoutStore.activeItem];
+  const toVertex = graph.vertexes[layoutStore().activeItem!];
   if (!toVertex) {
     showErrorToast("Target vertex not found when dropping");
     return;
   }
 
-  for (const vertex of layoutStore.draggedVertices) {
+  for (const vertex of layoutStore().draggedVertices) {
     const fromVertex = vertex;
 
     if (!fromVertex) {
@@ -40,7 +43,7 @@ export async function handleDrop(
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
 
-    if (!layoutStore.position) {
+    if (!layoutStore().position) {
       showErrorToast("Position not found when dropping");
       return;
     }
@@ -48,14 +51,17 @@ export async function handleDrop(
     const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      layoutStore.formStore[0].txnId,
-      graph.vertexes[layoutStore.formStore[0].formDataId!],
+      formStoreVertex().P.txnId,
+      graph.vertexes[formStoreVertex().P.formDataId!],
       fromVertex,
       toVertex,
-      layoutStore.position,
+      layoutStore().position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      onLayoutItemClick(setLayoutStore, layoutId as string, graph, setGraph);
+      mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+        selectedId: layoutId as string,
+        selectedComponent: -1
+      });
     }
   }
 }

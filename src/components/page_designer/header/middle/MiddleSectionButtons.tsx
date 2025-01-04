@@ -3,9 +3,18 @@ import { For } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import type { PageLayoutObject } from "../../context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/FormContext";
 
 export const MiddleSectionButtons = () => {
-  const [_, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <For each={["Build", "Setting"]}>
       {(section) => (
@@ -24,7 +33,9 @@ export const MiddleSectionButtons = () => {
               : "solar:settings-linear"
           }
           onclick={() =>
-            setLayoutStore("selectedSection", section.toLowerCase())
+            mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+              selectedSection: section.toLowerCase(),
+            })
           }
           size={22}
           title={section}

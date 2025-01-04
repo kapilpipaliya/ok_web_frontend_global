@@ -55,6 +55,6 @@ export function transactionDetailAdd(
       activeUndoIndex: newActiveUndoIndex
     };
 
-    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, false);
+    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, { cloneProperties: false });
   });
 }

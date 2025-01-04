@@ -22,8 +22,8 @@ export function SelectedAttrConfigPopOver(
   props: Readonly<SelectedAttrConfigPopOverProps>,
 ) {
   const zIndex = useZIndex();
-  const [, setLayoutStore] = useDesignerLayoutStore();
-  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const [graph, setGraph] = useGraph();
   const getComponentName = () =>
     getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
 
@@ -37,7 +37,7 @@ export function SelectedAttrConfigPopOver(
           draggable={true}
           icon="material-symbols:drag-indicator"
           onClick={() => {}}
-          onDragStart={(e) => handleDragStart(e, setLayoutStore, props.item)}
+          onDragStart={(e) => handleDragStart(e, graph, setGraph, layoutStoreId, props.item)}
           size={20}
           title="Move"
         />

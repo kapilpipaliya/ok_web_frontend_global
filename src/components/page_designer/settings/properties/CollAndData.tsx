@@ -13,6 +13,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
 import {
@@ -43,7 +44,7 @@ function initializeMetaVertex(
 
 function createFieldAttributes(
   graph: GraphInterface,
-  layoutStore: PageLayoutObject,
+  layoutStore: () => PageLayoutObject,
 ): FieldAttribute[] {
   return [
     {
@@ -55,8 +56,8 @@ function createFieldAttributes(
     },
     {
       collection: () =>
-        graph.vertexes[layoutStore.selectedId]?.P?.collection
-          ? `g:'${graph.vertexes[layoutStore.selectedId]?.P?.collection}'`
+        graph.vertexes[layoutStore().selectedId]?.P?.collection
+          ? `g:'${graph.vertexes[layoutStore().selectedId]?.P?.collection}'`
           : "",
       componentName: "Select",
       key: "data",
@@ -72,22 +73,23 @@ function createFieldAttributes(
 function handleCollectionChange(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStore: PageLayoutObject,
+  layoutStore: () => PageLayoutObject,
+  formStoreVertex: () => Vertex<FormStoreObject>,
   collMetaVertex: Vertex[],
 ) {
   return (value: string) => {
     setValueGlobal(
       graph,
       setGraph,
-      layoutStore.formStore[0].txnId,
+      formStoreVertex().P.txnId,
       collMetaVertex[0],
-      graph.vertexes[layoutStore.selectedId],
+      graph.vertexes[layoutStore().selectedId],
       value,
       false,
     );
     setSelectionValue(
-      layoutStore.formStore[0].txnId,
-      graph.vertexes[layoutStore.selectedId],
+      formStoreVertex().P.txnId,
+      graph.vertexes[layoutStore().selectedId],
       graph,
       setGraph,
       collMetaVertex[1],
@@ -98,7 +100,9 @@ function handleCollectionChange(
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
   const attributes = createFieldAttributes(graph, layoutStore);
@@ -123,6 +127,7 @@ export function CollAndData() {
     graph,
     setGraph,
     layoutStore,
+    formStoreVertex,
     collMetaVertex.vertexes,
   );
 
@@ -132,13 +137,13 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
           <DynamicComponent
-            data={graph.vertexes[layoutStore.selectedId]}
+            data={graph.vertexes[layoutStore().selectedId]}
             disabled={false}
             isNoPermissionCheck={true}
             meta={collMetaVertex.vertexes![2]}
             noLabel
             title={""}
-            txnId={layoutStore.formStore[0].txnId}
+            txnId={formStoreVertex().P.txnId}
           />
           {/* 
             <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
@@ -150,23 +155,23 @@ export function CollAndData() {
       <span class="flex:.5 mt:5">Collection:</span>
       <SelectField
         componentName={"Select"}
-        data={graph.vertexes[layoutStore.selectedId]}
+        data={graph.vertexes[layoutStore().selectedId]}
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![0]}
         onChange={onCollectionChange}
         title={"Select Collection"}
-        txnId={layoutStore.formStore[0].txnId}
+        txnId={formStoreVertex().P.txnId}
       />
       <span class="flex:.5 mt:5">Data:</span>
       <SelectField
         componentName={"MultiSelect"}
-        data={graph.vertexes[layoutStore.selectedId]}
+        data={graph.vertexes[layoutStore().selectedId]}
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![1]}
         title={"Select Data"}
-        txnId={layoutStore.formStore[0].txnId}
+        txnId={formStoreVertex().P.txnId}
       />
     </>
   );

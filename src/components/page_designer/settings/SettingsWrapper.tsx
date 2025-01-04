@@ -1,15 +1,20 @@
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { SettingTabs } from "./SettingTabs";
 
 export function SettingsWrapper() {
-  const [layoutStore] = useDesignerLayoutStore();
   const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <aside
       classList={{
-        "display:none": !layoutStore.isRightOpen,
+        "display:none": !layoutStore().isRightOpen,
       }}
     >
       <div

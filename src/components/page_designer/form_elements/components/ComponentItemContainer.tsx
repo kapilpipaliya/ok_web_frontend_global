@@ -5,6 +5,9 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { onCompDragStart } from "./onCompDragStart";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import type { PageLayoutObject } from "../../context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/FormContext";
 
 export function ComponentItemContainer(props: {
   child: Vertex;
@@ -18,11 +21,14 @@ export function ComponentItemContainer(props: {
   selectedComponents?: () => Set<Vertex>;
   setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void;
 }) {
-  const [graph] = useGraph();
-  const [, setLayoutStore] = useDesignerLayoutStore() || [];
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const onDragEnd = () => {
-    resetDragDropState(setLayoutStore);
+    resetDragDropState(layoutStoreId, graph, setGraph);
   };
 
   const baseStyle =
@@ -44,8 +50,9 @@ export function ComponentItemContainer(props: {
         onCompDragStart(
           e,
           graph,
+          setGraph,
           props.child.id,
-          setLayoutStore,
+          layoutStoreId,
           props.selectedComponents,
           props.setSelectedComponents,
         )

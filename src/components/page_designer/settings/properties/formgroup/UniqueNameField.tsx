@@ -3,8 +3,9 @@ import { uniqueNameKey } from "~/components/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/generateFormMetaAttributes";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { FormStoreObject } from "~/components/form/FormContext";
 
-import { useDesignerLayoutStore } from "../../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject } from "../../../context/LayoutContext";
 import { Label } from "./Label";
 
 export function UniqueNameField(
@@ -16,7 +17,11 @@ export function UniqueNameField(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   function setUniqueNameValue(metaVertex: Vertex, data: string) {
     if (metaVertex.P.key === uniqueNameKey) {
       if (data.length) {
@@ -24,7 +29,7 @@ export function UniqueNameField(
           isUniqueIdUsed(
             graph,
             setGraph,
-            graph.vertexes[layoutStore.formStore[0]?.formDataId!],
+            graph.vertexes[formStoreVertex().P.formDataId!],
             props.selectedLayout,
             data,
           )

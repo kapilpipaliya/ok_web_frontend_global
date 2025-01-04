@@ -8,12 +8,18 @@ import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContex
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import type { FormStoreObject } from "../FormContext";
 
 export function FormStepper() {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formDataId = () => formStoreVertex()?.P?.formDataId;
+
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, graph.vertexes[layoutStore.formStore[0].formDataId!]),
+    getChildrenAttrs(graph, setGraph, graph.vertexes[formDataId()!]),
   );
 
   const handleAddStepBefore = (e: MouseEvent, step: Vertex) => {
@@ -21,9 +27,8 @@ export function FormStepper() {
     addStepBefore(
       graph,
       setGraph,
-      layoutStore,
-      setLayoutStore,
-      graph.vertexes[layoutStore.formStore[0].formDataId!],
+      layoutStoreId,
+      graph.vertexes[formDataId()!],
       step,
     );
   };
@@ -33,9 +38,8 @@ export function FormStepper() {
     addStepAfter(
       graph,
       setGraph,
-      layoutStore,
-      setLayoutStore,
-      graph.vertexes[layoutStore.formStore[0].formDataId!],
+      layoutStoreId,
+      graph.vertexes[formDataId()!],
       step,
     );
   };

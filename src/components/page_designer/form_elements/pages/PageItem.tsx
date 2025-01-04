@@ -8,8 +8,11 @@ import { onClickAddComponent } from "~/components/page_designer/functions/onClic
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function PageItem(
   props: Readonly<{
@@ -19,11 +22,14 @@ export function PageItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
+  const layoutStoreId = useDesignerLayoutStore();
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   let menuRef: HTMLDivElement;
 
@@ -55,30 +61,30 @@ export function PageItem(
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    setLayoutStore("draggedVertices", []);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [] });
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
-    setLayoutStore("draggedVertices", (prev) => [...prev, ...dataTransfer]);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [...layoutStore().draggedVertices, ...dataTransfer] });
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    setLayoutStore("draggedVertices", [graph.vertexes[props.child.id]]);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [graph.vertexes[props.child.id]] });
     onClickAddComponent(
       graph,
       setGraph,
-      layoutStore.formStore[0].txnId,
-      layoutStore.draggedVertices[0],
-      layoutStore.formStore[0] || {},
-      layoutStore.selectedId !== -1
-        ? layoutStore.selectedId
-        : layoutStore.formStore[0].formDataId,
+      formStoreVertex().P.txnId,
+      layoutStore().draggedVertices[0],
+      formStoreVertex().P || {},
+      layoutStore().selectedId !== -1
+        ? layoutStore().selectedId
+        : formStoreVertex().P.formDataId,
     );
-    setLayoutStore("draggedVertices", []);
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [] });
   };
 
   onCleanup(() => {

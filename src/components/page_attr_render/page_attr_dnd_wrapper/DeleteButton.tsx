@@ -4,26 +4,31 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function DeleteButton(props: {
   componentName: string;
   item: Vertex;
 }) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const { showSuccessToast } = useToast();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <IconButton
       class="cursor:pointer"
       icon="fluent:delete-20-regular"
       onClick={() =>
         deleteLayoutAttr(
-          layoutStore,
-          setLayoutStore,
+          layoutStoreId,
           props.item,
           graph,
           setGraph,
-          layoutStore.formStore[0].txnId,
+          formStoreVertex().P.txnId,
           props.componentName,
           showSuccessToast,
         )

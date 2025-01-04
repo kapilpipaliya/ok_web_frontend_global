@@ -8,12 +8,17 @@ import PreviewPage from "~/components/styled/PreviewPage";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { PageLayoutObject } from "../../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function PreviewButton() {
-  const [ graph ] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
   const [isModalOpen, setIsModalOpen] = createSignal(false);
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const handleButtonClick = () => {
     setIsModalOpen(true);
@@ -22,6 +27,7 @@ export function PreviewButton() {
   const handleCloseClick = () => {
     setIsModalOpen(false);
   };
+
   const Content = () => {
     return (
       <PreviewPage>
@@ -29,7 +35,7 @@ export function PreviewButton() {
           isDesignMode={false}
           isNoPermissionCheck={true}
           // data={layoutStore.formStore[0].formData}
-          metaVertex={graph.vertexes[layoutStore.formStore[0].formDataId!]}
+          metaVertex={graph.vertexes[formStoreVertex().P.formDataId!]}
         />
       </PreviewPage>
     );

@@ -7,6 +7,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
@@ -16,8 +17,12 @@ export function AddNewRule(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
-  const prevTxnIndex = getLastTxnIndex(layoutStore.formStore[0].txnId, graph);
+  const layoutStoreId = useDesignerLayoutStore();
+  
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const prevTxnIndex = getLastTxnIndex(formStoreVertex().P.txnId, graph);
   const [selectedRule, setSelectedRule] = createSignal<Vertex>();
   const metaTxnId = graph.newTxnId();
 
@@ -39,9 +44,9 @@ export function AddNewRule(
     );
 
     const rowResult = insertNewRow(
-      layoutStore.formStore[0].txnId,
+      formStoreVertex().P.txnId,
       graph.vertexes[rulesMetaVertexId],
-      graph.vertexes[layoutStore.formStore[0]?.formDataId!],
+      graph.vertexes[formStoreVertex().P.formDataId!],
       false,
       graph,
       setGraph,
@@ -62,7 +67,7 @@ export function AddNewRule(
     );
 
     insertNewRow(
-      layoutStore.formStore[0].txnId,
+      formStoreVertex().P.txnId,
       graph.vertexes[condMetaVertexId],
       rule,
       false,

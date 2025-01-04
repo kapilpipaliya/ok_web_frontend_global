@@ -6,19 +6,24 @@ import { addComponentAttrInPage } from "~/components/page_designer/functions/dro
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import { FormStoreObject } from "../FormContext";
 
 export function addStepAfter(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStore: Store<PageLayoutObject>,
-  _setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutStoreId: string,
   formVertex: Vertex,
   toVertex: Vertex,
 ) {
+  const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
+  const formStoreVertex = graph.vertexes[layoutStore.formId!] as Vertex<FormStoreObject>;
+  const formDataId = formStoreVertex?.P?.formDataId;
+  const txnId = formStoreVertex?.P?.txnId || 0;
+
   const layoutRowId = addComponentAttrInPage(
     formVertex,
-    graph.vertexes[layoutStore.formStore[0].formDataId!],
-    layoutStore.formStore[0].txnId,
+    graph.vertexes[formDataId!],
+    txnId,
     graph,
     setGraph,
     "Step",
@@ -33,12 +38,10 @@ export function addStepAfter(
   sortChildren(
     graph,
     setGraph,
-    layoutStore.formStore[0].txnId,
+    txnId,
     fromVertex,
-    graph.vertexes[layoutStore.formStore[0].formDataId!],
+    graph.vertexes[formDataId!],
     toVertex,
     "after",
   );
-
-  // setLayoutStore('activeStepId', layoutRowId);
 }

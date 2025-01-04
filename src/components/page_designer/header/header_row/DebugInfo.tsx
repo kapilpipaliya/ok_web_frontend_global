@@ -1,31 +1,36 @@
 import { Show } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
+import { TransactionDetail, useGraph, Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 export function DebugInfo() {
   const [graph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const tnxVertex = () => graph.vertexes[`txn${formStoreVertex().P.txnId}`] as Vertex<TransactionDetail>;
+
   return (
-    <Show when={layoutStore.formStore[0]?.txnId && graph.isDevelopment}>
+    <Show when={formStoreVertex()?.P.txnId && graph.isDevelopment}>
       <div class="flex flex:row gap:2">
-        <span>Txn ID: {layoutStore.formStore[0].txnId}</span>
+        <span>Txn ID: {formStoreVertex()?.P.txnId}</span>
         <span>
           Steps:{" "}
-          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.steps.length}
+          {tnxVertex()?.P.steps.length}
         </span>
         <span>
           Submitted Step:{" "}
-          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.submittedIndex}
+          {tnxVertex()?.P.submittedIndex}
         </span>
         <span>
           Active Undo Point Index:{" "}
-          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.activeUndoIndex}
+          {tnxVertex()?.P.activeUndoIndex}
         </span>
         <span>
           Undo Points:{" "}
-          {graph.vertexes[`txn${layoutStore.formStore[0].txnId}`]?.P.undoStepIndexes.join(", ")}
+          {tnxVertex()?.P.undoStepIndexes.join(", ")}
         </span>
       </div>
     </Show>

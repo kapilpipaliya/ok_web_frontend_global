@@ -8,6 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
+import { FormStoreObject } from "~/components/form/FormContext";
 
 import { RulesModal } from "../../../rules/RulesModal";
 import { AddNewRule } from "../../rules/AddNewRule";
@@ -22,8 +23,11 @@ export function SelectPermField(
 ) {
   const [showDropdown, setShowDropdown] = createSignal(false);
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     const [isOpenRule, setIsOpenRule] = createSignal(false);
@@ -56,7 +60,7 @@ export function SelectPermField(
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${layoutStore.formStore[0].formDataId}'->Rule`,
+      collection: () => `id:'${formStoreVertex().P.formDataId}'->Rule`,
       componentName: "Select",
       displayName: props.metaVertex.P.displayName,
       key: props.metaVertex.P.key,
@@ -73,7 +77,7 @@ export function SelectPermField(
         isRealTime={false}
         meta={meta}
         noLabel
-        txnId={layoutStore.formStore[0].txnId}
+        txnId={formStoreVertex().P.txnId}
       />
     );
   };

@@ -45,6 +45,7 @@ export function addNewEdge(
   edge: Edge,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -116,7 +117,9 @@ export function addNewEdge(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({addNewEdge: {txnId, edge}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({addNewEdge: {txnId, edge}}));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -130,6 +133,7 @@ export function replaceEdgeProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
+  options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
@@ -165,7 +169,9 @@ export function replaceEdgeProperties(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({replaceEdgeProperties: {txnId, edgeId, properties}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({replaceEdgeProperties: {txnId, edgeId, properties}}));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -180,6 +186,7 @@ export function replaceEdgeStart(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newStartVertexId: Id,
+  options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
@@ -232,7 +239,9 @@ export function replaceEdgeStart(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({replaceEdgeStart: {txnId, edgeId, newStartVertexId}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({replaceEdgeStart: {txnId, edgeId, newStartVertexId}}));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -247,6 +256,7 @@ export function replaceEdgeEnd(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newEndVertexId: Id,
+  options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
@@ -299,7 +309,9 @@ export function replaceEdgeEnd(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({replaceEdgeEnd: {txnId, edgeId, newEndVertexId}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({replaceEdgeEnd: {txnId, edgeId, newEndVertexId}}));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -312,6 +324,7 @@ export function deleteEdge(
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -357,7 +370,9 @@ export function deleteEdge(
       graph,
       setGraph,
     );
-    channel.postMessage(JSON.stringify({deleteEdge: {txnId, edgeId}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({deleteEdge: {txnId, edgeId}}));
+    }
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -370,6 +385,7 @@ export function updateEdgeId(
   newEdgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ) {
   return untrack(() => {
     if (!graph.edges[oldEdgeId]) {
@@ -398,7 +414,9 @@ export function updateEdgeId(
     );
     // @ts-ignore
     setGraph("edges", oldEdgeId, undefined);
-    channel.postMessage(JSON.stringify({updateEdgeId: {oldEdgeId, newEdgeId}}));
+    if (!options?.skipPostMessage) {
+      channel.postMessage(JSON.stringify({updateEdgeId: {oldEdgeId, newEdgeId}}));
+    }
     return { error: "" };
   });
 }

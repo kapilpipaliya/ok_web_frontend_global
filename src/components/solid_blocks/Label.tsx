@@ -8,8 +8,8 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext } from "../form/FormContext";
-import {useGraph} from "~/lib/graph/graph";
+import { useFormContext, type FormStoreObject } from "../form/FormContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 interface LabeledFieldProps {
   children: JSX.Element;
@@ -27,12 +27,13 @@ export function Label(
       LabeledFieldProps
   >,
 ) {
-  const [formStore] = useFormContext();
+  const formId = useFormContext();
   const [graph] = useGraph();
+  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
 
   const position = createMemo(() =>
     !props.position || props.position === "system"
-      ? graph.vertexes[formStore?.formMetaId!]!.P.position || "top"
+      ? graph.vertexes[formVertex()?.P.formMetaId!]?.P.position || "top"
       : props.position,
   );
 

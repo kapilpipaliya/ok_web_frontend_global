@@ -2,15 +2,20 @@ import { createVisibilityObserver } from "@solid-primitives/intersection-observe
 import { createSelector, Match, Switch } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 
 export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
-  const [layoutStore] = useDesignerLayoutStore();
-  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore.hoverId);
+  const layoutStoreId = useDesignerLayoutStore();
+  const [graph] = useGraph();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
+  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
 
   let popoverRef: HTMLDivElement | undefined;
   const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8 });
@@ -26,7 +31,7 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
           <Match
             when={
               isSelectedHoverId(props.item.id) ||
-              layoutStore.multiHighlight.includes(props.item.id)
+              layoutStore().multiHighlight.includes(props.item.id)
             }
           >
             <HoverAttrConfigPopOver item={props.item} />

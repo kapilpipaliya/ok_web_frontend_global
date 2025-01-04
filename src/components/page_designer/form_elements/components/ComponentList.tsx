@@ -39,7 +39,7 @@ export function ComponentList(props: {
     if ((result as { error: string })?.error) {
       showErrorToast((result as { error: string }).error);
     } else if ((result as ServerResult)?.result) {
-      setGraphData(graph, setGraph, (result as ServerResult).graph);
+      setGraphData(graph, setGraph, (result as ServerResult).graph!);
       const rootVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",

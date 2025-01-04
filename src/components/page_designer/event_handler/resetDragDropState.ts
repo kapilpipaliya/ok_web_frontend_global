@@ -3,12 +3,21 @@ import type { SetStoreFunction } from "solid-js/store";
 import { batch } from "solid-js";
 
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
+
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function resetDragDropState(
-  setLayoutStore: SetStoreFunction<PageLayoutObject>,
+  layoutStoreId: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   batch(() => {
-    setLayoutStore({
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
       activeItem: null,
       draggedVertices: [],
       position: null,

@@ -7,7 +7,11 @@ import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContex
 
 export function ParentButton(props: { item: Vertex }) {
   const [graph, setGraph] = useGraph();
-  const [, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formStore[0]];
+
   return (
     <IconButton
       class="cursor:pointer"
@@ -18,7 +22,7 @@ export function ParentButton(props: { item: Vertex }) {
           return;
         }
         onLayoutItemClick(
-          setLayoutStore,
+          layoutStoreId,
           parentResult.vertex!.id,
           graph,
           setGraph,

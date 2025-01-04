@@ -1,14 +1,18 @@
 import { createSignal, For, Show } from "solid-js";
 
-import { useGraph, type Id } from "~/lib/graph/graph";
+import { useGraph, type Id, type Vertex } from "~/lib/graph/graph";
+import { FormStoreObject } from "~/components/form/FormContext";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {  
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
@@ -34,15 +38,15 @@ export function LayoutTree() {
     //     ? [steps()[0]]
     //     : [];
     // }
-    return layoutStore.formStore[0]?.formDataId
-      ? [graph.vertexes[layoutStore.formStore[0]?.formDataId!]]
+    return formStoreVertex().P.formDataId
+      ? [graph.vertexes[formStoreVertex().P.formDataId!]]
       : [];
   };
 
   return (
     <For each={rootVertexes()}>
       {(item) => (
-        <Show when={layoutStore.formStore[0]}>
+        <Show when={formStoreVertex()}>
           <LayoutTreeItem
             collapsedKeys={collapsedKeys}
             metaVertex={item}

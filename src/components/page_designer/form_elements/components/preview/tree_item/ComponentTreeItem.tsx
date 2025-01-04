@@ -18,12 +18,12 @@ export function CompPreviewTreeItem(
     toggleExpand: (itemId: Id) => void;
   }>,
 ) {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const children = createMemo(() => getCompChildren(props.item, graph));
-  const [, setLayoutStore] = useDesignerLayoutStore() || [];
+  const layoutStoreId = useDesignerLayoutStore();
 
   const onDragEnd = () => {
-    resetDragDropState(setLayoutStore);
+    resetDragDropState(layoutStoreId, graph, setGraph);
   };
 
   // Create a new array of ancestor IDs including the current item's ID
@@ -38,7 +38,7 @@ export function CompPreviewTreeItem(
           isHovered={false}
           onDragEnd={onDragEnd}
           onDragStart={(e) =>
-            onCompDragStart(e, graph, props.item.id, setLayoutStore)
+            onCompDragStart(e, graph, setGraph, props.item.id, layoutStoreId)
           }
           onMouseEnter={() => {}}
           onmouseleave={() => {}}

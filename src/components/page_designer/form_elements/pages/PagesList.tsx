@@ -11,8 +11,10 @@ import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
-import { type Id, useGraph } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { FormStoreObject } from "~/components/form/FormContext";
+import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
@@ -20,13 +22,16 @@ import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore() || [];
+  const layoutStoreId = useDesignerLayoutStore();
   const { showErrorToast } = useToast();
   let originalData: any[] = [];
   const [isFetchingData, setIsFetchingData] = createSignal(true);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<NavItem[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   // Fetch data function
   async function fetchData(): Promise<{
@@ -55,14 +60,14 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-        if (result.graph.vertexes[layoutStore.formStore[0].formDataId]) {
-          delete result.graph.vertexes[layoutStore.formStore[0].formDataId];
+        if (result.graph.vertexes[formStoreVertex().P.formDataId!]) {
+          delete result.graph.vertexes[formStoreVertex().P.formDataId!];
         }
         setGraphData(graph, setGraph, result.graph);
 
         const data2 = getTreeData(graph, setGraph, {
           collection: `g:'${props.coll}'`,
-        }).filter((item) => item.id !== layoutStore.formStore[0].formDataId);
+        }).filter((item) => item.id !== formStoreVertex().P.formDataId!);
         originalData = data2;
         setFilteredData(data2);
         setIsFetchingData(false);

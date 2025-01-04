@@ -1,10 +1,11 @@
 import { createEffect, createSignal, type JSX } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
-import { useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
 import { useToast } from "./Toast";
+import { FormStoreObject } from "../form/FormContext";
 
 export function ResizableContainer(
   props: Readonly<{
@@ -64,8 +65,12 @@ export function ResizableContainer(
   // };
 
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const { showErrorToast } = useToast();
+
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   return (
     <div
       class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto width:100%"
@@ -88,18 +93,17 @@ export function ResizableContainer(
         }}
         onDrop={async (e) => {
           setIsDraggingOver(false);
-          setLayoutStore("activeItem", layoutStore.formStore[0].formDataId);
-          setLayoutStore("position", "center");
+          graph.vertexes[layoutStoreId].P.activeItem = formStoreVertex().P.formDataId;
+          graph.vertexes[layoutStoreId].P.position = "center";
 
           await handleDrop(
             e,
-            layoutStore,
-            setLayoutStore,
+            layoutStore(),
             graph,
             setGraph,
-            showErrorToast,
+            showErrorToast
           );
-          resetDragDropState(setLayoutStore);;
+          resetDragDropState(layoutStoreId, graph, setGraph);
         }}
       >
         {/*<div

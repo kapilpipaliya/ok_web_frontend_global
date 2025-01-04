@@ -7,24 +7,29 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
+import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import type { FormStoreObject } from "../FormContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function Step(
   props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[] }>,
 ) {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, graph.vertexes[layoutStore.formStore[0].formDataId!]),
+    getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex().P.formDataId!]),
   );
 
   const handleDelete = (_e: MouseEvent) => {
     deleteStep(
       graph,
       setGraph,
-      layoutStore,
-      setLayoutStore,
+      layoutStoreId,
       props.steps,
       props.step,
       showErrorToast,
@@ -37,8 +42,7 @@ export function Step(
       moveStep(
         graph,
         setGraph,
-        layoutStore,
-        setLayoutStore,
+        layoutStoreId,
         props.steps,
         props.index(),
         props.index() - 1,
@@ -51,8 +55,7 @@ export function Step(
       moveStep(
         graph,
         setGraph,
-        layoutStore,
-        setLayoutStore,
+        layoutStoreId,
         props.steps,
         props.index(),
         props.index() + 1,
@@ -70,12 +73,12 @@ export function Step(
     >
       <button
         class="flex align-items:center; gap:0.5rem; width:100%"
-        onClick={() => setLayoutStore("activeStepId", props.step.id)}
+        onClick={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { activeStepId: props.step.id })}
         type="button"
       >
         <span style="display:flex; align-items:center;">
           <span
-            style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${isActiveStep ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+            style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${isActiveStep() ? "background-color:rgb(37,99,235); color:white;" : ""}`}
             title={props.step.P.key}
           >
             {props.index() + 1}

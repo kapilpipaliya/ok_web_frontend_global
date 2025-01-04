@@ -161,7 +161,7 @@ export function transactionDetailAdd(
   existingTxnValue.steps.push(txnValue);
   existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, false);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {cloneProperties: false});
 }
 
 transactionDetailAdd(1, { a: 1 });

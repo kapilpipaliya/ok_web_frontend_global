@@ -11,7 +11,7 @@ import {
   useFormContext,
 } from "~/components/form/FormContext";
 import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -26,7 +26,10 @@ import { Overlay } from "./Overlay";
 
 const getMetaAttributes = (selectedRule?: null | Vertex) => {
   const [graph, setGraph] = useGraph();
-  const [layoutStore] = useDesignerLayoutStore();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   let metaAttribute = klona(
     FormMetaData.Form.attributes.find((x) => x.key === "Rule")!,
   );
@@ -37,7 +40,7 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
           condAttribute.key === "leftField" ||
           condAttribute.key === "rightField"
         ) {
-          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStore);
+          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStoreId);
         }
       }
     }
@@ -51,18 +54,18 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
 const cleanupRowMetaTxnIds = (
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  formStore?: FormStoreObject,
+  formStoreVertex: Vertex<FormStoreObject>,
   excludeIds?: number[],
 ) => {
-  if (formStore) {
+  if (formStoreVertex) {
     for (const rowMetaTxnId of (
-      formStore.cleanUpConfig().rowMetaTxnIds || []
+      formStoreVertex.P.cleanUpConfig().rowMetaTxnIds || []
     ).reverse()) {
       if (!excludeIds?.includes(rowMetaTxnId)) {
         revertTransaction(rowMetaTxnId, graph, setGraph);
       }
     }
-    formStore.cleanUpConfig().rowMetaTxnIds = excludeIds || [];
+    formStoreVertex.P.cleanUpConfig().rowMetaTxnIds = excludeIds || [];
   }
 };
 
@@ -77,11 +80,14 @@ export function RulesModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
-  const [formStore] = useFormContext();
-  const excludeIds = [...(formStore?.cleanUpConfig().rowMetaTxnIds || [])];
+  
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const excludeIds = [...(formStoreVertex().P.cleanUpConfig().rowMetaTxnIds || [])];
 
   const prevTxnIndex =
-    props.prevTxnIndex ?? getLastTxnIndex(formStore!.txnId, graph);
+    props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex().P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedRule),
@@ -129,9 +135,9 @@ export function RulesModal(
   };
 
   onCleanup(() => {
-    cleanupRowMetaTxnIds(graph, setGraph, formStore, excludeIds);
+    cleanupRowMetaTxnIds(graph, setGraph, formStoreVertex(), excludeIds);
     if (revertChanges) {
-      revertTransactionUpToIndex(formStore!.txnId, prevTxnIndex - 1, graph, setGraph);
+      revertTransactionUpToIndex(formStoreVertex().P.txnId, prevTxnIndex - 1, graph, setGraph);
     }
   });
 
@@ -167,12 +173,12 @@ export function RulesModal(
                         data={
                           props.selectedRule
                             ? props.selectedRule
-                            : graph.vertexes[formStore!.formDataId]
+                            : graph.vertexes[formStoreVertex()?.P.formDataId]
                         }
                         isNoPermissionCheck={true}
                         isRealTime={false}
                         meta={graph.vertexes[metaVertexId]}
-                        txnId={formStore!.txnId}
+                        txnId={formStoreVertex()?.P.txnId}
                       />
                   </div>
                 </div>
