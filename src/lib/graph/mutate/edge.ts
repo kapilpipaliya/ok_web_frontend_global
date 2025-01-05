@@ -109,6 +109,7 @@ export function addNewEdge(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, {addNewEdge: {txnId, edge}});
@@ -147,6 +148,7 @@ export function replaceEdgeProperties(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeProperties: {txnId, edgeId, properties}});
@@ -203,6 +205,7 @@ export function replaceEdgeStart(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeStart: {txnId, edgeId, newStartVertexId}});
@@ -259,6 +262,7 @@ export function replaceEdgeEnd(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, {replaceEdgeEnd: {txnId, edgeId, newEndVertexId}});
@@ -316,6 +320,7 @@ export function deleteEdge(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, {deleteEdge: {txnId, edgeId}});

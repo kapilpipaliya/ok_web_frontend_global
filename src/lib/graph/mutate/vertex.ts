@@ -63,6 +63,7 @@ export function addNewVertex(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, { addNewVertex: { txnId, vertex } });
@@ -106,6 +107,7 @@ export function replaceVertexProperties(
         },
         graph,
         setGraph,
+        options
       );
     }
     if (!options?.skipPostMessage) {
@@ -155,6 +157,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, { mergeVertexProperties: { txnId, vertexId, properties } });
@@ -269,6 +272,7 @@ export function deleteVertex(
       },
       graph,
       setGraph,
+      options
     );
     if (!options?.skipPostMessage) {
       broadcastToAllChannels(graph.broadcastChannels, { deleteVertex: { txnId, vertexId } });

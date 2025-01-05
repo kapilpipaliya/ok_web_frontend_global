@@ -12,6 +12,7 @@ export function transactionDetailAdd(
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  options?: { skipPostMessage?: boolean }
 ) {
   return untrack(() => {
     if (!txnId) {
@@ -55,6 +56,6 @@ export function transactionDetailAdd(
       activeUndoIndex: newActiveUndoIndex
     };
 
-    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, { cloneProperties: false });
+    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, { cloneProperties: false, skipPostMessage: options?.skipPostMessage });
   });
 }
