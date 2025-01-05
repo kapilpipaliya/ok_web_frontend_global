@@ -37,7 +37,7 @@ export function replacePlaceholderWithUrl(
 }
 
 export function cssStateToString(
-  cssStore: CSSStore,
+  cssStore: CSSStore | string,
   meta: Vertex,
   data: Vertex,
   graph: GraphInterface,
@@ -46,7 +46,16 @@ export function cssStateToString(
     return "";
   }
   if (typeof cssStore === "string") {
-    return cssStore;
+    if (cssStore.trim().startsWith("{")) {
+      try {
+        cssStore = JSON.parse(cssStore);
+      } catch (e) {
+        console.error("Invalid JSON string:", e);
+        return "";
+      }
+    } else {
+      return cssStore;
+    }
   }
 
   return Object.entries(cssStore)

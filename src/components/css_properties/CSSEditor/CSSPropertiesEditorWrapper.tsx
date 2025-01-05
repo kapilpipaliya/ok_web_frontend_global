@@ -22,16 +22,27 @@ export function CSSPropertiesEditorWrapper(
   props: Readonly<{
     data?: Vertex;
     meta: Vertex;
-    onChange?: (data: CSSStore) => void;
+    onChange?: (data: string) => void;
   }>,
 ) {
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
 
-  const cssValue = () =>
-    JSON.parse(
-      JSON.stringify((props.data?.P[props.meta.P.key] as string) || { "": {} }),
-    );
+  const cssValue = () => {
+    const value = props.data?.P[props.meta.P.key];
+    if (typeof value === "string" && value.trim().startsWith("{")) {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        console.error("Invalid JSON string:", e);
+        return { "": {} };
+      }
+    } else if (isObject(value)) {
+      return JSON.parse(JSON.stringify(value));
+    } else {
+      return { "": {} };
+    }
+  };
 
   const initializeState = (
     value: string,
@@ -61,7 +72,7 @@ export function CSSPropertiesEditorWrapper(
   ) => {
     // @ts-expect-error imporoper type error
     setCssState(...args);
-    props.onChange?.(JSON.parse(JSON.stringify(cssState)));
+    props.onChange?.(JSON.stringify(cssState));
   };
 
   return (
