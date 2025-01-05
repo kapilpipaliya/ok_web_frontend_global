@@ -17,7 +17,7 @@ export function onCompDragStart(
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
 
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-    draggedVertices: [],
+    draggedVertexIds: [],
   });
 
   const draggedItems =
@@ -26,7 +26,7 @@ export function onCompDragStart(
       : [graph.vertexes[childId]];
 
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-    draggedVertices: [...layoutStore().draggedVertices, ...draggedItems],
+    draggedVertexIds: [...layoutStore().draggedVertexIds, ...draggedItems.map(v => v.id)],
   });
 
   if (setSelectedComponents) {

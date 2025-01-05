@@ -16,6 +16,6 @@ export function handleDragStart(
   const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
 
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-    draggedVertices: [...(layoutStore.draggedVertices || []), layoutVertex],
+    draggedVertexIds: [...(layoutStore.draggedVertexIds || []), layoutVertex.id],
   });
 }

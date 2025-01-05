@@ -61,30 +61,30 @@ export function PageItem(
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [] });
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [...layoutStore().draggedVertices, ...dataTransfer] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [...layoutStore().draggedVertexIds, ...dataTransfer.map(v => v.id)] });
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [graph.vertexes[props.child.id]] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [props.child.id] });
     onClickAddComponent(
       graph,
       setGraph,
       formStoreVertex().P.txnId,
-      layoutStore().draggedVertices[0],
+      graph.vertexes[layoutStore().draggedVertexIds[0]],
       formStoreVertex().P || {},
       layoutStore().selectedId !== -1
         ? layoutStore().selectedId
         : formStoreVertex().P.formDataId,
     );
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertices: [] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [] });
   };
 
   onCleanup(() => {

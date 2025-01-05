@@ -7,6 +7,7 @@ import { PageLayoutObject, useDesignerLayoutStore } from "../page_designer/conte
 import { useToast } from "./Toast";
 import { FormStoreObject } from "../form/FormContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function ResizableContainer(
   props: Readonly<{
@@ -87,15 +88,16 @@ export function ResizableContainer(
         onDragOver={(e) => {
           e.preventDefault(); // Allow drop
           setIsDraggingOver(true);
-          console.log("Drag over event");
         }}
         onDragLeave={() => {
           setIsDraggingOver(false)
         }}
         onDrop={async (e) => {
           setIsDraggingOver(false);
-          graph.vertexes[layoutStoreId].P.activeItem = formStoreVertex().P.formDataId;
-          graph.vertexes[layoutStoreId].P.position = "center";
+          mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+            activeItem: formStoreVertex().P.formDataId,
+            position: "center"
+          });
 
           await handleDrop(
             e,

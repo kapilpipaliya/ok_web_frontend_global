@@ -42,8 +42,8 @@ export function handleDragOver(
   }
   expandChildren?.(layoutStore().position!);
 
-  for (const vertex of layoutStore().draggedVertices) {
-    const fromVertex = vertex;
+  for (const vertexId of layoutStore().draggedVertexIds) {
+    const fromVertex = graph.vertexes[vertexId];
     const toVertexId = layoutStore().activeItem!;
     if (!fromVertex) {
       // Don't allow drag and drop

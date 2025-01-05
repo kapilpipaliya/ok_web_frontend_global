@@ -61,7 +61,7 @@ export function handleDragOverAndSetDropPosition(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = layoutStore().draggedVertices[0];
+  const fromVertex = graph.vertexes[layoutStore().draggedVertexIds[0]];
   const toVertexId = activeItem;
   if (
     !validateDragOver(

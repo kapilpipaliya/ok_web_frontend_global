@@ -31,8 +31,8 @@ export async function handleDrop(
     return;
   }
 
-  for (const vertex of layoutStore().draggedVertices) {
-    const fromVertex = vertex;
+  for (const vertexId of layoutStore().draggedVertexIds) {
+    const fromVertex = graph.vertexes[vertexId];
 
     if (!fromVertex) {
       showErrorToast("from Vertex not found when dropping ");

@@ -10,6 +10,7 @@ import { SimpleWithDismissButton } from "../../../styled/SimpleModal";
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 import { FormStoreObject } from "~/components/form/FormContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function RulesList() {
   const [graph, setGraph] = useGraph();
@@ -49,7 +50,9 @@ export function RulesList() {
         incomingIds.push(graph.edges[edge].S);
       }
     }
-    graph.vertexes[layoutStoreId].P.multiHighlight = incomingIds;
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      multiHighlight: incomingIds
+    });
   };
 
   const ruleUsageCount = (rule: Vertex) => {
@@ -65,7 +68,9 @@ export function RulesList() {
   };
 
   const unhighlightRule = () => {
-    graph.vertexes[layoutStoreId].P.multiHighlight = [];
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      multiHighlight: []
+    });
   };
 
   const removeAllConditions = (rule: Vertex) => {

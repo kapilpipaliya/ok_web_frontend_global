@@ -10,7 +10,7 @@ export function getInitialDesignerLayoutStore() {
   return {
     id: uuidv4(),
     activeItem: null as Id | null | number,
-    draggedVertices: [] as Vertex[],
+    draggedVertexIds: [] as Id[],
     formId: null as Id | null,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
