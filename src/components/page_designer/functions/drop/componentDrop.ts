@@ -98,7 +98,7 @@ export function componentDrop(
       false,
     );
 
-    const rowVertex = graph.vertexes[rowResult.vertexId!];debugger
+    const rowVertex = graph.vertexes[rowResult.vertexId!];
 
     if (["Comp"].includes(fromVertex.L[0])) {
       // set Component to the row

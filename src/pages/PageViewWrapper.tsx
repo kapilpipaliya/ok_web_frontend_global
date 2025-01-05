@@ -53,6 +53,7 @@ import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -108,7 +109,7 @@ export function PageViewWrapper(
   );
   const allConfiguredPermission = createMemo(() =>
     getConfiguredPermissions(
-      graph.userRoles,
+      getGlobalStore(graph).P.userRoles,
       graph.vertexes[formStore().P.formMetaId!]!,
       graph,
       setGraph,
@@ -185,7 +186,7 @@ export function PageViewWrapper(
           (props.formId
             ? `id:'${props.formId}'`
             : `g:'${props.pageVertexLabel ?? "Form"}[${props.pageVertexName}]'`),
-        [graph.url]: true,
+        [getGlobalStore(graph).P.url]: true,
         incoming,
         outgoing,
       });
@@ -404,7 +405,7 @@ export function PageViewWrapper(
         </Match>
       </Switch>
 
-      {/* <Show when={graph.isDevelopment}>
+      {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
           authError={authError()}
@@ -415,7 +416,7 @@ export function PageViewWrapper(
           isNoPermissionCheck={isNoPermissionCheck()}
           metaVertexId={formStore().P.formMeta?.id}
           mounted={formStore().P.mounted}
-          userRoles={graph.userRoles}
+          userRoles={getGlobalStore(graph).P.userRoles}
         />
       </Show> */}
       <Show when={graph.vertexes[formStore().P.formDataId!]}>

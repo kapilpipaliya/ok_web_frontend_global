@@ -4,6 +4,7 @@ import { TransactionDetail, useGraph, Vertex } from "~/lib/graph/graph";
 
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/FormContext";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function DebugInfo() {
   const [graph] = useGraph();
@@ -13,7 +14,7 @@ export function DebugInfo() {
   const tnxVertex = () => graph.vertexes[`txn${formStoreVertex().P.txnId}`] as Vertex<TransactionDetail>;
 
   return (
-    <Show when={formStoreVertex()?.P.txnId && graph.isDevelopment}>
+    <Show when={formStoreVertex()?.P.txnId && getGlobalStore(graph).P.isDevelopment}>
       <div class="flex flex:row gap:2">
         <span>Txn ID: {formStoreVertex()?.P.txnId}</span>
         <span>

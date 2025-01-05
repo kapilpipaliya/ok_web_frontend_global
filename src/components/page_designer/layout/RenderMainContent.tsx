@@ -18,6 +18,7 @@ import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
 import { getChannel, handleChannelMessage } from './channel';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
+import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -221,7 +222,7 @@ export function ResizableAltKey() {
             }
           >
             <div
-              class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5`}
+              class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
             >
               <PropertiesContent />
             </div>

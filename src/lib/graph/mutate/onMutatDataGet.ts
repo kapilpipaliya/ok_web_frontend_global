@@ -6,12 +6,7 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/edge";
-import { updateVertexId } from "~/lib/graph/mutate/vertex";
-
-import {
-  edgeOldIdToNewIdMap,
-  vertexOldIdToNewIdMap,
-} from "../transaction/TransactionType";
+import { mergeVertexProperties, updateVertexId } from "~/lib/graph/mutate/vertex";
 
 function handleInsertVertex(
   oldId: string,
@@ -19,7 +14,7 @@ function handleInsertVertex(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  vertexOldIdToNewIdMap.set(oldId, newId);
+  mergeVertexProperties(0, "vertexOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
   updateVertexId(oldId, newId, graph, setGraph);
 }
 
@@ -29,7 +24,7 @@ function handleInsertEdge(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  edgeOldIdToNewIdMap.set(oldId, newId);
+  mergeVertexProperties(0, "edgeOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
   updateEdgeId(oldId, newId, graph, setGraph);
 }
 
@@ -94,8 +89,8 @@ export function onMutatDataGet(
     }
 
     /*if (isAllTxnProcessed(graph)) {
-      vertexOldIdToNewIdMap.clear();
-      edgeOldIdToNewIdMap.clear();
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {vertexOldIdToNewIdMap: []})
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {edgeOldIdToNewIdMap: []})
     } else {
       // commitTxn(txnId, graph);
     }*/

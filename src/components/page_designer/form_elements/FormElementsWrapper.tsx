@@ -8,6 +8,7 @@ import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { CloseIconTopRight } from "./CloseIconTopRight";
 import { FormElementTabs } from "./FormElementTabs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function FormElementsWrapper() {
   const [graph, setGraph] = useGraph();
@@ -28,7 +29,7 @@ export function FormElementsWrapper() {
         />
       </ZIndex>
       <div
-        class={`scrollbar-color:lightgrey flex {scrollbar-width:thin} border:1px|solid|lightgrey flex:column h:calc(100vh-${graph.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`}
+        class={`scrollbar-color:lightgrey flex {scrollbar-width:thin} border:1px|solid|lightgrey flex:column h:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`}
       >
         <FormElementTabs />
       </div>

@@ -7,8 +7,10 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { useGraph } from "~/lib/graph/graph";
+import { GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";
+import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { saveUser } from "~/lib/graph/mutate/loadUser";
 
 type GeneralProps = {
   originalProfileData: { [key: string]: any };
@@ -18,7 +20,7 @@ type GeneralProps = {
 };
 
 export const GeneralSection = (props: Readonly<GeneralProps>): JSX.Element => {
-  const [_graph, setGraph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
   const [isEdit, setIsEdit] = createSignal(false);
   const [selectedImage, setSelectedImage] = createSignal<File | null>(null);
@@ -119,7 +121,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>): JSX.Element => {
             username: user.P.username.toLowerCase(),
           });
           props.setOriginalProfileData(props.profileData);
-          setGraph("member", data);
+          saveUser(user, graph, setGraph);
         }
       },
       promise: profileCall(),

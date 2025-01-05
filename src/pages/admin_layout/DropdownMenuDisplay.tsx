@@ -8,6 +8,7 @@ import { useGraph } from "~/lib/graph/graph";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();
@@ -19,7 +20,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
   const handleClose = () => setIsOpen(false);
 
   const profileImage =
-    graph.member?.P?.profileImage ||
+    getMemberVertex(graph)?.P?.profileImage ||
     "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png";
 
   return (

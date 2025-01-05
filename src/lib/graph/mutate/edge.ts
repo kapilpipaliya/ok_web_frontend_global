@@ -6,11 +6,8 @@ import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
-import {
-  edgeOldIdToNewIdMap,
-  vertexOldIdToNewIdMap,
-} from "../transaction/TransactionType";
 import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
+import { getVertexOldIdToNewIdMap, getEdgeOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 
 export function newEdge(
   edgeId: Id,
@@ -30,12 +27,12 @@ export function newEdge(
   };
 }
 
-function updateEdge(edge: Edge) {
+function updateEdge(edge: Edge, graph: Store<GraphInterface>) {
   return untrack(() => {
     const edge2 = klona(edge);
-    edge2.id = edgeOldIdToNewIdMap.get(edge.id) || edge.id;
-    edge2.S = vertexOldIdToNewIdMap.get(edge.S) || edge.S;
-    edge2.E = vertexOldIdToNewIdMap.get(edge.E) || edge.E;
+    edge2.id = getEdgeOldIdToNewIdMap(graph)[edge.id] || edge.id;
+    edge2.S = getVertexOldIdToNewIdMap(graph)[edge.S] || edge.S;
+    edge2.E = getVertexOldIdToNewIdMap(graph)[edge.E] || edge.E;
     return edge2;
   });
 }
@@ -51,9 +48,9 @@ export function addNewEdge(
   txnDetailIndex?: number;
 } {
   return untrack(() => {
-    const actualEdgeId = edgeOldIdToNewIdMap.get(edge.id) || edge.id;
-    const actualStartVertexId = vertexOldIdToNewIdMap.get(edge.S) || edge.S;
-    const actualEndVertexId = vertexOldIdToNewIdMap.get(edge.E) || edge.E;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edge.id] || edge.id;
+    const actualStartVertexId = getVertexOldIdToNewIdMap(graph)[edge.S] || edge.S;
+    const actualEndVertexId = getVertexOldIdToNewIdMap(graph)[edge.E] || edge.E;
 
     if (!actualEdgeId) {
       return { error: "Edge ID is not valid" };
@@ -86,7 +83,7 @@ export function addNewEdge(
       };
     }
     batch(() => {
-      setGraph("edges", actualEdgeId, updateEdge(edge));
+      setGraph("edges", actualEdgeId, updateEdge(edge, graph));
       setGraph(
         "vertexes",
         actualStartVertexId,
@@ -101,16 +98,16 @@ export function addNewEdge(
         Array.isArray(in_edges) ? [...in_edges, actualEdgeId] : [actualEdgeId],
       );
     });
-    const data = updateEdge(edge);
+    const data = updateEdge(edge, graph);
     transactionDetailAdd(
       txnId,
       {
         data,
-        insertEdge: () => updateEdge(data),
-        redo: () => addNewEdge(0, updateEdge(data), graph, setGraph),
+        insertEdge: () => updateEdge(data, graph),
+        redo: () => addNewEdge(0, updateEdge(data, graph), graph, setGraph),
         revert: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return deleteEdge(0, actualEdgeId2, graph, setGraph);
         },
       },
@@ -136,27 +133,27 @@ export function replaceEdgeProperties(
   options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
-    const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
 
     if (!graph.edges[actualEdgeId]) {
       return { error: "Edge ID is not valid" };
     }
     const originalProperties = klona(graph.edges[actualEdgeId].P);
     setGraph("edges", actualEdgeId, "P", reconcile(klona(properties)));
-    const data = updateEdge(graph.edges[actualEdgeId]);
+    const data = updateEdge(graph.edges[actualEdgeId], graph);
     transactionDetailAdd(
       txnId,
       {
         data,
         redo: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeProperties(0, actualEdgeId2, graph, setGraph, data.P);
         },
-        replaceEdge: () => updateEdge(data),
+        replaceEdge: () => updateEdge(data, graph),
         revert: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeProperties(
             0,
             actualEdgeId2,
@@ -189,14 +186,14 @@ export function replaceEdgeStart(
   options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
-    const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
     const actualNewStartVertexId =
-      vertexOldIdToNewIdMap.get(newStartVertexId) || newStartVertexId;
+      getVertexOldIdToNewIdMap(graph)[newStartVertexId] || newStartVertexId;
 
     if (!graph.edges[actualEdgeId]) {
       return { error: "Edge ID is not valid" };
     }
-    const edge = updateEdge(graph.edges[actualEdgeId]);
+    const edge = updateEdge(graph.edges[actualEdgeId], graph);
     const oldStartVertexId = edge.S;
     if (oldStartVertexId === actualNewStartVertexId) {
       return { error: "" };
@@ -213,20 +210,20 @@ export function replaceEdgeStart(
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
       );
     });
-    const data = updateEdge(graph.edges[actualEdgeId]);
+    const data = updateEdge(graph.edges[actualEdgeId], graph);
     transactionDetailAdd(
       txnId,
       {
         data,
         redo: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeStart(0, actualEdgeId2, graph, setGraph, data.S);
         },
-        replaceEdgeStart: () => updateEdge(data),
+        replaceEdgeStart: () => updateEdge(data, graph),
         revert: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeStart(
             0,
             actualEdgeId2,
@@ -259,14 +256,14 @@ export function replaceEdgeEnd(
   options?: { skipPostMessage?: boolean }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
-    const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
     const actualNewEndVertexId =
-      vertexOldIdToNewIdMap.get(newEndVertexId) || newEndVertexId;
+      getVertexOldIdToNewIdMap(graph)[newEndVertexId] || newEndVertexId;
 
     if (!graph.edges[actualEdgeId]) {
       return { error: "Edge ID is not valid" };
     }
-    const edge = updateEdge(graph.edges[actualEdgeId]);
+    const edge = updateEdge(graph.edges[actualEdgeId], graph);
     const oldEndVertexId = edge.E;
     if (oldEndVertexId === actualNewEndVertexId) {
       return { error: "" };
@@ -283,20 +280,20 @@ export function replaceEdgeEnd(
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
       );
     });
-    const data = updateEdge(graph.edges[actualEdgeId]);
+    const data = updateEdge(graph.edges[actualEdgeId], graph);
     transactionDetailAdd(
       txnId,
       {
         data,
         redo: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeEnd(0, actualEdgeId2, graph, setGraph, data.E);
         },
-        replaceEdgeEnd: () => updateEdge(data),
+        replaceEdgeEnd: () => updateEdge(data, graph),
         revert: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return replaceEdgeEnd(
             0,
             actualEdgeId2,
@@ -330,12 +327,12 @@ export function deleteEdge(
   txnDetailIndex?: number;
 } {
   return untrack(() => {
-    const actualEdgeId = edgeOldIdToNewIdMap.get(edgeId) || edgeId;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
 
     if (!graph.edges[actualEdgeId]) {
       return { error: "Edge ID is not valid" };
     }
-    const edge = updateEdge(graph.edges[actualEdgeId]);
+    const edge = updateEdge(graph.edges[actualEdgeId], graph);
     batch(() => {
       const type = edge.T;
       setGraph("vertexes", graph.edges[actualEdgeId].S, "OUT", type, (ids) => {
@@ -359,13 +356,13 @@ export function deleteEdge(
       txnId,
       {
         data,
-        deleteEdge: () => updateEdge(data),
+        deleteEdge: () => updateEdge(data, graph),
         redo: () => {
           const actualEdgeId2 =
-            edgeOldIdToNewIdMap.get(actualEdgeId) || actualEdgeId;
+            getEdgeOldIdToNewIdMap(graph)[actualEdgeId] || actualEdgeId;
           return deleteEdge(0, actualEdgeId2, graph, setGraph);
         },
-        revert: () => addNewEdge(0, updateEdge(data), graph, setGraph),
+        revert: () => addNewEdge(0, updateEdge(data, graph), graph, setGraph),
       },
       graph,
       setGraph,

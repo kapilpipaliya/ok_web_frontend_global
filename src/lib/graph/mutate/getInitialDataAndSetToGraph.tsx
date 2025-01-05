@@ -6,6 +6,8 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
 import { setGraphData } from "./setGraphData";
+import { getGlobalStore } from "../get/sync/getGlobalStore";
+import { mergeVertexProperties } from "./vertex";
 
 export function getInitialDataAndSetToGraph(
   graph: [get: GraphInterface, set: SetStoreFunction<GraphInterface>],
@@ -19,11 +21,12 @@ export function getInitialDataAndSetToGraph(
         vertexMap[propName] = vertexId;
       }
     }
-    graph[1]("componentIdMap", vertexMap);
+    const globalStoreId = "globalStoreId";
+    mergeVertexProperties(0, globalStoreId, graph[0], graph[1], { componentIdMap: vertexMap });
   }
 
   const getData = async () => {
-    const url = graph[0].url ? `?${graph[0].url}=true` : '';
+    const url = getGlobalStore(graph[0]).P.url ? `?${getGlobalStore(graph[0]).P.url}=true` : '';
     const data = await getAPI(`${API.getInitialDataUrl}${url}`);
     setGraphData(graph[0], graph[1], data as any);
     setComponentIdMap(data.vertexes);

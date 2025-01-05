@@ -1,39 +1,59 @@
-import { ReactiveMap } from "@solid-primitives/map";
 import { createStore } from "solid-js/store";
 
 import type {
   EdgeMap,
+  GlobalProperties,
   GraphInterface,
   Id,
   Vertex,
   VertexMap,
 } from "~/lib/graph/graph";
+import { addNewVertex } from "./lib/graph/mutate/vertex";
 
 export function createAppState() {
   const graph = createStore<GraphInterface>({
-    activeClickOutside: [],
-    APP_BASE_URL: "/admin",
-    componentIdMap: {},
     edges: {} as EdgeMap,
-    events: {},
-    globalThemeId: "",
-    isDevelopment: false,
-    isLoadingPage: false,
-    member: { P: {} } as Vertex,
-    navBarHeight: 45,
-    navigationData: [],
-    newVertexId_: -500000,
-    txnId_: 0,
-    broadcastChannels: [],
-    userRoles: [],
-    get userSetting() {
-      return this.vertexes[this.userSettingId]; // NOSONAR
-    },
-    userSettingId: "",
     vertexes: {} as VertexMap,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    url: "",
+    broadcastChannels: [],
   });
+
+  addNewVertex(0, {
+    id: "globalStoreId",
+    L: ["GlobalStore"],
+    P: {
+      activeClickOutside: [],
+      componentIdMap: {},
+      globalThemeId: "",
+      isDevelopment: false,
+      isLoadingPage: false,
+      navBarHeight: 45,
+      navigationData: [],
+      newVertexId_: -500000,
+      txnId_: 0,
+      userRoles: [],
+      userSettingId: "",
+      url: "",
+    } as GlobalProperties,
+    IN: {},
+    OUT: {}
+  }, graph[0], graph[1]);
+
+  addNewVertex(0, {
+    id: "vertexOldIdToNewIdMap",
+    L: ["vertexOldIdToNewIdMap"],
+    P: {},
+    IN: {},
+    OUT: {}
+  }, graph[0], graph[1]);
+
+  addNewVertex(0, {
+    id: "edgeOldIdToNewIdMap",
+    L: ["edgeOldIdToNewIdMap"],
+    P: {},
+    IN: {},
+    OUT: {}
+  }, graph[0], graph[1]);
 
   return graph;
 }

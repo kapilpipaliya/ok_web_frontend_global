@@ -15,6 +15,3 @@ export type InsertFn = {
 };
 
 export type TransactionValue = { data: any } & InsertFn & Revert;
-
-export const vertexOldIdToNewIdMap = new Map<Id, Id>();
-export const edgeOldIdToNewIdMap = new Map<Id, Id>();

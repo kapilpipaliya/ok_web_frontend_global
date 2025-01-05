@@ -22,6 +22,7 @@ import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName"
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 const defaultStateLabel = "Default State";
 
@@ -125,7 +126,7 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
         />
         <br />
       </Show>
-      {graph.isDevelopment ? JSON.stringify(cssState) : null}
+      {getGlobalStore(graph).P.isDevelopment ? JSON.stringify(cssState) : null}
       <ResetButton onReset={resetCssState} />
       <TextEditor
         disabled={true}

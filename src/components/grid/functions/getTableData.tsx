@@ -5,6 +5,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { GraphInterface } from "~/lib/graph/graph";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export async function getTableData(
   graph: Store<GraphInterface>,
@@ -23,7 +24,7 @@ export async function getTableData(
     const result = await fetchDataFromMG(
       {
         expression: `g:'${tableId}[$1]'`,
-        [graph.url]: true,
+        [getGlobalStore(graph).P.url]: true,
         incoming,
         outgoing,
       },

@@ -6,6 +6,7 @@ import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,
@@ -21,7 +22,7 @@ export async function loadPageData(
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
   const result = await fetchDataFromMG({
     expression: `id:'${fromVertex.id}'`,
-    [graph.url]: true,
+    [getGlobalStore(graph).P.url]: true,
     incoming,
     outgoing,
   });

@@ -6,11 +6,12 @@ import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function getInitialGridState(graph: GraphInterface) {
   return {
     allConfiguredPermission: (() => []) as Accessor<Vertex[]>,
-    cardSize: graph.vertexes[graph.userSettingId]?.P.cardSize || 3,
+    cardSize: graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
     error: null as null | string,
     fetchTableData: (() => {}) as (
@@ -34,7 +35,7 @@ export function getInitialGridState(graph: GraphInterface) {
     isNoPermissionCheck: false,
     isSearching: false,
     isShowLoadMore: true,
-    layout: (graph.vertexes[graph.userSettingId]?.P.layout || "table") as
+    layout: (graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.layout || "table") as
       | "card"
       | "table",
     metaVertex: null as null | Vertex,

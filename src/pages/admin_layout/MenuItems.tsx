@@ -4,6 +4,7 @@ import { useGraph } from "~/lib/graph/graph";
 
 import { AuthenticatedMenu } from "./AuthenticatedMenu";
 import { UnauthenticatedMenu } from "./UnauthenticatedMenu";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 export interface MenuItemsProps {
   onClose: () => void;
   signOutCall: () => Promise<{
@@ -16,7 +17,7 @@ export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {
   return (
     <Show
       fallback={<UnauthenticatedMenu onClose={props.onClose} />}
-      when={!!graph.member?.P?.email}
+      when={!!getMemberVertex(graph)?.P?.email}
     >
       <AuthenticatedMenu
         onClose={props.onClose}

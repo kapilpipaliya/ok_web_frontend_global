@@ -5,7 +5,7 @@ import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedP
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
-import { edgeOldIdToNewIdMap, vertexOldIdToNewIdMap } from "./TransactionType";
+import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   if(!txnId) {
@@ -74,10 +74,10 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
 
   if (stepsToCommit.length || txnVertex.P.revertSteps.length) {
     const data = {
-      edgeIdMap: [...edgeOldIdToNewIdMap],
+      edgeIdMap: [...Object.entries(getEdgeOldIdToNewIdMap(graph))],
       transactions: [...reverseStepsToCommit, ...stepsToCommit],
       txnId: txnId,
-      vertexIdMap: [...vertexOldIdToNewIdMap],
+      vertexIdMap: [...Object.entries(getVertexOldIdToNewIdMap(graph))],
     };
     return data;
   }

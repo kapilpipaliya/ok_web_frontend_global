@@ -1,8 +1,8 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, type JSX } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { GlobalProperties, useGraph, Vertex } from "~/lib/graph/graph";
+import { addNewVertex, newVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
 
 import { AuthenticateUser } from "./AuthenticateUser";
@@ -16,6 +16,7 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   const [graph, setGraph] = useGraph();
   const location = useLocation();
   const navBarVertexId = generateNewVertexId(graph, setGraph);
+  const globalStoreId = "globalStoreId";
 
   // Add new vertex for the navbar
   addNewVertex(
@@ -29,7 +30,7 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
 
   // Handle URL change for sidebar visibility
   const handleUrlChange = () => {
-    setGraph("isSideBarOpen", !isPageDesignerPath(location.pathname));
+    mergeVertexProperties(0, globalStoreId, graph, setGraph, { isSideBarOpen: !isPageDesignerPath(location.pathname) });
   };
 
   createEffect(() => {
@@ -42,7 +43,7 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
       <div
         class="flex {scrollbar-width:thin} flex:column overflow:auto"
         classList={{
-          "flex-grow:1": graph.isSideBarOpen || graph.isSubSideBarOpen,
+          "flex-grow:1": (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSideBarOpen || (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSubSideBarOpen,
         }}
       >
         {props.children}

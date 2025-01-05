@@ -22,7 +22,7 @@ export function rowMetaInitialize(
 ) {
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   // when we delete the row, revertTransaction will not work, so used new metaTxnId.
-  //const metaTxnId = rowMetaAttrInst.error ? graph.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
+  //const metaTxnId = rowMetaAttrInst.error ? getGlobalStore(graph).P.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
   const metaTxnId = generateNewTxnId(graph, setGraph);
   const rows = rowMetaAttrInst.error
     ? {}

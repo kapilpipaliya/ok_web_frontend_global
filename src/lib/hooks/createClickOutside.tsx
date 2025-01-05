@@ -5,6 +5,7 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { createActiveClickOutside } from "./createActiveClickOutside";
+import { getGlobalStore } from "../graph/get/sync/getGlobalStore";
 
 export function createClickOutside(
   graph: Store<GraphInterface>,
@@ -15,7 +16,7 @@ export function createClickOutside(
   const handleClickOutside = (event: MouseEvent) => {
     if (
       activeClickOutside !==
-      graph.activeClickOutside[graph.activeClickOutside.length - 1]
+      getGlobalStore(graph).P.activeClickOutside[getGlobalStore(graph).P.activeClickOutside.length - 1]
     ) {
       return;
     }

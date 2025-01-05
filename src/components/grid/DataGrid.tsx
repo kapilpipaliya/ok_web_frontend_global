@@ -47,6 +47,7 @@ import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {
@@ -77,7 +78,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(null);
 
   const allConfiguredPermission = createMemo(() =>
-    getConfiguredPermissions(graph.userRoles, gridState.metaVertex, graph, setGraph)
+    getConfiguredPermissions(getGlobalStore(graph).P.userRoles, gridState.metaVertex, graph, setGraph)
   );
 
   const permissionChecks = {
@@ -132,7 +133,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromMG({
         expression: `g:'Form[${props.tableId}]'`,
-        [graph.url]: true,
+        [getGlobalStore(graph).P.url]: true,
         incoming,
         outgoing,
       });

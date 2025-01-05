@@ -1,7 +1,12 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
 import type { GraphInterface } from "../graph";
+import { mergeVertexProperties } from "../mutate/vertex";
 
 export function generateNewVertexId(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>): string {
-  setGraph("newVertexId_", (newVertexId: number) => newVertexId + 1);
-  return graph.newVertexId_.toString();
+  const globalStoreId = "globalStoreId";
+  const newVertexId = graph.vertexes[globalStoreId].P.newVertexId_ + 1;
+
+  mergeVertexProperties(0, globalStoreId, graph, setGraph, { newVertexId_: newVertexId });
+
+  return newVertexId.toString();
 }

@@ -6,6 +6,7 @@ import { mergeVertexProperties } from "../graph/mutate/vertex";
 import { commitTxn } from "../graph/transaction/commitTxn";
 import { submitDataCall } from "./service/data/submitDataCall";
 import { generateNewTxnId } from "../graph/transaction/generateNewTxnId";
+import { getGlobalStore } from "../graph/get/sync/getGlobalStore";
 
 export function saveUserSetting(
   properties: { [key: string]: any },
@@ -15,7 +16,7 @@ export function saveUserSetting(
   const newTxn = generateNewTxnId(graph, setGraph);
   mergeVertexProperties(
     newTxn,
-    graph.userSettingId,
+    getGlobalStore(graph).P.userSettingId,
     graph,
     setGraph,
     properties,

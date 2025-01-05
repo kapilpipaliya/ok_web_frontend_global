@@ -7,6 +7,7 @@ import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
 
 import { loadUser } from "../../lib/graph/mutate/loadUser";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
 interface AuthenticateUserProps {
   children: JSX.Element;
@@ -29,8 +30,8 @@ export function AuthenticateUser(props: Readonly<AuthenticateUserProps>) {
 
   return (
     <Switch>
-      <Match when={!graph.member?.id}>Loading</Match>
-      <Match when={graph.member?.id}>{props.children}</Match>
+      <Match when={!getMemberVertex(graph)?.id}>Loading</Match>
+      <Match when={getMemberVertex(graph)?.id}>{props.children}</Match>
     </Switch>
   );
 }

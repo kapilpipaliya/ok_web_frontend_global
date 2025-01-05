@@ -50,6 +50,7 @@ import { Label } from "../solid_blocks/Label";
 import { useToast } from "../styled/Toast";
 import { FormStoreObject, useFormContext } from "./FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function getText(
   graph: GraphInterface,
@@ -139,7 +140,7 @@ export function DynamicComponent(
   });
 
   const allConfiguredPermission = createLazyMemo(() =>
-    getConfiguredPermissions(graph.userRoles, props.meta, graph, setGraph),
+    getConfiguredPermissions(getGlobalStore(graph).P.userRoles, props.meta, graph, setGraph),
   );
   const hasInsertPermission = createLazyMemo(() => {
     return (
@@ -643,7 +644,7 @@ export function DynamicComponent(
 
   return (
     <>
-      {/* <Show when={!props.isNoPermissionCheck && graph.isDevelopment}>
+      {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
@@ -655,7 +656,7 @@ export function DynamicComponent(
           isNoPermissionCheck={isNoPermissionCheck()}
           metaVertexId={props.meta.id}
           mounted={true}
-          userRoles={graph.userRoles}
+          userRoles={getGlobalStore(graph).P.userRoles}
         />
       </Show> */}
       <PageRenderContextProvider store={repeterStore}>

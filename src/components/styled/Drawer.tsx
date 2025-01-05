@@ -12,6 +12,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface DrawerProps {
   children: JSX.Element;
@@ -59,7 +60,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
   const handleEscClose = (event: KeyboardEvent) => {
     if (
       activeClickOutside !==
-      graph.activeClickOutside[graph.activeClickOutside.length - 1]
+      getGlobalStore(graph).P.activeClickOutside[getGlobalStore(graph).P.activeClickOutside.length - 1]
     ) {
       return;
     }

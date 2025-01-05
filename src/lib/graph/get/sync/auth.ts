@@ -1,6 +1,7 @@
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { getSelectionOptions } from "./getSelectionOptions";
+import { getMemberVertex } from "./getMemberVertex";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
@@ -13,7 +14,7 @@ export function getPermissions(meta: Vertex) {
       if (!roles.error) {
         const allowedRoleIds = new Set<Id>();
         for (const role of roles.vertexes!) {
-          if (graph.member?.P.roles?.includes(role.id)) {
+          if (getMemberVertex(graph).P.roles?.includes(role.id)) {
             allowedRoleIds.add(role.id);
           }
         }
@@ -34,7 +35,7 @@ export function getPermissions(meta: Vertex) {
               );
               if (!permissions.error) {
                 permissionResult.push([
-                  permissions.vertexes?.map((perm) => perm.id),
+                  permissions.vertexes?.map((perm: Vertex) => perm.id),
                   permissionRow.P.scope,
                 ]);
               }

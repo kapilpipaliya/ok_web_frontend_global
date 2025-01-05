@@ -13,6 +13,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
 
@@ -63,14 +64,17 @@ export function Login(): JSX.Element {
       return;
     }
 
-    setGraph("isLoadingPage", true);
+    const globalStoreId = "globalStoreId";
+    const globalStore = graph.vertexes[globalStoreId] as Vertex;
+
+    mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: true });
     await showLoadingToast({
       loadMessage: "Logging In...",
       onError(_error) {
-        setGraph("isLoadingPage", false);
+        mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
       },
       onSuccess: (value) => {
-        setGraph("isLoadingPage", false);
+        mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
         handleLoginRedirect(value as Vertex, graph, navigate);
       },
       promise: signInCall(formData),

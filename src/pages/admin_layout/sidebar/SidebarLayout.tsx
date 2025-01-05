@@ -4,11 +4,13 @@ import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { useGraph } from "~/lib/graph/graph";
+import { GlobalProperties, useGraph, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { getGlobalStore } from "../../../lib/graph/get/sync/getGlobalStore";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -17,7 +19,6 @@ export interface navbarDataI {
   id: string;
   key: string;
 }
-
 /* deprecated */
 export function Sidebar() {
   const [searchData, setSearchData] = createSignal<any>([]);
@@ -47,11 +48,12 @@ export function Sidebar() {
     const searchName = input.trim().toLowerCase();
     setIsSearchMode(searchName.length > 0);
 
+
     if (searchName.length > 0) {
-      const filteredData = filterNavData(graph.navigationData, searchName);
+      const filteredData = filterNavData(getGlobalStore(graph).P.navigationData, searchName);
       setSearchData(filteredData);
     } else {
-      setSearchData(graph.navigationData);
+      setSearchData(getGlobalStore(graph).P.navigationData);
     }
   }
 
@@ -106,11 +108,11 @@ export function Sidebar() {
     const path = location.pathname;
 
     if (path.includes("/admin")) {
-      setGraph("isSideBarOpen", true);
-      setGraph("isSubSideBarOpen", true);
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSideBarOpen: true });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSubSideBarOpen: true });
     } else {
-      setGraph("isSideBarOpen", false);
-      setGraph("isSubSideBarOpen", false);
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSideBarOpen: false });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSubSideBarOpen: false });
     }
   };
 
@@ -145,20 +147,22 @@ export function Sidebar() {
       setGraphData(graph, setGraph, data.graph);
       setNavData(data.children[0].children);
       setSearchData(data.children[0].children);
-      setGraph("navigationData", data.children[0].children);
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { navigationData: data.children[0].children });
     }
   });
 
-  const sidebarStyle = () =>
-    ({
+  const sidebarStyle = () => {
+    const globalStore = graph.vertexes["globalStoreId"] as Vertex<GlobalProperties>;
+    return {
       background: "#f4f4f4",
       "border-right": "1px solid lightgray",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",
-      display: graph.isSideBarOpen ? "" : "none",
-      transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
+      display: globalStore.P.isSideBarOpen ? "" : "none",
+      transform: globalStore.P.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       transition: "transform 0.3s ease-in-out",
       // width: isCollapsed() ? "70px" : "310px",
-    }) as JSX.CSSProperties;
+    } as JSX.CSSProperties;
+  };
 
   return (
     <aside class="flex r:0|10|10|0" style={sidebarStyle()}>

@@ -1,4 +1,5 @@
 import { type JSX, Show } from "solid-js";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
 import { useGraph } from "~/lib/graph/graph";
 export interface ProfileHeaderProps {
@@ -19,16 +20,16 @@ export function ProfileHeader(
       <div class="ml:10 mr:1rem">
         <div class="f:15 font-weight:bold text-align:start">
           <Show
-            fallback={graph.member?.P?.username ?? "anonymous"}
-            when={!graph.member?.P?.username}
+            fallback={getMemberVertex(graph)?.P?.username ?? "anonymous"}
+            when={!getMemberVertex(graph)?.P?.username}
           >
             Guest User
           </Show>
         </div>
         <div class="f:13 text-align:start">
           <Show
-            fallback={graph.member?.P?.email ?? "anonymous@gmail.com"}
-            when={!graph.member?.P?.email}
+            fallback={getMemberVertex(graph)?.P?.email ?? "anonymous@gmail.com"}
+            when={!getMemberVertex(graph)?.P?.email}
           >
             guest@gmail.com
           </Show>

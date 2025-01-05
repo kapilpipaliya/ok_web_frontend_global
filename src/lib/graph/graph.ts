@@ -47,34 +47,32 @@ export interface TransactionDetail {
   undoStepIndexes: number[];
 }
 
-export interface GraphInterface {
+export interface GlobalProperties {
   txnId_: number;
   newVertexId_: number;
   activeClickOutside: string[];
-  APP_BASE_URL: string;
   componentIdMap: { [key: string]: string };
-  edges: EdgeMap;
-  events: { [key: string]: any };
   globalThemeId: Id;
   isDevelopment: boolean;
   isLoadingPage?: boolean;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  member?: Vertex;
   navBarHeight: number;
   navigationData?: AnyObject[];
-  broadcastChannels: string[];
   userRoles: Id[];
-  userSetting: Vertex;
   userSettingId: Id;
-  vertexes: VertexMap;
-  vertexLabelIdMap: { [key: string]: Id[] };
   url: string;
-
   // isAuthenticated: false,
   // theme: "light" as "light" | "dark",
   // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
   // language: "en" as string,
+}
+
+export interface GraphInterface {
+  edges: EdgeMap;
+  broadcastChannels: string[];
+  vertexes: VertexMap;
+  vertexLabelIdMap: { [key: string]: Id[] };
 }
 
 export const GraphContext =

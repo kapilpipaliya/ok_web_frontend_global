@@ -6,6 +6,7 @@ import { resetDragDropState } from "../page_designer/event_handler/resetDragDrop
 import { PageLayoutObject, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
 import { useToast } from "./Toast";
 import { FormStoreObject } from "../form/FormContext";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function ResizableContainer(
   props: Readonly<{
@@ -16,7 +17,7 @@ export function ResizableContainer(
   const [width, setWidth] = createSignal("");
   const [graph, setGraph] = useGraph();
   const [_height, setHeight] = createSignal(
-    `calc(100vh - ${graph.navBarHeight + 2}px)`,
+    `calc(100vh - ${getGlobalStore(graph).P.navBarHeight + 2}px)`,
   );
   const DIMENSIONS = {
     desktop: { height: "1200px", width: "100%" },
@@ -78,7 +79,7 @@ export function ResizableContainer(
       <div
         class="scrollbar-color:lightgrey {scrollbar-width:thin} border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
-          [`height:calc(100vh-${graph.navBarHeight + 2}px)`]: true,
+          [`height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px)`]: true,
           // [`height:${height()}`]: !!height(), // resizable height
           [`width:${width()}`]: !!width(),
           "bg:#f3f3f4": isDraggingOver(),
@@ -98,7 +99,7 @@ export function ResizableContainer(
 
           await handleDrop(
             e,
-            layoutStore(),
+            layoutStoreId,
             graph,
             setGraph,
             showErrorToast

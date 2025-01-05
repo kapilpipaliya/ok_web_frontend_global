@@ -8,6 +8,7 @@ import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,
@@ -18,7 +19,7 @@ export const getFormData = async (
     const { incoming, outgoing } = getEdgesFromRowsAttr(metaAttrs);
     const result = await fetchDataFromMG({
       expression: `id:'${id}'`,
-      [graph.url]: true,
+      [getGlobalStore(graph).P.url]: true,
       incoming,
       outgoing,
     });

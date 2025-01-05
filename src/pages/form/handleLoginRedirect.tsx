@@ -13,6 +13,6 @@ export function handleLoginRedirect(
   if (redirectUrl) {
     navigate(redirectUrl);
   } else if (value != null && value.id !== null) {
-    navigate(`${graph.APP_BASE_URL}/${value.P.redirectUrl ?? ""}`);
+    navigate(`admin/${value.P.redirectUrl ?? ""}`);
   }
 }

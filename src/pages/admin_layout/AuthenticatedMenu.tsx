@@ -3,7 +3,8 @@ import type { JSX } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/Toast";
-import { useGraph } from "~/lib/graph/graph";
+import { GlobalProperties, useGraph } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -18,12 +19,14 @@ export function AuthenticatedMenu(
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showLoadingToast } = useToast();
+  const globalStoreId = "globalStoreId";
+
   return (
     <>
       <li class="m:5|10 mt:5px">
         <a
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={`${graph.APP_BASE_URL}/settings`}
+          href={`/admin/settings`}
           onclick={props.onClose}
         >
           Account Setting
@@ -44,7 +47,7 @@ export function AuthenticatedMenu(
           class="flex ai:center color:#333 cursor:default p:10px|7px r:5|5|5|5 text-decoration:none"
           onclick={async () => {
             props.onClose();
-            setGraph("isLoadingPage", true);
+            mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { isLoadingPage: true });
             await showLoadingToast({
               loadMessage: "Logging Out...",
               onSuccess: (value) => {
@@ -55,7 +58,7 @@ export function AuthenticatedMenu(
               promise: props.signOutCall(),
               successMessage: "Log Out Successfully",
             });
-            setGraph("isLoadingPage", false);
+            mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
           }}
         >
           Sign Out
