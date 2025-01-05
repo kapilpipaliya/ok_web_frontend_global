@@ -3,6 +3,7 @@ import type { Strategy } from "@floating-ui/dom";
 import createFloating from "@corvu/utils/create/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
+import { getFloatingStyle } from '@corvu/utils/floating'
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -23,7 +24,20 @@ export function AttrConfigPopOverWrapper(
   const floatingState = createFloating({
     enabled: true,
     floating: floating,
-    options: () => ({}),
+    options: () => ({
+      flip: {
+        padding: {
+          top: 28,
+          bottom: 28
+        },
+        // this seems not working now
+        // fallbackPlacements: ['top', 'top-end', 'bottom-start'],
+      },
+      shift: {},
+      offset: ({ placement }) => {
+        return placement.startsWith('bottom') ? 30 : 1;
+      }
+    }),
     placement: () => (props.isSelectedLayoutId ? "top-start" : "top-start"),
     reference: () => props.reference() ?? null,
     strategy,
@@ -33,12 +47,12 @@ export function AttrConfigPopOverWrapper(
     <ZIndex>
       <Portal>
         <div
-          class=""
           ref={setFloating}
           style={{
-            left: `${floatingState().x ?? 0}px`,
-            position: strategy(),
-            top: `${floatingState().y ?? 0}px`,
+            ...getFloatingStyle({
+              strategy: () => strategy(),
+              floatingState: () => floatingState(),
+            })(),
           }}
         >
           <AttrConfigPopOver item={props.item} />
