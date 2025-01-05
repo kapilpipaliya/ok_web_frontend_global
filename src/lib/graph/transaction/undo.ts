@@ -4,6 +4,8 @@ import type { GraphInterface, TransactionDetail } from "../graph";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "../mutate/vertex";
+import { redoTxn } from "./redoTxn";
+import { undoTxn } from "./undoTxn";
 
 export function undoAllowed(
   txnId: number,
@@ -57,10 +59,10 @@ export function undo(
   const newUndoIndex =
     revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
-  txnValue.steps
-    .slice(newUndoIndex + 1, activeUndoIndex + 1)
-    .reverse()
-    .forEach((txn) => txn.revert());
+  const stepsToRedo = txnValue.steps.slice(newUndoIndex + 1, activeUndoIndex + 1).reverse();
+  for (const txn of stepsToRedo) {
+    undoTxn(txn, graph, setGraph);
+  }
   txnValue.activeUndoIndex = newUndoIndex;
 
   if (removeAfterSteps) {

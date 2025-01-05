@@ -1,6 +1,5 @@
 import type { Id } from "../graph";
 
-export type Revert = { redo: () => void; revert: () => void };
 export type InsertFn = {
   [key in
     | "deleteEdge"
@@ -10,8 +9,10 @@ export type InsertFn = {
     | "merge"
     | "replace"
     | "replaceEdge"
+    // we dont have mergeEdge function
     | "replaceEdgeEnd"
-    | "replaceEdgeStart"]?: () => void;
+    | "replaceEdgeStart"]?: string;
 };
 
-export type TransactionValue = { data: any } & InsertFn & Revert;
+export type TransactionValue = { id: Id,originalData: any, data: any } & InsertFn;
+

@@ -4,6 +4,7 @@ import type { GraphInterface } from "../graph";
 
 import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "../mutate/vertex";
+import { redoTxn } from "./redoTxn";
 
 export function redoAllowed(
   txnId: number,
@@ -46,13 +47,9 @@ export function redo(
   }
 
   txnValue.activeUndoIndex = nextUndoIndex;
-  txnValue.steps
-    .slice(activeUndoIndex + 1, nextUndoIndex + 1)
-    .forEach((step) => {
-      if (step.redo) {
-        step.redo();
-      }
-    });
+  for (const step of txnValue.steps.slice(activeUndoIndex + 1, nextUndoIndex + 1)) {
+    redoTxn(step, graph, setGraph);
+  }
 
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
 }

@@ -6,6 +6,8 @@ import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
 import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
+import { updateVertexIdsToNew } from "../mutate/vertex";
+import { updateEdgeIdsToNew } from "../mutate/edge";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   if(!txnId) {
@@ -40,35 +42,29 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
 
   const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
     return removeUndefinedProperties({
-      deleteEdge: txnDetail.insertEdge ? txnDetail.insertEdge() : undefined,
-      deleteVertex: txnDetail.insert ? txnDetail.insert() : undefined,
-      insertEdge: txnDetail.deleteEdge ? txnDetail.deleteEdge() : undefined,
-      insertVertex: txnDetail.deleteVertex
-        ? txnDetail.deleteVertex()
-        : undefined,
-      merge: txnDetail.merge ? txnDetail.merge() : undefined,
-      replace: txnDetail.replace ? txnDetail.replace() : undefined,
-      replaceEdge: txnDetail.replaceEdge ? txnDetail.replaceEdge() : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd
-        ? txnDetail.replaceEdgeEnd()
-        : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart
-        ? txnDetail.replaceEdgeStart()
-        : undefined,
+      deleteEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      deleteVertex: txnDetail.insert ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      insertEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      insertVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      merge: txnDetail.merge ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      replace: txnDetail.replace ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
     });
   });
 
   const stepsToCommit = steps.map((txnDetail) => {
     return removeUndefinedProperties({
-      deleteEdge: txnDetail.deleteEdge?.(),
-      deleteVertex: txnDetail.deleteVertex?.(),
-      insert: txnDetail.insert?.(),
-      insertEdge: txnDetail.insertEdge?.(),
-      merge: txnDetail.merge?.(),
-      replace: txnDetail.replace?.(),
-      replaceEdge: txnDetail.replaceEdge?.(),
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
-      replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
+      deleteEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      deleteVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      insert: txnDetail.insert ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      insertEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      merge: txnDetail.merge ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      replace: txnDetail.replace ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
     });
   });
 

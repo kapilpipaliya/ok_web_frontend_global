@@ -44,7 +44,7 @@ export function addNewVertex(
     if (existedVertexes.length) {
       return { error: "vertex ID already exist while adding new vertex" };
     }
-    setGraph("vertexes", actualVertexId, updateVertex(klona(vertex), graph));
+    setGraph("vertexes", actualVertexId, updateVertexIdsToNew(klona(vertex), graph));
     vertex.L.forEach((label) =>
       setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
         Array.isArray(vertexIds)
@@ -52,22 +52,14 @@ export function addNewVertex(
           : [actualVertexId],
       ),
     );
-    const data = updateVertex(klona(vertex), graph);
+    const data = updateVertexIdsToNew(klona(vertex), graph);
     transactionDetailAdd(
       txnId,
       {
+        id: actualVertexId,
         data,
-        insert: () => {
-          return updateVertex(data, graph);
-        },
-        redo: () => {
-          return addNewVertex(0, updateVertex(data, graph), graph, setGraph);
-        },
-        revert: () => {
-          const actualVertexId2 =
-            getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-          return deleteVertex(0, actualVertexId2, graph, setGraph);
-        },
+        insert: "insertVertex",
+        originalData: klona(vertex),
       },
       graph,
       setGraph,
@@ -103,34 +95,14 @@ export function replaceVertexProperties(
     setGraph("vertexes", actualVertexId, "P", reconcile(shouldClone ? klona(properties) : properties));
     if (txnId) {
       const originalProperties = klona(graph.vertexes[actualVertexId].P);
-      const data = updateVertex(klona(graph.vertexes[actualVertexId]), graph);
+      const data = updateVertexIdsToNew(klona(graph.vertexes[actualVertexId]), graph);
       transactionDetailAdd(
         txnId,
         {
+          id: actualVertexId,
+          originalData: klona(originalProperties),
           data,
-          redo: () => {
-            const actualVertexId2 =
-              getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-            return replaceVertexProperties(
-              0,
-              actualVertexId2,
-              graph,
-              setGraph,
-              data.P,
-            );
-          },
-          replace: () => updateVertex(data, graph),
-          revert: () => {
-            const actualVertexId2 =
-              getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-            return replaceVertexProperties(
-              0,
-              actualVertexId2,
-              graph,
-              setGraph,
-              originalProperties,
-            );
-          },
+          replace: "replaceVertex", 
         },
         graph,
         setGraph,
@@ -170,38 +142,16 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
     const clonedProperties = klona(properties);
     // It will only merge top level properties.
     setGraph("vertexes", actualVertexId, "P", clonedProperties);
-    const data = updateVertex(klona(vertex), graph);
+    const data = updateVertexIdsToNew(klona(vertex), graph);
     data.P = clonedProperties;
 
     transactionDetailAdd(
       txnId,
       {
-        data: clonedProperties,
-        merge: () => {
-          return updateVertex(data, graph);
-        },
-        redo: () => {
-          const actualVertexId2 =
-            getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-          return mergeVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            clonedProperties,
-          );
-        },
-        revert: () => {
-          const actualVertexId2 =
-            getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-          return mergeVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            klona(originalProperties),
-          );
-        },
+        id: actualVertexId,
+        originalData: klona(originalProperties),
+        data,
+        merge: "mergeVertex",
       },
       graph,
       setGraph,
@@ -312,16 +262,10 @@ export function deleteVertex(
     transactionDetailAdd(
       txnId,
       {
+        id: actualVertexId,
+        originalData: klona(vertex),
         data,
-        deleteVertex: () => updateVertex(data, graph),
-        redo: () => {
-          const actualVertexId2 =
-            getVertexOldIdToNewIdMap(graph)[actualVertexId] || actualVertexId;
-          return deleteVertex(0, actualVertexId2, graph, setGraph);
-        },
-        revert: () => {
-          return addNewVertex(0, updateVertex(data, graph), graph, setGraph);
-        },
+        deleteVertex: "deleteVertexFn",
       },
       graph,
       setGraph,
@@ -336,7 +280,7 @@ export function deleteVertex(
   });
 }
 
-function updateVertex(vertex: Vertex, graph: Store<GraphInterface>) {
+export function updateVertexIdsToNew(vertex: Vertex, graph: Store<GraphInterface>) {
   return untrack(() => {
     vertex.id = getVertexOldIdToNewIdMap(graph)[vertex.id] || vertex.id;
     Object.entries(vertex.IN).forEach(([edgeType, edgeIds]) => {
