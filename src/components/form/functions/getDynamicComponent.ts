@@ -49,7 +49,6 @@ import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { componentMap } from "~/components/css_properties/components/componentMap";
 import { CheckboxField } from "~/components/fields/CheckboxField";
-import { FormError } from "~/components/fields/FormError";
 import { FragmentField } from "~/components/fields/FragmentField";
 import { IconField } from "~/components/fields/IconField";
 import { ImageField } from "~/components/fields/ImageField";
@@ -67,7 +66,7 @@ import { TableInputField } from "~/components/fields/table_field/TableInputField
 import { TextAreaField } from "~/components/fields/TextArea";
 import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { Repeater } from "~/components/page_attr_render/Repeater";
+import { DataField } from "~/components/page_attr_render/Repeater";
 
 import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
@@ -97,7 +96,6 @@ export const componentsMap: Record<string, any> = {
   // ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
-  FormError,
   Fragment: FragmentField,
   Icon: IconField,
   Image: ImageField,
@@ -111,7 +109,7 @@ export const componentsMap: Record<string, any> = {
   Radio: RadioField,
   RadioGroup: RadioGroupField,
   // RadioGroup: RadioGroupField,
-  Repeater: Repeater,
+  Data: DataField,
   Select: SelectField,
   Step,
   Steps: StepsRoot,

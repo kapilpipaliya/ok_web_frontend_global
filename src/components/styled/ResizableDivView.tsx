@@ -1,4 +1,5 @@
-import { createEffect, createSignal, type JSX } from "solid-js";
+import { createEffect, createSignal, Show, type JSX } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
@@ -13,58 +14,71 @@ export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
     view: string;
+    width?: string;
+    height?: string;
   }>,
 ) {
-  const [width, setWidth] = createSignal("");
+  const [width, setWidth] = createSignal(props.width || "");
   const [graph, setGraph] = useGraph();
-  const [_height, setHeight] = createSignal(
-    `calc(100vh - ${getGlobalStore(graph).P.navBarHeight + 2}px)`,
+  const [height, setHeight] = createSignal(
+    props.height || `calc(100vh - ${getGlobalStore(graph).P.navBarHeight + 2}px)`
   );
+  const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
+  const [resizing, setResizing] = createSignal(false);
+
   const DIMENSIONS = {
-    desktop: { height: "1200px", width: "100%" },
+    desktop: { height: "1200px", width: "1200px" },
     mobile: { height: "570px", width: "360px" },
     tablet: { height: "1026px", width: "768px" },
   };
 
   createEffect(() => {
-    if (props.view === "Mobile") {
-      setWidth(DIMENSIONS.mobile.width);
-      setHeight(DIMENSIONS.mobile.height);
-    } else if (props.view === "Tablet") {
-      setWidth(DIMENSIONS.tablet.width);
-      setHeight(DIMENSIONS.tablet.height);
-    } else {
-      setWidth(DIMENSIONS.desktop.width);
-      setHeight(DIMENSIONS.desktop.height);
+    if (!props.width && !props.height) {
+      if (props.view === "Mobile") {
+        setWidth(DIMENSIONS.mobile.width);
+        setHeight(DIMENSIONS.mobile.height);
+      } else if (props.view === "Tablet") {
+        setWidth(DIMENSIONS.tablet.width);
+        setHeight(DIMENSIONS.tablet.height);
+      } else {
+        setWidth(DIMENSIONS.desktop.width);
+        setHeight(DIMENSIONS.desktop.height);
+      }
     }
   });
 
-  // const handleMouseDown = (e, direction) => {
-  //     e.preventDefault();
-  //     const container = e.target.closest(".resizable-container");
-  //     const initialWidth = container.offsetWidth;
-  //     const initialHeight = container.offsetHeight;
-  //     const startX = e.clientX;
-  //     const startY = e.clientY;
-  //
-  //     const handleMouseMove = (e) => {
-  //         if (direction === "horizontal") {
-  //             const newWidth = initialWidth + e.clientX - startX;
-  //             setWidth(newWidth < 50 ? 50 : newWidth);
-  //         } else if (direction === "vertical") {
-  //             const newHeight = initialHeight + e.clientY - startY;
-  //             setHeight(newHeight < 50 ? 50 : newHeight);
-  //         }
-  //     };
-  //
-  //     const handleMouseUp = () => {
-  //         window.removeEventListener("mousemove", handleMouseMove);
-  //         window.removeEventListener("mouseup", handleMouseUp);
-  //     };
-  //
-  //     window.addEventListener("mousemove", handleMouseMove);
-  //     window.addEventListener("mouseup", handleMouseUp);
-  // };
+  const handleMouseDown = (e: MouseEvent, direction: "horizontal" | "vertical") => {
+    e.preventDefault();
+    const container = containerRef();
+    if (!container) return;
+
+    setResizing(true);
+    const initialWidth = container.offsetWidth;
+    const initialHeight = container.offsetHeight;
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizing()) return;
+      
+      if (direction === "horizontal") {
+        const newWidth = initialWidth + e.clientX - startX;
+        setWidth(`${Math.max(50, newWidth)}px`);
+      } else if (direction === "vertical") {
+        const newHeight = initialHeight + e.clientY - startY;
+        setHeight(`${Math.max(50, newHeight)}px`);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setResizing(false);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
 
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const layoutStoreId = useDesignerLayoutStore();
@@ -75,15 +89,18 @@ export function ResizableContainer(
 
   return (
     <div
-      class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto width:100%"
+      class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto"
     >
       <div
+        ref={setContainerRef}
         class="scrollbar-color:lightgrey {scrollbar-width:thin} border:2px|solid|lightgray justify-self:center overflow:auto position:relative r:10|10|10|10"
         classList={{
-          [`height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px)`]: true,
-          // [`height:${height()}`]: !!height(), // resizable height
-          [`width:${width()}`]: !!width(),
           "bg:#f3f3f4": isDraggingOver(),
+          "user-select:none": resizing(),
+        }}
+        style={{
+          height: height(),
+          width: width()
         }}
         onDragOver={(e) => {
           e.preventDefault(); // Allow drop
@@ -109,16 +126,32 @@ export function ResizableContainer(
           resetDragDropState(layoutStoreId, graph, setGraph);
         }}
       >
-        {/*<div
-                    style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
-                    onMouseDown={(e) => handleMouseDown(e, "horizontal")}
-                />*/}
+        <div
+          style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0; z-index: 10;`}
+          onMouseDown={(e) => handleMouseDown(e, "horizontal")}
+        />
         {props.children}
-        {/*<div
-                    style={`width: 100%; height: 2px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
-                    onMouseDown={(e) => handleMouseDown(e, "vertical")}
-                />*/}
+        <div
+          style={`width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0; z-index: 10;`}
+          onMouseDown={(e) => handleMouseDown(e, "vertical")}
+        />
       </div>
+
+      {/* Overlay Portal */}
+      <Show when={resizing()}>
+        <Portal>
+          <div
+            style={{
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              right: '0', 
+              bottom: '0',
+              'z-index': '9999'
+            }}
+          />
+        </Portal>
+      </Show>
     </div>
   );
 }
