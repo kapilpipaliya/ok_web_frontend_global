@@ -24,7 +24,7 @@ export function modifyFieldMetaAllFields(
     generateFormMetaAttributes(
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex().P.formDataId!],
+      graph.vertexes[formStoreVertex()?.P.formDataId!],
       ignoreTable,
     ).attributes;
   return attribute;

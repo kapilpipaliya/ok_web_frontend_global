@@ -20,7 +20,7 @@ export function NameKey() {
       <span class="f:15 flex:1">
         <DynamicComponent
           componentName={"MultiSelect"}
-          data={graph.vertexes[formStoreVertex().P.formDataId!]}
+          data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={
@@ -34,7 +34,7 @@ export function NameKey() {
               ),
             } as unknown as Vertex
           }
-          txnId={formStoreVertex().P.txnId}
+          txnId={formStoreVertex()?.P.txnId}
         />
       </span>
     </div>

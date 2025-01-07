@@ -29,7 +29,7 @@ export function ShareSection() {
     if (layoutStore()) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
-      const { id, L, P } = graph.vertexes[formStoreVertex().P.formDataId!];
+      const { id, L, P } = graph.vertexes[formStoreVertex()?.P.formDataId!];
 
       if (isNegative(id)) {
         setError(`Please save the ${L[0]} first.`);

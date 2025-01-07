@@ -22,10 +22,10 @@ export function DuplicateButton(props: { item: Vertex }) {
           props.item,
           undefined,
           undefined,
-          formStoreVertex().P.txnId,
+          formStoreVertex()?.P.txnId,
           graph,
           setGraph,
-          graph.vertexes[formStoreVertex().P.formDataId!],
+          graph.vertexes[formStoreVertex()?.P.formDataId!],
         )
       }
       size={20}

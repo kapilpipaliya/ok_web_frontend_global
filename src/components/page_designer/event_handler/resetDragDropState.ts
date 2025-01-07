@@ -17,7 +17,7 @@ export function resetDragDropState(
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   batch(() => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       activeItem: null,
       draggedVertexIds: [],
       position: null,

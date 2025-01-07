@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { type GraphInterface, type Id, useGraph } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../context/LayoutContext";
@@ -40,12 +40,12 @@ export function DeleteAttributeDialog() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const nameKeyAttributes = () =>
-    getAttributeNames(graph, layoutStore().usedAttrsInNameKeys);
+    getAttributeNames(graph, formStoreVertex()?.P.usedAttrsInNameKeys);
   const uniqueConstraintAttributes = () =>
-    getAttributeNames(graph, layoutStore().usedAttrsInUniqueConstraints);
+    getAttributeNames(graph, formStoreVertex()?.P.usedAttrsInUniqueConstraints);
 
   const handleClose = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       usedAttrsInRules: reconcile({}),
       usedAttrsInNameKeys: reconcile([]),
       usedAttrsInUniqueConstraints: reconcile([]),
@@ -55,19 +55,19 @@ export function DeleteAttributeDialog() {
 
   const descriptionParts = [
     "The attribute or its children are used in the following rules or constraints.",
-    layoutStore().usedAttrsInRules &&
-    Object.keys(layoutStore().usedAttrsInRules).length > 0
+    formStoreVertex()?.P.usedAttrsInRules &&
+    Object.keys(formStoreVertex()?.P.usedAttrsInRules ?? {}).length > 0
       ? "Please delete them from the rules before deleting the attribute."
       : "",
-    layoutStore().usedAttrsInNameKeys &&
-    layoutStore().usedAttrsInNameKeys.length > 0
+    formStoreVertex()?.P.usedAttrsInNameKeys &&
+    formStoreVertex()?.P.usedAttrsInNameKeys.length > 0
       ? "Please delete them from the key keys before deleting the attribute."
       : "",
-    layoutStore().usedAttrsInUniqueConstraints &&
-    layoutStore().usedAttrsInUniqueConstraints.length > 0
+    formStoreVertex()?.P.usedAttrsInUniqueConstraints &&
+    formStoreVertex()?.P.usedAttrsInUniqueConstraints.length > 0
       ? "Please delete them from the unique constraints before deleting the attribute."
       : "",
-    layoutStore().shouldContainAtLeastOneForm
+    formStoreVertex()?.P.shouldContainAtLeastOneForm
       ? "Additionally, ensure that at least one form attribute is present."
       : "",
   ]
@@ -82,14 +82,14 @@ export function DeleteAttributeDialog() {
       title="Delete Attribute"
     >
       <div class="mt:1rem">
-        <For each={Object.keys(layoutStore().usedAttrsInRules)}>
+        <For each={Object.keys(formStoreVertex()?.P.usedAttrsInRules)}>
           {(attr) => (
             <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
               <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem">
                 <li>
                   The attribute {graph.vertexes[attr]?.P.key} is used in the
                   following rules:{" "}
-                  {layoutStore().usedAttrsInRules[attr]
+                  {formStoreVertex()?.P.usedAttrsInRules[attr]
                     .map((rule) => graph.vertexes[rule]?.P.key)
                     .join(", ")}
                   .
@@ -106,7 +106,7 @@ export function DeleteAttributeDialog() {
           attributes={uniqueConstraintAttributes()}
           title="The following attributes are used in unique constraints:"
         />
-        <Show when={layoutStore().shouldContainAtLeastOneForm}>
+        <Show when={formStoreVertex()?.P.shouldContainAtLeastOneForm}>
           <div class="lh:1.25rem color:red f:0.875rem mt:0.5rem">
             Error: At least one form attribute should be present.
           </div>

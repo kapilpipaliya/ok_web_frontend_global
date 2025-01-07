@@ -35,7 +35,7 @@ export function ImportMenu(
 
   const [htmlContent, setHtmlContent] = createSignal("");
   const [error] = createSignal("");
-  const prevTxnIndex = getLastTxnIndex(formStoreVertex().P.txnId, graph);
+  const prevTxnIndex = getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const metaVertexId = generateNewVertexId(graph, setGraph);
   const dataVertexId = generateNewVertexId(graph, setGraph);
@@ -49,18 +49,18 @@ export function ImportMenu(
 
   const onImport = () => {
     const jsxParser = new JsxParser({
-      formData: graph.vertexes[formStoreVertex().P.formDataId!],
+      formData: graph.vertexes[formStoreVertex()?.P.formDataId!],
       jsx: htmlContent(),
-      parent: graph.vertexes[layoutStore().selectedId],
+      parent: graph.vertexes[formStoreVertex()?.P().selectedId],
       showWarnings: true,
-      txnId: formStoreVertex().P.txnId,
+      txnId: formStoreVertex()?.P.txnId,
     });
     jsxParser.render(graph, setGraph);
   };
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
-        formStoreVertex().P.txnId,
+        formStoreVertex()?.P.txnId,
         prevTxnIndex,
         graph,
         setGraph,

@@ -61,30 +61,30 @@ export function PageItem(
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [] });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [] });
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [...layoutStore().draggedVertexIds, ...dataTransfer.map(v => v.id)] });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [...formStoreVertex()?.P.draggedVertexIds, ...dataTransfer.map(v => v.id)] });
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [props.child.id] });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [props.child.id] });
     onClickAddComponent(
       graph,
       setGraph,
-      formStoreVertex().P.txnId,
-      graph.vertexes[layoutStore().draggedVertexIds[0]],
-      formStoreVertex().P || {},
-      layoutStore().selectedId !== -1
-        ? layoutStore().selectedId
-        : formStoreVertex().P.formDataId,
+      formStoreVertex()?.P.txnId,
+      graph.vertexes[formStoreVertex()?.P.draggedVertexIds[0]],
+      formStoreVertex()?.P || {},
+      formStoreVertex()?.P.selectedId !== -1
+        ? formStoreVertex()?.P.selectedId
+        : formStoreVertex()?.P.formDataId,
     );
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { draggedVertexIds: [] });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [] });
   };
 
   onCleanup(() => {

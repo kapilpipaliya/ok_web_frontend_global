@@ -42,8 +42,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              formStoreVertex().P.txnId,
-              graph.vertexes[formStoreVertex().P.formDataId!],
+              formStoreVertex()?.P.txnId,
+              graph.vertexes[formStoreVertex()?.P.formDataId!],
               fromVertex,
               props.item,
               "before",
@@ -71,8 +71,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              formStoreVertex().P.txnId,
-              graph.vertexes[formStoreVertex().P.formDataId!],
+              formStoreVertex()?.P.txnId,
+              graph.vertexes[formStoreVertex()?.P.formDataId!],
               fromVertex,
               props.item,
               "after",
@@ -100,8 +100,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
             await handleDropAtPosition(
               graph,
               setGraph,
-              formStoreVertex().P.txnId,
-              graph.vertexes[formStoreVertex().P.formDataId!],
+              formStoreVertex()?.P.txnId,
+              graph.vertexes[formStoreVertex()?.P.formDataId!],
               fromVertex,
               props.item,
               "center",

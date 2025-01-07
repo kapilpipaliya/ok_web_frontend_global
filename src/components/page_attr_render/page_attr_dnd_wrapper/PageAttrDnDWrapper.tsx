@@ -33,9 +33,9 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [graph, setGraph] = useGraph();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
+  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const [previewStore] = usePreviewContext();
-  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
+  const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showErrorToast } = useToast();
 
   const childrenAttrs = createMemo(() =>
@@ -53,12 +53,12 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   // no need debounde, it is called too less
   const handleMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, { hoverId: props.item.id });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { hoverId: props.item.id });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, { hoverId: -1 });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { hoverId: -1 });
   };
 
   // debounce is giving error, node not found when running element.currentTarget and we must need it
@@ -72,7 +72,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       childrenAttrs,
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex().P.formDataId!],
+      graph.vertexes[formStoreVertex()?.P.formDataId!],
     );
   };
 
@@ -102,7 +102,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         // @ts-expect-error ignore
         el.getBoundingClientRectOriginal = el.getBoundingClientRect.bind(el);
         el.getBoundingClientRect = () => {
-          if (layoutStore()?.hiddenNodes.includes(props.item.id)) {
+          if (formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)) {
             // @ts-expect-error ignore
             return el.getBoundingClientRectOriginal();
           }
@@ -111,14 +111,14 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       }}
       style="display:contents;"
     >
-      <Show keyed when={!layoutStore()?.hiddenNodes.includes(props.item.id)}>
+      <Show keyed when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}>
         {resolvedChildren()}
       </Show>
       <Show
         when={
           isSelectedLayoutId(props.item.id) ||
           isSelectedHoverId(props.item.id) ||
-          layoutStore().multiHighlight.includes(props.item.id)
+          formStoreVertex()?.P.multiHighlight.includes(props.item.id)
         }
       >
         <AttrConfigPopOverWrapper
@@ -127,7 +127,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
           reference={reference}
         />
       </Show>
-      <Show keyed when={!layoutStore()?.hiddenNodes.includes(props.item.id)}>
+      <Show keyed when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}>
         <BorderOverlay item={props.item} reference={reference} />
       </Show>
     </div>

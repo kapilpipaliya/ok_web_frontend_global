@@ -29,7 +29,7 @@ export function UniqueNameField(
           isUniqueIdUsed(
             graph,
             setGraph,
-            graph.vertexes[formStoreVertex().P.formDataId!],
+            graph.vertexes[formStoreVertex()?.P.formDataId!],
             props.selectedLayout,
             data,
           )

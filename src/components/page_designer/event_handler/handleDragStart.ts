@@ -1,4 +1,5 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
@@ -13,9 +14,10 @@ export function handleDragStart(
 ) {
   e.stopPropagation();
 
-  const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-    draggedVertexIds: [...(layoutStore.draggedVertexIds || []), layoutVertex.id],
+  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    draggedVertexIds: [...(formStoreVertex()?.P.draggedVertexIds || []), layoutVertex.id],
   });
 }

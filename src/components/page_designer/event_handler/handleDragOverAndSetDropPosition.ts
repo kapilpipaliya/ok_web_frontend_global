@@ -23,7 +23,7 @@ export function handleDragOverAndSetDropPosition(
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem: layoutVertex.id, position: null });
+  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem: layoutVertex.id, position: null });
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
@@ -32,7 +32,7 @@ export function handleDragOverAndSetDropPosition(
     | "right"
     | null;
   if (!position) {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem: null, position: null });
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem: null, position: null });
     return;
   }
 
@@ -61,7 +61,7 @@ export function handleDragOverAndSetDropPosition(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = graph.vertexes[layoutStore().draggedVertexIds[0]];
+  const fromVertex = graph.vertexes[formStoreVertex()?.P.draggedVertexIds[0]];
   const toVertexId = activeItem;
   if (
     !validateDragOver(
@@ -75,5 +75,5 @@ export function handleDragOverAndSetDropPosition(
   ) {
     return;
   }
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { activeItem, position });
+  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem, position });
 }

@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web";
 import { useZIndex, ZIndex } from "~/components/fields/ZIndex";
 import PageView from "~/components/page_attr_render/PageView";
 import { IconButton } from "~/components/styled/IconButton";
-import PreviewPage from "~/components/styled/PreviewPage";
+import {PreviewPage} from "~/components/styled/PreviewPage";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
@@ -35,7 +35,7 @@ export function PreviewButton() {
           isDesignMode={false}
           isNoPermissionCheck={true}
           // data={layoutStore.formStore[0].formData}
-          metaVertex={graph.vertexes[formStoreVertex().P.formDataId!]}
+          metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
         />
       </PreviewPage>
     );

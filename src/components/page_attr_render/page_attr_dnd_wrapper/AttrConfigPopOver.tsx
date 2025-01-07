@@ -8,14 +8,17 @@ import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContex
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const layoutStoreId = useDesignerLayoutStore();
   const [graph] = useGraph();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
 
   let popoverRef: HTMLDivElement | undefined;
   const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8 });
@@ -33,7 +36,7 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
           <Match
             when={
               isSelectedHoverId(props.item.id) ||
-              layoutStore().multiHighlight.includes(props.item.id)
+              formStoreVertex()?.P.multiHighlight.includes(props.item.id)
             }
           >
             <HoverAttrConfigPopOver item={props.item} />

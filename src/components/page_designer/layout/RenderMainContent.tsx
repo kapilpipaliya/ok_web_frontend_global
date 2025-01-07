@@ -19,6 +19,7 @@ import { makePersisted } from '@solid-primitives/storage';
 import { getChannel, handleChannelMessage } from './channel';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
+import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -82,13 +83,13 @@ function PageViewComponent() {
   }
   return (
     <Show when={formStoreVertex()?.P.id}>
-      <ResizableContainer view={layoutStore().view}>
-        <IFrame />
-        {/* <PageView
+      <ResizableContainer view={formStoreVertex()?.P.view}>
+        {/* <IFrame /> */}
+        <PageView
           isDesignMode={true}
           isNoPermissionCheck={true}
-          metaVertex={graph.vertexes[formStoreVertex().P.formDataId!]}
-        /> */}
+          metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
+        />
       </ResizableContainer>
     </Show>
   );
@@ -131,9 +132,9 @@ function PropertiesContent() {
   return (
     <Show
       when={
-        formStoreVertex().P &&
-        layoutStore().selectedComponent !== -1 &&
-        graph.vertexes[layoutStore().selectedId]
+        formStoreVertex()?.P &&
+        formStoreVertex()?.P.selectedComponent !== -1 &&
+        graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
       <FormContext.Provider value={layoutStore().formId!}>
@@ -147,13 +148,14 @@ function DeleteConfirmation() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   return (
     <Show
       when={
-        Object.keys(layoutStore().usedAttrsInRules).length > 0 ||
-        layoutStore().usedAttrsInUniqueConstraints.length > 0 ||
-        layoutStore().usedAttrsInNameKeys.length > 0 ||
-        layoutStore().shouldContainAtLeastOneForm
+        Object.keys(formStoreVertex()?.P.usedAttrsInRules ?? {}).length > 0 ||
+        formStoreVertex()?.P.usedAttrsInUniqueConstraints.length > 0 ||
+        formStoreVertex()?.P.usedAttrsInNameKeys.length > 0 ||
+        formStoreVertex()?.P.shouldContainAtLeastOneForm
       }
     >
       <ZIndex>
@@ -172,9 +174,12 @@ export function ResizableAltKey() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   const [sizes, setSizes] = makePersisted(createSignal<number[]>([]), {
     name: 'resizable-sizes',
   })
+  const [isResizing, setIsResizing] = createSignal(false);
+
   return (
     <div class="size-full p-4">
       <Resizable class="size-full" sizes={sizes()} onSizesChange={setSizes}>
@@ -188,6 +193,8 @@ export function ResizableAltKey() {
         <Resizable.Handle
           aria-label="Resize Handle"
           class="px:3"
+          onHandleDragStart={() => setIsResizing(true)}
+          onHandleDragEnd={() => setIsResizing(false)}
         >
           <div class="" />
         </Resizable.Handle>
@@ -201,6 +208,8 @@ export function ResizableAltKey() {
         <Resizable.Handle
           aria-label="Resize Handle"
           class="px:3"
+          onHandleDragStart={() => setIsResizing(true)}
+          onHandleDragEnd={() => setIsResizing(false)}
         >
           <div class="" />
         </Resizable.Handle>
@@ -216,9 +225,9 @@ export function ResizableAltKey() {
               </div>
             }
             when={
-              layoutStore().selectedId !== -1 &&
-              graph.vertexes[layoutStore().selectedId] &&
-              graph.vertexes[layoutStore().selectedId].L?.[0]?.endsWith("Attr")
+              formStoreVertex()?.P.selectedId !== -1 &&
+              graph.vertexes[formStoreVertex()?.P.selectedId] &&
+              graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
           >
             <div
@@ -231,6 +240,8 @@ export function ResizableAltKey() {
         <Resizable.Handle
           aria-label="Resize Handle"
           class="px:3"
+          onHandleDragStart={() => setIsResizing(true)}
+          onHandleDragEnd={() => setIsResizing(false)}
         >
           <div class="" />
         </Resizable.Handle>
@@ -243,6 +254,9 @@ export function ResizableAltKey() {
         </Resizable.Panel>
       </Resizable>
       <DeleteConfirmation />
+      <Show when={isResizing()}>
+        <ResizeOverlay />
+      </Show>
     </div>
   )
 }

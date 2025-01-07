@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { onCleanup } from "solid-js";
+import { Accessor, onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
@@ -46,7 +46,7 @@ function initializeMetaVertex(
 
 function createFieldAttributes(
   graph: GraphInterface,
-  layoutStore: () => PageLayoutObject,
+  formStoreVertex: Accessor<Vertex<FormStoreObject>>,
 ): FieldAttribute[] {
   return [
     {
@@ -58,8 +58,8 @@ function createFieldAttributes(
     },
     {
       collection: () =>
-        graph.vertexes[layoutStore().selectedId]?.P?.collection
-          ? `g:'${graph.vertexes[layoutStore().selectedId]?.P?.collection}'`
+        graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection
+          ? `g:'${graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection}'`
           : "",
       componentName: "Select",
       key: "data",
@@ -83,15 +83,15 @@ function handleCollectionChange(
     setValueGlobal(
       graph,
       setGraph,
-      formStoreVertex().P.txnId,
+      formStoreVertex()?.P.txnId,
       collMetaVertex[0],
-      graph.vertexes[layoutStore().selectedId],
+      graph.vertexes[formStoreVertex()?.P.selectedId],
       value,
       false,
     );
     setSelectionValue(
-      formStoreVertex().P.txnId,
-      graph.vertexes[layoutStore().selectedId],
+      formStoreVertex()?.P.txnId,
+      graph.vertexes[formStoreVertex()?.P.selectedId],
       graph,
       setGraph,
       collMetaVertex[1],
@@ -107,7 +107,7 @@ export function CollAndData() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
-  const attributes = createFieldAttributes(graph, layoutStore);
+  const attributes = createFieldAttributes(graph, formStoreVertex);
 
   addMetaVertexes(
     graph,
@@ -139,13 +139,13 @@ export function CollAndData() {
         <span class="flex:.5 mt:5">Expression: </span>
         <div class="flex ai:center f:15 flex:1">
           <DynamicComponent
-            data={graph.vertexes[layoutStore().selectedId]}
+            data={graph.vertexes[formStoreVertex()?.P.selectedId]}
             disabled={false}
             isNoPermissionCheck={true}
             meta={collMetaVertex.vertexes![2]}
             noLabel
             title={""}
-            txnId={formStoreVertex().P.txnId}
+            txnId={formStoreVertex()?.P.txnId}
           />
           {/* 
             <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
@@ -157,23 +157,23 @@ export function CollAndData() {
       <span class="flex:.5 mt:5">Collection:</span>
       <SelectField
         componentName={"Select"}
-        data={graph.vertexes[layoutStore().selectedId]}
+        data={graph.vertexes[formStoreVertex()?.P.selectedId]}
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![0]}
         onChange={onCollectionChange}
         title={"Select Collection"}
-        txnId={formStoreVertex().P.txnId}
+        txnId={formStoreVertex()?.P.txnId}
       />
       <span class="flex:.5 mt:5">Data:</span>
       <SelectField
         componentName={"MultiSelect"}
-        data={graph.vertexes[layoutStore().selectedId]}
+        data={graph.vertexes[formStoreVertex()?.P.selectedId]}
         disabled={false}
         isRealTime={false}
         meta={collMetaVertex.vertexes![1]}
         title={"Select Data"}
-        txnId={formStoreVertex().P.txnId}
+        txnId={formStoreVertex()?.P.txnId}
       />
     </>
   );

@@ -28,7 +28,7 @@ export function DeleteButton(props: {
           props.item,
           graph,
           setGraph,
-          formStoreVertex().P.txnId,
+          formStoreVertex()?.P.txnId,
           props.componentName,
           showSuccessToast,
         )

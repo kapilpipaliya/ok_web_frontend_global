@@ -92,7 +92,7 @@ export function SettingTabs() {
             <LayoutTree />
           </div>
 
-          <Show when={graph.vertexes[formStoreVertex().P.formDataId!]?.L[0] === "Form"}>
+          <Show when={graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form"}>
             <Show when={layoutStore().selectedTab === "Keys"}>
               {/* <PrimaryKey /> */}
               <NameKey />

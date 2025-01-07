@@ -38,8 +38,8 @@ export function LayoutTree() {
     //     ? [steps()[0]]
     //     : [];
     // }
-    return formStoreVertex().P.formDataId
-      ? [graph.vertexes[formStoreVertex().P.formDataId!]]
+    return formStoreVertex()?.P.formDataId
+      ? [graph.vertexes[formStoreVertex()?.P.formDataId!]]
       : [];
   };
 

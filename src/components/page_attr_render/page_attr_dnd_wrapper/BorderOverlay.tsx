@@ -22,6 +22,7 @@ import { getBoundingRectChildren } from "~/components/page_designer/functions/ge
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
@@ -30,9 +31,10 @@ export function BorderOverlay(
   const [graph] = useGraph();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
-  const activeItemChanged = createSelector(() => layoutStore().activeItem);
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
+  const activeItemChanged = createSelector(() => formStoreVertex()?.P.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
 
   const getBorder = createMemo(() => {
@@ -40,7 +42,7 @@ export function BorderOverlay(
 
     if (isActiveTargetItem()) {
       const boxShadowProps = getDnDBoxShadowArgs(
-        layoutStore().position,
+        formStoreVertex()?.P.position,
         "green-60",
       );
       boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;

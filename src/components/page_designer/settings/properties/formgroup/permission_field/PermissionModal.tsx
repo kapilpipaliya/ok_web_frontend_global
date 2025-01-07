@@ -47,7 +47,7 @@ export function PermissionModal(
 
   const prevTxnIndex =
     props.prevTxnIndex ??
-    getLastTxnIndex(formStoreVertex().P.txnId, graph);
+    getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedAttr),
@@ -66,7 +66,7 @@ export function PermissionModal(
   const onCancel = () => {
     if (prevTxnIndex !== -1) {
       revertTransactionUpToIndex(
-        formStoreVertex().P.txnId,
+        formStoreVertex()?.P.txnId,
         prevTxnIndex - 1,
         graph,
         setGraph,
@@ -107,12 +107,12 @@ export function PermissionModal(
                       data={
                         props.selectedAttr
                           ? props.selectedAttr
-                          : graph.vertexes[formStoreVertex().P.formDataId!]
+                          : graph.vertexes[formStoreVertex()?.P.formDataId!]
                       }
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={formStoreVertex().P.txnId}
+                      txnId={formStoreVertex()?.P.txnId}
                     />
                   </div>
                 </div>

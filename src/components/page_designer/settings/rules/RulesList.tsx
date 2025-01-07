@@ -23,12 +23,12 @@ export function RulesList() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const rules = createMemo(() => {
-    if (formStoreVertex().P.formDataId) {
+    if (formStoreVertex()?.P.formDataId) {
       return (
         evalExpression("->Rule", {
           graph,
           setGraph,
-          vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]],
+          vertexes: [graph.vertexes[formStoreVertex()?.P.formDataId!]],
         }) || []
       ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
     }
@@ -50,7 +50,7 @@ export function RulesList() {
         incomingIds.push(graph.edges[edge].S);
       }
     }
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       multiHighlight: incomingIds
     });
   };
@@ -59,7 +59,7 @@ export function RulesList() {
     const count: Id[] = [];
     for (const key in rule.IN) {
       for (const edge of rule.IN[key]) {
-        if (graph.edges[edge].S !== formStoreVertex().P.formDataId) {
+        if (graph.edges[edge].S !== formStoreVertex()?.P.formDataId) {
           count.push(graph.edges[edge].S);
         }
       }
@@ -68,7 +68,7 @@ export function RulesList() {
   };
 
   const unhighlightRule = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       multiHighlight: []
     });
   };
@@ -86,14 +86,14 @@ export function RulesList() {
         false,
         graph,
         setGraph,
-        formStoreVertex().P.txnId,
+        formStoreVertex()?.P.txnId,
       );
     }
   };
 
   const deleteRule = (rule: Vertex) => {
     removeAllConditions(rule);
-    deleteRow(rule, false, graph, setGraph, formStoreVertex().P.txnId);
+    deleteRow(rule, false, graph, setGraph, formStoreVertex()?.P.txnId);
     setSelectedRuleToDelete(null);
   };
 

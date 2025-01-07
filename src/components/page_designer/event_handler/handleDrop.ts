@@ -21,17 +21,17 @@ export async function handleDrop(
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  if (!layoutStore().activeItem) { // layoutVertex
+  if (!formStoreVertex()?.P.activeItem) { // layoutVertex
     showErrorToast("Active item not found when dropping");
     return;
   }
-  const toVertex = graph.vertexes[layoutStore().activeItem!];
+  const toVertex = graph.vertexes[formStoreVertex()?.P.activeItem!];
   if (!toVertex) {
     showErrorToast("Target vertex not found when dropping");
     return;
   }
 
-  for (const vertexId of layoutStore().draggedVertexIds) {
+  for (const vertexId of formStoreVertex()?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
 
     if (!fromVertex) {
@@ -43,7 +43,7 @@ export async function handleDrop(
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
 
-    if (!layoutStore().position) {
+    if (!formStoreVertex()?.P.position) {
       showErrorToast("Position not found when dropping");
       return;
     }
@@ -51,14 +51,14 @@ export async function handleDrop(
     const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      formStoreVertex().P.txnId,
-      graph.vertexes[formStoreVertex().P.formDataId!],
+      formStoreVertex()?.P.txnId,
+      graph.vertexes[formStoreVertex()?.P.formDataId!],
       fromVertex,
       toVertex,
-      layoutStore().position!,
+      formStoreVertex()?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
         selectedId: layoutId as string,
         selectedComponent: -1
       });

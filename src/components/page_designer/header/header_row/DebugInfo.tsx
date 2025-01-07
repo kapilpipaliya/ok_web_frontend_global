@@ -11,7 +11,7 @@ export function DebugInfo() {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-  const tnxVertex = () => graph.vertexes[`txn${formStoreVertex().P.txnId}`] as Vertex<TransactionDetail>;
+  const tnxVertex = () => graph.vertexes[`txn${formStoreVertex()?.P.txnId}`] as Vertex<TransactionDetail>;
 
   return (
     <Show when={formStoreVertex()?.P.txnId && getGlobalStore(graph).P.isDevelopment}>

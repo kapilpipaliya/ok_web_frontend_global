@@ -33,8 +33,8 @@ function DropableWrapper(props: { children: any }) {
       }}
       onDrop={async (e) => {
         setIsDraggingOver(false);
-        mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-          activeItem: formStoreVertex().P.formDataId,
+        mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+          activeItem: formStoreVertex()?.P.formDataId,
           position: "center"
         });
 
@@ -77,7 +77,7 @@ export default function PageShareView() {
           <PageView
             isDesignMode={true}
             isNoPermissionCheck={true}
-            metaVertex={graph.vertexes[formStoreVertex().P.formDataId!]}
+            metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           />
         </DropableWrapper>
       </DesignerLayoutStoreContext.Provider>

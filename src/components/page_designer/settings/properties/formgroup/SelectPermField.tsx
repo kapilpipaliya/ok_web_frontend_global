@@ -61,7 +61,7 @@ export function SelectPermField(
   const meta = {
     P: {
       class: "flex:1",
-      collection: () => `id:'${formStoreVertex().P.formDataId}'->Rule`,
+      collection: () => `id:'${formStoreVertex()?.P.formDataId}'->Rule`,
       componentName: "Select",
       displayName: props.metaVertex.P.displayName,
       key: props.metaVertex.P.key,
@@ -78,7 +78,7 @@ export function SelectPermField(
         isRealTime={false}
         meta={meta}
         noLabel
-        txnId={formStoreVertex().P.txnId}
+        txnId={formStoreVertex()?.P.txnId}
       />
     );
   };

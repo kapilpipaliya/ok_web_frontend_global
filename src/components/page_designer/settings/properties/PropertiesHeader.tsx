@@ -13,17 +13,17 @@ export function PropertiesHeader() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const getComponentName = () =>
-    layoutStore().selectedId !== -1 && layoutStore().selectedComponent !== -1
-      ? graph.vertexes[layoutStore().selectedComponent].P.key || ""
+    formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1
+      ? graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key || ""
       : "";
 
   return (
     <div class="flex ai:center cursor:pointer jc:space-between">
       <div class="f:16 flex:grow font-weight:bold mb:2px ml:5px p:3|0 text-align:left">
         {getComponentName()} Properties{" "}
-        <OpenComponentSettings id={layoutStore().selectedComponent as string} />
+        <OpenComponentSettings id={formStoreVertex()?.P.selectedComponent as string} />
         <OpenComponentURL
-          meta={graph.vertexes[layoutStore().selectedComponent]}
+          meta={graph.vertexes[formStoreVertex()?.P.selectedComponent]}
         />
       </div>
     </div>

@@ -22,7 +22,7 @@ export function Step(
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex().P.formDataId!]),
+    getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex()?.P.formDataId!]),
   );
 
   const handleDelete = (_e: MouseEvent) => {
@@ -73,7 +73,7 @@ export function Step(
     >
       <button
         class="flex align-items:center; gap:0.5rem; width:100%"
-        onClick={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { activeStepId: props.step.id })}
+        onClick={() => mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeStepId: props.step.id })}
         type="button"
       >
         <span style="display:flex; align-items:center;">

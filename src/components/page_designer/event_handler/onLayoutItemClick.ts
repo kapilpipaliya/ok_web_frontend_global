@@ -19,7 +19,7 @@ export function onLayoutItemClick(
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   batch(() => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       selectedId: layoutVertexId ?? -1
     });
 
@@ -28,7 +28,7 @@ export function onLayoutItemClick(
       graph,
       setGraph,
     );
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       selectedComponent: componentVertex?.id ?? -1
     });
   });

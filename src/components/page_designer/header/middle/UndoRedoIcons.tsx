@@ -20,13 +20,13 @@ export function UndoRedoIcons() {
     {
       disabled: () => !undoAllowed(formStoreVertex()?.P.txnId, graph),
       icon: "ci:arrow-undo-up-left",
-      onClick: () => undo(formStoreVertex().P.txnId, graph, setGraph),
+      onClick: () => undo(formStoreVertex()?.P.txnId, graph, setGraph),
       tooltip: "Undo",
     },
     {
       disabled: () => !redoAllowed(formStoreVertex()?.P.txnId, graph),
       icon: "ci:arrow-undo-up-right",
-      onClick: () => redo(formStoreVertex().P.txnId, graph, setGraph),
+      onClick: () => redo(formStoreVertex()?.P.txnId, graph, setGraph),
       tooltip: "Redo",
     },
   ];

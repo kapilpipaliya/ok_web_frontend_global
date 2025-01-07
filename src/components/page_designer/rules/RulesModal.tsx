@@ -84,10 +84,10 @@ export function RulesModal(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-  const excludeIds = [...(formStoreVertex().P.cleanUpConfig().rowMetaTxnIds || [])];
+  const excludeIds = [...(formStoreVertex()?.P.cleanUpConfig().rowMetaTxnIds || [])];
 
   const prevTxnIndex =
-    props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex().P.txnId, graph);
+    props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedRule),
@@ -137,7 +137,7 @@ export function RulesModal(
   onCleanup(() => {
     cleanupRowMetaTxnIds(graph, setGraph, formStoreVertex(), excludeIds);
     if (revertChanges) {
-      revertTransactionUpToIndex(formStoreVertex().P.txnId, prevTxnIndex - 1, graph, setGraph);
+      revertTransactionUpToIndex(formStoreVertex()?.P.txnId, prevTxnIndex - 1, graph, setGraph);
     }
   });
 

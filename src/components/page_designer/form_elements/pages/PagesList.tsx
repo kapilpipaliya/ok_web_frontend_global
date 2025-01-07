@@ -60,14 +60,14 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       if (result?.error) {
         showErrorToast(result.error);
       } else if (result?.graph) {
-        if (result.graph.vertexes[formStoreVertex().P.formDataId!]) {
-          delete result.graph.vertexes[formStoreVertex().P.formDataId!];
+        if (result.graph.vertexes[formStoreVertex()?.P.formDataId!]) {
+          delete result.graph.vertexes[formStoreVertex()?.P.formDataId!];
         }
         setGraphData(graph, setGraph, result.graph);
 
         const data2 = getTreeData(graph, setGraph, {
           collection: `g:'${props.coll}'`,
-        }).filter((item) => item.id !== formStoreVertex().P.formDataId!);
+        }).filter((item) => item.id !== formStoreVertex()?.P.formDataId!);
         originalData = data2;
         setFilteredData(data2);
         setIsFetchingData(false);

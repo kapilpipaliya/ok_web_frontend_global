@@ -48,10 +48,10 @@ export function SaveAsTemplateMenu(
       props.item,
       dataVertex,
       newFormTxnId,
-      formStoreVertex().P.txnId,
+      formStoreVertex()?.P.txnId,
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex().P.formDataId!],
+      graph.vertexes[formStoreVertex()?.P.formDataId!],
     );
     const data = commitTxn(newFormTxnId, graph);
 

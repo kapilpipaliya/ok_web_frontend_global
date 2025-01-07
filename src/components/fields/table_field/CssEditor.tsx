@@ -44,7 +44,6 @@ export function CssEditor(
                   false,
                 );
               }}
-              txnId={props.txnId}
             />
           </Drawer>
         </ZIndex>

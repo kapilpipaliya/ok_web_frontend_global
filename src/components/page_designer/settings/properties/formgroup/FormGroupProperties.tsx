@@ -1,6 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import {
+  Accessor,
   createMemo,
   createUniqueId,
   For,
@@ -42,6 +43,7 @@ import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 function modifyMetaVertexExpr(meta: Vertex) {
   return {
@@ -66,12 +68,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const layoutStoreId = useDesignerLayoutStore();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!];
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const vertexIds = createVertexIds();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
-  const selectedComp = () => graph.vertexes[layoutStore().selectedComponent];
+  const selectedComp = () => graph.vertexes[formStoreVertex()?.P.selectedComponent];
   const propAttributes = createMemo(() =>
     clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
   );
@@ -91,7 +93,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For
-        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore())}
+        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore, formStoreVertex)}
       >
         {(meta) => (
           <PropertyField
@@ -297,13 +299,14 @@ function moveClassToLast(
   vertices: Vertex[],
   vertexIds: ReturnType<typeof createVertexIds>,
   graph: GraphInterface,
-  layoutStore: PageLayoutObject,
+  layoutStore: Accessor<PageLayoutObject>,
+  formStoreVertex: Accessor<Vertex<FormStoreObject>>,
 ) {
   const otherVertices = vertices.filter(
     (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
   );
-  const componentName = graph.vertexes[layoutStore.selectedComponent].P.key;
-  const isForm = graph.vertexes[layoutStore.formId!]?.L[0] === "Form";
+  const componentName = graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key;
+  const isForm = graph.vertexes[layoutStore().formId!]?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(

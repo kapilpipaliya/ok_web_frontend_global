@@ -31,7 +31,7 @@ import { usePreviewContext } from "~/components/page_designer/context/PreviewCon
 import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
 import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
-import PreviewPage from "~/components/styled/PreviewPage";
+import {PreviewPage} from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";

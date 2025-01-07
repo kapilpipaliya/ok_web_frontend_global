@@ -1,5 +1,4 @@
-import { createEffect, createSignal, Show, type JSX } from "solid-js";
-import { Portal } from "solid-js/web";
+import { createEffect, createSignal, For, Show, type JSX } from "solid-js";
 
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
@@ -9,6 +8,14 @@ import { useToast } from "./Toast";
 import { FormStoreObject } from "../form/context/FormContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { ResizeOverlay } from "./ResizeOverlay";
+import { IconButton } from "./IconButton";
+
+export const DIMENSIONS = {
+  mobile: { id: "mobile", height: "570px", width: "360px", icon: "prime:mobile" },
+  tablet: { id: "tablet", height: "1026px", width: "768px", icon: "uil:tablet" },
+  desktop: { id: "desktop", height: "1200px", width: "1200px", icon: "humbleicons:desktop" },
+};
 
 export function ResizableContainer(
   props: Readonly<{
@@ -25,25 +32,18 @@ export function ResizableContainer(
   );
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [resizing, setResizing] = createSignal(false);
+  const [isDraggingOver, setIsDraggingOver] = createSignal(false);
+  const layoutStoreId = useDesignerLayoutStore();
+  const { showErrorToast } = useToast();
 
-  const DIMENSIONS = {
-    desktop: { height: "1200px", width: "1200px" },
-    mobile: { height: "570px", width: "360px" },
-    tablet: { height: "1026px", width: "768px" },
-  };
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (!props.width && !props.height) {
-      if (props.view === "Mobile") {
-        setWidth(DIMENSIONS.mobile.width);
-        setHeight(DIMENSIONS.mobile.height);
-      } else if (props.view === "Tablet") {
-        setWidth(DIMENSIONS.tablet.width);
-        setHeight(DIMENSIONS.tablet.height);
-      } else {
-        setWidth(DIMENSIONS.desktop.width);
-        setHeight(DIMENSIONS.desktop.height);
-      }
+      const dimension = DIMENSIONS[props.view.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
+      setWidth(dimension.width);
+      setHeight(dimension.height);
     }
   });
 
@@ -80,17 +80,28 @@ export function ResizableContainer(
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  const [isDraggingOver, setIsDraggingOver] = createSignal(false);
-  const layoutStoreId = useDesignerLayoutStore();
-  const { showErrorToast } = useToast();
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();  // Allow drop
+    setIsDraggingOver(true);
+  };
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const handleDragLeave = () => {
+    setIsDraggingOver(false);
+  };
+
+  const handleDropEvent = async (e: DragEvent) => {
+    setIsDraggingOver(false);
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+      activeItem: formStoreVertex()?.P.formDataId,
+      position: "center"
+    });
+
+    await handleDrop(e, layoutStoreId, graph, setGraph, showErrorToast);
+    resetDragDropState(layoutStoreId, graph, setGraph);
+  };
 
   return (
-    <div
-      class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto"
-    >
+    <div class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto">
       <div
         ref={setContainerRef}
         class="scrollbar-color:lightgrey {scrollbar-width:thin} justify-self:center overflow:auto position:relative r:10|10|10|10"
@@ -102,29 +113,9 @@ export function ResizableContainer(
           height: height(),
           width: width()
         }}
-        onDragOver={(e) => {
-          e.preventDefault(); // Allow drop
-          setIsDraggingOver(true);
-        }}
-        onDragLeave={() => {
-          setIsDraggingOver(false)
-        }}
-        onDrop={async (e) => {
-          setIsDraggingOver(false);
-          mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-            activeItem: formStoreVertex().P.formDataId,
-            position: "center"
-          });
-
-          await handleDrop(
-            e,
-            layoutStoreId,
-            graph,
-            setGraph,
-            showErrorToast
-          );
-          resetDragDropState(layoutStoreId, graph, setGraph);
-        }}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDropEvent}
       >
         <div
           style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
@@ -137,21 +128,55 @@ export function ResizableContainer(
         />
       </div>
 
-      {/* Overlay Portal */}
       <Show when={resizing()}>
-        <Portal>
-          <div
-            style={{
-              position: 'fixed',
-              top: '0',
-              left: '0',
-              right: '0', 
-              bottom: '0',
-              'z-index': '9999'
-            }}
-          />
-        </Portal>
+        <ResizeOverlay />
       </Show>
     </div>
   );
 }
+
+export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
+  const [view, setView] = createSignal(DIMENSIONS.desktop);
+
+  const currentDimensions = () => {
+    return {
+      height: "90vh",
+      width: "100%"
+    };
+  };
+
+  return (
+    <div class="flex ai:center bg:gray-100 flex:col min-h:100vh p:5|20">
+      <div class="flex mb:16">
+        <For each={Object.values(DIMENSIONS)}>
+          {(viewData, index) => (
+            <IconButton
+              classList={{
+                "bg:#E0E7F3 color:#5252F1": viewData.id === view().id,
+                "color:grey": viewData.id !== view().id,
+                "r:0|5|5|0": index() === 2,
+                "r:5|0|0|5": index() === 0,
+                "rel b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default f:0.875rem font-weight:600 px:0.75rem py:0.5rem": true,
+              }}
+              icon={viewData.icon}
+              onclick={() => setView(viewData)}
+              size={22}
+              title={viewData.id}
+            />
+          )}
+        </For>
+      </div>
+      <div class="flex ai:center h:full jc:center w:full">
+        <div
+          class="b:1px|solid|lightblue r:5 overflow:auto"
+          style={{
+            height: currentDimensions().height,
+            width: currentDimensions().width
+          }}
+        >
+          {props.children}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -40,7 +40,7 @@ export function UniqueConstrains() {
           isNoPermissionCheck={true}
           isRealTime={false}
           meta={graph.vertexes[metaVertexId]}
-          txnId={formStoreVertex().P.txnId}
+          txnId={formStoreVertex()?.P.txnId}
         />
     </div>
   );

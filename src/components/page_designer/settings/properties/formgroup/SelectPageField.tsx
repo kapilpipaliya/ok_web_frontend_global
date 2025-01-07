@@ -58,7 +58,7 @@ export function SelectPageField(
         isRealTime={false}
         meta={meta}
         noLabel
-        txnId={formStoreVertex().P.txnId}
+        txnId={formStoreVertex()?.P.txnId}
       />
     );
   };

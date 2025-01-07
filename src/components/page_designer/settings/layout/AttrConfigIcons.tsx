@@ -20,17 +20,17 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   
-  const isSelectedLayoutId = createSelector(() => layoutStore().selectedId);
-  const isSelectedHoverId = createSelector(() => layoutStore().hoverId);
+  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showSuccessToast } = useToast();
 
   const toggleHidden = (itemId: Id) => {
-    const hiddenNodes = layoutStore().hiddenNodes || [];
+    const hiddenNodes = formStoreVertex()?.P.hiddenNodes || [];
     const newHiddenNodes = hiddenNodes.includes(itemId)
       ? hiddenNodes.filter((item) => item !== itemId)
       : [...hiddenNodes, itemId];
       
-    mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
       hiddenNodes: newHiddenNodes
     });
   };
@@ -40,7 +40,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
 
   const HideShowIcon = () => {
     const isHiddenAttr = () =>
-      (layoutStore().hiddenNodes || []).includes(props.metaVertex.id);
+      (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id);
     const icon = () =>
       isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline";
     const tooltipContent = () => (isHiddenAttr() ? "Show" : "Hide");
@@ -72,7 +72,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         when={
           isSelectedLayoutId(props.metaVertex.id) ||
           isSelectedHoverId(props.metaVertex.id) ||
-          (layoutStore().hiddenNodes || []).includes(props.metaVertex.id)
+          (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id)
         }
       >
         <IconButton
@@ -84,10 +84,10 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               undefined,
               undefined,
-              formStoreVertex().P.txnId,
+              formStoreVertex()?.P.txnId,
               graph,
               setGraph,
-              graph.vertexes[formStoreVertex().P.formDataId!],
+              graph.vertexes[formStoreVertex()?.P.formDataId!],
             );
           }}
           size={18}
@@ -114,7 +114,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
               props.metaVertex,
               graph,
               setGraph,
-              formStoreVertex().P.txnId,
+              formStoreVertex()?.P.txnId,
               getComponent(),
               showSuccessToast,
             );

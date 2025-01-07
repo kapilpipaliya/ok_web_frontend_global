@@ -21,14 +21,14 @@ export function PropertiesBody() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const clearFileSelection = (meta: Vertex) => {
-    const txnId = formStoreVertex().P.txnId;
+    const txnId = formStoreVertex()?.P.txnId;
     if (!txnId) {
       return;
     }
 
     setSelectionValue(
       txnId,
-      graph.vertexes[layoutStore().selectedId],
+      graph.vertexes[formStoreVertex()?.P.selectedId],
       graph,
       setGraph,
       meta,
@@ -36,14 +36,14 @@ export function PropertiesBody() {
   };
 
   const setPropertyValue = (meta: Vertex, value: any) => {
-    if (layoutStore().selectedId !== -1 && layoutStore().selectedComponent !== -1) {
+    if (formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1) {
       setPropertyValueGlobal(
         graph,
         setGraph,
-        formStoreVertex().P.txnId,
+        formStoreVertex()?.P.txnId,
         meta,
-        graph.vertexes[layoutStore().selectedId],
-        graph.vertexes[layoutStore().selectedComponent],
+        graph.vertexes[formStoreVertex()?.P.selectedId],
+        graph.vertexes[formStoreVertex()?.P.selectedComponent],
         value,
       );
       if (value === null) {
@@ -53,7 +53,7 @@ export function PropertiesBody() {
   };
 
   const selectedComponentProperties = () => {
-    const selectedComp = graph.vertexes[layoutStore().selectedComponent];
+    const selectedComp = graph.vertexes[formStoreVertex()?.P.selectedComponent];
     if (!selectedComp) {
       return { error: true };
     }
@@ -63,13 +63,13 @@ export function PropertiesBody() {
   return (
     <Show
       when={
-        layoutStore().selectedId !== -1 && graph.vertexes[layoutStore().selectedId]
+        formStoreVertex()?.P.selectedId !== -1 && graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
       {/* <div class="flex gap:2 jc:start"> */}
         {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       {/* </div> */}
-      <Show when={graph.vertexes[layoutStore().selectedComponent].P.key === "Repeater"}>
+      <Show when={graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key === "Repeater"}>
         <CollAndData />
       </Show>
       <JsonEditorFieldComponent />
@@ -77,8 +77,8 @@ export function PropertiesBody() {
       <FormGroupProperties
         metaAttributes={selectedComponentProperties().vertexes ?? []}
         onChange={setPropertyValue}
-        selectedLayout={graph.vertexes[layoutStore().selectedId]}
-        txnId={formStoreVertex().P.txnId}
+        selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
+        txnId={formStoreVertex()?.P.txnId}
       />
     </Show>
   );
@@ -92,12 +92,12 @@ function JsonEditorFieldComponent() {
   const [isJsonValid, setIsJsonValid] = createSignal(true);
 
   const replacePropertyValue = (value: any) => {
-    if (layoutStore().selectedId !== -1 && layoutStore().selectedComponent !== -1) {
+    if (formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1) {
       try {
         const parsedValue = JSON.parse(value);
         replaceVertexProperties(
-          formStoreVertex().P.txnId,
-          graph.vertexes[layoutStore().selectedId].id,
+          formStoreVertex()?.P.txnId,
+          graph.vertexes[formStoreVertex()?.P.selectedId].id,
           graph,
           setGraph,
           parsedValue,
@@ -111,9 +111,9 @@ function JsonEditorFieldComponent() {
   };
     createEffect(
     on(
-      () => layoutStore().selectedComponent,
+      () => formStoreVertex()?.P.selectedComponent,
       () => {
-        if (layoutStore().selectedComponent !== -1) {
+        if (formStoreVertex()?.P.selectedComponent !== -1) {
           setIsJsonValid(true);
         }
       },
@@ -126,13 +126,13 @@ function JsonEditorFieldComponent() {
       Properties JSON
       {/* <textarea
           placeholder="Enter value here"
-          value={JSON.stringify(graph.vertexes[layoutStore().selectedId].P, null, 2)}
+          value={JSON.stringify(graph.vertexes[formStoreVertex()?.P.selectedId].P, null, 2)}
           onChange={(e) => replacePropertyValue(e.currentTarget.value)}
           class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:red-50' : ''}`}
           style={{ height: "200px" }}
         /> */}
       <JsonEditorField
-        json={graph.vertexes[layoutStore().selectedId].P}
+        json={graph.vertexes[formStoreVertex()?.P.selectedId].P}
         onChange={replacePropertyValue}
       />
       {!isJsonValid() && <span class="fg:red-50">Invalid JSON</span>}
@@ -144,13 +144,14 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
 
   createEffect(
     on(
-      () => layoutStore().selectedComponent,
+      () => formStoreVertex()?.P.selectedComponent,
       () => {
-        if (layoutStore().selectedComponent !== -1) {
+        if (formStoreVertex()?.P.selectedComponent !== -1) {
           setIsFunctionValid(true);
         }
       },
@@ -211,7 +212,7 @@ access following variables in the args:
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
 `}
         style={{ height: "200px" }}
-        value={graph.vertexes[layoutStore().selectedId].P.otherProps ?? ""}
+        value={graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? ""}
       />
       {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
     </label>

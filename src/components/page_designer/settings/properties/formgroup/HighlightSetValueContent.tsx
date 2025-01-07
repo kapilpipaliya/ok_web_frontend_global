@@ -28,7 +28,7 @@ export function HighlightSetValueContent(
   const layoutStore = () => graph.vertexes[layoutStoreId].P;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  const selectedComponentName = () => graph.vertexes[layoutStore().selectedComponent];
+  const selectedComponentVertex = () => graph.vertexes[layoutStore().selectedComponent] ?? {P: {}};
   const selectedAttr = () => graph.vertexes[layoutStore().selectedId];
   const componentExample = createMemo(
     () =>
@@ -64,7 +64,7 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedComponentName().P.key === "Image" && props.meta.P.key === "src"
+              selectedComponentVertex().P.key === "Image" && props.meta.P.key === "src"
             }
           >
             <div>
@@ -89,7 +89,7 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedComponentName().P.key === "Icon" && props.meta.P.key === "icon"
+              selectedComponentVertex().P.key === "Icon" && props.meta.P.key === "icon"
             }
           >
             <div>
