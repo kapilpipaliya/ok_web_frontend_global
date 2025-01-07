@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
-import type { FormStoreObject } from "~/components/form/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { generateFormMetaAttributes } from "../../functions/generateFormMetaAttributes";
 
