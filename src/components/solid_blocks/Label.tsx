@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext, type FormStoreObject } from "../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 interface LabeledFieldProps {

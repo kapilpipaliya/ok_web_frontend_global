@@ -13,7 +13,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
 import {

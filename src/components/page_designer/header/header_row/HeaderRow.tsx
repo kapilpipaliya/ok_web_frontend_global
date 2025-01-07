@@ -1,12 +1,9 @@
 import { Show } from "solid-js";
 
-import { FormContext } from "~/components/form/FormContext";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 import { useGraph, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
-
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
 import { MiddleSectionButtons } from "../middle/MiddleSectionButtons";
@@ -17,6 +14,7 @@ import { PreviewButton } from "../right/PreviewButton";
 import { RightToggleButton } from "../right/RightToggleButton";
 import { SaveIconButton } from "../right/SaveIconButton";
 import { DebugInfo } from "./DebugInfo";
+import { FormContext, FormStoreObject } from "~/components/form/context/FormContext";
 
 export function HeaderRow() {
   const [graph] = useGraph();

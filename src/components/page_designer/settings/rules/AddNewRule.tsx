@@ -7,7 +7,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";

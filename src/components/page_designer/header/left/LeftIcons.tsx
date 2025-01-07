@@ -5,7 +5,7 @@ import logo from "~/assets/graphics/sidebarLogo.svg";
 import { IconButton } from "~/components/styled/IconButton";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 import { useGraph, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";

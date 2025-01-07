@@ -1,15 +1,11 @@
+Follow Guidelines:
 - write own components and documentation
-- support for custom js code
 - support for custom condition in rules.
 
 Bugs:
-- fix css elements style
-- fix style for number input in properties editor.
+- remove cleanUpConfig variable usage.
 
 Feature:
-- user can always drag and drop on canvas
-- write the component properties sync logic.
 
-- rename Repeater to Data.
 
-- dont allow item to be drop on itself.
+

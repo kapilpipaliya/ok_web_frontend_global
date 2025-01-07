@@ -13,7 +13,7 @@ import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useToast } from "../../styled/Toast";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SaveAsTemplateMenu(

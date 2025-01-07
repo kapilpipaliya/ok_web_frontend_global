@@ -6,7 +6,7 @@ import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function ShareSection() {
   const [graph] = useGraph();

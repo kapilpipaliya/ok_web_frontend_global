@@ -9,7 +9,7 @@ import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import type { FormStoreObject } from "../FormContext";
+import type { FormStoreObject } from "../context/FormContext";
 
 export function FormStepper() {
   const layoutStoreId = useDesignerLayoutStore();

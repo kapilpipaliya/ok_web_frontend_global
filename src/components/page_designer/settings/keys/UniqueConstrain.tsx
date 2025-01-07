@@ -9,7 +9,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function UniqueConstrains() {
   const layoutStoreId = useDesignerLayoutStore();

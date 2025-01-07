@@ -7,7 +7,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";

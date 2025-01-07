@@ -2,14 +2,14 @@ import Resizable from '@corvu/resizable'
 import { createSignal, onCleanup, type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { FormContext } from "~/components/form/FormContext";
+import { FormContext } from "~/components/form/context/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";

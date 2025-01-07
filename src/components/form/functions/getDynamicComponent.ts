@@ -66,7 +66,6 @@ import { TableInputField } from "~/components/fields/table_field/TableInputField
 import { TextAreaField } from "~/components/fields/TextArea";
 import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DataField } from "~/components/page_attr_render/Repeater";
 
 import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
@@ -74,6 +73,7 @@ import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
+import { DataField } from "~/components/fields/DataField";
 
 export const corvuComponents = {
   Accordion,

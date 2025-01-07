@@ -6,7 +6,7 @@ import { addComponentAttrInPage } from "~/components/page_designer/functions/dro
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "../FormContext";
+import { FormStoreObject } from "../context/FormContext";
 
 export function addStepAfter(
   graph: Store<GraphInterface>,

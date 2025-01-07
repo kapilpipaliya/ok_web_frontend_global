@@ -3,7 +3,7 @@ import { reconcile } from "solid-js/store";
 
 import { type GraphInterface, type Id, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../context/LayoutContext";
 
 import { SimpleWithDismissButton } from "../../styled/SimpleModal";

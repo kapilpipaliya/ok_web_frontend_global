@@ -13,7 +13,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { PROPERTIES } from "../../../styled/constants/constant";
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { Label } from "../properties/formgroup/Label";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SEOFormGroupProperties() {

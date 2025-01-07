@@ -3,7 +3,7 @@ import { uniqueNameKey } from "~/components/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/generateFormMetaAttributes";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../../context/LayoutContext";
 import { Label } from "./Label";

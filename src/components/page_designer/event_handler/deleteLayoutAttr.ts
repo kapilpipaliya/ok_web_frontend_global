@@ -4,7 +4,7 @@ import { batch } from "solid-js";
 
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";

@@ -1,4 +1,4 @@
-import type { IFormContext } from "~/components/form/FormContext";
+import type { IFormContext } from "~/components/form/context/FormContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";

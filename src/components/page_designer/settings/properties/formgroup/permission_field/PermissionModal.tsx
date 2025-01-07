@@ -13,7 +13,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   // const [graph, setGraph] = useGraph();

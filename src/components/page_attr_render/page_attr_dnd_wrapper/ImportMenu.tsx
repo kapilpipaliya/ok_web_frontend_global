@@ -15,7 +15,7 @@ import {
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function ImportMenu(

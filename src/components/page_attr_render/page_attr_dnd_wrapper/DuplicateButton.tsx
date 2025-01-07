@@ -4,7 +4,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function DuplicateButton(props: { item: Vertex }) {
   const [graph, setGraph] = useGraph();

@@ -8,7 +8,7 @@ import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContex
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import type { FormStoreObject } from "../FormContext";
+import type { FormStoreObject } from "../context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function Step(

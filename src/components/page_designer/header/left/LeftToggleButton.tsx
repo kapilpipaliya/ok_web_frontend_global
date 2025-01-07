@@ -2,7 +2,7 @@ import { useDesignerLayoutStore } from "~/components/page_designer/context/Layou
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function LeftToggleButton() {

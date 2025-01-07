@@ -8,7 +8,7 @@ import { handleDropAtPosition } from "~/components/page_designer/functions/handl
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function InsertButtons(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();

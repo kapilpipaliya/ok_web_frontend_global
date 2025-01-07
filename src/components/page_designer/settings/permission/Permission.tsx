@@ -8,7 +8,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";

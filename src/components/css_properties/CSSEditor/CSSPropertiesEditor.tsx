@@ -11,7 +11,7 @@ import type { CSSStore } from "../context/CssEditorContext";
 
 import { ZIndex } from "../../fields/ZIndex";
 import { DynamicComponent } from "../../form/DynamicComponent";
-import { useFormContext, type FormStoreObject } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { MultiSelectField } from "../../styled/MultiSelect";
 import { useCssEditor } from "../context/CssEditorContext";

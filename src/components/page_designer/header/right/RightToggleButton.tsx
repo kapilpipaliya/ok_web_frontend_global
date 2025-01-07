@@ -3,7 +3,7 @@ import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function RightToggleButton() {
   const [graph, setGraph] = useGraph();

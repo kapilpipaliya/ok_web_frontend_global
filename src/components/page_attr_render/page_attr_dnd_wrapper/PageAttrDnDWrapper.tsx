@@ -21,7 +21,7 @@ import { PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/co
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 interface PageAttrDnDWrapperProps {

@@ -1,6 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 
-import { useFormContext, type FormStoreObject } from "~/components/form/FormContext";
+import { useFormContext, type FormStoreObject } from "~/components/form/context/FormContext";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";

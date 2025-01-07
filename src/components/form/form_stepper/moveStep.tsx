@@ -5,7 +5,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "../FormContext";
+import { FormStoreObject } from "../context/FormContext";
 
 export function moveStep(
   graph: Store<GraphInterface>,

@@ -22,8 +22,10 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const visible = useVisibilityObserver(() => popoverRef);
 
   return (
-    <div ref={popoverRef}>
-      <div classList={{ hidden: !visible() }}>
+    <div ref={popoverRef} >
+      <div
+        // classList={{ hidden: !visible() }}
+       >
         <Switch>
           <Match when={isSelectedLayoutId(props.item.id)}>
             <SelectedAttrConfigPopOver item={props.item} />

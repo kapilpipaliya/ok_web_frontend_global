@@ -25,7 +25,7 @@ import { getColumnProps } from "~/lib/graph/mutate/form/addNewRow";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useFormContext, type FormStoreObject } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 

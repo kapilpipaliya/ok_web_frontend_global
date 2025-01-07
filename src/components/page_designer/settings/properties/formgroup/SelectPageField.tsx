@@ -2,7 +2,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { Label } from "./Label";
 

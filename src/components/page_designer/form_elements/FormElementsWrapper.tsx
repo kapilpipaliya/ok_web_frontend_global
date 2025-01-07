@@ -1,7 +1,7 @@
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph } from "~/lib/graph/graph";
 import type { PageLayoutObject } from "../context/LayoutContext";
-import type { FormStoreObject } from "~/components/form/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";

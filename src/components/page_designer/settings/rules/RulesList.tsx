@@ -9,7 +9,7 @@ import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { SimpleWithDismissButton } from "../../../styled/SimpleModal";
 import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function RulesList() {

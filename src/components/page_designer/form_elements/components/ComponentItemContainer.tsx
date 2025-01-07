@@ -7,7 +7,7 @@ import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { onCompDragStart } from "./onCompDragStart";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { PageLayoutObject } from "../../context/LayoutContext";
-import type { FormStoreObject } from "~/components/form/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function ComponentItemContainer(props: {
   child: Vertex;

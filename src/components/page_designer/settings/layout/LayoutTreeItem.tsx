@@ -8,7 +8,7 @@ import { resetDragDropState } from "~/components/page_designer/event_handler/res
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
 import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";

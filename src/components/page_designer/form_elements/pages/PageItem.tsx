@@ -8,7 +8,7 @@ import { onClickAddComponent } from "~/components/page_designer/functions/onClic
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";

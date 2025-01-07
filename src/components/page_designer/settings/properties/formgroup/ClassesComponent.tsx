@@ -5,7 +5,7 @@ import { genericInputComponents } from "~/components/form/functions/genericInput
 import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import type { createVertexIds } from "./FormGroupProperties";
 

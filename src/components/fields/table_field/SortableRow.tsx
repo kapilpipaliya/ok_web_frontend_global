@@ -18,7 +18,7 @@ import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 
-import { useFormContext, type FormStoreObject } from "../../form/FormContext";
+import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
 export const SortableRow = (

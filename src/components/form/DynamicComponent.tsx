@@ -48,7 +48,7 @@ import { getComponentLabel } from "../page_designer/functions/getComponentLabel"
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useToast } from "../styled/Toast";
-import { FormStoreObject, useFormContext } from "./FormContext";
+import { FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 

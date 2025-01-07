@@ -19,11 +19,7 @@ import { createStore } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {
-  FormContext,
-  FormStoreObject,
-  getInitialFormStore,
-} from "~/components/form/FormContext";
+import { FormStoreObject, getInitialFormStore, FormContext } from "~/components/form/context/FormContext";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { getFormData } from "~/components/form/functions/getFormData";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";

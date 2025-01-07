@@ -6,7 +6,7 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { PageLayoutObject } from "../../context/LayoutContext";
-import type { FormStoreObject } from "~/components/form/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 export const MiddleSectionButtons = () => {
   const layoutStoreId = useDesignerLayoutStore();

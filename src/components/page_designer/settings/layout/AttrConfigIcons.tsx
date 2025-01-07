@@ -12,7 +12,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();

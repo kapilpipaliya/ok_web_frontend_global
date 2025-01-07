@@ -8,7 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { RulesModal } from "../../../rules/RulesModal";
 import { AddNewRule } from "../../rules/AddNewRule";

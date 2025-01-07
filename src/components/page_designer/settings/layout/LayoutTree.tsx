@@ -1,7 +1,7 @@
 import { createSignal, For, Show } from "solid-js";
 
 import { useGraph, type Id, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";

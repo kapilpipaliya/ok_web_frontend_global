@@ -8,7 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";
