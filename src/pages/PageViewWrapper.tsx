@@ -2,7 +2,7 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { Meta, Title } from "@solidjs/meta";
 import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 import {
   createEffect,
   createMemo,
@@ -50,6 +50,7 @@ import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreven
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -68,13 +69,15 @@ export function PageViewWrapper(
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
+    uuid?: string;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
   const id = createMemo(() =>
     props.dataId === "new" ? undefined : props.dataId,
   );
-  const pageFormVertexObject = newVertex(uuidv4(), ["PageForm"], {
+  const layoutStoreId = props.uuid ?? uuidv7();
+  const pageFormVertexObject = newVertex(layoutStoreId, ["PageForm"], {
     ...getInitialFormStore(graph, setGraph),
     formId: props.pageVertexName,
     id: id()!,
@@ -341,10 +344,19 @@ export function PageViewWrapper(
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (isDisabledTxn(formStore().P.txnId, graph)) {
-      // allow navigation
+    const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+    
+    // Check if any opened form has unsaved changes
+    const hasUnsavedChanges = layoutStore().openedFormIds.some(form => {
+      const vertex = graph.vertexes[form.formId] as Vertex<FormStoreObject>;
+      return vertex?.P.txnId && !isDisabledTxn(vertex.P.txnId, graph);
+    });
+
+    if (!hasUnsavedChanges) {
+      // Allow navigation if no unsaved changes
       return;
     }
+
     // preventDefault to block immediately and prompt user async
     e.preventDefault();
     setTimeout(() => {

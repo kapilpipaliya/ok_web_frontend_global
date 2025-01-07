@@ -42,9 +42,8 @@ export function getTreeData(
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.key;
       const navItem: NavItem = {
         expanded: true,
-        id: child.id,
+        ...child,
         key: key,
-        P: child.P,
       };
       if (
         levels.child &&

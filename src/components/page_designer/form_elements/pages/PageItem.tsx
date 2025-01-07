@@ -1,8 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { toTitle } from "case-switcher-js";
 import { createSignal, onCleanup, Show } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
-import type { NavItem } from "~/lib/graph/get/sync/traverse";
+import type { NavItem } from "../getTreeData";
 
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -10,6 +11,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
+import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
@@ -86,6 +88,29 @@ export function PageItem(
     );
     mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [] });
   };
+  const handleOpenClick = (e: MouseEvent) => {
+    // Check if form with same label and dataId already exists
+    const exists = layoutStore().openedFormIds.some(
+      form => form.label === props.child.L[0] && form.dataId === props.child.id
+    );
+
+    if (!exists) {
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        layoutStoreId,
+        graph,
+        setGraph,
+        {
+          openedFormIds: [...layoutStore().openedFormIds, {
+            formId: uuidv7(),
+           
+          label: props.child.L[0],
+            dataId: props.child.id
+          }]
+        }
+      );
+    }
+  };
 
   onCleanup(() => {
     clearTimeout(timeoutId);
@@ -104,6 +129,13 @@ export function PageItem(
       >
         <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
         <div class="font-size:14px">{toTitle(props.child.key)}</div>
+        <div class="margin-left:auto">
+          <IconButton
+            icon="mdi:open-in-new"
+            onClick={handleOpenClick}
+            size={18}
+          />
+        </div>
         <Show when={props.previewPageId === props.child.id}>
           <DropdownMenu
             onClickOutside={() => props.setPreviewPageId(null)}

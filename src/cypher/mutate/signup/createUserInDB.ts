@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
 import type { Transaction } from "neo4j-driver";
 
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
@@ -17,7 +17,7 @@ export async function createUserInSuperDB(
     username: string;
   },
 ) {
-  const uuid = uuidv4();
+  const uuid = uuidv7();
 
   const createUserQuery = `CREATE (u:User {
             username: $username,

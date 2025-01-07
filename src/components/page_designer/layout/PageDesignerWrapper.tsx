@@ -7,6 +7,7 @@ import { isServer } from "solid-js/web";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { getTableData } from "~/components/grid/functions/getTableData";
+import { v7 as uuidv7 } from "uuid";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
@@ -23,13 +24,20 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
 import { clientOnly } from "@solidjs/start";
+import { useParams } from "@solidjs/router";
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
+  const params = useParams();
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const vertex = newVertex(initialStore.id, ["PageDesigner"], initialStore);
+  const formId = uuidv7();
+  const vertex = newVertex(initialStore.id, ["PageDesigner"], {
+    ...initialStore,
+    openedFormIds: [{formId, label: params.entity, dataId: params.id}],
+    formId,
+  });
   addNewVertex(0, vertex, graph, setGraph);
 
   const handleResize = () => {

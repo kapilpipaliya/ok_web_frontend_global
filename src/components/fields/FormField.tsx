@@ -1,6 +1,6 @@
 import { createMemo, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
@@ -41,7 +41,7 @@ export function FormField(
   const formId = useFormContext();
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
 
-  const pageFormVertexObject = newVertex(uuidv4(), ["PageForm"], {
+  const pageFormVertexObject = newVertex(uuidv7(), ["PageForm"], {
     cleanUpConfig: () => cleanUpConfig,
     txnId,
   });

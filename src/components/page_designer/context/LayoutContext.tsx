@@ -1,6 +1,6 @@
 import type { createStore } from "solid-js/store";
 import { createContext, useContext } from "solid-js";
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 import type { FormStoreObject } from "../../form/context/FormContext";
@@ -8,7 +8,8 @@ import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
 
 export function getInitialDesignerLayoutStore() {
   return {
-    id: uuidv4(),
+    id: uuidv7(),
+    openedFormIds: [] as {formId: Id, label: string, dataId: Id}[],
     formId: null as Id | null,
     isLeftOpen: true,
     isRightOpen: true,

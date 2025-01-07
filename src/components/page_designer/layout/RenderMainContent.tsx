@@ -1,5 +1,5 @@
 import Resizable from '@corvu/resizable'
-import { createSignal, type Setter, Show } from "solid-js";
+import { createSignal, For, type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/context/FormContext";
@@ -20,6 +20,7 @@ import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { IFramePreview } from './IFramePreview';
+import { isDisabledTxn } from '~/lib/graph/transaction/isDisabledTxn';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -49,6 +50,74 @@ function FormElements() {
         <FormElementsWrapper />
       </Show>
     </Show>
+  );
+}
+
+function TabBar() {
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const handleClose = (formId: string) => {
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      {
+        openedFormIds: layoutStore().openedFormIds.filter(f => f.formId !== formId),
+        formId: layoutStore().openedFormIds.find(f => f.formId !== formId)?.formId || null
+      }
+    );
+  };
+
+  const handleTabClick = (formId: string) => {
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      {
+        formId
+      }
+    );
+  };
+
+  const isUnsaved = (formId: string) => {
+    const vertex = graph.vertexes[formId] as Vertex<FormStoreObject>;
+    return vertex?.P.txnId && !isDisabledTxn(vertex.P.txnId, graph);
+  };
+
+  return (
+    <div class="display:flex gap:5px padding:5px">
+      <For each={layoutStore().openedFormIds}>
+        {(form, index) => (
+          <div
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${
+              layoutStore().formId === form.formId ? "background:#e0e0e0" : ""
+            }`}
+            onClick={[handleTabClick, form.formId]}
+          >
+            <span>
+              {form.label}
+              {isUnsaved(form.formId) && "*"}
+            </span>
+            <Show when={index() !== 0}>
+              <button
+                class="background:none border:none cursor:pointer font-size:14px padding:2px"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClose(form.formId);
+                }}
+              >
+                ×
+              </button>
+            </Show>
+          </div>
+        )}
+      </For>
+    </div>
   );
 }
 function PageViewComponent() {
@@ -180,7 +249,10 @@ export function ResizableAltKey() {
           initialSize={sizes()[1] ?? 0.7}
           minSize={0.2}
         >
-          <PageViewComponent />
+          <div>
+            <TabBar />
+            <PageViewComponent />
+          </div>
         </Resizable.Panel>
         <Resizable.Handle
           aria-label="Resize Handle"
