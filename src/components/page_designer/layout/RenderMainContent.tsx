@@ -1,5 +1,5 @@
 import Resizable from '@corvu/resizable'
-import { createSignal, onCleanup, type Setter, Show } from "solid-js";
+import { createSignal, type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/context/FormContext";
@@ -16,10 +16,10 @@ import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
-import { getChannel, handleChannelMessage } from './channel';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
+import { IFramePreview } from './IFramePreview';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -57,39 +57,16 @@ function PageViewComponent() {
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  const IFrame = () => {
-    const [graph, setGraph] = useGraph();
 
-    const onLoad = () => {
-      setTimeout(() => {
-        const channel = getChannel(layoutStoreId);
-        channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph);
-        channel.postMessage(JSON.stringify({graph}));
-      }, 1000);
-    };
-
-    setGraph("broadcastChannels", (channels) => channels.includes(layoutStoreId) ? channels : [...channels, layoutStoreId]);
-
-    onCleanup(() => {
-      setGraph("broadcastChannels", (channels) => channels.filter(id => id !== layoutStoreId));
-    });
-    
-    {/* TODO: use unique id for each page */ }
-    return <iframe
-      src={`${window.location.origin}/page_design_preview?id=${layoutStoreId}`}
-      style={{ width: "100%", height: "100%", border: "none" }}
-      onLoad={onLoad}
-    />
-  }
   return (
     <Show when={formStoreVertex()?.P.id}>
       <ResizableContainer view={formStoreVertex()?.P.view}>
-        {/* <IFrame /> */}
-        <PageView
+        <IFramePreview />
+        {/* <PageView
           isDesignMode={true}
           isNoPermissionCheck={true}
           metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
-        />
+        /> */}
       </ResizableContainer>
     </Show>
   );

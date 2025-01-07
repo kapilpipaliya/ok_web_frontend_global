@@ -11,6 +11,7 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
+import { IFramePreview } from "../../layout/IFramePreview";
 
 export function PreviewButton() {
   const [graph] = useGraph();
@@ -31,12 +32,13 @@ export function PreviewButton() {
   const Content = () => {
     return (
       <PreviewPage>
-        <PageView
+        <IFramePreview />
+        {/* <PageView
           isDesignMode={false}
           isNoPermissionCheck={true}
           // data={layoutStore.formStore[0].formData}
           metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
-        />
+        /> */}
       </PreviewPage>
     );
   };
