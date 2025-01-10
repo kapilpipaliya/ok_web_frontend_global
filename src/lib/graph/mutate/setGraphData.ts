@@ -17,7 +17,7 @@ import { broadcastToAllChannels } from "~/components/page_designer/layout/channe
 
 interface UpdateOptions {
   skipExisting?: boolean;
-  skipPostMessage?: boolean;
+  skipPostMessage?: string;
 }
 
 export function updateVertex(
@@ -49,9 +49,7 @@ export function updateVertex(
         : [vertexData.id];
     });
   }
-  if (!skipPostMessage) {
-    broadcastToAllChannels(graph.broadcastChannels, { updateVertex: { vertexId, vertexData, options } });
-  }
+  broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateVertex: { vertexId, vertexData, options } });
 }
 
 export function updateEdge(
@@ -61,7 +59,7 @@ export function updateEdge(
   setGraph: SetStoreFunction<GraphInterface>,
   options: UpdateOptions = {},
 ) {
-  const { skipExisting = false, skipPostMessage = false } = options;
+  const { skipExisting = false, skipPostMessage = "" } = options;
 
   if (skipExisting && graph.edges[edgeId]) {
     return;
@@ -84,9 +82,7 @@ export function updateEdge(
         : [edge.id],
     );
   }
-  if (!skipPostMessage) {
-    broadcastToAllChannels(graph.broadcastChannels, { updateEdge: { edgeId, edge, options } });
-  }
+  broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateEdge: { edgeId, edge, options } });
 }
 
 function handleDeletions(

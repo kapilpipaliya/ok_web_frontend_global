@@ -10,7 +10,7 @@ export const IFramePreview = () => {
   const onLoad = () => {
     setTimeout(() => {
       const channel = getChannel(layoutStoreId);
-      channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph);
+      channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, layoutStoreId);
       channel.postMessage(JSON.stringify({ graph }));
     }, 1000);
   };

@@ -65,7 +65,7 @@ export default function PageShareView() {
 
   const channel = getChannel(id);
 
-  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, id);
+  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, id, id);
 
   const layoutStore = () => graph.vertexes[id]?.P as PageLayoutObject || {};
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;

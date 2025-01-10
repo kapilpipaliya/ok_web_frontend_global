@@ -12,7 +12,7 @@ export function transactionDetailAdd(
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: boolean }
+  options?: { skipPostMessage?: string }
 ) {
   return untrack(() => {
     if (!txnId) {

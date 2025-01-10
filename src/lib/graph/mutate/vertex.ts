@@ -26,7 +26,7 @@ export function addNewVertex(
   vertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: boolean }
+  options?: { skipPostMessage?: string }
 ): {
   error: string;
   txnDetailIndex?: number;
@@ -65,9 +65,7 @@ export function addNewVertex(
       setGraph,
       options
     );
-    if (!options?.skipPostMessage) {
-      broadcastToAllChannels(graph.broadcastChannels, { addNewVertex: { txnId, vertex } });
-    }
+    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { addNewVertex: { txnId, vertex } });
     return {
       error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -83,7 +81,7 @@ export function replaceVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
   // clonning will reduce performance, so we can use this flag to disable it.
-  options?: { cloneProperties?: boolean; skipPostMessage?: boolean }
+  options?: { cloneProperties?: boolean; skipPostMessage?: string }
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId = getVertexOldIdToNewIdMap(graph)[vertexId] || vertexId;
@@ -110,9 +108,7 @@ export function replaceVertexProperties(
         options
       );
     }
-    if (!options?.skipPostMessage) {
-      broadcastToAllChannels(graph.broadcastChannels, { replaceVertexProperties: { txnId, vertexId, properties } });
-    }
+    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { replaceVertexProperties: { txnId, vertexId, properties } });
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -127,7 +123,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
-  options?: { skipPostMessage?: boolean, cloneProperties?: boolean },
+  options?: { skipPostMessage?: string, cloneProperties?: boolean },
   _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
@@ -159,9 +155,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
       setGraph,
       options
     );
-    if (!options?.skipPostMessage) {
-      broadcastToAllChannels(graph.broadcastChannels, { mergeVertexProperties: { txnId, vertexId, properties } });
-    }
+    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { mergeVertexProperties: { txnId, vertexId, properties } });
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -175,7 +169,7 @@ export function deleteVertex(
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: boolean }
+  options?: { skipPostMessage?: string }
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -274,9 +268,7 @@ export function deleteVertex(
       setGraph,
       options
     );
-    if (!options?.skipPostMessage) {
-      broadcastToAllChannels(graph.broadcastChannels, { deleteVertex: { txnId, vertexId } });
-    }
+    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { deleteVertex: { txnId, vertexId } });
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -308,7 +300,7 @@ export function updateVertexId(
   newVertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: boolean }
+  options?: { skipPostMessage?: string }
 ) {
   return untrack(() => {
     if (!graph.vertexes[oldVertexId]) {
@@ -343,9 +335,7 @@ export function updateVertexId(
         setGraph("edges", edgeIds, "E", newVertexId);
       },
     );
-    if (!options?.skipPostMessage) {
-      broadcastToAllChannels(graph.broadcastChannels, { updateVertexId: { oldVertexId, newVertexId } });
-    }
+    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateVertexId: { oldVertexId, newVertexId } });
     return { error: "" };
   });
 }
