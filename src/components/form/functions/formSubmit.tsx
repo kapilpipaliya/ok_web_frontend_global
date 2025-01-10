@@ -5,28 +5,26 @@ import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
 import { useToast } from "../../styled/Toast";
+import { SetStoreFunction } from "solid-js/store";
 
-export function formSubmit(closePopUp?: () => void) {
+export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, closePopUp?: () => void) {
   const _navigate = useNavigate();
-  const formId = useFormContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
-  const [graph, setGraph] = useGraph();
-  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
 
   return async () => {
     const navigateToParentRoute = () => {
       // navigate(removeLastPathSegment());
     };
 
-    const label = graph.vertexes[formVertex().P.formDataId!]?.L[0].replace(/([A-Z])/g, " $1").trim();
-    if (graph.vertexes[`txn${formVertex().P.txnId}`]?.P.steps.length === 0) {
+    const label = graph.vertexes[formStoreVertex().P.formDataId!]?.L[0].replace(/([A-Z])/g, " $1").trim();
+    if (graph.vertexes[`txn${formStoreVertex().P.txnId}`]?.P.steps.length === 0) {
       showWarningToast(`There is nothing to save for ${label}.`);
-    } else if (isDisabledTxn(formVertex().P.txnId, graph)) {
+    } else if (isDisabledTxn(formStoreVertex().P.txnId, graph)) {
       showWarningToast(`${label} is already saved or not changed.`);
       return;
     }
@@ -42,15 +40,15 @@ export function formSubmit(closePopUp?: () => void) {
     // TODO: add validation on form that AttrsTableData keys should not available.
     // !!!TODO!!! Handle Error Received From server when commit
     if (!isRealTime) {
-      data = commitTxn(formVertex().P.txnId, graph);
+      data = commitTxn(formStoreVertex().P.txnId, graph);
       if (!data) {
         showWarningToast("No data to Submit");
         return;
       }
 
-      const key = graph.vertexes[formVertex().P.formDataId!]?.P.key;
+      const key = graph.vertexes[formStoreVertex().P.formDataId!]?.P.key;
 
-      const res = await checkUniqueConstrains(graph.vertexes[formVertex().P.formDataId!]);
+      const res = await checkUniqueConstrains(graph.vertexes[formStoreVertex().P.formDataId!]);
 
       if (!isValidResponse(res)) {
         showErrorToast(getErrorMessage(res));
@@ -71,7 +69,7 @@ export function formSubmit(closePopUp?: () => void) {
           { ...data, key },
           graph,
           setGraph,
-          formVertex().P.txnId,
+          formStoreVertex().P.txnId,
         ),
         successMessage: `${label} Saved Successfully`,
       });

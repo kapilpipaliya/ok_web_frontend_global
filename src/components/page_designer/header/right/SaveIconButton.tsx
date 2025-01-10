@@ -6,15 +6,17 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
+import { PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function SaveIconButton() {
-  const formId = useFormContext();
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
 
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
-  const txnId = () => formVertex()?.P.txnId;
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const txnId = () => formStoreVertex()?.P.txnId;
 
-  const onSubmit = formSubmit();
   const isDisabled = createMemo(
     () => !!txnId() && isDisabledTxn(txnId()!, graph),
   );
@@ -23,7 +25,7 @@ export function SaveIconButton() {
     <IconButton
       class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
       icon="bi:floppy"
-      onClick={onSubmit}
+      onClick={() => formSubmit(formStoreVertex, graph, setGraph)()}
       size={22}
       title="Save"
     />

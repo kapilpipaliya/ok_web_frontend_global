@@ -95,6 +95,7 @@ export function PageItem(
     );
 
     if (!exists) {
+      // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
       mergeVertexProperties<PageLayoutObject>(
         0,
         layoutStoreId,
@@ -103,11 +104,11 @@ export function PageItem(
         {
           openedFormIds: [...layoutStore().openedFormIds, {
             formId: uuidv7(),
-           
-          label: props.child.L[0],
+            label: props.child.L[0],
             dataId: props.child.id
           }]
-        }
+        },
+        { cloneProperties: false }
       );
     }
   };

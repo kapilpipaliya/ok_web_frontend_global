@@ -60,6 +60,7 @@ function TabBar() {
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const handleClose = (formId: string) => {
+    // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreId,
@@ -68,7 +69,8 @@ function TabBar() {
       {
         openedFormIds: layoutStore().openedFormIds.filter(f => f.formId !== formId),
         formId: layoutStore().openedFormIds.find(f => f.formId !== formId)?.formId || null
-      }
+      },
+      { cloneProperties: false }
     );
   };
 

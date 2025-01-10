@@ -127,7 +127,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
-  options?: { skipPostMessage?: boolean },
+  options?: { skipPostMessage?: boolean, cloneProperties?: boolean },
   _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
@@ -141,7 +141,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
       // clonning json will remove undefined value, so used null as default.
       originalProperties[property] = vertex.P[property] ?? null;
     }
-    const clonedProperties = klona(properties);
+    const clonedProperties = options?.cloneProperties ? klona(properties) : properties;
     // It will only merge top level properties.
     setGraph("vertexes", actualVertexId, "P", clonedProperties);
     const data = updateVertexIdsToNew(klona(vertex), graph);

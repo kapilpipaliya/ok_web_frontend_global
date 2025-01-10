@@ -90,6 +90,7 @@ export function PageViewWrapper(
     mergeVertexProperties<FormStoreObject>(0, pageFormVertexObject.id, graph, setGraph, { [key]: value });
   };
 
+  // Note: onCleanUp will be called on reverse order of the cleanup functions
   onCleanup(() => {
     deleteVertex(0, pageFormVertexObject.id, graph, setGraph);
   })
@@ -194,7 +195,7 @@ export function PageViewWrapper(
         return;
       }
       metaDtaInitialize(data);
-      if (graph.vertexes[formStore().P.formMetaId!]!) {
+      if (formStore()?.P.formMetaId && graph.vertexes[formStore().P.formMetaId!]!) {
         form = generateFormMetaAttributes(graph, setGraph, graph.vertexes[formStore().P.formMetaId!]!);
       }
     }
@@ -333,27 +334,23 @@ export function PageViewWrapper(
   onCleanup(() => {
     // TODO: Remove all the meta
   });
+
   onCleanup(() => {
     // setLayoutStore?.("formData", undefined);
     for (const rowMetaTxnId of (
-      formStore().P.cleanUpConfig().rowMetaTxnIds || []
+      formStore().P.cleanUpConfig()?.rowMetaTxnIds || []
     ).reverse()) {
       revertTransaction(rowMetaTxnId, graph, setGraph);
     }
-    formStore().P.cleanUpConfig().rowMetaTxnIds = [];
+    if (formStore().P.cleanUpConfig()?.rowMetaTxnIds) {
+      formStore().P.cleanUpConfig().rowMetaTxnIds = [];
+    }
   });
 
+  // Each open tab will be hidden and have its own useBeforeLeave callback
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-    
-    // Check if any opened form has unsaved changes
-    const hasUnsavedChanges = layoutStore().openedFormIds.some(form => {
-      const vertex = graph.vertexes[form.formId] as Vertex<FormStoreObject>;
-      return vertex?.P.txnId && !isDisabledTxn(vertex.P.txnId, graph);
-    });
-
-    if (!hasUnsavedChanges) {
-      // Allow navigation if no unsaved changes
+    if (isDisabledTxn(formStore().P.txnId, graph)) {
+      // allow navigation
       return;
     }
 

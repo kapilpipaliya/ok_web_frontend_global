@@ -2,6 +2,8 @@ import { type JSXElement, Show } from "solid-js";
 
 import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";
+import { FormStoreObject, useFormContext } from "./context/FormContext";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 
 export function SaveCancelButton(
   props: Readonly<{
@@ -11,8 +13,11 @@ export function SaveCancelButton(
     disabled?: boolean;
   }>,
 ) {
-  const onSubmit = formSubmit(props.closePopUp);
-  const onCancel = formCancel(props.closePopUp);
+  const [graph, setGraph] = useGraph();
+  const formId = useFormContext();
+  const formStoreVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
+  const onSubmit = formSubmit(formStoreVertex, graph, setGraph, props.closePopUp);
+  const onCancel = formCancel(formStoreVertex, graph, setGraph, props.closePopUp);
   return (
     <div
       class={`${props.buttonAlign ? `jc:${props.buttonAlign}` : "jc:start"} flex`}
