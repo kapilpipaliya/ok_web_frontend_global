@@ -345,18 +345,6 @@ export function PageViewWrapper(
     // TODO: Remove all the meta
   });
 
-  onCleanup(() => {
-    // setLayoutStore?.("formData", undefined);
-    for (const rowMetaTxnId of (
-      formStore().P.cleanUpConfig()?.rowMetaTxnIds || []
-    ).reverse()) {
-      revertTransaction(rowMetaTxnId, graph, setGraph);
-    }
-    if (formStore().P.cleanUpConfig()?.rowMetaTxnIds) {
-      formStore().P.cleanUpConfig().rowMetaTxnIds = [];
-    }
-  });
-
   // Each open tab will be hidden and have its own useBeforeLeave callback
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
     if (isDisabledTxn(formStore().P.txnId, graph)) {

@@ -10,11 +10,8 @@ import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 import { IDToRuleMap } from "~/components/page_designer/functions/generateFormMetaAttributes";
 
 export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  const cleanUpConfigInitial = { rowMetaTxnIds: [] as number[] };
   return {
     ...InitialPermissions,
-    // TODO: Fix this
-    cleanUpConfig: () => cleanUpConfigInitial,
     count: 1,
     discardPopup: false,
     error: undefined as string | undefined,

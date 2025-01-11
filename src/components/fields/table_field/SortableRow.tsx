@@ -1,10 +1,12 @@
 import {
   type Accessor,
   createComputed,
+  createEffect,
   createMemo,
   createSignal,
   For,
   on,
+  onCleanup,
   Show,
 } from "solid-js";
 
@@ -20,6 +22,8 @@ import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 
 import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { evalExpression } from "~/lib/expression_eval";
 
 export const SortableRow = (
   props: Readonly<
@@ -48,45 +52,27 @@ export const SortableRow = (
 
   createComputed(
     on(props.tableColumnsTemplate, (tableColumnsTemplate) => {
-      const metaTxnId = rowMetaInitialize(
+      rowMetaInitialize(
         graph,
         setGraph,
         props.joinVertex,
         props.meta,
         tableColumnsTemplate,
       );
-      if (metaTxnId && formVertex()?.P.cleanUpConfig) {
-        const config = formVertex()!.P.cleanUpConfig();
-        if (!config.rowMetaTxnIds) {
-          config.rowMetaTxnIds = [];
-        }
-        // currently, when we delete row and unmount form, it is not giving error, but it should, because revertTransaction is not strict.
-
-        if (!config.rowMetaTxnIds.includes(metaTxnId)) {
-          config.rowMetaTxnIds.push(metaTxnId);
-        }
-      }
     }),
   );
 
-  const instResult = createMemo(
-    () => getChildVertex(graph, ["AttrInst"], props.joinVertex).vertex,
-  );
+  const attributesResult = createMemo(() => evalExpression("->AttrInst->Attr", {
+    graph,
+    setGraph,
+    vertexes: [props.joinVertex],
+  })) as Accessor<Vertex[]>;
 
-  const getMetaVertex = (columnId: Id) => {
-    const instRes = instResult();
-    const rowId = instRes?.P?.rows[columnId];
-    return rowId !== undefined && graph.vertexes[rowId]
-      ? graph.vertexes[rowId]
-      : ({ P: { componentName: "Error" } } as unknown as Vertex);
-  };
-
-  // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "Attr"], [p.joinVertex]));
   const rowColumnsMetaAttrs = createMemo(() =>
-    props.tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand"),
+    attributesResult()?.filter((vertex) => vertex.P.tab !== "expand") ?? [],
   );
   const expandVertex = createMemo(() =>
-    props.tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand"),
+    attributesResult()?.find((vertex) => vertex.P.tab === "expand"),
   );
 
   const handleDragEnter = () => props.setDragToIndex(props.rowIndex);
@@ -166,7 +152,6 @@ export const SortableRow = (
             <DisplayProperty
               column={column}
               disabled={disabled}
-              getMetaVertex={getMetaVertex}
               isNoPermissionCheck={props.isNoPermissionCheck}
               isRealTime={props.isRealTime}
               joinVertex={props.joinVertex}

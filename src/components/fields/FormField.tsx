@@ -36,13 +36,11 @@ export function FormField(
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta!;
   const data = () => parentRenderContext()?.context.data!;
-  const cleanUpConfig = {} as { [key: string]: any };
   const txnId = generateNewTxnId(graph, setGraph);
   const formId = useFormContext();
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
 
   const pageFormVertexObject = newVertex(uuidv7(), ["PageForm"], {
-    cleanUpConfig: () => cleanUpConfig,
     txnId,
   });
 
@@ -112,12 +110,6 @@ export function FormField(
       setFormStore("error", `Error When Loading Form: ${e.message}`);
     }
   }
-
-  onCleanup(() => {
-    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) {
-      revertTransaction(rowMetaTxnId, graph, setGraph);
-    }
-  });
 
   return (
     <FormContext.Provider value={pageFormVertexObject.id}>

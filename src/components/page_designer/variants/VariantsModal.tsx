@@ -37,24 +37,6 @@ const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   return metaAttribute;
 };
 
-const cleanupRowMetaTxnIds = (
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formStoreVertex: Vertex<FormStoreObject>,
-  excludeIds?: number[],
-) => {
-  if (formStoreVertex) {
-    for (const rowMetaTxnId of (
-      formStoreVertex.P.cleanUpConfig().rowMetaTxnIds || []
-    ).reverse()) {
-      if (!excludeIds?.includes(rowMetaTxnId)) {
-        revertTransaction(rowMetaTxnId, graph, setGraph);
-      }
-    }
-    formStoreVertex.P.cleanUpConfig().rowMetaTxnIds = excludeIds || [];
-  }
-};
-
 export function VariantsModal(
   props: Readonly<{
     closeModal: () => void;
@@ -70,7 +52,6 @@ export function VariantsModal(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-  const excludeIds = [...(formStoreVertex()?.P.cleanUpConfig().rowMetaTxnIds || [])];
 
   const prevTxnIndex =
     props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
@@ -98,7 +79,6 @@ export function VariantsModal(
   };
 
   onCleanup(() => {
-    cleanupRowMetaTxnIds(graph, setGraph, formStoreVertex(), excludeIds);
     if (revertChanges) {
       revertTransactionUpToIndex(formStoreVertex()?.P.txnId, prevTxnIndex - 1, graph, setGraph);
     }

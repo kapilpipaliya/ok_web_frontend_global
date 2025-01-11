@@ -54,6 +54,7 @@ export function SelectField(
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
   const [error, setError] = createSignal("");
+  const outerOwner = getOwner();
 
   const getCollection = () =>
     typeof meta().P.collection === "function"
@@ -101,35 +102,51 @@ export function SelectField(
 
   const loadOptions = async () => {
     let parsedOptions: any[] = [];
-    setError("");
-    if (memoizedOptions()) {
-      parsedOptions = getStaticOptions(memoizedOptions());
-    } else if (props.disabled) {
-      parsedOptions = getSelectedOptions();
-    } else if (getCollection()) {
-      setLoading(true);
-      if (meta().P.useLocalStorage) {
-        const res = getSelectionOptions(graph, setGraph, getCollection(), [
+    const collection = runWithOwner(outerOwner, () => getCollection());
+    runWithOwner(outerOwner, () => {
+      setError("");
+      if (memoizedOptions()) {
+        parsedOptions = getStaticOptions(memoizedOptions());
+        setOptions(parsedOptions);
+        return parsedOptions;
+      } else if (props.disabled) {
+        parsedOptions = getSelectedOptions();
+        setOptions(parsedOptions);
+        return parsedOptions;
+      } else if (collection && meta().P.useLocalStorage) {
+        parsedOptions = getSelectionOptions(graph, setGraph, collection, [
           data(),
-        ]);
-        parsedOptions = res.vertexes || [];
+        ]).vertexes || [];
+        setOptions(parsedOptions);
+        return parsedOptions;
+      }
+    });
+    if (parsedOptions.length) {
+      return;
+    }
+    
+    if (collection) {
+      runWithOwner(outerOwner, () => {
+        setLoading(true);
+      });
+
+      const mutationData = props.txnId
+        ? commitTxn(props.txnId, graph)
+        : undefined;
+      const res = await getSelectionOptionsMGCall(
+        [data()],
+        collection,
+        mutationData,
+        10,
+      );
+      if (isValidResponse(res)) {
+        parsedOptions = res.result || [];
       } else {
-        const mutationData = props.txnId
-          ? commitTxn(props.txnId, graph)
-          : undefined;
-        const res = await getSelectionOptionsMGCall(
-          [data()],
-          getCollection(),
-          mutationData,
-          10,
-        );
-        if (isValidResponse(res)) {
-          parsedOptions = res.result || [];
-        } else {
-          const errorMsg = getErrorMessage(res);
-          if (errorMsg) {
+        const errorMsg = getErrorMessage(res);
+        if (errorMsg) {
+          runWithOwner(outerOwner, () => {
             setError(errorMsg);
-          }
+          });
         }
       }
       runWithOwner(outerOwner, () => {
@@ -149,8 +166,6 @@ export function SelectField(
     }
     return props.componentName;
   }
-
-  const outerOwner = getOwner();
 
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {

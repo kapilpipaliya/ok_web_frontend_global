@@ -3,7 +3,7 @@ Follow Guidelines:
 - support for custom condition in rules.
 
 Bugs:
-- remove cleanUpConfig variable usage.
+- 
 
 Feature:
 

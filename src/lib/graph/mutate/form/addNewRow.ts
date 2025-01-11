@@ -126,16 +126,3 @@ export function addNewRow(
     return newRowResult;
   });
 }
-
-export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
-  const P = klona(attrColumn.P);
-  P.templateId = attrColumn.id;
-
-  if (!P.componentName) {
-    const componentName = getCompFallbackToString(attrColumn, graph)?.P[IdAttr];
-    if (componentName) {
-      P.componentName = componentName;
-    }
-  }
-  return P;
-}

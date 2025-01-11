@@ -86,7 +86,7 @@ FormMetaData.Form = {
       componentName: "DynamicTable",
       key: "Unique",
     },
-    rulesMetaAttribute!,
+    // rulesMetaAttribute!,
   ],
   key: "Form",
   title: "Form",

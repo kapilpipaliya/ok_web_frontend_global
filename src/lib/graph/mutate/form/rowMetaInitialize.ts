@@ -9,9 +9,10 @@ import { cloneVertexWithEdges } from "../../get/sync/cloneVertexWithEdges";
 import { getChildVertex } from "../../get/sync/getChildVertex";
 import { addNewEdge, newEdge } from "../edge";
 import { mergeVertexProperties } from "../vertex";
-import { getColumnProps, newRow } from "./addNewRow";
+import { newRow } from "./addNewRow";
 import { generateNewTxnId } from "../../transaction/generateNewTxnId";
 import { generateNewVertexId } from "../../transaction/generateNewVertexId";
+import { revertTransaction } from "../../transaction/revertTransaction";
 
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,
@@ -50,10 +51,7 @@ export function rowMetaInitialize(
   }
 
   onCleanup(() => {
-    // remove all AttrInst vertex.
-    // TODO: This is breaking when new row is added, its interesting to fix this.
-    // console.log('called', metaTxnId)
-    // revertTransaction(metaTxnId, graph);
+    revertTransaction(metaTxnId, graph, setGraph);
   });
 
   return metaTxnId;
@@ -139,8 +137,8 @@ function createAttributeRows(
       continue;
     }
 
-    // now this P is not needed, just use {}
-    const P = getColumnProps(attrColumn, graph);
+    const P = klona(attrColumn.P);
+    P.templateId = attrColumn.id;
 
     // instead of addRow, use cloneVertexWithEdges and add the edge manually
     const attrRowClone = cloneVertexWithEdges(

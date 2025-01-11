@@ -10,6 +10,7 @@ export function getStringComponent(
   graph: Store<GraphInterface>,
   attrDataTypeVertex?: Vertex,
 ) {
+  // TODO Fix this:
   if (!attrDataTypeVertex) {
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
       graph,

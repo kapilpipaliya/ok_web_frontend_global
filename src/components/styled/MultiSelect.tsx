@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
-import { createMemo, createSignal, For, type JSX, Show } from "solid-js";
+import { createMemo, createSignal, For, type JSX, Show, getOwner, runWithOwner } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -43,6 +43,7 @@ export function MultiSelectField(
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
   let optionTimeout: NodeJS.Timeout;
+  const owner = getOwner();
 
   const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
 
@@ -79,11 +80,13 @@ export function MultiSelectField(
 
   // Remove tag from selected values
   const handleRemoveTag = (option: Option) => {
-    const newSelected = selectedValue().filter(
-      (item) => getOptionValue(item) !== option,
-    );
+    runWithOwner(owner, () => {
+      const newSelected = selectedValue().filter(
+        (item) => getOptionValue(item) !== option,
+      );
 
-    props.onRemove?.(newSelected, option);
+      props.onRemove?.(newSelected, option);
+    });
   };
 
   // Filter options based on input value
@@ -126,14 +129,16 @@ export function MultiSelectField(
   };
 
   const handleInputFocus = () => {
-    if (dropdownVisible()) {
-      clearTimeout(optionTimeout);
-    } else {
-      setDropdownVisible(true);
-      if (!props.isLoadingOptions) {
-        props.loadOptions?.();
+    runWithOwner(owner, () => {
+      if (dropdownVisible()) {
+        clearTimeout(optionTimeout);
+      } else {
+        setDropdownVisible(true);
+        if (!props.isLoadingOptions) {
+          props.loadOptions?.();
+        }
       }
-    }
+    });
   };
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -146,55 +151,59 @@ export function MultiSelectField(
 
     // Handle changes in selection
     const handleSelectChange = (option: Option) => {
-      const value = getOptionValue(option);
-      let newSelected: Option[];
-      if (selectedValue().some((item) => getOptionValue(item) === value)) {
-        newSelected = selectedValue().filter(
-          (item) => getOptionValue(item) !== value,
-        );
+      runWithOwner(owner, () => {
+        const value = getOptionValue(option);
+        let newSelected: Option[];
+        if (selectedValue().some((item) => getOptionValue(item) === value)) {
+          newSelected = selectedValue().filter(
+            (item) => getOptionValue(item) !== value,
+          );
 
-        props.onRemove?.(newSelected, value);
-      } else {
-        if (
-          props.selectionLimit &&
-          props.selectionLimit > 1 &&
-          selectedValue().length >= props.selectionLimit
-        ) {
-          showErrorToast("Selection limit reached");
-          setDropdownVisible(false);
-          return; // Exit if selection limit is reached
-        }
-        if (props.selectionLimit === 1) {
-          newSelected = [option];
+          props.onRemove?.(newSelected, value);
         } else {
-          newSelected = [...selectedValue(), option];
+          if (
+            props.selectionLimit &&
+            props.selectionLimit > 1 &&
+            selectedValue().length >= props.selectionLimit
+          ) {
+            showErrorToast("Selection limit reached");
+            setDropdownVisible(false);
+            return; // Exit if selection limit is reached
+          }
+          if (props.selectionLimit === 1) {
+            newSelected = [option];
+          } else {
+            newSelected = [...selectedValue(), option];
+          }
+
+          props.onSelect?.(newSelected, value);
         }
 
-        props.onSelect?.(newSelected, value);
-      }
+        if (props.selectionLimit === 1) {
+          setDropdownVisible(false);
+        }
+        setInputValue(""); // mostimes user wants to clear the input after selecting an option
+        if (props.selectionLimit !== 1) {
+          // if we don't focus options list will be closed.
+          inputRef?.focus();
+        }
 
-      if (props.selectionLimit === 1) {
-        setDropdownVisible(false);
-      }
-      setInputValue(""); // mostimes user wants to clear the input after selecting an option
-      if (props.selectionLimit !== 1) {
-        // if we don't focus options list will be closed.
-        inputRef?.focus();
-      }
-
-      setIsReFetchSelectedValues((v) => v + 1);
+        setIsReFetchSelectedValues((v) => v + 1);
+      });
     };
 
     const toggleExpandOption = (option: Option) => {
-      const newHiddenOptions = new Set(hiddenOptions());
-      if (newHiddenOptions.has(option)) {
-        newHiddenOptions.delete(option);
-      } else {
-        newHiddenOptions.add(option);
-      }
-      setHiddenOptions(newHiddenOptions);
-      // if we don't focus options list will be closed.
-      inputRef?.focus();
+      runWithOwner(owner, () => {
+        const newHiddenOptions = new Set(hiddenOptions());
+        if (newHiddenOptions.has(option)) {
+          newHiddenOptions.delete(option);
+        } else {
+          newHiddenOptions.add(option);
+        }
+        setHiddenOptions(newHiddenOptions);
+        // if we don't focus options list will be closed.
+        inputRef?.focus();
+      });
     };
 
     const filteredOptions = createMemo(() => {
@@ -219,9 +228,11 @@ export function MultiSelectField(
               }}
               // @ts-expect-error ignore
               onClick={() =>
-                (!p.option[childrenKey()] ||
-                  p.option[childrenKey()].length === 0) &&
-                handleSelectChange(p.option)
+                runWithOwner(owner, () => {
+                  (!p.option[childrenKey()] ||
+                    p.option[childrenKey()].length === 0) &&
+                    handleSelectChange(p.option)
+                })
               }
             >
               {" "}

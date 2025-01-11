@@ -4,7 +4,9 @@ import {
   createMemo,
   createSignal,
   For,
+  getOwner,
   Match,
+  runWithOwner,
   Show,
   Switch,
 } from "solid-js";
@@ -85,6 +87,7 @@ export function TableInputField(
     setDragFromIndex(null);
     setDragToIndex(null);
   };
+  const owner = getOwner();
 
   return (
     <Switch>
@@ -98,13 +101,14 @@ export function TableInputField(
         {/* <Show when={props.isTableInside}> */}
         <AddNewButton
           onClick={() =>
-            insertNewRow(
+            runWithOwner(owner, () => insertNewRow(
               props.txnId || 0,
               meta()!,
               data()!,
               props.isRealTime ?? false,
               graph,
               setGraph,
+              ),
             )
           }
         />

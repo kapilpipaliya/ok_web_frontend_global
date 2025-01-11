@@ -21,13 +21,14 @@ import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMet
 import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { type Id, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { getColumnProps } from "~/lib/graph/mutate/form/addNewRow";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
 import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
+import { klona } from "klona/json";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {
@@ -49,7 +50,6 @@ export function DisplayProperty(
   props: Readonly<{
     column: Vertex;
     disabled: Accessor<boolean>;
-    getMetaVertex: (columnId: Id) => Vertex;
     isNoPermissionCheck?: boolean;
     isRealTime: boolean;
     joinVertex: Vertex;
@@ -60,7 +60,7 @@ export function DisplayProperty(
   const formId = useFormContext();
   const [graph, setGraph] = useGraph();
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
-  const metaVertex = createMemo(() => props.getMetaVertex(props.column.id));
+  const metaVertex = createMemo(() => props.column);
   const outerOwner = getOwner();
 
   // this is used to add props to meta when meta is configured in json
@@ -93,21 +93,19 @@ export function DisplayProperty(
             }
             const metaDataVal = removeUndefinedProperties(metaData, false, 10);
 
-            const newMetaData = Object.assign(
-              // when componentName is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
-              getColumnProps(
-                graph.vertexes[metaVertex().P.templateId] ?? { P: {} },
-                graph,
-              ),
-              metaDataVal,
-            );
+
+            // when componentName is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
+            const templateVertex = graph.vertexes[metaVertex().P.templateId];
+            const P = klona(templateVertex ?? { P: {} });
+            P.templateId = templateVertex?.id;
+            P.metaDataVal = metaDataVal;
 
             replaceVertexProperties(
               0,
               metaVertex().id,
               graph,
               setGraph,
-              newMetaData,
+              P,
             );
           }
         },
@@ -115,18 +113,18 @@ export function DisplayProperty(
     );
   }
   const [componentName, setComponentName] = createWritableMemo(() =>
-    getComponent(props.column.id),
+    getComponent(props.column),
   );
-  function getComponent(columnId: Id) {
-    const columnMetaVertex = props.getMetaVertex(columnId);
-    if (columnMetaVertex.P.componentName.includes("-")) {
+  function getComponent(column: Vertex) {
+    const componentNameValue = column.P.componentName || getComponentLabel(graph, column);
+    if (componentNameValue?.includes("-")) {
       createComputed(
         on(
           () =>
             getSelectionOptions(
               graph,
               setGraph,
-              columnMetaVertex.P.componentName,
+              componentNameValue,
               [props.joinVertex],
             ).vertexes,
           async (vertexes) => {
@@ -137,7 +135,7 @@ export function DisplayProperty(
                 : undefined;
               const res = await getSelectionOptionsMGCall(
                 [props.joinVertex],
-                columnMetaVertex.P.componentName,
+                componentNameValue,
                 mutationData,
                 10,
               );
@@ -159,7 +157,7 @@ export function DisplayProperty(
         ),
       );
     } else {
-      return columnMetaVertex.P.componentName;
+      return componentNameValue;
     }
   }
 
