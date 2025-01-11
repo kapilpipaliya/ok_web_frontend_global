@@ -8,6 +8,7 @@ import type { TransactionValue } from "./TransactionType";
 import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 import { updateVertexIdsToNew } from "../mutate/vertex";
 import { updateEdgeIdsToNew } from "../mutate/edge";
+import { klona } from "klona";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   if(!txnId) {
@@ -42,29 +43,29 @@ export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
 
   const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
     return removeUndefinedProperties({
-      deleteEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      deleteVertex: txnDetail.insert ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      insertEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      insertVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      merge: txnDetail.merge ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      replace: txnDetail.replace ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      deleteEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      deleteVertex: txnDetail.insert ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      insertEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      insertVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      merge: txnDetail.merge ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replace: txnDetail.replace ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
     });
   });
 
   const stepsToCommit = steps.map((txnDetail) => {
     return removeUndefinedProperties({
-      deleteEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      deleteVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      insert: txnDetail.insert ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      insertEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      merge: txnDetail.merge ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      replace: txnDetail.replace ? updateVertexIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(txnDetail.data, graph) : undefined,
+      deleteEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      deleteVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      insert: txnDetail.insert ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      insertEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      merge: txnDetail.merge ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replace: txnDetail.replace ? updateVertexIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
+      replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(klona(txnDetail.data), graph) : undefined,
     });
   });
 

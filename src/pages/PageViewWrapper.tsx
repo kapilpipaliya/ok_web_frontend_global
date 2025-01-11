@@ -51,6 +51,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -170,8 +171,10 @@ export function PageViewWrapper(
   };
 
   // load form meta data
-  async function loadFormDesignerMetaData() {
-    // let form = props.pageVertexLabel ? FormMetaData[props.pageVertexLabel] : null;
+  async function loadFormDesignerMetaData(): Promise<boolean> {
+    if (!formStore()) {
+      return false;
+    }
     let form: IFormMetaData | null = null;
     if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
       form = FormMetaData[props.pageVertexName];
@@ -192,7 +195,7 @@ export function PageViewWrapper(
       });
       if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} configured`);
-        return;
+        return false;
       }
       metaDtaInitialize(data);
       if (formStore()?.P.formMetaId && graph.vertexes[formStore().P.formMetaId!]!) {
@@ -201,13 +204,13 @@ export function PageViewWrapper(
     }
     setFormStore("formMetaData", form);
     if (!formStore().P.formMetaData) {
-      setFormStore("error", `No ${props.pageVertexName} configured`);
-      return;
+      setFormStore("error", `${props.pageVertexName} is not configured`);
+      return false;
     }
     if (!formStore().P.formMetaId) {
       const metaVertexResult = untrack(() => {
         let formToUse = form;
-        if (form.key === "Page") {
+        if (PageDesignerLabels.includes(form.key)) {
           formToUse = {
             ...form,
             attributes: form.attributes.map(attr => ({
@@ -220,12 +223,13 @@ export function PageViewWrapper(
       });
 
       if (metaVertexResult.error) {
-        return { error: "Meta Vertex Error" };
+        return false;
       }
       setFormStore("formMetaId", metaVertexResult.vertex!.id);
     }
 
     setFormStore("isPreview", props.pageId === "preview");
+    return true;
   }
 
   function hasRequiredPermissions() {
@@ -259,7 +263,9 @@ export function PageViewWrapper(
   }
   onMount(async () => {
     setFormStore("mounted", true);
-    await loadFormDesignerMetaData();
+    if (!await loadFormDesignerMetaData()) {
+      return;
+    }
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
@@ -271,8 +277,12 @@ export function PageViewWrapper(
       );
       return;
     }
+    if (!graph.vertexes[formStore().P.formMetaId!]) {
+      setFormStore("error", "No form meta data found");
+      return;
+    }
     if (!graph.vertexes[formStore().P.formMetaId!]?.P.key) {
-      setFormStore("error", "No key for the page");
+      setFormStore("error", `No key for the ${props.pageVertexName}`);
       return;
     }
     if (!id()) {

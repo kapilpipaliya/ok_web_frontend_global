@@ -21,6 +21,7 @@ import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { Variants } from "./variants/Variants";
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
@@ -31,9 +32,15 @@ export function SettingTabs() {
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];
+    if (!formStoreVertex()) {
+      return baseTabs;
+    }
     const formType = graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0];
     if (formType === "Form") {
       baseTabs.push("Keys");
+    }
+    if (formType === "Component") {
+      baseTabs.push("Variants");
     }
     if (formType === "Form" || formType === "Page") {
       baseTabs.push("Rules", "Permission", "SEO");
@@ -109,6 +116,9 @@ export function SettingTabs() {
           </Show>
           <Show when={layoutStore().selectedTab === "Rules"}>
             <Rules />
+          </Show>
+          <Show when={layoutStore().selectedTab === "Variants"}>
+            <Variants />
           </Show>
           <Show when={layoutStore().selectedTab === "SEO"}>
             <SEOFormGroupProperties />

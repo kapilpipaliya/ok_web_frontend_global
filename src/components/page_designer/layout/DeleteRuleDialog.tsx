@@ -46,9 +46,9 @@ export function DeleteAttributeDialog() {
 
   const handleClose = () => {
     mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
-      usedAttrsInRules: reconcile({}),
-      usedAttrsInNameKeys: reconcile([]),
-      usedAttrsInUniqueConstraints: reconcile([]),
+      usedAttrsInRules: {},
+      usedAttrsInNameKeys: [],
+      usedAttrsInUniqueConstraints: [],
       shouldContainAtLeastOneForm: false,
     });
   };

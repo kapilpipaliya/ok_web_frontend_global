@@ -26,6 +26,7 @@ export function MultiSelectField(
     childrenKey?: string;
     disable?: boolean;
     displayValueKey?: string;
+    error?: string;
     isLoadingOptions?: boolean;
     loadOptions?: () => Promise<void>;
     onRemove: (newSelected: Option[], value: Option) => void;
@@ -292,6 +293,9 @@ export function MultiSelectField(
   return (
     <div
       class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
+      classList={{
+        "b:1px|solid|#ff0000": !!props.error
+      }}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
       <div
@@ -339,6 +343,9 @@ export function MultiSelectField(
           value={inputValue()}
         />
       </div>
+      <Show when={props.error}>
+        <div class="c:#ff0000 f:12 p:2px">{props.error}</div>
+      </Show>
       <Show when={dropdownVisible()}>
         <ZIndex>
           <DropdownMenu

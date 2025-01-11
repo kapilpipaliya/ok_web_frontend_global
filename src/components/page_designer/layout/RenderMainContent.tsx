@@ -134,7 +134,7 @@ function PageViewComponent() {
         const vertex = () => formStoreVertex(form.formId);
 
         return (
-          <Show when={vertex()?.P.id}>
+          <Show when={vertex()?.id}>
             <ResizableContainer
               view={vertex()?.P.view}
               class={isActive() ? '' : 'hidden'}

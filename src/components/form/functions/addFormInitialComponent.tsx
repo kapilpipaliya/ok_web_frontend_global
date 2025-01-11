@@ -38,7 +38,7 @@ export function addFormInitialComponent(
     txnId,
     setGraph,
     "Box",
-    { class: { "": { padding: "10px" } } },
+    { class: JSON.stringify({ "": { padding: "10px" } }) },
   );
   if (layoutRowId === -1) {
     return -1;
@@ -64,13 +64,13 @@ export function addFormInitialComponent(
     setGraph,
     "Box",
     {
-      class: {
+      class: JSON.stringify({
         "": {
           display: "flex",
           gap: "0.5rem",
           padding: "10px",
         },
-      },
+      }),
     },
   );
 
@@ -86,14 +86,14 @@ export function addFormInitialComponent(
     setGraph,
     "TextInput",
     {
-      class: {
+      class: JSON.stringify({
         "": {
           "border-radius": "6px",
           "border-style": "solid",
           "border-width": "1px",
           padding: "0.5rem",
         },
-      },
+      }),
       label: "First Name",
     },
   );
@@ -110,13 +110,13 @@ export function addFormInitialComponent(
     setGraph,
     "Box",
     {
-      class: {
+      class: JSON.stringify({
         "": {
           display: "flex",
           gap: "0.5rem",
           padding: "10px",
         },
-      },
+      }),
     },
   );
 

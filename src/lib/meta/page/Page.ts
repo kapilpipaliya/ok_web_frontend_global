@@ -125,3 +125,45 @@ export const Page: IFormMetaData = {
   key: "Page",
   title: "Page",
 };
+
+
+export const variantAttributes =  {
+  attributes: [
+    {
+      componentName: "TextInput",
+      displayName: "Variant Name",
+      key: "key",
+    },
+    {
+      componentName: "Select",
+      displayName: "Type",
+      key: "type",
+      
+      options: `boolean
+string
+date
+number`,
+    },
+    {
+      attributes: [
+        {
+          componentName: "TextInput",
+          displayName: "Property Name",
+          key: "key",
+        }, 
+        {
+          componentName: "TextInput",
+          displayName: "Value",
+          key: "value",
+        },
+      ],
+      componentName: "DynamicTable",
+      displayName: "Variants",
+      key: "value",
+    },
+  ],
+  componentName: "DynamicTable",
+  key: "Variant",
+  label: "Variant",
+  type: "Variant",
+} as FieldAttribute;

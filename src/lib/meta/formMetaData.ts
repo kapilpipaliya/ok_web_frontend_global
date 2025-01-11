@@ -16,7 +16,7 @@ import { Coll } from "./page/Coll";
 import { CollCategory } from "./page/CollCategory";
 import { Dashboard } from "./page/Dashboard";
 import { FormCategory } from "./page/FormCategory";
-import { Page } from "./page/Page";
+import { Page, variantAttributes } from "./page/Page";
 
 const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
   Dashboard: Dashboard,
@@ -62,6 +62,8 @@ FormMetaData.Page.attributes.push({
   ...permissionMetaAttribute!,
   hidden: true,
 });
+// To load all the rules when the page is loaded.
+FormMetaData.Page.attributes.push(rulesMetaAttribute!);
 
 FormMetaData.Form = {
   attributes: [
@@ -88,6 +90,16 @@ FormMetaData.Form = {
   ],
   key: "Form",
   title: "Form",
+};
+
+export const ComponentLabel = "Component";
+FormMetaData.Component = {
+  attributes: [
+    ...FormMetaData.Page.attributes,
+    variantAttributes!,
+  ],
+  key: "Component",
+  title: "Component",
 };
 
 FormMetaData.CompExample = {

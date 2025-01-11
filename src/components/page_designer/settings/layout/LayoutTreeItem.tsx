@@ -167,7 +167,7 @@ export function LayoutTreeItem(
 
       <Show
         when={
-          !props.collapsedKeys().includes(props.metaVertex.id) &&
+          !props.collapsedKeys().includes(props.metaVertex?.id) &&
           children().length > 0
         }
       >

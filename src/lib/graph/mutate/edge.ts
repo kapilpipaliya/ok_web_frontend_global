@@ -27,6 +27,7 @@ export function newEdge(
   };
 }
 
+// make sure to use klona to avoid cant mutate edge issues
 export function updateEdgeIdsToNew(edge: Edge, graph: Store<GraphInterface>) {
   return untrack(() => {
     const edge2 = klona(edge);

@@ -276,6 +276,7 @@ export function deleteVertex(
   });
 }
 
+// make sure to use klona to avoid cant mutate vertex issues
 export function updateVertexIdsToNew(vertex: Vertex, graph: Store<GraphInterface>) {
   return untrack(() => {
     vertex.id = getVertexOldIdToNewIdMap(graph)[vertex.id] || vertex.id;

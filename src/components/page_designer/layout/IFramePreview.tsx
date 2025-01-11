@@ -25,5 +25,6 @@ export const IFramePreview = () => {
   return <iframe
     src={`${window.location.origin}/page_design_preview?id=${layoutStoreId}`}
     style={{ width: "100%", height: "100%", border: "none" }}
+    allow="clipboard-read; clipboard-write"
     onLoad={onLoad} />;
 };

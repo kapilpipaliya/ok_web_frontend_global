@@ -29,6 +29,7 @@ import { selectedValue } from "./utils/selectedValue";
 import { setSelectValueHelper } from "./utils/setSelectValueHelper";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
@@ -52,6 +53,7 @@ export function SelectField(
   const data = () => props.data ?? parentRenderContext()?.context.data!;
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
+  const [error, setError] = createSignal("");
 
   const getCollection = () =>
     typeof meta().P.collection === "function"
@@ -99,6 +101,7 @@ export function SelectField(
 
   const loadOptions = async () => {
     let parsedOptions: any[] = [];
+    setError("");
     if (memoizedOptions()) {
       parsedOptions = getStaticOptions(memoizedOptions());
     } else if (props.disabled) {
@@ -122,6 +125,11 @@ export function SelectField(
         );
         if (isValidResponse(res)) {
           parsedOptions = res.result || [];
+        } else {
+          const errorMsg = getErrorMessage(res);
+          if (errorMsg) {
+            setError(errorMsg);
+          }
         }
       }
       runWithOwner(outerOwner, () => {
@@ -261,6 +269,7 @@ export function SelectField(
           });
         }}
         selectionLimit={getComponent() === "Select" ? 1 : undefined}
+        error={error()}
       />
     </Show>
   );
