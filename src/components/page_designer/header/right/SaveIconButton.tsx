@@ -8,11 +8,12 @@ import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useToast } from "~/components/styled/Toast";
 
 export function SaveIconButton() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-
+  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   const txnId = () => formStoreVertex()?.P.txnId;
@@ -25,7 +26,7 @@ export function SaveIconButton() {
     <IconButton
       class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
       icon="bi:floppy"
-      onClick={() => formSubmit(formStoreVertex, graph, setGraph)()}
+      onClick={() => formSubmit(formStoreVertex, graph, setGraph, () => {}, showErrorToast, showLoadingToast, showWarningToast)()}
       size={22}
       title="Save"
     />

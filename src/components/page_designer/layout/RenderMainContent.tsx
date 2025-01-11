@@ -96,9 +96,8 @@ function TabBar() {
       <For each={layoutStore().openedFormIds}>
         {(form, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${
-              layoutStore().formId === form.formId ? "background:#e0e0e0" : ""
-            }`}
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${layoutStore().formId === form.formId ? "background:#e0e0e0" : ""
+              }`}
             onClick={[handleTabClick, form.formId]}
           >
             <span>
@@ -126,20 +125,31 @@ function PageViewComponent() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
+  const formStoreVertex = (formId: string) => graph.vertexes[formId] as Vertex<FormStoreObject>;
 
   return (
-    <Show when={formStoreVertex()?.P.id}>
-      <ResizableContainer view={formStoreVertex()?.P.view}>
-        <IFramePreview />
-        {/* <PageView
-          isDesignMode={true}
-          isNoPermissionCheck={true}
-          metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
-        /> */}
-      </ResizableContainer>
-    </Show>
+    <For each={layoutStore().openedFormIds}>
+      {(form) => {
+        const isActive = () => layoutStore().formId === form.formId;
+        const vertex = () => formStoreVertex(form.formId);
+
+        return (
+          <Show when={vertex()?.P.id}>
+            <ResizableContainer
+              view={vertex()?.P.view}
+              class={isActive() ? '' : 'hidden'}
+            >
+              <IFramePreview />
+              {/* <PageView
+                isDesignMode={true}
+                isNoPermissionCheck={true}
+                metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
+              /> */}
+            </ResizableContainer>
+          </Show>
+        );
+      }}
+    </For>
   );
 }
 

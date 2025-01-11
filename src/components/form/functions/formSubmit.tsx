@@ -12,10 +12,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { useToast } from "../../styled/Toast";
 import { SetStoreFunction } from "solid-js/store";
 
-export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, closePopUp?: () => void) {
-  const _navigate = useNavigate();
-  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
-
+export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, closePopUp: () => void, showErrorToast: (message: string) => void, showLoadingToast: (options: { loadMessage: string, onSuccess: (value: any) => void, promise: Promise<any>, successMessage: string }) => void, showWarningToast: (message: string) => void) {
   return async () => {
     const navigateToParentRoute = () => {
       // navigate(removeLastPathSegment());
