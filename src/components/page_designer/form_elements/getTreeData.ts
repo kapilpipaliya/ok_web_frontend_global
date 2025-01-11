@@ -38,6 +38,9 @@ export function getTreeData(
     for (const child of (children || []).sort(
       (a: any, b: any) => a.P.pos - b.P.pos,
     )) {
+      if (!child?.P?.key) {
+        continue;
+      }
       const key =
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.key;
       const navItem: NavItem = {

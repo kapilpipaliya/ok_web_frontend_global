@@ -15,6 +15,7 @@ export const UlContainer = (props: ParentProps) => (
 export function FormElementTabs() {
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
+    { collection: "Component", title: "Library" },
     { collection: "TemplatePage", title: "Templates" },
     { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },

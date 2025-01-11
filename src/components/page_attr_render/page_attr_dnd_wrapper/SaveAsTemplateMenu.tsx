@@ -20,7 +20,8 @@ export function SaveAsTemplateMenu(
   props: Readonly<{
     item: Vertex;
     onClose: () => void;
-    onMouseLeave: () => void;
+    onClickOutside?: () => void;
+    onMouseLeave?: () => void;
     parentRef: HTMLElement;
     saveAsLabel: "Template" | "Component";
   }>,
@@ -42,7 +43,7 @@ export function SaveAsTemplateMenu(
       graph,
       setGraph,
       newFormTxnId,
-      `${label()}Page`,
+      props.saveAsLabel,
       { key: templateName() },
     );
     const dataVertex = createResult.vertex!;
@@ -90,6 +91,7 @@ export function SaveAsTemplateMenu(
   return (
     <DropdownMenu
       class="padding:0.50rem"
+      onClickOutside={props.onClickOutside}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >

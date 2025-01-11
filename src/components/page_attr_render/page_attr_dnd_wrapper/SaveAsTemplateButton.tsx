@@ -36,7 +36,8 @@ export function SaveAsTemplateButton(props: {
       <Show when={showModal()}>
         <DropdownMenu
           class="padding:0.50rem"
-          onMouseLeave={() => setShowModal(false)}
+          onClickOutside={() => setShowModal(false)}
+          // onMouseLeave={() => setShowModal(false)}
           parentRef={saveAsTemplateRef!}
         >
           <div class="flex flex-col gap:0.5rem">
@@ -60,7 +61,8 @@ export function SaveAsTemplateButton(props: {
         <SaveAsTemplateMenu
           item={props.item}
           onClose={() => setShowTemplateMenu(false)}
-          onMouseLeave={() => setShowTemplateMenu(false)}
+          // onMouseLeave={() => setShowTemplateMenu(false)}
+          onClickOutside={() => setShowTemplateMenu(false)}
           parentRef={saveAsTemplateRef!}
           saveAsLabel={saveAsLabel()}
         />
