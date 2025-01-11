@@ -22,6 +22,7 @@ export function SaveAsTemplateMenu(
     onClose: () => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
+    saveAsLabel: "Template" | "Component";
   }>,
 ) {
   let nameInputRef: HTMLInputElement;
@@ -30,6 +31,7 @@ export function SaveAsTemplateMenu(
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
   const { showSuccessToast, showWarningToast } = useToast();
+  const label = () => (props.saveAsLabel).replace(/Page$/, "");
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
@@ -40,7 +42,7 @@ export function SaveAsTemplateMenu(
       graph,
       setGraph,
       newFormTxnId,
-      "TemplatePage",
+      `${label()}Page`,
       { key: templateName() },
     );
     const dataVertex = createResult.vertex!;
@@ -62,7 +64,7 @@ export function SaveAsTemplateMenu(
 
     try {
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
-      showSuccessToast("Template Saved Successfully");
+      showSuccessToast(`${label()} Saved Successfully`);
       props.onClose();
     } catch (_error) {
       setError("An unexpected error occurred");
@@ -71,7 +73,7 @@ export function SaveAsTemplateMenu(
 
   const saveAsTemplate = async (key: string) => {
     const res = await checkUniqueConstrains({
-      L: ["TemplatePage"],
+      L: [`${props.saveAsLabel}`],
       P: { key },
     } as unknown as Vertex);
     if (res.error) {
@@ -91,10 +93,10 @@ export function SaveAsTemplateMenu(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <DialogHeader title="Save As Template" />
+      <DialogHeader title={`Save As ${label()}`} />
 
       <DialogSubTitle>
-        Template key must be unique. If the key already exists, you will be
+        {label()} key must be unique. If the key already exists, you will be
         prompted to change it.
       </DialogSubTitle>
 
@@ -103,14 +105,14 @@ export function SaveAsTemplateMenu(
           class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
           for="templateName"
         >
-          Template Name
+          {label()} Name
         </label>
         <div class="mt:2">
           <input
             class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
             id="templateName"
             onChange={(e) => setTemplateName(e.target.value)}
-            placeholder="New Template Name"
+            placeholder={`New ${label()} Name`}
             ref={nameInputRef!}
             type="text"
             value={templateName()}
