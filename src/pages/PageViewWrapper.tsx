@@ -156,7 +156,7 @@ export function PageViewWrapper(
   });
 
   const metaDtaInitialize = (data: ServerResult) => {
-    if (props.formId) {
+    if (props.formId && graph.vertexes[props.formId]) {
       delete data.graph!.vertexes[props.formId];
     }
     setGraphData(graph, setGraph, data.graph!);

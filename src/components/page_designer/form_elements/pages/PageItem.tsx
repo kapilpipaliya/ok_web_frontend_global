@@ -7,7 +7,7 @@ import type { NavItem } from "../getTreeData";
 
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
@@ -15,6 +15,8 @@ import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { createAppState } from "~/createAppState";
+import { GetInitialData } from "~/GetInitialData";
 
 export function PageItem(
   props: Readonly<{
@@ -144,13 +146,22 @@ export function PageItem(
             parentRef={menuRef!}
           >
             {toTitle(props.child.key)} Preview
-            <PageViewWrapper
-              formId={props.child.id}
-              isNoPermissionCheck={true}
-            />
+            <PreviewIsolated child={props.child} />
           </DropdownMenu>
         </Show>
       </div>
     </Show>
   );
+}
+
+const PreviewIsolated = (props: { child: NavItem }) => {
+  const graph = createAppState();
+  return <GraphContext.Provider value={graph}>
+    <GetInitialData>
+      <PageViewWrapper
+        formId={props.child.id}
+        isNoPermissionCheck={true}
+      />
+    </GetInitialData>
+  </GraphContext.Provider>
 }
