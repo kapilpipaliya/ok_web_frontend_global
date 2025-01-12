@@ -86,6 +86,8 @@ export function componentDrop(
     delete p.pos;
     delete p.key;
     props = { ...props, ...p };
+  } else if (fromVertex.L[0] === "Component") {
+    props = { ...props, componentName: "Component", componentId: fromVertex.id };
   }
   batch(() => {
     rowResult = addNewRow(

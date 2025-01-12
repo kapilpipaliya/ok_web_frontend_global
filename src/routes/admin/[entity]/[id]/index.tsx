@@ -10,7 +10,7 @@ export default function FormEdit() {
 
   return (
     <Switch>
-      <Match when={PageDesignerLabels.includes(params.entity)}>
+      <Match when={[...PageDesignerLabels, "Component"].includes(params.entity)}>
         <PageDesignerWrapper />
       </Match>
       <Match when={true}>

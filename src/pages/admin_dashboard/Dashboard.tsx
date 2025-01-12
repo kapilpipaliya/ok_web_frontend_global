@@ -14,10 +14,13 @@ export default function AdminDashboard() {
   const handleTabClick = (index: number) => {
     setSelectedIndex(index);
   };
-  const tabs = PageDesignerLabels.filter(label => label !== "CompExample").map((label) => ({
+  const tabs = [...PageDesignerLabels.filter(label => label !== "CompExample").map((label) => ({
     key: label,
     label: toTitle(label) + 's',
-  }));
+  }), {
+    key: "Component",
+    label: "Components",
+  }];
 
   return (
     <div>

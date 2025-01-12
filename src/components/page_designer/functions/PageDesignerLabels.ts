@@ -1,6 +1,6 @@
+// dont add "Component" here
 export const PageDesignerLabels = [
   "Page",
-  "Component",
   "Form",
   "ThankYouPage",
   "ErrorPage",

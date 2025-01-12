@@ -40,9 +40,11 @@ export function PageAttrRender(
             getComponentLabel(graph, item),
         );
         const parentComponent = createMemo(() => {
+          const parentMeta = getLastItem(parentItems, 1)?.[0].context.meta;
+          if (!parentMeta) return undefined;
           return getComponentLabel(
             graph,
-            getLastItem(parentItems, 1)?.[0].context.meta!,
+            parentMeta
           );
         });
         // TODO: Is This Parent Vertex is ok?

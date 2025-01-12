@@ -8,6 +8,7 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
+import { getComponentLabel } from "../../functions/getComponentLabel";
 
 export function TreeItemContent(
   props: Readonly<{
@@ -20,9 +21,9 @@ export function TreeItemContent(
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
-  const getComponent = () =>
-    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.key as string;
 
+  const componentName = () => getComponentLabel(graph, props.metaVertex) || props.metaVertex?.P.componentName || "";
+  
   return (
     <div
       classList={{
@@ -39,12 +40,12 @@ export function TreeItemContent(
       <Icon
         height={17}
         icon={
-          iconMap[getComponent() as keyof typeof iconMap] ??
+          iconMap[componentName() as keyof typeof iconMap] ??
           "material-symbols:widgets-outline-rounded"
         }
         width={17}
       />
-      {nameExpr(props.metaVertex, getComponent())}
+      {nameExpr(props.metaVertex, componentName(), graph)}
     </div>
   );
 }

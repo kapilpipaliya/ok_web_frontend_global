@@ -29,6 +29,7 @@ import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 import { klona } from "klona/json";
 import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
+import { evalExpression } from "~/lib/expression_eval";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {
@@ -117,18 +118,23 @@ export function DisplayProperty(
   );
   function getComponent(column: Vertex) {
     const componentNameValue = column.P.componentName || getComponentLabel(graph, column);
-    if (componentNameValue?.includes("-")) {
+    if (componentNameValue?.includes("::")) {
       createComputed(
         on(
           () =>
-            getSelectionOptions(
-              graph,
-              setGraph,
-              componentNameValue,
-              [props.joinVertex],
-            ).vertexes,
-          async (vertexes) => {
-            let componentName = "";
+            evalExpression(componentNameValue, {
+            graph,
+            setGraph,
+            vertexes: [props.joinVertex]
+          }),
+          async (value) => {
+            // to avoid error:  ReferenceError: Cannot access 'setComponentName' before initialization
+            setTimeout(() => {
+              runWithOwner(outerOwner, () => {
+                setComponentName(value || getStringComponent());
+              });
+            });
+            let componentNameNew = "";
             if (formVertex()?.P.txnId) {
               const mutationData = formVertex()?.P.txnId
                 ? commitTxn(formVertex()!.P.txnId, graph)
@@ -140,17 +146,19 @@ export function DisplayProperty(
                 10,
               );
               if (isValidResponse(res) && typeof res.result === "string") {
-                componentName = res.result;
+                componentNameNew = res.result;
+              } else {
+                componentNameNew = value;
               }
             } else {
-              componentName = vertexes;
+              componentNameNew = value;
             }
-            if (!componentName) {
-              componentName = getStringComponent();
+            if (!componentNameNew) {
+              componentNameNew = getStringComponent();
             }
             setTimeout(() => {
               runWithOwner(outerOwner, () => {
-                setComponentName(componentName);
+                setComponentName(componentNameNew);
               });
             });
           },
@@ -165,6 +173,7 @@ export function DisplayProperty(
     <>
       <Show when={componentName() === "Error"}>Error</Show>
       <DynamicComponent
+        // Dynamic component only supported on table 
         componentName={componentName()}
         data={props.joinVertex}
         disabled={props.disabled()}

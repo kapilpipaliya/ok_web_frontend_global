@@ -51,6 +51,9 @@ export function FormElementTabs() {
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList />
         </Match>
+        <Match when={selectedTab().collection === "Component"}>
+          <PagesList coll="Component" />
+        </Match>
         <Match
           keyed
           when={PageDesignerLabels.find((v) => v === selectedTab().collection)}

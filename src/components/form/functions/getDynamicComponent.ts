@@ -74,6 +74,7 @@ import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 import { DataField } from "~/components/fields/DataField";
+import { ComponentField } from "~/components/fields/ComponentField";
 
 export const corvuComponents = {
   Accordion,
@@ -111,6 +112,7 @@ export const componentsMap: Record<string, any> = {
   // RadioGroup: RadioGroupField,
   Data: DataField,
   Select: SelectField,
+  Component: ComponentField,
   Step,
   Steps: StepsRoot,
   // TemplatePage: PageField,

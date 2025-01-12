@@ -39,7 +39,7 @@ export async function handleDropAtPosition(
       ? toVertex
       : getParentVertex(["Attr"], toVertex, graph).vertex;
 
-  if (fromVertex.L[0] === "Comp") {
+  if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Component") {
     const layoutRowId = componentDrop (
       formData,
       txnId,

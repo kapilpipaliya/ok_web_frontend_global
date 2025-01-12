@@ -441,6 +441,7 @@ export function DynamicComponent(
     let componentLabel: string | undefined;
     if (props.componentName) {
       componentLabel = props.componentName;
+      return componentLabel;
     }
     const { componentName } = props.meta.P;
     if (componentName) {

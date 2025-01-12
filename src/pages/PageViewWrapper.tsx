@@ -210,7 +210,7 @@ export function PageViewWrapper(
     if (!formStore().P.formMetaId) {
       const metaVertexResult = untrack(() => {
         let formToUse = form;
-        if (PageDesignerLabels.includes(form.key)) {
+        if (PageDesignerLabels.includes(form.key) || form.key === "Component") {
           formToUse = {
             ...form,
             attributes: form.attributes.map(attr => ({

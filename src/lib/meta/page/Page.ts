@@ -139,10 +139,20 @@ export const variantAttributes =  {
       displayName: "Type",
       key: "type",
       
-      options: `boolean
-string
-date
-number`,
+      options: `boolean,CheckBox
+string,TextInput`,
+// date,Date
+// number,TextInput
+    },
+    {
+      componentName: "::'P.type'",
+      displayName: "Default Value",
+      key: "defValue",
+    },
+    {
+      componentName: "::'P.type'",
+      displayName: "Value",
+      key: "value",
     },
     {
       attributes: [
@@ -152,14 +162,14 @@ number`,
           key: "key",
         }, 
         {
-          componentName: "TextInput",
+          componentName: "<-$0::'P.type'",
           displayName: "Value",
           key: "value",
         },
       ],
       componentName: "DynamicTable",
       displayName: "Variants",
-      key: "value",
+      key: "option",
     },
   ],
   componentName: "DynamicTable",
