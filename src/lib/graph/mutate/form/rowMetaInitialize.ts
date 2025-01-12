@@ -17,25 +17,22 @@ import { revertTransaction } from "../../transaction/revertTransaction";
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  joinVertex: Vertex,
-  tableMeta: Vertex,
+  tableMetaInstance: Vertex,
   tableColumnsTemplate: Vertex[],
+  joinVertex: Vertex,
 ) {
-  const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
-  // when we delete the row, revertTransaction will not work, so used new metaTxnId.
-  //const metaTxnId = rowMetaAttrInst.error ? getGlobalStore(graph).P.newTxnId : rowMetaAttrInst.vertex?.P.metaTxnId;
-  const metaTxnId = generateNewTxnId(graph, setGraph);
-  const rows = rowMetaAttrInst.error
-    ? {}
-    : klona(rowMetaAttrInst.vertex?.P.rows);
+  // const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], tableMeta);
 
-  if (rowMetaAttrInst.error) {
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+  const rows = klona(tableMetaInstance?.P.rows || {});
+
+  if (!rows[joinVertex.id]) {
     createNewMetaInstance(
       graph,
       setGraph,
       metaTxnId,
       joinVertex,
-      tableMeta,
+      tableMetaInstance,
       tableColumnsTemplate,
       rows,
     );
@@ -44,7 +41,7 @@ export function rowMetaInitialize(
       graph,
       setGraph,
       metaTxnId,
-      rowMetaAttrInst.vertex!,
+      graph.vertexes[rows[joinVertex.id]],
       tableColumnsTemplate,
       rows,
     );
@@ -62,34 +59,41 @@ export function createNewMetaInstance(
   setGraph: SetStoreFunction<GraphInterface>,
   metaTxnId: number,
   joinVertex: Vertex,
-  tableMeta: Vertex,
+  tableMetaInstance: Vertex,
   tableColumnsTemplate: Vertex[],
   rows: { [key: Id]: Id },
 ) {
-  const P = { ...klona(tableMeta.P), templateId: tableMeta.id };
-
   batch(() => {
     const metaInstanceResult = newRow(
       graph,
       setGraph,
       metaTxnId,
-      joinVertex,
+      tableMetaInstance,
       "AttrInst",
       undefined,
-      P,
+      { templateId: tableMetaInstance.id },
     );
     if (metaInstanceResult.error) {
       console.error("Error creating a row for attribute instance");
       return;
     }
 
+    mergeVertexProperties(
+      metaTxnId,
+      tableMetaInstance.id,
+      graph,
+      setGraph,
+      { rows: { ...(rows ?? {}), [joinVertex.id]: metaInstanceResult.vertexId! } },
+    );
+
+    let columns = {};
     createAttributeRows(
       graph,
       setGraph,
       metaTxnId,
       metaInstanceResult.vertexId!,
       tableColumnsTemplate,
-      rows,
+      columns,
     );
 
     mergeVertexProperties(
@@ -97,7 +101,7 @@ export function createNewMetaInstance(
       metaInstanceResult.vertexId!,
       graph,
       setGraph,
-      { metaTxnId, rows },
+      { metaTxnId, columns },
     );
   });
 }
@@ -108,7 +112,7 @@ export function updateExistingMetaInstance(
   metaTxnId: number,
   metaInstance: Vertex,
   tableColumnsTemplate: Vertex[],
-  rows: { [key: Id]: Id },
+  columns: { [key: Id]: Id },
 ) {
   batch(() => {
     createAttributeRows(
@@ -117,10 +121,10 @@ export function updateExistingMetaInstance(
       metaTxnId,
       metaInstance.id,
       tableColumnsTemplate,
-      rows,
+      columns,
     );
     mergeVertexProperties(metaTxnId, metaInstance.id, graph, setGraph, {
-      rows,
+      columns,
     });
   });
 }
@@ -130,10 +134,10 @@ function createAttributeRows(
   metaTxnId: number,
   parentId: Id,
   tableColumnsTemplate: Vertex[],
-  rows: { [key: Id]: Id },
+  columns: { [key: Id]: Id },
 ) {
   for (const attrColumn of tableColumnsTemplate) {
-    if (rows[attrColumn.id]) {
+    if (columns[attrColumn.id]) {
       continue;
     }
 
@@ -161,7 +165,7 @@ function createAttributeRows(
       return;
     }
 
-    rows[attrColumn.id] = attrRowClone.id;
+    columns[attrColumn.id] = attrRowClone.id;
 
     // now not needed because we are using cloneVertexWithEdges, so it use children attributes same.
     // Recursively clone child Attrs

@@ -1,5 +1,6 @@
 import {
   type Accessor,
+  batch,
   createComputed,
   createEffect,
   createMemo,
@@ -29,6 +30,7 @@ export const SortableRow = (
   props: Readonly<
     {
       dragFromIndex: Accessor<null | number>;
+      metaInstanceId: Vertex;
       dragToIndex: Accessor<null | number>;
       handleDrop: (event: DragEvent) => void;
       isNoPermissionCheck?: boolean;
@@ -55,17 +57,17 @@ export const SortableRow = (
       rowMetaInitialize(
         graph,
         setGraph,
-        props.joinVertex,
-        props.meta,
+        props.metaInstanceId,
         tableColumnsTemplate,
+        props.joinVertex,
       );
     }),
   );
 
-  const attributesResult = createMemo(() => evalExpression("->AttrInst->Attr", {
+  const attributesResult = createMemo(() => evalExpression("->Attr", { // ->AttrInst->Attr
     graph,
     setGraph,
-    vertexes: [props.joinVertex],
+    vertexes: props.metaInstanceId.P.rows && props.metaInstanceId.P.rows[props.joinVertex.id] && graph.vertexes[props.metaInstanceId.P.rows[props.joinVertex.id]] ? [graph.vertexes[props.metaInstanceId.P.rows[props.joinVertex.id]]] : [],
   })) as Accessor<Vertex[]>;
 
   const rowColumnsMetaAttrs = createMemo(() =>

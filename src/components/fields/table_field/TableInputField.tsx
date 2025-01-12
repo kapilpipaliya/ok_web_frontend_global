@@ -6,6 +6,7 @@ import {
   For,
   getOwner,
   Match,
+  onCleanup,
   runWithOwner,
   Show,
   Switch,
@@ -21,10 +22,12 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 export function TableInputField(
   props: Readonly<
@@ -44,6 +47,13 @@ export function TableInputField(
   const meta = () => props.meta ?? parentRenderContext()?.context.meta;
   const data = () => props.data ?? parentRenderContext()?.context.data;
 
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+  addNewVertex(metaTxnId, {...meta()!, id: `${meta()!.id}-meta`}, graph, setGraph);
+
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph, setGraph);
+  }); 
+  
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
@@ -180,6 +190,7 @@ export function TableInputField(
                     setDragToIndex={setDragToIndex}
                     tableColumnsTemplate={tableColumnsTemplate}
                     txnId={props.txnId ?? 0}
+                    metaInstanceId={graph.vertexes[`${meta()!.id}-meta`]}
                   />
                 )}
               </For>
