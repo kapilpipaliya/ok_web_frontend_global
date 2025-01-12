@@ -26,7 +26,7 @@ export function rowMetaInitialize(
   const metaTxnId = generateNewTxnId(graph, setGraph);
   const rows = klona(tableMetaInstance?.P.rows || {});
 
-  if (!rows[joinVertex.id]) {
+  if (!(rows[joinVertex.id] && graph.vertexes[rows[joinVertex.id]])) {
     createNewMetaInstance(
       graph,
       setGraph,
@@ -63,7 +63,7 @@ export function createNewMetaInstance(
   tableColumnsTemplate: Vertex[],
   rows: { [key: Id]: Id },
 ) {
-  batch(() => {
+  return batch(() => {
     const metaInstanceResult = newRow(
       graph,
       setGraph,
@@ -79,11 +79,12 @@ export function createNewMetaInstance(
     }
 
     mergeVertexProperties(
-      metaTxnId,
+      0,
       tableMetaInstance.id,
       graph,
       setGraph,
       { rows: { ...(rows ?? {}), [joinVertex.id]: metaInstanceResult.vertexId! } },
+      { cloneProperties: false },
     );
 
     let columns = {};
@@ -103,6 +104,7 @@ export function createNewMetaInstance(
       setGraph,
       { metaTxnId, columns },
     );
+    return metaInstanceResult.vertexId
   });
 }
 

@@ -30,7 +30,7 @@ export const SortableRow = (
   props: Readonly<
     {
       dragFromIndex: Accessor<null | number>;
-      metaInstanceId: Vertex;
+      metaInstance: Vertex;
       dragToIndex: Accessor<null | number>;
       handleDrop: (event: DragEvent) => void;
       isNoPermissionCheck?: boolean;
@@ -57,7 +57,7 @@ export const SortableRow = (
       rowMetaInitialize(
         graph,
         setGraph,
-        props.metaInstanceId,
+        props.metaInstance,
         tableColumnsTemplate,
         props.joinVertex,
       );
@@ -67,7 +67,7 @@ export const SortableRow = (
   const attributesResult = createMemo(() => evalExpression("->Attr", { // ->AttrInst->Attr
     graph,
     setGraph,
-    vertexes: props.metaInstanceId.P.rows && props.metaInstanceId.P.rows[props.joinVertex.id] && graph.vertexes[props.metaInstanceId.P.rows[props.joinVertex.id]] ? [graph.vertexes[props.metaInstanceId.P.rows[props.joinVertex.id]]] : [],
+    vertexes: props.metaInstance.P.rows && props.metaInstance.P.rows[props.joinVertex.id] && graph.vertexes[props.metaInstance.P.rows[props.joinVertex.id]] ? [graph.vertexes[props.metaInstance.P.rows[props.joinVertex.id]]] : [],
   })) as Accessor<Vertex[]>;
 
   const rowColumnsMetaAttrs = createMemo(() =>
