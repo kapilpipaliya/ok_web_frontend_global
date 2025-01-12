@@ -11,7 +11,6 @@ import {
 } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
-import { getCompFallbackToString } from "../../get/sync/getCompFallbackToString";
 import { getInEdge } from "../../get/sync/getInEdge";
 import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 import { getToEdge } from "../../get/sync/getToEdge";

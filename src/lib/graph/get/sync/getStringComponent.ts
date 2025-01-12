@@ -7,20 +7,6 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getChildVertex } from "./getChildVertex";
 
 export function getStringComponent(
-  graph: Store<GraphInterface>,
-  attrDataTypeVertex?: Vertex,
 ) {
-  // TODO Fix this:
-  if (!attrDataTypeVertex) {
-    attrDataTypeVertex = findVertexByLabelAndUniqueId(
-      graph,
-      "DataType",
-      "key",
-      "String",
-    );
-    if (!attrDataTypeVertex) {
-      return;
-    }
-  }
-  return getChildVertex(graph, ["$0Default"], attrDataTypeVertex).vertex;
+  return "TextInput";
 }

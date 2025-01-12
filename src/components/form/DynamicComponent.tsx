@@ -100,7 +100,7 @@ export function DynamicComponent(
   const zIndex = useZIndex();
 
   // const [parentItems] = usePageRenderVertexContext();
-  // const parentComponent = createMemo(() => getCompFallbackToString(getLastItem(parentItems?.vertexes || [], 2), graph)?.P[IdAttr]);
+  // const parentComponent = createMemo(() => getComponentLabel(graph, getLastItem(parentItems?.vertexes || [], 2))?.P[IdAttr]);
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 

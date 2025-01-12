@@ -146,7 +146,7 @@ export function DisplayProperty(
               componentName = vertexes;
             }
             if (!componentName) {
-              componentName = getStringComponent(graph)?.P.key;
+              componentName = getStringComponent();
             }
             setTimeout(() => {
               runWithOwner(outerOwner, () => {
@@ -179,7 +179,8 @@ export function DisplayProperty(
             : metaVertex()
         }
         noLabel={true}
-        onChange={props.onChange}
+        // we cant use props.onChange in table cell, let dynamic component use its own onChange for the data.
+        // onChange={props.onChange}
         title={toTitle(
           props.column.P.displayName || props.column.P[IdAttr] || "",
         )}

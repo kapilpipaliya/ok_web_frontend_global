@@ -4,13 +4,13 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { getCompFallbackToString } from "~/lib/graph/get/sync/getCompFallbackToString";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
 import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
 import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
+import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
 
 export function PageAttrRender(
   props: Readonly<{
@@ -37,13 +37,13 @@ export function PageAttrRender(
         const componentName = createMemo(
           () =>
             item.P.componentName ||
-            getCompFallbackToString(item, graph)?.P[IdAttr],
+            getComponentLabel(graph, item),
         );
         const parentComponent = createMemo(() => {
-          return getCompFallbackToString(
-            getLastItem(parentItems, 1)?.[0].context.meta,
+          return getComponentLabel(
             graph,
-          )?.P[IdAttr];
+            getLastItem(parentItems, 1)?.[0].context.meta!,
+          );
         });
         // TODO: Is This Parent Vertex is ok?
         // Need Repetitive parent checks?
