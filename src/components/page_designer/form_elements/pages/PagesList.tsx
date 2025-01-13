@@ -11,7 +11,7 @@ import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
@@ -19,6 +19,8 @@ import { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
+import { createAppState } from "~/createAppState";
+import { GetInitialData } from "~/GetInitialData";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -86,40 +88,48 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       setFilteredData(originalData);
     }
   };
-
+  const [previewGraph, setPreviewGraph] = createAppState();
   return (
-    <Switch fallback={<LoaderNew loaderHeight="55vh" />}>
-      <Match when={data.error}>Error: {data.error}</Match>
-      <Match when={!isFetchingData()}>
-        <>
-          <SearchBar
-            handleChange={(value) => {
-              setSearchQuery(value);
-              updateFilteredData();
-            }}
-            placeholder={`Search ${props.coll}...`}
-            value={searchQuery()}
-          />
-          <div class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto">
-            <For
-              each={filteredData()}
-              fallback={
-                <div class="font-weight:bold m:20px|0px p:3 text-align:center">
-                  No {props.coll} Found!
-                </div>
-              }
-            >
-              {(item) => (
-                <PageItem
-                  child={item}
-                  previewPageId={previewPageId()}
-                  setPreviewPageId={setPreviewPageId}
-                />
-              )}
-            </For>
-          </div>
-        </>
-      </Match>
-    </Switch>
+    <>
+      <Switch fallback={<LoaderNew loaderHeight="55vh" />}>
+        <Match when={data.error}>Error: {data.error}</Match>
+        <Match when={!isFetchingData()}>
+          <>
+            <GraphContext.Provider value={[previewGraph, setPreviewGraph]}>
+              <GetInitialData />
+            </GraphContext.Provider>
+
+            <SearchBar
+              handleChange={(value) => {
+                setSearchQuery(value);
+                updateFilteredData();
+              }}
+              placeholder={`Search ${props.coll}...`}
+              value={searchQuery()}
+            />
+            <div class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto">
+              <For
+                each={filteredData()}
+                fallback={
+                  <div class="font-weight:bold m:20px|0px p:3 text-align:center">
+                    No {props.coll} Found!
+                  </div>
+                }
+              >
+                {(item) => (
+                  <PageItem
+                    child={item}
+                    previewPageId={previewPageId()}
+                    setPreviewPageId={setPreviewPageId}
+                    previewGraph={previewGraph}
+                    setPreviewGraph={setPreviewGraph}
+                  />
+                )}
+              </For>
+            </div>
+          </>
+        </Match>
+      </Switch>
+    </>
   );
 }

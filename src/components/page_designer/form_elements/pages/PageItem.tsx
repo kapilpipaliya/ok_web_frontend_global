@@ -7,7 +7,7 @@ import type { NavItem } from "../getTreeData";
 
 import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
@@ -17,12 +17,15 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
+import { SetStoreFunction } from "solid-js/store";
 
 export function PageItem(
   props: Readonly<{
     child: NavItem;
     previewPageId: Id | null;
     setPreviewPageId: (id: Id | null) => void;
+    previewGraph: GraphInterface;
+    setPreviewGraph: SetStoreFunction<GraphInterface>;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -146,7 +149,7 @@ export function PageItem(
             parentRef={menuRef!}
           >
             {toTitle(props.child.key)} Preview
-            <PreviewIsolated child={props.child} />
+            <PreviewIsolated child={props.child} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
           </DropdownMenu>
         </Show>
       </div>
@@ -154,14 +157,11 @@ export function PageItem(
   );
 }
 
-const PreviewIsolated = (props: { child: NavItem }) => {
-  const graph = createAppState();
-  return <GraphContext.Provider value={graph}>
-    <GetInitialData>
-      <PageViewWrapper
-        formId={props.child.id}
-        isNoPermissionCheck={true}
-      />
-    </GetInitialData>
+const PreviewIsolated = (props: { child: NavItem, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface> }) => {
+  return <GraphContext.Provider value={[props.graph, props.setGraph]}>
+    <PageViewWrapper
+      formId={props.child.id}
+      isNoPermissionCheck={true}
+    />
   </GraphContext.Provider>
 }
