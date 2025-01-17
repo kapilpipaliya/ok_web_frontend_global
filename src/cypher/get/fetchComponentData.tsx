@@ -1,0 +1,22 @@
+import { SetStoreFunction } from "solid-js/store";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { Vertex, GraphInterface } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+
+
+export async function fetchComponentData(vertexes: Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+  const { incoming, outgoing } = getEdgesFromRowsAttr(FormMetaData.Component.attributes);
+  const componentData = await fetchDataFromMG({
+    expression: `id:'${vertexes.map(v => v.id).join("|")}'`,
+    [getGlobalStore(graph).P.url]: true,
+    incoming,
+    outgoing,
+  });
+  if (componentData?.graph) {
+    // skip existing because we not want to modify existing component data
+    setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
+  }
+}

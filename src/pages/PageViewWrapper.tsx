@@ -52,6 +52,8 @@ import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
+import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
 );
@@ -253,6 +255,16 @@ export function PageViewWrapper(
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
         setFormStore("error", `No ${props.pageVertexName} found`);
         return;
+      }
+
+      // Find all Component vertices from the loaded data
+      const componentVertices = Object.values(data!.graph!.vertexes).filter(v => 
+        v.L.includes("Component")
+      );
+
+      // Fetch data for all components
+      if (componentVertices.length > 0) {        
+        await fetchComponentData(componentVertices, graph, setGraph);
       }
 
       setGraphData(graph, setGraph, data!.graph!);
