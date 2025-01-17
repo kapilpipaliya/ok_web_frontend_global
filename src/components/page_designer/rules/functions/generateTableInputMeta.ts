@@ -18,15 +18,17 @@ export function generateTableInputMeta(metaAttribute: FieldAttribute) {
     metaTxnId,
     newVertex(metaVertexId, ["Attr"], metaAttribute),
     graph,
-    setGraph,
+    setGraph
   );
-  addMetaVertexes(
-    graph,
-    setGraph,
-    metaTxnId,
-    graph.vertexes[metaVertexId],
-    metaAttribute.attributes!,
-  );
+  if (metaAttribute.attributes) {
+    addMetaVertexes(
+      graph,
+      setGraph,
+      metaTxnId,
+      graph.vertexes[metaVertexId],
+      metaAttribute.attributes
+    );
+  }
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
   });

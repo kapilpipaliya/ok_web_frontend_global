@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, Match, on, Show, Switch } from "solid-js";
 
 import { JsonEditorField } from "~/components/fields/JsonEditorField";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
@@ -12,11 +12,12 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  
+
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
@@ -67,13 +68,16 @@ export function PropertiesBody() {
       }
     >
       {/* <div class="flex gap:2 jc:start"> */}
-        {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
+      {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       {/* </div> */}
       <Show when={graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key === "Repeater"}>
         <CollAndData />
       </Show>
       <JsonEditorFieldComponent />
       <FunctionEditor setPropertyValue={setPropertyValue} />
+      <Show when={graph.vertexes[formStoreVertex()?.P.selectedComponent].L[0] === "Component"}>
+        <ComponentVariantsInput setPropertyValue={setPropertyValue} />
+      </Show>
       <FormGroupProperties
         metaAttributes={selectedComponentProperties().vertexes ?? []}
         onChange={setPropertyValue}
@@ -81,6 +85,90 @@ export function PropertiesBody() {
         txnId={formStoreVertex()?.P.txnId}
       />
     </Show>
+  );
+}
+
+function ComponentVariantsInput(props: { setPropertyValue: (meta: Vertex, value: any) => void }) {
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  const variants = createMemo(() => {
+    const selectedComp = graph.vertexes[formStoreVertex()?.P.selectedComponent];
+    if (!selectedComp) return [];
+    return evalExpression("->$0Variant", { graph, setGraph, vertexes: [selectedComp] }) as Vertex[];
+  });
+
+  // createEffect(() => {
+  //   if (variants().length === 0) {
+  //     // Fetch variants data if not already loaded
+  //     fetchComponentData([graph.vertexes[formStoreVertex()?.P.selectedComponent]], graph, setGraph);
+  //   }
+  // });
+  return (
+    <div class="">
+      <For each={variants()}>
+        {(variant) => {
+          const options = createMemo(() => {
+            return evalExpression("->$0Option", {
+              graph,
+              setGraph,
+              vertexes: [variant]
+            }) as Vertex[];
+          });
+          return (
+            <div class="flex ai:center gap:2 justify-content:space-between mt:6">
+              <span class="f:15 flex:.5">{variant.P.label || variant.P.key}</span>
+              <div class="flex f:15 flex:1 gap:1px">
+                <Switch>
+                  <Match when={options()}>
+                    <select
+                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      value={graph.vertexes[formStoreVertex()?.P.selectedId].P[variant.P.key] || ""}
+                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.value)}
+                    >
+                      <option value="">Select...</option>
+                      <For each={options()}>
+                        {(option) => (
+                          <option value={option.P.value}>{option.P.key}</option>
+                        )}
+                      </For>
+                    </select>
+                  </Match>
+                  <Match when={variant.P.type?.toLowerCase() === "boolean"}>
+                    <input
+                      type="checkbox"
+                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      checked={graph.vertexes[formStoreVertex()?.P.selectedId].P[variant.P.key] || false}
+                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.checked)}
+                    />
+                  </Match>
+                  <Match when={variant.P.type?.toLowerCase() === "number" || variant.P.type?.toLowerCase() === "date"}>
+                    <input
+                      type={variant.P.type?.toLowerCase()}
+                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      value={graph.vertexes[formStoreVertex()?.P.selectedId].P[variant.P.key] || ""}
+                      onChange={(e) => props.setPropertyValue(variant,
+                        variant.P.type?.toLowerCase() === "number" ? Number(e.currentTarget.value) : e.currentTarget.value
+                      )}
+                    />
+                  </Match>
+                  <Match when={true}>
+                    <input
+                      type="text"
+                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      value={graph.vertexes[formStoreVertex()?.P.selectedId].P[variant.P.key] || ""}
+                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.value)}
+                    />
+                  </Match>
+                </Switch>
+              </div>
+            </div>
+          );
+        }}
+      </For>
+    </div>
   );
 }
 
@@ -109,7 +197,7 @@ function JsonEditorFieldComponent() {
       }
     }
   };
-    createEffect(
+  createEffect(
     on(
       () => formStoreVertex()?.P.selectedComponent,
       () => {

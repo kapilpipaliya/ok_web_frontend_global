@@ -12,7 +12,8 @@ export function VariantsHeader() {
       />
 
       <div class="flex ai:center jc:space-between mt:10">
-        <AddNewVariantButton />
+        {/* We dont allow configuring a single variant, because we have many properties to edit with variant name, we need a saprate modal for it */}
+        {/* <AddNewVariantButton /> */}
         <DisplayAllVariants />
       </div>
     </>

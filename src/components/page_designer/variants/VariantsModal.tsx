@@ -31,8 +31,12 @@ const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(
     FormMetaData[ComponentLabel].attributes.find((x) => x.key === "Variant")!,
   );
+  // we dont allow configuring a single variant for now, because we have many properties for variant with name.
   if (selectedVariant) {
-    metaAttribute = metaAttribute.attributes!.find((x) => x.key === "value")!;
+    metaAttribute = metaAttribute.attributes!.find((x) => x.key === "option")!;
+  }
+  if (!metaAttribute) {
+    console.error("Meta attribute not found")
   }
   return metaAttribute;
 };

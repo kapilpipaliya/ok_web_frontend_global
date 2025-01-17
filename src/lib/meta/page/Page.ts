@@ -3,6 +3,8 @@ import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType"
 import { PROPERTIES } from "~/components/styled/constants/constant";
 
 import { pageAttr } from "./pageAttr";
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import { evalExpression } from "~/lib/expression_eval";
 
 export const wrapWithTitle = (title: string, required: boolean, children: any) => {
   return {
@@ -139,18 +141,28 @@ export const variantAttributes =  {
       displayName: "Type",
       key: "type",
       
-      options: `boolean,CheckBox
-string,TextInput`,
-// date,Date
-// number,TextInput
+      options: `boolean
+string`,
+// date
+// number
     },
     {
-      componentName: "::'P.type'",
+      // componentName: "::'P.type'",
+      otherProps: (options: FunctionArgumentType) => {
+        return {
+          componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+        }
+      },
       displayName: "Default Value",
       key: "defValue",
     },
     {
-      componentName: "::'P.type'",
+      // componentName: "::'P.type'",
+      otherProps: (options: FunctionArgumentType) => {
+        return {
+          componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+        }
+      },
       displayName: "Value",
       key: "value",
     },
@@ -162,7 +174,16 @@ string,TextInput`,
           key: "key",
         }, 
         {
-          componentName: "<-$0::'P.type'",
+          otherProps: (options: FunctionArgumentType) => {
+            const type = evalExpression("<-$0::'P.type'", {
+              graph: options.graph,
+              setGraph: options.setGraph,
+              vertexes: [options.data]
+            });
+            return {
+              componentName: type === "boolean" ? "CheckBox" : "TextInput"
+            };
+          },
           displayName: "Value",
           key: "value",
         },
@@ -174,6 +195,6 @@ string,TextInput`,
   ],
   componentName: "DynamicTable",
   key: "Variant",
-  label: "Variant",
-  type: "Variant",
+  // label: "Variant",
+  // type: "Variant",
 } as FieldAttribute;

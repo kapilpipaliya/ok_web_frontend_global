@@ -87,7 +87,7 @@ export function componentDrop(
     delete p.key;
     props = { ...props, ...p };
   } else if (fromVertex.L[0] === "Component") {
-    props = { ...props, componentName: "Component", componentId: fromVertex.id };
+    props = { ...props, componentName: "Component" };
   }
   batch(() => {
     rowResult = addNewRow(
@@ -102,7 +102,7 @@ export function componentDrop(
 
     const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-    if (["Comp"].includes(fromVertex.L[0])) {
+    if (["Comp", "Component"].includes(fromVertex.L[0])) {
       // set Component to the row
       setSelectionValue(
         txnId,

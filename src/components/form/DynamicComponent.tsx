@@ -226,6 +226,12 @@ export function DynamicComponent(
       get meta() {
         return props.meta;
       },
+      get graph() {
+        return graph;
+      },
+      get setGraph() {
+        return setGraph;
+      },
       mounted,
       onChange,
       owner,
@@ -437,33 +443,6 @@ export function DynamicComponent(
     });
   };
 
-  const componentName = createMemo(() => {
-    let componentLabel: string | undefined;
-    if (props.componentName) {
-      componentLabel = props.componentName;
-      return componentLabel;
-    }
-    const { componentName } = props.meta.P;
-    if (componentName) {
-      componentLabel = componentName;
-    }
-    if (!componentLabel) {
-      componentLabel = getComponentLabel(graph, props.meta);
-    }
-    if (!componentLabel) {
-      return "NotFoundComponent";
-    }
-    if (typeof componentLabel === "string") {
-      return componentLabel;
-    }
-    return typeof componentLabel === "function"
-      ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
-      : componentLabel;
-  });
-
-  const component = createMemo(
-    () => getDynamicComponent(componentName()) || NotFoundComponent,
-  );
 
   const getMetaProps = (
     meta: Record<string, any>,
@@ -513,6 +492,37 @@ export function DynamicComponent(
     }
     return {};
   });
+  
+  const componentName = createMemo(() => {
+    if (dynamicProps().componentName) {
+      return dynamicProps().componentName;
+    }
+    let componentLabel: string | undefined;
+    if (props.componentName) {
+      componentLabel = props.componentName;
+      return componentLabel;
+    }
+    const { componentName } = props.meta.P;
+    if (componentName) {
+      componentLabel = componentName;
+    }
+    if (!componentLabel) {
+      componentLabel = getComponentLabel(graph, props.meta);
+    }
+    if (!componentLabel) {
+      return "NotFoundComponent";
+    }
+    if (typeof componentLabel === "string") {
+      return componentLabel;
+    }
+    return typeof componentLabel === "function"
+      ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
+      : componentLabel;
+  });
+
+  const component = createMemo(
+    () => getDynamicComponent(componentName()) || NotFoundComponent,
+  );
 
   const isHidden = () => {
     const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;

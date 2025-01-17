@@ -1,10 +1,11 @@
 
 import type { Accessor, Owner } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import type { PageRenderObject, PageRenderStore } from "../page_attr_render/context/PageRenderContext";
 import type { FormStoreObject } from "./context/FormContext";
+import { SetStoreFunction } from "solid-js/store";
 
 export interface RegexValidation {
   enabled: boolean;
@@ -28,6 +29,8 @@ export interface FunctionArgumentBaseType {
   hasInsertPermission: boolean | null | undefined;
   hasViewPermission: boolean | null | undefined;
   isNoPermissionCheck: boolean | null | undefined;
+  graph: GraphInterface;
+  setGraph: SetStoreFunction<GraphInterface>;
   isViewMode: boolean | null | undefined;
   // formInitialValues: FormStoreObject;
   // formValueStore: FormStoreObject;
