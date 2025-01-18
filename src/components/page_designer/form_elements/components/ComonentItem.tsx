@@ -16,6 +16,7 @@ export function ComonentItem(
     expandedComponent?: Vertex;
     onDoubleClick?: (fromVertex: Vertex) => void;
     setExpandedComponent: (component?: Vertex) => void;
+    edgeName: string;
   }>,
 ) {
   const [graph] = useGraph();
@@ -123,6 +124,7 @@ export function ComonentItem(
       </ComponentItemContainer>
       <Show when={props.expandedComponent === props.child}>
         <ComponentPreview
+          edgeName={props.edgeName}
           item={props.child}
           // onClose={() => setShowPreview(false)}
           // onMouseLeave={(event) => {

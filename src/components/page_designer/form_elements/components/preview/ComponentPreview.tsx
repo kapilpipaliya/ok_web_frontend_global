@@ -15,6 +15,7 @@ export function ComponentPreview(
     // onMouseLeave?: (event: MouseEvent) => void;
     parentRef: HTMLElement;
     ref: Setter<HTMLElement | null>;
+    edgeName: string;
   }>,
 ) {
   const zIndex = useZIndex();
@@ -39,6 +40,7 @@ export function ComponentPreview(
         <div>
           <CompPreviewTreeItem
             collapsedKeys={collapsedKeys}
+            edgeName={props.edgeName}
             hideFirstItem={true}
             item={props.item}
             toggleExpand={toggleExpand}

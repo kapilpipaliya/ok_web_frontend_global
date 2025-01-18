@@ -106,6 +106,7 @@ export function ComponentList(props: {
               <>
                 <div class={"font-weight:600 my:8px"}>
                   <ComonentItem
+                    edgeName={props.edgeName}
                     child={item}
                     expandedComponent={expandedComponent()}
                     onDoubleClick={props.onDoubleClick}

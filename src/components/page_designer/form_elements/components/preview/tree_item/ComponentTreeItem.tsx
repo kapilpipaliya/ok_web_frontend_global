@@ -46,6 +46,7 @@ export function CompPreviewTreeItem(
         >
           <TreeItemContent
             collapsedKeys={props.collapsedKeys}
+            edgeName={props.edgeName}
             item={props.item}
             toggleExpand={props.toggleExpand}
           />
@@ -60,6 +61,7 @@ export function CompPreviewTreeItem(
                 <CompPreviewTreeItem
                   ancestorIds={currentAncestorIds} // Pass the ancestor IDs down
                   collapsedKeys={props.collapsedKeys}
+                  edgeName={props.edgeName}
                   item={child}
                   toggleExpand={props.toggleExpand}
                 />
