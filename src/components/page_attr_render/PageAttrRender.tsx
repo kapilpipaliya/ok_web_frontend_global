@@ -29,6 +29,7 @@ export function PageAttrRender(
   const previewStoreProxy = new Proxy(previewStore, {
     get(target, prop) {
       if (prop === 'isDesignMode') return false;
+      if (prop === 'isDesignModePrev') return target.isDesignMode;
       return target[prop as keyof typeof target];
     }
   });
@@ -115,15 +116,11 @@ export function PageAttrRender(
               </li>
             </Match> */}
             <Match when={true}>
-              <Show fallback={<Content />} when={previewStore.isDesignMode}>
-                <Show 
-                  when={componentName() === "Component"}
-                  fallback={
-                    <PageAttrDnDWrapper item={item}>
-                      <Content />
-                    </PageAttrDnDWrapper>
-                  }
-                >
+              <Switch>
+                <Match when={!previewStore.isDesignMode}>
+                  <Content />
+                </Match>
+                <Match when={componentName() === "Component"}>
                   <PageAttrDnDWrapper item={item}>
                     <PreviewContext.Provider 
                       value={[previewStoreProxy, setPreviewStore]}
@@ -131,8 +128,13 @@ export function PageAttrRender(
                       <Content />
                     </PreviewContext.Provider>
                   </PageAttrDnDWrapper>
-                </Show>
-              </Show>
+                </Match>
+                <Match when={true}>
+                  <PageAttrDnDWrapper item={item}>
+                    <Content />
+                  </PageAttrDnDWrapper>
+                </Match>
+              </Switch>
             </Match>
           </Switch>
         );

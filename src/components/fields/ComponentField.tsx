@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
+import { children, createEffect, createMemo, on, Show, splitProps } from "solid-js";
 import type { GenericComponentProps } from "./FieldType";
 import { Id, useGraph, Vertex } from "~/lib/graph/graph";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
@@ -8,12 +8,14 @@ import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { ServerResult } from "~/cypher/types/ServerResult";
 import { evalExpression } from "~/lib/expression_eval";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+import { ComponentChildrenContext } from "./contexts/ComponentChildrenContext";
+import { PreviewContext, usePreviewContext } from "../page_designer/context/PreviewContext";
 
 export function ComponentField(props: Readonly<GenericComponentProps & { componentId?: string }>) {
   const [local] = splitProps(props, [
     "componentName",
     "onChange",
-    "value", 
+    "value",
     "isRealTime",
     "isTableInside",
     "txnId",
@@ -23,6 +25,7 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const [previewStore, setPreviewStore] = usePreviewContext();
 
   const meta = () => parentRenderContext()?.context.meta!;
   const data = () => parentRenderContext()?.context.data!;
@@ -34,7 +37,7 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
     fetchComponentData([getCopmVertex()[0]], graph, setGraph);
   }
 
-  const getCopmVertex = createMemo(() =>  meta() ? evalExpression("->$0Comp", { graph, setGraph, vertexes: [meta()] }) as Vertex[] || [] as Vertex[] : []);
+  const getCopmVertex = createMemo(() => meta() ? evalExpression("->$0Comp", { graph, setGraph, vertexes: [meta()] }) as Vertex[] || [] as Vertex[] : []);
 
   createEffect(on(getCopmVertex, (component, prevComponent) => {
     if (component && JSON.parse(JSON.stringify(component)) !== JSON.parse(JSON.stringify(prevComponent || [])) && (component.length === 0 || getChildrenAttrs(graph, setGraph, component[0]).length === 0)) {
@@ -44,10 +47,24 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
     }
   }));
 
+  const previewStoreProxy = new Proxy(previewStore, {
+    get(target, prop) {
+      // @ts-expect-error ignore temporary key name
+      if (prop === 'isDesignMode') return target["isDesignModePrev"];
+      return target[prop as keyof typeof target];
+    }
+  });
+
   return (
     <>
       <Show when={getCopmVertex().length}>
-        <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+        <ComponentChildrenContext.Provider value={() => {
+          return <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
+            {props.children}
+          </PreviewContext.Provider>
+        }}>
+          <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+        </ComponentChildrenContext.Provider>
       </Show>
       <Show when={!getCopmVertex().length}>
         Error

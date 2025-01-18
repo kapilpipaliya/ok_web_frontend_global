@@ -75,6 +75,7 @@ import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
 import { DataField } from "~/components/fields/DataField";
 import { ComponentField } from "~/components/fields/ComponentField";
+import { ComponentChildrenField } from "~/components/fields/ComponentChildrenField";
 
 export const corvuComponents = {
   Accordion,
@@ -121,6 +122,7 @@ export const componentsMap: Record<string, any> = {
   TextInput: TextInputField,
   Transition,
   TransitionGroup,
+  ComponentChildren: ComponentChildrenField,
   // ThankYouPage: PageField,
   ZIndex,
 };
