@@ -101,7 +101,10 @@ export function InsertButtonsMenu(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <ComponentList />
+      <ComponentList
+        edgeName="ParentComp"
+        rootExpression={`g:'Comp[Root]'`}
+      />
     </DropdownMenu>
   );
 }

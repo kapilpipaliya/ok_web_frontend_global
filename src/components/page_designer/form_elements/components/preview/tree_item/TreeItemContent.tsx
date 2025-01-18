@@ -9,11 +9,12 @@ export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Id[];
     item: Vertex;
+    edgeName: string;
     toggleExpand: (itemId: Id) => void;
   }>,
 ) {
   const [graph] = useGraph();
-  const children = createMemo(() => getCompChildren(props.item, graph));
+  const children = createMemo(() => getCompChildren([props.item], props.edgeName, graph));
 
   return (
     <div

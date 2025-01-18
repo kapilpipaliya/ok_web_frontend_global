@@ -15,11 +15,12 @@ export function CompPreviewTreeItem(
     collapsedKeys: string[];
     hideFirstItem?: boolean;
     item: Vertex;
+    edgeName: string;
     toggleExpand: (itemId: Id) => void;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const children = createMemo(() => getCompChildren(props.item, graph));
+  const children = createMemo(() => getCompChildren([props.item], props.edgeName, graph));
   const layoutStoreId = useDesignerLayoutStore();
 
   const onDragEnd = () => {

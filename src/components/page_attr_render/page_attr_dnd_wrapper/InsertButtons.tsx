@@ -131,6 +131,8 @@ export function InsertButtonsMenu(
       parentRef={props.parentRef}
     >
       <ComponentList
+        edgeName="ParentComp"
+        rootExpression={`g:'Comp[Root]'`}
         onDoubleClick={props.onDoubleClick}
       />
     </DropdownMenu>

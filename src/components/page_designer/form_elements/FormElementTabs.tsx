@@ -35,13 +35,7 @@ const PageLevelComponents = () => {
   return (
     <div>
       <div class="p:1rem font-weight:500">Components</div>
-      <div class="p:0.5rem">
-        <For each={parentComponents()}>
-          {(component) => (
-            <div class="p:0.5rem">{component.P.key}</div>
-          )}
-        </For>
-      </div>
+      <ComponentList edgeName="ParentComponent" rootVertexes={parentComponents()} isFetchData={false} />
     </div>
   );
 };
@@ -83,7 +77,7 @@ export function FormElementTabs() {
 
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
-          <ComponentList />
+          <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
           <PageLevelComponents />
         </Match>
         <Match when={selectedTab().collection === "Component"}>

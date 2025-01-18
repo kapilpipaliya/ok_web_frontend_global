@@ -2,11 +2,11 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 
-export function getCompChildren(vertex: Vertex, graph: GraphInterface) {
+export function getCompChildren(vertex: Vertex[], edgeName: string, graph: GraphInterface) {
   if (!vertex) {
     return [];
   }
   const children: Vertex[] =
-    evalExpression("<-ParentComp", { graph, vertexes: [vertex] }) || [];
+    evalExpression(`<-${edgeName}`, { graph, vertexes: vertex }) || [];
   return children;
 }
