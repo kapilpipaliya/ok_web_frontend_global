@@ -1,4 +1,4 @@
-import { createSignal, For, Match, ParentProps, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, ParentProps, Switch } from "solid-js";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
@@ -6,7 +6,7 @@ import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
 import { useGraph, Vertex } from "~/lib/graph/graph";
-import { evalExpression } from "~/lib/expression_eval";
+import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
 import { PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -16,26 +16,39 @@ export const UlContainer = (props: ParentProps) => (
     {props.children}
   </ul>
 );
-
-const PageLevelComponents = () => {
+const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
 
-  
-  const parentComponents = () => {
-    return formStoreVertex()?.P?.formDataId ? evalExpression("<-ParentComponent", {
-      graph,
-      setGraph: () => {},
-      vertexes: [graph.vertexes[formStoreVertex().P.formDataId]],
-    }) : [];
-  };
+  createEffect(async () => {
+    if (props.rootLevel) {
+      const result = await evalExpressionAsync("g:'ALL_ROOT_LEVEL_COMPONENTS'", {
+        graph,
+        vertexes: [],
+      });
+      setRootVertexes(result || []);
+    } else {
+      if (formStoreVertex()?.P?.formDataId) {
+        setRootVertexes(
+          evalExpression("<-ParentComponent", {
+            graph,
+            setGraph: () => {},
+            vertexes: [graph.vertexes[formStoreVertex().P.formDataId]],
+          }) || []
+        );
+      } else {
+        setRootVertexes([]);
+      }
+    }
+  });
 
   return (
     <div>
-      <div class="p:1rem font-weight:500">Components</div>
-      <ComponentList edgeName="ParentComponent" rootVertexes={parentComponents()} isFetchData={false} />
+      {!props.rootLevel ? <div class="p:1rem font-weight:500">Components</div> : null}
+      <ComponentList edgeName="ParentComponent" rootVertexes={rootVertexes()} isFetchData={false} />
     </div>
   );
 };
@@ -78,10 +91,10 @@ export function FormElementTabs() {
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
-          <PageLevelComponents />
+          <PageLevelComponents rootLevel={false} />
         </Match>
         <Match when={selectedTab().collection === "Component"}>
-          <PagesList coll="Component" />
+          <PageLevelComponents rootLevel={true} />
         </Match>
         <Match
           keyed

@@ -114,6 +114,13 @@ function buildQuery(
     if (label === "ALL_LABELS") {
       query = "MATCH (n) RETURN DISTINCT labels(n)";
       params = { allLabels: true };
+    } else if (label === "ALL_ROOT_LEVEL_COMPONENTS") {
+      query = `MATCH (n:Component)
+WHERE NOT EXISTS {
+  MATCH (n)-[:ParentComponent]->()
+}
+RETURN n`;
+      params = { };
     } else {
       const {
         filter,
