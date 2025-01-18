@@ -28,7 +28,10 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
     if (props.rootLevel) {
       const result = await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'", undefined, { skipExisting: true });
       setRootVertexes(result?.result || []);
+      // Fetch children level Components
+      await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'<-'ParentComponent*'", undefined, { skipExisting: true });
     } else {
+      // children level Components are already fetched when page is loaded.
       if (formStoreVertex()?.P?.formDataId) {
         setRootVertexes(
           evalExpression("<-ParentComponent", {
