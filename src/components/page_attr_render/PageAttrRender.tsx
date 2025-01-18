@@ -2,7 +2,7 @@ import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { usePreviewContext, PreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
@@ -24,7 +24,14 @@ export function PageAttrRender(
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
-  const [previewStore] = usePreviewContext();
+  const [previewStore, setPreviewStore] = usePreviewContext();
+
+  const previewStoreProxy = new Proxy(previewStore, {
+    get(target, prop) {
+      if (prop === 'isDesignMode') return false;
+      return target[prop as keyof typeof target];
+    }
+  });
 
   const childrenAttrs = createMemo(() => {
     const attrs = getChildrenAttrs(graph, setGraph, props.metaVertex);
@@ -109,9 +116,22 @@ export function PageAttrRender(
             </Match> */}
             <Match when={true}>
               <Show fallback={<Content />} when={previewStore.isDesignMode}>
-                <PageAttrDnDWrapper item={item}>
-                  <Content />
-                </PageAttrDnDWrapper>
+                <Show 
+                  when={componentName() === "Component"}
+                  fallback={
+                    <PageAttrDnDWrapper item={item}>
+                      <Content />
+                    </PageAttrDnDWrapper>
+                  }
+                >
+                  <PageAttrDnDWrapper item={item}>
+                    <PreviewContext.Provider 
+                      value={[previewStoreProxy, setPreviewStore]}
+                    >
+                      <Content />
+                    </PreviewContext.Provider>
+                  </PageAttrDnDWrapper>
+                </Show>
               </Show>
             </Match>
           </Switch>
