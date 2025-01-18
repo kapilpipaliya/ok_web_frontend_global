@@ -13,6 +13,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { getCompChildren } from "./getCompChildren";
 import { createStore } from "solid-js/store";
 import { ComponentItem } from "./ComonentItem";
+import { createAppState } from "~/createAppState";
 
 export function ComponentList(props: {
   onDoubleClick?: (fromVertex: Vertex) => void;
@@ -27,6 +28,8 @@ export function ComponentList(props: {
   const { showErrorToast } = useToast();
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
   const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
+  const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
+  const [previewGraph, setPreviewGraph] = createAppState();
 
   function toggleExpand(itemId: Id) {
     setExpandedKeys((prev) =>
@@ -41,7 +44,7 @@ export function ComponentList(props: {
     try {
       // * allows the traversal to match a path of one or more ParentComp relationships, i.e., a variable-length path.
       const expression = `${props.rootExpression}<-'${props.edgeName}*'`;
-      return await fetchAndSetGraphData(graph, setGraph, expression);
+      return await fetchAndSetGraphData(graph, setGraph, expression, undefined, {skipExisting: true});
     } catch (error: unknown) {
       return { error: error instanceof Error ? error.message : String(error) };
     }
@@ -120,6 +123,10 @@ export function ComponentList(props: {
                     expandedKeys={expandedKeys}
                     toggleExpand={toggleExpand}
                     onDoubleClick={props.onDoubleClick}
+                    previewPageId={previewPageId()}
+                    setPreviewPageId={setPreviewPageId}
+                    previewGraph={previewGraph}
+                    setPreviewGraph={setPreviewGraph}
                   />
                 </div>
               </>

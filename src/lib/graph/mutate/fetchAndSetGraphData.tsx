@@ -4,7 +4,7 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData, UpdateOptions } from "~/lib/graph/mutate/setGraphData";
 import { getGlobalStore } from "../get/sync/getGlobalStore";
 
 export async function fetchAndSetGraphData(
@@ -14,6 +14,7 @@ export async function fetchAndSetGraphData(
   context?: {
     [key: string]: any;
   },
+  options?: UpdateOptions
 ) {
   const result = await fetchDataFromMG(
     { expression, [getGlobalStore(graph).P.url]: true },
@@ -21,10 +22,9 @@ export async function fetchAndSetGraphData(
   );
 
   if (!isValidResponse(result)) {
-    // @ts-expect-error ignore
     return { error: result.error || "Error When Loading Data" };
   }
-  setGraphData(graph, setGraph, result.graph);
+  setGraphData(graph, setGraph, result.graph, options);
 
   return result;
 }

@@ -1,23 +1,19 @@
-import { Icon } from "@iconify-icon/solid";
-import { toTitle } from "case-switcher-js";
-import { createSignal, onCleanup, Show } from "solid-js";
-import { v7 as uuidv7 } from "uuid";
+import {Icon} from "@iconify-icon/solid";
+import {toTitle} from "case-switcher-js";
+import {createSignal, onCleanup, Show} from "solid-js";
 
-import type { NavItem } from "../getTreeData";
+import type {NavItem} from "../getTreeData";
 
-import { onClickAddComponent } from "~/components/page_designer/functions/onClickAddComponent";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { GraphContext, GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "../../context/LayoutContext";
-import { IconButton } from "~/components/styled/IconButton";
-
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { createAppState } from "~/createAppState";
-import { GetInitialData } from "~/GetInitialData";
-import { SetStoreFunction } from "solid-js/store";
+import {onClickAddComponent} from "~/components/page_designer/functions/onClickAddComponent";
+import {DropdownMenu} from "~/components/styled/DropdownMenu";
+import {GraphInterface, type Id, useGraph, type Vertex} from "~/lib/graph/graph";
+import {FormStoreObject} from "~/components/form/context/FormContext";
+import {PageLayoutObject, useDesignerLayoutStore} from "../../context/LayoutContext";
+import {IconButton} from "~/components/styled/IconButton";
+import {mergeVertexProperties} from "~/lib/graph/mutate/vertex";
+import {SetStoreFunction} from "solid-js/store";
+import {openInNewInternalTab} from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
+import { PreviewIsolated } from "./PreviewIsolated";
 
 export function PageItem(
   props: Readonly<{
@@ -93,29 +89,9 @@ export function PageItem(
     );
     mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { draggedVertexIds: [] });
   };
-  const handleOpenClick = (e: MouseEvent) => {
-    // Check if form with same label and dataId already exists
-    const exists = layoutStore().openedFormIds.some(
-      form => form.label === props.child.L[0] && form.dataId === props.child.id
-    );
 
-    if (!exists) {
-      // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        layoutStoreId,
-        graph,
-        setGraph,
-        {
-          openedFormIds: [...layoutStore().openedFormIds, {
-            formId: uuidv7(),
-            label: props.child.L[0],
-            dataId: props.child.id
-          }]
-        },
-        { cloneProperties: false }
-      );
-    }
+  const openInNewInternalTabClick = () => {
+    openInNewInternalTab(layoutStoreId, graph.vertexes[props.child.id], layoutStore, graph, setGraph);
   };
 
   onCleanup(() => {
@@ -138,7 +114,7 @@ export function PageItem(
         <div class="margin-left:auto">
           <IconButton
             icon="mdi:open-in-new"
-            onClick={handleOpenClick}
+            onClick={openInNewInternalTabClick}
             size={18}
           />
         </div>
@@ -149,19 +125,10 @@ export function PageItem(
             parentRef={menuRef!}
           >
             {toTitle(props.child.key)} Preview
-            <PreviewIsolated child={props.child} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
+            <PreviewIsolated formId={props.child.id} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
           </DropdownMenu>
         </Show>
       </div>
     </Show>
   );
-}
-
-const PreviewIsolated = (props: { child: NavItem, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface> }) => {
-  return <GraphContext.Provider value={[props.graph, props.setGraph]}>
-    <PageViewWrapper
-      formId={props.child.id}
-      isNoPermissionCheck={true}
-    />
-  </GraphContext.Provider>
 }

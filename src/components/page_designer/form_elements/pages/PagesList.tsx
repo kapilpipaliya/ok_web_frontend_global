@@ -31,6 +31,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<NavItem[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
+  const [previewGraph, setPreviewGraph] = createAppState();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
@@ -88,7 +89,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
       setFilteredData(originalData);
     }
   };
-  const [previewGraph, setPreviewGraph] = createAppState();
+
   return (
     <>
       <Switch fallback={<LoaderNew loaderHeight="55vh" />}>

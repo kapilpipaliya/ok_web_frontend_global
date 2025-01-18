@@ -21,6 +21,10 @@ export function onCompDragStart(
   mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
     draggedVertexIds: [],
   });
+  if (!graph.vertexes[childId]) {
+    console.error('Dragged vertex not found, this should not happen');
+    return;
+  }
 
   const draggedItems =
     selectedComponents && selectedComponents().size > 0

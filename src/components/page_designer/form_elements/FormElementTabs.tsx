@@ -9,6 +9,7 @@ import { useGraph, Vertex } from "~/lib/graph/graph";
 import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
 import { PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
 
 export const UlContainer = (props: ParentProps) => (
@@ -25,11 +26,8 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   createEffect(async () => {
     if (props.rootLevel) {
-      const result = await evalExpressionAsync("g:'ALL_ROOT_LEVEL_COMPONENTS'", {
-        graph,
-        vertexes: [],
-      });
-      setRootVertexes(result || []);
+      const result = await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'", undefined, { skipExisting: true });
+      setRootVertexes(result?.result || []);
     } else {
       if (formStoreVertex()?.P?.formDataId) {
         setRootVertexes(
@@ -56,7 +54,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 export function FormElementTabs() {
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
-    { collection: "Component", title: "Library" }, // TODO: Fix to only show root level components
+    { collection: "Component", title: "Library" },
     { collection: "TemplatePage", title: "Templates" },
     { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },

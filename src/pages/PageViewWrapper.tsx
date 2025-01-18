@@ -127,7 +127,7 @@ export function PageViewWrapper(
   };
 
   function checkPermission(action: string) {
-    if (!formStore().P.formMetaData) {
+    if (!formStore()?.P.formMetaData) {
       return false;
     }
     return (
@@ -205,7 +205,7 @@ export function PageViewWrapper(
       }
     }
     setFormStore("formMetaData", form);
-    if (!formStore().P.formMetaData) {
+    if (!formStore()?.P.formMetaData) {
       setFormStore("error", `${props.pageVertexName} is not configured`);
       return false;
     }

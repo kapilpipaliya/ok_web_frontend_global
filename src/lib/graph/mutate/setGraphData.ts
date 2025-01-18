@@ -15,7 +15,7 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
 
-interface UpdateOptions {
+export interface UpdateOptions {
   skipExisting?: boolean;
   skipPostMessage?: string;
 }
