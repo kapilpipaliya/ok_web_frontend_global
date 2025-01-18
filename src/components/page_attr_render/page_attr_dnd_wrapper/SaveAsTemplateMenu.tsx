@@ -15,6 +15,8 @@ import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useToast } from "../../styled/Toast";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -31,6 +33,7 @@ export function SaveAsTemplateMenu(
   const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
+  const [saveInCurrentPage, setSaveInCurrentPage] = createSignal(false);
   const { showSuccessToast, showWarningToast } = useToast();
   const label = () => (props.saveAsLabel).replace(/Page$/, "");
 
@@ -56,6 +59,23 @@ export function SaveAsTemplateMenu(
       setGraph,
       graph.vertexes[formStoreVertex()?.P.formDataId!],
     );
+    const parentComponentMetaVertex = {
+      id: "",
+      IN: {},
+      L: [],
+      OUT: {},
+      P: props.saveAsLabel === "Template" ? parentTemplateAttribute : parentComponentAttribute,
+    } as Vertex;
+    if (saveInCurrentPage()) {
+      setSelectionValue(
+        newFormTxnId,
+        dataVertex,
+        graph,
+        setGraph,
+        parentComponentMetaVertex,
+        formStoreVertex().P.formDataId
+      );
+    }
     const data = commitTxn(newFormTxnId, graph);
 
     if (!data) {
@@ -119,6 +139,16 @@ export function SaveAsTemplateMenu(
             type="text"
             value={templateName()}
           />
+        </div>
+        <div class="mt:2">
+          <label class="display:flex gap:0.5rem align-items:center">
+            <input
+              type="checkbox"
+              checked={saveInCurrentPage()}
+              onChange={(e) => setSaveInCurrentPage(e.target.checked)}
+            />
+            <span class="f:0.875rem">Save in current page</span>
+          </label>
         </div>
       </div>
       <Show when={error()}>

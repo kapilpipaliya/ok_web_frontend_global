@@ -9,6 +9,22 @@ export const parentCompAttribute = {
   type: "ParentComp",
   // validation: { required: true },
 };
+export const parentComponentAttribute = {
+  collection: "g:'Component'",
+  componentName: "Select",
+  displayName: "Parent Component",
+  key: "ParentComponent",
+  type: "ParentComponent",
+  // validation: { required: true },
+};
+export const parentTemplateAttribute = {
+  collection: "g:'TemplatePage'",
+  componentName: "Select",
+  displayName: "Parent Template",
+  key: "ParentTemplate",
+  type: "ParentTemplate",
+  // validation: { required: true },
+};
 export const Comp: IFormMetaData = {
   attributes: [
     {

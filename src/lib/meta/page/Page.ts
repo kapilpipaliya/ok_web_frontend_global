@@ -5,6 +5,7 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 import { pageAttr } from "./pageAttr";
 import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { evalExpression } from "~/lib/expression_eval";
+import { parentComponentAttribute, parentTemplateAttribute } from "../base/Comp";
 
 export const wrapWithTitle = (title: string, required: boolean, children: any) => {
   return {
@@ -111,6 +112,14 @@ export const Page: IFormMetaData = {
           label: "Attr",
           tab: "Attribute",
           type: "Attr",
+        },
+        {
+          ...parentComponentAttribute,
+          inward: true,
+        },
+        {
+          ...parentTemplateAttribute,
+          inward: true,
         },
         {
           collection: "->$0Perm",
