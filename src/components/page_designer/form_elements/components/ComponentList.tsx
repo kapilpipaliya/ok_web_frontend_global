@@ -10,8 +10,9 @@ import { Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { ComonentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
+import { createStore } from "solid-js/store";
+import { ComponentItem } from "./ComonentItem";
 
 export function ComponentList(props: {
   onDoubleClick?: (fromVertex: Vertex) => void;
@@ -25,7 +26,15 @@ export function ComponentList(props: {
   const [isFetchingData, setIsFetchingData] = createSignal(false);
   const { showErrorToast } = useToast();
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
-  const [expandedComponent, setExpandedComponent] = createSignal<Vertex>();
+  const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
+
+  function toggleExpand(itemId: Id) {
+    setExpandedKeys((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((item) => item !== itemId)
+        : [...prev, itemId],
+    );
+  }
 
   // Fetch data function
   async function fetchData() {
@@ -105,12 +114,12 @@ export function ComponentList(props: {
             {(item) => (
               <>
                 <div class={"font-weight:600 my:8px"}>
-                  <ComonentItem
+                  <ComponentItem
                     edgeName={props.edgeName}
                     child={item}
-                    expandedComponent={expandedComponent()}
+                    expandedKeys={expandedKeys}
+                    toggleExpand={toggleExpand}
                     onDoubleClick={props.onDoubleClick}
-                    setExpandedComponent={setExpandedComponent}
                   />
                 </div>
               </>
