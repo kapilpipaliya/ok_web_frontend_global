@@ -5,6 +5,11 @@ import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
+import { useGraph, Vertex } from "~/lib/graph/graph";
+import { evalExpression } from "~/lib/expression_eval";
+import { PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
+
 
 export const UlContainer = (props: ParentProps) => (
   <ul class="flex {scrollbar-width:thin} flex:wrap jc:space-around margin-bottom:-1px overflow-x:auto">
@@ -12,10 +17,39 @@ export const UlContainer = (props: ParentProps) => (
   </ul>
 );
 
+const PageLevelComponents = () => {
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+  
+  const parentComponents = () => {
+    return formStoreVertex()?.P?.formDataId ? evalExpression("<-ParentComponent", {
+      graph,
+      setGraph: () => {},
+      vertexes: [graph.vertexes[formStoreVertex().P.formDataId]],
+    }) : [];
+  };
+
+  return (
+    <div>
+      <div class="p:1rem font-weight:500">Components</div>
+      <div class="p:0.5rem">
+        <For each={parentComponents()}>
+          {(component) => (
+            <div class="p:0.5rem">{component.P.key}</div>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+};
+
 export function FormElementTabs() {
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
-    { collection: "Component", title: "Library" },
+    { collection: "Component", title: "Library" }, // TODO: Fix to only show root level components
     { collection: "TemplatePage", title: "Templates" },
     { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },
@@ -50,6 +84,7 @@ export function FormElementTabs() {
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList />
+          <PageLevelComponents />
         </Match>
         <Match when={selectedTab().collection === "Component"}>
           <PagesList coll="Component" />
