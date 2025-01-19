@@ -29,7 +29,7 @@ export function PreviewButton() {
   const Content = () => {
     return (
       <PreviewPage>
-        <IFramePreview formId={formStoreId!}/>
+        <IFramePreview formStoreId={formStoreId!}/>
         {/* <PageView
           isDesignMode={false}
           isNoPermissionCheck={true}

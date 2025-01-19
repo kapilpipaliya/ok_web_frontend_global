@@ -129,17 +129,17 @@ function PageViewComponent() {
 
   return (
     <For each={layoutStore().openedFormIds}>
-      {(form) => {
-        const isActive = () => useDesignerFormIdContext() === form.formId;
-        const vertex = () => formStoreVertex(form.formId);
+      {(pageInfo) => {
+        const isActive = () => layoutStore().formId === pageInfo.formId;
+        const vertex = () => formStoreVertex(pageInfo.formId);
 
         return (
           <Show when={vertex()?.id}>
             <ResizableContainer
               view={vertex()?.P.view}
-              // class={isActive() ? '' : 'hidden'}
+              class={isActive() ? '' : 'hidden'}
             >
-              <IFramePreview  formId={form.formId} />
+              <IFramePreview  formStoreId={pageInfo.formId} />
               {/* <PageView
                 isDesignMode={true}
                 isNoPermissionCheck={true}

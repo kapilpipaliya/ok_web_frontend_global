@@ -1,20 +1,20 @@
 import { createStore } from 'solid-js/store';
 import { useGraph, Vertex } from '~/lib/graph/graph';
 import { PageView } from "~/components/page_attr_render/PageView";
-import { DesignerLayoutStoreContext, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
+import { DesignerFormIdContext, DesignerLayoutStoreContext, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
 import { Show, createSignal } from 'solid-js';
 import { getChannel, handleChannelMessage } from '~/components/page_designer/layout/channel';
 import { handleDrop } from '~/components/page_designer/event_handler/handleDrop';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { resetDragDropState } from '~/components/page_designer/event_handler/resetDragDropState';
-import {FormStoreObject} from "~/components/form/context/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
-function DroppableWrapper(props: { formId: string; children: any }) {
+function DroppableWrapper(props: { formStoreId: string; children: any }) {
   const [graph, setGraph] = useGraph();
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   // const { showErrorToast } = useToast();
 
-  const formStoreVertex = () => graph.vertexes[props.formId] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
 
   return (
     <div
@@ -31,7 +31,7 @@ function DroppableWrapper(props: { formId: string; children: any }) {
       }}
       onDrop={async (e) => {
         setIsDraggingOver(false);
-        mergeVertexProperties<FormStoreObject>(0, props.formId, graph, setGraph, {
+        mergeVertexProperties<FormStoreObject>(0, props.formStoreId, graph, setGraph, {
           activeItem: formStoreVertex()?.P.formDataId,
           position: "center"
         });
@@ -54,9 +54,9 @@ function DroppableWrapper(props: { formId: string; children: any }) {
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);
-  const formId = queryParams.get('formId');
+  const formStoreId = queryParams.get('formStoreId');
   const layoutStoreId = queryParams.get('layoutStoreId');
-  if (!formId) {
+  if (!formStoreId) {
     return <div>No Form ID</div>;
   }
   if (!layoutStoreId) {
@@ -65,22 +65,24 @@ export default function PageShareView() {
 
   const [graph, setGraph] = useGraph();
 
-  const channel = getChannel(formId);
+  const channel = getChannel(formStoreId);
 
-  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, formId, formId);
+  channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, formStoreId, formStoreId);
 
-  const formStoreVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <Show when={formStoreVertex()}>
       <DesignerLayoutStoreContext.Provider value={layoutStoreId!}>
-        <DroppableWrapper formId={formId}>
-          <PageView
-            isDesignMode={true}
-            isNoPermissionCheck={true}
-            metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
-          />
-        </DroppableWrapper>
+        <DesignerFormIdContext.Provider value={formStoreId!}>
+          <DroppableWrapper formStoreId={formStoreId}>
+            <PageView
+              isDesignMode={true}
+              isNoPermissionCheck={true}
+              metaVertex={graph.vertexes[formStoreVertex()?.P.formDataId!]}
+            />
+          </DroppableWrapper>
+        </DesignerFormIdContext.Provider>
       </DesignerLayoutStoreContext.Provider>
     </Show>
   );
