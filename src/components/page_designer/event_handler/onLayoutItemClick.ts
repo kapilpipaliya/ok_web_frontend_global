@@ -10,16 +10,13 @@ import { getComponentFromLayoutRow } from "~/components/page_designer/functions/
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function onLayoutItemClick(
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertexId: Id,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
   batch(() => {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
       selectedId: layoutVertexId ?? -1
     });
 
@@ -28,7 +25,7 @@ export function onLayoutItemClick(
       graph,
       setGraph,
     );
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
       selectedComponent: componentVertex?.id ?? -1
     });
   });

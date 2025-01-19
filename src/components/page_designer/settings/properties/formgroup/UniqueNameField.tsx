@@ -5,7 +5,7 @@ import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { Label } from "./Label";
 
 export function UniqueNameField(
@@ -17,10 +17,9 @@ export function UniqueNameField(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   function setUniqueNameValue(metaVertex: Vertex, data: string) {
     if (metaVertex.P.key === uniqueNameKey) {

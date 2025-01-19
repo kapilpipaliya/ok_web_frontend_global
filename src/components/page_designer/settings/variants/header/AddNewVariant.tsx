@@ -9,7 +9,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore } from "../../../context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
@@ -19,10 +19,8 @@ export function AddNewVariant(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex = getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
   const [selectedVariant, setSelectedVariant] = createSignal<Vertex>();

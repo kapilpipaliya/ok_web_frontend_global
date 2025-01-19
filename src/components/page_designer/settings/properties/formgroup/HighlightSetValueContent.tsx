@@ -3,7 +3,7 @@ import { type Accessor, createMemo, Match, Show, Switch } from "solid-js";
 import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { evalExpression } from "~/lib/expression_eval";
@@ -23,13 +23,12 @@ export function HighlightSetValueContent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const selectedComponentVertex = () => graph.vertexes[layoutStore().selectedComponent] ?? {P: {}};
-  const selectedAttr = () => graph.vertexes[layoutStore().selectedId];
+  const selectedComponentVertex = () => graph.vertexes[formStoreVertex().P.selectedComponent] ?? {P: {}};
+  const selectedAttr = () => graph.vertexes[formStoreVertex().P.selectedId];
   const componentExample = createMemo(
     () =>
       evalExpression("->$0CompExample", {

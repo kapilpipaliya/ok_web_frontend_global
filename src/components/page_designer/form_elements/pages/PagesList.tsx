@@ -14,7 +14,7 @@ import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
@@ -24,7 +24,6 @@ import { GetInitialData } from "~/GetInitialData";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   const { showErrorToast } = useToast();
   let originalData: any[] = [];
   const [isFetchingData, setIsFetchingData] = createSignal(true);
@@ -33,8 +32,8 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
   const [previewGraph, setPreviewGraph] = createAppState();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   // Fetch data function
   async function fetchData(): Promise<{

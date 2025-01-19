@@ -1,6 +1,6 @@
 import type { GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import type { PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, type PageLayoutObject } from "../../context/LayoutContext";
 import { SetStoreFunction } from "solid-js/store";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -9,16 +9,13 @@ export function onCompDragStart(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   childId: string,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   selectedComponents?: () => Set<Vertex>,
   setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void,
 ) {
   e.stopPropagation();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
     draggedVertexIds: [],
   });
   if (!graph.vertexes[childId]) {
@@ -31,8 +28,8 @@ export function onCompDragStart(
       ? Array.from(selectedComponents())
       : [graph.vertexes[childId]];
 
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
-    draggedVertexIds: [...formStoreVertex()?.P.draggedVertexIds, ...draggedItems.map(v => v.id)],
+  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
+    draggedVertexIds: [...formStoreVertex.P.draggedVertexIds, ...draggedItems.map(v => v.id)],
   });
 
   if (setSelectedComponents) {

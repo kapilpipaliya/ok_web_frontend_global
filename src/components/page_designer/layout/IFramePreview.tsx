@@ -1,4 +1,4 @@
-import { onCleanup } from "solid-js";
+import { createEffect, onCleanup } from "solid-js";
 import { useGraph } from "~/lib/graph/graph";
 import { getChannel, handleChannelMessage } from "./channel";
 import { useDesignerLayoutStore } from "../context/LayoutContext";
@@ -16,8 +16,12 @@ export const IFramePreview = (props: {formId: string}) => {
   };
 
   setGraph("broadcastChannels", (channels) => channels.includes(props.formId) ? channels : [...channels, props.formId]);
-
+  console.log('add', props.formId);
+  createEffect(() => {
+    console.log('effect', props.formId);
+  })
   onCleanup(() => {
+    console.log('remove', props.formId)
     setGraph("broadcastChannels", (channels) => channels.filter(id => id !== props.formId));
   });
 

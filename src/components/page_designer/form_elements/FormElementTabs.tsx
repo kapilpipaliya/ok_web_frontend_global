@@ -7,7 +7,7 @@ import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
-import { PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
@@ -19,9 +19,8 @@ export const UlContainer = (props: ParentProps) => (
 );
 const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
 
   createEffect(async () => {

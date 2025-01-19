@@ -18,6 +18,7 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PROPERTIES } from "../../../styled/constants/constant";
 import {
   type PageLayoutObject,
+  useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
@@ -75,7 +76,6 @@ function createFieldAttributes(
 function handleCollectionChange(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStore: () => PageLayoutObject,
   formStoreVertex: () => Vertex<FormStoreObject>,
   collMetaVertex: Vertex[],
 ) {
@@ -102,9 +102,8 @@ function handleCollectionChange(
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
   const attributes = createFieldAttributes(graph, formStoreVertex);
@@ -128,7 +127,6 @@ export function CollAndData() {
   const onCollectionChange = handleCollectionChange(
     graph,
     setGraph,
-    layoutStore,
     formStoreVertex,
     collMetaVertex.vertexes,
   );

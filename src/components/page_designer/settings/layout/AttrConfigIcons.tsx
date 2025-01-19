@@ -11,14 +11,13 @@ import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
@@ -30,7 +29,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
       ? hiddenNodes.filter((item) => item !== itemId)
       : [...hiddenNodes, itemId];
       
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hiddenNodes: newHiddenNodes
     });
   };
@@ -110,7 +109,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
           iconClass="transition:0.5s|ease-in-out"
           onClick={() => {
             deleteLayoutAttr(
-              layoutStoreId,
+              formStoreVertex(),
               props.metaVertex,
               graph,
               setGraph,

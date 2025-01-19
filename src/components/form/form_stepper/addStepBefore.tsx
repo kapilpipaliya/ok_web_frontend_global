@@ -11,12 +11,10 @@ import { FormStoreObject } from "../context/FormContext";
 export function addStepBefore(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   formVertex: Vertex,
   toVertex: Vertex,
 ) {
-  const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
-  const formStoreVertex = graph.vertexes[layoutStore.formId!] as Vertex<FormStoreObject>;
   const formDataId = formStoreVertex?.P?.formDataId;
   const txnId = formStoreVertex?.P?.txnId || 0;
 

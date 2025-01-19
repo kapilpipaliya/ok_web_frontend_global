@@ -3,7 +3,7 @@ import { createEffect, createSignal, For, Show, type JSX } from "solid-js";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
-import { PageLayoutObject, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
 import { useToast } from "./Toast";
 import { FormStoreObject } from "../form/context/FormContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
@@ -34,11 +34,10 @@ export function ResizableContainer(
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [resizing, setResizing] = createSignal(false);
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
-  const layoutStoreId = useDesignerLayoutStore();
   const { showErrorToast } = useToast();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (!props.width && !props.height) {
@@ -92,13 +91,13 @@ export function ResizableContainer(
 
   const handleDropEvent = async (e: DragEvent) => {
     setIsDraggingOver(false);
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       activeItem: formStoreVertex()?.P.formDataId,
       position: "center"
     });
 
-    await handleDrop(e, layoutStoreId, graph, setGraph, showErrorToast);
-    resetDragDropState(layoutStoreId, graph, setGraph);
+    await handleDrop(e, formStoreVertex(), graph, setGraph, showErrorToast);
+    resetDragDropState(formStoreVertex(), graph, setGraph);
   };
 
   return (

@@ -2,7 +2,7 @@ import { createMemo, createSignal, Show } from "solid-js";
 
 import { CSSPropertiesEditorWrapper } from "~/components/css_properties/CSSEditor/CSSPropertiesEditorWrapper";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
@@ -19,13 +19,12 @@ interface ClassesComponentProps {
 }
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const getComponentName = () =>
-    graph.vertexes[layoutStore().selectedComponent]?.P.key;
+    graph.vertexes[formStoreVertex().P.selectedComponent]?.P.key;
   const checkIsForm = () => graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form";
   const checkIsFormField = () =>
     checkIsForm() && genericInputComponents.includes(getComponentName());

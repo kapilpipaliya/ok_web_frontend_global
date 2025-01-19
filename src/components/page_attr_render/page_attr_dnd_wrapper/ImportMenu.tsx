@@ -6,7 +6,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import {
   dialogCancelButtonClass,
   DialogFooter,
@@ -28,10 +28,9 @@ export function ImportMenu(
 ) {
   let nameInputRef: HTMLTextAreaElement;
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [htmlContent, setHtmlContent] = createSignal("");
   const [error] = createSignal("");

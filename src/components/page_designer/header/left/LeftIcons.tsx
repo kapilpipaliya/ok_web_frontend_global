@@ -6,7 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftToggleButton } from "./LeftToggleButton";
@@ -17,7 +17,8 @@ export const LeftIcons = () => {
   const layoutStoreId = useDesignerLayoutStore();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   
   const handleBackClick = () => {
     if (window.history.length > 1) {

@@ -6,16 +6,15 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
-import { PageLayoutObject } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useToast } from "~/components/styled/Toast";
 
 export function SaveIconButton() {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
+  const formStoreId = useDesignerFormIdContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const txnId = () => formStoreVertex()?.P.txnId;
 
   const isDisabled = createMemo(

@@ -2,16 +2,15 @@ import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export const ResizeViewButtons = () => {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const views = [
     { icon: true, key: "prime:mobile", value: "Mobile" },
@@ -33,7 +32,7 @@ export const ResizeViewButtons = () => {
               "r:5|0|0|5": index() === 0,
             }}
             icon={view.key}
-            onclick={() => mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { view: view.value })}
+            onclick={() => mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { view: view.value })}
             size={22}
             title={view.value}
           />

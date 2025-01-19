@@ -4,7 +4,7 @@ import { createSignal, For, type Setter, Show } from "solid-js";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/context/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { useGraph, Vertex } from "~/lib/graph/graph";
@@ -57,7 +57,7 @@ function TabBar() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[useDesignerFormIdContext()!] as Vertex<FormStoreObject>;
 
   const handleClose = (formId: string) => {
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
@@ -96,7 +96,7 @@ function TabBar() {
       <For each={layoutStore().openedFormIds}>
         {(form, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${layoutStore().formId === form.formId ? "background:#e0e0e0" : ""
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === form.formId ? "background:#e0e0e0" : ""
               }`}
             onClick={[handleTabClick, form.formId]}
           >
@@ -130,14 +130,14 @@ function PageViewComponent() {
   return (
     <For each={layoutStore().openedFormIds}>
       {(form) => {
-        const isActive = () => layoutStore().formId === form.formId;
+        const isActive = () => useDesignerFormIdContext() === form.formId;
         const vertex = () => formStoreVertex(form.formId);
 
         return (
           <Show when={vertex()?.id}>
             <ResizableContainer
               view={vertex()?.P.view}
-              class={isActive() ? '' : 'hidden'}
+              // class={isActive() ? '' : 'hidden'}
             >
               <IFramePreview  formId={form.formId} />
               {/* <PageView
@@ -184,9 +184,8 @@ function Settings() {
 
 function PropertiesContent() {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   return (
     <Show
       when={
@@ -195,7 +194,7 @@ function PropertiesContent() {
         graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
-      <FormContext.Provider value={layoutStore().formId!}>
+      <FormContext.Provider value={useDesignerFormIdContext()!}>
         <PropertiesWrapper />
       </FormContext.Provider>
     </Show>
@@ -204,9 +203,8 @@ function PropertiesContent() {
 
 function DeleteConfirmation() {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   return (
     <Show
       when={
@@ -229,10 +227,9 @@ export function RenderMainContent() {
 export default RenderMainContent
 
 export function ResizableAltKey() {
-  const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const [graph] = useGraph()
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [sizes, setSizes] = makePersisted(createSignal<number[]>([]), {
     name: 'resizable-sizes',
   })

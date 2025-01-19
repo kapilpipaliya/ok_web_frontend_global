@@ -3,16 +3,15 @@ import { createSignal, For, Show } from "solid-js";
 import { useGraph, type Id, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {  
-  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>

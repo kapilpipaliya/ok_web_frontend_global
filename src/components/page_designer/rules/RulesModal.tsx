@@ -11,7 +11,7 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -24,11 +24,8 @@ import { getConditionsExpression } from "./functions/getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./functions/modifyFieldMetaAllFields";
 import { Overlay } from "./Overlay";
 
-const getMetaAttributes = (selectedRule?: null | Vertex) => {
+const getMetaAttributes = (formStoreVertex: Vertex<FormStoreObject>, selectedRule?: null | Vertex) => {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   let metaAttribute = klona(
     FormMetaData.Form.attributes.find((x) => x.key === "Rule")!,
@@ -40,7 +37,7 @@ const getMetaAttributes = (selectedRule?: null | Vertex) => {
           condAttribute.key === "leftField" ||
           condAttribute.key === "rightField"
         ) {
-          modifyFieldMetaAllFields(condAttribute, graph, setGraph, layoutStoreId);
+          modifyFieldMetaAllFields(condAttribute, graph, setGraph, formStoreVertex);
         }
       }
     }
@@ -63,15 +60,14 @@ export function RulesModal(
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
   
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
-    getMetaAttributes(props.selectedRule),
+    getMetaAttributes(formStoreVertex(), props.selectedRule),
   );
 
   const [error, setError] = createSignal<null | string>(null);

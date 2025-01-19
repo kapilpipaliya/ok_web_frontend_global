@@ -8,12 +8,12 @@ import {v7 as uuidv7} from "uuid";
 export function openInNewInternalTab(
   layoutStoreId: Id,
   child: Vertex,
-  layoutStore: () => PageLayoutObject,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
+  const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
   // Check if form with same label and dataId already exists
-  const exists = layoutStore().openedFormIds.some(
+  const exists = layoutStore.openedFormIds.some(
     form => form.label === child.L[0] && form.dataId === child.id
   );
 
@@ -25,7 +25,7 @@ export function openInNewInternalTab(
       graph,
       setGraph,
       {
-        openedFormIds: [...layoutStore().openedFormIds, {
+        openedFormIds: [...layoutStore.openedFormIds, {
           formId: uuidv7(),
           label: child.L[0],
           dataId: child.id

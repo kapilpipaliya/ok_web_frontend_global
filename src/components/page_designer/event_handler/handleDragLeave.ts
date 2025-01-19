@@ -8,10 +8,9 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 export function handleDragLeave(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStoreId: string,
+  formId: string,
 ) {
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem: null, position: null });
+  mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, { activeItem: null, position: null });
   // Do not uncomment this, because drag is called before on drop
   // setDraggedVertex(null);
   // resetDragDropState();

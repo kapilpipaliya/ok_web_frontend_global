@@ -16,53 +16,50 @@ import {
 } from "../functions/generateFormMetaAttributes";
 
 function validateLayoutDeletion(
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ): boolean {
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
   const usedAttrs = getAllFieldsUsedInAllRules(
     graph,
     setGraph,
-    graph.vertexes[formStoreVertex()?.P.formDataId!],
+    graph.vertexes[formStoreVertex?.P.formDataId!],
   );
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
   if (Object.keys(usedAttrsInRules).length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { usedAttrsInRules });
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInRules });
     return true;
   }
 
   const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(
     graph,
     setGraph,
-    graph.vertexes[formStoreVertex()?.P.formDataId!],
+    graph.vertexes[formStoreVertex?.P.formDataId!],
     layoutVertex,
     "->$0Unique->$0Key",
   );
 
   if (usedAttrsInUniqueConstraints.length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { usedAttrsInUniqueConstraints });
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInUniqueConstraints });
     return true;
   }
 
   const usedAttrsInNameKeys = getAllFieldsUsedInRootLevelSetting(
     graph,
     setGraph,
-    graph.vertexes[formStoreVertex()?.P.formDataId!],
+    graph.vertexes[formStoreVertex?.P.formDataId!],
     layoutVertex,
     "->$0NameKey",
   );
 
   if (usedAttrsInNameKeys.length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { usedAttrsInNameKeys });
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInNameKeys });
     return true;
   }
 
-  if (graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form") {
+  if (graph.vertexes[formStoreVertex?.P.formDataId!]?.L[0] === "Form") {
     const childContainsFormAttr = allFormAttrsInPageFromLevel(
       graph,
       layoutVertex,
@@ -72,13 +69,13 @@ function validateLayoutDeletion(
     if (childContainsFormAttr.length > 0) {
       const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(
         graph,
-        graph.vertexes[formStoreVertex()?.P.formDataId!],
+        graph.vertexes[formStoreVertex?.P.formDataId!],
         "Form",
         childContainsFormAttr,
       );
 
       if (rootContainsFormAttrExcludingChild.length === 0) {
-        mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { shouldContainAtLeastOneForm: true });
+        mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { shouldContainAtLeastOneForm: true });
         return true;
       }
     }
@@ -88,7 +85,7 @@ function validateLayoutDeletion(
 }
 
 export function deleteLayoutAttr(
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -96,12 +93,10 @@ export function deleteLayoutAttr(
   key: string,
   showSuccessToast: (message: string) => void,
 ) {
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   if (
     validateLayoutDeletion(
-      layoutStoreId,
+      formStoreVertex,
       layoutVertex,
       graph,
       setGraph,
@@ -111,14 +106,14 @@ export function deleteLayoutAttr(
   }
 
   batch(() => {
-    if (formStoreVertex()?.P.selectedId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    if (formStoreVertex?.P.selectedId === layoutVertex.id) {
+      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, {
         selectedId: -1,
         selectedComponent: -1
       });
     }
-    if (formStoreVertex()?.P.hoverId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { hoverId: -1 });
+    if (formStoreVertex?.P.hoverId === layoutVertex.id) {
+      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { hoverId: -1 });
     }
   });
 

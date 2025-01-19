@@ -4,7 +4,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
@@ -13,6 +13,7 @@ import { InsertButtons } from "./InsertButtons";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
@@ -22,7 +23,10 @@ export function SelectedAttrConfigPopOver(
   props: Readonly<SelectedAttrConfigPopOverProps>,
 ) {
   const zIndex = useZIndex();
-  const layoutStoreId = useDesignerLayoutStore();
+
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+
   const [graph, setGraph] = useGraph();
   const getComponentName = () =>
     getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
@@ -37,7 +41,7 @@ export function SelectedAttrConfigPopOver(
           draggable={true}
           icon="material-symbols:drag-indicator"
           onClick={() => {}}
-          onDragStart={(e) => handleDragStart(e, graph, setGraph, layoutStoreId, props.item)}
+          onDragStart={(e) => handleDragStart(e, graph, setGraph, formStoreVertex(), props.item)}
           size={20}
           title="Move"
         />

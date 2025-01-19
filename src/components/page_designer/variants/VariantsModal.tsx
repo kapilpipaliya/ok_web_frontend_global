@@ -11,7 +11,7 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
@@ -23,11 +23,6 @@ import { Overlay } from "../rules/Overlay";
 import { generateTableInputMeta } from "../rules/functions/generateTableInputMeta";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
-  const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
   let metaAttribute = klona(
     FormMetaData[ComponentLabel].attributes.find((x) => x.key === "Variant")!,
   );
@@ -53,9 +48,8 @@ export function VariantsModal(
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
   
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);

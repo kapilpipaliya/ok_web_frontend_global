@@ -7,7 +7,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import {PreviewPage} from "~/components/styled/PreviewPage";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
@@ -15,11 +15,8 @@ import { IFramePreview } from "../../layout/IFramePreview";
 
 export function PreviewButton() {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   const [isModalOpen, setIsModalOpen] = createSignal(false);
-
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
 
   const handleButtonClick = () => {
     setIsModalOpen(true);
@@ -32,7 +29,7 @@ export function PreviewButton() {
   const Content = () => {
     return (
       <PreviewPage>
-        <IFramePreview />
+        <IFramePreview formId={formStoreId!}/>
         {/* <PageView
           isDesignMode={false}
           isNoPermissionCheck={true}

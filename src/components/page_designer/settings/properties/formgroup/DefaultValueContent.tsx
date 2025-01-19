@@ -2,7 +2,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../../context/LayoutContext";
 
 export function DefaultValueContent(
   props: Readonly<{
@@ -13,14 +13,12 @@ export function DefaultValueContent(
   }>,
 ) {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <DynamicComponent
-      componentName={graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key}
+      componentName={graph.vertexes[formStoreVertex()?.P.selectedComponent]?.P.key}
       data={props.selectedLayout}
       isNoPermissionCheck={true}
       isRealTime={false}

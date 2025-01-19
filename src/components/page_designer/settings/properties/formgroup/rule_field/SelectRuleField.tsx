@@ -1,5 +1,5 @@
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { RulesModal } from "~/components/page_designer/rules/RulesModal";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
@@ -18,10 +18,9 @@ interface SelectRuleFieldProps {
 
 export function SelectRuleField(props: SelectRuleFieldProps) {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const meta = {
     P: {

@@ -11,7 +11,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
@@ -26,9 +26,8 @@ export function LayoutTreeItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
@@ -46,7 +45,7 @@ export function LayoutTreeItem(
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
-      layoutStoreId,
+      formStoreVertex(),
       props.metaVertex,
       false,
       props.collapsedKeys,
@@ -65,7 +64,7 @@ export function LayoutTreeItem(
   };
 
   const handleDragLeave = () => {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       activeItem: null,
       position: null
     });
@@ -74,28 +73,28 @@ export function LayoutTreeItem(
   const handleDropEvent = async (e: DragEvent) => {
     await handleDrop(
       e,
-      layoutStoreId,
+      formStoreVertex(),
       graph,
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(layoutStoreId, graph, setGraph);
+    resetDragDropState(formStoreVertex(), graph, setGraph);
   };
 
   const handleClick = () => {
-    onLayoutItemClick(layoutStoreId, props.metaVertex.id, graph, setGraph);
+    onLayoutItemClick(formStoreVertex(), props.metaVertex.id, graph, setGraph);
   };
 
   const handleMouseOver = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: props.metaVertex.id
     });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: -1
     });
   };
@@ -143,7 +142,7 @@ export function LayoutTreeItem(
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
         onDragStart={(e) =>
-          handleDragStart(e, graph, setGraph, layoutStoreId, props.metaVertex)
+          handleDragStart(e, graph, setGraph, formStoreVertex(), props.metaVertex)
         }
         onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}

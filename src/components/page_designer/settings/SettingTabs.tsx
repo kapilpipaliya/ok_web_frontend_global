@@ -4,7 +4,7 @@ import { createMemo, For, type JSX, Show } from "solid-js";
 import { FormContext, FormStoreObject } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../context/LayoutContext";
 import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
@@ -28,7 +28,8 @@ export function SettingTabs() {
   const [graph, setGraph] = useGraph();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];

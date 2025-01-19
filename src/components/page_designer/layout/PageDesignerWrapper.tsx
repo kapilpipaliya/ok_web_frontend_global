@@ -12,6 +12,7 @@ import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
   PageLayoutObject,
+  useDesignerFormIdContext,
 } from "~/components/page_designer/context/LayoutContext";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
@@ -86,7 +87,8 @@ export function PageDesignerWrapper(): JSX.Element {
   };
 
   const layoutStore = () => graph.vertexes[initialStore.id].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <ZIndex>

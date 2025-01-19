@@ -11,17 +11,16 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { Label } from "../properties/formgroup/Label";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SEOFormGroupProperties() {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const vertexIds = createVertexIds();
 

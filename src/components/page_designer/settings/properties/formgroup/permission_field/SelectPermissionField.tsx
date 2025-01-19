@@ -1,5 +1,5 @@
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { Label } from "../Label";
@@ -14,10 +14,9 @@ interface SelectPermissionFieldProps {
 
 export function SelectPermissionField(props: SelectPermissionFieldProps) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const meta = {
     P: {
       class: "flex:1",

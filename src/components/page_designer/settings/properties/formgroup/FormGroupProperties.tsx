@@ -32,6 +32,7 @@ import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { PROPERTIES } from "../../../../styled/constants/constant";
 import {
   type PageLayoutObject,
+  useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
@@ -65,10 +66,9 @@ interface FormGroupPropertiesProps {
 
 export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const vertexIds = createVertexIds();
   const metaTxnId = generateNewTxnId(graph, setGraph);
@@ -93,7 +93,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For
-        each={moveClassToLast(propAttributes(), vertexIds, graph, layoutStore, formStoreVertex)}
+        each={moveClassToLast(propAttributes(), vertexIds, graph, formStoreVertex)}
       >
         {(meta) => (
           <PropertyField
@@ -299,14 +299,13 @@ function moveClassToLast(
   vertices: Vertex[],
   vertexIds: ReturnType<typeof createVertexIds>,
   graph: GraphInterface,
-  layoutStore: Accessor<PageLayoutObject>,
   formStoreVertex: Accessor<Vertex<FormStoreObject>>,
 ) {
   const otherVertices = vertices.filter(
     (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
   );
   const componentName = graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key;
-  const isForm = graph.vertexes[layoutStore().formId!]?.L[0] === "Form";
+  const isForm = formStoreVertex()?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
   const nonCssVertices = otherVertices.filter(

@@ -12,26 +12,24 @@ import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 
 export async function handleDrop(
   e: DragEvent,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   showErrorToast: (message: string) => void,
 ) {
   e.stopPropagation();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
-  if (!formStoreVertex()?.P.activeItem) { // layoutVertex
+  if (!formStoreVertex?.P.activeItem) { // layoutVertex
     showErrorToast("Active item not found when dropping");
     return;
   }
-  const toVertex = graph.vertexes[formStoreVertex()?.P.activeItem!];
+  const toVertex = graph.vertexes[formStoreVertex?.P.activeItem!];
   if (!toVertex) {
     showErrorToast("Target vertex not found when dropping");
     return;
   }
 
-  for (const vertexId of formStoreVertex()?.P.draggedVertexIds) {
+  for (const vertexId of formStoreVertex?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
 
     if (!fromVertex) {
@@ -43,7 +41,7 @@ export async function handleDrop(
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
 
-    if (!formStoreVertex()?.P.position) {
+    if (!formStoreVertex?.P.position) {
       showErrorToast("Position not found when dropping");
       return;
     }
@@ -51,14 +49,14 @@ export async function handleDrop(
     const layoutId = await handleDropAtPosition(
       graph,
       setGraph,
-      formStoreVertex()?.P.txnId,
-      graph.vertexes[formStoreVertex()?.P.formDataId!],
+      formStoreVertex?.P.txnId,
+      graph.vertexes[formStoreVertex?.P.formDataId!],
       fromVertex,
       toVertex,
-      formStoreVertex()?.P.position!,
+      formStoreVertex?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
         selectedId: layoutId as string,
         selectedComponent: -1
       });

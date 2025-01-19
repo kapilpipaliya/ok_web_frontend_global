@@ -12,7 +12,7 @@ import { onCompDragStart } from "./onCompDragStart";
 import { TreeItemContainer } from "../../settings/layout/TreeItemContainer";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { getCompChildren } from "./getCompChildren";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
@@ -41,8 +41,8 @@ export function ComponentItem(
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
@@ -91,7 +91,7 @@ export function ComponentItem(
   };
 
   const onDragEnd = () => {
-    resetDragDropState(layoutStoreId, graph, setGraph);
+    resetDragDropState(formStoreVertex(), graph, setGraph);
   };
   const children = createMemo(() => getCompChildren([props.child], props.edgeName, graph));
   return (
@@ -103,7 +103,7 @@ export function ComponentItem(
         onDragEnd={onDragEnd}
         onDragStart={(e) => {
           // props.setPreviewPageId(null);
-          return onCompDragStart(e, graph, setGraph, props.child.id, layoutStoreId, selectedComponents,
+          return onCompDragStart(e, graph, setGraph, props.child.id, formStoreVertex(), selectedComponents,
             setSelectedComponents);
         }
         }
@@ -165,7 +165,7 @@ export function ComponentItem(
               <div class="margin-left:auto">
                 <IconButton
                   icon="mdi:open-in-new"
-                  onClick={() => openInNewInternalTab(layoutStoreId, props.child, layoutStore, graph, setGraph)}
+                  onClick={() => openInNewInternalTab(layoutStoreId, props.child, graph, setGraph)}
                   size={18}
                 />
               </div>

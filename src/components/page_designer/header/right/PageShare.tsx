@@ -3,21 +3,20 @@ import { createEffect, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function ShareSection() {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   const [error, setError] = createSignal("");
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (access() === "everyone") {
@@ -26,7 +25,7 @@ export function ShareSection() {
   });
 
   const getLink = () => {
-    if (layoutStore()) {
+    if (formStoreVertex()) {
       const { hostname, port, protocol } = window.location;
       const formattedPort = port ? `:${port}` : "";
       const { id, L, P } = graph.vertexes[formStoreVertex()?.P.formDataId!];

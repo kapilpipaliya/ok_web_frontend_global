@@ -7,20 +7,19 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
 import { SimpleWithDismissButton } from "../../../../styled/SimpleModal";
-import { PageLayoutObject, useDesignerLayoutStore } from "../../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   const [selectedVariant, setSelectedVariant] = createSignal<null | Vertex>(null);
   const [selectedVariantToDelete, setSelectedVariantToDelete] =
     createSignal<null | Vertex>(null);
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const variants = createMemo(() => {
     if (formStoreVertex()?.P.formDataId) {
@@ -50,7 +49,7 @@ export function VariantsList() {
         incomingIds.push(graph.edges[edge].S);
       }
     }
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       multiHighlight: incomingIds
     });
   };
@@ -68,7 +67,7 @@ export function VariantsList() {
   };
 
   const unhighlightVariant = () => {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       multiHighlight: []
     });
   };

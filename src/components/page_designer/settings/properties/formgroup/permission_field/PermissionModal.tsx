@@ -5,7 +5,7 @@ import { Portal } from "solid-js/web";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { generateTableInputMeta } from "~/components/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/components/page_designer/rules/Overlay";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -16,8 +16,6 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
-  // const [graph, setGraph] = useGraph();
-  // const layoutStoreId = useDesignerLayoutStore();
   const metaAttribute = klona(
     FormMetaData.Form.attributes.find((x) => x.key === "Perm")!,
   );
@@ -40,10 +38,9 @@ export function PermissionModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
-  const layoutStoreId = useDesignerLayoutStore();
+  const formStoreId = useDesignerFormIdContext();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ??

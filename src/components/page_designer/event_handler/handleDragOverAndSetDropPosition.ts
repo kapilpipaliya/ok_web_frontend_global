@@ -11,7 +11,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
   collapsedKeys: Accessor<Id[]> | boolean,
@@ -20,10 +20,7 @@ export function handleDragOverAndSetDropPosition(
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
 ) {
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem: layoutVertex.id, position: null });
+  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem: layoutVertex.id, position: null });
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
@@ -32,7 +29,7 @@ export function handleDragOverAndSetDropPosition(
     | "right"
     | null;
   if (!position) {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem: null, position: null });
+    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem: null, position: null });
     return;
   }
 
@@ -61,7 +58,7 @@ export function handleDragOverAndSetDropPosition(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = graph.vertexes[formStoreVertex()?.P.draggedVertexIds[0]];
+  const fromVertex = graph.vertexes[formStoreVertex?.P.draggedVertexIds[0]];
   const toVertexId = activeItem;
   if (
     !validateDragOver(
@@ -75,5 +72,5 @@ export function handleDragOverAndSetDropPosition(
   ) {
     return;
   }
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeItem, position });
+  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem, position });
 }

@@ -12,7 +12,6 @@ import {FormStoreObject} from "~/components/form/context/FormContext";
 function DroppableWrapper(props: { formId: string; children: any }) {
   const [graph, setGraph] = useGraph();
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
-  const layoutStoreId = useDesignerLayoutStore();
   // const { showErrorToast } = useToast();
 
   const formStoreVertex = () => graph.vertexes[props.formId] as Vertex<FormStoreObject>;
@@ -39,13 +38,13 @@ function DroppableWrapper(props: { formId: string; children: any }) {
 
         await handleDrop(
           e,
-          layoutStoreId,
+          formStoreVertex(),
           graph,
           setGraph,
           // showErrorToast
           error => console.error(error)
         );
-        resetDragDropState(layoutStoreId, graph, setGraph);
+        resetDragDropState(formStoreVertex(), graph, setGraph);
       }}
     >
       {props.children}
@@ -70,9 +69,8 @@ export default function PageShareView() {
 
   channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, formId, formId);
 
-  const layoutStore = () => graph.vertexes[layoutStoreId]?.P as PageLayoutObject || {};
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-x
+  const formStoreVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
+
   return (
     <Show when={formStoreVertex()}>
       <DesignerLayoutStoreContext.Provider value={layoutStoreId!}>

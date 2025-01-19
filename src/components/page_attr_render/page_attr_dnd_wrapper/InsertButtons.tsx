@@ -2,7 +2,7 @@ import { createSignal, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -12,7 +12,6 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function InsertButtons(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   let insertBeforeButtonsRef: HTMLElement;
   let insertAfterButtonsRef: HTMLElement;
   let insertInsideButtonsRef: HTMLElement;
@@ -20,8 +19,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
   const [showAfterMenu, setShowAfterMenu] = createSignal(false);
   const [showInsideMenu, setShowInsideMenu] = createSignal(false);
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <>

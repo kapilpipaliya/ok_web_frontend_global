@@ -4,7 +4,7 @@ import { reconcile } from "solid-js/store";
 import { type GraphInterface, type Id, useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext } from "../context/LayoutContext";
 
 import { SimpleWithDismissButton } from "../../styled/SimpleModal";
 import { useDesignerLayoutStore } from "../context/LayoutContext";
@@ -33,11 +33,10 @@ const AttributeList = (
 );
 
 export function DeleteAttributeDialog() {
-  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const nameKeyAttributes = () =>
     getAttributeNames(graph, formStoreVertex()?.P.usedAttrsInNameKeys);
@@ -45,7 +44,7 @@ export function DeleteAttributeDialog() {
     getAttributeNames(graph, formStoreVertex()?.P.usedAttrsInUniqueConstraints);
 
   const handleClose = () => {
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       usedAttrsInRules: {},
       usedAttrsInNameKeys: [],
       usedAttrsInUniqueConstraints: [],

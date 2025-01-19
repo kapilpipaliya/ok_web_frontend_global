@@ -4,7 +4,7 @@ import { getChildrenAttrs } from "~/components/page_designer/functions/getChildr
 import { useToast } from "~/components/styled/Toast";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
@@ -14,12 +14,12 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 export function Step(
   props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[] }>,
 ) {
-  const layoutStoreId = useDesignerLayoutStore();
+  // TODO: This formId may be wrong, get from formContext instead.
+  const formStoreId = useDesignerFormIdContext();
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const steps = createMemo<Vertex[]>(() =>
     getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex()?.P.formDataId!]),
@@ -29,7 +29,7 @@ export function Step(
     deleteStep(
       graph,
       setGraph,
-      layoutStoreId,
+      formStoreVertex()!,
       props.steps,
       props.step,
       showErrorToast,
@@ -42,7 +42,7 @@ export function Step(
       moveStep(
         graph,
         setGraph,
-        layoutStoreId,
+        formStoreVertex(),
         props.steps,
         props.index(),
         props.index() - 1,
@@ -55,7 +55,7 @@ export function Step(
       moveStep(
         graph,
         setGraph,
-        layoutStoreId,
+        formStoreVertex(),
         props.steps,
         props.index(),
         props.index() + 1,
@@ -73,7 +73,7 @@ export function Step(
     >
       <button
         class="flex align-items:center; gap:0.5rem; width:100%"
-        onClick={() => mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { activeStepId: props.step.id })}
+        onClick={() => mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, { activeStepId: props.step.id })}
         type="button"
       >
         <span style="display:flex; align-items:center;">

@@ -1,16 +1,15 @@
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { OpenComponentURL } from "../../OpenComponentURL";
 
 export function PropertiesHeader() {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const getComponentName = () =>
     formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1

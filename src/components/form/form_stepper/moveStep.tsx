@@ -10,13 +10,11 @@ import { FormStoreObject } from "../context/FormContext";
 export function moveStep(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   steps: Vertex[],
   fromIndex: number,
   toIndex: number,
 ) {
-  const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
-  const formStoreVertex = graph.vertexes[layoutStore.formId!] as Vertex<FormStoreObject>;
   const fromVertex = steps[fromIndex];
   const toVertex = steps[toIndex];
   const position = toIndex < fromIndex ? "before" : "after";

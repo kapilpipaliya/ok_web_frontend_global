@@ -9,15 +9,12 @@ export function handleDragStart(
   e: DragEvent,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStoreId: Id,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
 ) {
   e.stopPropagation();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
-  mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, {
-    draggedVertexIds: [...(formStoreVertex()?.P.draggedVertexIds || []), layoutVertex.id],
+  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
+    draggedVertexIds: [...(formStoreVertex?.P.draggedVertexIds || []), layoutVertex.id],
   });
 }

@@ -19,7 +19,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
@@ -27,11 +27,10 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
 ) {
-  const layoutStoreId = useDesignerLayoutStore();
   const [graph] = useGraph();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const activeItemChanged = createSelector(() => formStoreVertex()?.P.activeItem);

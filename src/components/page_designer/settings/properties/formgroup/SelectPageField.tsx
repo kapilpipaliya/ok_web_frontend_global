@@ -1,5 +1,5 @@
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
@@ -15,11 +15,10 @@ export function SelectPageField(
   }>,
 ) {
   const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     return (

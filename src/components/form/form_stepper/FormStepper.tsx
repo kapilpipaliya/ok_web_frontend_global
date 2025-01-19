@@ -4,7 +4,7 @@ import { createMemo, For, Show } from "solid-js";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";
@@ -12,10 +12,9 @@ import type { PageLayoutObject } from "../../page_designer/context/LayoutContext
 import type { FormStoreObject } from "../context/FormContext";
 
 export function FormStepper() {
-  const layoutStoreId = useDesignerLayoutStore();
+  const formStoreId = useDesignerFormIdContext();
   const [graph, setGraph] = useGraph();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const formDataId = () => formStoreVertex()?.P?.formDataId;
 
   const steps = createMemo<Vertex[]>(() =>
@@ -27,7 +26,7 @@ export function FormStepper() {
     addStepBefore(
       graph,
       setGraph,
-      layoutStoreId,
+      formStoreVertex(),
       graph.vertexes[formDataId()!],
       step,
     );
@@ -38,7 +37,7 @@ export function FormStepper() {
     addStepAfter(
       graph,
       setGraph,
-      layoutStoreId,
+      formStoreVertex()!,
       graph.vertexes[formDataId()!],
       step,
     );

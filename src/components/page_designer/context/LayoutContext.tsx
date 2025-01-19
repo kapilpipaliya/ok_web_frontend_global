@@ -23,7 +23,12 @@ export function getInitialDesignerLayoutStore() {
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
 export const DesignerLayoutStoreContext = createContext<Id>();
+export const DesignerFormIdContext = createContext<Id>();
 
 export function useDesignerLayoutStore() {
   return useContext(DesignerLayoutStoreContext)!;
+}
+
+export function useDesignerFormIdContext() {
+  return useContext(DesignerFormIdContext);
 }

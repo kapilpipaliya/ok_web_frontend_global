@@ -3,7 +3,7 @@ import { Show } from "solid-js";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 import { useGraph, Vertex } from "~/lib/graph/graph";
-import { PageLayoutObject } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
 import { MiddleSectionButtons } from "../middle/MiddleSectionButtons";
@@ -21,7 +21,8 @@ export function HeaderRow() {
   const layoutStoreId = useDesignerLayoutStore();
   
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <header class="flex bg:#f3f3f4 jc:space-between r:7">
@@ -46,7 +47,7 @@ export function HeaderRow() {
           <RightToggleButton />
         </Show>
         <Show when={formStoreVertex()}>
-          <FormContext.Provider value={layoutStore().formId!}>
+          <FormContext.Provider value={formStoreId!}>
             <SaveIconButton />
           </FormContext.Provider>
         </Show>

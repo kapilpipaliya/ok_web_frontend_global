@@ -17,7 +17,7 @@ import { getBoundingRectChildren } from "~/components/page_designer/functions/ge
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
@@ -29,10 +29,9 @@ interface PageAttrDnDWrapperProps {
   item: Vertex;
 }
 export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
-  const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const [previewStore] = usePreviewContext();
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
@@ -47,25 +46,25 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
-    onLayoutItemClick(layoutStoreId, props.item.id, graph, setGraph);
+    onLayoutItemClick(formStoreVertex(), props.item.id, graph, setGraph);
   };
 
   // no need debounde, it is called too less
   const handleMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { hoverId: props.item.id });
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { hoverId: props.item.id });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, layoutStore().formId!, graph, setGraph, { hoverId: -1 });
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { hoverId: -1 });
   };
 
   // debounce is giving error, node not found when running element.currentTarget and we must need it
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
-      layoutStoreId,
+      formStoreVertex(),
       props.item,
       previewStore.isDesignMode,
       false,
@@ -79,19 +78,19 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const handleDropEvent = async (e: DragEvent) => {
     await handleDrop(
       e,
-      layoutStoreId,
+      formStoreVertex(),
       graph,
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(layoutStoreId, graph, setGraph);
+    resetDragDropState(formStoreVertex(), graph, setGraph);
   };
 
   return (
     <div // NOSONAR
       onClick={handleClick}
       onDragEnter={handleDragOverEvent}
-      onDragLeave={() => handleDragLeave(graph, setGraph, layoutStoreId)}
+      onDragLeave={() => handleDragLeave(graph, setGraph, formStoreVertex().id)}
       onDragOver={handleDragOverEvent}
       onDrop={handleDropEvent}
       onMouseEnter={handleMouseEnter}

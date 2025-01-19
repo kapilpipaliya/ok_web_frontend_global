@@ -4,18 +4,17 @@ import { createSelector, Match, Switch } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
-  const layoutStoreId = useDesignerLayoutStore();
   const [graph] = useGraph();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);

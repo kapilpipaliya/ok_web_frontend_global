@@ -1,7 +1,7 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -10,7 +10,6 @@ export function RightToggleButton() {
   const layoutStoreId = useDesignerLayoutStore();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton

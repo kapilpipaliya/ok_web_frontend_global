@@ -2,7 +2,7 @@ import { createSignal, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
@@ -24,11 +24,10 @@ export function SelectPermField(
 ) {
   const [showDropdown, setShowDropdown] = createSignal(false);
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
   let buttonRef: HTMLInputElement;
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     const [isOpenRule, setIsOpenRule] = createSignal(false);

@@ -3,14 +3,13 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function ParentButton(props: { item: Vertex }) {
   const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-
-  const layoutStore = () => graph.vertexes[layoutStoreId].P;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formStore[0]];
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton
@@ -22,7 +21,7 @@ export function ParentButton(props: { item: Vertex }) {
           return;
         }
         onLayoutItemClick(
-          layoutStoreId,
+          formStoreVertex()!,
           parentResult.vertex!.id,
           graph,
           setGraph,

@@ -10,7 +10,7 @@ import { FormStoreObject } from "../context/FormContext";
 export function deleteStep(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   steps: Vertex[],
   item: Vertex,
   showErrorToast: (message: string) => void,
@@ -21,8 +21,6 @@ export function deleteStep(
     return;
   }
 
-  const layoutStore = graph.vertexes[layoutStoreId].P as Partial<PageLayoutObject>;
-  const formStoreVertex = graph.vertexes[layoutStore.formId!] as Vertex<FormStoreObject>;
   const txnId = formStoreVertex?.P?.txnId || 0;
 
   const currentStep = steps.findIndex((step) => step.id === item.id);
@@ -35,7 +33,7 @@ export function deleteStep(
   }
 
   deleteLayoutAttr(
-    layoutStore.id!,
+    formStoreVertex,
     setGraph,
     item,
     graph,

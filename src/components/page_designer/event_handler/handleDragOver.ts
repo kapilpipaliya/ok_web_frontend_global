@@ -11,7 +11,7 @@ import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosi
 
 export function handleDragOver(
   e: DragEvent,
-  layoutStoreId: string,
+  formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
   collapsedKeys: Accessor<Id[]> | boolean,
@@ -22,12 +22,10 @@ export function handleDragOver(
   expandChildren?: (position: string) => void,
 ) {
   e.stopPropagation();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   handleDragOverAndSetDropPosition(
     e,
-    layoutStoreId,
+    formStoreVertex,
     layoutVertex,
     isDesignMode,
     collapsedKeys,
@@ -37,15 +35,15 @@ export function handleDragOver(
     formData,
   );
 
-  if (!formStoreVertex()?.P.position) {
+  if (!formStoreVertex?.P.position) {
     // Don't allow drag and drop
     return;
   }
-  expandChildren?.(formStoreVertex()?.P.position!);
+  expandChildren?.(formStoreVertex?.P.position!);
 
-  for (const vertexId of formStoreVertex()?.P.draggedVertexIds) {
+  for (const vertexId of formStoreVertex?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
-    const toVertexId = formStoreVertex()?.P.activeItem!;
+    const toVertexId = formStoreVertex?.P.activeItem!;
     if (!fromVertex) {
       // Don't allow drag and drop
       return;
@@ -58,7 +56,7 @@ export function handleDragOver(
         fromVertex,
         toVertexId,
         formData,
-        formStoreVertex()?.P.position!,
+        formStoreVertex?.P.position!,
       )
     ) {
       // Don't allow drag and drop
