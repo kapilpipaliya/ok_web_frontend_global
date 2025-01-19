@@ -11,17 +11,13 @@ export const IFramePreview = (props: {formId: string}) => {
     setTimeout(() => {
       const channel = getChannel(props.formId);
       channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, props.formId);
-      channel.postMessage(JSON.stringify({ graph }));
+      channel.postMessage(JSON.stringify({ graph: {...graph, broadcastChannels: []} }));
     }, 1000);
   };
 
   setGraph("broadcastChannels", (channels) => channels.includes(props.formId) ? channels : [...channels, props.formId]);
-  console.log('add', props.formId);
-  createEffect(() => {
-    console.log('effect', props.formId);
-  })
+
   onCleanup(() => {
-    console.log('remove', props.formId)
     setGraph("broadcastChannels", (channels) => channels.filter(id => id !== props.formId));
   });
 
