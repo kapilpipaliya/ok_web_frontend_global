@@ -26,10 +26,9 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   createEffect(async () => {
     if (props.rootLevel) {
-      const result = await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'", undefined, { skipExisting: true });
-      setRootVertexes(result?.result || []);
       // Fetch children level Components
-      await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'<-'ParentComponent*'", undefined, { skipExisting: true });
+      const result = await fetchAndSetGraphData(graph, setGraph, "g:'ALL_ROOT_LEVEL_COMPONENTS'<-'ParentComponent*'", undefined, { skipExisting: true });
+      setRootVertexes(Object.values(result?.graph?.vertexes ?? {}).filter(vertex => !vertex.OUT || (Object.keys(vertex.OUT).length === 0)) || []);
     } else {
       // children level Components are already fetched when page is loaded.
       if (formStoreVertex()?.P?.formDataId) {
@@ -65,7 +64,7 @@ export function FormElementTabs() {
     { collection: "ErrorPages", title: "Error Pages" },
     { collection: "EmailTemplate", title: "Email Template" },
   ];
-  const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
+  const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[1]);
 
   const TabList = () => (
     <UlContainer>

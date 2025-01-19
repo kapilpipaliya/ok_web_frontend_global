@@ -70,10 +70,10 @@ export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: 
 
 export function broadcastToAllChannels(channels: string[], skipChannel: string, message: any) {
   const messageString = JSON.stringify(message);
-  channels.forEach((channelName) => {
+  for (const channelName of channels) {
     if (channelName !== skipChannel) {
       const channel = getChannel(channelName);
       channel.postMessage(messageString);
     }
-  });
+  }
 }

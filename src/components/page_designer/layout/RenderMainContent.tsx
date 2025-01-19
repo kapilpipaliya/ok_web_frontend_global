@@ -139,7 +139,7 @@ function PageViewComponent() {
               view={vertex()?.P.view}
               class={isActive() ? '' : 'hidden'}
             >
-              <IFramePreview />
+              <IFramePreview  formId={form.formId} />
               {/* <PageView
                 isDesignMode={true}
                 isNoPermissionCheck={true}
