@@ -17,7 +17,10 @@ export function onLayoutItemClick(
 ) {
   batch(() => {
     mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
-      selectedId: layoutVertexId ?? -1
+      selectedId: layoutVertexId ?? -1,
+      // clear the drag state
+      activeItem: null,
+      position: null,
     });
 
     const componentVertex = getComponentFromLayoutRow(
