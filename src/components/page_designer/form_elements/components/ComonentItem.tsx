@@ -41,6 +41,7 @@ export function ComponentItem(
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
@@ -91,7 +92,7 @@ export function ComponentItem(
   };
 
   const onDragEnd = () => {
-    resetDragDropState(formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
   };
   const children = createMemo(() => getCompChildren([props.child], props.edgeName, graph));
   return (
@@ -103,7 +104,7 @@ export function ComponentItem(
         onDragEnd={onDragEnd}
         onDragStart={(e) => {
           // props.setPreviewPageId(null);
-          return onCompDragStart(e, graph, setGraph, props.child.id, formStoreVertex(), selectedComponents,
+          return onCompDragStart(e, graph, setGraph, props.child.id, layoutStoreVertex(), selectedComponents,
             setSelectedComponents);
         }
         }

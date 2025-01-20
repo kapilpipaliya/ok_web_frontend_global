@@ -11,6 +11,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,
+  layoutStoreVertex: Vertex<PageLayoutObject>,
   formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
@@ -58,7 +59,7 @@ export function handleDragOverAndSetDropPosition(
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = graph.vertexes[formStoreVertex?.P.draggedVertexIds[0]];
+  const fromVertex = graph.vertexes[layoutStoreVertex?.P.draggedVertexIds[0]];
   const toVertexId = activeItem;
   if (
     !validateDragOver(

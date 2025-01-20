@@ -23,7 +23,6 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     mounted: false,
     txnId: generateNewTxnId(graph, setGraph),
     activeItem: null as Id | null | number,
-    draggedVertexIds: [] as Id[],
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     multiHighlight: [] as Array<Id | number>,

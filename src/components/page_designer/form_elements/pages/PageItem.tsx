@@ -26,6 +26,7 @@ export function PageItem(
 ) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
@@ -64,30 +65,30 @@ export function PageItem(
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { draggedVertexIds: [] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, { draggedVertexIds: [] });
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { draggedVertexIds: [...formStoreVertex()?.P.draggedVertexIds, ...dataTransfer.map(v => v.id)] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, { draggedVertexIds: [...layoutStoreVertex()?.P.draggedVertexIds, ...dataTransfer.map(v => v.id)] });
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { draggedVertexIds: [props.child.id] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, { draggedVertexIds: [props.child.id] });
     onClickAddComponent(
       graph,
       setGraph,
       formStoreVertex()?.P.txnId,
-      graph.vertexes[formStoreVertex()?.P.draggedVertexIds[0]],
+      graph.vertexes[layoutStoreVertex()?.P.draggedVertexIds[0]],
       formStoreVertex()?.P || {},
       formStoreVertex()?.P.selectedId !== -1
         ? formStoreVertex()?.P.selectedId
         : formStoreVertex()?.P.formDataId,
     );
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { draggedVertexIds: [] });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, { draggedVertexIds: [] });
   };
 
   const openInNewInternalTabClick = () => {

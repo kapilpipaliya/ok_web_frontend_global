@@ -30,6 +30,8 @@ interface PageAttrDnDWrapperProps {
 }
 export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
@@ -64,6 +66,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
+      layoutStoreVertex(),
       formStoreVertex(),
       props.item,
       previewStore.isDesignMode,
@@ -78,12 +81,13 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const handleDropEvent = async (e: DragEvent) => {
     await handleDrop(
       e,
+      layoutStoreVertex(),
       formStoreVertex(),
       graph,
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
   };
 
   return (

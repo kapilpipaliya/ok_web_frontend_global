@@ -9,13 +9,13 @@ export function onCompDragStart(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   childId: string,
-  formStoreVertex: Vertex<FormStoreObject>,
+  layoutStoreVertex: Vertex<PageLayoutObject>,
   selectedComponents?: () => Set<Vertex>,
   setSelectedComponents?: (updater: (prev: Set<Vertex>) => Set<Vertex>) => void,
 ) {
   e.stopPropagation();
 
-  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
+  mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
     draggedVertexIds: [],
   });
   if (!graph.vertexes[childId]) {
@@ -28,8 +28,8 @@ export function onCompDragStart(
       ? Array.from(selectedComponents())
       : [graph.vertexes[childId]];
 
-  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
-    draggedVertexIds: [...formStoreVertex.P.draggedVertexIds, ...draggedItems.map(v => v.id)],
+  mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
+    draggedVertexIds: [...layoutStoreVertex.P.draggedVertexIds, ...draggedItems.map(v => v.id)],
   });
 
   if (setSelectedComponents) {

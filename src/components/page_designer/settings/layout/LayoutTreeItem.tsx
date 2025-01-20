@@ -26,6 +26,9 @@ export function LayoutTreeItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
@@ -45,6 +48,7 @@ export function LayoutTreeItem(
   const handleDragOverEvent = (e: DragEvent) => {
     handleDragOver(
       e,
+      layoutStoreVertex(),
       formStoreVertex(),
       props.metaVertex,
       false,
@@ -73,12 +77,13 @@ export function LayoutTreeItem(
   const handleDropEvent = async (e: DragEvent) => {
     await handleDrop(
       e,
+      layoutStoreVertex(),
       formStoreVertex(),
       graph,
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
   };
 
   const handleClick = () => {
@@ -142,7 +147,7 @@ export function LayoutTreeItem(
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
         onDragStart={(e) =>
-          handleDragStart(e, graph, setGraph, formStoreVertex(), props.metaVertex)
+          handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.metaVertex)
         }
         onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}

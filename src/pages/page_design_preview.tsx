@@ -13,7 +13,8 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
   const [graph, setGraph] = useGraph();
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   // const { showErrorToast } = useToast();
-
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreVertex = () => graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
 
   return (
@@ -38,13 +39,14 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
 
         await handleDrop(
           e,
+          layoutStoreVertex(),
           formStoreVertex(),
           graph,
           setGraph,
           // showErrorToast
           error => console.error(error)
         );
-        resetDragDropState(formStoreVertex(), graph, setGraph);
+        resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
       }}
     >
       {props.children}

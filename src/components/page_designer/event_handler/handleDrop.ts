@@ -12,6 +12,7 @@ import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 
 export async function handleDrop(
   e: DragEvent,
+  layoutStoreVertex: Vertex<PageLayoutObject>,
   formStoreVertex: Vertex<FormStoreObject>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -29,7 +30,7 @@ export async function handleDrop(
     return;
   }
 
-  for (const vertexId of formStoreVertex?.P.draggedVertexIds) {
+  for (const vertexId of layoutStoreVertex?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
 
     if (!fromVertex) {

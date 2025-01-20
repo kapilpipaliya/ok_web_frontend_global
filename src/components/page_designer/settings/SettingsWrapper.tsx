@@ -9,7 +9,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 export function SettingsWrapper() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
   return (
     <aside

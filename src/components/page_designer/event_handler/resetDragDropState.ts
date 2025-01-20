@@ -9,15 +9,20 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function resetDragDropState(
+  layoutStoreVertex: Vertex<PageLayoutObject>,
+  // we dont have accesss to the form store vertex here, remove this param
   formStoreVertex: Vertex<FormStoreObject>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   batch(() => {
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
-      activeItem: null,
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
       draggedVertexIds: [],
-      position: null,
     });
+    // we dont have accesss to the form store vertex here
+    // mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
+    //   activeItem: null,
+    //   position: null,
+    // });
   });
 }

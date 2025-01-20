@@ -11,6 +11,7 @@ import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosi
 
 export function handleDragOver(
   e: DragEvent,
+  layoutStoreVertex: Vertex<PageLayoutObject>,
   formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
@@ -25,6 +26,7 @@ export function handleDragOver(
 
   handleDragOverAndSetDropPosition(
     e,
+    layoutStoreVertex,
     formStoreVertex,
     layoutVertex,
     isDesignMode,
@@ -41,7 +43,7 @@ export function handleDragOver(
   }
   expandChildren?.(formStoreVertex?.P.position!);
 
-  for (const vertexId of formStoreVertex?.P.draggedVertexIds) {
+  for (const vertexId of layoutStoreVertex?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
     const toVertexId = formStoreVertex?.P.activeItem!;
     if (!fromVertex) {

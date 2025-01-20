@@ -36,6 +36,8 @@ export function ResizableContainer(
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const { showErrorToast } = useToast();
 
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
@@ -96,8 +98,8 @@ export function ResizableContainer(
       position: "center"
     });
 
-    await handleDrop(e, formStoreVertex(), graph, setGraph, showErrorToast);
-    resetDragDropState(formStoreVertex(), graph, setGraph);
+    await handleDrop(e, layoutStoreVertex(), formStoreVertex(), graph, setGraph, showErrorToast);
+    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
   };
 
   return (

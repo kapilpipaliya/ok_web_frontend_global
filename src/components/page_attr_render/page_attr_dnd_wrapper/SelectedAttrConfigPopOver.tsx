@@ -4,7 +4,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
@@ -24,8 +24,8 @@ export function SelectedAttrConfigPopOver(
 ) {
   const zIndex = useZIndex();
 
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
   const [graph, setGraph] = useGraph();
   const getComponentName = () =>
@@ -41,7 +41,7 @@ export function SelectedAttrConfigPopOver(
           draggable={true}
           icon="material-symbols:drag-indicator"
           onClick={() => {}}
-          onDragStart={(e) => handleDragStart(e, graph, setGraph, formStoreVertex(), props.item)}
+          onDragStart={(e) => handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)}
           size={20}
           title="Move"
         />
