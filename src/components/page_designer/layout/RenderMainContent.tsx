@@ -25,7 +25,7 @@ import { isDisabledTxn } from '~/lib/graph/transaction/isDisabledTxn';
 function FormElements() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
   return (
     <Show
       fallback={
@@ -56,8 +56,7 @@ function FormElements() {
 function TabBar() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreVertex = () => graph.vertexes[useDesignerFormIdContext()!] as Vertex<FormStoreObject>;
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
   const handleClose = (formId: string) => {
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
@@ -124,7 +123,7 @@ function TabBar() {
 function PageViewComponent() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
   const formStoreVertex = (formId: string) => graph.vertexes[formId] as Vertex<FormStoreObject>;
 
   return (
@@ -139,7 +138,7 @@ function PageViewComponent() {
               view={vertex()?.P.view}
               class={isActive() ? '' : 'hidden'}
             >
-              <IFramePreview  formStoreId={pageInfo.formId} />
+              <IFramePreview formStoreId={pageInfo.formId} />
               {/* <PageView
                 isDesignMode={true}
                 isNoPermissionCheck={true}
@@ -156,7 +155,7 @@ function PageViewComponent() {
 function Settings() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
   return (
     <Show
       fallback={
