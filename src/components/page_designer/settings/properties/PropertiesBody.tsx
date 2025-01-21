@@ -1,4 +1,5 @@
 import { createEffect, createMemo, createSignal, For, Match, on, Show, Switch } from "solid-js";
+import { MonacoEditor } from 'solid-monaco';
 
 import { JsonEditorField } from "~/components/fields/JsonEditorField";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
@@ -13,6 +14,30 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { evalExpression } from "~/lib/expression_eval";
+
+
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+// import onigasm from 'onigasm/lib/onigasm.wasm?url';
+
+window.MonacoEnvironment = {
+  getWorker(_moduleId: unknown, label: string) {
+    switch (label) {
+      case 'css':
+        return new cssWorker();
+      case 'json':
+        return new jsonWorker();
+      case 'typescript':
+      case 'javascript':
+        return new tsWorker();
+      default:
+        return new editorWorker();
+    }
+  },
+  // onigasm,
+};
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -273,29 +298,22 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       setIsFunctionValid(false);
     }
   };
-
   return (
     <label class="mt:5">
       Other Props (JavaScript Function)
-      <textarea
+      <MonacoEditor
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
-        onChange={(e) => evaluateOtherProps(e.currentTarget.value)}
-        placeholder={`Enter JavaScript function body here:
-access following variables in the args:
-  data: Vertex;
-  evalExpression: (expression: string, options: object) => any;
-  meta: Vertex;
-  onChange: (value: any) => void;
-  owner: Owner;
-  parentItems: PageRenderStore[];
-  parentMeta: Vertex;
-  readOnly: boolean | null | undefined;
-  ref: Accessor<HTMLDivElement | null>;
-  repeaterContext: Record<string | symbol, any>;
-  runWithOwner: <T>(fn: () => T) => T | undefined;
-  runWithParentOwner: <T>(fn: () => T) => T | undefined;
-`}
-        style={{ height: "200px" }}
+        language="javascript"
+        onChange={(value) => evaluateOtherProps(value)}
+        height="200px"
+        options={{
+          minimap: { enabled: false },
+          lineNumbers: "off",
+          glyphMargin: false,
+          folding: false,
+          lineDecorationsWidth: 0,
+          lineNumbersMinChars: 0,
+        }}
         value={graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? ""}
       />
       {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
