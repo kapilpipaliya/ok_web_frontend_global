@@ -4,7 +4,7 @@ import { createSignal, For, type Setter, Show } from "solid-js";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/context/FormContext";
 import { PageView } from "~/components/page_attr_render/PageView";
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { DesignerFormIdContext, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { useGraph, Vertex } from "~/lib/graph/graph";
@@ -183,19 +183,25 @@ function Settings() {
 
 function PropertiesContent() {
   const [graph] = useGraph();
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
   return (
-    <Show
-      when={
-        formStoreVertex()?.P &&
-        formStoreVertex()?.P.selectedComponent !== -1 &&
-        graph.vertexes[formStoreVertex()?.P.selectedId]
-      }
-    >
-      <FormContext.Provider value={useDesignerFormIdContext()!}>
-        <PropertiesWrapper />
-      </FormContext.Provider>
+    <Show when={formStoreVertex()?.id} keyed>
+      <Show
+        when={
+          formStoreVertex()?.P &&
+          formStoreVertex()?.P.selectedComponent !== -1 &&
+          graph.vertexes[formStoreVertex()?.P.selectedId] &&
+          graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
+        }
+      >
+        <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+          <FormContext.Provider value={formStoreVertex().id}>
+            <PropertiesWrapper />
+          </FormContext.Provider>
+        </DesignerFormIdContext.Provider>
+      </Show>
     </Show>
   );
 }
@@ -275,7 +281,7 @@ export function ResizableAltKey() {
           initialSize={sizes()[2] ?? "350px"}
           minSize={"200px"}
         >
-          <Show
+          {/* <Show
             fallback={
               <div class="bl:1|solid|lightgrey pl:8 pt:8">
                 Element is not selected
@@ -286,13 +292,13 @@ export function ResizableAltKey() {
               graph.vertexes[formStoreVertex()?.P.selectedId] &&
               graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
-          >
+          > */}
             <div
               class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
             >
               <PropertiesContent />
             </div>
-          </Show>
+          {/* </Show> */}
         </Resizable.Panel>
         <Resizable.Handle
           aria-label="Resize Handle"
