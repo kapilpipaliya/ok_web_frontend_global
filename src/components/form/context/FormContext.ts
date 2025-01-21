@@ -22,12 +22,9 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     isPreview: false,
     mounted: false,
     txnId: generateNewTxnId(graph, setGraph),
-    activeItem: null as Id | null | number,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     multiHighlight: [] as Array<Id | number>,
-    // this propes may required on preview too
-    position: null as "after" | "before" | "center" | "left" | "right" | null,
     selectedComponent: -1 as Id | number,
     selectedId: -1 as Id | number,
 

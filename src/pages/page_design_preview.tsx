@@ -32,7 +32,7 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
       }}
       onDrop={async (e) => {
         setIsDraggingOver(false);
-        mergeVertexProperties<FormStoreObject>(0, props.formStoreId, graph, setGraph, {
+        mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
           activeItem: formStoreVertex()?.P.formDataId,
           position: "center"
         });
@@ -46,7 +46,7 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
           // showErrorToast
           error => console.error(error)
         );
-        resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
+        resetDragDropState(layoutStoreVertex(), graph, setGraph);
       }}
     >
       {props.children}

@@ -2,7 +2,6 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -18,11 +17,7 @@ export function onLayoutItemClick(
   batch(() => {
     mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
       selectedId: layoutVertexId ?? -1,
-      // clear the drag state
-      activeItem: null,
-      position: null,
     });
-
     const componentVertex = getComponentFromLayoutRow(
       layoutVertexId,
       graph,

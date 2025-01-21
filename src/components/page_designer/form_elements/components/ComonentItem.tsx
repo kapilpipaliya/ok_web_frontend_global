@@ -92,7 +92,7 @@ export function ComponentItem(
   };
 
   const onDragEnd = () => {
-    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
   const children = createMemo(() => getCompChildren([props.child], props.edgeName, graph));
   return (

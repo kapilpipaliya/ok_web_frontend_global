@@ -37,15 +37,15 @@ export function handleDragOver(
     formData,
   );
 
-  if (!formStoreVertex?.P.position) {
+  if (!layoutStoreVertex?.P.position) {
     // Don't allow drag and drop
     return;
   }
-  expandChildren?.(formStoreVertex?.P.position!);
+  expandChildren?.(layoutStoreVertex?.P.position!);
 
   for (const vertexId of layoutStoreVertex?.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
-    const toVertexId = formStoreVertex?.P.activeItem!;
+    const toVertexId = layoutStoreVertex?.P.activeItem!;
     if (!fromVertex) {
       // Don't allow drag and drop
       return;
@@ -58,7 +58,7 @@ export function handleDragOver(
         fromVertex,
         toVertexId,
         formData,
-        formStoreVertex?.P.position!,
+        layoutStoreVertex?.P.position!,
       )
     ) {
       // Don't allow drag and drop

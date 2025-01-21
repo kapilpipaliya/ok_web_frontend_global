@@ -87,14 +87,14 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
 
   return (
     <div // NOSONAR
       onClick={handleClick}
       onDragEnter={handleDragOverEvent}
-      onDragLeave={() => handleDragLeave(graph, setGraph, formStoreVertex().id)}
+      onDragLeave={() => handleDragLeave(graph, setGraph, layoutStoreId)}
       onDragOver={handleDragOverEvent}
       onDrop={handleDropEvent}
       onMouseEnter={handleMouseEnter}

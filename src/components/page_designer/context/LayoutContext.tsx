@@ -11,6 +11,8 @@ export function getInitialDesignerLayoutStore() {
     id: uuidv7(),
     openedFormIds: [] as {formId: Id, label: string, dataId: Id}[],
     draggedVertexIds: [] as Id[],
+    activeItem: null as Id | null | number,
+    position: null as "after" | "before" | "center" | "left" | "right" | null,
     formId: null as Id | null,
     isLeftOpen: true,
     isRightOpen: true,

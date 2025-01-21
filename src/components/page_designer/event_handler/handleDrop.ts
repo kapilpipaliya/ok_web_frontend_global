@@ -20,11 +20,11 @@ export async function handleDrop(
 ) {
   e.stopPropagation();
 
-  if (!formStoreVertex?.P.activeItem) { // layoutVertex
+  if (!layoutStoreVertex?.P.activeItem) { // layoutVertex
     showErrorToast("Active item not found when dropping");
     return;
   }
-  const toVertex = graph.vertexes[formStoreVertex?.P.activeItem!];
+  const toVertex = graph.vertexes[layoutStoreVertex?.P.activeItem!];
   if (!toVertex) {
     showErrorToast("Target vertex not found when dropping");
     return;
@@ -42,7 +42,7 @@ export async function handleDrop(
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
 
-    if (!formStoreVertex?.P.position) {
+    if (!layoutStoreVertex?.P.position) {
       showErrorToast("Position not found when dropping");
       return;
     }
@@ -54,7 +54,7 @@ export async function handleDrop(
       graph.vertexes[formStoreVertex?.P.formDataId!],
       fromVertex,
       toVertex,
-      formStoreVertex?.P.position!,
+      layoutStoreVertex?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
       mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {

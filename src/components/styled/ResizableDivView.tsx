@@ -93,13 +93,13 @@ export function ResizableContainer(
 
   const handleDropEvent = async (e: DragEvent) => {
     setIsDraggingOver(false);
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, {
       activeItem: formStoreVertex()?.P.formDataId,
       position: "center"
     });
 
     await handleDrop(e, layoutStoreVertex(), formStoreVertex(), graph, setGraph, showErrorToast);
-    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
 
   return (

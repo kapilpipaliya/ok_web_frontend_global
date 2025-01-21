@@ -35,7 +35,7 @@ export function LayoutTreeItem(
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showErrorToast } = useToast();
-  const activeItemChanged = createSelector(() => formStoreVertex()?.P.activeItem);
+  const activeItemChanged = createSelector(() => layoutStoreVertex()?.P.activeItem);
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
   const children = createMemo(() =>
@@ -68,7 +68,7 @@ export function LayoutTreeItem(
   };
 
   const handleDragLeave = () => {
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, {
       activeItem: null,
       position: null
     });
@@ -83,7 +83,7 @@ export function LayoutTreeItem(
       setGraph,
       showErrorToast,
     );
-    resetDragDropState(layoutStoreVertex(), formStoreVertex(), graph, setGraph);
+    resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
 
   const handleClick = () => {
@@ -105,16 +105,16 @@ export function LayoutTreeItem(
   };
 
   const isAfter = createMemo(
-    () => isActiveTargetItem() && formStoreVertex()?.P.position === "after",
+    () => isActiveTargetItem() && layoutStoreVertex()?.P.position === "after",
   );
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
     if (isActiveTargetItem()) {
-      if (formStoreVertex()?.P.position !== "after") {
+      if (layoutStoreVertex()?.P.position !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
-          formStoreVertex()?.P.position,
+          layoutStoreVertex()?.P.position,
           "green-60",
         );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;

@@ -21,7 +21,6 @@ export function handleDragOverAndSetDropPosition(
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
 ) {
-  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem: layoutVertex.id, position: null });
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
@@ -30,7 +29,7 @@ export function handleDragOverAndSetDropPosition(
     | "right"
     | null;
   if (!position) {
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem: null, position: null });
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id!, graph, setGraph, { activeItem: null, position: null });
     return;
   }
 
@@ -71,7 +70,10 @@ export function handleDragOverAndSetDropPosition(
       position,
     )
   ) {
-    return;
+    position = null;
   }
-  mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { activeItem, position });
+
+  if (layoutStoreVertex.P.activeItem !== activeItem || layoutStoreVertex.P.position !== position) {
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id!, graph, setGraph, { activeItem, position });
+  }
 }
