@@ -3,7 +3,7 @@ Follow Guidelines:
 - support for custom condition in rules.
 
 Bugs:
-- 
+- Drag Over is not as fast as pineGrow
 
 Feature:
 

@@ -255,6 +255,8 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
+  const getOtherProps = () => graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? "";
+  const [editorValue, setEditorValue] = createSignal(getOtherProps());
 
   createEffect(
     on(
@@ -262,6 +264,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       () => {
         if (formStoreVertex()?.P.selectedComponent !== -1) {
           setIsFunctionValid(true);
+          setEditorValue(getOtherProps());
         }
       },
       { defer: true },
@@ -298,13 +301,18 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       setIsFunctionValid(false);
     }
   };
+
+  const handleSave = () => {
+    evaluateOtherProps(editorValue());
+  };
+
   return (
     <label class="mt:5">
       Other Props (JavaScript Function)
       <MonacoEditor
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
         language="javascript"
-        onChange={(value) => evaluateOtherProps(value)}
+        onChange={(value) => setEditorValue(value)}
         height="200px"
         options={{
           minimap: { enabled: false },
@@ -314,8 +322,14 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 0,
         }}
-        value={graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? ""}
+        value={editorValue()}
       />
+      <button 
+        class="mt:2 px:3 py:1 bg:blue-60 fg:white r:1" 
+        onClick={handleSave}
+      >
+        Save
+      </button>
       {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
     </label>
   );
