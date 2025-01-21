@@ -4,7 +4,7 @@ import { createMemo, For, type JSX, Show } from "solid-js";
 import { FormContext, FormStoreObject } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../context/LayoutContext";
+import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext, DesignerFormIdContext } from "../context/LayoutContext";
 import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
@@ -27,9 +27,9 @@ export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const layoutStore = () => (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
+
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];
@@ -88,43 +88,45 @@ export function SettingTabs() {
         <FormConfig />
       </div>
 
-      <Show when={formStoreVertex()}>
-        <FormContext.Provider value={formStoreVertex().id}>
-          <Show when={layoutStore().selectedTab === "status"}>
-            <FormStatus />
-          </Show>
-          {/* Keep Display:none to keep expanded state */}
-          <div
-            classList={{ "display:none": layoutStore().selectedTab !== "layers" }}
-          >
-            <LayoutTree />
-          </div>
-
-          <Show when={graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form"}>
-            <Show when={layoutStore().selectedTab === "Keys"}>
-              {/* <PrimaryKey /> */}
-              <NameKey />
-              <Divider class="mt:10" />
-              <HeaderWithDescription
-                description="Add unique constrains to your form to ensure that no duplicate data is submitted."
-                title="Unique Constrains"
-              />
-              <UniqueConstrains />
+      <Show when={formStoreVertex()?.id} keyed>
+        <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+          <FormContext.Provider value={formStoreVertex().id}>
+            <Show when={layoutStore().selectedTab === "status"}>
+              <FormStatus />
             </Show>
-          </Show>
-          <Show when={layoutStore().selectedTab === "Permission"}>
-            <Permission />
-          </Show>
-          <Show when={layoutStore().selectedTab === "Rules"}>
-            <Rules />
-          </Show>
-          <Show when={layoutStore().selectedTab === "Variants"}>
-            <Variants />
-          </Show>
-          <Show when={layoutStore().selectedTab === "SEO"}>
-            <SEOFormGroupProperties />
-          </Show>
-        </FormContext.Provider>
+            {/* Keep Display:none to keep expanded state */}
+            <div
+              classList={{ "display:none": layoutStore().selectedTab !== "layers" }}
+            >
+              <LayoutTree />
+            </div>
+
+            <Show when={graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form"}>
+              <Show when={layoutStore().selectedTab === "Keys"}>
+                {/* <PrimaryKey /> */}
+                <NameKey />
+                <Divider class="mt:10" />
+                <HeaderWithDescription
+                  description="Add unique constrains to your form to ensure that no duplicate data is submitted."
+                  title="Unique Constrains"
+                />
+                <UniqueConstrains />
+              </Show>
+            </Show>
+            <Show when={layoutStore().selectedTab === "Permission"}>
+              <Permission />
+            </Show>
+            <Show when={layoutStore().selectedTab === "Rules"}>
+              <Rules />
+            </Show>
+            <Show when={layoutStore().selectedTab === "Variants"}>
+              <Variants />
+            </Show>
+            <Show when={layoutStore().selectedTab === "SEO"}>
+              <SEOFormGroupProperties />
+            </Show>
+          </FormContext.Provider>
+        </DesignerFormIdContext.Provider>
       </Show>
     </>
   );

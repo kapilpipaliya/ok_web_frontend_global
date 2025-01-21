@@ -63,7 +63,7 @@ export function FormElementTabs() {
     { collection: "ErrorPages", title: "Error Pages" },
     { collection: "EmailTemplate", title: "Email Template" },
   ];
-  const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[1]);
+  const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
   const TabList = () => (
     <UlContainer>
