@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Match, ParentProps, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, ParentProps, Show, Switch } from "solid-js";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
@@ -7,7 +7,7 @@ import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
+import { DesignerFormIdContext, PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
@@ -53,6 +53,11 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 };
 
 export function FormElementTabs() {
+  const [graph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
+  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
     { collection: "Component", title: "Library" },
@@ -90,10 +95,18 @@ export function FormElementTabs() {
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
-          <PageLevelComponents rootLevel={false} />
+          <Show when={formStoreVertex()?.id} keyed>
+            <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+              <PageLevelComponents rootLevel={false} />
+            </DesignerFormIdContext.Provider>
+          </Show>
         </Match>
         <Match when={selectedTab().collection === "Component"}>
-          <PageLevelComponents rootLevel={true} />
+          <Show when={formStoreVertex()?.id} keyed>
+            <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+              <PageLevelComponents rootLevel={true} />
+            </DesignerFormIdContext.Provider>
+          </Show>
         </Match>
         <Match
           keyed

@@ -308,7 +308,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 
   return (
     <label class="mt:5">
-      Other Props (JavaScript Function){editorValue()}
+      Other Props (JavaScript Function)
       <MonacoEditor
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
         language="javascript"

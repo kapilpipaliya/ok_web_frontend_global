@@ -285,3 +285,12 @@ I had to provide my own ease function, but at least the source code is clear eno
 
 Solid MotionOne
 https://github.com/solidjs-community/solid-motionone?tab=readme-ov-file
+
+
+Nested functions can be used like:
+return {
+    fns: {
+        p2: () => args.fns("p1")("kk")
+    },
+    onClick: () => console.log(args.fns("p2")("ll"))
+}

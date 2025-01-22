@@ -11,7 +11,7 @@ export const parentCompAttribute = {
 };
 export const parentComponentAttribute = {
   collection: "g:'Component'",
-  componentName: "Select",
+  componentName: "MultiSelect",
   displayName: "Parent Component",
   key: "ParentComponent",
   type: "ParentComponent",
@@ -19,7 +19,7 @@ export const parentComponentAttribute = {
 };
 export const parentTemplateAttribute = {
   collection: "g:'TemplatePage'",
-  componentName: "Select",
+  componentName: "MultiSelect",
   displayName: "Parent Template",
   key: "ParentTemplate",
   type: "ParentTemplate",
