@@ -44,6 +44,7 @@ export interface FunctionArgumentBaseType {
   readOnly: boolean | null | undefined;
   ref: Accessor<HTMLDivElement | null>;
   repeaterContext: Record<string | symbol, any>;
+  fns: (name: string) => Function | undefined;
   runWithOwner: <T>(fn: () => T) => T | undefined;
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;

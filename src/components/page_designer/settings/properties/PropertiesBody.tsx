@@ -260,9 +260,9 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 
   createEffect(
     on(
-      () => formStoreVertex()?.P.selectedComponent,
+      () => formStoreVertex()?.P.selectedId,
       () => {
-        if (formStoreVertex()?.P.selectedComponent !== -1) {
+        if (formStoreVertex()?.P.selectedId !== -1) {
           setIsFunctionValid(true);
           setEditorValue(getOtherProps());
         }
@@ -308,12 +308,13 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 
   return (
     <label class="mt:5">
-      Other Props (JavaScript Function)
+      Other Props (JavaScript Function){editorValue()}
       <MonacoEditor
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
         language="javascript"
         onChange={(value) => setEditorValue(value)}
         height="200px"
+        onMount={(ref, a) => console.log(ref, a)}
         options={{
           minimap: { enabled: false },
           lineNumbers: "off",

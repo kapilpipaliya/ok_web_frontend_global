@@ -58,10 +58,15 @@ export function getText(
   projection: string,
   repeaterContext: Vertex[],
 ) {
-  return (
-    (getSelectionOptions(graph, setGraph, projection, repeaterContext)
-      .vertexes as string) || projection
-  );
+  try {
+    return (
+      (getSelectionOptions(graph, setGraph, projection, repeaterContext)
+        .vertexes as string) || projection
+    );
+  } catch (error) {
+    console.error("Error in getText:", error);
+    return "";
+  }
 }
 
 export function getUrl(
@@ -70,9 +75,14 @@ export function getUrl(
   projection: string,
   repeaterContext: Vertex[],
 ) {
-  const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
-    .vertexes as string | undefined;
-  return typeof url === "string" && url.startsWith("/") ? url : undefined;
+  try {
+    const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
+      .vertexes as string | undefined;
+    return typeof url === "string" && url.startsWith("/") ? url : undefined;
+  } catch (error) {
+    console.error("Error in getUrl:", error);
+    return undefined;
+  }
 }
 
 export function DynamicComponent(
@@ -109,15 +119,26 @@ export function DynamicComponent(
   const owner = getOwner();
 
   const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
-    return runWithOwner(owner, () => {
-      return fn();
-    });
-  };
-  const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
-    if (parentRenderContext()) {
-      return runWithOwner(parentRenderContext()?.context.owner!, () => {
+    try {
+      return runWithOwner(owner, () => {
         return fn();
       });
+    } catch (error) {
+      console.error("Error in runWithOwnerFunction:", error);
+      return undefined;
+    }
+  };
+
+  const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
+    try {
+      if (parentRenderContext()) {
+        return runWithOwner(parentRenderContext()?.context.owner!, () => {
+          return fn();
+        });
+      }
+    } catch (error) {
+      console.error("Error in runWithParentOwnerFunction:", error);
+      return undefined;
     }
   };
 
@@ -148,6 +169,7 @@ export function DynamicComponent(
       parentRenderContext()?.context.hasInsertPermission
     );
   });
+
   const hasEditPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "edit", graph, setGraph) ??
@@ -190,6 +212,18 @@ export function DynamicComponent(
     } else {
       const permission = hasInsertPermission() || hasEditPermission();
       return !permission ? true : undefined;
+    }
+  };
+
+  const functionProxy = (key: string) => {
+    try {
+      if (dynamicProps().fns && key in dynamicProps().fns) {
+        return dynamicProps().fns[key];
+      }
+      return parentRenderContext()?.context.fns(key);
+    } catch (error) {
+      console.error("Error in functionProxy:", error);
+      return undefined;
     }
   };
 
@@ -250,6 +284,7 @@ export function DynamicComponent(
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
       zIndex,
+      fns: functionProxy
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
@@ -448,76 +483,96 @@ export function DynamicComponent(
     meta: Record<string, any>,
     ignoreKeys: string[],
   ): Record<string, any> => {
-    const result = {} as Record<string, any>;
+    try {
+      const result = {} as Record<string, any>;
 
-    for (const key in meta) {
-      if (ignoreKeys.includes(key)) {
-        continue;
-      }
+      for (const key in meta) {
+        if (ignoreKeys.includes(key)) {
+          continue;
+        }
 
-      const value = meta[key];
-      if (typeof value === "function") {
-        result[key] = (...args: unknown[]) =>
-          runWithOwner(owner, () => {
-            const functionArgs = getFunctionArgumentWithValue();
-            return (meta[key] as (...args: unknown[]) => unknown)(
-              Object.assign(functionArgs, { args }),
-            );
-          });
-      } else if (value !== null) {
-        result[key] = value;
+        const value = meta[key];
+        if (typeof value === "function") {
+          result[key] = (...args: unknown[]) =>
+            runWithOwner(owner, () => {
+              try {
+                const functionArgs = getFunctionArgumentWithValue();
+                return (meta[key] as (...args: unknown[]) => unknown)(
+                  Object.assign(functionArgs, { args }),
+                );
+              } catch (error) {
+                console.error(`Error executing function for key ${key}:`, error);
+                return undefined;
+              }
+            });
+        } else if (value !== null) {
+          result[key] = value;
+        }
       }
+      return result;
+    } catch (error) {
+      console.error("Error in getMetaProps:", error);
+      return {};
     }
-    return result;
   };
 
   const dynamicProps = createMemo(() => {
-    if (typeof props.meta.P.otherProps === "function") {
-      const dynamicPropsObj =
-        props.meta.P.otherProps!(getFunctionArgumentWithValue()) || {};
-      return getMetaProps(dynamicPropsObj, []);
-    } else if (typeof props.meta.P.otherProps === "string") {
-      try {
-        const otherPropsFunction = new Function(
-          "args",
-          props.meta.P.otherProps,
-        );
+    try {
+      if (typeof props.meta.P.otherProps === "function") {
         const dynamicPropsObj =
-          otherPropsFunction(getFunctionArgumentWithValue()) || {};
+          props.meta.P.otherProps!(getFunctionArgumentWithValue()) || {};
         return getMetaProps(dynamicPropsObj, []);
-      } catch (error) {
-        console.error("Error evaluating otherProps function:", error);
-        return {};
+      } else if (typeof props.meta.P.otherProps === "string") {
+        try {
+          const otherPropsFunction = new Function(
+            "args",
+            props.meta.P.otherProps,
+          );
+          const dynamicPropsObj =
+            otherPropsFunction(getFunctionArgumentWithValue()) || {};
+          return getMetaProps(dynamicPropsObj, []);
+        } catch (error) {
+          console.error("Error evaluating otherProps function:", error);
+          return {};
+        }
       }
+      return {};
+    } catch (error) {
+      console.error("Error in dynamicProps:", error);
+      return {};
     }
-    return {};
   });
   
   const componentName = createMemo(() => {
-    if (dynamicProps().componentName) {
-      return dynamicProps().componentName;
-    }
-    let componentLabel: string | undefined;
-    if (props.componentName) {
-      componentLabel = props.componentName;
-      return componentLabel;
-    }
-    const { componentName } = props.meta.P;
-    if (componentName) {
-      componentLabel = componentName;
-    }
-    if (!componentLabel) {
-      componentLabel = getComponentLabel(graph, props.meta);
-    }
-    if (!componentLabel) {
+    try {
+      if (dynamicProps().componentName) {
+        return dynamicProps().componentName;
+      }
+      let componentLabel: string | undefined;
+      if (props.componentName) {
+        componentLabel = props.componentName;
+        return componentLabel;
+      }
+      const { componentName } = props.meta.P;
+      if (componentName) {
+        componentLabel = componentName;
+      }
+      if (!componentLabel) {
+        componentLabel = getComponentLabel(graph, props.meta);
+      }
+      if (!componentLabel) {
+        return "NotFoundComponent";
+      }
+      if (typeof componentLabel === "string") {
+        return componentLabel;
+      }
+      return typeof componentLabel === "function"
+        ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
+        : componentLabel;
+    } catch (error) {
+      console.error("Error in componentName:", error);
       return "NotFoundComponent";
     }
-    if (typeof componentLabel === "string") {
-      return componentLabel;
-    }
-    return typeof componentLabel === "function"
-      ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
-      : componentLabel;
   });
 
   const component = createMemo(
@@ -525,12 +580,17 @@ export function DynamicComponent(
   );
 
   const isHidden = () => {
-    const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;
-    const result =
-      typeof hiddenProp === "function"
-        ? hiddenProp(getFunctionArgumentWithValue())
-        : hiddenProp;
-    return result;
+    try {
+      const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;
+      const result =
+        typeof hiddenProp === "function"
+          ? hiddenProp(getFunctionArgumentWithValue())
+          : hiddenProp;
+      return result;
+    } catch (error) {
+      console.error("Error in isHidden:", error);
+      return false;
+    }
   };
 
   const isViewMode = () =>
@@ -553,32 +613,45 @@ export function DynamicComponent(
   });
 
   if (dynamicProps().beforeMount) {
-    runWithOwner(owner, () => {
-      dynamicProps().beforeMount!(getFunctionArgumentWithValue());
-    });
+    try {
+      runWithOwner(owner, () => {
+        dynamicProps().beforeMount!(getFunctionArgumentWithValue());
+      });
+    } catch (error) {
+      console.error("Error in beforeMount:", error);
+    }
   }
 
   onMount(() => {
-    setMounted(true);
-    // props.meta.mounted = true;
-    runWithOwner(owner, () => {
-      const onMountResult = dynamicProps().onMount?.(
-        getFunctionArgumentWithValue(),
-      );
-      if (typeof onMountResult === "function") {
-        onCleanup(onMountResult);
-      }
-    });
-  });
-  onCleanup(() => {
-    setMounted(false);
-    if (dynamicProps().onUnmount) {
-      // props.meta.mounted = false;
+    try {
+      setMounted(true);
+      // props.meta.mounted = true;
       runWithOwner(owner, () => {
-        dynamicProps().onUnmount!(getFunctionArgumentWithValue());
+        const onMountResult = dynamicProps().onMount?.(
+          getFunctionArgumentWithValue(),
+        );
+        if (typeof onMountResult === "function") {
+          onCleanup(onMountResult);
+        }
       });
+    } catch (error) {
+      console.error("Error in onMount:", error);
     }
   });
+
+  onCleanup(() => {
+    try {
+      setMounted(false);
+      if (dynamicProps().onUnmount) {
+        runWithOwner(owner, () => {
+          dynamicProps().onUnmount!(getFunctionArgumentWithValue());
+        });
+      }
+    } catch (error) {
+      console.error("Error in onCleanup:", error);
+    }
+  });
+
   const Content = () => (
     <>
       <ErrorBoundary
@@ -752,6 +825,7 @@ export function DynamicComponent(
     </>
   );
 }
+
 const _inputTypes = {
   color: "color",
   date: "date",
