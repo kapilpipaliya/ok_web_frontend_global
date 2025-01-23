@@ -3,20 +3,19 @@ import { createEffect, createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-export function PageShare() {
+export function PageShare(props: { formStoreId: string }) {
   const [graph] = useGraph();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   const [error, setError] = createSignal("");
 
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (access() === "everyone") {

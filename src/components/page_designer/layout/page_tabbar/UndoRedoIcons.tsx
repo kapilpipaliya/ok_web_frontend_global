@@ -8,12 +8,10 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-
-export function UndoRedoIcons() {
+export function UndoRedoIcons(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
 
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   const icons = [
     {

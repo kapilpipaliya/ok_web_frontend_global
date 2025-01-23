@@ -7,7 +7,7 @@ import { PageView } from "~/components/page_attr_render/PageView";
 import { DesignerFormIdContext, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { Drawer } from "~/components/styled/Drawer";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { Id, useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -21,6 +21,12 @@ import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { IFramePreview } from './IFramePreview';
 import { isDisabledTxn } from '~/lib/graph/transaction/isDisabledTxn';
+import { UndoRedoIcons } from './page_tabbar/UndoRedoIcons';
+import { ResizeViewButtons } from './page_tabbar/ResizeViewButtons';
+import { DebugInfo } from './page_tabbar/DebugInfo';
+import { SaveIconButton } from './page_tabbar/SaveIconButton';
+import { PreviewButton } from './page_tabbar/PreviewButton';
+import { ShareButton } from './page_tabbar/ShareButton';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -120,6 +126,32 @@ function TabBar() {
     </div>
   );
 }
+
+export function PageTabBar(props: { formStoreId: Id }) {
+  return (
+    <header class="flex bg:#f3f3f4 gap:6 r:7">
+
+      <div class="flex ai:center gap:6">
+        <UndoRedoIcons formStoreId={props.formStoreId}/>
+        <ResizeViewButtons formStoreId={props.formStoreId}/>
+        {/* <SettingPageIcon /> */}
+      </div>
+
+      <DebugInfo formStoreId={props.formStoreId}/>
+      {/* <Show when={layoutStore().selectedSection === "setting"}>
+        <div class="flex ai:center">
+          <MiddleSectionButtons />
+        </div>
+      </Show> */}
+      <div class="flex ai:center gap:6">
+        <SaveIconButton formStoreId={props.formStoreId} />
+        <PreviewButton formStoreId={props.formStoreId} />
+        <ShareButton formStoreId={props.formStoreId} />
+      </div>
+    </header>
+  )
+}
+
 function PageViewComponent() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
@@ -138,6 +170,7 @@ function PageViewComponent() {
               view={vertex()?.P.view}
               class={isActive() ? '' : 'hidden'}
             >
+              <PageTabBar formStoreId={pageInfo.formId} />
               <IFramePreview formStoreId={pageInfo.formId} />
               {/* <PageView
                 isDesignMode={true}
@@ -293,11 +326,11 @@ export function ResizableAltKey() {
               graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
           > */}
-            <div
-              class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
-            >
-              <PropertiesContent />
-            </div>
+          <div
+            class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
+          >
+            <PropertiesContent />
+          </div>
           {/* </Show> */}
         </Resizable.Panel>
         <Resizable.Handle

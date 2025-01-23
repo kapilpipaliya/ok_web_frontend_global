@@ -2,15 +2,14 @@ import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-export const ResizeViewButtons = () => {
+export const ResizeViewButtons = (props: { formStoreId: string }) => {
   const [graph, setGraph] = useGraph();
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   const views = [
     { icon: true, key: "prime:mobile", value: "Mobile" },
@@ -32,7 +31,7 @@ export const ResizeViewButtons = () => {
               "r:5|0|0|5": index() === 0,
             }}
             icon={view.key}
-            onclick={() => mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { view: view.value })}
+            onclick={() => mergeVertexProperties<FormStoreObject>(0, props.formStoreId!, graph, setGraph, { view: view.value })}
             size={22}
             title={view.value}
           />

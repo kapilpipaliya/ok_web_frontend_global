@@ -6,7 +6,7 @@ import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { PageShare } from "./PageShare";
 
-export function ShareButton() {
+export function ShareButton(props: { formStoreId: string }) {
   const [openDialog, setOpenDialog] = createSignal(false);
   return (
     <>
@@ -27,7 +27,7 @@ export function ShareButton() {
         setOpen={setOpenDialog}
         title={"Code"}
       >
-        <PageShare />
+        <PageShare formStoreId={props.formStoreId} />
       </CustomModal>
     </>
   );

@@ -2,15 +2,14 @@ import { Show } from "solid-js";
 
 import { TransactionDetail, useGraph, Vertex } from "~/lib/graph/graph";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
-export function DebugInfo() {
+export function DebugInfo(props: { formStoreId: string }) {
   const [graph] = useGraph();
 
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const tnxVertex = () => graph.vertexes[`txn${formStoreVertex()?.P.txnId}`] as Vertex<TransactionDetail>;
 
   return (

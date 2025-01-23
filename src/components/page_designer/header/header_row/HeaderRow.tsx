@@ -6,14 +6,14 @@ import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
-import { MiddleSectionButtons } from "../middle/MiddleSectionButtons";
-import { ResizeViewButtons } from "../middle/ResizeViewButtons";
-import { UndoRedoIcons } from "../middle/UndoRedoIcons";
-import { ShareButton } from "../right/ShareButton";
-import { PreviewButton } from "../right/PreviewButton";
+import { MiddleSectionButtons } from "../../layout/page_tabbar/MiddleSectionButtons";
+import { ResizeViewButtons } from "../../layout/page_tabbar/ResizeViewButtons";
+import { UndoRedoIcons } from "../../layout/page_tabbar/UndoRedoIcons";
+import { ShareButton } from "../../layout/page_tabbar/ShareButton";
+import { PreviewButton } from "../../layout/page_tabbar/PreviewButton";
 import { RightToggleButton } from "../right/RightToggleButton";
-import { SaveIconButton } from "../right/SaveIconButton";
-import { DebugInfo } from "./DebugInfo";
+import { SaveAllButton } from "../right/SaveAllButton";
+import { DebugInfo } from "../../layout/page_tabbar/DebugInfo";
 import { FormContext, FormStoreObject } from "~/components/form/context/FormContext";
 
 export function HeaderRow() {
@@ -28,31 +28,11 @@ export function HeaderRow() {
     <header class="flex bg:#f3f3f4 jc:space-between r:7">
       <LeftIcons />
 
-      <Show when={layoutStore().selectedSection === "build"}>
-        <div class="flex ai:center gap:6">
-          <UndoRedoIcons />
-          <ResizeViewButtons />
-          {/* <SettingPageIcon /> */}
-        </div>
-      </Show>
-      <DebugInfo />
-      <Show when={layoutStore().selectedSection === "setting"}>
-        <div class="flex ai:center">
-          <MiddleSectionButtons />
-        </div>
-      </Show>
-
       <div class="flex ai:center gap:5">
         <Show when={!layoutStore().isRightOpen || layoutStore().isSmallScreen}>
           <RightToggleButton />
         </Show>
-        <Show when={formStoreVertex()}>
-          <FormContext.Provider value={formStoreId!}>
-            <SaveIconButton />
-          </FormContext.Provider>
-        </Show>
-        <PreviewButton />
-        <ShareButton />
+        <SaveAllButton />
         <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>

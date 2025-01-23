@@ -4,20 +4,18 @@ import { Portal } from "solid-js/web";
 import { useZIndex, ZIndex } from "~/components/fields/ZIndex";
 import PageView from "~/components/page_attr_render/PageView";
 import { IconButton } from "~/components/styled/IconButton";
-import {PreviewPage} from "~/components/styled/PreviewPage";
+import { PreviewPage } from "~/components/styled/PreviewPage";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-import { IFramePreview } from "../../layout/IFramePreview";
+import { IFramePreview } from "../IFramePreview";
 
-export function PreviewButton() {
+export function PreviewButton(props: { formStoreId: string }) {
   const [graph] = useGraph();
   const [isModalOpen, setIsModalOpen] = createSignal(false);
-  const formStoreId = useDesignerFormIdContext();
-
   const handleButtonClick = () => {
     setIsModalOpen(true);
   };
@@ -29,7 +27,7 @@ export function PreviewButton() {
   const Content = () => {
     return (
       <PreviewPage>
-        <IFramePreview formStoreId={formStoreId!}/>
+        <IFramePreview formStoreId={props.formStoreId} />
         {/* <PageView
           isDesignMode={false}
           isNoPermissionCheck={true}
