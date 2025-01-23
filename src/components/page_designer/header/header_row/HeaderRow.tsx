@@ -9,7 +9,7 @@ import { LeftIcons } from "../left/LeftIcons";
 import { MiddleSectionButtons } from "../middle/MiddleSectionButtons";
 import { ResizeViewButtons } from "../middle/ResizeViewButtons";
 import { UndoRedoIcons } from "../middle/UndoRedoIcons";
-import { ExportSection } from "../right/ExportSection";
+import { ShareButton } from "../right/ShareButton";
 import { PreviewButton } from "../right/PreviewButton";
 import { RightToggleButton } from "../right/RightToggleButton";
 import { SaveIconButton } from "../right/SaveIconButton";
@@ -52,7 +52,7 @@ export function HeaderRow() {
           </FormContext.Provider>
         </Show>
         <PreviewButton />
-        <ExportSection />
+        <ShareButton />
         <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>

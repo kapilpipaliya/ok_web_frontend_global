@@ -4,9 +4,9 @@ import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
-import { ShareSection } from "./PageShare";
+import { PageShare } from "./PageShare";
 
-export function ExportSection() {
+export function ShareButton() {
   const [openDialog, setOpenDialog] = createSignal(false);
   return (
     <>
@@ -27,7 +27,7 @@ export function ExportSection() {
         setOpen={setOpenDialog}
         title={"Code"}
       >
-        <ShareSection />
+        <PageShare />
       </CustomModal>
     </>
   );

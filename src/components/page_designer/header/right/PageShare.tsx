@@ -8,7 +8,7 @@ import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-export function ShareSection() {
+export function PageShare() {
   const [graph] = useGraph();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
