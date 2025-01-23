@@ -1,6 +1,7 @@
 import type { createStore, SetStoreFunction } from "solid-js/store";
 
 import { Accessor, createContext, useContext } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -33,7 +34,8 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
-    view: "Desktop",
+    // we can save the view state in component level to avoid re-rendering the page when the view changes
+    openedViews: [{view: "Desktop", id: uuidv7()}]
   };
 }
 

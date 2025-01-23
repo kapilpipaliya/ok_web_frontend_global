@@ -1,5 +1,6 @@
 import Resizable from '@corvu/resizable'
 import { createSignal, For, type Setter, Show } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormContext } from "~/components/form/context/FormContext";
@@ -109,6 +110,24 @@ function TabBar() {
               {form.label}
               {isUnsaved(form.formId) && "*"}
             </span>
+            <button
+              class="background:none border:none cursor:pointer font-size:14px padding:2px"
+              onClick={() => {
+                const newViewId = uuidv7();
+                const newView = { view: "Mobile", id: newViewId };
+                mergeVertexProperties<FormStoreObject>(
+                  0,
+                  form.formId,
+                  graph,
+                  setGraph,
+                  {
+                    openedViews: [...graph.vertexes[form.formId]?.P.openedViews, newView]
+                  }
+                );
+              }}
+            >
+              +
+            </button>
             <Show when={index() !== 0}>
               <button
                 class="background:none border:none cursor:pointer font-size:14px padding:2px"
@@ -127,13 +146,13 @@ function TabBar() {
   );
 }
 
-export function PageTabBar(props: { formStoreId: Id }) {
+export function PageTabBar(props: { formStoreId: Id, openIndex: number }) {
   return (
     <header class="flex bg:#f3f3f4 gap:6 r:7">
 
       <div class="flex ai:center gap:6">
         <UndoRedoIcons formStoreId={props.formStoreId}/>
-        <ResizeViewButtons formStoreId={props.formStoreId}/>
+        <ResizeViewButtons formStoreId={props.formStoreId} openIndex={props.openIndex}/>
         {/* <SettingPageIcon /> */}
       </div>
 
@@ -156,32 +175,37 @@ function PageViewComponent() {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
-  const formStoreVertex = (formId: string) => graph.vertexes[formId] as Vertex<FormStoreObject>;
 
   return (
-    <For each={layoutStore().openedFormIds}>
-      {(pageInfo) => {
-        const isActive = () => layoutStore().formId === pageInfo.formId;
-        const vertex = () => formStoreVertex(pageInfo.formId);
+    <div class="flex gap:8 overflow:scroll flex:nowrap max-w:2000px">
+      <For each={layoutStore().openedFormIds}>
+        {(pageInfo) => {
+          const isActive = () => layoutStore().formId === pageInfo.formId;
+          const formStoreVertex = () => graph.vertexes[pageInfo.formId] as Vertex<FormStoreObject>;
 
-        return (
-          <Show when={vertex()?.id}>
-            <ResizableContainer
-              view={vertex()?.P.view}
-              class={isActive() ? '' : 'hidden'}
-            >
-              <PageTabBar formStoreId={pageInfo.formId} />
-              <IFramePreview formStoreId={pageInfo.formId} />
-              {/* <PageView
-                isDesignMode={true}
-                isNoPermissionCheck={true}
-                metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
-              /> */}
-            </ResizableContainer>
-          </Show>
-        );
-      }}
-    </For>
+          return (
+            <Show when={formStoreVertex()?.id}>
+              <For each={formStoreVertex()?.P.openedViews}>
+                {(openedView, index) => (
+                  <ResizableContainer
+                    view={openedView.view}
+                    class={isActive() ? '' : 'hidden'}
+                  >
+                    <PageTabBar formStoreId={pageInfo.formId} openIndex={index()}/>
+                    <IFramePreview formStoreId={pageInfo.formId} />
+                    {/* <PageView
+                      isDesignMode={true}
+                      isNoPermissionCheck={true}
+                      metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
+                    /> */}
+                  </ResizableContainer>
+                )}
+              </For>
+            </Show>
+          );
+        }}
+      </For>
+    </div>
   );
 }
 
@@ -295,6 +319,7 @@ export function ResizableAltKey() {
           class="flex-col items-center justify-center space-y-2 overflow-hidden rounded-lg bg-corvu-100 px-4 flex"
           initialSize={sizes()[1] ?? 0.7}
           minSize={0.2}
+          maxSize={0.8}
         >
           <div>
             <TabBar />

@@ -103,7 +103,7 @@ export function ResizableContainer(
   };
 
   return (
-    <div class={`scrollbar-color:lightgrey grid ${props.class} {scrollbar-width:thin} overflow:auto`}>
+    <div class={`scrollbar-color:lightgrey grid ${props.class} {scrollbar-width:thin} overflow:auto flex-shrink:0`}>
       <div
         ref={setContainerRef}
         class="scrollbar-color:lightgrey {scrollbar-width:thin} justify-self:center overflow:auto position:relative r:10|10|10|10"
