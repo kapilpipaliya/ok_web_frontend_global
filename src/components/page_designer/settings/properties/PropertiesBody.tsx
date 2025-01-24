@@ -10,6 +10,9 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { CustomModal } from "~/components/styled/CustomModal";
+import { IconButton } from "~/components/styled/IconButton";
+
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
@@ -257,6 +260,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
   const getOtherProps = () => graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? "";
   const [editorValue, setEditorValue] = createSignal(getOtherProps());
+  const [isModalOpen, setIsModalOpen] = createSignal(false);
 
   createEffect(
     on(
@@ -304,17 +308,18 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 
   const handleSave = () => {
     evaluateOtherProps(editorValue());
+    if (isFunctionValid()) {
+      setIsModalOpen(false);
+    }
   };
 
-  return (
-    <label class="mt:5">
-      Other Props (JavaScript Function)
+  const EditorContent = (props: { height?: string }) => (
+    <>
       <MonacoEditor
         class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
         language="javascript"
         onChange={(value) => setEditorValue(value)}
-        height="200px"
-        onMount={(ref, a) => console.log(ref, a)}
+        height={props.height ?? "200px"}
         options={{
           minimap: { enabled: false },
           lineNumbers: "off",
@@ -325,13 +330,37 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         }}
         value={editorValue()}
       />
-      <button 
-        class="mt:2 px:3 py:1 bg:blue-60 fg:white r:1" 
+      <button
+        class="mt:2 px:3 py:1 bg:blue-60 fg:white r:1"
         onClick={handleSave}
       >
         Save
       </button>
       {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
-    </label>
+    </>
+  );
+
+  return (
+    <>
+      <div class="mt:5">
+        <span class="flex ai:center">Other Props (JavaScript Function)
+          <IconButton
+            icon="ph:arrow-square-out"
+            class="ml:6"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            title="Edit Function in Modal"
+          />
+        </span>
+        <EditorContent height="200px" />
+      </div>
+      <CustomModal open={isModalOpen} setOpen={setIsModalOpen} title="Edit Other Props" >
+        <div class="p:3 width:600px height:600px">
+          <EditorContent height="560px" />
+        </div>
+      </CustomModal>
+    </>
   );
 }
