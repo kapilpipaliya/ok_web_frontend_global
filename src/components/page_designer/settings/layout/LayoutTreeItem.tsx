@@ -17,6 +17,7 @@ import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
+import { HideShowIcon } from "./HideShowIcon";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -164,6 +165,7 @@ export function LayoutTreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
         />
+        <HideShowIcon metaVertex={props.metaVertex} iconSize={20} />
         <Show
           when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}
         >
