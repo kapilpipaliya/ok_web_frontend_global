@@ -31,6 +31,7 @@ export function SelectedAttrConfigPopOver(
   const getComponentName = () =>
     getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
 
+  const iconSize = 20;
   return (
     <span class="position:relative">
       <div
@@ -39,20 +40,20 @@ export function SelectedAttrConfigPopOver(
         <IconButton
           class="cursor:grab"
           draggable={true}
-          icon="material-symbols:drag-indicator"
+          icon="ph:dots-six-vertical-light"
           onClick={() => {}}
           onDragStart={(e) => handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)}
-          size={20}
+          size={iconSize}
           title="Move"
         />
-        <InsertButtons item={props.item} />
+        <InsertButtons item={props.item} size={iconSize} />
         <ComponentName componentName={getComponentName()} />
-        <ParentButton item={props.item} />
-        <DuplicateButton item={props.item} />
-        <SaveAsTemplateButton item={props.item} size={20} />
-        <PreviewCSSButton item={props.item} size={20} />
-        <ImportHtmlButton item={props.item} size={20} />
-        <DeleteButton componentName={getComponentName()} item={props.item} />
+        <ParentButton item={props.item} size={iconSize} />
+        <DuplicateButton item={props.item} size={iconSize} />
+        <SaveAsTemplateButton item={props.item} size={iconSize} />
+        <PreviewCSSButton item={props.item} size={iconSize} />
+        <ImportHtmlButton item={props.item} size={iconSize} />
+        <DeleteButton componentName={getComponentName()} item={props.item} size={iconSize} class="color:red" />
       </div>
     </span>
   );

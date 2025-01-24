@@ -41,8 +41,9 @@ export function PreviewCSSButton(
   return (
     <>
       <IconButton
-        class={`${props.class} cursor:pointer`}
-        icon="ic:baseline-css"
+        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        icon="ph:file-css"
+        iconClass="transition:0.5s|ease-in-out"
         onClick={() => setShowModal(true)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

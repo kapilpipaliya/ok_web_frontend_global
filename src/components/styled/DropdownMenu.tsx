@@ -1,4 +1,4 @@
-import type { Placement, Strategy } from "@floating-ui/dom";
+import type { OffsetOptions, Placement, Strategy } from "@floating-ui/dom";
 
 import createFloating from "@corvu/utils/create/floating";
 import { createSignal, type JSX, onMount, splitProps } from "solid-js";
@@ -11,6 +11,8 @@ import { useZIndex } from "../fields/ZIndex";
 
 export function DropdownMenu(
   props: {
+    applyDefaultStyles?: boolean;
+    offset?: OffsetOptions;
     onClickOutside?: () => void;
     parentRef: HTMLElement;
     placement?: Placement;
@@ -19,7 +21,6 @@ export function DropdownMenu(
     useShift?: boolean;
   } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
-  const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [graph, setGraph] = useGraph();
   const zIndex = useZIndex();
@@ -35,12 +36,8 @@ export function DropdownMenu(
       shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
     }),
     placement: () => props.placement ?? "bottom-start",
-    reference: () => reference() ?? null,
+    reference: () => props.parentRef ?? null,
     strategy,
-  });
-
-  onMount(() => {
-    setReference(props.parentRef);
   });
 
   createClickOutside(graph, setGraph, (event) => {
@@ -57,7 +54,7 @@ export function DropdownMenu(
     <Portal mount={document.body}>
       <div
         aria-orientation="vertical"
-        class={`${local.class ?? ""} ${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem z-index:${zIndex}`}
+        class={`${local.class ?? ""} ${(props.applyDefaultStyles ?? true) ? `${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem` : ""} z-index:${zIndex}`}
         ref={(el) => {
           setFloating(el);
           if (typeof local.ref === "function") {

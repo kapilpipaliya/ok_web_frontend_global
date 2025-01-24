@@ -13,22 +13,27 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DuplicateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DuplicateButton";
+import { DeleteButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
+import { ParentButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ParentButton";
 
-export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
+export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef: HTMLElement }>) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  
+
   const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showSuccessToast } = useToast();
 
+  const iconSize = 32;
   const toggleHidden = (itemId: Id) => {
     const hiddenNodes = formStoreVertex()?.P.hiddenNodes || [];
     const newHiddenNodes = hiddenNodes.includes(itemId)
       ? hiddenNodes.filter((item) => item !== itemId)
       : [...hiddenNodes, itemId];
-      
+
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hiddenNodes: newHiddenNodes
     });
@@ -41,7 +46,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
     const isHiddenAttr = () =>
       (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id);
     const icon = () =>
-      isHiddenAttr() ? "mdi:eye-off-outline" : "mdi:eye-outline";
+      isHiddenAttr() ? "ph:eye-slash" : "ph:eye";
     const tooltipContent = () => (isHiddenAttr() ? "Show" : "Hide");
 
     return (
@@ -50,79 +55,49 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex }>) {
         icon={icon()}
         iconClass="transition:0.5s|ease-in-out"
         onClick={() => toggleHidden(props.metaVertex.id)}
-        size={18}
+        size={iconSize}
         title={tooltipContent()}
       />
     );
   };
 
   return (
-    <div class="flex ai:center">
-      <Show
-        when={
-          isSelectedLayoutId(props.metaVertex.id) ||
-          isSelectedHoverId(props.metaVertex.id)
-        }
-      >
-        <InsertButtons item={props.metaVertex} />
-      </Show>
+    <DropdownMenu
+      applyDefaultStyles={false}
+      placement="right"
+      parentRef={props.parentRef}
+      useFlip={false}
+      offset={-32}
+    >
+      <div class="flex flex:col ai:center bg:white">
+        <Show
+          when={
+            isSelectedLayoutId(props.metaVertex.id) // ||
+            // isSelectedHoverId(props.metaVertex.id)
+          }
+        >
+          <InsertButtons item={props.metaVertex} size={iconSize} />
+        </Show>
 
-      <Show
-        when={
-          isSelectedLayoutId(props.metaVertex.id) ||
-          isSelectedHoverId(props.metaVertex.id) ||
-          (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id)
-        }
-      >
-        <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mage:copy"
-          iconClass="transition:0.5s|ease-in-out"
-          onClick={() => {
-            cloneLayoutAndChildren(
-              props.metaVertex,
-              undefined,
-              undefined,
-              formStoreVertex()?.P.txnId,
-              graph,
-              setGraph,
-              graph.vertexes[formStoreVertex()?.P.formDataId!],
-            );
-          }}
-          size={18}
-          title="Duplicate"
-        />
-        <SaveAsTemplateButton
-          class="mr:5px opacity:.5 opacity:1:hover"
-          item={props.metaVertex}
-          size={20}
-        />
-        <ImportHtmlButton
-          class="mr:5px opacity:.5 opacity:1:hover"
-          item={props.metaVertex}
-          size={20}
-        />
-        <HideShowIcon />
-        <IconButton
-          class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mage:trash"
-          iconClass="transition:0.5s|ease-in-out"
-          onClick={() => {
-            deleteLayoutAttr(
-              formStoreVertex(),
-              props.metaVertex,
-              graph,
-              setGraph,
-              formStoreVertex()?.P.txnId,
-              getComponent(),
-              showSuccessToast,
-            );
-          }}
-          size={18}
-          title="Delete"
-        />
-        &nbsp;
-      </Show>
-    </div>
+        <Show
+          when={
+            isSelectedLayoutId(props.metaVertex.id) ||
+            // isSelectedHoverId(props.metaVertex.id) ||
+            (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id)
+          }
+        >
+          <ParentButton item={props.metaVertex} size={iconSize} />
+          <DuplicateButton item={props.metaVertex} size={iconSize} />
+          <SaveAsTemplateButton
+            item={props.metaVertex}
+            size={iconSize}
+          />
+          <ImportHtmlButton item={props.metaVertex} size={iconSize} />
+          <HideShowIcon />
+          <DeleteButton componentName={getComponent()} item={props.metaVertex} size={iconSize} class="color:red" />
+          &nbsp;
+        </Show>
+      </div>
+    </DropdownMenu>
   );
 }

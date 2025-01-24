@@ -18,9 +18,13 @@ export function ImportHtmlButton(
   return (
     <>
       <IconButton
-        class={`${props.class} cursor:pointer`}
-        icon="ri:upload-line"
-        onClick={() => setShowModal(true)}
+        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        icon="ph:arrow-square-down"
+        iconClass="transition:0.5s|ease-in-out"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowModal(true);
+        }}
         ref={(el) => (saveAsTemplateRef = el)}
         size={props.size}
         title="Save as Template"

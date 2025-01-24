@@ -1,4 +1,4 @@
-import { type Accessor, createMemo, createSelector, For, Show } from "solid-js";
+import { type Accessor, createMemo, createSelector, createSignal, For, Show } from "solid-js";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
@@ -41,6 +41,7 @@ export function LayoutTreeItem(
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
+  const [parentRef, setParentRef] = createSignal<HTMLElement>();
 
   let startTime = 0;
 
@@ -153,6 +154,7 @@ export function LayoutTreeItem(
         onMouseEnter={handleMouseOver}
         onmouseleave={handleMouseLeave}
         ref={(el) => {
+          setParentRef(el);
           // @ts-expect-error ignore
           el.useCurrentPosition = true;
         }}
@@ -165,7 +167,7 @@ export function LayoutTreeItem(
         <Show
           when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}
         >
-          <AttrConfigIcons metaVertex={props.metaVertex} />
+          <AttrConfigIcons metaVertex={props.metaVertex} parentRef={parentRef()!} />
         </Show>
       </TreeItemContainer>
 

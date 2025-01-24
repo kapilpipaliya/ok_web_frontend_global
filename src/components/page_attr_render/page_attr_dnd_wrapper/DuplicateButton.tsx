@@ -6,16 +6,18 @@ import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_des
 import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-export function DuplicateButton(props: { item: Vertex }) {
+export function DuplicateButton(props: { item: Vertex; size: number }) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton
-      class="cursor:pointer"
-      icon="mage:copy"
-      onClick={() =>
+      class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+      icon="ph:copy"
+      iconClass="transition:0.5s|ease-in-out"
+      onClick={(e) => {
+        e.stopPropagation();
         cloneLayoutAndChildren(
           props.item,
           undefined,
@@ -25,8 +27,8 @@ export function DuplicateButton(props: { item: Vertex }) {
           setGraph,
           graph.vertexes[formStoreVertex()?.P.formDataId!],
         )
-      }
-      size={20}
+      }}
+      size={props.size}
       title="Duplicate"
     />
   );

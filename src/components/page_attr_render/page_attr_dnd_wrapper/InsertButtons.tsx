@@ -10,7 +10,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
-export function InsertButtons(props: Readonly<{ item: Vertex }>) {
+export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [graph, setGraph] = useGraph();
   let insertBeforeButtonsRef: HTMLElement;
   let insertAfterButtonsRef: HTMLElement;
@@ -26,11 +26,14 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
     <>
       <IconButton
         class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-        icon="gg:insert-before-o"
+        icon="ph:arrow-line-up"
         iconClass="transition:0.5s|ease-in-out"
-        onClick={() => setShowBeforeMenu(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowBeforeMenu(true);
+        }}
         ref={(el) => (insertBeforeButtonsRef = el)}
-        size={18}
+        size={props.size}
         title="Add Before"
       />
       <Show when={showBeforeMenu()}>
@@ -55,11 +58,14 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
 
       <IconButton
         class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-        icon="gg:insert-after-o"
+        icon="ph:arrow-line-down"
         iconClass="transition:0.5s|ease-in-out"
-        onClick={() => setShowAfterMenu(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowAfterMenu(true);
+        }}
         ref={(el) => (insertAfterButtonsRef = el)}
-        size={18}
+        size={props.size}
         title="Add After"
       />
       <Show when={showAfterMenu()}>
@@ -84,11 +90,14 @@ export function InsertButtons(props: Readonly<{ item: Vertex }>) {
 
       <IconButton
         class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-        icon="material-symbols:add-circle-outline"
+        icon="ph:plus-circle"
         iconClass="transition:0.5s|ease-in-out"
-        onClick={() => setShowInsideMenu(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowInsideMenu(true);
+        }}
         ref={(el) => (insertInsideButtonsRef = el)}
-        size={18}
+        size={props.size}
         title="Add Inside"
       />
       <Show when={showInsideMenu()}>
