@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show, type JSX } from "solid-js";
 
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { Id, useGraph, Vertex } from "~/lib/graph/graph";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
 import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
@@ -12,15 +12,15 @@ import { ResizeOverlay } from "./ResizeOverlay";
 import { IconButton } from "./IconButton";
 
 export const DIMENSIONS = {
-  mobile: { id: "mobile", height: "570px", width: "360px", icon: "prime:mobile" },
-  tablet: { id: "tablet", height: "1026px", width: "768px", icon: "uil:tablet" },
-  desktop: { id: "desktop", height: "1200px", width: "1200px", icon: "humbleicons:desktop" },
+  mobile: { id: "mobile", height: "570px", width: "360px", icon: "ph:device-mobile" },
+  tablet: { id: "tablet", height: "1026px", width: "768px", icon: "ph:device-tablet" },
+  desktop: { id: "desktop", height: "1200px", width: "1200px", icon: "ph:desktop" },
 };
 
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
-    view: string;
+    view: Id;
     width?: string;
     height?: string;
     class?: string;
@@ -40,10 +40,11 @@ export function ResizableContainer(
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const viewVertex = () => graph.vertexes[props.view] as Vertex<{view: string}>;
 
   createEffect(() => {
     if (!props.width && !props.height) {
-      const dimension = DIMENSIONS[props.view.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
+      const dimension = DIMENSIONS[viewVertex()?.P.view?.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
       setWidth(dimension.width);
       setHeight(dimension.height);
     }

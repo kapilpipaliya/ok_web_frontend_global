@@ -6,37 +6,33 @@ import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutCo
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
+import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 
 export const ResizeViewButtons = (props: { formStoreId: string, openIndex: number }) => {
   const [graph, setGraph] = useGraph();
   const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
-  const views = [
-    { icon: true, key: "prime:mobile", value: "Mobile" },
-    { icon: true, key: "uil:tablet", value: "Tablet" },
-    { icon: true, key: "humbleicons:desktop", value: "Desktop" },
-  ];
+  const openedView = () => formStoreVertex()?.P.openedViews[props.openIndex];
+  const viewVertex = () => graph.vertexes[openedView()] as Vertex<{view: string}>;
   return (
     <div>
-      <For each={views}>
+      <For each={Object.values(DIMENSIONS)}>
         {(view, index) => (
           <IconButton
             class="b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
             classList={{
-              "bg:#E0E7F3": view.value === formStoreVertex()?.P.openedViews[props.openIndex].view,
+              "bg:#E0E7F3": view.id === viewVertex()?.P.view?.toLowerCase(),
               "bl:none": index() !== 0,
-              "color:#5252F1": view.value === formStoreVertex()?.P.openedViews[props.openIndex].view,
-              "color:grey": view.value !== formStoreVertex()?.P.openedViews[props.openIndex].view,
+              "color:#5252F1": view.id === viewVertex()?.P.view?.toLowerCase(),
+              "color:grey": view.id !== viewVertex()?.P.view?.toLowerCase(),
               "r:0|5|5|0": index() === 2,
               "r:5|0|0|5": index() === 0,
             }}
-            icon={view.key}
+            icon={view.icon}
             onclick={() => {
-              const updatedOpenedViews = [...formStoreVertex()?.P.openedViews];
-              updatedOpenedViews[props.openIndex] = { view: view.value, id: updatedOpenedViews[props.openIndex].id };
-              mergeVertexProperties<FormStoreObject>(0, props.formStoreId!, graph, setGraph, { openedViews: updatedOpenedViews });
+              mergeVertexProperties(0, openedView(), graph, setGraph, { view: view.id });
             }}
             size={22}
-            title={view.value}
+            title={view.id}
           />
         )}
       </For>

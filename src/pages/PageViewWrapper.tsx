@@ -1,58 +1,44 @@
-import { makeEventListener } from "@solid-primitives/event-listener";
-import { Meta, Title } from "@solidjs/meta";
-import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
-import { clientOnly } from "@solidjs/start";
-import { v7 as uuidv7 } from "uuid";
-import {
-  createEffect,
-  createMemo,
-  Match,
-  on,
-  onCleanup,
-  onMount,
-  Show,
-  Switch,
-  untrack,
-} from "solid-js";
-import { createStore } from "solid-js/store";
+import {makeEventListener} from "@solid-primitives/event-listener";
+import {Meta, Title} from "@solidjs/meta";
+import {type BeforeLeaveEventArgs, useBeforeLeave} from "@solidjs/router";
+import {clientOnly} from "@solidjs/start";
+import {v7 as uuidv7} from "uuid";
+import {createEffect, createMemo, Match, on, onCleanup, onMount, Show, Switch, untrack,} from "solid-js";
 
-import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type {ServerResult} from "~/cypher/types/ServerResult";
+import type {IFormMetaData} from "~/lib/meta/FormMetadataType";
 
-import { FormStoreObject, getInitialFormStore, FormContext } from "~/components/form/context/FormContext";
-import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
-import { getFormData } from "~/components/form/functions/getFormData";
-import { SaveCancelButton } from "~/components/form/SaveCancelButton";
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/components/page_attr_render/permissions";
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
-import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
-import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
-import { DialogWithButtons } from "~/components/styled/DeleteDialog";
+import {FormContext, FormStoreObject, getInitialFormStore} from "~/components/form/context/FormContext";
+import {addFormInitialComponent} from "~/components/form/functions/addFormInitialComponent";
+import {getFormData} from "~/components/form/functions/getFormData";
+import {SaveCancelButton} from "~/components/form/SaveCancelButton";
+import {getConfiguredPermissions, hasPermissions,} from "~/components/page_attr_render/permissions";
+import {usePreviewContext} from "~/components/page_designer/context/PreviewContext";
+import {generateFormMetaAttributes} from "~/components/page_designer/functions/generateFormMetaAttributes";
+import {getPageTitle} from "~/components/page_designer/layout/getPageTitle";
+import {DialogWithButtons} from "~/components/styled/DeleteDialog";
 import {PreviewPage} from "~/components/styled/PreviewPage";
-import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { isValidResponse } from "~/lib/api/isValidResponse";
-import { isObject } from "~/lib/data_structure/object/isObject";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { type Id, useGraph, Vertex } from "~/lib/graph/graph";
-import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { createMeta } from "~/lib/graph/mutate/form/createMeta";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { addNewVertex, newVertex, mergeVertexProperties, deleteVertex } from "~/lib/graph/mutate/vertex";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
-import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
-import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
-import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
-import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+import {SimpleWarningAlert} from "~/components/styled/SimpleWarningAlert";
+import {fetchDataFromMG} from "~/cypher/get/fetchDataFromMG";
+import {isValidResponse} from "~/lib/api/isValidResponse";
+import {isObject} from "~/lib/data_structure/object/isObject";
+import {getEdgesFromRowsAttr} from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import {type Id, useGraph, Vertex} from "~/lib/graph/graph";
+import {createFormVertex} from "~/lib/graph/mutate/form/createForm";
+import {createMeta} from "~/lib/graph/mutate/form/createMeta";
+import {setGraphData} from "~/lib/graph/mutate/setGraphData";
+import {addNewVertex, deleteVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
+import {isDisabledTxn} from "~/lib/graph/transaction/isDisabledTxn";
+import {revertTransaction} from "~/lib/graph/transaction/revertTransaction";
+import {saveStepIndex} from "~/lib/graph/transaction/saveStepIndex";
+import {saveUndoPoint} from "~/lib/graph/transaction/saveUndoPoint";
+import {setPreventUndoAtOrBeforeIndex} from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
+import {FormMetaData} from "~/lib/meta/formMetaData";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
+import {getGlobalStore} from "~/lib/graph/get/sync/getGlobalStore";
+import {PageDesignerLabels} from "~/components/page_designer/functions/PageDesignerLabels";
+import {fetchComponentData} from "~/cypher/get/fetchComponentData";
+import {createViewVertex} from "~/lib/graph/mutate/createViewVertex";
 
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
@@ -80,11 +66,14 @@ export function PageViewWrapper(
     props.dataId === "new" ? undefined : props.dataId,
   );
   const layoutStoreId = props.uuid ?? uuidv7();
+  const viewVertexObject = createViewVertex({view: "Desktop"}, graph, setGraph);
   const pageFormVertexObject = newVertex(layoutStoreId, ["PageForm"], {
     ...getInitialFormStore(graph, setGraph),
+    openedViews: [viewVertexObject.id],
     formId: props.pageVertexName,
     id: id()!,
   });
+
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
 
@@ -92,6 +81,12 @@ export function PageViewWrapper(
   const setFormStore = (key: string, value: any) => {
     mergeVertexProperties<FormStoreObject>(0, pageFormVertexObject.id, graph, setGraph, { [key]: value });
   };
+
+  onCleanup(() => {
+    for (const viewId of formStore()?.P?.openedViews ?? []) {
+      deleteVertex(0, viewId, graph, setGraph);
+    }
+  });
 
   // Note: onCleanUp will be called on reverse order of the cleanup functions
   onCleanup(() => {

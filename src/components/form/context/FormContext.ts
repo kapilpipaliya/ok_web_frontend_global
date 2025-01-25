@@ -34,8 +34,7 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
-    // we can save the view state in component level to avoid re-rendering the page when the view changes
-    openedViews: [{view: "Desktop", id: uuidv7()}]
+    openedViews: [] as Array<Id>
   };
 }
 

@@ -12,7 +12,7 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-import { FormContext, type FormStoreObject, getInitialFormStore, useFormContext } from "../form/context/FormContext";
+import { FormContext, type FormStoreObject, useFormContext } from "../form/context/FormContext";
 import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";

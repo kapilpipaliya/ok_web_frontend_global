@@ -5,9 +5,8 @@ import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { headerIconButtonClass } from "~/pages/admin_layout/constant";
-import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { useToast } from "~/components/styled/Toast";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
@@ -22,7 +21,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
   return (
     <IconButton
       class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
-      icon="bi:floppy"
+      icon="ph:floppy-disk"
       onClick={() => formSubmit(formStoreVertex, graph, setGraph, () => {}, showErrorToast, showLoadingToast, showWarningToast)()}
       size={22}
       title="Save"

@@ -1,10 +1,19 @@
-import { createSignal, For, type JSX } from "solid-js";
+import { createSignal, For, onCleanup, type JSX } from "solid-js";
 
 import { IconButton } from "./IconButton";
 import { DIMENSIONS, ResizableContainer } from "./ResizableDivView";
+import { Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
+import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
+import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
 export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
   const [view, setView] = createSignal(DIMENSIONS.desktop);
+  const [graph, setGraph] = useGraph();
+  const viewVertexObject = createViewVertex({ view: "Desktop" }, graph, setGraph);
+  onCleanup(() => {
+    deleteVertex(0, viewVertexObject.id, graph, setGraph);
+  })
 
   return (
     <div class="flex ai:center bg:gray-100 flex:col min-h:100vh p:5|20">
@@ -28,8 +37,8 @@ export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
         </For>
       </div>
       <div class="flex ai:center h:full jc:center w:full">
-      <ResizableContainer
-            view={view().id}
+        <ResizableContainer
+          view={viewVertexObject.id}
         >
           {props.children}
         </ResizableContainer>

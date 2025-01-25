@@ -28,6 +28,7 @@ import { DebugInfo } from './page_tabbar/DebugInfo';
 import { SaveIconButton } from './page_tabbar/SaveIconButton';
 import { PreviewButton } from './page_tabbar/PreviewButton';
 import { ShareButton } from './page_tabbar/ShareButton';
+import { createViewVertex } from '~/lib/graph/mutate/createViewVertex';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -113,15 +114,14 @@ function TabBar() {
             <button
               class="background:none border:none cursor:pointer font-size:14px padding:2px"
               onClick={() => {
-                const newViewId = uuidv7();
-                const newView = { view: "Mobile", id: newViewId };
+                const newView = createViewVertex( { view: "Mobile" }, graph, setGraph);
                 mergeVertexProperties<FormStoreObject>(
                   0,
                   form.formId,
                   graph,
                   setGraph,
                   {
-                    openedViews: [...graph.vertexes[form.formId]?.P.openedViews, newView]
+                    openedViews: [...graph.vertexes[form.formId]?.P.openedViews, newView.id]
                   }
                 );
               }}
@@ -188,7 +188,7 @@ function PageViewComponent() {
               <For each={formStoreVertex()?.P.openedViews}>
                 {(openedView, index) => (
                   <ResizableContainer
-                    view={openedView.view}
+                    view={openedView}
                     class={isActive() ? '' : 'hidden'}
                   >
                     <PageTabBar formStoreId={pageInfo.formId} openIndex={index()}/>

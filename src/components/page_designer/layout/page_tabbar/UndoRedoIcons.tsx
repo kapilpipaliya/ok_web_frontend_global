@@ -16,13 +16,13 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
   const icons = [
     {
       disabled: () => !undoAllowed(formStoreVertex()?.P.txnId, graph),
-      icon: "mynaui:undo",
+      icon: "ph:arrow-counter-clockwise",
       onClick: () => undo(formStoreVertex()?.P.txnId, graph, setGraph),
       tooltip: "Undo",
     },
     {
       disabled: () => !redoAllowed(formStoreVertex()?.P.txnId, graph),
-      icon: "mynaui:redo",
+      icon: "ph:arrow-clockwise",
       onClick: () => redo(formStoreVertex()?.P.txnId, graph, setGraph),
       tooltip: "Redo",
     },
