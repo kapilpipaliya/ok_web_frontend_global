@@ -334,7 +334,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         class="mt:2 px:3 py:1 bg:blue-60 fg:white r:1"
         onClick={handleSave}
       >
-        Save
+        Submit
       </button>
       {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
     </>

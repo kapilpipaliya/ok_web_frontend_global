@@ -202,7 +202,7 @@ export function FormStatus() {
           class="lh:1.25rem bg:rgb(79,70,229) bg:rgb(99,102,241):hover border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:rgb(255,255,255) f:0.875rem font-weight:600 outline-color:rgb(23,17,123):focus-visible outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem"
           type="button"
         >
-          Save
+          Submit
         </button>
       </div>
     </>
