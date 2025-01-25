@@ -10,12 +10,13 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { isVertex } from "~/lib/graph/mutate/vertex";
 
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
+import { evalExpression } from "~/lib/expression_eval";
 
 export const DataField = (props: { data: any[], expression: string }) => {
   const [graph, setGraph] = useGraph();
@@ -38,8 +39,11 @@ export const DataField = (props: { data: any[], expression: string }) => {
     if (isValidResponse(result)) {
       setGraphData(graph, setGraph, result.graph!, true);
       setOptions(
-        getSelectionOptions(graph, setGraph, expression, repeaterContext)
-          .vertexes,
+        evalExpression(expression, {
+          graph,
+          setGraph,
+          vertexes: repeaterContext,
+        }) || [],
       );
     } else {
       setOptions([]);
@@ -63,9 +67,11 @@ export const DataField = (props: { data: any[], expression: string }) => {
       setInitialState(props.expression);
       return;
     }
-    const data = getSelectionOptions(graph, setGraph, "->$0Data", [
-      meta(),
-    ]).vertexes;
+    const data = evalExpression("->$0Data", {
+      graph,
+      setGraph,
+      vertexes: [meta()!],
+    });
     if (data) {
       setOptions(data);
       return;

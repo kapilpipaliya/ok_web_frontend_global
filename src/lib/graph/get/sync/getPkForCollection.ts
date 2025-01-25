@@ -2,13 +2,16 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./getSelectionOptions";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getPkForCollection(
   graph: Store<GraphInterface>,
   collVertex: Vertex,
 ) {
   const pks =
-    getSelectionOptions(graph, () => 0, "->$0Pk", [collVertex]).vertexes || [];
+    evalExpression("->$0Pk", {
+      graph,
+      vertexes: [collVertex],
+    }) || [];
   return pks.map((pk: Vertex) => pk.P.key);
 }

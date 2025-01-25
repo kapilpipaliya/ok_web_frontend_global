@@ -3,11 +3,12 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { selectedValue } from "../../fields/utils/selectedValue";
 import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getSelectNameValue(
   props: Readonly<{
@@ -25,17 +26,19 @@ export function getSelectNameValue(
     props.graph,
   );
   if (vertex[0]) {
-    return getSelectionOptions(
-      props.graph,
-      props.setGraph,
+    return evalExpression(
       props.attribute.displayExpr ||
         formNameDisplayExprFromVertex(
           props.graph,
           props.attribute.collection,
         ) ||
         `::'P.${IdAttr}'`,
-      [props.graph.vertexes[vertex[0]]],
-    ).vertexes;
+      {
+        graph: props.graph,
+        setGraph: props.setGraph,
+        vertexes: [props.graph.vertexes[vertex[0]]],
+      },
+    );
   }
   return "";
 }

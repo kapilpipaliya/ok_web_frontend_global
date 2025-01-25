@@ -18,7 +18,7 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { type Id, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";

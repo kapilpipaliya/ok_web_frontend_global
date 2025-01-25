@@ -7,7 +7,7 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
+import { evalExpression } from "~/lib/expression_eval";
 
 // Select On Change Handler
 export function onChangeHandler(
@@ -38,9 +38,10 @@ export function onChangeHandler(
     }
 
     const attribute = (
-      getSelectionOptions(graph, setGraph, "-Attr->Attr", [
-        changedFieldAttribute,
-      ]).vertexes || []
+      evalExpression("-Attr->Attr", {
+        graph,
+        vertexes: [changedFieldAttribute],
+      }) || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
     if (!attribute) {
       return;

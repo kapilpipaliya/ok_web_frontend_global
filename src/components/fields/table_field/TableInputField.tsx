@@ -18,7 +18,7 @@ import { AddNewButton } from "~/components/grid/AddNewButton";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
@@ -29,6 +29,7 @@ import { SortableRow } from "./SortableRow";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function TableInputField(
   props: Readonly<
@@ -60,7 +61,11 @@ export function TableInputField(
 
   const tableColumnsTemplate = createMemo(() =>
     sortVertexesByPosition(
-      getSelectionOptions(graph, setGraph, "->Attr", [meta()!]).vertexes || [],
+      evalExpression("->Attr", {
+        graph,
+        setGraph,
+        vertexes: [meta()!],
+      }) || [],
     ),
   );
 

@@ -1,41 +1,43 @@
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./getSelectionOptions";
 import { getMemberVertex } from "./getMemberVertex";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
   const [graph, setGraph] = useGraph();
 
-  const roleRows = getSelectionOptions(graph, setGraph, "->$0Role", [meta]);
-  if (!roleRows.error) {
-    for (const roleRow of roleRows.vertexes!) {
-      const roles = getSelectionOptions(graph, setGraph, "->$0Role", [roleRow]);
-      if (!roles.error) {
+  const roleRows = evalExpression("->$0Role", {
+    graph,
+    vertexes: [meta],
+  });
+  if (roleRows) {
+    for (const roleRow of roleRows) {
+      const roles = evalExpression("->$0Role", {
+        graph,
+        vertexes: [roleRow],
+      });
+      if (roles) {
         const allowedRoleIds = new Set<Id>();
-        for (const role of roles.vertexes!) {
+        for (const role of roles) {
           if (getMemberVertex(graph).P.roles?.includes(role.id)) {
             allowedRoleIds.add(role.id);
           }
         }
         if (allowedRoleIds.size > 0) {
-          const permissionRows = getSelectionOptions(
+          const permissionRows = evalExpression("->$0Perm", {
             graph,
-            setGraph,
-            "->$0Perm",
-            [roleRow],
-          );
-          if (!permissionRows.error) {
-            for (const permissionRow of permissionRows.vertexes!) {
-              const permissions = getSelectionOptions(
+            vertexes: [roleRow],
+          });
+          if (permissionRows) {
+            for (const permissionRow of permissionRows) {
+              const permissions = evalExpression("->$0Perm", {
                 graph,
-                setGraph,
-                "->$0Perm",
-                [permissionRow],
-              );
-              if (!permissions.error) {
+                vertexes: [permissionRow],
+              });
+              if (permissions) {
                 permissionResult.push([
-                  permissions.vertexes?.map((perm: Vertex) => perm.id),
+                  permissions?.map((perm: Vertex) => perm.id),
                   permissionRow.P.scope,
                 ]);
               }

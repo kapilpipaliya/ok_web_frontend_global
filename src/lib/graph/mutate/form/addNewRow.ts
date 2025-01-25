@@ -12,12 +12,12 @@ import {
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { getInEdge } from "../../get/sync/getInEdge";
-import { getSelectionOptions } from "../../get/sync/getSelectionOptions";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { commitTxn } from "../../transaction/commitTxn";
 import { addNewEdge, newEdge } from "../edge";
 import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 import { generateNewTxnId } from "../../transaction/generateNewTxnId";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
@@ -25,7 +25,10 @@ export function getSublistRowsForType(
   vertex: Vertex,
 ) {
   return (
-    getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
+    evalExpression(`->${type}`, {
+      graph,
+      vertexes: [vertex],
+    }) || []
   ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
@@ -40,7 +43,10 @@ export function getSublistRows(
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (
-    getSelectionOptions(graph, () => 0, `->${type}`, [vertex]).vertexes || []
+    evalExpression(`->${type}`, {
+      graph,
+      vertexes: [vertex],
+    }) || []
   ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 

@@ -163,7 +163,10 @@ export const SortableRow = (
         </For>
       </tr>
       {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
-      {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
+      {/* {evalExpression("->$0", {
+        graph,
+        vertexes: [props.joinVertex],
+      })?.length} */}
       <Show when={expandVertex() && expanded()}>
         <tr class="border-bottom:1px|solid|#dddddd border-radius:10px">
           <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>

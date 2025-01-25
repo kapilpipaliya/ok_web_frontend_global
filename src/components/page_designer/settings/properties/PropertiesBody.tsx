@@ -4,7 +4,7 @@ import { MonacoEditor } from 'solid-monaco';
 import { JsonEditorField } from "~/components/fields/JsonEditorField";
 import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
 import { PROPERTIES } from "~/components/styled/constants/constant";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
@@ -85,7 +85,11 @@ export function PropertiesBody() {
     if (!selectedComp) {
       return { error: true };
     }
-    return getSelectionOptions(graph, setGraph, "->$0Prop", [selectedComp]);
+    return evalExpression("->$0Prop", {
+      graph,
+      setGraph,
+      vertexes: [selectedComp],
+    });
   };
 
   return (
@@ -106,7 +110,7 @@ export function PropertiesBody() {
         <ComponentVariantsInput setPropertyValue={setPropertyValue} />
       </Show>
       <FormGroupProperties
-        metaAttributes={selectedComponentProperties().vertexes ?? []}
+        metaAttributes={selectedComponentProperties() ?? []}
         onChange={setPropertyValue}
         selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
         txnId={formStoreVertex()?.P.txnId}

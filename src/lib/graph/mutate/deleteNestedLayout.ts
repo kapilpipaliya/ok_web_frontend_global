@@ -2,8 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "../get/sync/getSelectionOptions";
 import { deleteRow } from "./deleteRow";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function deleteNestedLayout(
   graph: Store<GraphInterface>,
@@ -16,20 +16,21 @@ export function deleteNestedLayout(
   },
 ) {
   const deleteChildren = (vertexes: Vertex[]) => {
-    const children = getSelectionOptions(graph, () => 0, "->Attr", vertexes);
-    for (const child of children.vertexes || []) {
+    const children = evalExpression("->Attr", {
+      graph,
+      vertexes,
+    });
+    for (const child of children || []) {
       // delete children
       deleteChildren([child]);
 
       // delete properties:
-      const AttrProps = getSelectionOptions(
+      const AttrProps = evalExpression("->$0Prop", {
         graph,
-        () => 0,
-        "->$0Prop",
         vertexes,
-      );
-      if (!AttrProps.error) {
-        for (const vertex of AttrProps.vertexes!) {
+      });
+      if (AttrProps) {
+        for (const vertex of AttrProps) {
           // delete in edges and out edges of properties
           deleteRow(vertex, false, graph, setGraph, txnId);
           // no commitTxn because, it's not realtime

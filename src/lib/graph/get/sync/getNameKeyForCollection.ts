@@ -1,15 +1,17 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface, Vertex, VertexMap } from "~/lib/graph/graph";
-
-import { getSelectionOptions } from "./getSelectionOptions";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+  
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getNameKeyForCollection(
   graph: Store<GraphInterface>,
   collVertex: Vertex,
 ): string[] {
   const pks =
-    getSelectionOptions(graph, () => 0, "->$0NameKey", [collVertex]).vertexes ||
-    [];
-  return pks.map((pk: VertexMap) => pk.P.key);
+    evalExpression("->$0NameKey", {
+      graph,
+      vertexes: [collVertex],
+    }) || [];
+  return pks.map((pk: Vertex) => pk.P.key);
 }

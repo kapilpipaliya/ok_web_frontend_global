@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptions } from "./getSelectionOptions";
+import { evalExpression } from "~/lib/expression_eval";
 
 function getComponentProperties(
   graph: Store<GraphInterface>,
@@ -11,12 +11,13 @@ function getComponentProperties(
 ) {
   const metaData = metaRows.reduce(
     (acc, curr) => {
-      const key = getSelectionOptions(
-        graph,
-        setGraph,
+      const key = evalExpression(
         "->$0Name::'P.key'||::'P.key'",
-        [curr],
-      ).vertexes;
+        {
+          graph,
+          setGraph,
+          vertexes: [curr],
+      });
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
       }
@@ -39,6 +40,9 @@ export function getPropsFromMetaExpression(
   }
 
   const metaRows =
-    getSelectionOptions(graph, setGraph, meta, [data]).vertexes || [];
+    evalExpression(meta, {
+      graph,
+      vertexes: [data],
+    }) || [];
   return getComponentProperties(graph, setGraph, metaRows);
 }

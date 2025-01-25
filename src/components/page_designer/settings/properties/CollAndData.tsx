@@ -6,7 +6,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -23,6 +23,7 @@ import {
 } from "../../context/LayoutContext";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { evalExpression } from "~/lib/expression_eval";
 
 function initializeMetaVertex(
   graph: GraphInterface,
@@ -121,14 +122,16 @@ export function CollAndData() {
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = getSelectionOptions(graph, setGraph, "->Attr", [
-    metaVertex,
-  ]);
+  const collMetaVertex = evalExpression("->Attr", {
+    graph,
+    setGraph,
+    vertexes: [metaVertex],
+  }) ?? [];
   const onCollectionChange = handleCollectionChange(
     graph,
     setGraph,
     formStoreVertex,
-    collMetaVertex.vertexes,
+    collMetaVertex,
   );
 
   return (
@@ -140,7 +143,7 @@ export function CollAndData() {
             data={graph.vertexes[formStoreVertex()?.P.selectedId]}
             disabled={false}
             isNoPermissionCheck={true}
-            meta={collMetaVertex.vertexes![2]}
+            meta={collMetaVertex![2]}
             noLabel
             title={""}
             txnId={formStoreVertex()?.P.txnId}
@@ -158,7 +161,7 @@ export function CollAndData() {
         data={graph.vertexes[formStoreVertex()?.P.selectedId]}
         disabled={false}
         isRealTime={false}
-        meta={collMetaVertex.vertexes![0]}
+        meta={collMetaVertex![0]}
         onChange={onCollectionChange}
         title={"Select Collection"}
         txnId={formStoreVertex()?.P.txnId}
@@ -169,7 +172,7 @@ export function CollAndData() {
         data={graph.vertexes[formStoreVertex()?.P.selectedId]}
         disabled={false}
         isRealTime={false}
-        meta={collMetaVertex.vertexes![1]}
+        meta={collMetaVertex![1]}
         title={"Select Data"}
         txnId={formStoreVertex()?.P.txnId}
       />

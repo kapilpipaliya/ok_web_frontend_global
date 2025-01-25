@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
+import { evalExpression } from "~/lib/expression_eval";
 
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 // Component to display the default value
@@ -12,9 +12,11 @@ export function DefaultValue(
   return (
     <Show when={props.metaVertex.P.defaultValue}>
       {
-        getSelectionOptions(graph, setGraph, props.metaVertex.P.defaultValue, [
-          props.joinVertex,
-        ]).vertexes
+        evalExpression(props.metaVertex.P.defaultValue, {
+          graph,
+          setGraph,
+          vertexes: [props.joinVertex],
+        })
       }
     </Show>
   );

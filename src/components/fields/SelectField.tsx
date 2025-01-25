@@ -15,7 +15,7 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -30,6 +30,7 @@ import { setSelectValueHelper } from "./utils/setSelectValueHelper";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { evalExpression } from "~/lib/expression_eval";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
@@ -95,8 +96,11 @@ export function SelectField(
 
   const _getDynamicOptions = () => {
     return (
-      getSelectionOptions(graph, setGraph, getCollection(), [data()])
-        .vertexes || []
+      evalExpression(getCollection(), {
+        graph,
+        setGraph,
+        vertexes: [data()],
+      }) || []
     );
   };
 
@@ -114,9 +118,11 @@ export function SelectField(
         setOptions(parsedOptions);
         return parsedOptions;
       } else if (collection && meta().P.useLocalStorage) {
-        parsedOptions = getSelectionOptions(graph, setGraph, collection, [
-          data(),
-        ]).vertexes || [];
+        parsedOptions = evalExpression(collection, {
+          graph,
+          setGraph,
+          vertexes: [data()],
+        }) || [];
         setOptions(parsedOptions);
         return parsedOptions;
       }
@@ -234,12 +240,13 @@ export function SelectField(
           {(vertexId) => (
             <>
               {
-                getSelectionOptions(
-                  graph,
-                  setGraph,
+                evalExpression(
                   meta().P.displayExpr || `::'P.${IdAttr}'`,
-                  [graph.vertexes[vertexId]],
-                ).vertexes
+                  {
+                    graph,
+                    vertexes: [graph.vertexes[vertexId]],
+                  },
+                )
               }
             </>
           )}

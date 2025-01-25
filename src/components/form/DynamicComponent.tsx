@@ -20,7 +20,7 @@ import { usePreviewContext } from "~/components/page_designer/context/PreviewCon
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import {
   type GraphInterface,
   IdAttr,
@@ -60,8 +60,11 @@ export function getText(
 ) {
   try {
     return (
-      (getSelectionOptions(graph, setGraph, projection, repeaterContext)
-        .vertexes as string) || projection
+      (evalExpression(projection, {
+        graph,
+        setGraph,
+        vertexes: repeaterContext,
+      }) as string) || projection
     );
   } catch (error) {
     console.error("Error in getText:", error);
@@ -76,8 +79,11 @@ export function getUrl(
   repeaterContext: Vertex[],
 ) {
   try {
-    const url = getSelectionOptions(graph, setGraph, projection, repeaterContext)
-      .vertexes as string | undefined;
+    const url = evalExpression(projection, {
+      graph,
+      setGraph,
+      vertexes: repeaterContext,
+    }) as string | undefined;
     return typeof url === "string" && url.startsWith("/") ? url : undefined;
   } catch (error) {
     console.error("Error in getUrl:", error);

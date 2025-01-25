@@ -8,8 +8,9 @@ import {
   Show,
   useContext,
 } from "solid-js";
+import { evalExpression } from "~/lib/expression_eval";
 
-import { getSelectionOptions } from "~/lib/graph/get/sync/getSelectionOptions";
+
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
@@ -37,8 +38,10 @@ export function TreeView(
   const RenderTreeNode = (TreeItemProps: any) => {
     const isExpanded = () => expandedItems().has(props.meta.id);
     const childrenLength = () =>
-      getSelectionOptions(graph, setGraph, "->Attr", [props.meta]).vertexes
-        ?.length || 0;
+      evalExpression("->Attr", {
+        graph,
+        vertexes: [props.meta],
+      })?.length || 0;
     return (
       <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
         <span class={"display:inline-flex"}>
