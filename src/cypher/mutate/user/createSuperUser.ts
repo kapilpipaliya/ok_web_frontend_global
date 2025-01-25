@@ -30,9 +30,6 @@ export async function createSuperUser(
       })
       CREATE (s:SubDomain {
         key: "super",
-        driverPort: 1102,
-        labPort: 1104,
-        logsPort: 1103
       })
       CREATE (u)-[:UserSubDomain]->(s)
       RETURN u, s

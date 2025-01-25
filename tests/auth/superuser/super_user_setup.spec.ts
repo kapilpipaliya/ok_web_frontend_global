@@ -14,10 +14,7 @@ test.describe('super user setup', () => {
     const superDatabase = result.records.find(record => record.get("name") === "super");
 
     if (!superDatabase) {
-      const driverPort = 1102;
-      const logsPort = 1103;
-      const labPort = 1104;
-      await createDatabase("super", driverPort, logsPort, labPort);
+      await createDatabase("super");
     }
 
     await session.close();

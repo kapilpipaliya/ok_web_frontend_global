@@ -8,10 +8,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 export async function createUserInSuperDB(
   superTx: Transaction,
   userData: {
-    driverPort: number;
     email: string;
-    labPort: number;
-    logsPort: number;
     password: string;
     subDomain: string[];
     username: string;
@@ -36,15 +33,9 @@ export async function createUserInSuperDB(
 
   for (const subDomain of userData.subDomain) {
     const createSubDomainQuery = `CREATE (s:SubDomain {
-            key: $subDomain,
-            driverPort: $driverPort,
-            labPort: $labPort,
-            logsPort: $logsPort
+            key: $subDomain
         }) RETURN s;`;
     const createSubDomainParams = {
-      driverPort: userData.driverPort,
-      labPort: userData.labPort,
-      logsPort: userData.logsPort,
       subDomain,
     };
     const createSubDomainResult = await superTx.run(

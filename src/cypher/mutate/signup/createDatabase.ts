@@ -2,9 +2,7 @@ import { auth, driver, type Driver } from "neo4j-driver";
 
 export async function createDatabase(
   subdomain: string,
-  driverPort: number,
-  logsPort: number,
-  labPort: number,
+
 ) {
   let neo4JDriver: Driver | undefined = undefined;
   try {
