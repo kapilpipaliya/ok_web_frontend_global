@@ -3,10 +3,10 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { componentDrop } from "~/components/page_designer/functions/drop/componentDrop";
-import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
-
-import { saveUndoPoint } from "../../../lib/graph/transaction/saveUndoPoint";
+  
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { sortChildren } from "./sortChildren";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function cloneLayoutAndChildren(
   layoutVertex: Vertex,
@@ -24,7 +24,10 @@ export function cloneLayoutAndChildren(
   const position = toExternalVertex ? "center" : "after";
 
   const toParentVertex =
-    toExternalVertex ?? getParentVertex(["Attr"], toVertex, graph).vertex;
+    toExternalVertex ?? evalExpression("<-Attr", {
+      graph,
+      vertexes: [toVertex],
+    })?.[0];
 
   const layoutRowId = componentDrop(
     formData,

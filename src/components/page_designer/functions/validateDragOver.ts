@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,
@@ -24,8 +24,11 @@ export function validateDragOver(
   // Don't allow parent to move inside children.
   let parentVertex = graph.vertexes[toVertexId];
   while (true) {
-    const parentResult = getParentVertex(["Attr"], parentVertex, graph);
-    if (parentResult.error) {
+    const parentResult = evalExpression("<-Attr", {
+      graph,
+      vertexes: [parentVertex],
+    })?.[0];
+    if (!parentResult) {
       break;
     }
     if (parentResult.vertex?.id === fromVertex.id) {
@@ -48,11 +51,10 @@ export function validateDragOver(
       // }
     }
   } else {
-    const toParentVertex = getParentVertex(
-      ["Attr"],
-      graph.vertexes[toVertexId],
+    const toParentVertex = evalExpression("<-Attr", {
       graph,
-    ).vertex;
+      vertexes: [graph.vertexes[toVertexId]],
+    })?.[0];
 
     if (!toParentVertex) {
       // Dont allow drag before and after first element

@@ -6,11 +6,11 @@ import { handlePageDrag } from "~/components/page_designer/functions/handlePageD
 import { handleParentChange } from "~/components/page_designer/functions/handleParentChange";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
-import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
 import { PageDesignerLabels } from "./PageDesignerLabels";
 import { componentDrop } from "./drop/componentDrop";
+import { evalExpression } from "~/lib/expression_eval";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,
@@ -33,11 +33,17 @@ export async function handleDropAtPosition(
   ) {
     return;
   }
-  const fromParentVertex = getParentVertex(["Attr"], fromVertex, graph);
+  const fromParentVertex = evalExpression("<-Attr", {
+    graph,
+    vertexes: [fromVertex],
+  })?.[0];
   const toParentVertex =
     position === "center"
       ? toVertex
-      : getParentVertex(["Attr"], toVertex, graph).vertex;
+      : evalExpression("<-Attr", {
+          graph,
+          vertexes: [toVertex],
+        })?.[0];
 
   if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Component") {
     const layoutRowId = componentDrop (
