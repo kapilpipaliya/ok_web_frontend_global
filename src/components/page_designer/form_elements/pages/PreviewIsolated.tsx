@@ -6,6 +6,7 @@ export function PreviewIsolated(props: { formId: Id; graph: GraphInterface; setG
   return <GraphContext.Provider value={[props.graph, props.setGraph]}>
     <PageViewWrapper
       formId={props.formId}
-      isNoPermissionCheck={true} />
+      isNoPermissionCheck={true}
+      hideSaveCancelButton />
   </GraphContext.Provider>;
 }

@@ -89,6 +89,7 @@ export function ComponentItem(
       return;
     }
     // handle any other logic
+    props.setPreviewPageId(null);
   };
 
   const onDragEnd = () => {
@@ -174,13 +175,19 @@ export function ComponentItem(
           </div>
         </div>
       </TreeItemContainer>
-      <Show when={props.previewPageId === props.child.id}>
+      <Show when={props.child.L[0] !== "Comp" && props.previewPageId === props.child.id}>
         <DropdownMenu
           onClickOutside={() => props.setPreviewPageId(null)}
-          onMouseLeave={() => props.setPreviewPageId(null)}
+          onMouseLeave={(e) => {
+            if (!menuRef?.contains(e.relatedTarget as Node)) {
+              props.setPreviewPageId(null);
+            }
+          }}
           parentRef={menuRef!}
+          ref={setFloating}
+          offset={{crossAxis: 30}}
         >
-          {toTitle(props.child.P.key)} Preview
+          {/* {toTitle(props.child.P.key)} Preview */}
           <PreviewIsolated formId={props.child.id} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
         </DropdownMenu>
       </Show>
