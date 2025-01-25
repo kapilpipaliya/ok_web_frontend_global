@@ -28,7 +28,7 @@ export const DataField = (props: { data: any[], expression: string }) => {
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal("");
-  const repeaterContext = useRepeaterVertexContext();
+  const dataContext = useRepeaterVertexContext();
 
   const setInitialState = async (expression: string) => {
     setIsFetching(true);
@@ -42,7 +42,7 @@ export const DataField = (props: { data: any[], expression: string }) => {
         evalExpression(expression, {
           graph,
           setGraph,
-          vertexes: repeaterContext,
+          vertexes: dataContext,
         }) || [],
       );
     } else {

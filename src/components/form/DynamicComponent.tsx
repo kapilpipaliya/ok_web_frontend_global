@@ -56,14 +56,14 @@ export function getText(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  repeaterContext: Vertex[],
+  dataContext: Vertex[],
 ) {
   try {
     return (
       (evalExpression(projection, {
         graph,
         setGraph,
-        vertexes: repeaterContext,
+        vertexes: dataContext,
       }) as string) || projection
     );
   } catch (error) {
@@ -76,13 +76,13 @@ export function getUrl(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  repeaterContext: Vertex[],
+  dataContext: Vertex[],
 ) {
   try {
     const url = evalExpression(projection, {
       graph,
       setGraph,
-      vertexes: repeaterContext,
+      vertexes: dataContext,
     }) as string | undefined;
     return typeof url === "string" && url.startsWith("/") ? url : undefined;
   } catch (error) {
@@ -284,7 +284,7 @@ export function DynamicComponent(
         return isReadOnly();
       },
       ref,
-      get repeaterContext() {
+      get dataContext() {
         return runWithOwner(owner, () => useRepeaterVertexContext());
       },
       runWithOwner: runWithOwnerFunction,
