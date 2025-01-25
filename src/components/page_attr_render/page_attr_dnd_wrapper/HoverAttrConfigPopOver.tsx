@@ -1,17 +1,17 @@
 import { Icon } from "@iconify-icon/solid";
 
 import { useZIndex } from "~/components/fields/ZIndex";
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { ComponentName } from "./ComponentName";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () =>
-    getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
+    getComponentLabel(graph, props.item);
   return (
     <span class="position:relative ">
       <div
@@ -21,7 +21,7 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
           class="flex"
           icon={iconMap[getComponentName() as keyof typeof iconMap]}
         />
-        <ComponentName componentName={getComponentName()} />
+        <ComponentName componentName={getComponentName()!} />
       </div>
     </span>
   );

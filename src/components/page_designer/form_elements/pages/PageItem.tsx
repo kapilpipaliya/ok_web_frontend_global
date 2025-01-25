@@ -32,8 +32,7 @@ export function PageItem(
     new Set<Vertex>(),
   );
 
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => graph.vertexes[layoutStoreVertex()?.P.formId!] as Vertex<FormStoreObject>;
 
   let menuRef: HTMLDivElement;
 
@@ -83,7 +82,7 @@ export function PageItem(
       setGraph,
       formStoreVertex()?.P.txnId,
       graph.vertexes[layoutStoreVertex()?.P.draggedVertexIds[0]],
-      formStoreVertex()?.P || {},
+      graph.vertexes[formStoreVertex()?.P.formDataId],
       formStoreVertex()?.P.selectedId !== -1
         ? formStoreVertex()?.P.selectedId
         : formStoreVertex()?.P.formDataId,

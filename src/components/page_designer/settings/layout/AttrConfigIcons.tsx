@@ -3,7 +3,6 @@ import { createSelector, Show } from "solid-js";
 import { ImportHtmlButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ImportHtmlButton";
 import { InsertButtons } from "~/components/page_attr_render/page_attr_dnd_wrapper/InsertButtons";
 import { SaveAsTemplateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
@@ -13,9 +12,10 @@ import { DuplicateButton } from "~/components/page_attr_render/page_attr_dnd_wra
 import { DeleteButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
 import { ParentButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ParentButton";
 import { HideShowIcon, toggleHidden } from "./HideShowIcon";
+import { getComponentLabel } from "../../functions/getComponentLabel";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef: HTMLElement }>) {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
@@ -25,7 +25,7 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef:
   const iconSize = 32;
 
   const getComponent = () =>
-    getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.key as string;
+    getComponentLabel(graph, props.metaVertex);
 
   return (
     <DropdownMenu
@@ -56,10 +56,8 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef:
             size={iconSize}
           />
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
-          <HideShowIcon metaVertex={props.metaVertex} iconSize={iconSize} onClick={() => {
-            toggleHidden(props.metaVertex.id, formStoreId!, graph, setGraph);
-          }} />
-          <DeleteButton componentName={getComponent()} item={props.metaVertex} size={iconSize} class="color:red" />
+          <HideShowIcon metaVertex={props.metaVertex} iconSize={iconSize} />
+          <DeleteButton componentName={getComponent()!} item={props.metaVertex} size={iconSize} class="color:red" />
           &nbsp;
         </Show>
       </div>

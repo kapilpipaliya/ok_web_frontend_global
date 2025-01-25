@@ -15,7 +15,6 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";

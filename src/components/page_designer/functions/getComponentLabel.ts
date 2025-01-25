@@ -1,10 +1,15 @@
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function getComponentLabel(
   graph: GraphInterface,
   vertex: Vertex,
 ): string | undefined {
-  return getChildVertex(graph, ["$0Comp"], vertex).vertex?.P.key;
+  const vertexes = evalExpression("->$0Comp", {
+    graph,
+    vertexes: [vertex],
+  });
+
+  return vertexes?.[0]?.P.key;
 }

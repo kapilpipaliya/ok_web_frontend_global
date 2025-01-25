@@ -6,7 +6,6 @@ import { batch, onCleanup } from "solid-js";
 import type { GraphInterface, Id, Vertex } from "../../graph";
 
 import { cloneVertexWithEdges } from "../../get/sync/cloneVertexWithEdges";
-import { getChildVertex } from "../../get/sync/getChildVertex";
 import { addNewEdge, newEdge } from "../edge";
 import { mergeVertexProperties } from "../vertex";
 import { newRow } from "./addNewRow";

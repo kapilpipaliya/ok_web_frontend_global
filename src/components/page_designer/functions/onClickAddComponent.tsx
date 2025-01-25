@@ -2,11 +2,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
-import { getParentVertex } from "~/lib/graph/get/sync/getParentVertex";
 import { sortChildren } from "./sortChildren";
 import { componentDrop } from "./drop/componentDrop";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,
@@ -16,12 +15,22 @@ export function onClickAddComponent(
   formData: any,
   toVertexId: Id | number,
 ) {
+  debugger;
   let toVertex = graph.vertexes[toVertexId];
-  const componentName = getChildVertex(graph, ["$0Comp"], toVertex).vertex;
-  if (!componentName?.P.child) {
-    toVertex = getParentVertex(["Attr"], toVertex, graph).vertex!;
-  }
-  const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
+  const component = evalExpression("->$0Comp", {
+    graph,
+    vertexes: [toVertex],
+  });
+  // if (!component?.[0]?.P.child) {
+  //   toVertex = evalExpression("<-Attr", {
+  //     graph,
+  //     vertexes: [toVertex],
+  //   })?.[0];
+  // }
+  const toParentVertex = evalExpression("<-Attr", {
+    graph,
+    vertexes: [toVertex],
+  })?.[0];
 
   const layoutRowId = componentDrop(
     formData,

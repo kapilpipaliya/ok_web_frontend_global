@@ -1,7 +1,6 @@
 import { useZIndex } from "~/components/fields/ZIndex";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { IconButton } from "~/components/styled/IconButton";
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
@@ -14,6 +13,7 @@ import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
 import { FormStoreObject } from "~/components/form/context/FormContext";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
@@ -29,7 +29,7 @@ export function SelectedAttrConfigPopOver(
 
   const [graph, setGraph] = useGraph();
   const getComponentName = () =>
-    getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.key;
+    getComponentLabel(graph, props.item);
 
   const iconSize = 20;
   return (
@@ -47,13 +47,13 @@ export function SelectedAttrConfigPopOver(
           title="Move"
         />
         <InsertButtons item={props.item} size={iconSize} />
-        <ComponentName componentName={getComponentName()} />
+        <ComponentName componentName={getComponentName()!} />
         <ParentButton item={props.item} size={iconSize} />
         <DuplicateButton item={props.item} size={iconSize} />
         <SaveAsTemplateButton item={props.item} size={iconSize} />
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
-        <DeleteButton componentName={getComponentName()} item={props.item} size={iconSize} class="color:red" />
+        <DeleteButton componentName={getComponentName()!} item={props.item} size={iconSize} class="color:red" />
       </div>
     </span>
   );

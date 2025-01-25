@@ -1,9 +1,13 @@
 import type { Store } from "solid-js/store";
+import { evalExpression } from "~/lib/expression_eval";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { getChildVertex } from "~/lib/graph/get/sync/getChildVertex";
 
 export function getDataVertex(graph: Store<GraphInterface>, item?: Vertex) {
-  return item && getChildVertex(graph, ["$0Data"], item).vertex;
+  const vertexes = evalExpression("->$0Data", {
+    graph,
+    vertexes: [item],
+  });
+  return vertexes?.[0];
 }
