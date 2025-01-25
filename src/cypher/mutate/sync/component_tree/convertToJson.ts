@@ -35,32 +35,9 @@ export function getComponentTree(): ComponentNode[] {
 
 
   const yamlContent = `- Root:
-  - Accordion:
-    - Accordion.Item:
-      - Accordion.Trigger
-      - Accordion.Content
   - Box
   - Button
   - CheckBox
-  - Dialog:
-      - Dialog.Trigger
-      - Dialog.Portal:
-          - Dialog.Overlay
-          - Dialog.Content:
-              - Dialog.Close
-              - Dialog.Label
-              - Dialog.Description
-  - Disclosure:
-    - Disclosure.Trigger
-    - Disclosure.Content
-  - Drawer:
-    - Drawer.Trigger
-    - Drawer.Portal:
-        - Drawer.Overlay
-        - Drawer.Content:
-            - Drawer.Close
-            - Drawer.Label
-            - Drawer.Description
   - DynamicTable
   - FileUploader
   - Form
@@ -68,10 +45,7 @@ export function getComponentTree(): ComponentNode[] {
   - Fragment
   - Icon
   - Image
-  - KeyedContext
   - MultiSelect
-  - OtpField:
-    - OtpField.Input
   - Page
   - Portal
   - Popover:
@@ -87,10 +61,7 @@ export function getComponentTree(): ComponentNode[] {
   - PullToRefresh
   - RadioGroup:
     - Radio
-  - Repeater
-  - Resizable:
-    - Resizable.Handle
-    - Resizable.Panel
+  - Data
   - Select
   - Steps:
     - Step
@@ -113,3 +84,34 @@ export function getComponentTree(): ComponentNode[] {
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));
 }
+
+/*
+  - Accordion:
+    - Accordion.Item:
+      - Accordion.Trigger
+      - Accordion.Content
+  - Dialog:
+      - Dialog.Trigger
+      - Dialog.Portal:
+          - Dialog.Overlay
+          - Dialog.Content:
+              - Dialog.Close
+              - Dialog.Label
+              - Dialog.Description
+  - Disclosure:
+    - Disclosure.Trigger
+    - Disclosure.Content
+  - Drawer:
+    - Drawer.Trigger
+    - Drawer.Portal:
+        - Drawer.Overlay
+        - Drawer.Content:
+            - Drawer.Close
+            - Drawer.Label
+            - Drawer.Description
+  - Resizable:
+    - Resizable.Handle
+    - Resizable.Panel
+  - OtpField:
+    - OtpField.Input
+*/

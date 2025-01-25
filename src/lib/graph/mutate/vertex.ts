@@ -8,7 +8,7 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
-import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
+import { broadcastToAllChannels } from "~/lib/graph/mutate/channel";
 import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 
 // return a new Vertex

@@ -13,7 +13,7 @@ import type {
 
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
+import { broadcastToAllChannels } from "~/lib/graph/mutate/channel";
 
 export interface UpdateOptions {
   skipExisting?: boolean;

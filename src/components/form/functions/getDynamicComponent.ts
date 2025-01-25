@@ -52,7 +52,6 @@ import { CheckboxField } from "~/components/fields/CheckboxField";
 import { FragmentField } from "~/components/fields/FragmentField";
 import { IconField } from "~/components/fields/IconField";
 import { ImageField } from "~/components/fields/ImageField";
-import { KeyedContext } from "~/components/fields/KeyedContext";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import { PullToRefresh } from "~/components/fields/PullToRefresh";
 import { RadioField } from "~/components/fields/RadioField";
@@ -101,7 +100,6 @@ export const componentsMap: Record<string, any> = {
   Fragment: FragmentField,
   Icon: IconField,
   Image: ImageField,
-  KeyedContext: KeyedContext,
   // HtmlEditor: KobalteTextField,
   MultiSelect: SelectField,
   // Link: Link,

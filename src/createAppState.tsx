@@ -34,6 +34,7 @@ export function createAppState() {
       userRoles: [],
       userSettingId: "",
       url: "",
+      initialDataFetchError: "",
     } as GlobalProperties,
     IN: {},
     OUT: {}

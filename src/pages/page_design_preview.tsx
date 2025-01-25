@@ -3,7 +3,7 @@ import { useGraph, Vertex } from '~/lib/graph/graph';
 import { PageView } from "~/components/page_attr_render/PageView";
 import { DesignerFormIdContext, DesignerLayoutStoreContext, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
 import { Show, createSignal } from 'solid-js';
-import { getChannel, handleChannelMessage } from '~/components/page_designer/layout/channel';
+import { getChannel, handleChannelMessage } from '~/lib/graph/mutate/channel';
 import { handleDrop } from '~/components/page_designer/event_handler/handleDrop';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { resetDragDropState } from '~/components/page_designer/event_handler/resetDragDropState';

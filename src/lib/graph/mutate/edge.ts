@@ -6,7 +6,7 @@ import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
-import { broadcastToAllChannels } from "~/components/page_designer/layout/channel";
+import { broadcastToAllChannels } from "~/lib/graph/mutate/channel";
 import { getVertexOldIdToNewIdMap, getEdgeOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 
 export function newEdge(

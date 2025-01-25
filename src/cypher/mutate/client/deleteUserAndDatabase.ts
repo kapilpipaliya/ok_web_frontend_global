@@ -1,7 +1,6 @@
 import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
-import { removeDockerComposeDirectory } from "~/server/docker_compose/remove";
 import { getSubDomain } from "~/server/getSubDomain";
 
 // unused function, To be used in the future
@@ -12,21 +11,12 @@ export async function deleteUserAndDatabase(userName: string) {
   const subDomain = await getSubDomain(host);
 
   const dbSessionSource = (await getDriver()).session({database: subDomain});
-  // const subDomainForUser = subDomain + "-user"; // TODO Fix this
   try {
-    // const removeDockerComposeRes =
-    //   await removeDockerComposeDirectory(subDomainForUser);
-    // if (!removeDockerComposeRes) {
-    //   return {
-    //     error: false,
-    //     message: "Docker Removed successfully",
-    //   };
-    // }
-
     // Delete the Neo4j database named subDomain
     await dbSessionSource.run(`DROP DATABASE ${subDomain}`);
 
     // TODO: delete user from super user database too
+    // TODO: delete user directory from server
     return {
       error: false,
       message: "User and database deleted successfully",

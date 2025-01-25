@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { GlobalProperties, GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
@@ -22,7 +22,7 @@ export function getInitialDataAndSetToGraph(
       }
     }
     const globalStoreId = "globalStoreId";
-    mergeVertexProperties(0, globalStoreId, graph[0], graph[1], { componentIdMap: vertexMap });
+    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph[0], graph[1], { componentIdMap: vertexMap });
   }
 
   const getData = async () => {

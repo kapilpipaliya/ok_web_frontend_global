@@ -48,8 +48,6 @@
     "case-switcher-js": "^1.1.10",
     "corvu": "^0.7.1",
     "debounce": "^2.2.0",
-    "docker-compose": "^1.1.0",
-    "dockerode": "^4.0.3",
     "fast-memoize": "^2.5.2",
     "formidable": "^3.5.2",
     "idb-keyval": "^6.2.1",

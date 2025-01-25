@@ -1,5 +1,5 @@
 import { Page } from "@playwright/test";
-import { SignUpData } from "./signup_admin.spec";
+import { SignUpData } from "../data/signUpData";
 
 export async function fillSignUpForm(page: Page, data: SignUpData): Promise<void> {
   await page.getByPlaceholder('Enter SubDomain').fill(data.subDomain);

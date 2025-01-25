@@ -62,6 +62,7 @@ export interface GlobalProperties {
   userRoles: Id[];
   userSettingId: Id;
   url: string;
+  initialDataFetchError: string;
   // isAuthenticated: false,
   // theme: "light" as "light" | "dark",
   // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,

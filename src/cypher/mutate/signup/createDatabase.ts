@@ -6,24 +6,6 @@ export async function createDatabase(
   logsPort: number,
   labPort: number,
 ) {
-  // Create Docker container with configured ports
-
-  /*const dockerError = await executeDockerCompose(
-    subdomain,
-    driverPort,
-    logsPort,
-    labPort,
-  );
-  if (dockerError) {
-    throw Error(dockerError);
-  }
-
-  const driver = await connectToNeo4jWithRetry(
-    `bolt://localhost:${driverPort}`,
-    "",
-    "",
-    20,
-  );*/
   let neo4JDriver: Driver | undefined = undefined;
   try {
     // Create a new database with the subdomain name

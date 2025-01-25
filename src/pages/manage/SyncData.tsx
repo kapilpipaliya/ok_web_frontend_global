@@ -7,7 +7,6 @@ import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
-// TODO: Full Navbar Sync from super
 const transferNodes = [
   { key: "Component", value: "Comp" },
   { key: "Data Type", value: "DataType" },
