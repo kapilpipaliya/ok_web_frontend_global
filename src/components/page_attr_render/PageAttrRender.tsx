@@ -17,6 +17,7 @@ export function PageAttrRender(
     data?: Vertex;
     filter?: (vertex: Vertex) => boolean;
     metaVertex: Vertex;
+    isNoPermissionCheck: boolean;
   }>,
 ) {
   const parentItems = usePageRenderContext();
@@ -26,14 +27,6 @@ export function PageAttrRender(
   const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   const [previewStore, setPreviewStore] = usePreviewContext();
 
-  const previewStoreProxy = new Proxy(previewStore, {
-    get(target, prop) {
-      if (prop === 'isDesignMode') return false;
-      if (prop === 'isDesignModePrev') return target.isDesignMode;
-      return target[prop as keyof typeof target];
-    }
-  });
-
   const childrenAttrs = createMemo(() => {
     const attrs = getChildrenAttrs(graph, setGraph, props.metaVertex);
     return props.filter ? attrs.filter(props.filter) : attrs;
@@ -42,39 +35,16 @@ export function PageAttrRender(
   return (
     <For each={childrenAttrs()}>
       {(item, _index) => {
-        const componentName = createMemo(
-          () =>
-            item.P.componentName ||
-            getComponentLabel(graph, item),
-        );
-        const parentComponent = createMemo(() => {
-          const parentMeta = getLastItem(parentItems, 1)?.[0].context.meta;
-          if (!parentMeta) return undefined;
-          return getComponentLabel(
-            graph,
-            parentMeta
-          );
-        });
-        // TODO: Is This Parent Vertex is ok?
-        // Need Repetitive parent checks?
-        // @ts-ignore
-        const _parentData = () => {
-          return getDataVertex(
-            graph,
-            getLastItem(parentItems, 1)?.[0].context.meta,
-          );
-        };
 
         const Content = () => {
           return (
             <DynamicComponent
-              // NOTE: For repeater we cant use parentData
-              componentName={componentName()}
               // data={props.data || getDataVertex(item) || parentData()}
               data={props.data}
               // onChange={props.onChange}
               meta={item}
               txnId={formVertex()?.P.txnId}
+              isNoPermissionCheck={props.isNoPermissionCheck}
             />
           );
         };
@@ -119,15 +89,6 @@ export function PageAttrRender(
               <Switch>
                 <Match when={!previewStore.isDesignMode}>
                   <Content />
-                </Match>
-                <Match when={componentName() === "Component"}>
-                  <PageAttrDnDWrapper item={item}>
-                    <PreviewContext.Provider 
-                      value={[previewStoreProxy, setPreviewStore]}
-                    >
-                      <Content />
-                    </PreviewContext.Provider>
-                  </PageAttrDnDWrapper>
                 </Match>
                 <Match when={true}>
                   <PageAttrDnDWrapper item={item}>

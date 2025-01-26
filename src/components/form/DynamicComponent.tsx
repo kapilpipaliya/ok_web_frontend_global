@@ -16,7 +16,7 @@ import {
 import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { PreviewContext, usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
@@ -121,7 +121,7 @@ export function DynamicComponent(
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
   const parentMeta = () => parentRenderContext()?.context.meta;
-  const [previewStore] = usePreviewContext();
+  const [previewStore, setPreviewStore] = usePreviewContext();
   const owner = getOwner();
 
   const runWithOwnerFunction = <T,>(fn: () => T): T | undefined => {
@@ -290,7 +290,10 @@ export function DynamicComponent(
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
       zIndex,
-      fns: functionProxy
+      fns: functionProxy,
+      get txnId() {
+        return props.txnId!;
+      }
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
@@ -658,6 +661,14 @@ export function DynamicComponent(
     }
   });
 
+  const previewStoreProxy = new Proxy(previewStore, {
+    get(target, prop) {
+      if (prop === 'isDesignMode') return false;
+      if (prop === 'isDesignModePrev') return target.isDesignMode;
+      return target[prop as keyof typeof target];
+    }
+  });
+
   const Content = () => (
     <>
       <ErrorBoundary
@@ -691,6 +702,7 @@ export function DynamicComponent(
           isViewMode={isViewMode()}
           readOnly={isReadOnly()}
           {...dynamicProps()}
+          hidden={null}
           // merged class
           {...[
             ...Object.keys(deNullifyAndMergeCSS()).filter((key) =>
@@ -731,6 +743,21 @@ export function DynamicComponent(
       <DisplayError />
     </>
   );
+
+  const ContentWrapper = () => {
+    return <Switch>
+      <Match when={componentName() === "Component"}>
+        <PreviewContext.Provider
+          value={[previewStoreProxy, setPreviewStore]}
+        >
+          <Content />
+        </PreviewContext.Provider>
+      </Match>
+      <Match when={true}>
+        <Content />
+      </Match>
+    </Switch>
+  }
 
   return (
     <>
@@ -783,9 +810,9 @@ export function DynamicComponent(
                 props.meta.P.validation?.required ||
                 expressionProperties().required
               }
-              //tooltip={(props.meta).P.tooltip}
+            //tooltip={(props.meta).P.tooltip}
             >
-              <Content />
+              <ContentWrapper />
             </Label>
           </Match>
           <Match
@@ -822,7 +849,7 @@ export function DynamicComponent(
                 </Label>
               </Match> */}
               <Match when={true}>
-                <Content />
+                <ContentWrapper />
               </Match>
             </Switch>
           </Match>

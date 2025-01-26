@@ -50,6 +50,7 @@ export interface FunctionArgumentBaseType {
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   zIndex: number;
+  txnId: number;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

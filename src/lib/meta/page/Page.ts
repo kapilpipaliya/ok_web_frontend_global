@@ -6,6 +6,7 @@ import { pageAttr } from "./pageAttr";
 import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { evalExpression } from "~/lib/expression_eval";
 import { parentComponentAttribute, parentTemplateAttribute } from "../base/Comp";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export const wrapWithTitle = (title: string, required: boolean, children: any) => {
   return {
@@ -156,14 +157,45 @@ string`,
 // number
     },
     {
-      // componentName: "::'P.type'",
-      otherProps: (options: FunctionArgumentType) => {
-        return {
-          componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
-        }
-      },
+      componentName: "Fragment",
       displayName: "Default Value",
       key: "defValue",
+      attributes: [
+        {
+          // componentName: "::'P.type'",
+          otherProps: (options: FunctionArgumentType) => {
+            return {
+              componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+            }
+          },
+          displayName: "Default Value",
+          key: "defValue",
+        },
+        {
+          componentName: "Button",
+          key: "button",
+          // TODO: Make hidden on otherProps reactive
+          hidden: (options: FunctionArgumentType) => {
+            return options.data.P.defValue === undefined || options.data.P.defValue === null;
+          },
+          otherProps: (options: FunctionArgumentType) => {
+            return {
+              onClick: () => {
+                mergeVertexProperties(options.txnId, options.data.id, options.graph, options.setGraph, {
+                  defValue: null
+                })
+              }
+            }
+          },
+          attributes: [
+            {
+              componentName: "Icon",
+              icon: "ph:x",
+              size: 16,
+            }
+          ]
+        }
+      ]
     },
     // {
     //   // componentName: "::'P.type'",
