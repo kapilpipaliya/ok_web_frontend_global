@@ -143,6 +143,7 @@ export const variantAttributes =  {
   attributes: [
     {
       componentName: "TextInput",
+      class: PROPERTIES.Css.TextField,
       displayName: "Variant Name",
       key: "key",
     },
@@ -165,8 +166,10 @@ string`,
         {
           // componentName: "::'P.type'",
           otherProps: (options: FunctionArgumentType) => {
+            const type = options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
-              componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+              class: type === "CheckBox" ? PROPERTIES.Css.CheckBox : PROPERTIES.Css.TextField,
+              componentName: type,
             }
           },
           displayName: "Default Value",

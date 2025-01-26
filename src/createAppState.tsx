@@ -25,7 +25,7 @@ export function createAppState() {
       activeClickOutside: [],
       componentIdMap: {},
       globalThemeId: "",
-      isDevelopment: true,
+      isDevelopment: false,
       isLoadingPage: false,
       navBarHeight: 45,
       navigationData: [],
