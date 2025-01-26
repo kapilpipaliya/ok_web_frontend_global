@@ -12,6 +12,7 @@ import { ComponentChildrenContext } from "./contexts/ComponentChildrenContext";
 import { PreviewContext, usePreviewContext } from "../page_designer/context/PreviewContext";
 import { RepeaterVertexContext, useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
 import { getComponentDefaultValues } from "./getComponentDefaultValues";
+import { deNullify } from "~/lib/data_structure/object/deNullify";
 
 export function ComponentField(props: Readonly<GenericComponentProps & { componentId?: string }>) {
   const [local, otherProps] = splitProps(props, [
@@ -60,7 +61,7 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
   const ComponentWrapper = () => {
     const context = useRepeaterVertexContext();
     const values = createMemo(() => {
-      return {...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph), ...otherProps};
+      return {...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph), ...deNullify(otherProps)};
     });
 
     const repeaterStore = new Proxy(context, {

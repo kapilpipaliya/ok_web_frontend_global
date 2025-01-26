@@ -12,6 +12,7 @@ import { RepeaterVertexContext, useRepeaterVertexContext } from "./context/PageA
 import { useDesignerFormIdContext } from "../page_designer/context/LayoutContext";
 import { FormStoreObject } from "../form/context/FormContext";
 import { getComponentDefaultValues } from "../fields/getComponentDefaultValues";
+import { deNullify } from "~/lib/data_structure/object/deNullify";
 
 export function PageView(
   props: Readonly<{
@@ -84,7 +85,7 @@ export function PageView(
       const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
       const componentValue = formStore?.P.componentValue ? graph.vertexes[formStore.P.componentValue]?.P : {};
       debugger;
-      return {...getComponentDefaultValues(props.metaVertex!, graph, setGraph), ...componentValue};
+      return {...getComponentDefaultValues(props.metaVertex!, graph, setGraph), ...deNullify(componentValue)};
     });
 
     const repeaterStore = new Proxy(context, {

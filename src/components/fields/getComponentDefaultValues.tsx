@@ -12,7 +12,7 @@ export function getComponentDefaultValues(component: Vertex, graph: GraphInterfa
   const defaultValues = {} as { [key: string]: any; };
   for (const variant of variants) {
     if (variant.P.key) {
-      if (variant.P.defValue !== undefined) {
+      if (variant.P.defValue !== undefined && variant.P.defValue !== null) {
         defaultValues[variant.P.key] = variant.P.defValue;
       }
     }
