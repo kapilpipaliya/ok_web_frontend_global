@@ -503,17 +503,20 @@ export function DynamicComponent(
         const value = meta[key];
         if (typeof value === "function") {
           result[key] = (...args: unknown[]) =>
-            runWithOwner(owner, () => {
-              try {
-                const functionArgs = getFunctionArgumentWithValue();
-                return (meta[key] as (...args: unknown[]) => unknown)(
-                  Object.assign(functionArgs, { args }),
-                );
-              } catch (error) {
-                console.error(`Error executing function for key ${key}:`, error);
-                return undefined;
-              }
-            });
+            {
+              // Note: runWithOwner is breaking the reactivity of the function
+              // return runWithOwner(owner, () => {
+                try {
+                  const functionArgs = getFunctionArgumentWithValue();
+                  return (meta[key] as (...args: unknown[]) => unknown)(
+                    Object.assign(functionArgs, { args })
+                  );
+                } catch (error) {
+                  console.error(`Error executing function for key ${key}:`, error);
+                  return undefined;
+                }
+              // });
+            };
         } else if (value !== null) {
           result[key] = value;
         }

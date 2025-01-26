@@ -157,8 +157,9 @@ string`,
 // number
     },
     {
-      componentName: "Fragment",
+      componentName: "Box",
       displayName: "Default Value",
+      class: "flex ai:center gap:2",
       key: "defValue",
       attributes: [
         {
@@ -173,13 +174,13 @@ string`,
         },
         {
           componentName: "Button",
+          class: "flex ai:center gap:2 color:red",
           key: "button",
-          // TODO: Make hidden on otherProps reactive
-          hidden: (options: FunctionArgumentType) => {
-            return options.data.P.defValue === undefined || options.data.P.defValue === null;
-          },
           otherProps: (options: FunctionArgumentType) => {
             return {
+              hidden: (options: FunctionArgumentType) => {
+                return options.data.P.defValue === undefined || options.data.P.defValue === null;
+              },
               onClick: () => {
                 mergeVertexProperties(options.txnId, options.data.id, options.graph, options.setGraph, {
                   defValue: null
