@@ -165,16 +165,16 @@ string`,
       displayName: "Default Value",
       key: "defValue",
     },
-    {
-      // componentName: "::'P.type'",
-      otherProps: (options: FunctionArgumentType) => {
-        return {
-          componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
-        }
-      },
-      displayName: "Value",
-      key: "value",
-    },
+    // {
+    //   // componentName: "::'P.type'",
+    //   otherProps: (options: FunctionArgumentType) => {
+    //     return {
+    //       componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+    //     }
+    //   },
+    //   displayName: "Value",
+    //   key: "value",
+    // },
     {
       attributes: [
         {

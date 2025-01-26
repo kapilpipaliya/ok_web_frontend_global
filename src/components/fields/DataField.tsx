@@ -1,10 +1,8 @@
 import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 
 import {
-  RepeaterVertexContext,
   useRepeaterVertexContext,
 } from "~/components/page_attr_render/context/PageAttrContext";
-import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
@@ -13,12 +11,12 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { isVertex } from "~/lib/graph/mutate/vertex";
 
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { evalExpression } from "~/lib/expression_eval";
+import { RepeaterInternal } from "./RepeaterInternal";
 
-export const DataField = (props: { data: any[], expression: string }) => {
+export const DataField = (props: { data: any[] | (() => any[]), expression: string }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -84,31 +82,6 @@ export const DataField = (props: { data: any[], expression: string }) => {
     setOptions([]);
   });
 
-  const RepeaterInternal = (props: {
-    index: number;
-    repeaterValue: any;
-  }) => {
-    const context = useRepeaterVertexContext();
-    const repeaterStore = new Proxy(context, {
-      get(target, key) {
-        if (key === meta().P.name) {
-          return props.repeaterValue;
-        }
-        if (key === `${meta().P.name}index`) {
-          return props.index;
-        }
-        return target[key];
-      },
-    });
-    return (
-      <RepeaterVertexContext.Provider value={repeaterStore}>
-        <PageAttrRender
-          data={isVertex(props.repeaterValue) ? props.repeaterValue : data()}
-          metaVertex={meta()}
-        />
-      </RepeaterVertexContext.Provider>
-    );
-  };
   return (
     <Switch>
       <Match when={isFetching()}>
@@ -120,12 +93,12 @@ export const DataField = (props: { data: any[], expression: string }) => {
       <Match when={Array.isArray(options()) && !props.noRepeat}>
         <For each={options()}>
           {(value, index) => {
-            return <RepeaterInternal index={index()} repeaterValue={value} />;
+            return <RepeaterInternal meta={meta()} data={data()} index={index()} repeaterValue={value} />;
           }}
         </For>
       </Match>
       <Match when={options()}>
-        <RepeaterInternal index={0} repeaterValue={options()} />
+        <RepeaterInternal meta={meta()} data={data()} index={0} repeaterValue={options()} />
       </Match>
     </Switch>
   );

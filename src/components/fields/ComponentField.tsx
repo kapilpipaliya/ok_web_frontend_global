@@ -10,9 +10,11 @@ import { evalExpression } from "~/lib/expression_eval";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import { ComponentChildrenContext } from "./contexts/ComponentChildrenContext";
 import { PreviewContext, usePreviewContext } from "../page_designer/context/PreviewContext";
+import { RepeaterVertexContext, useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
+import { getComponentDefaultValues } from "./getComponentDefaultValues";
 
 export function ComponentField(props: Readonly<GenericComponentProps & { componentId?: string }>) {
-  const [local] = splitProps(props, [
+  const [local, otherProps] = splitProps(props, [
     "componentName",
     "onChange",
     "value",
@@ -55,6 +57,25 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
     }
   });
 
+  const ComponentWrapper = () => {
+    const context = useRepeaterVertexContext();
+    const values = createMemo(() => {
+      return {...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph), ...otherProps};
+    });
+
+    const repeaterStore = new Proxy(context, {
+      get(target, key) {
+        if (key === "props") {
+          return values();
+        }
+        return target[key];
+      },
+    });
+    return <RepeaterVertexContext.Provider value={repeaterStore}>
+      <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+    </RepeaterVertexContext.Provider>
+  }
+  
   return (
     <>
       <Show when={getCopmVertex().length}>
@@ -63,7 +84,7 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
             {props.children}
           </PreviewContext.Provider>
         }}>
-          <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+          <ComponentWrapper />
         </ComponentChildrenContext.Provider>
       </Show>
       <Show when={!getCopmVertex().length}>

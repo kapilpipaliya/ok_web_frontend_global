@@ -8,6 +8,10 @@ import {
   type PreviewStoreObject,
 } from "~/components/page_designer/context/PreviewContext";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { RepeaterVertexContext, useRepeaterVertexContext } from "./context/PageAttrContext";
+import { useDesignerFormIdContext } from "../page_designer/context/LayoutContext";
+import { FormStoreObject } from "../form/context/FormContext";
+import { getComponentDefaultValues } from "../fields/getComponentDefaultValues";
 
 export function PageView(
   props: Readonly<{
@@ -23,7 +27,7 @@ export function PageView(
     metaVertex?: Vertex;
   }>,
 ) {
-  const [graph, _setGraph] = useGraph();
+  const [graph, setGraph] = useGraph();
 
   const _dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
 
@@ -72,12 +76,43 @@ export function PageView(
     },
   });
 
+  const ComponentWrapper = () => {
+    const context = useRepeaterVertexContext();
+    const formStoreId = useDesignerFormIdContext();
+
+    const values = createMemo(() => {
+      const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+      const componentValue = formStore?.P.componentValue ? graph.vertexes[formStore.P.componentValue]?.P : {};
+      debugger;
+      return {...getComponentDefaultValues(props.metaVertex!, graph, setGraph), ...componentValue};
+    });
+
+    const repeaterStore = new Proxy(context, {
+      get(target, key) {
+        if (key === "props") {
+          return values();
+        }
+        return target[key];
+      },
+    });
+    return <RepeaterVertexContext.Provider value={repeaterStore}>
+      <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+    </RepeaterVertexContext.Provider>
+  }
+
   return (
     <Show keyed when={props.metaVertex}>
       <Switch>
         <Match when={true}>
           <PreviewContext.Provider value={previewStore}>
-            <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+            <Switch>
+              <Match when={props.metaVertex?.L[0] === "Component"}>
+                <ComponentWrapper />
+              </Match>
+              <Match when={true}>
+                <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+              </Match>
+            </Switch>
           </PreviewContext.Provider>
         </Match>
       </Switch>

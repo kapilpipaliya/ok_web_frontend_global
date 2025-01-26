@@ -34,7 +34,8 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
-    openedViews: [] as Array<Id>
+    openedViews: [] as Array<Id>,
+    componentValue: null as Id | null,
   };
 }
 

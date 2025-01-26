@@ -39,6 +39,7 @@ import {getGlobalStore} from "~/lib/graph/get/sync/getGlobalStore";
 import {PageDesignerLabels} from "~/components/page_designer/functions/PageDesignerLabels";
 import {fetchComponentData} from "~/cypher/get/fetchComponentData";
 import {createViewVertex} from "~/lib/graph/mutate/createViewVertex";
+import { createCompContextVertex } from "~/lib/graph/mutate/createCompContextVertex";
 
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
@@ -67,13 +68,14 @@ export function PageViewWrapper(
   );
   const layoutStoreId = props.uuid ?? uuidv7();
   const viewVertexObject = createViewVertex({view: "Desktop"}, graph, setGraph);
+  const componentVertexObject = createCompContextVertex({}, graph, setGraph);
   const pageFormVertexObject = newVertex(layoutStoreId, ["PageForm"], {
     ...getInitialFormStore(graph, setGraph),
     openedViews: [viewVertexObject.id],
     formId: props.pageVertexName,
     id: id()!,
+    componentValue: componentVertexObject.id,
   });
-
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
 
@@ -86,6 +88,10 @@ export function PageViewWrapper(
     for (const viewId of formStore()?.P?.openedViews ?? []) {
       deleteVertex(0, viewId, graph, setGraph);
     }
+  });
+
+  onCleanup(() => {
+    deleteVertex(0, componentVertexObject.id, graph, setGraph);
   });
 
   // Note: onCleanUp will be called on reverse order of the cleanup functions
