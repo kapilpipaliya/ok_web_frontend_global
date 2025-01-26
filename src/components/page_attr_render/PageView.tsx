@@ -84,7 +84,6 @@ export function PageView(
     const values = createMemo(() => {
       const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
       const componentValue = formStore?.P.componentValue ? graph.vertexes[formStore.P.componentValue]?.P : {};
-      debugger;
       return {...getComponentDefaultValues(props.metaVertex!, graph, setGraph), ...deNullify(componentValue)};
     });
 

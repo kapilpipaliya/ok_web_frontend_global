@@ -717,7 +717,7 @@ export function DynamicComponent(
           <Show
             fallback={
               <Show when={props.meta.id}>
-                <PageAttrRender data={props.data} metaVertex={props.meta} />
+                <PageAttrRender data={props.data} isNoPermissionCheck={isNoPermissionCheck()} metaVertex={props.meta} />
               </Show>
             }
             // @ts-ignore
@@ -825,6 +825,9 @@ export function DynamicComponent(
                 <Content />
               </Match>
             </Switch>
+          </Match>
+          <Match when={getGlobalStore(graph).P.isDevelopment}>
+            Hidden component
           </Match>
         </Switch>
       </PageRenderContextProvider>

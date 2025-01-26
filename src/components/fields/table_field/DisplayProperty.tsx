@@ -64,55 +64,6 @@ export function DisplayProperty(
   const metaVertex = createMemo(() => props.column);
   const outerOwner = getOwner();
 
-  // this is used to add props to meta when meta is configured in json
-  if (metaVertex().P.meta) {
-    // TODO: when meta changed realtime its not updating.
-    createComputed(
-      on(
-        () =>
-          getPropsFromMetaExpression(
-            graph,
-            setGraph,
-            metaVertex(),
-            props.joinVertex,
-          ),
-        async (v) => {
-          if (metaVertex().P.meta) {
-            let metaData;
-            if (formVertex()?.P.txnId) {
-              const mutationData = formVertex()?.P.txnId
-                ? commitTxn(formVertex()!.P.txnId, graph)
-                : undefined;
-              metaData = await getPropsFromMetaExpressionMGCall(
-                metaVertex(),
-                [props.joinVertex],
-                mutationData,
-                10,
-              );
-            } else {
-              metaData = v;
-            }
-            const metaDataVal = removeUndefinedProperties(metaData, false, 10);
-
-
-            // when componentName is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
-            const templateVertex = graph.vertexes[metaVertex().P.templateId];
-            const P = klona(templateVertex ?? { P: {} });
-            P.templateId = templateVertex?.id;
-            P.metaDataVal = metaDataVal;
-
-            replaceVertexProperties(
-              0,
-              metaVertex().id,
-              graph,
-              setGraph,
-              P,
-            );
-          }
-        },
-      ),
-    );
-  }
   const [componentName, setComponentName] = createWritableMemo(() =>
     getComponent(props.column),
   );
@@ -180,13 +131,10 @@ export function DisplayProperty(
         isLabelWrap={false}
         isNoPermissionCheck={props.isNoPermissionCheck}
         isRealTime={props.isRealTime}
+        // TODO: Remove this prop
         isTableInside={false}
         // When we have a Table we pass original Table Meta Vertex
-        meta={
-          componentName() === "DynamicTable"
-            ? graph.vertexes[metaVertex().P.templateId]
-            : metaVertex()
-        }
+        meta={metaVertex()}
         noLabel={true}
         // we cant use props.onChange in table cell, let dynamic component use its own onChange for the data.
         // onChange={props.onChange}

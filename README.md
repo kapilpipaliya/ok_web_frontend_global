@@ -294,3 +294,5 @@ return {
     },
     onClick: () => console.log(args.fns("p2")("ll"))
 }
+
+we dont need to create saprate meta for repeated component, we can handle logic with other props functions.

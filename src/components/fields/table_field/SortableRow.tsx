@@ -51,23 +51,7 @@ export const SortableRow = (
   const [expanded, setExpanded] = createSignal(true);
   const [disabled] = createSignal(false);
 
-  createComputed(
-    on(props.tableColumnsTemplate, (tableColumnsTemplate) => {
-      rowMetaInitialize(
-        graph,
-        setGraph,
-        props.metaInstance,
-        tableColumnsTemplate,
-        props.joinVertex,
-      );
-    }),
-  );
-
-  const attributesResult = createMemo(() => evalExpression("->Attr", { // ->AttrInst->Attr
-    graph,
-    setGraph,
-    vertexes: props.metaInstance.P.rows && props.metaInstance.P.rows[props.joinVertex.id] && graph.vertexes[props.metaInstance.P.rows[props.joinVertex.id]] ? [graph.vertexes[props.metaInstance.P.rows[props.joinVertex.id]]] : [],
-  })) as Accessor<Vertex[]>;
+  const attributesResult = () => props.tableColumnsTemplate();
 
   const rowColumnsMetaAttrs = createMemo(() =>
     attributesResult()?.filter((vertex) => vertex.P.tab !== "expand") ?? [],
