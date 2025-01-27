@@ -15,6 +15,12 @@ https://neo4j.com/docs/javascript-manual/current/
 https://github.com/neo4j/neo4j/issues/12920
 https://dozerdb.org
 
+uncomment this in neo4j.conf
+server.default_listen_address=0.0.0.0
+     auth.basic("neo4j", "12345678"),
+
+http://localhost:3001/api/mutate/super_user_setup
+
 ## Building
 Solid apps are built with _presets_, which optimise your project for deployment to different environments.
 

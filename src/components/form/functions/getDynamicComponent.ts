@@ -44,7 +44,7 @@ Tooltip.Portal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal
 // @ts-expect-error ignore
 Tooltip.Trigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
 
-import { Portal } from "solid-js/web";
+import { Match, Portal, Show, Switch } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { componentMap } from "~/components/css_properties/components/componentMap";
@@ -90,6 +90,7 @@ export const corvuComponents = {
 export const componentsMap: Record<string, any> = {
   ActiveStep: StepsContent,
   Box: BoxField,
+  Html: BoxField,
   Button: ButtonField,
   CheckBox: CheckboxField,
   // https://ark-ui.com/solid/docs/components/color-picker
@@ -118,6 +119,9 @@ export const componentsMap: Record<string, any> = {
   Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
+  Show,
+  Switch,
+  Match,
   Transition,
   TransitionGroup,
   ComponentChildren: ComponentChildrenField,

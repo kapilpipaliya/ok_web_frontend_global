@@ -32,22 +32,29 @@ function cleanFormat(data: ComponentNode[]): ComponentNode[] {
 }
 
 export function getComponentTree(): ComponentNode[] {
-
-
   const yamlContent = `- Root:
-  - Box
-  - Button
-  - CheckBox
+  - Html
   - DynamicTable
-  - FileUploader
-  - Form
-  - FormError
-  - Fragment
   - Icon
-  - Image
-  - MultiSelect
   - Page
   - Portal
+  - Data
+  - Form
+  - Select
+  - Show
+  - Switch
+  - Match
+  - Transition
+  - TransitionGroup
+  - ZIndex
+`
+
+  const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
+  return cleanFormat(convertToRequiredFormat(parsedYaml));
+}
+
+/*
+  - FileUploader
   - Popover:
     - Popover.Anchor:
       - Popover.Trigger
@@ -58,17 +65,6 @@ export function getComponentTree(): ComponentNode[] {
             - Popover.Close
             - Popover.Label
             - Popover.Description
-  - PullToRefresh
-  - RadioGroup:
-    - Radio
-  - Data
-  - Select
-  - Steps:
-    - Step
-    - ActiveStep
-  - Text
-  - TextArea
-  - TextInput
   - Tooltip:
     - Tooltip.Anchor:
       - Tooltip.Trigger
@@ -76,15 +72,7 @@ export function getComponentTree(): ComponentNode[] {
       - Tooltip.Content:
         - Tooltip.Arrow
       - Tooltip.Overlay
-  - Transition
-  - TransitionGroup
-  - ZIndex
-`
-
-  const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
-  return cleanFormat(convertToRequiredFormat(parsedYaml));
-}
-
+*/
 /*
   - Accordion:
     - Accordion.Item:

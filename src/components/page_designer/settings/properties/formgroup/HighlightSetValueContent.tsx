@@ -15,7 +15,6 @@ import { Label } from "./Label";
 
 export function HighlightSetValueContent(
   props: Readonly<{
-    componentName: Accessor<string>;
     meta: Vertex;
     onChange: (meta: Vertex, data: any) => void;
     selectedLayout: Vertex;
@@ -69,7 +68,6 @@ export function HighlightSetValueContent(
             <div>
               <div class={`flex gap:2`}>
                 <DynamicComponent
-                  componentName={props.componentName()}
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}
                   isRealTime={false}
@@ -94,7 +92,6 @@ export function HighlightSetValueContent(
             <div>
               <div class={`flex gap:2`}>
                 <DynamicComponent
-                  componentName={props.componentName()}
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}
                   isRealTime={false}
@@ -114,7 +111,6 @@ export function HighlightSetValueContent(
           </Match>
           <Match when={true}>
             <DynamicComponent
-              componentName={props.componentName()}
               data={props.selectedLayout}
               isNoPermissionCheck={true}
               isRealTime={false}

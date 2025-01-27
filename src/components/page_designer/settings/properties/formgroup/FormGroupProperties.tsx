@@ -343,7 +343,6 @@ interface PropertyFieldProps {
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
-  const componentName = createMemo(() => props.meta.P.type || "TextInput");
   const metaProps = getPropsFromMetaExpression(
     graph,
     setGraph,
@@ -399,12 +398,11 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             txnId={props.txnId}
           />
         </Match>
-        <Match when={componentName() === "Table"}>
+        <Match when={props.meta.P.componentName === "Table"}>
           <h3>
             <Label meta={props.meta} />
           </h3>
           <DynamicComponent
-            componentName={componentName()}
             data={props.selectedLayout}
             isNoPermissionCheck={true}
             isRealTime={false}
@@ -416,7 +414,6 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         </Match>
         <Match when={props.selectedLayout}>
           <HighlightSetValueContent
-            componentName={componentName}
             meta={props.meta}
             onChange={props.onChange}
             selectedLayout={props.selectedLayout}
