@@ -29,7 +29,7 @@ export async function createSuperUser(
         uuid: randomUUID()
       })
       CREATE (s:SubDomain {
-        key: "super",
+        key: "super"
       })
       CREATE (u)-[:UserSubDomain]->(s)
       RETURN u, s
