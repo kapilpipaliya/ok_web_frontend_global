@@ -69,7 +69,7 @@ export function JsonEditorField(
   return (
     <div
       {...divProps}
-      class="h:400px overflow:auto"
+      class="h:200px overflow:auto"
       ref={(el) => (containerRef = el)}
     ></div>
   );

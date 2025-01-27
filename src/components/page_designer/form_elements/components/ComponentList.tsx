@@ -88,7 +88,7 @@ export function ComponentList(props: {
       ((child.P.label as string) || (child.P.key as string))
         .toLowerCase()
         .includes(query),
-    );
+    ).sort((a, b) => (a.P.key as string).localeCompare(b.P.key as string));
   });
 
   return (

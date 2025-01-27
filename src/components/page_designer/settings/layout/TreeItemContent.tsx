@@ -8,7 +8,9 @@ import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
 import { getComponentLabel } from "../../functions/getComponentLabel";
-
+import { evalExpression } from "~/lib/expression_eval";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
@@ -17,11 +19,19 @@ export function TreeItemContent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
 
-  const componentName = () => getComponentLabel(graph, props.metaVertex) || props.metaVertex?.P.componentName || "";
+  const componentVertex = createMemo(() => {
+    return evalExpression("->$0Comp", {
+      graph,
+      vertexes: [props.metaVertex],
+    })?.[0];
+  });
+  const componentName = () => componentVertex()?.P.key || props.metaVertex?.P.componentName || "";
   
   return (
     <div
@@ -39,8 +49,9 @@ export function TreeItemContent(
       <Icon
         height={17}
         icon={
+          iconMap[componentVertex()?.L[0] as keyof typeof iconMap] ??
           iconMap[componentName() as keyof typeof iconMap] ??
-          "material-symbols:widgets-outline-rounded"
+          "ph:circle"
         }
         width={17}
       />

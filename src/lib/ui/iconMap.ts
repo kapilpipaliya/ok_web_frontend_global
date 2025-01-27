@@ -45,4 +45,6 @@ export const iconMap = {
   TreeView: "ph:tree-view-light",
   TreeViewChild: "carbon:tree-view-alt",
   TreeViewItem: "tdesign:tree-list",
+  Html: "ph:file-html",
+  Component: "ph:puzzle-piece",
 };

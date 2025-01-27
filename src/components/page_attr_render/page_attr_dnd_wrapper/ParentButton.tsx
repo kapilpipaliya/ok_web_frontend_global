@@ -27,7 +27,7 @@ export function ParentButton(props: { item: Vertex; size: number }) {
         }
         onLayoutItemClick(
           formStoreVertex()!,
-          parentResult.vertex!.id,
+          parentResult[0].id,
           graph,
           setGraph,
         );

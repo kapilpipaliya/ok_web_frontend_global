@@ -385,11 +385,13 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             props.meta.P.key === "calculatedValue"
           }
         >
-          <SelectRuleField
+          {/*Dont use expression builder for now*/}
+          <></>
+          {/* <SelectRuleField
             meta={props.meta}
             selectedLayout={props.selectedLayout}
             txnId={props.txnId}
-          />
+          /> */}
         </Match>
         <Match when={props.meta.P.key === "perm"}>
           <SelectPermissionField
