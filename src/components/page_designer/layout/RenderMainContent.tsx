@@ -1,5 +1,5 @@
 import Resizable from '@corvu/resizable'
-import { createSignal, For, type Setter, Show } from "solid-js";
+import { Component, createSignal, For, type Setter, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import { ZIndex } from "~/components/fields/ZIndex";
@@ -29,6 +29,7 @@ import { SaveIconButton } from './page_tabbar/SaveIconButton';
 import { PreviewButton } from './page_tabbar/PreviewButton';
 import { ShareButton } from './page_tabbar/ShareButton';
 import { createViewVertex } from '~/lib/graph/mutate/createViewVertex';
+import { createStore } from 'solid-js/store';
 
 function FormElements() {
   const [graph, setGraph] = useGraph();
@@ -114,7 +115,7 @@ function TabBar() {
             <button
               class="background:none border:none cursor:pointer font-size:14px padding:2px"
               onClick={() => {
-                const newView = createViewVertex( { view: "Mobile" }, graph, setGraph);
+                const newView = createViewVertex({ view: "Mobile" }, graph, setGraph);
                 mergeVertexProperties<FormStoreObject>(
                   0,
                   form.formId,
@@ -151,12 +152,12 @@ export function PageTabBar(props: { formStoreId: Id, openIndex: number }) {
     <header class="flex bg:#f3f3f4 gap:6 r:7">
 
       <div class="flex ai:center gap:6">
-        <UndoRedoIcons formStoreId={props.formStoreId}/>
-        <ResizeViewButtons formStoreId={props.formStoreId} openIndex={props.openIndex}/>
+        <UndoRedoIcons formStoreId={props.formStoreId} />
+        <ResizeViewButtons formStoreId={props.formStoreId} openIndex={props.openIndex} />
         {/* <SettingPageIcon /> */}
       </div>
 
-      <DebugInfo formStoreId={props.formStoreId}/>
+      <DebugInfo formStoreId={props.formStoreId} />
       {/* <Show when={layoutStore().selectedSection === "setting"}>
         <div class="flex ai:center">
           <MiddleSectionButtons />
@@ -191,7 +192,7 @@ function PageViewComponent() {
                     view={openedView}
                     class={isActive() ? '' : 'hidden'}
                   >
-                    <PageTabBar formStoreId={pageInfo.formId} openIndex={index()}/>
+                    <PageTabBar formStoreId={pageInfo.formId} openIndex={index()} />
                     <IFramePreview formStoreId={pageInfo.formId} />
                     {/* <PageView
                       isDesignMode={true}
@@ -286,60 +287,129 @@ function DeleteConfirmation() {
 export function RenderMainContent() {
   return <ResizableAltKey />
 }
-export default RenderMainContent
+export default RenderMainContent;
+
+interface ResizeHandleProps {
+  onMouseDown: (e: MouseEvent) => void;
+  isHorizontal?: boolean;
+  position: 'left' | 'right' | 'top';
+}
+const ResizeHandle: Component<ResizeHandleProps> = (props) => {
+  const isHorizontal = props.isHorizontal ?? true;
+
+  return (
+    <div
+      class={`
+        position:absolute
+        ${props.position}:-3px
+        ${isHorizontal ? 'top:0' : 'top:-3px'}
+        ${isHorizontal ? 'width:6px' : 'width:100%'}
+        ${isHorizontal ? 'height:100%' : 'height:6px'}
+        ${isHorizontal ? 'cursor:col-resize' : 'cursor:row-resize'}
+        background-color:transparent
+        z-index:1
+      `}
+      onMouseDown={props.onMouseDown}
+    />
+  );
+};
+
+interface PanelProps {
+  children: any;
+  onResize?: (e: MouseEvent) => void;
+  resizePosition?: 'left' | 'right' | 'top';
+  style?: any;
+}
+
+const Panel: Component<PanelProps> = (props) => {
+  return (
+    <div style={{
+      // 'background-color': '#f0f0f0',
+      // 'border': '1px solid #ccc',
+      position: 'relative',
+      ...props.style
+    }}>
+      {props.children}
+      <Show when={props.onResize}>
+        <ResizeHandle
+          onMouseDown={props.onResize!}
+          position={props.resizePosition || 'right'}
+          isHorizontal={props.resizePosition !== 'top'}
+        />
+      </Show>
+    </div>
+  );
+};
 
 export function ResizableAltKey() {
   const [graph] = useGraph()
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const [sizes, setSizes] = makePersisted(createSignal<number[]>([]), {
-    name: 'resizable-sizes',
-  })
+
+  const [sizes, setSizes] = createStore({
+    leftWidth: 300,
+    rightWidth1: 300,
+    rightWidth2: 300,
+    bottomHeight: 300
+  });
+
   const [isResizing, setIsResizing] = createSignal(false);
 
+  const createResizeHandler = (key: keyof typeof sizes, isHorizontal: boolean) => (e: MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startPos = isHorizontal ? e.pageX : e.pageY;
+    const startSize = sizes[key];
+
+    const onMouseMove = (e: MouseEvent) => {
+      const currentPos = isHorizontal ? e.pageX : e.pageY;
+      const diff = currentPos - startPos;
+
+      // Determine if we're resizing from left/top (positive) or right/bottom (negative)
+      const isPositiveResize = key === 'leftWidth';
+      const newSize = Math.max(100, startSize + (isPositiveResize ? diff : -diff));
+
+      setSizes({
+        ...sizes,
+        [key]: newSize
+      });
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
   return (
-    <div class="size-full p-4">
-      <Resizable class="size-full" sizes={sizes()} onSizesChange={setSizes}>
-        <Resizable.Panel
-          class=""
-          initialSize={sizes()[0] ?? "300px"}
-          minSize={"200px"}
-        >
-          <FormElements />
-        </Resizable.Panel>
-        <Resizable.Handle
-          aria-label="Resize Handle"
-          class="px:3"
-          onHandleDragStart={() => setIsResizing(true)}
-          onHandleDragEnd={() => setIsResizing(false)}
-        >
-          <div class="" />
-        </Resizable.Handle>
-        <Resizable.Panel
-          class="flex-col items-center justify-center space-y-2 overflow-hidden rounded-lg bg-corvu-100 px-4 flex"
-          initialSize={sizes()[1] ?? 0.7}
-          minSize={0.2}
-          maxSize={0.8}
-        >
-          <div>
-            <TabBar />
-            <PageViewComponent />
-          </div>
-        </Resizable.Panel>
-        <Resizable.Handle
-          aria-label="Resize Handle"
-          class="px:3"
-          onHandleDragStart={() => setIsResizing(true)}
-          onHandleDragEnd={() => setIsResizing(false)}
-        >
-          <div class="" />
-        </Resizable.Handle>
-        <Resizable.Panel
-          class="bl:1|solid|lightgrey"
-          initialSize={sizes()[2] ?? "350px"}
-          minSize={"200px"}
-        >
-          {/* <Show
+    <div class={`
+      display:grid
+      grid-template-cols:${sizes.leftWidth}px|1fr|${sizes.rightWidth1}px|${sizes.rightWidth2}px
+     
+      height:calc(100vh-45px)
+      width:100vw
+      overflow:hidden
+    `}
+    //  grid-template-rows:1fr|${sizes.bottomHeight}px
+    >
+      <Panel onResize={createResizeHandler('leftWidth', true)} resizePosition="right">
+        <FormElements />
+      </Panel>
+
+      <Panel style={{
+        // 'background-color': '#ffffff',
+        overflow: 'auto'
+      }}>
+        <TabBar />
+        <PageViewComponent />
+      </Panel>
+
+      <Panel onResize={createResizeHandler('rightWidth1', true)} resizePosition="left">
+        {/* <Show
             fallback={
               <div class="bl:1|solid|lightgrey pl:8 pt:8">
                 Element is not selected
@@ -351,33 +421,29 @@ export function ResizableAltKey() {
               graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
           > */}
-          <div
-            class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
-          >
-            <PropertiesContent />
-          </div>
-          {/* </Show> */}
-        </Resizable.Panel>
-        <Resizable.Handle
-          aria-label="Resize Handle"
-          class="px:3"
-          onHandleDragStart={() => setIsResizing(true)}
-          onHandleDragEnd={() => setIsResizing(false)}
+        <div
+          class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
         >
-          <div class="" />
-        </Resizable.Handle>
-        <Resizable.Panel
-          class=""
-          initialSize={sizes()[3] ?? "400px"}
-          minSize={"200px"}
-        >
-          <Settings />
-        </Resizable.Panel>
-      </Resizable>
+          <PropertiesContent />
+        </div>
+        {/* </Show> */}
+      </Panel>
+
+      <Panel onResize={createResizeHandler('rightWidth2', true)} resizePosition="left">
+        <Settings />
+      </Panel>
+
+      {/* <Panel
+        style={{ 'grid-column': '1 / span 4' }}
+        onResize={createResizeHandler('bottomHeight', false)}
+        resizePosition="top"
+      >
+        bottom panel
+      </Panel> */}
       <DeleteConfirmation />
       <Show when={isResizing()}>
         <ResizeOverlay />
       </Show>
     </div>
-  )
+  );
 }
