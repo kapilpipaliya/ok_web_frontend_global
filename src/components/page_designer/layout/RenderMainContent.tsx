@@ -348,7 +348,7 @@ export function ResizableAltKey() {
 
   const [sizes, setSizes] = createStore({
     leftWidth: 300,
-    rightWidth1: 300,
+    rightWidth1: 400,
     rightWidth2: 300,
     bottomHeight: 300
   });

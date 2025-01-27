@@ -81,6 +81,9 @@ export function componentDrop(
     if (fromVertex.P.key === "Text" && !props.text) {
       props = { ...props, text: "Sample Text" };
     }
+    if (fromVertex.P.key === "Html" && !props.as) {
+      props = { ...props, as: "div" };
+    }
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);
     delete p.pos;

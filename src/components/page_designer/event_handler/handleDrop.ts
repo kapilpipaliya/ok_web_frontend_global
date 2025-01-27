@@ -9,6 +9,7 @@ import { loadPageData } from "~/components/page_designer/functions/loadPageData"
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
+import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(
   e: DragEvent,
@@ -57,10 +58,7 @@ export async function handleDrop(
       layoutStoreVertex?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
-        selectedId: layoutId as string,
-        selectedComponent: -1
-      });
+      onLayoutItemClick(formStoreVertex, layoutId as string, graph, setGraph);
     }
   }
 }

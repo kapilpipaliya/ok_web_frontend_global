@@ -14,7 +14,7 @@ export const ResizeViewButtons = (props: { formStoreId: string, openIndex: numbe
   const openedView = () => formStoreVertex()?.P.openedViews[props.openIndex];
   const viewVertex = () => graph.vertexes[openedView()] as Vertex<{view: string}>;
   return (
-    <div>
+    <div class="flex">
       <For each={Object.values(DIMENSIONS)}>
         {(view, index) => (
           <IconButton
