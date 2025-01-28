@@ -19,7 +19,7 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
 
   return (
     <div
-      class="height:100vh"
+      class="min-h:300px"
       classList={{
         "bg:#f3f3f4": isDraggingOver(),
       }}

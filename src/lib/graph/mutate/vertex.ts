@@ -45,13 +45,13 @@ export function addNewVertex(
       return { error: "vertex ID already exist while adding new vertex" };
     }
     setGraph("vertexes", actualVertexId, updateVertexIdsToNew(klona(vertex), graph));
-    vertex.L.forEach((label) =>
+    for (const label of vertex.L) {
       setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
         Array.isArray(vertexIds)
           ? [...vertexIds, actualVertexId]
           : [actualVertexId],
-      ),
-    );
+      );
+    }
     const data = updateVertexIdsToNew(klona(vertex), graph);
     transactionDetailAdd(
       txnId,
@@ -280,17 +280,17 @@ export function deleteVertex(
 export function updateVertexIdsToNew(vertex: Vertex, graph: Store<GraphInterface>) {
   return untrack(() => {
     vertex.id = getVertexOldIdToNewIdMap(graph)[vertex.id] || vertex.id;
-    Object.entries(vertex.IN).forEach(([edgeType, edgeIds]) => {
+    for (const [edgeType, edgeIds] of Object.entries(vertex.IN)) {
       vertex.IN[edgeType] = edgeIds.map(
         (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
       );
-    });
+    }
 
-    Object.entries(vertex.OUT).forEach(([edgeType, edgeIds]) => {
+    for (const [edgeType, edgeIds] of Object.entries(vertex.OUT)) {
       vertex.OUT[edgeType] = edgeIds.map(
         (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
       );
-    });
+    }
     return vertex;
   });
 }
@@ -312,30 +312,26 @@ export function updateVertexId(
     }
     setGraph("vertexes", newVertexId, graph.vertexes[oldVertexId]);
     setGraph("vertexes", newVertexId, "id", newVertexId);
-    // @ts-ignore
-    setGraph("vertexes", oldVertexId, undefined);
     // TODO: replace id exactly at same position
-    graph.vertexes[newVertexId as string].L.forEach((label) =>
+    for (const label of graph.vertexes[newVertexId as string].L) {
       setGraph("vertexLabelIdMap", label, (ids) =>
         ids.filter((id) => id !== oldVertexId),
-      ),
-    );
-    graph.vertexes[newVertexId as string].L.forEach((label) =>
+      );
+    }
+    for (const label of graph.vertexes[newVertexId as string].L) {
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
         Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
-      ),
-    );
+      );
+    }
     // v->E--in->V-out-->E->v
-    Object.entries(graph.vertexes[newVertexId as string].OUT).forEach(
-      ([_edgeType, edgeIds]) => {
-        setGraph("edges", edgeIds, "S", newVertexId);
-      },
-    );
-    Object.entries(graph.vertexes[newVertexId as string].IN).forEach(
-      ([_edgeType, edgeIds]) => {
-        setGraph("edges", edgeIds, "E", newVertexId);
-      },
-    );
+    for (const [_edgeType, edgeIds] of Object.entries(graph.vertexes[newVertexId as string].OUT)) {
+      setGraph("edges", edgeIds, "S", newVertexId);
+    }
+    for (const [_edgeType, edgeIds] of Object.entries(graph.vertexes[newVertexId as string].IN)) {
+      setGraph("edges", edgeIds, "E", newVertexId);
+    }
+    // @ts-ignore
+    setGraph("vertexes", oldVertexId, undefined);
     broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateVertexId: { oldVertexId, newVertexId } });
     return { error: "" };
   });

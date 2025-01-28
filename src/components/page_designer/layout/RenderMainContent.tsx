@@ -178,7 +178,7 @@ function PageViewComponent() {
   const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
   return (
-    <div class="flex gap:8 overflow:scroll flex:nowrap max-w:2000px">
+    <div class="flex gap:8 flex:nowrap">
       <For each={layoutStore().openedFormIds}>
         {(pageInfo) => {
           const isActive = () => layoutStore().formId === pageInfo.formId;

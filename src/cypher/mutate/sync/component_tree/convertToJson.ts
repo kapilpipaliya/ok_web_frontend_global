@@ -34,7 +34,7 @@ function cleanFormat(data: ComponentNode[]): ComponentNode[] {
 export function getComponentTree(): ComponentNode[] {
   const yamlContent = `- Root:
   - Html
-  - DynamicTable
+  - Table
   - Icon
   - Page
   - Portal

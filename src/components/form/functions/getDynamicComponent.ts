@@ -95,6 +95,7 @@ export const componentsMap: Record<string, any> = {
   CheckBox: CheckboxField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
+  Table: TableInputField,
   // ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
