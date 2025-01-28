@@ -15,14 +15,8 @@ export function onLayoutItemClick(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   batch(() => {
-    const componentVertex = getComponentFromLayoutRow(
-      layoutVertexId,
-      graph,
-      setGraph,
-    );
     mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
       selectedId: layoutVertexId ?? -1,
-      selectedComponent: componentVertex?.id ?? -1
     });
   });
 }

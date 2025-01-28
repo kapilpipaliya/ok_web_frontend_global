@@ -11,19 +11,14 @@ export function PropertiesHeader() {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const getComponentName = () =>
-    formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1
-      ? graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key || ""
-      : "";
-
   return (
     <div class="flex ai:center cursor:pointer jc:space-between">
       <div class="f:16 flex:grow font-weight:bold mb:2px ml:5px p:3|0 text-align:left">
-        {getComponentName()} Properties{" "}
-        <OpenComponentSettings id={formStoreVertex()?.P.selectedComponent as string} />
+        Properties
+        {/* <OpenComponentSettings id={formStoreVertex()?.P.selectedComponent as string} />
         <OpenComponentURL
           meta={graph.vertexes[formStoreVertex()?.P.selectedComponent]}
-        />
+        /> */}
       </div>
     </div>
   );

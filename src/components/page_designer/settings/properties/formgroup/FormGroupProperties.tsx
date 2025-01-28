@@ -73,9 +73,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const vertexIds = createVertexIds();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
-  const selectedComp = () => graph.vertexes[formStoreVertex()?.P.selectedComponent];
+  const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
   const propAttributes = createMemo(() =>
-    clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph),
+    clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph) ?? [],
   );
 
   onCleanup(() => {
@@ -86,7 +86,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
     <>
       <div class="">
         <ValidationConfig
-          componentMeta={selectedComp()}
+          componentName={selectedAttr()?.P.componentName}
           data={props.selectedLayout}
           meta={{ P: { key: "validation" } } as unknown as Vertex}
           onChange={props.onChange}
@@ -275,7 +275,7 @@ function clonePropAttributes(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  return metaAttributes.map((vertex) => {
+  return metaAttributes?.map((vertex) => {
     const form = FormMetaData.Comp;
     const _propAttribute = form.attributes.find((attr) => attr.key === "Prop")!;
     // now we simplified this so user cant enter default value
@@ -301,10 +301,10 @@ function moveClassToLast(
   graph: GraphInterface,
   formStoreVertex: Accessor<Vertex<FormStoreObject>>,
 ) {
-  const otherVertices = vertices.filter(
+  const otherVertices = vertices?.filter(
     (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
-  );
-  const componentName = graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key;
+  ) ?? [];
+  const componentName = graph.vertexes[formStoreVertex()?.P.selectedId].P.componentName;
   const isForm = formStoreVertex()?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 

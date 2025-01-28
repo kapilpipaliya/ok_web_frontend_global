@@ -23,17 +23,17 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const getComponentName = () =>
-    graph.vertexes[formStoreVertex().P.selectedComponent]?.P.key;
-  const checkIsForm = () => graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form";
-  const checkIsFormField = () =>
-    checkIsForm() && genericInputComponents.includes(getComponentName());
+  // const getComponentName = () =>
+  //   graph.vertexes[formStoreVertex().P.selectedComponent]?.P.key;
+  // const checkIsForm = () => graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form";
+  // const checkIsFormField = () =>
+  //   checkIsForm() && genericInputComponents.includes(getComponentName());
   const getClassVertices = () =>
-    props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class"));
+    props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class")) ?? [];
 
   const metaClasses = createMemo(() => [
     graph.vertexes[props.vertexIds.class],
-    ...(checkIsFormField() ? [graph.vertexes[props.vertexIds.labelClass]] : []),
+    // ...(checkIsFormField() ? [graph.vertexes[props.vertexIds.labelClass]] : []),
     ...getClassVertices(),
   ]);
 

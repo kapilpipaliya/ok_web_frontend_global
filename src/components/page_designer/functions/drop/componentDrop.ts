@@ -121,14 +121,16 @@ export function componentDrop(
         graph,
         setGraph,
       );
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrCompMetaVertex,
-        compVertex.id,
-      );
+      if (compVertex) {
+        setSelectionValue(
+          txnId,
+          rowVertex,
+          graph,
+          setGraph,
+          attrCompMetaVertex,
+          compVertex.id,
+        );
+      }
       processChildrenAttrs(
         formVertex,
         fromVertex,

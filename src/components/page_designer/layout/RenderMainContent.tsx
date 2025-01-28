@@ -249,7 +249,6 @@ function PropertiesContent() {
       <Show
         when={
           formStoreVertex()?.P &&
-          formStoreVertex()?.P.selectedComponent !== -1 &&
           graph.vertexes[formStoreVertex()?.P.selectedId] &&
           graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
         }

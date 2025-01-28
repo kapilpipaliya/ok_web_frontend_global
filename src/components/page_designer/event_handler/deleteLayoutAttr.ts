@@ -109,7 +109,6 @@ export function deleteLayoutAttr(
     if (formStoreVertex?.P.selectedId === layoutVertex.id) {
       mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, {
         selectedId: -1,
-        selectedComponent: -1
       });
     }
     if (formStoreVertex?.P.hoverId === layoutVertex.id) {

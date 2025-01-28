@@ -26,7 +26,6 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     multiHighlight: [] as Array<Id | number>,
-    selectedComponent: -1 as Id | number,
     selectedId: -1 as Id | number,
 
     // check if at least one form in the layout tree when deleting a layout item, it display a dialog

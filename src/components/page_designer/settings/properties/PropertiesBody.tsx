@@ -48,7 +48,12 @@ export function PropertiesBody() {
 
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-
+  const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
+  const selectedComp = () => evalExpression("->$0Comp", {
+    graph,
+    setGraph,
+    vertexes: [selectedAttr()],
+  })?.[0];
   const clearFileSelection = (meta: Vertex) => {
     const txnId = formStoreVertex()?.P.txnId;
     if (!txnId) {
@@ -65,14 +70,13 @@ export function PropertiesBody() {
   };
 
   const setPropertyValue = (meta: Vertex, value: any) => {
-    if (formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1) {
+    if (formStoreVertex()?.P.selectedId !== -1) {
       setPropertyValueGlobal(
         graph,
         setGraph,
         formStoreVertex()?.P.txnId,
         meta,
         graph.vertexes[formStoreVertex()?.P.selectedId],
-        graph.vertexes[formStoreVertex()?.P.selectedComponent],
         value,
       );
       if (value === null) {
@@ -82,14 +86,14 @@ export function PropertiesBody() {
   };
 
   const selectedComponentProperties = () => {
-    const selectedComp = graph.vertexes[formStoreVertex()?.P.selectedComponent];
-    if (!selectedComp) {
-      return { error: true };
+    const compVertex = selectedComp();
+    if (!compVertex) {
+      return [];
     }
     return evalExpression("->$0Prop", {
       graph,
       setGraph,
-      vertexes: [selectedComp],
+      vertexes: [compVertex],
     });
   };
 
@@ -102,13 +106,13 @@ export function PropertiesBody() {
       {/* <div class="flex gap:2 jc:start"> */}
       {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       {/* </div> */}
-      <Show when={graph.vertexes[formStoreVertex()?.P.selectedComponent].P.key === "Repeater"}>
+      <Show when={selectedAttr()?.P.componentName === "Repeater"}>
         <CollAndData />
       </Show>
       <JsonEditorFieldComponent />
       <FunctionEditor setPropertyValue={setPropertyValue} />
-      <Show when={graph.vertexes[formStoreVertex()?.P.selectedComponent].L[0] === "Component"}>
-        <ComponentVariantsInput setPropertyValue={setPropertyValue} compVertex={graph.vertexes[formStoreVertex()?.P.selectedComponent]} dataVertex={graph.vertexes[formStoreVertex()?.P.selectedId]}/>
+      <Show when={selectedAttr()?.P.componentName === "Component"}>
+        <ComponentVariantsInput setPropertyValue={setPropertyValue} compVertex={selectedComp()} dataVertex={graph.vertexes[formStoreVertex()?.P.selectedId]}/>
       </Show>
       <FormGroupProperties
         metaAttributes={selectedComponentProperties() ?? []}
@@ -127,7 +131,7 @@ function JsonEditorFieldComponent() {
   const [isJsonValid, setIsJsonValid] = createSignal(true);
 
   const replacePropertyValue = (value: any) => {
-    if (formStoreVertex()?.P.selectedId !== -1 && formStoreVertex()?.P.selectedComponent !== -1) {
+    if (formStoreVertex()?.P.selectedId !== -1) {
       try {
         const parsedValue = JSON.parse(value);
         replaceVertexProperties(
@@ -146,9 +150,9 @@ function JsonEditorFieldComponent() {
   };
   createEffect(
     on(
-      () => formStoreVertex()?.P.selectedComponent,
+      () => formStoreVertex()?.P.selectedId,
       () => {
-        if (formStoreVertex()?.P.selectedComponent !== -1) {
+        if (formStoreVertex()?.P.selectedId !== -1) {
           setIsJsonValid(true);
         }
       },

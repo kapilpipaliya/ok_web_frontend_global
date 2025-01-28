@@ -12,7 +12,6 @@ export function setPropertyValueGlobal(
   txnId: number,
   meta: Vertex,
   layoutVertex: Vertex,
-  _componentVertex: Vertex,
   value: any,
   valueSet?: boolean,
 ) {

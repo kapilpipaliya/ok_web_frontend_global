@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { validateInput } from "./validateInput";
 
 interface ValidationProps {
-  componentMeta: Vertex;
+  componentName: string;
   data: Vertex;
   meta: Vertex;
   onChange(meta: Vertex, data: any): void;
@@ -35,7 +35,7 @@ export interface ValidationConfigType {
 
 export function ValidationConfig(props: Readonly<ValidationProps>) {
   const rules =
-    validations[props.componentMeta.P.key as keyof typeof validations]?.split(
+    validations[props.componentName as keyof typeof validations]?.split(
       "|",
     ) || [];
   const [values, setValues] = createStore<ValidationConfigType>(

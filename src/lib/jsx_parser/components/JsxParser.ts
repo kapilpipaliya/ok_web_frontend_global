@@ -215,7 +215,6 @@ export default class JsxParser {
         this.props.txnId,
         { P: { key: "as" } } as any,
         graph.vertexes[rowId],
-        componentVertex,
         comp,
       );
     }
@@ -296,7 +295,6 @@ export default class JsxParser {
         this.props.txnId,
         { P: { key: "attr" } } as any,
         graph.vertexes[rowId],
-        componentVertex,
         JSON.stringify(uiKitProps),
       );
     }
@@ -313,7 +311,6 @@ export default class JsxParser {
           P: { key: key === "className" || key === "class" ? "class" : key },
         } as any,
         graph.vertexes[rowId],
-        componentVertex,
         nonUiKitProps[key],
       );
     }
@@ -325,7 +322,6 @@ export default class JsxParser {
         this.props.txnId,
         { P: { key: "icon" } } as any,
         graph.vertexes[rowId],
-        componentVertex,
         `'${"mdi:hamburger-menu".replaceAll("'", "\\'")}'`,
       );
       return;
@@ -367,7 +363,6 @@ export default class JsxParser {
             this.props.txnId,
             { P: { key: "text" } } as any,
             graph.vertexes[rowId],
-            componentVertex,
             `'${value.replaceAll("'", "\\'")}'`,
           );
         }
@@ -414,7 +409,6 @@ export default class JsxParser {
           this.props.txnId,
           { P: { key: "text" } } as any,
           graph.vertexes[rowId],
-          componentVertex,
           `'${children.replaceAll("'", "\\'")}'`,
         );
       }
