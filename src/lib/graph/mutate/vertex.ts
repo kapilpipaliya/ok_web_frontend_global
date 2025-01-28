@@ -12,10 +12,10 @@ import { broadcastToAllChannels } from "~/lib/graph/mutate/channel";
 import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
 
 // return a new Vertex
-export function newVertex(
+export function newVertex<T extends { [key: string]: any }>(
   id: Id,
   labels: string[],
-  properties?: { [key: string]: any },
+  properties?: T,
 ): Vertex {
   return { id, IN: {}, L: labels, OUT: {}, P: properties || {} };
 }

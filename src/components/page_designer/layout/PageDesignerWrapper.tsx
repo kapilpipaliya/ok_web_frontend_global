@@ -1,7 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
 import { Title } from "@solidjs/meta";
-import { type JSX, onMount } from "solid-js";
+import { type JSX, onCleanup, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
@@ -19,7 +19,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
@@ -34,12 +34,27 @@ export function PageDesignerWrapper(): JSX.Element {
   const [graph, setGraph] = useGraph();
 
   const formId = uuidv7();
+
+  const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
+    formId,
+    label: params.entity,
+    dataId: params.id,
+  });
+  addNewVertex(0, newOpenVertex, graph, setGraph);
+  
   const vertex = newVertex(initialStore.id, ["PageDesigner"], {
     ...initialStore,
-    openedFormIds: [{formId, label: params.entity, dataId: params.id}],
+    openedFormIds: [newOpenVertex.id],
     formId,
   });
   addNewVertex(0, vertex, graph, setGraph);
+
+  onCleanup(() => {
+    for (const vertexId of graph.vertexes[initialStore.id].P.openedFormIds) {
+      deleteVertex(0, vertexId, graph, setGraph);
+    }
+    deleteVertex(0, initialStore.id, graph, setGraph);
+  })
 
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;

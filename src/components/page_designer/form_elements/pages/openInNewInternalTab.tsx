@@ -1,8 +1,8 @@
 import {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
 import type {NavItem} from "~/components/page_designer/form_elements/getTreeData";
-import {PageLayoutObject} from "~/components/page_designer/context/LayoutContext";
+import {OpenFormInfo, PageLayoutObject} from "~/components/page_designer/context/LayoutContext";
 import {SetStoreFunction} from "solid-js/store";
-import {mergeVertexProperties} from "~/lib/graph/mutate/vertex";
+import {addNewVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
 import {v7 as uuidv7} from "uuid";
 
 export function openInNewInternalTab(
@@ -14,10 +14,21 @@ export function openInNewInternalTab(
   const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
   // Check if form with same label and dataId already exists
   const exists = child.id !== "new" && layoutStore.openedFormIds.some(
-    form => form.label === child.L[0] && form.dataId === child.id
+    formId => {
+      const form = graph.vertexes[formId].P as OpenFormInfo;
+      return form.label === child.L[0] && form.dataId === child.id;
+    }
   );
 
   if (!exists) {
+    const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
+      formId: uuidv7(),
+      label: child.L[0],
+      dataId: child.id,
+      // @ts-expect-error ignore
+      parentId: child.P.parentId
+    });
+    addNewVertex(0, newOpenVertex, graph, setGraph);
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,
@@ -25,13 +36,7 @@ export function openInNewInternalTab(
       graph,
       setGraph,
       {
-        openedFormIds: [...layoutStore.openedFormIds, {
-          formId: uuidv7(),
-          label: child.L[0],
-          dataId: child.id,
-          // @ts-expect-error ignore
-          parentId: child.P.parentId
-        }]
+        openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id]
       },
       {cloneProperties: false}
     );

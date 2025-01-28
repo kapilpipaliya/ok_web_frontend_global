@@ -15,20 +15,20 @@ export function FormConfig() {
 
   return (
     <For each={layoutStore().openedFormIds}>
-      {(form) => (
+      {(openedFormId) => (
         <div
           style={{
-            display: layoutStore().formId === form.formId ? "block" : "none",
+            display: layoutStore().formId === openedFormId ? "block" : "none",
           }}
         >
           <PageViewWrapper
-            dataId={form.dataId}
+            dataId={graph.vertexes[openedFormId].P.dataId}
             hideSaveCancelButton={true}
             isNoPermissionCheck={true}
-            pageVertexName={form.label}
-            uuid={form.formId}
+            pageVertexName={graph.vertexes[openedFormId].P.label}
+            uuid={graph.vertexes[openedFormId].P.formId}
             // @ts-expect-error ignore
-            parentId={form.parentId}
+            parentId={graph.vertexes[openedFormId].P.parentId}
           />
         </div>
       )}

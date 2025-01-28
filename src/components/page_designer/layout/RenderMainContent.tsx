@@ -17,7 +17,7 @@ import { PropertiesWrapper } from "../settings/properties/PropertiesWrapper";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteAttributeDialog } from "./DeleteRuleDialog";
 import { makePersisted } from '@solid-primitives/storage';
-import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
+import { deleteVertex, mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { IFramePreview } from './IFramePreview';
@@ -67,7 +67,8 @@ function TabBar() {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
-  const handleClose = (formId: string) => {
+  const handleClose = (openedFormId: Id) => {
+    const openTab = layoutStore().openedFormIds.find(f => f !== openedFormId);
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,
@@ -75,11 +76,12 @@ function TabBar() {
       graph,
       setGraph,
       {
-        openedFormIds: layoutStore().openedFormIds.filter(f => f.formId !== formId),
-        formId: layoutStore().openedFormIds.find(f => f.formId !== formId)?.formId || null
+        openedFormIds: layoutStore().openedFormIds.filter(f => f !== openedFormId),
+        formId: graph.vertexes[openTab!]?.P.formId || null
       },
       { cloneProperties: false }
     );
+    deleteVertex(0, openedFormId, graph, setGraph);
   };
 
   const handleTabClick = (formId: string) => {
@@ -102,15 +104,15 @@ function TabBar() {
   return (
     <div class="display:flex gap:5px padding:5px">
       <For each={layoutStore().openedFormIds}>
-        {(form, index) => (
+        {(openedFormId, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === form.formId ? "background:#e0e0e0" : ""
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""
               }`}
-            onClick={[handleTabClick, form.formId]}
+            onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
           >
             <span>
-              {form.label}
-              {isUnsaved(form.formId) && "*"}
+              {graph.vertexes[openedFormId].P.label}
+              {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
             </span>
             <button
               class="background:none border:none cursor:pointer font-size:14px padding:2px"
@@ -118,11 +120,11 @@ function TabBar() {
                 const newView = createViewVertex({ view: "Mobile" }, graph, setGraph);
                 mergeVertexProperties<FormStoreObject>(
                   0,
-                  form.formId,
+                  graph.vertexes[openedFormId].P.formId,
                   graph,
                   setGraph,
                   {
-                    openedViews: [...graph.vertexes[form.formId]?.P.openedViews, newView.id]
+                    openedViews: [...graph.vertexes[graph.vertexes[openedFormId].P.formId]?.P.openedViews, newView.id]
                   }
                 );
               }}
@@ -134,7 +136,7 @@ function TabBar() {
                 class="background:none border:none cursor:pointer font-size:14px padding:2px"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleClose(form.formId);
+                  handleClose(openedFormId);
                 }}
               >
                 ×
@@ -180,9 +182,9 @@ function PageViewComponent() {
   return (
     <div class="flex gap:8 flex:nowrap">
       <For each={layoutStore().openedFormIds}>
-        {(pageInfo) => {
-          const isActive = () => layoutStore().formId === pageInfo.formId;
-          const formStoreVertex = () => graph.vertexes[pageInfo.formId] as Vertex<FormStoreObject>;
+        {(openedFormId) => {
+          const isActive = () => layoutStore().formId === graph.vertexes[openedFormId].P.formId;
+          const formStoreVertex = () => graph.vertexes[graph.vertexes[openedFormId].P.formId] as Vertex<FormStoreObject>;
 
           return (
             <Show when={formStoreVertex()?.id}>
@@ -192,8 +194,8 @@ function PageViewComponent() {
                     view={openedView}
                     class={isActive() ? '' : 'hidden'}
                   >
-                    <PageTabBar formStoreId={pageInfo.formId} openIndex={index()} />
-                    <IFramePreview formStoreId={pageInfo.formId} />
+                    <PageTabBar formStoreId={graph.vertexes[openedFormId].P.formId} openIndex={index()} />
+                    <IFramePreview formStoreId={graph.vertexes[openedFormId].P.formId} />
                     {/* <PageView
                       isDesignMode={true}
                       isNoPermissionCheck={true}

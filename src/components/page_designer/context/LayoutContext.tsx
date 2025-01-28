@@ -6,10 +6,14 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 import type { FormStoreObject } from "../../form/context/FormContext";
 import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
 
+export interface OpenFormInfo {
+  formId: Id, label: string, dataId: Id
+}
+
 export function getInitialDesignerLayoutStore() {
   return {
     id: uuidv7(),
-    openedFormIds: [] as {formId: Id, label: string, dataId: Id}[],
+    openedFormIds: [] as Id[],
     draggedVertexIds: [] as Id[],
     activeItem: null as Id | null | number,
     position: null as "after" | "before" | "center" | "left" | "right" | null,

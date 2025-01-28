@@ -25,9 +25,9 @@ export function SaveAllButton() {
   };
 
   const handleSaveAll = async () => {
-    const idsToSave = formStoreIds().filter(openFormData => !isDisabled(openFormData.formId));
+    const idsToSave = formStoreIds().filter(openFormData => !isDisabled(graph.vertexes[openFormData].P.formId));
     for (const openFormData of idsToSave) {
-      const formStoreVertex = () => graph.vertexes[openFormData.formId] as Vertex<FormStoreObject>;
+      const formStoreVertex = () => graph.vertexes[graph.vertexes[openFormData].P.formId] as Vertex<FormStoreObject>;
       await formSubmit(formStoreVertex, graph, setGraph, () => {}, showErrorToast, showLoadingToast, showWarningToast)();
     }
   };
@@ -36,10 +36,10 @@ export function SaveAllButton() {
     <IconButton
       class={`${headerIconButtonClass}`}
       icon="ic:baseline-save-all"
-      onClick={formStoreIds().every(openFormData => isDisabled(openFormData.formId)) ? undefined : handleSaveAll}
+      onClick={formStoreIds().every(openFormData => isDisabled(graph.vertexes[openFormData].P.formId)) ? undefined : handleSaveAll}
       size={22}
       title="Save All"
-      disabled={formStoreIds().every(openFormData => isDisabled(openFormData.formId))}
+      disabled={formStoreIds().every(openFormData => isDisabled(graph.vertexes[openFormData].P.formId))}
     />
   );
 }
