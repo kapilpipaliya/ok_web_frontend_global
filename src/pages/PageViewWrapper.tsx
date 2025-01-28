@@ -62,6 +62,7 @@ export function PageViewWrapper(
     pageVertexLabel?: string;
     pageVertexName?: string;
     uuid?: string;
+    // openedFormId?: Id;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -313,6 +314,12 @@ export function PageViewWrapper(
         return;
       }
 
+      // we cant save the dataId again, because its used as a prop and giving some error
+      // if (props.openedFormId) {
+      //   mergeVertexProperties(0, props.openedFormId, graph, setGraph, {
+      //     dataId: createResult.vertex!.id
+      //   });
+      // }
       // @ts-expect-error ignore. Link to parent page
       if (props.parentId && (props.pageVertexName === "Template" || props.pageVertexName === "Component")) {
         const parentComponentMetaVertex = {

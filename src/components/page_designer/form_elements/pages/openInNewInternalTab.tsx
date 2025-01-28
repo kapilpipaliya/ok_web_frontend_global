@@ -40,5 +40,12 @@ export function openInNewInternalTab(
       },
       {cloneProperties: false}
     );
+  } else {
+    const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
+    if (openFormId) {
+      mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+        formId: graph.vertexes[openFormId].P.formId
+      });
+    }
   }
 }

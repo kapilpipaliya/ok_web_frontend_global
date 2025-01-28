@@ -18,7 +18,7 @@ export function FormConfig() {
       {(openedFormId) => (
         <div
           style={{
-            display: layoutStore().formId === openedFormId ? "block" : "none",
+            display: layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "block" : "none",
           }}
         >
           <PageViewWrapper
@@ -29,6 +29,7 @@ export function FormConfig() {
             uuid={graph.vertexes[openedFormId].P.formId}
             // @ts-expect-error ignore
             parentId={graph.vertexes[openedFormId].P.parentId}
+            // openedFormId={openedFormId}
           />
         </div>
       )}
