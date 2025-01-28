@@ -39,6 +39,7 @@ export function PageDesignerWrapper(): JSX.Element {
     formId,
     label: params.entity,
     dataId: params.id,
+    mainPanel: 0
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
   

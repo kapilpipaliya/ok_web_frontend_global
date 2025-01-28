@@ -101,8 +101,15 @@ function TabBar() {
     return vertex?.P.txnId && !isDisabledTxn(vertex.P.txnId, graph);
   };
 
+  const addMainPanel = () => {
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      mainPannel: [...layoutStore().mainPannel, layoutStore().mainPannel.length]
+    });
+  };
+
   return (
     <div class="display:flex gap:5px padding:5px">
+      <button onClick={addMainPanel}>Add Main Panel</button>
       <For each={layoutStore().openedFormIds}>
         {(openedFormId, index) => (
           <div
@@ -342,25 +349,32 @@ const Panel: Component<PanelProps> = (props) => {
   );
 };
 
+interface Tab {
+  id: string;
+  title: string;
+  content: string;
+}
+
+interface MainPanelData {
+  id: string;
+  tabs: Tab[];
+  activeTab: string;
+}
+
 export function ResizableAltKey() {
-  const [graph] = useGraph()
+  const [graph, setGraph] = useGraph()
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const [sizes, setSizes] = createStore({
-    leftWidth: 300,
-    rightWidth1: 400,
-    rightWidth2: 300,
-    bottomHeight: 300
-  });
-
   const [isResizing, setIsResizing] = createSignal(false);
 
-  const createResizeHandler = (key: keyof typeof sizes, isHorizontal: boolean) => (e: MouseEvent) => {
+  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight', isHorizontal: boolean) => (e: MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startPos = isHorizontal ? e.pageX : e.pageY;
-    const startSize = sizes[key];
+    const startSize = layoutStore()[key];
 
     const onMouseMove = (e: MouseEvent) => {
       const currentPos = isHorizontal ? e.pageX : e.pageY;
@@ -370,8 +384,7 @@ export function ResizableAltKey() {
       const isPositiveResize = key === 'leftWidth';
       const newSize = Math.max(100, startSize + (isPositiveResize ? diff : -diff));
 
-      setSizes({
-        ...sizes,
+      mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
         [key]: newSize
       });
     };
@@ -389,7 +402,7 @@ export function ResizableAltKey() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${sizes.leftWidth}px|1fr|${sizes.rightWidth1}px|${sizes.rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPannel.map(() => '1fr').join('|')}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw
@@ -401,13 +414,19 @@ export function ResizableAltKey() {
         <FormElements />
       </Panel>
 
-      <Panel style={{
-        // 'background-color': '#ffffff',
-        overflow: 'auto'
-      }}>
-        <TabBar />
-        <PageViewComponent />
-      </Panel>
+      <For each={layoutStore().mainPannel}>
+        {(mainPanel, index) => (
+          <Panel style={{
+            // 'background-color': '#ffffff',
+            overflow: 'auto'
+          }}
+          // onResize={index() < layoutStore().mainPannel.length - 1 ? createResizeHandler('leftWidth', true) : undefined}
+          >
+            <TabBar />
+            <PageViewComponent />
+          </Panel>
+        )}
+      </For>
 
       <Panel onResize={createResizeHandler('rightWidth1', true)} resizePosition="left">
         {/* <Show
