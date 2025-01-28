@@ -6,7 +6,7 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
-export function LayoutTree() {  
+export function LayoutTree() {
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
@@ -37,22 +37,25 @@ export function LayoutTree() {
     //     ? [steps()[0]]
     //     : [];
     // }
+    
     return formStoreVertex()?.P.formDataId
-      ? [graph.vertexes[formStoreVertex()?.P.formDataId!]]
+      ? graph.vertexes[formStoreVertex()?.P.formDataId!]
+        ? [graph.vertexes[formStoreVertex()?.P.formDataId!]]
+        : []
       : [];
   };
 
   return (
-    <For each={rootVertexes()}>
-      {(item) => (
-        <Show when={formStoreVertex()}>
+    <Show when={formStoreVertex()}>
+      <For each={rootVertexes()}>
+        {(item) => (
           <LayoutTreeItem
             collapsedKeys={collapsedKeys}
             metaVertex={item}
             toggleExpand={toggleExpand}
           />
-        </Show>
-      )}
-    </For>
+        )}
+      </For>
+    </Show>
   );
 }

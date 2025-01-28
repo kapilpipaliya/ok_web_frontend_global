@@ -11,6 +11,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
 import { useToast } from "../../styled/Toast";
 import { SetStoreFunction } from "solid-js/store";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, closePopUp: () => void, showErrorToast: (message: string) => void, showLoadingToast: (options: { loadMessage: string, onSuccess: (value: any) => void, promise: Promise<any>, successMessage: string }) => void, showWarningToast: (message: string) => void) {
   return async () => {
@@ -54,7 +55,15 @@ export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph:
 
       await showLoadingToast({
         loadMessage: `Saving ${label}...`,
-        onSuccess: (_value) => {
+        onSuccess: (value) => {
+          for (const item of value.data) {
+            if (item.insert) {
+              if (item.insert[0] === formStoreVertex().P.formDataId) {
+                mergeVertexProperties<FormStoreObject>(0, formStoreVertex().id, graph, setGraph, {formDataId: item.insert[1]});
+              }
+            }
+          }
+
           // currently we are navigating back.
           if (closePopUp) {
             closePopUp();
