@@ -77,10 +77,10 @@ export function componentDrop(
   }
   if (fromVertex.L[0] === "Comp") {
     const compProps = getCompPropsObj(graph, fromVertex);
-    props = { ...compProps, ...props };
-    if (fromVertex.P.key === "Text" && !props.text) {
-      props = { ...props, text: "Sample Text" };
-    }
+    props = { ...compProps, ...props, componentName: fromVertex.P.key };
+    // if (fromVertex.P.key === "Text" && !props.text) {
+    //   props = { ...props, text: "Sample Text" };
+    // }
     if (fromVertex.P.key === "Html" && !props.as) {
       props = { ...props, as: "div" };
     }
@@ -105,7 +105,7 @@ export function componentDrop(
 
     const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-    if (["Comp", "Component"].includes(fromVertex.L[0])) {
+    if (["Component"].includes(fromVertex.L[0])) {
       // set Component to the row
       setSelectionValue(
         txnId,
