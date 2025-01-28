@@ -85,10 +85,10 @@ export function ComponentList(props: {
     const children = props.rootVertexes || (rootCompVertex() ? getCompChildren([rootCompVertex()!], props.edgeName, graph) : []);
     const query = searchQuery().toLowerCase();
     return children.filter((child) =>
-      ((child.P.label as string) || (child.P.key as string))
+      ((child.P.label as string) || (child.P.key as string) || "")
         .toLowerCase()
         .includes(query),
-    ).sort((a, b) => (a.P.key as string).localeCompare(b.P.key as string));
+    ).sort((a, b) => (a.P.key as string || "").localeCompare(b.P.key as string || ""));
   });
 
   return (

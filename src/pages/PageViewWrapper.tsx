@@ -40,6 +40,8 @@ import {PageDesignerLabels} from "~/components/page_designer/functions/PageDesig
 import {fetchComponentData} from "~/cypher/get/fetchComponentData";
 import {createViewVertex} from "~/lib/graph/mutate/createViewVertex";
 import { createCompContextVertex } from "~/lib/graph/mutate/createCompContextVertex";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
 
 const PageView = clientOnly(
   () => import("~/components/page_attr_render/PageView"),
@@ -310,6 +312,27 @@ export function PageViewWrapper(
         setFormStore("error", createResult.error);
         return;
       }
+
+      // @ts-expect-error ignore. Link to parent page
+      if (props.parentId && (props.pageVertexName === "Template" || props.pageVertexName === "Component")) {
+        const parentComponentMetaVertex = {
+          id: "",
+          IN: {},
+          L: [],
+          OUT: {},
+          P: props.pageVertexName === "Template" ? parentTemplateAttribute : parentComponentAttribute,
+        } as Vertex;
+        setSelectionValue(
+          formStore().P.txnId,
+          createResult.vertex!,
+          graph,
+          setGraph,
+          parentComponentMetaVertex,
+          // @ts-expect-error ignore
+          props.parentId
+        );
+      }
+
       setFormStore("formDataId", createResult.vertex!.id);
     }
 

@@ -27,6 +27,8 @@ export function FormConfig() {
             isNoPermissionCheck={true}
             pageVertexName={form.label}
             uuid={form.formId}
+            // @ts-expect-error ignore
+            parentId={form.parentId}
           />
         </div>
       )}

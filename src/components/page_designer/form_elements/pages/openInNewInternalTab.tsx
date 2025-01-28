@@ -28,7 +28,9 @@ export function openInNewInternalTab(
         openedFormIds: [...layoutStore.openedFormIds, {
           formId: uuidv7(),
           label: child.L[0],
-          dataId: child.id
+          dataId: child.id,
+          // @ts-expect-error ignore
+          parentId: child.P.parentId
         }]
       },
       {cloneProperties: false}

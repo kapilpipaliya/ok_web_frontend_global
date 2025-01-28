@@ -12,6 +12,8 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { IconButton } from "~/components/styled/IconButton";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
+import { useToast } from "~/components/styled/Toast";
 
 export const UlContainer = (props: ParentProps) => (
   <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto flex-wrap:nowrap">
@@ -24,7 +26,8 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
-
+  const { showWarningToast } = useToast();
+  
   createEffect(async () => {
     if (props.rootLevel) {
       // Fetch children level Components
@@ -51,7 +54,15 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
       <div class="flex ai:center gap:2">
         {!props.rootLevel ? <div class="p:1rem font-weight:500">Components</div> : null}
         <IconButton icon="ph:file"
-          onClick={() => openInNewInternalTab(layoutStoreId, { L: ["Component"], id: "new" } as Vertex, graph, setGraph)}
+          onClick={() => {
+            if (!props.rootLevel) {
+              if(isNegative(formStoreVertex().P.formDataId)) {
+                showWarningToast("Please Save Current Page first.");
+                return;
+              }
+            }
+            return openInNewInternalTab(layoutStoreId, { L: ["Component"], id: "new", P: {parentId: props.rootLevel ? null :formStoreVertex().P.formDataId} , IN: {}, OUT: {} } as Vertex, graph, setGraph);
+          }}
         />
       </div>
       <ComponentList edgeName="ParentComponent" rootVertexes={rootVertexes()} isFetchData={false} />

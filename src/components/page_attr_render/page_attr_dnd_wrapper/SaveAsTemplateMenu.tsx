@@ -17,6 +17,7 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -66,6 +67,10 @@ export function SaveAsTemplateMenu(
       P: props.saveAsLabel === "Template" ? parentTemplateAttribute : parentComponentAttribute,
     } as Vertex;
     if (saveInCurrentPage()) {
+      if(isNegative(formStoreVertex().P.formDataId)) {
+        showWarningToast("Please Save Parent Page first.");
+        return;
+      }
       setSelectionValue(
         newFormTxnId,
         dataVertex,
