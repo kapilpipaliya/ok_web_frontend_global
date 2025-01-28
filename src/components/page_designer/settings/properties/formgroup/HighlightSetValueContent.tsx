@@ -85,7 +85,7 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedComponentVertex().P.key === "Icon" && props.meta.P.key === "icon"
+              selectedAttr()?.P.componentName === "Icon" && props.meta.P.key === "icon"
             }
           >
             <div>

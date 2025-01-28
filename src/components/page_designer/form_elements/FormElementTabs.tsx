@@ -10,15 +10,17 @@ import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
 import { DesignerFormIdContext, PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-
+import { IconButton } from "~/components/styled/IconButton";
+import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 
 export const UlContainer = (props: ParentProps) => (
-  <ul class="flex {scrollbar-width:thin} flex:wrap jc:space-around margin-bottom:-1px overflow-x:auto">
+  <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto flex-wrap:nowrap">
     {props.children}
   </ul>
 );
 const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
@@ -34,7 +36,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
         setRootVertexes(
           evalExpression("<-ParentComponent", {
             graph,
-            setGraph: () => {},
+            setGraph: () => { },
             vertexes: [graph.vertexes[formStoreVertex().P.formDataId]],
           }) || []
         );
@@ -46,7 +48,12 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   return (
     <div>
-      {!props.rootLevel ? <div class="p:1rem font-weight:500">Components</div> : null}
+      <div class="flex ai:center gap:2">
+        {!props.rootLevel ? <div class="p:1rem font-weight:500">Components</div> : null}
+        <IconButton icon="ph:file"
+          onClick={() => openInNewInternalTab(layoutStoreId, { L: ["Component"], id: "new" } as Vertex, graph, setGraph)}
+        />
+      </div>
       <ComponentList edgeName="ParentComponent" rootVertexes={rootVertexes()} isFetchData={false} />
     </div>
   );

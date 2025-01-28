@@ -13,7 +13,7 @@ export function openInNewInternalTab(
 ) {
   const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
   // Check if form with same label and dataId already exists
-  const exists = layoutStore.openedFormIds.some(
+  const exists = child.id !== "new" && layoutStore.openedFormIds.some(
     form => form.label === child.L[0] && form.dataId === child.id
   );
 

@@ -166,7 +166,7 @@ export function ComponentItem(
             <Show when={props.child.L[0] !== "Comp"}>
               <div class="margin-left:auto">
                 <IconButton
-                  icon="mdi:open-in-new"
+                  icon="ph:arrow-square-out"
                   onClick={() => openInNewInternalTab(layoutStoreId, props.child, graph, setGraph)}
                   size={18}
                 />
