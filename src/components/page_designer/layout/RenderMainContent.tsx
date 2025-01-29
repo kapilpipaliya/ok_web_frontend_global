@@ -106,7 +106,7 @@ export function ResizableAltKey() {
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
 
-  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${number}`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: MouseEvent) => {
+  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startPos = isHorizontal ? e.pageX : e.pageY;
@@ -141,7 +141,7 @@ export function ResizableAltKey() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((_, index) => layoutStore()[`mainPanel${index}`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(index => layoutStore()[`mainPanel${index}`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw
@@ -159,14 +159,14 @@ export function ResizableAltKey() {
       </Panel>
 
       <For each={layoutStore().mainPanel}>
-        {(mainPanel, index) => (
+        {(mainPanel) => (
           <Panel style={{
             // 'background-color': '#ffffff',
             overflow: 'auto'
           }}
-          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${index()}`]: el }))}
-          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
-          onResize={createResizeHandler(`mainPanel${index()}`, () => mainPanelRefs()[`mainPanel${index()}`], true)}
+          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
+          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
+          onResize={createResizeHandler(`mainPanel${mainPanel}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
           >
             <TabBar />
             <PageViewComponent />

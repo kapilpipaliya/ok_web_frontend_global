@@ -11,14 +11,15 @@ export interface OpenFormInfo {
 }
 
 export function getInitialDesignerLayoutStore() {
+  const mainPanel = uuidv7();
   return {
     id: uuidv7(),
-    mainPanel: [0],
+    mainPanel: [mainPanel],
     leftWidth: 200,
     rightWidth1: 300,
     rightWidth2: 300,
     bottomHeight: 300,
-    ["mainPanel0" as `mainPanel${number}`]: '1fr',
+    [`mainPanel${mainPanel}` as `mainPanel${string}`]: '1fr',
     openedFormIds: [] as Id[],
     draggedVertexIds: [] as Id[],
     activeItem: null as Id | null | number,

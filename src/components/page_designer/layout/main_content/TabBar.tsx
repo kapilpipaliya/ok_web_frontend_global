@@ -5,6 +5,7 @@ import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
 import { mergeVertexProperties, deleteVertex } from "~/lib/graph/mutate/vertex";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
+import { v7 as uuidv7 } from "uuid";
 
 export function TabBar() {
   const [graph, setGraph] = useGraph();
@@ -47,7 +48,7 @@ export function TabBar() {
 
   const addMainPanel = () => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      mainPanel: [...layoutStore().mainPanel, layoutStore().mainPanel.length]
+      mainPanel: [...layoutStore().mainPanel, uuidv7()]
     });
   };
 
