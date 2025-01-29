@@ -7,7 +7,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { v7 as uuidv7 } from "uuid";
 
-export function TabBar() {
+export function TabBar(props: {mainPanel: Id}) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
@@ -36,7 +36,8 @@ export function TabBar() {
       graph,
       setGraph,
       {
-        formId
+        formId,
+        [`mainPanel${props.mainPanel}Tab`]: formId
       }
     );
   };
@@ -52,14 +53,36 @@ export function TabBar() {
     });
   };
 
+  const moveTab = (toPanelId: Id) => {
+    const dragInfo = layoutStore().draggedTab;
+    if (!dragInfo) return;
+
+    const tab = graph.vertexes[dragInfo].P.mainPanel;
+    if (!tab) return;
+    if (tab === toPanelId) return;
+
+    mergeVertexProperties(0, dragInfo, graph, setGraph, { mainPanel: toPanelId });
+    const prevTabOpenForms = layoutStore().openedFormIds.filter(id => graph.vertexes[id].P.mainPanel === tab);
+    mergeVertexProperties(0, layoutStoreId, graph, setGraph, { [`mainPanel${tab}Tab`]: graph.vertexes[prevTabOpenForms[prevTabOpenForms.length - 1]]?.P.formId || null });
+    mergeVertexProperties(0, layoutStoreId, graph, setGraph, { [`mainPanel${toPanelId}Tab`]: graph.vertexes[dragInfo]?.P.formId || null });
+    mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: null });
+  };
+
   return (
-    <div class="display:flex gap:5px padding:5px">
+    <div class="display:flex gap:5px padding:5px border-bottom:1px|solid|#ccc bg:#f5f5f5"
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={() => moveTab(props.mainPanel)}
+    >
       <button onClick={addMainPanel}>Add Main Panel</button>
-      <For each={layoutStore().openedFormIds}>
+      <For each={layoutStore().openedFormIds.filter(id => graph.vertexes[id].P.mainPanel === props.mainPanel)}>
         {(openedFormId, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""}`}
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} cursor:move`}
             onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
+            draggable={true}
+            onDragStart={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: openedFormId })}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => moveTab(props.mainPanel)}
           >
             <span>
               {graph.vertexes[openedFormId].P.label}

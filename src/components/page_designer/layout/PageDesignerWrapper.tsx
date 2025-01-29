@@ -39,7 +39,7 @@ export function PageDesignerWrapper(): JSX.Element {
     formId,
     label: params.entity,
     dataId: params.id,
-    mainPanel: 0
+    mainPanel: initialStore.mainPanel[0],
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
   
@@ -47,6 +47,7 @@ export function PageDesignerWrapper(): JSX.Element {
     ...initialStore,
     openedFormIds: [newOpenVertex.id],
     formId,
+    [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId
   });
   addNewVertex(0, vertex, graph, setGraph);
 

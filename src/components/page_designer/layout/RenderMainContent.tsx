@@ -1,18 +1,11 @@
-import Resizable from '@corvu/resizable'
 import { Component, createSignal, For, Show } from "solid-js";
-import { v7 as uuidv7 } from "uuid";
-
-import { PageView } from "~/components/page_attr_render/PageView";
 import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { PageLayoutObject } from "../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
-
-import { makePersisted } from '@solid-primitives/storage';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
-import { createStore } from 'solid-js/store';
 import { FormElements } from './main_content/FormElements';
 import { TabBar } from './main_content/TabBar';
 import { PageViewComponent } from './main_content/PageViewComponent';
@@ -26,34 +19,32 @@ export function RenderMainContent() {
 export default RenderMainContent;
 
 interface ResizeHandleProps {
-  onMouseDown: (e: MouseEvent) => void;
+  onPointerDown: (e: PointerEvent) => void;
   isHorizontal?: boolean;
-  position: 'left' | 'right' | 'top';
+  position: 'left' | 'right' | 'top' | 'bottom';
 }
+
 const ResizeHandle: Component<ResizeHandleProps> = (props) => {
   const isHorizontal = props.isHorizontal ?? true;
 
   return (
     <div
       class={`
-        position:absolute
-        ${props.position}:0px
-        ${isHorizontal ? 'top:0' : 'top:-3px'}
-        ${isHorizontal ? 'width:6px' : 'width:100%'}
-        ${isHorizontal ? 'height:100%' : 'height:6px'}
+        ${isHorizontal ? 'width:3px height:100%' : 'width:100% height:3px'}
         ${isHorizontal ? 'cursor:col-resize' : 'cursor:row-resize'}
         background-color:transparent
         z-index:1
+        touch-action:none
       `}
-      onMouseDown={props.onMouseDown}
+      onPointerDown={props.onPointerDown}
     />
   );
 };
 
 interface PanelProps {
   children: any;
-  onResize?: (e: MouseEvent) => void;
-  resizePosition?: 'left' | 'right' | 'top';
+  onResize?: (e: PointerEvent) => void;
+  resizePosition?: 'left' | 'right' | 'top' | 'bottom';
   style?: any;
   ref?: (el: HTMLDivElement) => void;
 }
@@ -65,14 +56,25 @@ const Panel: Component<PanelProps> = (props) => {
       style={{
         // 'background-color': '#f0f0f0',
         'border': '1px solid #ccc',
-        position: 'relative',
+        'display': 'grid',
+        'grid-template-columns': props.resizePosition === 'left' ? '3px 1fr' : '1fr 3px',
+        'grid-template-rows': props.resizePosition === 'top' ? '3px 1fr' : '1fr',
         ...props.style
       }}
     >
-      {props.children}
-      <Show when={props.onResize}>
+      <Show when={props.resizePosition === 'left' && props.onResize}>
         <ResizeHandle
-          onMouseDown={props.onResize!}
+          onPointerDown={props.onResize!}
+          position={props.resizePosition!}
+          isHorizontal={props.resizePosition !== 'top'}
+        />
+      </Show>
+      <div style={{ "overflow": "auto" }}>
+        {props.children}
+      </div>
+      <Show when={props.resizePosition !== 'left' && props.onResize}>
+        <ResizeHandle
+          onPointerDown={props.onResize!}
           position={props.resizePosition || 'right'}
           isHorizontal={props.resizePosition !== 'top'}
         />
@@ -80,18 +82,6 @@ const Panel: Component<PanelProps> = (props) => {
     </div>
   );
 };
-
-interface Tab {
-  id: string;
-  title: string;
-  content: string;
-}
-
-interface MainPanelData {
-  id: string;
-  tabs: Tab[];
-  activeTab: string;
-}
 
 export function ResizableAltKey() {
   const [graph, setGraph] = useGraph()
@@ -106,7 +96,7 @@ export function ResizableAltKey() {
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
 
-  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: MouseEvent) => {
+  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startPos = isHorizontal ? e.pageX : e.pageY;
@@ -114,8 +104,10 @@ export function ResizableAltKey() {
     if (!panel) return;
     
     const startWidth = panel.getBoundingClientRect().width;
+    const pointerId = e.pointerId;
 
-    const onMouseMove = (e: MouseEvent) => {
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
       const currentPos = isHorizontal ? e.pageX : e.pageY;
       const diff = currentPos - startPos;
 
@@ -128,20 +120,24 @@ export function ResizableAltKey() {
       });
     };
 
-    const onMouseUp = () => {
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerId !== pointerId) return;
       setIsResizing(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    panel.setPointerCapture(pointerId);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
   };
 
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw
@@ -166,10 +162,10 @@ export function ResizableAltKey() {
           }}
           ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
           // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
-          onResize={createResizeHandler(`mainPanel${mainPanel}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
+          onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
           >
-            <TabBar />
-            <PageViewComponent />
+            <TabBar mainPanel={mainPanel} />
+            <PageViewComponent mainPanel={mainPanel} />
           </Panel>
         )}
       </For>
@@ -210,7 +206,7 @@ export function ResizableAltKey() {
 
       {/* <Panel
         style={{ 'grid-column': '1 / span 4' }}
-        onResize={createResizeHandler('bottomHeight', false)}
+        onResize={createResizeHandler('bottomHeight',()=>undefined, false)}
         resizePosition="top"
       >
         bottom panel

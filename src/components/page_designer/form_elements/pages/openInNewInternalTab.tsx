@@ -27,7 +27,7 @@ export function openInNewInternalTab(
       dataId: child.id,
       // @ts-expect-error ignore
       parentId: child.P.parentId,
-      mainPanel: 0
+      mainPanel: layoutStore.mainPanel[0]
     });
     addNewVertex(0, newOpenVertex, graph, setGraph);
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
@@ -42,11 +42,11 @@ export function openInNewInternalTab(
       {cloneProperties: false}
     );
   } else {
-    const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
-    if (openFormId) {
-      mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-        formId: graph.vertexes[openFormId].P.formId
-      });
-    }
+    // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
+    // if (openFormId) {
+    //   mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+    //     formId: graph.vertexes[openFormId].P.formId
+    //   });
+    // }
   }
 }
