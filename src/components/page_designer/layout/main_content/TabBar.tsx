@@ -77,7 +77,7 @@ export function TabBar(props: {mainPanel: Id}) {
       <For each={layoutStore().openedFormIds.filter(id => graph.vertexes[id].P.mainPanel === props.mainPanel)}>
         {(openedFormId, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${useDesignerFormIdContext() === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} cursor:move`}
+            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "bb:2px|solid|red" : ""} cursor:move`}
             onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
             draggable={true}
             onDragStart={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: openedFormId })}
