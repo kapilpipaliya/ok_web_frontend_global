@@ -2,7 +2,7 @@ import { createStore } from 'solid-js/store';
 import { useGraph, Vertex } from '~/lib/graph/graph';
 import { PageView } from "~/components/page_attr_render/PageView";
 import { DesignerFormIdContext, DesignerLayoutStoreContext, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
-import { Show, createSignal } from 'solid-js';
+import { Show, createSignal, onMount } from 'solid-js';
 import { getChannel, handleChannelMessage } from '~/lib/graph/mutate/channel';
 import { handleDrop } from '~/components/page_designer/event_handler/handleDrop';
 import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
@@ -72,6 +72,9 @@ export default function PageShareView() {
   channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, formStoreId, formStoreId);
 
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  onMount(() => {
+    window.parent.postMessage({ type: 'LOADED' }, '*');
+  });
 
   return (
     <Show when={formStoreVertex()}>
