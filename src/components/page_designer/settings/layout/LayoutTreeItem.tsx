@@ -89,7 +89,7 @@ export function LayoutTreeItem(
   };
 
   const handleClick = () => {
-    onLayoutItemClick(formStoreVertex(), props.metaVertex.id, graph, setGraph);
+    onLayoutItemClick(layoutStoreVertex(), formStoreVertex(), props.metaVertex.id, graph, setGraph);
   };
 
   const handleMouseOver = (e: MouseEvent) => {

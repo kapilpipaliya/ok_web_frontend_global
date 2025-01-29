@@ -48,7 +48,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
-    onLayoutItemClick(formStoreVertex(), props.item.id, graph, setGraph);
+    onLayoutItemClick(layoutStoreVertex(), formStoreVertex(), props.item.id, graph, setGraph);
   };
 
   // no need debounde, it is called too less

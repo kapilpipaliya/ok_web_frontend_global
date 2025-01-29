@@ -58,7 +58,7 @@ export async function handleDrop(
       layoutStoreVertex?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      onLayoutItemClick(formStoreVertex, layoutId as string, graph, setGraph);
+      onLayoutItemClick(layoutStoreVertex, formStoreVertex, layoutId as string, graph, setGraph);
     }
   }
 }

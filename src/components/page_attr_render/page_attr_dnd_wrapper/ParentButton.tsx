@@ -2,13 +2,15 @@ import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLa
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
 import { evalExpression } from "~/lib/expression_eval";
 
 export function ParentButton(props: { item: Vertex; size: number }) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
@@ -26,6 +28,7 @@ export function ParentButton(props: { item: Vertex; size: number }) {
           return;
         }
         onLayoutItemClick(
+          layoutStoreVertex(),
           formStoreVertex()!,
           parentResult[0].id,
           graph,
