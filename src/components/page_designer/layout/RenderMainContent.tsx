@@ -37,7 +37,7 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
     <div
       class={`
         position:absolute
-        ${props.position}:-3px
+        ${props.position}:0px
         ${isHorizontal ? 'top:0' : 'top:-3px'}
         ${isHorizontal ? 'width:6px' : 'width:100%'}
         ${isHorizontal ? 'height:100%' : 'height:6px'}
@@ -64,7 +64,7 @@ const Panel: Component<PanelProps> = (props) => {
       ref={props.ref}
       style={{
         // 'background-color': '#f0f0f0',
-        // 'border': '1px solid #ccc',
+        'border': '1px solid #ccc',
         position: 'relative',
         ...props.style
       }}
@@ -104,9 +104,9 @@ export function ResizableAltKey() {
   const [leftPanelRef, setLeftPanelRef] = createSignal<HTMLDivElement>();
   const [rightPanel1Ref, setRightPanel1Ref] = createSignal<HTMLDivElement>();
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
-  const [mainPannelRefs, setMainPannelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
+  const [mainPanelRefs, setMainPanelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
 
-  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight', panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: MouseEvent) => {
+  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${number}`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
     const startPos = isHorizontal ? e.pageX : e.pageY;
@@ -120,7 +120,7 @@ export function ResizableAltKey() {
       const diff = currentPos - startPos;
 
       // Determine if we're resizing from left/top (positive) or right/bottom (negative)
-      const isPositiveResize = key === 'leftWidth' || key.startsWith('mainPannel');
+      const isPositiveResize = key === 'leftWidth' || key.startsWith('mainPanel');
       const newWidth = Math.max(100, startWidth + (isPositiveResize ? diff : -diff));
 
       mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
@@ -141,12 +141,13 @@ export function ResizableAltKey() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPannel.map((_, index) => layoutStore()[`mainPannel${index}`] ?? '1fr').join('|')}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((_, index) => layoutStore()[`mainPanel${index}`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(index => layoutStore()[`mainPanel${index}`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw
-      overflow:hidden
+      
     `}
+    // overflow:hidden
     //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
       <Panel 
@@ -157,20 +158,22 @@ export function ResizableAltKey() {
         <FormElements />
       </Panel>
 
-      <For each={layoutStore().mainPannel}>
+      <For each={layoutStore().mainPanel}>
         {(mainPanel, index) => (
           <Panel style={{
             // 'background-color': '#ffffff',
             overflow: 'auto'
           }}
-          ref={(el) => setMainPannelRefs((prev) => ({ ...prev, [`mainPannel${index()}`]: el }))}
-          onResize={index() < layoutStore().mainPannel.length - 1 ? createResizeHandler(`mainPannel${index()}`, () => mainPannelRefs()[`mainPannel${index()}`], true) : undefined}
+          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${index()}`]: el }))}
+          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
+          onResize={createResizeHandler(`mainPanel${index()}`, () => mainPanelRefs()[`mainPanel${index()}`], true)}
           >
             <TabBar />
             <PageViewComponent />
           </Panel>
         )}
       </For>
+      <div/>
 
       <Panel 
         ref={setRightPanel1Ref}

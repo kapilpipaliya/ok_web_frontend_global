@@ -7,17 +7,18 @@ import type { FormStoreObject } from "../../form/context/FormContext";
 import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
 
 export interface OpenFormInfo {
-  formId: Id, label: string, dataId: Id, mainPannel: Id
+  formId: Id, label: string, dataId: Id, mainPanel: Id
 }
 
 export function getInitialDesignerLayoutStore() {
   return {
     id: uuidv7(),
-    mainPannel: [0],
-    leftWidth: 300,
-    rightWidth1: 400,
+    mainPanel: [0],
+    leftWidth: 200,
+    rightWidth1: 300,
     rightWidth2: 300,
     bottomHeight: 300,
+    ["mainPanel0" as `mainPanel${number}`]: '1fr',
     openedFormIds: [] as Id[],
     draggedVertexIds: [] as Id[],
     activeItem: null as Id | null | number,

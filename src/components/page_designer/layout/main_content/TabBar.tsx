@@ -47,7 +47,7 @@ export function TabBar() {
 
   const addMainPanel = () => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      mainPannel: [...layoutStore().mainPannel, layoutStore().mainPannel.length]
+      mainPanel: [...layoutStore().mainPanel, layoutStore().mainPanel.length]
     });
   };
 
