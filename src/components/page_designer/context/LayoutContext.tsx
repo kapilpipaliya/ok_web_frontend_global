@@ -16,6 +16,7 @@ export function getInitialDesignerLayoutStore() {
     id: uuidv7(),
     mainPanel: [mainPanel],
     leftWidth: 200,
+    rightWidth0: 200,
     rightWidth1: 300,
     rightWidth2: 300,
     bottomHeight: 300,

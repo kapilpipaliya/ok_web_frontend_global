@@ -13,11 +13,6 @@ import { Settings } from './main_content/Settings';
 import { PropertiesContent } from './main_content/PropertiesContent';
 import { DeleteConfirmation } from './main_content/DeleteConfirmation';
 
-export function RenderMainContent() {
-  return <ResizableAltKey />
-}
-export default RenderMainContent;
-
 interface ResizeHandleProps {
   onPointerDown: (e: PointerEvent) => void;
   isHorizontal?: boolean;
@@ -99,7 +94,7 @@ const Panel: Component<PanelProps> = (props) => {
   );
 };
 
-export function ResizableAltKey() {
+export function RenderMainContent() {
   const [graph, setGraph] = useGraph()
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
@@ -109,11 +104,12 @@ export function ResizableAltKey() {
   const [isResizing, setIsResizing] = createSignal(false);
   const [activeResizeKey, setActiveResizeKey] = createSignal<string | null>(null);
   const [leftPanelRef, setLeftPanelRef] = createSignal<HTMLDivElement>();
+  const [rightPanel0Ref, setRightPanel0Ref] = createSignal<HTMLDivElement>();
   const [rightPanel1Ref, setRightPanel1Ref] = createSignal<HTMLDivElement>();
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
 
-  const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
+  const createResizeHandler = (key: 'leftWidth' | 'rightWidth0' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
     e.preventDefault();
     setIsResizing(true);
     setActiveResizeKey(key);
@@ -156,7 +152,7 @@ export function ResizableAltKey() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth0}px|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw
@@ -194,7 +190,23 @@ export function ResizableAltKey() {
           </Panel>
         )}
       </For>
+
       <div/>
+
+      <Panel 
+        ref={setRightPanel0Ref}
+        onResize={createResizeHandler('rightWidth0', rightPanel0Ref, true)} 
+        resizePosition="left"
+        isResizing={isResizing()}
+        resizeKey="rightWidth0"
+        activeResizeKey={activeResizeKey()}
+      >
+        <div
+          class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
+        >
+          New AI Panel
+        </div>
+      </Panel>
 
       <Panel 
         ref={setRightPanel1Ref}
@@ -249,3 +261,5 @@ export function ResizableAltKey() {
     </div>
   );
 }
+
+export default RenderMainContent;
