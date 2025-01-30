@@ -22,21 +22,28 @@ interface ResizeHandleProps {
   onPointerDown: (e: PointerEvent) => void;
   isHorizontal?: boolean;
   position: 'left' | 'right' | 'top' | 'bottom';
+  isResizing: boolean;
+  resizeKey: string;
+  activeResizeKey: string | null;
 }
 
 const ResizeHandle: Component<ResizeHandleProps> = (props) => {
   const isHorizontal = props.isHorizontal ?? true;
+  const [isHovered, setIsHovered] = createSignal(false);
 
   return (
     <div
       class={`
         ${isHorizontal ? 'width:3px height:100%' : 'width:100% height:3px'}
         ${isHorizontal ? 'cursor:col-resize' : 'cursor:row-resize'}
-        background-color:transparent
+        ${(isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey)) ? 'bg:gray-60' : 'bg:transparent'}
         z-index:1
         touch-action:none
+        transition:background-color|0.2s
       `}
       onPointerDown={props.onPointerDown}
+      onMouseEnter={() => !props.isResizing && setIsHovered(true)}
+      onMouseLeave={() => !props.isResizing && setIsHovered(false)}
     />
   );
 };
@@ -47,6 +54,9 @@ interface PanelProps {
   resizePosition?: 'left' | 'right' | 'top' | 'bottom';
   style?: any;
   ref?: (el: HTMLDivElement) => void;
+  isResizing: boolean;
+  resizeKey?: string;
+  activeResizeKey: string | null;
 }
 
 const Panel: Component<PanelProps> = (props) => {
@@ -67,6 +77,9 @@ const Panel: Component<PanelProps> = (props) => {
           onPointerDown={props.onResize!}
           position={props.resizePosition!}
           isHorizontal={props.resizePosition !== 'top'}
+          isResizing={props.isResizing}
+          resizeKey={props.resizeKey || ''}
+          activeResizeKey={props.activeResizeKey}
         />
       </Show>
       <div style={{ "overflow": "auto" }}>
@@ -77,6 +90,9 @@ const Panel: Component<PanelProps> = (props) => {
           onPointerDown={props.onResize!}
           position={props.resizePosition || 'right'}
           isHorizontal={props.resizePosition !== 'top'}
+          isResizing={props.isResizing}
+          resizeKey={props.resizeKey || ''}
+          activeResizeKey={props.activeResizeKey}
         />
       </Show>
     </div>
@@ -91,6 +107,7 @@ export function ResizableAltKey() {
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [isResizing, setIsResizing] = createSignal(false);
+  const [activeResizeKey, setActiveResizeKey] = createSignal<string | null>(null);
   const [leftPanelRef, setLeftPanelRef] = createSignal<HTMLDivElement>();
   const [rightPanel1Ref, setRightPanel1Ref] = createSignal<HTMLDivElement>();
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
@@ -99,6 +116,7 @@ export function ResizableAltKey() {
   const createResizeHandler = (key: 'leftWidth' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
     e.preventDefault();
     setIsResizing(true);
+    setActiveResizeKey(key);
     const startPos = isHorizontal ? e.pageX : e.pageY;
     const panel = panelRef();
     if (!panel) return;
@@ -123,6 +141,7 @@ export function ResizableAltKey() {
     const onPointerUp = (e: PointerEvent) => {
       if (e.pointerId !== pointerId) return;
       setIsResizing(false);
+      setActiveResizeKey(null);
       document.removeEventListener('pointermove', onPointerMove);
       document.removeEventListener('pointerup', onPointerUp);
       document.removeEventListener('pointercancel', onPointerUp);
@@ -150,6 +169,9 @@ export function ResizableAltKey() {
         ref={setLeftPanelRef}
         onResize={createResizeHandler('leftWidth', leftPanelRef, true)} 
         resizePosition="right"
+        isResizing={isResizing()}
+        resizeKey="leftWidth"
+        activeResizeKey={activeResizeKey()}
       >
         <FormElements />
       </Panel>
@@ -163,6 +185,9 @@ export function ResizableAltKey() {
           ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
           // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
           onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
+          isResizing={isResizing()}
+          resizeKey={`mainPanel${mainPanel}Width`}
+          activeResizeKey={activeResizeKey()}
           >
             <TabBar mainPanel={mainPanel} />
             <PageViewComponent mainPanel={mainPanel} />
@@ -175,6 +200,9 @@ export function ResizableAltKey() {
         ref={setRightPanel1Ref}
         onResize={createResizeHandler('rightWidth1', rightPanel1Ref, true)} 
         resizePosition="left"
+        isResizing={isResizing()}
+        resizeKey="rightWidth1"
+        activeResizeKey={activeResizeKey()}
       >
         {/* <Show
             fallback={
@@ -200,6 +228,9 @@ export function ResizableAltKey() {
         ref={setRightPanel2Ref}
         onResize={createResizeHandler('rightWidth2', rightPanel2Ref, true)} 
         resizePosition="left"
+        isResizing={isResizing()}
+        resizeKey="rightWidth2"
+        activeResizeKey={activeResizeKey()}
       >
         <Settings />
       </Panel>
