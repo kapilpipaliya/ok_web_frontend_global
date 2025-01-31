@@ -2,7 +2,7 @@
 import { useChat } from '@ai-sdk/solid';
 import { For, Show } from 'solid-js';
 
-export default function Chat() {
+export function UseChatTools() {
   const { messages, input, handleInputChange, handleSubmit, addToolResult } =
     useChat({
       api: '/api/use-chat-tools',

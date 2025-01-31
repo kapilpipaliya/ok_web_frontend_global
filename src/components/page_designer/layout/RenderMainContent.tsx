@@ -12,6 +12,7 @@ import { PageViewComponent } from './main_content/PageViewComponent';
 import { Settings } from './main_content/Settings';
 import { PropertiesContent } from './main_content/PropertiesContent';
 import { DeleteConfirmation } from './main_content/DeleteConfirmation';
+import { AIPanel } from "./AIPanel";
 
 interface ResizeHandleProps {
   onPointerDown: (e: PointerEvent) => void;
@@ -204,7 +205,7 @@ export function RenderMainContent() {
         <div
           class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
         >
-          New AI Panel
+          <AIPanel />
         </div>
       </Panel>
 

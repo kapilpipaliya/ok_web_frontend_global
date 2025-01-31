@@ -3,7 +3,7 @@ import { For, createSignal } from 'solid-js';
 import { useChat } from '@ai-sdk/solid';
 import { getTextFromDataUrl } from '@ai-sdk/ui-utils';
 
-export default function Chat() {
+export function UseChatAttachments() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   let fileInputRef: HTMLInputElement | undefined;
 

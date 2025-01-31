@@ -1,17 +1,17 @@
 import { experimental_useObject as useObject } from '@ai-sdk/solid';
-import { notificationSchema } from '../api/use-object/schema';
+import { notificationSchema } from '../../../../routes/api/use-object/schema';
 import { For, Show } from 'solid-js';
 
-export default function Page() {
+export function UseObject() {
   const { submit, isLoading, object, stop, error } = useObject({
     api: '/api/use-object',
     schema: notificationSchema,
   });
 
   return (
-    <div class="flex flex-col items-center min-h-screen p-4 m-4">
+    <div class="display:flex flex-direction:column align-items:center min-height:100vh padding:16px margin:16px">
       <button
-        class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-md disabled:bg-blue-200"
+        class="padding:16px|8px margin-top:16px color:white background:rgb(59,130,246) border-radius:6px disabled:background:rgb(191,219,254)"
         onClick={async () => {
           submit('Messages during finals week.');
         }}
@@ -22,18 +22,18 @@ export default function Page() {
 
       <Show when={error()}>
         {error => (
-          <div class="mt-4 text-red-500">
+          <div class="margin-top:16px color:rgb(239,68,68)">
             An error occurred. {error()?.message}
           </div>
         )}
       </Show>
 
       <Show when={isLoading()}>
-        <div class="mt-4 text-gray-500">
+        <div class="margin-top:16px color:rgb(107,114,128)">
           <div>Loading...</div>
           <button
             type="button"
-            class="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
+            class="padding:16px|8px margin-top:16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px"
             onClick={() => stop()}
           >
             STOP
@@ -41,24 +41,24 @@ export default function Page() {
         </div>
       </Show>
 
-      <div class="flex flex-col gap-4 mt-4">
+      <div class="display:flex flex-direction:column gap:16px margin-top:16px">
         <For each={object()?.notifications}>
           {(notification, index) => (
             <div
-              class="flex items-start gap-4 p-4 bg-gray-100 rounded-md dark:bg-gray-800"
+              class="display:flex align-items:start gap:16px padding:16px background:rgb(243,244,246) border-radius:6px dark:background:rgb(31,41,55)"
               data-index={index()}
             >
-              <div class="flex-1 space-y-1">
-                <div class="flex items-center justify-between">
-                  <p class="font-medium dark:text-white">
+              <div class="flex:1 space-y:4px">
+                <div class="display:flex align-items:center justify-content:space-between">
+                  <p class="font-weight:500 dark:color:white">
                     {notification?.name}
                   </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="font-size:14px color:rgb(107,114,128) dark:color:rgb(156,163,175)">
                     {notification?.minutesAgo}
                     {notification?.minutesAgo != null ? ' minutes ago' : ''}
                   </p>
                 </div>
-                <p class="text-gray-700 dark:text-gray-300">
+                <p class="color:rgb(55,65,81) dark:color:rgb(209,213,219)">
                   {notification?.message}
                 </p>
               </div>

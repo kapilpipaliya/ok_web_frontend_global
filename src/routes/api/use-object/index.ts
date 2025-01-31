@@ -2,25 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 
 import { APIHandler } from '@solidjs/start/server';
-
-import { DeepPartial } from 'ai';
-import { z } from 'zod';
-
-// define a schema for the notifications
-export const notificationSchema = z.object({
-  notifications: z.array(
-    z.object({
-      name: z.string().describe('Name of a fictional person.'),
-      message: z.string().describe('Message. Do not use emojis or links.'),
-      minutesAgo: z.number(),
-    }),
-  ),
-});
-
-// define a type for the partial notifications during generation
-export type PartialNotification = DeepPartial<typeof notificationSchema>;
-
-
+import { notificationSchema } from './schema';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
