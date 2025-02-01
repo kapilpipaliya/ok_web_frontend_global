@@ -12,6 +12,8 @@ import { FormStoreObject } from "~/components/form/context/FormContext";
 function DroppableWrapper(props: { formStoreId: string; children: any }) {
   const [graph, setGraph] = useGraph();
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
+  const queryParams = new URLSearchParams(window.location.search);
+  const noMinHeight = queryParams.get('noMinHeight') === 'true';
   // const { showErrorToast } = useToast();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -19,7 +21,7 @@ function DroppableWrapper(props: { formStoreId: string; children: any }) {
 
   return (
     <div
-      class="min-h:300px"
+      class={noMinHeight ? undefined : "min-h:300px"}
       classList={{
         "bg:#f3f3f4": isDraggingOver(),
       }}

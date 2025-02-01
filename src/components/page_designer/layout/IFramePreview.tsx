@@ -3,7 +3,10 @@ import { useGraph } from "~/lib/graph/graph";
 import { getChannel, handleChannelMessage } from "~/lib/graph/mutate/channel";
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 
-export const IFramePreview = (props: {formStoreId: string}) => {
+export const IFramePreview = (props: {
+  formStoreId: string;
+  noMinHeight?: boolean;
+}) => {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
 
@@ -36,7 +39,7 @@ export const IFramePreview = (props: {formStoreId: string}) => {
 
   { /* TODO: use unique id for each page */ }
   return <iframe
-    src={`${window.location.origin}/page_design_preview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}`}
+    src={`${window.location.origin}/page_design_preview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}${props.noMinHeight ? '&noMinHeight=true' : ''}`}
     style={{ width: "100%", height: "100%", border: "none" }}
     allow="clipboard-read; clipboard-write"
   />;

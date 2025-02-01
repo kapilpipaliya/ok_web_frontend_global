@@ -107,7 +107,7 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
     </div>
 
     <Show when={graph.vertexes[formId]}>
-      <IFramePreview formStoreId={formId} />
+      <IFramePreview formStoreId={formId} noMinHeight/>
     </Show>
   </>
 }

@@ -7,7 +7,7 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
-import { getComponentLabel } from "../../functions/getComponentLabel";
+import { getComponentLabel, getComponentName } from "../../functions/getComponentLabel";
 import { evalExpression } from "~/lib/expression_eval";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { FormStoreObject } from "~/components/form/context/FormContext";
@@ -31,7 +31,7 @@ export function TreeItemContent(
       vertexes: [props.metaVertex],
     })?.[0];
   });
-  const componentName = () => componentVertex()?.P.key || props.metaVertex?.P.componentName || "";
+  const componentName = () => getComponentName(componentVertex(), props.metaVertex);
   
   return (
     <div
