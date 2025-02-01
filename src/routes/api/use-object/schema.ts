@@ -3,21 +3,22 @@ import { z } from 'zod';
 
 // define schema for the graph interface
 export const graphInterfaceSchema = z.object({
-  edges: z.array(z.object({
-    E: z.string().describe('End vertex ID of the edge'),
-    id: z.string().describe('Unique identifier for the edge'), 
-    P: z.record(z.string(), z.any()).describe('Properties/attributes associated with the edge'),
-    S: z.string().describe('Start vertex ID of the edge'),
-    T: z.string().describe('Type/label of the edge')
-  })).describe('Array of Edge objects representing connections between vertices'),
 
   vertexes: z.array(z.object({
     id: z.string().describe('Unique identifier for the vertex'),
     //IN: z.record(z.string(), z.array(z.string())).describe('Map of incoming edge types to arrays of target edge IDs'),
     L: z.array(z.string()).describe('Labels/types associated with the vertex'), 
     //OUT: z.record(z.string(), z.array(z.string())).describe('Map of outgoing edge types to arrays of target edge IDs'),
-    P: z.record(z.string(), z.any()).describe('Properties/attributes associated with the vertex')
+    P: z.object({}).describe('Properties associated with the vertex')
   })).describe('Array of Vertex objects representing nodes in the graph'),
+
+  edges: z.array(z.object({
+    id: z.string().describe('Unique identifier for the edge'), 
+    T: z.string().describe('Type/label of the edge'),
+    // P: z.object({}).describe('Properties associated with the edge'),
+    E: z.string().describe('End vertex ID of the edge'),
+    S: z.string().describe('Start vertex ID of the edge'),
+  })).describe('Array of Edge objects representing connections between vertices. return empty array if no edges').optional(),
 
   // vertexLabelIdMap: z.record(z.string(), z.array(z.string()))
   //   .describe('Map of vertex labels to arrays of vertex IDs having that label')

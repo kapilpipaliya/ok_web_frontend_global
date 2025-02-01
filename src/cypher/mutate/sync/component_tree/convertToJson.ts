@@ -40,13 +40,10 @@ export function getComponentTree(): ComponentNode[] {
   - Portal
   - Data
   - Form
-  - Select
-  - Show
   - Switch
   - Match
   - Transition
-  - TransitionGroup
-  - ZIndex
+  - TransitionGroups
 `
 
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
