@@ -22,7 +22,7 @@ interface Message {
 
 export function UseObject() {
   const [graph, setGraph] = useGraph();
-  const [messages, setMessages] = createStore<Array<Message>>([{ prompt: 'Hello', response: 'World', formId: '1' }]);
+  const [messages, setMessages] = createStore<Array<Message>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;

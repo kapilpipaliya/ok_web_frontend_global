@@ -21,6 +21,7 @@ export const graphInterfaceSchema = z.object({
 
   // vertexLabelIdMap: z.record(z.string(), z.array(z.string()))
   //   .describe('Map of vertex labels to arrays of vertex IDs having that label')
+  explanation: z.string(),
 });
 
 // define type for partial graph interface during generation
