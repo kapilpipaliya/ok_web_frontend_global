@@ -4,6 +4,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export function PreviewIsolated(props: { formId: Id; graph: GraphInterface; setGraph: SetStoreFunction<GraphInterface>; }) {
   return <GraphContext.Provider value={[props.graph, props.setGraph]}>
+    {/* Note: Its assuming the "Form" component type */}
     <PageViewWrapper
       formId={props.formId}
       isNoPermissionCheck={true}
