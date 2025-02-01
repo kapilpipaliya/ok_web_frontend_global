@@ -61,6 +61,7 @@ export function TreeView(
                   }`,
                   transition: "transform 0.2s linear",
                 }}
+                noobserver
               />
             </span>
           </Show>

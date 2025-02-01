@@ -109,7 +109,7 @@ export function PageItem(
         onMouseLeave={handleMouseLeave}
         ref={menuRef!}
       >
-        <Icon height={22} icon={"iconoir:multiple-pages"} width={22} />
+        <Icon height={22} icon={"iconoir:multiple-pages"} width={22} noobserver />
         <div class="font-size:14px">{toTitle(props.child.key)}</div>
         <div class="margin-left:auto">
           <IconButton

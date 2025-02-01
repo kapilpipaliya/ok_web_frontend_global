@@ -54,6 +54,7 @@ export function FormStepper() {
               icon="mdi:plus"
               onClick={(e) => handleAddStepBefore(e, step)}
               width={20}
+              noobserver
             />
             <Step index={index} step={step} steps={steps()} />
             <Show when={index() === steps().length - 1}>
@@ -63,6 +64,7 @@ export function FormStepper() {
                 icon="mdi:plus"
                 onClick={(e) => handleAddStepAfter(e, step)}
                 width={20}
+                noobserver
               />
             </Show>
           </>

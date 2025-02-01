@@ -6,7 +6,7 @@ export function ImportExportButtons(
   return (
     <div class="flex justify-content:end mb:10px">
       <button class="flex" onClick={() => props.setPopup(true)} type="button">
-        <Icon height={22} icon={"lets-icons:import"} width={22} />
+        <Icon height={22} icon={"lets-icons:import"} width={22} noobserver />
         Import
       </button>
       <button
@@ -14,7 +14,7 @@ export function ImportExportButtons(
         onClick={() => props.setPopup(true)}
         type="button"
       >
-        <Icon height={22} icon={"lets-icons:export"} width={22} />
+        <Icon height={22} icon={"lets-icons:export"} width={22} noobserver />
         Export
       </button>
     </div>

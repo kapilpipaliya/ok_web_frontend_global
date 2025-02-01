@@ -11,6 +11,7 @@ export function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
       icon={"iconamoon:close-duotone"}
       onClick={props.onClick}
       width={30}
+      noobserver
     />
   );
 }

@@ -19,6 +19,7 @@ export function OpenComponentSettings(
         window.open(navigateUrl, "_blank");
       }}
       width={21}
+      noobserver
     />
   );
 }

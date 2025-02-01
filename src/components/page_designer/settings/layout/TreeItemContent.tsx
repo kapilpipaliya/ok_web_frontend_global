@@ -54,6 +54,7 @@ export function TreeItemContent(
           "ph:circle"
         }
         width={17}
+        noobserver
       />
       {nameExpr(props.metaVertex, componentName(), graph)}
     </div>

@@ -55,6 +55,7 @@ export const PricingPlans = (
                       height={22}
                       icon={icons[plan.name]}
                       width={22}
+                      noobserver
                     />
                   </div>
                   <div class="p:5|10">
@@ -102,6 +103,7 @@ export const CurrentPlan = (): JSX.Element => {
                   height={22}
                   icon={icons[plan.name]}
                   width={22}
+                  noobserver
                 />
               </div>
               <div class="p:5|10">

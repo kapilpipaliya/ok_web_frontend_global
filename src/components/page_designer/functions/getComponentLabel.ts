@@ -11,5 +11,5 @@ export function getComponentLabel(
     vertexes: [vertex],
   });
 
-  return vertexes?.[0]?.P.key;
+  return vertexes?.[0]?.P.key || vertex.P.componentName || "Html";
 }

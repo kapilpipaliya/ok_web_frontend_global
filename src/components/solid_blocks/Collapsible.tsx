@@ -58,6 +58,7 @@ export function Collapsible(
             "font-size": "13px",
             "margin-left": "5px",
           }}
+          noobserver
         />
       </button>
       <div

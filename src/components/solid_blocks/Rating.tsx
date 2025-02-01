@@ -32,6 +32,7 @@ export function StarRating(
                 onMouseEnter={() => setHover(ratingValue)}
                 onMouseLeave={() => setHover(0)}
                 width={24}
+                noobserver
               />
             );
           }}

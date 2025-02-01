@@ -20,6 +20,7 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
         <Icon
           class="flex"
           icon={iconMap[getComponentName() as keyof typeof iconMap]}
+          noobserver
         />
         <ComponentName componentName={getComponentName()!} />
       </div>

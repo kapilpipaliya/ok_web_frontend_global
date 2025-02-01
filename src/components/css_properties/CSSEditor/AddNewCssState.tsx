@@ -77,7 +77,7 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
         </label>
 
         <button onClick={addNewState}>
-          <Icon class="ml:2" height={21} icon="ic:round-check" width={21} />
+          <Icon class="ml:2" height={21} icon="ic:round-check" width={21} noobserver />
         </button>
       </div>
     </div>

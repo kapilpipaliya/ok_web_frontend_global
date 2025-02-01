@@ -915,16 +915,6 @@ const _inputTypes = {
   <Match when={componentName() === "TabList"}>
     <PageAttrRender data={local.data} disabled={local.disabled} metaVertex={local.meta} />
   </Match>
-  <Match when={componentName() === "Icon"}>
-    <Icon
-      height={local.meta.P.height || "24"}
-      icon={local.meta.P.icon}
-      width={local.meta.P.width || "24"}
-      {...deNullify(local.meta.P)}
-      class={mergeCSS("", local.meta.P.class)}
-      disabled={local.disabled}
-    />
-  </Match>
 
   <Match when={componentName() === "Table"}>
     <Table

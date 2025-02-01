@@ -53,7 +53,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
                   >
                     {option.icon ? (
-                      <Icon height={23} icon={option.icon} width={23} />
+                      <Icon height={23} icon={option.icon} width={23} noobserver />
                     ) : (
                       option.key
                     )}

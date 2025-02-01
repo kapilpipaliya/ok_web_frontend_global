@@ -15,6 +15,7 @@ import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import PageView from '~/components/page_attr_render/PageView';
 import { DesignerFormIdContext } from '../../context/LayoutContext';
+import { IFramePreview } from '../../layout/IFramePreview';
 
 export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> }) {
   const [graph, setGraph] = useGraph();
@@ -95,20 +96,18 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
 
   const formId = uuidv7();
   return <>
-    <PageViewWrapper
-      uuid={formId}
-      pageVertexName="Page"
-      isNoPermissionCheck={true}
-      hideSaveCancelButton />
+    <div class="display:none">
+      <PageViewWrapper
+        uuid={formId}
+        pageVertexName="Page"
+        isNoPermissionCheck={true}
+        hideSaveCancelButton
+        formDataId={parentId}
+      />
+    </div>
 
     <Show when={graph.vertexes[formId]}>
-      <DesignerFormIdContext.Provider value={formId}>
-        <PageView
-          isDesignMode={true}
-          isNoPermissionCheck={true}
-          metaVertex={graph.vertexes[parentId]}
-        />
-      </DesignerFormIdContext.Provider>
+      <IFramePreview formStoreId={formId} />
     </Show>
   </>
 }
@@ -116,6 +115,7 @@ export function UseObject() {
   const [graph, setGraph] = useGraph();
   const [messages, setMessages] = createStore<Array<{ prompt: string, response: any }>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
+  let chatHistoryRef: HTMLDivElement | undefined;
 
   const { submit, isLoading, object, stop, error } = useObject({
     api: '/api/use-object',
@@ -124,6 +124,12 @@ export function UseObject() {
       console.log('FinishReason', event.error);
       if (event.object) {
         setMessages([...messages, { prompt: input(), response: object() }]);
+        // Scroll to bottom after adding new message
+        setTimeout(() => {
+          if (chatHistoryRef) {
+            chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+          }
+        }, 0);
       }
     },
   });
@@ -142,7 +148,7 @@ export function UseObject() {
 
   return (
     <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
-      <div class="flex:1 overflow:auto padding:16px">
+      <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
         <For each={messages}>
           {(message, index) => (
             <div class="margin-bottom:24px">
@@ -215,16 +221,15 @@ export function UseObject() {
           <input
             class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
             value={input()}
-            placeholder="Generate a page..."
+            placeholder="Generate a page... (Press Cmd+Enter to submit)"
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
+                e.preventDefault();
+                submit({ prompt: input() });
+              }
+            }}
           />
-          <button
-            type="submit"
-            class="padding:8px|16px color:white background:rgb(59,130,246) border-radius:6px hover:background:rgb(37,99,235) disabled:background:rgb(191,219,254)"
-            disabled={isLoading()}
-          >
-            Generate
-          </button>
         </div>
       </form>
     </div>

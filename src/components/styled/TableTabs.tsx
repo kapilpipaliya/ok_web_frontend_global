@@ -22,7 +22,7 @@ export function TableTabs(props: Readonly<TableTabProps>) {
       "Unique Constrain": "material-symbols:inbox-customize-outline",
     };
     return icons[key] ? (
-      <Icon height={22} icon={icons[key]} width={22} />
+      <Icon height={22} icon={icons[key]} width={22} noobserver />
     ) : (
       <div />
     );

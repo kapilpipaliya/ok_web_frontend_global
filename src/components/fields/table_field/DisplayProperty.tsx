@@ -68,7 +68,7 @@ export function DisplayProperty(
     getComponent(props.column),
   );
   function getComponent(column: Vertex) {
-    const componentNameValue = column.P.componentName || getComponentLabel(graph, column);
+    const componentNameValue = getComponentLabel(graph, column);
     if (componentNameValue?.includes("::")) {
       createComputed(
         on(

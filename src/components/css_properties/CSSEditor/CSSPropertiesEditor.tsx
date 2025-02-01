@@ -149,11 +149,11 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
           <button class="ai:center d:inline-flex" onClick={removeState} title="Remove State">
-            <Icon height={21} icon="ic:round-remove" width={21} />
+            <Icon height={21} icon="ic:round-remove" width={21} noobserver />
           </button>
         </Show>
         <button class="ai:center d:inline-flex" onClick={handleAddNewClick} title="Add New State">
-          <Icon height={21} icon="ic:round-add" width={21} />
+          <Icon height={21} icon="ic:round-add" width={21} noobserver />
         </button>
         <IframeHelpDialog
           icon="material-symbols:help-outline"

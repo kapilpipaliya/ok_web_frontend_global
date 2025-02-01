@@ -89,6 +89,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                               }`,
                               transition: "transform 0.2s linear",
                             }}
+                            noobserver
                           />
                         </button>
                       </div>
@@ -114,6 +115,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                                 height={24}
                                 icon={props.mainIcon[child.P.url]}
                                 width={24}
+                                noobserver
                               />
                               <span class="color:#4B5563 ml:8 ">
                                 {child.P.key}

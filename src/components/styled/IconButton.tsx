@@ -34,6 +34,7 @@ export function IconButton(props: Readonly<IconButtonProps>) {
           height={local.size ?? 24}
           icon={local.icon!}
           width={local.size ?? 24}
+          noobserver
         />
       </Show>
       {local.children}

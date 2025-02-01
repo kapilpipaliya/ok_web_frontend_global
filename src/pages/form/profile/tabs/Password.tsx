@@ -190,6 +190,7 @@ const PasswordField = (props: PasswordFieldProps): JSX.Element => {
             props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"
           }
           onClick={props.togglePasswordVisibility}
+          noobserver
         />
       </Show>
     </div>

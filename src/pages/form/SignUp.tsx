@@ -248,6 +248,7 @@ const PasswordField = (props: PasswordFieldProps): JSX.Element => (
         class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
         icon={props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}
         onClick={props.togglePasswordVisibility}
+        noobserver
       />
     </div>
   </div>

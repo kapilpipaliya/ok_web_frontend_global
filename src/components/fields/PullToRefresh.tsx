@@ -30,7 +30,7 @@ export function PullToRefresh(props: {
           isRefreshing() ? {} : { transform: `rotate(${pullPosition()}deg)` }
         }
       >
-        <Icon height={32} icon="vaadin:rotate-left" width={32} />
+        <Icon height={32} icon="vaadin:rotate-left" width={32} noobserver />
       </div>
     </div>
   );

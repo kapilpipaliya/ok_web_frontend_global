@@ -77,6 +77,7 @@ export const Stepper = () => {
                 }}
                 style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
                 width={20}
+                noobserver
               />
               <li
                 onClick={() => setCurrentStep(step.id)}
@@ -119,6 +120,7 @@ export const Stepper = () => {
                     "padding:5px 0px;cursor:pointer; color:rgb(37,99,235);"
                   }
                   width={20}
+                  noobserver
                 />
               </Show>
             </>

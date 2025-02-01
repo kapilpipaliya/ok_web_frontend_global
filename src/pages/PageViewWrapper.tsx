@@ -62,6 +62,7 @@ export function PageViewWrapper(
     pageVertexLabel?: string;
     pageVertexName?: string;
     uuid?: string;
+    formDataId?: Id;
     // openedFormId?: Id;
   }>,
 ) {
@@ -246,6 +247,10 @@ export function PageViewWrapper(
   }
 
   async function loadData() {
+    if (props.formDataId) {
+      setFormStore("formDataId", props.formDataId);
+      return;
+    }
     if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
       return;
     }

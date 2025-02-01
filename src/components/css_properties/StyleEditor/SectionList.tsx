@@ -57,6 +57,7 @@ export const CollapsibleSection = (
           height={25}
           icon="uil:angle-up"
           width={25}
+          noobserver
         />
         <span class="f:15 font-weight:600">{props.title}</span>
       </button>
@@ -100,6 +101,7 @@ export const SectionList = (
             height={25}
             icon={showConfiguredOnly() ? "mdi:eye-off-outline" : "mdi:eye-outline"}
             width={25}
+            noobserver
           />
         </button>
         <button class="btn ml:2" onClick={collapseAll} title="Collapse all">
@@ -108,6 +110,7 @@ export const SectionList = (
             height={25}
             icon="mdi:collapse-all-outline"
             width={25}
+            noobserver
           />
         </button>
         <button class="btn ml:2" onClick={expandAll} title="Expand all">
@@ -116,6 +119,7 @@ export const SectionList = (
             height={25}
             icon="mdi:expand-all-outline"
             width={25}
+            noobserver
           />
         </button>
       </div>

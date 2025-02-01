@@ -129,7 +129,7 @@ export const SortableRow = (
             </Show>
           </div>
           {/*<Show when={!disabled}>*/}
-          {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
+          {/*  <Icon icon="material-symbols:edit"  noobserver onClick={() => setDisabled((v) => !v)} />*/}
           {/*</Show>*/}
         </td>
         <For each={rowColumnsMetaAttrs()}>

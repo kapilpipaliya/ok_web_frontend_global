@@ -273,6 +273,7 @@ function PasswordInput(props: PasswordInputProps): JSX.Element {
         class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
         icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
         onClick={togglePasswordVisibility}
+        noobserver
       />
     </div>
   );

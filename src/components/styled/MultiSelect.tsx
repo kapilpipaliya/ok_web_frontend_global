@@ -260,6 +260,7 @@ export function MultiSelectField(
                     ? "icon-park-solid:down-one"
                     : "icon-park-solid:right-one"
                 }
+                noobserver
               />
               <span>
                 {props.renderLabel

@@ -149,7 +149,7 @@ export function CollAndData() {
             txnId={formStoreVertex()?.P.txnId}
           />
           {/* 
-            <Icon icon="mdi:information-outline" class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
+            <Icon icon="mdi:information-outline" noobserver class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
           */}
         </div>
       </div>

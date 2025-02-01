@@ -44,6 +44,7 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
                   height={24}
                   icon={props.mainIcon[navNode.P.url]}
                   width={24}
+                  noobserver
                 />
               </a>
             </Show>
@@ -63,6 +64,7 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
             color: "rgb(161,161,169)",
           }}
           width={19}
+          noobserver
         />
       </div>
     </nav>

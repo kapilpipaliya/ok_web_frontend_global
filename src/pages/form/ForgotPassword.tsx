@@ -289,6 +289,7 @@ function InputField(props: Readonly<InputFieldProps>): JSX.Element {
           class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:32"
           icon={props.toggleValue ? "iconamoon:eye-light" : "iconamoon:eye-off"}
           onClick={props.onToggle}
+          noobserver
         />
       )}
     </div>

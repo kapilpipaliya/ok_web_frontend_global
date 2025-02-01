@@ -23,6 +23,7 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
           class="cursor:pointer mr:8"
           icon="icon-park-outline:more-one"
           onClick={() => openMenu[1](true)}
+          noobserver
         />
         <CssPropertyRowContent
           index={props.index}
@@ -35,6 +36,7 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
           class="cursor:pointer fg:red mr:8"
           icon="mdi:close"
           onClick={() => props.deleteOption(props.index())}
+          noobserver
         />
       </div>
       <CssPropertyRowSettings

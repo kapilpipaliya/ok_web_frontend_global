@@ -25,7 +25,7 @@ export function OpenComponentURL(
           rel="noreferrer"
           target="_blank"
         >
-          <Icon height={21} icon={"ci:external-link"} width={21} />
+          <Icon height={21} icon={"ci:external-link"} width={21} noobserver />
         </a>
       </Match>
     </Switch>

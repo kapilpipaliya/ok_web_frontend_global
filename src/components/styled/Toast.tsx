@@ -110,6 +110,7 @@ export function useToast() {
           icon={"mingcute:warning-line"}
           style={{ color: "#009cfa" }}
           width={27}
+          noobserver
         />
       ),
     });

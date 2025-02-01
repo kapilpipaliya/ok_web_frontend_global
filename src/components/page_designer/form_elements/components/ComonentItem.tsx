@@ -156,6 +156,7 @@ export function ComponentItem(
                   "material-symbols:widgets-outline-rounded"
                 }
                 width={24}
+                noobserver
               />
             </Show>
             <span

@@ -55,7 +55,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
             href={getUrl()}
             target="_blank"
           >
-            <Icon height={14} icon="mdi:information-outline" width={14} />
+            <Icon height={14} icon="mdi:information-outline" width={14} noobserver />
           </TooltipTrigger>
           <TooltipPortal>
             <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
@@ -81,6 +81,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
           icon="mdi:close"
           onClick={props.onResetIconClick}
           width={26}
+          noobserver
         />
       </Show>
     </span>

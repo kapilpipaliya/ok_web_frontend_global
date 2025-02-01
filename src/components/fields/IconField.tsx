@@ -23,6 +23,7 @@ export const IconField = (props: IconFieldProps) => {
   return (
     <Icon
       class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
+      noobserver
       {...others}
     />
   );

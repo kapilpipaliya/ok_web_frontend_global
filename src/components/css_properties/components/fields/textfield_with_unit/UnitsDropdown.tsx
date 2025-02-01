@@ -57,7 +57,7 @@ export function UnitsDropdown(props: Readonly<DropDownProps>) {
                   >
                     {option}
                     <Show when={props.selectedOption?.() === option}>
-                      <Icon icon={"mdi:check"} />
+                      <Icon icon={"mdi:check"} noobserver />
                     </Show>
                   </div>
                 )}

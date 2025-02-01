@@ -49,6 +49,7 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                         <Icon
                           icon={"octicon:chevron-right-12"}
                           style={{ color: "rgb(156,163,175)" }}
+                          noobserver
                         />
                         <span class="ms-1 lh:1.25rem md:ms-2 color:rgb(107,114,128)  color:rgb(156,163,175)@dark  f:0.875rem font-weight:500">
                           {item.key}
@@ -65,6 +66,7 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                             height={20}
                             icon={item.icon!}
                             width={20}
+                            noobserver
                           />
                         </Show>
                         <a

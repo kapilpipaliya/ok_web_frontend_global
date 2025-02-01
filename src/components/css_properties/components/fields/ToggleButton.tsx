@@ -35,7 +35,7 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
               }}
             >
               {option.icon ? (
-                <Icon height={23} icon={option.icon} width={23} />
+                <Icon height={23} icon={option.icon} width={23} noobserver />
               ) : (
                 option.key
               )}
