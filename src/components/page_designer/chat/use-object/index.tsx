@@ -1,11 +1,15 @@
 import { experimental_useObject as useObject } from '@ai-sdk/solid';
-import { notificationSchema } from '../../../../routes/api/use-object/schema';
+import { graphInterfaceSchema } from '../../../../routes/api/use-object/schema';
 import { For, Show } from 'solid-js';
 
 export function UseObject() {
   const { submit, isLoading, object, stop, error } = useObject({
     api: '/api/use-object',
-    schema: notificationSchema,
+    schema: graphInterfaceSchema,
+    onFinish(event) {
+      console.log('Usage', event.object);
+      console.log('FinishReason', event.error);
+    },
   });
 
   return (
@@ -17,7 +21,7 @@ export function UseObject() {
         }}
         disabled={isLoading()}
       >
-        Generate notifications
+        Generate
       </button>
 
       <Show when={error()}>
@@ -42,7 +46,8 @@ export function UseObject() {
       </Show>
 
       <div class="display:flex flex-direction:column gap:16px margin-top:16px">
-        <For each={object()?.notifications}>
+        {JSON.stringify(object())}
+        {/* <For each={object()?.notifications}>
           {(notification, index) => (
             <div
               class="display:flex align-items:start gap:16px padding:16px background:rgb(243,244,246) border-radius:6px dark:background:rgb(31,41,55)"
@@ -64,7 +69,7 @@ export function UseObject() {
               </div>
             </div>
           )}
-        </For>
+        </For> */}
       </div>
     </div>
   );

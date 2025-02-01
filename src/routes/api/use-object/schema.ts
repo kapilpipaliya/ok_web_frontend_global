@@ -1,16 +1,28 @@
 import { DeepPartial } from 'ai';
 import { z } from 'zod';
 
-// define a schema for the notifications
-export const notificationSchema = z.object({
-  notifications: z.array(
-    z.object({
-      name: z.string().describe('Name of a fictional person.'),
-      message: z.string().describe('Message. Do not use emojis or links.'),
-      minutesAgo: z.number(),
-    }),
-  ),
+// define schema for the graph interface
+export const graphInterfaceSchema = z.object({
+  edges: z.array(z.object({
+    E: z.string().describe('End vertex ID of the edge'),
+    id: z.string().describe('Unique identifier for the edge'), 
+    P: z.record(z.string(), z.any()).describe('Properties/attributes associated with the edge'),
+    S: z.string().describe('Start vertex ID of the edge'),
+    T: z.string().describe('Type/label of the edge')
+  })).describe('Array of Edge objects representing connections between vertices'),
+
+  vertexes: z.array(z.object({
+    id: z.string().describe('Unique identifier for the vertex'),
+    //IN: z.record(z.string(), z.array(z.string())).describe('Map of incoming edge types to arrays of target edge IDs'),
+    L: z.array(z.string()).describe('Labels/types associated with the vertex'), 
+    //OUT: z.record(z.string(), z.array(z.string())).describe('Map of outgoing edge types to arrays of target edge IDs'),
+    P: z.record(z.string(), z.any()).describe('Properties/attributes associated with the vertex')
+  })).describe('Array of Vertex objects representing nodes in the graph'),
+
+  // vertexLabelIdMap: z.record(z.string(), z.array(z.string()))
+  //   .describe('Map of vertex labels to arrays of vertex IDs having that label')
 });
 
-// define a type for the partial notifications during generation
-export type PartialNotification = DeepPartial<typeof notificationSchema>;
+// define type for partial graph interface during generation
+export type PartialGraphInterface = DeepPartial<typeof graphInterfaceSchema>;
+

@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 
 import { APIHandler } from '@solidjs/start/server';
-import { notificationSchema } from './schema';
+import { graphInterfaceSchema } from './schema';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -12,9 +12,9 @@ export const POST: APIHandler = async ({ request }) => {
 
   const result = streamObject({
     model: openai('gpt-4o'),
-    prompt: `Generate 3 notifications for a messages app in this context: ${context}`,
-    schema: notificationSchema,
+    prompt: `Generate any graph.`,
+    schema: graphInterfaceSchema,
   });
 
-  return result.toTextStreamResponse();
+  return result.toTextStreamResponse(); 
 };
