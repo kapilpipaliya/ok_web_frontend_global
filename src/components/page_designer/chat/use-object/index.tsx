@@ -1,22 +1,114 @@
 import { experimental_useObject as useObject } from '@ai-sdk/solid';
 import { graphInterfaceSchema } from '../../../../routes/api/use-object/schema';
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, For, onCleanup, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
-import { useGraph } from '~/lib/graph/graph';
+import { useGraph, Vertex } from '~/lib/graph/graph';
 import { createStore } from 'solid-js/store';
+import { z } from 'zod';
+import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
+import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
+import { addNewVertex } from '~/lib/graph/mutate/vertex';
+import { addNewEdge } from '~/lib/graph/mutate/edge';
+import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
+import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
+import { PageViewWrapper } from '~/pages/PageViewWrapper';
+import PageView from '~/components/page_attr_render/PageView';
 
+export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> }) {
+  const [graph, setGraph] = useGraph();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+  // Store vertex IDs with no parents
+  const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
+
+  // Add all vertices with new IDs
+  const vertexIdMap = new Map<string, string>();
+  for (const vertex of props.object.vertexes || []) {
+    const newId = generateNewVertexId(graph, setGraph);
+    vertexIdMap.set(vertex.id, newId);
+
+    const newVertex = {
+      id: newId,
+      L: vertex.L,
+      P: vertex.P,
+      IN: {},
+      OUT: {}
+    };
+
+    addNewVertex(metaTxnId, newVertex, graph, setGraph);
+  }
+
+  // Add all edges with new IDs
+  for (const edge of props.object.edges || []) {
+    const newId = generateNewVertexId(graph, setGraph);
+    const startId = vertexIdMap.get(edge.S)!;
+    const endId = vertexIdMap.get(edge.E)!;
+
+    const newEdge = {
+      id: newId,
+      T: edge.T,
+      P: {},
+      S: startId,
+      E: endId
+    };
+
+    addNewEdge(metaTxnId, newEdge, graph, setGraph);
+  }
+
+  // Find vertices with no parents
+  const parentMap = new Map<string, boolean>();
+
+  for (const edge of props.object.edges || []) {
+    parentMap.set(vertexIdMap.get(edge.E)!, true);
+  }
+
+  const noParentIds = Array.from(vertexIdMap.values())
+    .filter(id => !parentMap.has(id));
+  setRootVertexIds(noParentIds);
+
+  // Create parent vertex and link children
+  const parentId = generateNewVertexId(graph, setGraph);
+  const parentVertex = {
+    id: parentId,
+    L: ['Page'],
+    P: { key: "Page" },
+    IN: {},
+    OUT: {}
+  };
+
+  addNewVertex(metaTxnId, parentVertex, graph, setGraph);
+
+  // Link parent to root vertices
+  setSelectionValue(
+    metaTxnId,
+    graph.vertexes[parentId],
+    graph,
+    setGraph,
+    { P: { type: "Attr" } } as unknown as Vertex,
+    rootVertexIds()
+  );
+
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph, setGraph);
+  });
+
+  return <PageView
+    isDesignMode={true}
+    isNoPermissionCheck={true}
+    metaVertex={graph.vertexes[parentId]}
+  />
+}
 export function UseObject() {
   const [graph, setGraph] = useGraph();
-  const [messages, setMessages] = createStore<Array<{prompt: string, response: any}>>([]);
+  const [messages, setMessages] = createStore<Array<{ prompt: string, response: any }>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
-  
+
   const { submit, isLoading, object, stop, error } = useObject({
     api: '/api/use-object',
     schema: graphInterfaceSchema,
     onFinish(event) {
       console.log('FinishReason', event.error);
       if (event.object) {
-        setMessages([...messages, {prompt: input(), response: object()}]);
+        setMessages([...messages, { prompt: input(), response: object() }]);
       }
     },
   });
@@ -25,7 +117,7 @@ export function UseObject() {
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-    submit({prompt: input()});
+    submit({ prompt: input() });
   };
 
   const handleInsert = (response: any) => {
@@ -46,16 +138,15 @@ export function UseObject() {
               <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
                 <div class="font-weight:500 margin-bottom:4px">Response:</div>
                 <div class="white-space:pre-wrap">{JSON.stringify(message.response, null, 2)}</div>
-                
+
                 <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
                   <div class="font-weight:500 margin-bottom:8px">Preview:</div>
                   <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-                    {/* TODO: Implement preview rendering based on the graph structure */}
-                    Preview placeholder
+                    <Preview object={message.response} />
                   </div>
-                  
+
                   <div class="display:flex gap:8px margin-top:12px">
-                    <select 
+                    <select
                       class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
                       value={insertMode()}
                       onChange={(e) => setInsertMode(e.currentTarget.value as any)}
@@ -64,7 +155,7 @@ export function UseObject() {
                       <option value="after">Insert After</option>
                       <option value="center">Insert Into</option>
                     </select>
-                    
+
                     <button
                       type="button"
                       class="padding:8px|16px color:white background:rgb(59,130,246) border-radius:6px hover:background:rgb(37,99,235)"
@@ -101,8 +192,8 @@ export function UseObject() {
         </Show>
       </div>
 
-      <form 
-        onSubmit={handleSubmit} 
+      <form
+        onSubmit={handleSubmit}
         class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
       >
         <div class="display:flex gap:8px">

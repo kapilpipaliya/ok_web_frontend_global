@@ -20,11 +20,11 @@ each vertex is a component and each edge is a relationship between components.
 each Item label should be 'Attr' and Item children should be joined with 'Attr' edge name.
 each "Attr" vertex have optional 'componentName' property, whose values can be: 'Html', 'Icon', 'Data', 'Switch', 'Match'
 if componentName is not present, then it should be considered as 'Html' in the system. for 'Html' component omit 'componentName' property.
-when componentName is 'Html", then 'as' property should be present and its value should be any of html tags like 'div', 'span' etc.
+when componentName is 'Html", then 'as' property should be present and its value should be any of html tags like 'div', 'span' etc. if 'as' property is omited it means its a fragment component and it will render only children.
 
 each "Attr" vertex have 'pos' property, which is the position of the vertex in siblings.
 
-each "Attr" vertex have optional 'css' property, whose values can be following typescript interface, and it will be JSON encoded string:
+each "Attr" vertex have optional 'class' property, whose values can be following typescript interface, and it will be JSON encoded string:
 interface CSS {
   [state: string]: { [key: string]: { [key: string]: any } | string };
 }

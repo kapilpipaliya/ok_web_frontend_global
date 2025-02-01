@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 // define schema for the graph interface
 export const graphInterfaceSchema = z.object({
-
   vertexes: z.array(z.object({
     id: z.string().describe('Unique identifier for the vertex'),
     //IN: z.record(z.string(), z.array(z.string())).describe('Map of incoming edge types to arrays of target edge IDs'),
