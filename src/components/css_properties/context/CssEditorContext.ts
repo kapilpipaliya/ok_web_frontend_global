@@ -2,7 +2,7 @@ import { createContext, useContext } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
 export interface CSSStore {
-  [state: string]: { [key: string]: { [key: string]: any } | string };
+  [state: string]: { [cssKey: string]: any };
 }
 
 export const CssEditorContext = createContext<

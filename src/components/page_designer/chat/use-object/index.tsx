@@ -14,10 +14,14 @@ import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
 import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import PageView from '~/components/page_attr_render/PageView';
-import { DesignerFormIdContext } from '../../context/LayoutContext';
+import { DesignerFormIdContext, PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
 import { IFramePreview } from '../../layout/IFramePreview';
+import { IconButton } from '~/components/styled/IconButton';
+import { headerIconButtonClass } from '~/pages/admin_layout/constant';
+import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
+import { FormStoreObject } from '~/components/form/context/FormContext';
 
-export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> }) {
+export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>, formId: string }) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   // Store vertex IDs with no parents
@@ -32,7 +36,10 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
     const newVertex = {
       id: newId,
       L: vertex.L,
-      P: vertex.P,
+      P: {
+        ...vertex.P,
+        ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
+      },
       IN: {},
       OUT: {}
     };
@@ -94,11 +101,10 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
     revertTransaction(metaTxnId, graph, setGraph);
   });
 
-  const formId = uuidv7();
   return <>
     <div class="display:none">
       <PageViewWrapper
-        uuid={formId}
+        uuid={props.formId}
         pageVertexName="Page"
         isNoPermissionCheck={true}
         hideSaveCancelButton
@@ -106,15 +112,23 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
       />
     </div>
 
-    <Show when={graph.vertexes[formId]}>
-      <IFramePreview formStoreId={formId} noMinHeight/>
+    <Show when={graph.vertexes[props.formId]}>
+      <IFramePreview formStoreId={props.formId} noMinHeight />
     </Show>
   </>
 }
+interface Message {
+  prompt: string;
+  response: any;
+  formId: string;
+}
+
 export function UseObject() {
   const [graph, setGraph] = useGraph();
-  const [messages, setMessages] = createStore<Array<{ prompt: string, response: any }>>([]);
+  const [messages, setMessages] = createStore<Array<Message>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   let chatHistoryRef: HTMLDivElement | undefined;
 
   const { submit, isLoading, object, stop, error } = useObject({
@@ -123,7 +137,7 @@ export function UseObject() {
     onFinish(event) {
       console.log('FinishReason', event.error);
       if (event.object) {
-        setMessages([...messages, { prompt: input(), response: object() }]);
+        setMessages([...messages, { prompt: input(), response: object(), formId: uuidv7() }]);
         // Scroll to bottom after adding new message
         setTimeout(() => {
           if (chatHistoryRef) {
@@ -141,9 +155,35 @@ export function UseObject() {
     submit({ prompt: input() });
   };
 
-  const handleInsert = (response: any) => {
-    // TODO: Implement graph insertion logic based on insertMode()
-    console.log('Inserting with mode:', insertMode(), response);
+  const handleInsert = (response: Message) => {
+    const formVertex = graph.vertexes[layoutStoreId];
+    const fromStoreVertex = graph.vertexes[response.formId];
+    if (!fromStoreVertex) {
+      return;
+    }
+    if (layoutStoreVertex()?.P.formId === response.formId) {
+      return;
+    }
+    if (!layoutStoreVertex()?.P.formId) {
+      return;
+    }
+    const toStoreVertex = graph.vertexes[layoutStoreVertex().P.formId!] as Vertex<FormStoreObject>;
+    if (!toStoreVertex) {
+      return;
+    }
+    if (!graph.vertexes[toStoreVertex.P.selectedId!]) {
+      return;
+    }
+
+    handleDropAtPosition(
+      graph,
+      setGraph,
+      toStoreVertex.P.txnId,
+      graph.vertexes[toStoreVertex.P.formDataId!],
+      graph.vertexes[fromStoreVertex.P.formDataId!],
+      graph.vertexes[toStoreVertex.P.selectedId!],
+      insertMode()
+    );
   };
 
   return (
@@ -163,7 +203,7 @@ export function UseObject() {
                 <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
                   <div class="font-weight:500 margin-bottom:8px">Preview:</div>
                   <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-                    <Preview object={message.response} />
+                    <Preview object={message.response} formId={message.formId} />
                   </div>
 
                   <div class="display:flex gap:8px margin-top:12px">
@@ -177,13 +217,13 @@ export function UseObject() {
                       <option value="center">Insert Into</option>
                     </select>
 
-                    <button
-                      type="button"
-                      class="padding:8px|16px color:white background:rgb(59,130,246) border-radius:6px hover:background:rgb(37,99,235)"
-                      onClick={() => handleInsert(message.response)}
-                    >
-                      Insert Component
-                    </button>
+                    <IconButton
+                      icon="ph:plus-circle"
+                      class={`${headerIconButtonClass}`}
+                      onClick={() => handleInsert(message)}
+                      title="Insert"
+                      disabled={layoutStoreVertex()?.P.formId === message.formId}
+                    />
                   </div>
                 </div>
               </div>

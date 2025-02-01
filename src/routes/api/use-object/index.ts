@@ -24,9 +24,9 @@ when componentName is 'Html", then 'as' property should be present and its value
 
 each "Attr" vertex have 'pos' property, which is the position of the vertex in siblings.
 
-each "Attr" vertex have optional 'class' property, whose values can be following typescript interface, and it will be JSON encoded string:
+each "Attr" vertex have optional 'class' property, whose values can be following typescript interface:
 interface CSS {
-  [state: string]: { [key: string]: { [key: string]: any } | string };
+  [state: string]: { [cssKey: string]: any };
 }
   state can be any of the following:
     - ''
@@ -42,7 +42,7 @@ interface CSS {
     - '@sm'
     - '@md'
     - '@lg'
-  key can be any of the css properties like 'color', 'background', 'font-size', 'font-weight', 'text-align', 'padding', 'margin', 'border', 'border-radius', 'box-shadow', 'opacity', 'z-index' etc.
+  cssKey can be any of the css properties like 'color', 'background', 'font-size', 'font-weight', 'text-align', 'padding', 'margin', 'border', 'border-radius', 'box-shadow', 'opacity', 'z-index' etc.
   value will be the value of the css property.
 
   prefer 'rem' units for css values when possible.
