@@ -1,122 +1,19 @@
 import { experimental_useObject as useObject } from '@ai-sdk/solid';
 import { graphInterfaceSchema } from '../../../../routes/api/use-object/schema';
-import { createSignal, For, onCleanup, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { useGraph, Vertex } from '~/lib/graph/graph';
 import { createStore } from 'solid-js/store';
-import { object, z } from 'zod';
+import { object } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
-import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
-import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
-import { addNewVertex } from '~/lib/graph/mutate/vertex';
-import { addNewEdge } from '~/lib/graph/mutate/edge';
-import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
-import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
-import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import PageView from '~/components/page_attr_render/PageView';
 import { DesignerFormIdContext, PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { IFramePreview } from '../../layout/IFramePreview';
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
+import { Preview } from './Preview';
 
-export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>, formId: string }) {
-  const [graph, setGraph] = useGraph();
-  const metaTxnId = generateNewTxnId(graph, setGraph);
-  // Store vertex IDs with no parents
-  const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
-
-  // Add all vertices with new IDs
-  const vertexIdMap = new Map<string, string>();
-  for (const vertex of props.object.vertexes || []) {
-    const newId = generateNewVertexId(graph, setGraph);
-    vertexIdMap.set(vertex.id, newId);
-
-    const newVertex = {
-      id: newId,
-      L: vertex.L,
-      P: {
-        ...vertex.P,
-        ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
-      },
-      IN: {},
-      OUT: {}
-    };
-
-    addNewVertex(metaTxnId, newVertex, graph, setGraph);
-  }
-
-  // Add all edges with new IDs
-  for (const edge of props.object.edges || []) {
-    const newId = generateNewVertexId(graph, setGraph);
-    const startId = vertexIdMap.get(edge.S)!;
-    const endId = vertexIdMap.get(edge.E)!;
-
-    const newEdge = {
-      id: newId,
-      T: edge.T,
-      P: {},
-      S: startId,
-      E: endId
-    };
-
-    addNewEdge(metaTxnId, newEdge, graph, setGraph);
-  }
-
-  // Find vertices with no parents
-  const parentMap = new Map<string, boolean>();
-
-  for (const edge of props.object.edges || []) {
-    parentMap.set(vertexIdMap.get(edge.E)!, true);
-  }
-
-  const noParentIds = Array.from(vertexIdMap.values())
-    .filter(id => !parentMap.has(id));
-  setRootVertexIds(noParentIds);
-
-  // Create parent vertex and link children
-  const parentId = generateNewVertexId(graph, setGraph);
-  const parentVertex = {
-    id: parentId,
-    L: ['Page'],
-    P: { key: "Page" },
-    IN: {},
-    OUT: {}
-  };
-
-  addNewVertex(metaTxnId, parentVertex, graph, setGraph);
-
-  // Link parent to root vertices
-  setSelectionValue(
-    metaTxnId,
-    graph.vertexes[parentId],
-    graph,
-    setGraph,
-    { P: { type: "Attr" } } as unknown as Vertex,
-    rootVertexIds()
-  );
-
-  onCleanup(() => {
-    revertTransaction(metaTxnId, graph, setGraph);
-  });
-
-  return <>
-    <div class="display:none">
-      <PageViewWrapper
-        uuid={props.formId}
-        pageVertexName="Page"
-        isNoPermissionCheck={true}
-        hideSaveCancelButton
-        formDataId={parentId}
-      />
-    </div>
-
-    <Show when={graph.vertexes[props.formId]}>
-      <IFramePreview formStoreId={props.formId} noMinHeight />
-    </Show>
-  </>
-}
 interface Message {
   prompt: string;
   response: any;
@@ -125,7 +22,7 @@ interface Message {
 
 export function UseObject() {
   const [graph, setGraph] = useGraph();
-  const [messages, setMessages] = createStore<Array<Message>>([]);
+  const [messages, setMessages] = createStore<Array<Message>>([{ prompt: 'Hello', response: 'World', formId: '1' }]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -150,9 +47,15 @@ export function UseObject() {
 
   const [input, setInput] = createSignal('');
 
-  const handleSubmit = (e: SubmitEvent) => {
+  const handleSubmit = (e: SubmitEvent | KeyboardEvent) => {
     e.preventDefault();
     submit({ prompt: input() });
+    // Scroll to bottom after submitting input
+    setTimeout(() => {
+      if (chatHistoryRef) {
+        chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+      }
+    }, 0);
   };
 
   const handleInsert = (response: Message) => {
@@ -186,6 +89,10 @@ export function UseObject() {
     );
   };
 
+  const handleDelete = (formId: string) => {
+    setMessages(messages.filter(message => message.formId !== formId));
+  };
+
   return (
     <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
       <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
@@ -193,7 +100,15 @@ export function UseObject() {
           {(message, index) => (
             <div class="margin-bottom:24px">
               <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
-                <div class="font-weight:500 margin-bottom:4px">Prompt:</div>
+                <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
+                  <span>Prompt</span>
+                  <IconButton
+                      icon="ph:trash"
+                      class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+                      onClick={() => handleDelete(message.formId)}
+                      title="Delete"
+                    />
+                </div>
                 <div>{message.prompt}</div>
               </div>
               <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
@@ -265,8 +180,7 @@ export function UseObject() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
-                e.preventDefault();
-                submit({ prompt: input() });
+                handleSubmit(e);
               }
             }}
           />

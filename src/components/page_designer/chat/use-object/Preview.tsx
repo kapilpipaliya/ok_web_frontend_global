@@ -1,0 +1,109 @@
+import { createSignal, onCleanup, Show } from 'solid-js';
+import { z } from 'zod/lib/external';
+import { useGraph, Vertex } from '~/lib/graph/graph';
+import { addNewEdge } from '~/lib/graph/mutate/edge';
+import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
+import { addNewVertex } from '~/lib/graph/mutate/vertex';
+import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
+import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
+import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
+import { PageViewWrapper } from '~/pages/PageViewWrapper';
+import { graphInterfaceSchema } from '~/routes/api/use-object/schema';
+import { IFramePreview } from '../../layout/IFramePreview';
+
+
+export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; formId: string; }) {
+  const [graph, setGraph] = useGraph();
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+  // Store vertex IDs with no parents
+  const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
+
+  // Add all vertices with new IDs
+  const vertexIdMap = new Map<string, string>();
+  for (const vertex of props.object.vertexes || []) {
+    const newId = generateNewVertexId(graph, setGraph);
+    vertexIdMap.set(vertex.id, newId);
+
+    const newVertex = {
+      id: newId,
+      L: vertex.L,
+      P: {
+        ...vertex.P,
+        ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
+      },
+      IN: {},
+      OUT: {}
+    };
+
+    addNewVertex(metaTxnId, newVertex, graph, setGraph);
+  }
+
+  // Add all edges with new IDs
+  for (const edge of props.object.edges || []) {
+    const newId = generateNewVertexId(graph, setGraph);
+    const startId = vertexIdMap.get(edge.S)!;
+    const endId = vertexIdMap.get(edge.E)!;
+
+    const newEdge = {
+      id: newId,
+      T: edge.T,
+      P: {},
+      S: startId,
+      E: endId
+    };
+
+    addNewEdge(metaTxnId, newEdge, graph, setGraph);
+  }
+
+  // Find vertices with no parents
+  const parentMap = new Map<string, boolean>();
+
+  for (const edge of props.object.edges || []) {
+    parentMap.set(vertexIdMap.get(edge.E)!, true);
+  }
+
+  const noParentIds = Array.from(vertexIdMap.values())
+    .filter(id => !parentMap.has(id));
+  setRootVertexIds(noParentIds);
+
+  // Create parent vertex and link children
+  const parentId = generateNewVertexId(graph, setGraph);
+  const parentVertex = {
+    id: parentId,
+    L: ['Page'],
+    P: { key: "Page" },
+    IN: {},
+    OUT: {}
+  };
+
+  addNewVertex(metaTxnId, parentVertex, graph, setGraph);
+
+  // Link parent to root vertices
+  setSelectionValue(
+    metaTxnId,
+    graph.vertexes[parentId],
+    graph,
+    setGraph,
+    { P: { type: "Attr" } } as unknown as Vertex,
+    rootVertexIds()
+  );
+
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph, setGraph);
+  });
+
+  return <>
+    <div class="display:none">
+      <PageViewWrapper
+        uuid={props.formId}
+        pageVertexName="Page"
+        isNoPermissionCheck={true}
+        hideSaveCancelButton
+        formDataId={parentId} />
+    </div>
+
+    <Show when={graph.vertexes[props.formId]}>
+      <IFramePreview formStoreId={props.formId} noMinHeight />
+    </Show>
+  </>;
+}
