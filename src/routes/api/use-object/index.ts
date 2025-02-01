@@ -61,6 +61,7 @@ Always OUTPUT THE COMPLETE CODE.
 
 Do not say <!-- Rest of the code follows the same pattern --> or similar.
 Instead, write the full code, even if it is long.
+Do not skip any vertexes or edges.
 
 Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
 Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.

@@ -573,7 +573,7 @@ export function DynamicComponent(
         componentLabel = getComponentLabel(graph, props.meta);
       }
       if (!componentLabel) {
-        return "NotFoundComponent";
+        return "Html";
       }
       if (typeof componentLabel === "string") {
         return componentLabel;

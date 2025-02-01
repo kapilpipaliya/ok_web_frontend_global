@@ -4,7 +4,8 @@ import { createSignal, For, onCleanup, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { useGraph, Vertex } from '~/lib/graph/graph';
 import { createStore } from 'solid-js/store';
-import { z } from 'zod';
+import { object, z } from 'zod';
+import { v7 as uuidv7 } from 'uuid';
 import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
 import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
 import { addNewVertex } from '~/lib/graph/mutate/vertex';
@@ -13,6 +14,7 @@ import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
 import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import PageView from '~/components/page_attr_render/PageView';
+import { DesignerFormIdContext } from '../../context/LayoutContext';
 
 export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> }) {
   const [graph, setGraph] = useGraph();
@@ -91,11 +93,24 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema> })
     revertTransaction(metaTxnId, graph, setGraph);
   });
 
-  return <PageView
-    isDesignMode={true}
-    isNoPermissionCheck={true}
-    metaVertex={graph.vertexes[parentId]}
-  />
+  const formId = uuidv7();
+  return <>
+    <PageViewWrapper
+      uuid={formId}
+      pageVertexName="Page"
+      isNoPermissionCheck={true}
+      hideSaveCancelButton />
+
+    <Show when={graph.vertexes[formId]}>
+      <DesignerFormIdContext.Provider value={formId}>
+        <PageView
+          isDesignMode={true}
+          isNoPermissionCheck={true}
+          metaVertex={graph.vertexes[parentId]}
+        />
+      </DesignerFormIdContext.Provider>
+    </Show>
+  </>
 }
 export function UseObject() {
   const [graph, setGraph] = useGraph();
