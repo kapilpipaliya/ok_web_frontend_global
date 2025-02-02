@@ -153,7 +153,7 @@ export function RenderMainContent() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth0}px|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
+      grid-template-cols:${layoutStore().leftWidth}px|${layoutStore().mainPanel?.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}|${layoutStore().rightWidth0}px|${layoutStore().rightWidth1}px|${layoutStore().rightWidth2}px
      
       height:calc(100vh-45px)
       width:100vw

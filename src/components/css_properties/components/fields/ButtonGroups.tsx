@@ -20,7 +20,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   };
 
   return (
-    <div class="flex border:1px|solid|rgb(211,211,211) box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border f:14px flex:wrap min-w:max position:relative px:4px py:2px r:0.3rem w:100%">
+    <div class="flex border:1px|solid|rgb(211,211,211) box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border f:14px flex:wrap min-w:max r:0.3rem w:100%">
       <For each={props.options}>
         {(option) => {
           return (

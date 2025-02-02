@@ -57,7 +57,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
         <LabelWrapper meta={meta()} />
         <Icon
           class={"cursor:pointer"}
-          icon={"lets-icons:add-round"}
+          icon={"ph:plus-circle"}
           onClick={addOption}
           noobserver
         />

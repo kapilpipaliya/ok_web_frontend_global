@@ -39,7 +39,7 @@ export const FieldWithCustomBox = (
   });
   return (
     <div>
-      <div class="grid ai:end gap:10px grid-template-columns:1fr|20%">
+      <div class="grid gap:5px grid-template-columns:1fr|63px">
         <DynamicCSSComponent
           meta={
             {
@@ -75,7 +75,7 @@ export const FieldWithCustomBox = (
       </div>
       <Show when={optionType() === "custom"}>
         <div
-          class={`grid ai:end b:1px|solid|lightgray gap:10px grid-template-columns:${props.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
+          class={`grid b:1px|solid|lightgray gap:10px grid-template-columns:${props.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
         >
           <For each={props.customProperty}>
             {(item) => {

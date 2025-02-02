@@ -46,7 +46,7 @@ export function getStepStatusIconField(
   return {
     componentName: "icon",
     height: 22,
-    icon: "ph:circle-light",
+    icon: "ph:circle",
     name: "circle",
     otherProps: (options) => {
       const status = getStatus(options, requiredFields);
@@ -55,17 +55,17 @@ export function getStepStatusIconField(
       let className;
       switch (status) {
         case "completed": {
-          icon = "fa6-solid:check";
+          icon = "ph:check-circle";
           className = "text-green-500";
           break;
         }
         case "semi-completed": {
-          icon = "jam:pie-chart-alt";
+          icon = "ph:chart-pie";
           className = "text-primary";
           break;
         }
         default: {
-          icon = "ph:circle-light";
+          icon = "ph:circle";
           className = undefined;
           break;
         }

@@ -55,7 +55,7 @@ export const CollapsibleSection = (
         <Icon
           class={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
           height={25}
-          icon="uil:angle-up"
+          icon="ph:caret-up"
           width={25}
           noobserver
         />
@@ -99,7 +99,7 @@ export const SectionList = (
           <Icon
             class="transition:transform|0.2s|linear"
             height={25}
-            icon={showConfiguredOnly() ? "mdi:eye-off-outline" : "mdi:eye-outline"}
+            icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
             width={25}
             noobserver
           />
@@ -108,7 +108,7 @@ export const SectionList = (
           <Icon
             class="transition:transform|0.2s|linear"
             height={25}
-            icon="mdi:collapse-all-outline"
+            icon="ph:arrows-in"
             width={25}
             noobserver
           />
@@ -117,7 +117,7 @@ export const SectionList = (
           <Icon
             class="transition:transform|0.2s|linear"
             height={25}
-            icon="mdi:expand-all-outline"
+            icon="ph:arrows-out"
             width={25}
             noobserver
           />
