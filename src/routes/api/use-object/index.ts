@@ -16,11 +16,11 @@ export const POST: APIHandler = async ({ request }) => {
         {
           role: 'system',
           content: `Generate a graph for Page builder application Item tree.
-each vertex is a component and each edge is a relationship between components.
+each vertex is a Item and each edge is a relationship between Items.
 each Item label should be 'Attr' and Item children should be joined with 'Attr' edge name.
-each "Attr" vertex have optional 'componentName' property, whose values can be: 'Html', 'Icon', 'Data', 'Switch', 'Match'
-if componentName is not present, then it should be considered as 'Html' in the system. for 'Html' component omit 'componentName' property.
-when componentName is 'Html", then 'as' property should be present and its value should be any of html tags like 'div', 'span' etc. if 'as' property is omited it means its a fragment component and it will render only children.
+each "Attr" vertex have optional 'componentName' property, whose values can be: 'Html', 'Icon', 'Data', 'Switch', 'Match', 'ComponentChildren'
+if componentName is not present, then it should be considered as 'Html' in the system. for 'Html' Item omit 'componentName' property.
+when componentName is 'Html", then 'as' property should be present and its value should be any of html tags like 'div', 'span' etc. if 'as' property is omited it means its a fragment Item and it will render only children.
 
 each "Attr" vertex have 'pos' property, which is the position of the vertex in siblings.
 
@@ -46,6 +46,7 @@ interface CSS {
   value will be the value of the css property.
 
   prefer 'rem' units for css values when possible.
+  do not use 'style' property in the vertex, instead use 'class' property with css states.
 
 add additional properties as needed.
 
@@ -70,17 +71,17 @@ export interface FunctionArgumentBaseType {
 }
 any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
 
-'Data' component is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' component and use repeated component in the children of the 'Data' component. in the 'Data' component in the 'otherProps' function body pass data key the array of values it should iterate over.
-For 'Data' component, 'name' key is mandatory, In the 'Data' component children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
-use 'Data' component whenever possible.
+'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'otherProps' function body pass data key the array of values it should iterate over.
+For 'Data' Item, 'name' key is mandatory, In the 'Data' Item children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
+use 'Data' Item whenever possible.
 
-for adding text to the component, use 'text' property either in the 'otherProps' function body return value or directly to the vertex. It will be displayed like in the system:
+for adding text to the Item, use 'text' property either in the 'otherProps' function body return value or directly to the vertex. It will be displayed like in the system:
     <>
       {props.text}
       {props.children}
     </>
 
-for 'Icon' component, use 'icon' property. It is a string that should be the name of the icon from the iconify library.
+for 'Icon' Item, use 'icon' property. It is a string that should be the name of the icon from the iconify library.
 
 
 Always make sure that the layout and styling are visually appealing and consistent, with enough spacing and clear structure.

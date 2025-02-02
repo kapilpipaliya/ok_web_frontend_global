@@ -13,20 +13,30 @@ import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
 import { Preview } from './Preview';
+import { DropdownMenu } from '~/components/styled/DropdownMenu';
 
 interface Message {
   prompt: string;
   response: any;
   formId: string;
+  timestamp?: Date;
 }
 
 export function UseObject() {
   const [graph, setGraph] = useGraph();
   const [messages, setMessages] = createStore<Array<Message>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
+  const [showExamples, setShowExamples] = createSignal(false);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   let chatHistoryRef: HTMLDivElement | undefined;
+  let examplesButtonRef: HTMLButtonElement | undefined;
+
+  const examples = [
+    "Generate a responsive navigation bar with logo and menu items",
+    "Create a hero section with image, heading and call-to-action button",
+    "Design a contact form with name, email and message fields"
+  ];
 
   const { submit, isLoading, object, stop, error } = useObject({
     api: '/api/use-object',
@@ -34,7 +44,13 @@ export function UseObject() {
     onFinish(event) {
       console.log('FinishReason', event.error);
       if (event.object) {
-        setMessages([...messages, { prompt: input(), response: object(), formId: uuidv7() }]);
+        setMessages([...messages, { 
+          prompt: input(), 
+          response: object(), 
+          formId: uuidv7(),
+          timestamp: new Date()
+        }]);
+        setInput('');
         // Scroll to bottom after adding new message
         setTimeout(() => {
           if (chatHistoryRef) {
@@ -49,6 +65,7 @@ export function UseObject() {
 
   const handleSubmit = (e: SubmitEvent | KeyboardEvent) => {
     e.preventDefault();
+    if (!input().trim() || isLoading()) return;
     submit({ prompt: input() });
     // Scroll to bottom after submitting input
     setTimeout(() => {
@@ -93,6 +110,10 @@ export function UseObject() {
     setMessages(messages.filter(message => message.formId !== formId));
   };
 
+  const handleExampleClick = (example: string) => {
+    setInput(example);
+    setShowExamples(false);
+  };
   return (
     <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
       <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
@@ -101,7 +122,14 @@ export function UseObject() {
             <div class="margin-bottom:24px">
               <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
                 <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
-                  <span>Prompt</span>
+                  <div class="display:flex gap:8px align-items:center">
+                    <span>Prompt</span>
+                    {message.timestamp && (
+                      <span class="font-size:12px color:rgb(107,114,128)">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                    )}
+                  </div>
                   <IconButton
                       icon="ph:trash"
                       class={`${headerIconButtonClass} color:rgb(239,68,68)`}
@@ -121,23 +149,32 @@ export function UseObject() {
                     <Preview object={message.response} formId={message.formId} />
                   </div>
 
-                  <div class="display:flex gap:8px margin-top:12px">
-                    <select
-                      class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-                      value={insertMode()}
-                      onChange={(e) => setInsertMode(e.currentTarget.value as any)}
-                    >
-                      <option value="before">Insert Before</option>
-                      <option value="after">Insert After</option>
-                      <option value="center">Insert Into</option>
-                    </select>
+                  <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
+                    <div class="display:flex gap:8px">
+                      <select
+                        class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
+                        value={insertMode()}
+                        onChange={(e) => setInsertMode(e.currentTarget.value as any)}
+                      >
+                        <option value="before">Insert Before</option>
+                        <option value="after">Insert After</option>
+                        <option value="center">Insert Into</option>
+                      </select>
+
+                      <IconButton
+                        icon="ph:plus-circle"
+                        class={`${headerIconButtonClass}`}
+                        onClick={() => handleInsert(message)}
+                        title="Insert"
+                        disabled={layoutStoreVertex()?.P.formId === message.formId}
+                      />
+                    </div>
 
                     <IconButton
-                      icon="ph:plus-circle"
-                      class={`${headerIconButtonClass}`}
-                      onClick={() => handleInsert(message)}
-                      title="Insert"
-                      disabled={layoutStoreVertex()?.P.formId === message.formId}
+                      icon="ph:trash"
+                      class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+                      onClick={() => handleDelete(message.formId)}
+                      title="Delete"
                     />
                   </div>
                 </div>
@@ -172,18 +209,51 @@ export function UseObject() {
         onSubmit={handleSubmit}
         class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
       >
-        <div class="display:flex gap:8px">
-          <input
-            class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-            value={input()}
-            placeholder="Generate a page... (Press Cmd+Enter to submit)"
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
-                handleSubmit(e);
-              }
-            }}
-          />
+        <div class="display:flex flex-direction:column gap:8px">
+          <div class="display:flex gap:8px">
+            <input
+              class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed"
+              value={input()}
+              disabled={isLoading()}
+              placeholder="Generate a page... (Press Cmd+Enter to submit)"
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
+                  handleSubmit(e);
+                }
+              }}
+            />
+            <button
+              type="button"
+              class="padding:8px|16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
+              onClick={() => setShowExamples(!showExamples())}
+              disabled={isLoading()}
+              ref={examplesButtonRef}
+            >
+              Examples
+            </button>
+          </div>
+          <Show when={showExamples()}>
+            <DropdownMenu
+              parentRef={examplesButtonRef!}
+              onClickOutside={() => setShowExamples(false)}
+              onMouseLeave={() => setShowExamples(false)}
+            >
+              <div class="display:flex flex-direction:column gap:4px padding:8px">
+                <For each={examples}>
+                  {example => (
+                    <button
+                      type="button"
+                      class="text-align:left padding:8px background:rgb(243,244,246) border-radius:6px hover:background:rgb(229,231,235)"
+                      onClick={() => handleExampleClick(example)}
+                    >
+                      {example}
+                    </button>
+                  )}
+                </For>
+              </div>
+            </DropdownMenu>
+          </Show>
         </div>
       </form>
     </div>
