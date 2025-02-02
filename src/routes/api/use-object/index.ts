@@ -48,12 +48,39 @@ interface CSS {
   prefer 'rem' units for css values when possible.
 
 add additional properties as needed.
-for adding text to the component, use 'text' property. It will be displayed like in the system:
+
+to add properties with dynamic values use 'otherProps' property. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
+export interface FunctionArgumentBaseType {
+  data: Vertex;
+  evalExpression: (expression: string, options: object) => any;
+  graph: GraphInterface;
+  setGraph: SetStoreFunction<GraphInterface>;
+  meta: Vertex;
+  onChange: (value: any) => void;
+  owner: Owner;
+  parentItems: PageRenderStore[];
+  parentMeta: Vertex;
+  parentRenderContext: PageRenderObject;
+  readOnly: boolean | null | undefined;
+  ref: Accessor<HTMLDivElement | null>;
+  dataContext: Record<string | symbol, any>;
+  fns: (name: string) => Function | undefined;
+  runWithOwner: <T>(fn: () => T) => T | undefined;
+  runWithParentOwner: <T>(fn: () => T) => T | undefined;
+}
+any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+
+'Data' component is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' component and use repeated component in the children of the 'Data' component. in the 'Data' component in the 'otherProps' function body pass data key the array of values it should iterate over.
+For 'Data' component, 'name' key is mandatory, In the 'Data' component children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
+use 'Data' component whenever possible.
+
+for adding text to the component, use 'text' property either in the 'otherProps' function body return value or directly to the vertex. It will be displayed like in the system:
     <>
       {props.text}
       {props.children}
     </>
 
+for 'Icon' component, use 'icon' property. It is a string that should be the name of the icon from the iconify library.
 
 
 Always make sure that the layout and styling are visually appealing and consistent, with enough spacing and clear structure.

@@ -8,14 +8,15 @@ export function RepeaterInternal(props: {
   data: any;
   index: number;
   repeaterValue: any;
+  name: string;
 }) {
   const context = useRepeaterVertexContext();
   const repeaterStore = new Proxy(context, {
     get(target, key) {
-      if (key === props.meta.P.name) {
+      if (key === props.name) {
         return props.repeaterValue;
       }
-      if (key === `${props.meta.P.name}Index`) {
+      if (key === `${props.name}Index`) {
         return props.index;
       }
       return target[key];
