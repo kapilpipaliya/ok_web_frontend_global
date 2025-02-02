@@ -42,6 +42,7 @@ export function getComponentTree(): ComponentNode[] {
   - Form
   - Switch
   - Match
+  - ComponentChildren
   - Transition
   - TransitionGroups
 `

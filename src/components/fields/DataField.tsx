@@ -93,12 +93,12 @@ export const DataField = (props: { data: any[] | (() => any[]), expression: stri
       <Match when={Array.isArray(options()) && !props.noRepeat}>
         <For each={options()}>
           {(value, index) => {
-            return <RepeaterInternal meta={meta()} data={data()} index={index()} repeaterValue={value} />;
+            return <RepeaterInternal name={props.name} meta={meta()} data={data()} index={index()} repeaterValue={value} />;
           }}
         </For>
       </Match>
       <Match when={options()}>
-        <RepeaterInternal meta={meta()} data={data()} index={0} repeaterValue={options()} />
+        <RepeaterInternal name={props.name} meta={meta()} data={data()} index={0} repeaterValue={options()} />
       </Match>
     </Switch>
   );

@@ -33,7 +33,6 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
         ${isHorizontal ? 'width:3px height:100%' : 'width:100% height:3px'}
         ${isHorizontal ? 'cursor:col-resize' : 'cursor:row-resize'}
         ${(isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey)) ? 'bg:gray-60' : 'bg:transparent'}
-        z-index:1
         touch-action:none
         transition:background-color|0.2s
       `}

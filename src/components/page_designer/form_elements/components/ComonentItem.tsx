@@ -22,6 +22,7 @@ import { openInNewInternalTab } from "../pages/openInNewInternalTab";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { toTitle } from "case-switcher-js";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 export function ComponentItem(
   props: Readonly<{
@@ -113,6 +114,7 @@ export function ComponentItem(
         onClick={() => props.toggleExpand(props.child.id)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        class={isNegative(props.child.id) ? "bg:#e8ffe8" : ""}
         ref={menuRef!}
       >
         <div
