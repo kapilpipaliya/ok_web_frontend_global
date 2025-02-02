@@ -15,86 +15,109 @@ export const POST: APIHandler = async ({ request }) => {
       messages: [
         {
           role: 'system',
-          content: `Generate a graph for Page builder application Item tree.
-each vertex is a Item and each edge is a relationship between Items.
-each Item label should be 'Attr' and Item children should be joined with 'Attr' edge name.
-each "Attr" vertex have optional 'componentName' property, whose values can be: 'Html', 'Icon', 'Data', 'Switch', 'Match', 'ComponentChildren'
-if componentName is not present, then it should be considered as 'Html' in the system. for 'Html' Item omit 'componentName' property.
-when componentName is 'Html", then 'as' property should be present and its value should be any of html tags like 'div', 'span' etc. if 'as' property is omited it means its a fragment Item and it will render only children.
+          content: `You are tasked with generating a graph structure for a Page Builder application Item tree. Follow these specifications carefully:
 
-each "Attr" vertex have 'pos' property, which is the position of the vertex in siblings.
+Basic Structure:
+1. The graph consists of vertices (nodes) and edges (connections)
+2. Each vertex represents a UI Item and has the label 'Attr'
+3. Parent-child relationships between Items are represented by 'Attr' edges
 
-each "Attr" vertex have optional 'class' property, whose values can be following typescript interface:
-interface CSS {
-  [state: string]: { [cssKey: string]: any };
-}
-  state can be any of the following:
-    - ''
-    - ':active'
-    - ':hover'
-    - ':focus'
-    - ':disabled'
-    - ':visited'
-    - ':focus-within'
-    - ':focus-visible'
-    - ':target'
-    - '@xs'
-    - '@sm'
-    - '@md'
-    - '@lg'
-  cssKey can be any of the css properties like 'color', 'background', 'font-size', 'font-weight', 'text-align', 'padding', 'margin', 'border', 'border-radius', 'box-shadow', 'opacity', 'z-index' etc.
-  value will be the value of the css property.
+Attr Vertex:
+  - Required Properties:
+    - pos: number - Determines Item order among siblings
+  - Optional Properties:
+    - componentName: string - name of the component
+    - otherProps: Function Body string - dynamic properties for the Item e.g. 'otherProps: "return {}"'
+      Use 'otherProps' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
+      export interface FunctionArgumentBaseType {
+        data: Vertex; // current vertex data
+        evalExpression: (expression: string, options: object) => any;
+        graph: GraphInterface;
+        setGraph: SetStoreFunction<GraphInterface>;
+        meta: Vertex;
+        onChange: (value: any) => void;
+        owner: Owner;
+        parentItems: PageRenderStore[];
+        parentMeta: Vertex;
+        parentRenderContext: PageRenderObject;
+        readOnly: boolean | null | undefined;
+        ref: Accessor<HTMLDivElement | null>;
+        dataContext: Record<string | symbol, any>; // Data sharing between Items
+        fns: (name: string) => Function | undefined;
+        runWithOwner: <T>(fn: () => T) => T | undefined;
+        runWithParentOwner: <T>(fn: () => T) => T | undefined;
+      }
+      any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+  - Basic components are considered 'Html' type (no componentName needed)
+    required properties:
+    1. as: string - specifies HTML tag (div, span, etc)
+      - If omitted, Item acts as a fragment (renders only children)
+  - Special components must specify 'componentName' as one of:
+    * 'Html' - Basic HTML elements
+    * 'Icon' - Icon components using iconify library
+      - required properties:
+        - icon: string - iconify icon name
+    * 'Data' - For repeating Item patterns
+      - required properties:
+        - name: string - name of the data context, must not be empty
+      - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'otherProps' function body pass data key the array of values it should iterate over.
+      - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
+      - use 'Data' Item whenever possible.
+    * 'Switch' - Conditional rendering
+    * 'Match' - Pattern matching
+    * 'ComponentChildren' - Component slots
+  - Text Content:
+    Add text via 'text' property either:
+    - Directly on vertex
+    - In otherProps return value
+    Renders as: <>{text}{children}</>
 
-  prefer 'rem' units for css values when possible.
-  do not use 'style' property in the vertex, instead use 'class' property with css states.
+Styling System:
+  - Use the 'class' property for styling with this structure: { [state: string]: { ['css-property-name']: string | number } }
+  - Available states:
+    - '' (default)
+    - Interactive: ':active', ':hover', ':focus', ':disabled', ':visited'
+    - Focus states: ':focus-within', ':focus-visible', ':target'
+    - Responsive: '@xs', '@sm', '@md', '@lg'
+  - CSS best practices:
+    - Use rem units when possible
+    - Never use inline styles (no 'style' property)
+    - Include responsive breakpoints for mobile/desktop
+    - Always make sure that the layout and styling are visually appealing and consistent, with enough spacing and clear structure.
 
-add additional properties as needed.
+Reusable Components:
+  - Can have variants and internal structure
+  1. Create vertex with "Component" label
+  2. Define variants:
+    - Add "ComponentVariant" vertices
+    - Connect with "ComponentVariant" edge
+    - Specify key, type, defValue properties:
+      - key: string - name of the variant
+      - type: string - The data type ('string', 'number', 'boolean', 'array', 'object', etc)
+      - defValue?: any - default value of the variant
+  3. Add variant options:
+    - Create "ComponentVariantOption" vertices
+    - Connect with "ComponentVariantOption" edge
+    - Specify key, value, description properties:
+      - key: string - name of the option
+      - value: any - value of the option
+      - description?: string - Explains the purpose/usage of this option
+  4. Use components:
+    - Connect Item vertex to Component with "AttrComp" edge
+    - Omit componentName property
 
-to add properties with dynamic values use 'otherProps' property. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
-export interface FunctionArgumentBaseType {
-  data: Vertex;
-  evalExpression: (expression: string, options: object) => any;
-  graph: GraphInterface;
-  setGraph: SetStoreFunction<GraphInterface>;
-  meta: Vertex;
-  onChange: (value: any) => void;
-  owner: Owner;
-  parentItems: PageRenderStore[];
-  parentMeta: Vertex;
-  parentRenderContext: PageRenderObject;
-  readOnly: boolean | null | undefined;
-  ref: Accessor<HTMLDivElement | null>;
-  dataContext: Record<string | symbol, any>;
-  fns: (name: string) => Function | undefined;
-  runWithOwner: <T>(fn: () => T) => T | undefined;
-  runWithParentOwner: <T>(fn: () => T) => T | undefined;
-}
-any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+Important Guidelines:
+- Create visually balanced layouts
+- Include proper spacing and structure
+- Always output complete code
+- Use responsive design patterns
+- Never abbreviate or skip components
+- Do not skip any vertexes or edges.
 
-'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'otherProps' function body pass data key the array of values it should iterate over.
-For 'Data' Item, 'name' key is mandatory, In the 'Data' Item children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
-use 'Data' Item whenever possible.
-
-for adding text to the Item, use 'text' property either in the 'otherProps' function body return value or directly to the vertex. It will be displayed like in the system:
-    <>
-      {props.text}
-      {props.children}
-    </>
-
-for 'Icon' Item, use 'icon' property. It is a string that should be the name of the icon from the iconify library.
-
-
-Always make sure that the layout and styling are visually appealing and consistent, with enough spacing and clear structure.
-Always OUTPUT THE COMPLETE CODE.
-
-Do not say <!-- Rest of the code follows the same pattern --> or similar.
-Instead, write the full code, even if it is long.
-Do not skip any vertexes or edges.
-
-Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
-Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
-          `
+The graph must be a directed acyclic graph (DAG) to prevent circular dependencies.`
         },
+        // Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
+        // Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
         {
           role: 'user',
           content: context.prompt
