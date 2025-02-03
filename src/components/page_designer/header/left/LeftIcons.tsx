@@ -41,9 +41,6 @@ export const LeftIcons = () => {
       <a href="/admin">
         <img alt="logo" class="h:30px" src={logo} />
       </a>
-      <Show when={!layoutStore().isLeftOpen || layoutStore().isSmallScreen}>
-        <LeftToggleButton />
-      </Show>
     </div>
   );
 };

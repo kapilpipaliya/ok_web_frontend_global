@@ -74,8 +74,6 @@ export function PageDesignerWrapper(): JSX.Element {
       graph,
       setGraph,
       {
-        isLeftOpen: !isSmallScreen,
-        isRightOpen: !isSmallScreen,
         isSmallScreen,
       }
     );
@@ -117,6 +115,10 @@ export function PageDesignerWrapper(): JSX.Element {
       rightWidth0: layoutVertex.P.rightWidth0,
       rightWidth1: layoutVertex.P.rightWidth1,
       rightWidth2: layoutVertex.P.rightWidth2,
+      isLeftOpen: layoutVertex.P.isLeftOpen,
+      isRight0Open: layoutVertex.P.isRight0Open,
+      isRight1Open: layoutVertex.P.isRight1Open,
+      isRight2Open: layoutVertex.P.isRight2Open,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
       ...layoutVertex.P.mainPanel.reduce((acc, panel) => ({
         ...acc,
