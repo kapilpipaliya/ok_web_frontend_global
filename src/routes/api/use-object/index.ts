@@ -75,17 +75,99 @@ Attr Vertex:
     Renders as: <>{text}{children}</>
 
 Styling System:
-  - Use the 'class' property for styling with this structure: { [state: string]: { ['css-property-name']: string | number } }
-  - Available states:
-    - '' (default)
-    - Interactive: ':active', ':hover', ':focus', ':disabled', ':visited'
-    - Focus states: ':focus-within', ':focus-visible', ':target'
-    - Responsive: '@xs', '@sm', '@md', '@lg'
-  - CSS best practices:
-    - Use rem units when possible
-    - Never use inline styles (no 'style' property)
+  - Use the 'class' property for styling. It MUST follow this exact structure:
+    class: {
+      [state: string]: {
+        [css_property_name: string]: string | number
+      }
+    }
+  
+  - Valid states are ONLY:
+    - '' (empty string for default state)
+    - ':active'
+    - ':hover'
+    - ':focus'
+    - ':disabled'
+    - ':visited'
+    - ':focus-within'
+    - ':focus-visible'
+    - ':target'
+    - '@xs' (mobile)
+    - '@sm'
+    - '@md'
+    - '@lg' (desktop)
+
+  - Example of correct class structure:
+    class: {
+      '': {
+        'color': 'red',
+        'font-size': '1rem',
+        'padding': '1rem'
+      },
+      ':hover': {
+        'color': 'blue'
+      },
+      '@xs': {
+        'font-size': '0.875rem',
+        'padding': '0.5rem'
+      },
+      '@lg': {
+        'font-size': '1rem',
+        'padding': '1rem'
+      }
+    }
+  - Example of incorrect class structure:
+    class: {
+      '': '',
+      'color': 'red',
+      'font-size': '16px'
+    }
+  - IMPORTANT RULES for class property:
+    - values must be provided in the state object {'': {}}, for default state uses empty string for state.
+    - Each state MUST be an object containing only valid CSS properties in kebab-case
+    - Only use standard CSS property names (kebab-case), instead of 'borderRadius' use 'border-radius'
+    - Values must be valid CSS values as strings or numbers
+    - Never use custom class names
+    - Never use nested selectors
+    - Never use 'style' property, instead use 'class' property
+    - Use rem units when possible for consistent scaling
     - Include responsive breakpoints for mobile/desktop
-    - Always make sure that the layout and styling are visually appealing and consistent, with enough spacing and clear structure.
+    - Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
+    - Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
+    - for 'box-shadow' css property value return array of ShadowAttributes object:
+      interface ShadowAttributes {
+        "blur-radius": string;
+        color?: string;
+        inset?: string;
+        "offset-x": string;
+        "offset-y": string;
+        spread: string;
+      }
+    - for 'text-shadow' css property value return array of TextShadowAttributes object:
+      interface TextShadowAttributes {
+        "blur-radius": string;
+        color: string;
+        "offset-x": string;
+        "offset-y": string;
+      }
+    - for 'filter' css property value return array of FilterAttributes object:
+      interface FilterAttributes {
+        type: string;
+        value: string;
+      }
+    - for 'transition' css property value return array of TransitionAttributes object:
+      interface TransitionAttributes {
+        delay: string;
+        duration: string;
+        property: string;
+        timingFunction: string;
+      }
+    - for 'transform' css property value return array of TransformAttributes object:
+      interface TransformAttributes {
+        type: string;
+        value: string;
+      }
+    
 
 Reusable Components:
   - Can have variants and internal structure

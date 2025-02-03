@@ -13,9 +13,9 @@ export function SettingsWrapper() {
 
   return (
     <aside
-      classList={{
-        "display:none": !layoutStore().isRightOpen,
-      }}
+      // classList={{
+      //   "display:none": !layoutStore().isRightOpen,
+      // }}
     >
       <div
         class={`scrollbar-color:lightgrey {scrollbar-width:thin} border:1|solid|lightgrey flex:column h:100vh max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`}

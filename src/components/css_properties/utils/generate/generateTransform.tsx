@@ -7,8 +7,9 @@ export function generateTransform(
   transforms: TransformAttributes[],
   isView?: boolean,
 ): string {
+  if (!transforms) return '';
   const separator = isView ? " " : "|";
-  return transforms
+  return transforms.filter(transform => transform)
     .map((transform) => {
       const { type = "", value = "" } = transform;
       return `${type}(${value})`;

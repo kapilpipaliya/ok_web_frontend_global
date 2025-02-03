@@ -1,9 +1,9 @@
 import { experimental_useObject as useObject } from '@ai-sdk/solid';
 import { graphInterfaceSchema } from '../../../../routes/api/use-object/schema';
-import { createSignal, For, Show } from 'solid-js';
+import { createMemo, createSignal, For, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
-import { useGraph, Vertex } from '~/lib/graph/graph';
-import { createStore } from 'solid-js/store';
+import { GraphInterface, Id, useGraph, Vertex } from '~/lib/graph/graph';
+import { createStore, SetStoreFunction, Store } from 'solid-js/store';
 import { object } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
 import PageView from '~/components/page_attr_render/PageView';
@@ -14,21 +14,44 @@ import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
 import { Preview } from './Preview';
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { FormMetaData } from "~/lib/meta/formMetaData";
+import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
+import { deleteRow } from '~/lib/graph/mutate/deleteRow';
+import { evalExpression } from '~/lib/expression_eval';
 
 interface Message {
   prompt: string;
-  response: any;
-  formId: string;
-  timestamp?: Date;
+  response: string;
+  timestamp?: number;
 }
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
-  const [messages, setMessages] = createStore<Array<Message>>([]);
-  const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
-  const [showExamples, setShowExamples] = createSignal(false);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const newTxnId = generateNewTxnId(graph, setGraph);
+  
+  // Get the first mainPanel's formId and formStore
+  const formStoreId = () => {
+    const mainPanelId = layoutStoreVertex().P.mainPanel[0];
+    return layoutStoreVertex().P[`mainPanel${mainPanelId}Tab`] as Id | null;
+  };
+  const formStoreVertex = () => formStoreId() ? graph.vertexes[formStoreId()!] as Vertex<FormStoreObject> : undefined;
+
+  const messages = createMemo(() => {
+    const formDataVertex = formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex()!.P.formDataId!] : undefined;
+    if (!formDataVertex) return [];
+    
+    const chatHistory = evalExpression("->ChatHistory", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || []
+
+    return chatHistory.sort((a, b) => ((a.P?.timestamp || 0) - (b.P?.timestamp || 0))) as Vertex<Message>[];
+  });
+
+  const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
+  const [showExamples, setShowExamples] = createSignal(false);
   const [input, setInput] = createSignal('');
 
   let chatHistoryRef: HTMLDivElement | undefined;
@@ -44,14 +67,24 @@ export function UseObjectAIPanel() {
     api: '/api/use-object',
     schema: graphInterfaceSchema,
     onFinish(event) {
-      console.log('FinishReason', event.error);
-      if (event.object) {
-        setMessages([...messages, { 
+      // console.log('FinishReason', event.error);
+      if (event.object && formStoreVertex()) {
+        const message = { 
           prompt: input(), 
-          response: object(), 
-          formId: uuidv7(),
-          timestamp: new Date()
-        }]);
+          response: JSON.stringify(object()), 
+          timestamp: Date.now()
+        } as Message;
+        
+        insertNewRow(
+          newTxnId, // formStoreVertex()!.P.txnId,
+          {P: {type: "ChatHistory"}} as unknown as Vertex,
+          graph.vertexes[formStoreVertex()!.P.formDataId!],
+          false,
+          graph,
+          setGraph,
+          message
+        );
+
         // setInput('');
         // Scroll to bottom after adding new message
         setTimeout(() => {
@@ -75,13 +108,13 @@ export function UseObjectAIPanel() {
     }, 0);
   };
 
-  const handleInsert = (response: Message) => {
+  const handleInsert = (message: Vertex) => {
     const formVertex = graph.vertexes[layoutStoreId];
-    const fromStoreVertex = graph.vertexes[response.formId];
+    const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
     if (!fromStoreVertex) {
       return;
     }
-    if (layoutStoreVertex()?.P.formId === response.formId) {
+    if (layoutStoreVertex()?.P.formId === `${message.id}FormStore`) {
       return;
     }
     if (!layoutStoreVertex()?.P.formId) {
@@ -106,8 +139,14 @@ export function UseObjectAIPanel() {
     );
   };
 
-  const handleDelete = (formId: string) => {
-    setMessages(messages.filter(message => message.formId !== formId));
+  const handleDelete = (message: Vertex) => {
+    deleteRow(
+      message,
+      false,
+      graph,
+      setGraph,
+      newTxnId, // formStoreVertex()!.P.txnId
+    );
   };
 
   const handleExampleClick = (example: string) => {
@@ -117,36 +156,36 @@ export function UseObjectAIPanel() {
   return (
     <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
       <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
-        <For each={messages}>
-          {(message, index) => (
+        <For each={messages()}>
+          {(message) => (
             <div class="margin-bottom:24px">
               <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
                 <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
                   <div class="display:flex gap:8px align-items:center">
                     <span>Prompt</span>
-                    {message.timestamp && (
+                    {message.P?.timestamp && (
                       <span class="font-size:12px color:rgb(107,114,128)">
-                        {message.timestamp.toLocaleTimeString()}
+                        {new Date(message.P.timestamp).toLocaleTimeString()}
                       </span>
                     )}
                   </div>
                   <IconButton
                       icon="ph:trash"
                       class={`${headerIconButtonClass} color:rgb(239,68,68)`}
-                      onClick={() => handleDelete(message.formId)}
+                      onClick={() => handleDelete(message)}
                       title="Delete"
                     />
                 </div>
-                <div>{message.prompt}</div>
+                <div>{message.P?.prompt}</div>
               </div>
               <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
                 <div class="font-weight:500 margin-bottom:4px">Response:</div>
-                <div class="white-space:pre-wrap">{JSON.stringify(message.response, null, 2)}</div>
+                <div class="white-space:pre-wrap">{JSON.stringify(JSON.parse(message.P.response), null, 2)}</div>
 
                 <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
                   <div class="font-weight:500 margin-bottom:8px">Preview:</div>
                   <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-                    <Preview object={message.response} formId={message.formId} />
+                    <Preview object={JSON.parse(message.P.response)} formId={`${message.id}FormStore`} />
                   </div>
 
                   <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
@@ -166,14 +205,14 @@ export function UseObjectAIPanel() {
                         class={`${headerIconButtonClass}`}
                         onClick={() => handleInsert(message)}
                         title="Insert"
-                        disabled={layoutStoreVertex()?.P.formId === message.formId}
+                        disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
                       />
                     </div>
 
                     <IconButton
                       icon="ph:trash"
                       class={`${headerIconButtonClass} color:rgb(239,68,68)`}
-                      onClick={() => handleDelete(message.formId)}
+                      onClick={() => handleDelete(message)}
                       title="Delete"
                     />
                   </div>

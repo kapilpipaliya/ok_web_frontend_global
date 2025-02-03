@@ -10,10 +10,11 @@ export function generateBoxShadow(
   shadows: ShadowAttributes[],
   isView?: boolean,
 ): string {
+  if (!shadows) return '';
   const separator = isView ? " " : "|";
   const separator2 = isView ? ", " : ",";
 
-  return shadows
+  return shadows.filter(shadow => shadow)
     .map((shadow) => {
       const {
         "blur-radius": blurRadius = "0px",

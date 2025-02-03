@@ -1,5 +1,4 @@
 import { createSignal, onCleanup, Show } from 'solid-js';
-import { z } from 'zod/lib/external';
 import { useGraph, Vertex } from '~/lib/graph/graph';
 import { addNewEdge } from '~/lib/graph/mutate/edge';
 import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
@@ -10,6 +9,7 @@ import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import { graphInterfaceSchema } from '~/routes/api/use-object/schema';
 import { IFramePreview } from '../../layout/IFramePreview';
+import { z } from 'zod';
 
 
 export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; formId: string; }) {
