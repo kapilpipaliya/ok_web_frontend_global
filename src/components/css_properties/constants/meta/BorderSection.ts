@@ -17,7 +17,6 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     key: "border-color",
     label: "Border Color",
     mainFieldType: "colorPicker",
-    type: "number",
   },
   borderRadius: {
     componentName: "fieldWithCustomProperty",
@@ -32,8 +31,8 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     key: "border-radius",
     label: "Border Radius",
     mainFieldType: "string",
-    type: "number",
-    unitOptions: sizeTypes,
+    // type: "number",
+    // unitOptions: sizeTypes,
   },
   borderStyle: {
     componentName: "fieldWithCustomProperty",
@@ -49,7 +48,6 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     label: "Border Style",
     mainFieldType: "select",
     options: extraPropertyValues["border-style"].values,
-    type: "number",
   },
   borderWidth: {
     componentName: "fieldWithCustomProperty",
@@ -64,8 +62,8 @@ export const BorderSection: { [key: string]: FieldWithCustomProperty } = {
     key: "border-width",
     label: "Border Width",
     mainFieldType: "string",
-    type: "number",
-    unitOptions: defaultPixelSizeTypes,
+    // type: "number",
+    // unitOptions: defaultPixelSizeTypes,
     // TODO: Add support for options
     // options: extraPropertyValues["border-width"].values,
   },

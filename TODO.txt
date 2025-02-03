@@ -12,6 +12,6 @@ Bugs:
 
 
 Feature:
-
+- save and load Chat History
 
 

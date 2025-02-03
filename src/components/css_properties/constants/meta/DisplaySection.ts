@@ -104,12 +104,12 @@ export const DisplaySection = {
     componentName: "string",
     label: "Opacity",
     key: "opacity",
-    unitOptions: ["%"],
-    type: "number",
-    inputProps: {
-      min: 0,
-      max: 100,
-    },
+    // unitOptions: ["%"],
+    // type: "number",
+    // inputProps: {
+    //   min: 0,
+    //   max: 100,
+    // },
   } as TextFieldOptionsField,
   cursor: createSelectOptions("cursor", "Cursor", [
     "auto",

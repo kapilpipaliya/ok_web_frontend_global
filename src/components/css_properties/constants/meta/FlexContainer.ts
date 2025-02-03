@@ -10,22 +10,22 @@ export const gapFields = {
     componentName: "string",
     label: "Gap",
     key: "gap",
-    type: "number",
-    unitOptions: defaultPixelSizeTypes,
+    // type: "number",
+    // unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   rowGap: {
     componentName: "string",
     label: "Row Gap",
     key: "row-gap",
-    type: "number",
-    unitOptions: defaultPixelSizeTypes,
+    // type: "number",
+    // unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
   columnGap: {
     componentName: "string",
     label: "Column Gap",
     key: "column-gap",
-    type: "number",
-    unitOptions: defaultPixelSizeTypes,
+    // type: "number",
+    // unitOptions: defaultPixelSizeTypes,
   } as TextFieldOptionsField,
 };
 export const FlexContainer = {
