@@ -12,7 +12,7 @@ import { PageViewComponent } from './main_content/PageViewComponent';
 import { Settings } from './main_content/Settings';
 import { PropertiesContent } from './main_content/PropertiesContent';
 import { DeleteConfirmation } from './main_content/DeleteConfirmation';
-import { UseObjectAIPanel } from "../chat/use-object";
+import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 
 interface ResizeHandleProps {
   onPointerDown: (e: PointerEvent) => void;
