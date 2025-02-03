@@ -22,13 +22,15 @@ interface Message {
   timestamp?: Date;
 }
 
-export function UseObject() {
+export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
   const [messages, setMessages] = createStore<Array<Message>>([]);
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const [showExamples, setShowExamples] = createSignal(false);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const [input, setInput] = createSignal('');
+
   let chatHistoryRef: HTMLDivElement | undefined;
   let examplesButtonRef: HTMLButtonElement | undefined;
 
@@ -50,7 +52,7 @@ export function UseObject() {
           formId: uuidv7(),
           timestamp: new Date()
         }]);
-        setInput('');
+        // setInput('');
         // Scroll to bottom after adding new message
         setTimeout(() => {
           if (chatHistoryRef) {
@@ -60,8 +62,6 @@ export function UseObject() {
       }
     },
   });
-
-  const [input, setInput] = createSignal('');
 
   const handleSubmit = (e: SubmitEvent | KeyboardEvent) => {
     e.preventDefault();

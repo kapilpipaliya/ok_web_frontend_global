@@ -1,7 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
 import { Title } from "@solidjs/meta";
-import { type JSX, onCleanup, onMount } from "solid-js";
+import { type JSX, onCleanup, onMount, createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isServer } from "solid-js/web";
 
@@ -26,12 +26,20 @@ import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
 import { clientOnly } from "@solidjs/start";
 import { useParams } from "@solidjs/router";
+import { openDB } from 'idb';
+
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
   const params = useParams();
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+
+  const dbPromise = openDB('keyval-store', 1, {
+    upgrade(db) {
+      db.createObjectStore('keyval');
+    },
+  });
 
   const formId = uuidv7();
 
@@ -75,15 +83,50 @@ export function PageDesignerWrapper(): JSX.Element {
 
   const debouncedHandleResize = debounce(handleResize, 200);
 
-  onMount(() => {
+  onMount(async () => {
     if (isServer) {
       return;
     }
+    
+    // Get stored layout properties
+    const storedLayout = await (await dbPromise).get('keyval', 'page_designer_layout');
+    if (storedLayout) {
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        initialStore.id,
+        graph,
+        setGraph,
+        storedLayout
+      );
+    }
+
     handleResize(); // Initial check
-
     makeEventListener(window, "resize", debouncedHandleResize);
-
     fetchCompExamples();
+  });
+
+  // Save layout properties on change
+  createEffect(() => {
+    if (isServer) return;
+    
+    const layoutVertex = graph.vertexes[initialStore.id] as Vertex<PageLayoutObject>;
+    if (!layoutVertex) return;
+
+    const widthProps = {
+      leftWidth: layoutVertex.P.leftWidth,
+      rightWidth0: layoutVertex.P.rightWidth0,
+      rightWidth1: layoutVertex.P.rightWidth1,
+      rightWidth2: layoutVertex.P.rightWidth2,
+      // Note: this does not work because we use uuidv7 for the mainPanel ids
+      ...layoutVertex.P.mainPanel.reduce((acc, panel) => ({
+        ...acc,
+        [`mainPanel${panel}Width`]: layoutVertex.P[`mainPanel${panel}Width`]
+      }), {})
+    };
+
+    (async () => {
+      await (await dbPromise).put('keyval', widthProps, 'page_designer_layout');
+    })();
   });
 
   const fetchCompExamples = async () => {

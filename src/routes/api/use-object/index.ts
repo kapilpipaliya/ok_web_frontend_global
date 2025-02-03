@@ -7,6 +7,8 @@ import { graphInterfaceSchema } from './schema';
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
+// https://platform.openai.com/docs/guides/reasoning/beta-limitations
+// guidelines: https://cdn.openai.com/spec/model-spec-2024-05-08.html#follow-the-chain-of-command
 export const POST: APIHandler = async ({ request }) => {
   const context = await request.json();
   
@@ -28,8 +30,8 @@ Attr Vertex:
   - Optional Properties:
     - componentName: string - name of the component
     - otherProps: Function Body string - dynamic properties for the Item e.g. 'otherProps: "return {}"'
-      Use 'otherProps' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
-      export interface FunctionArgumentBaseType {
+      - Use 'otherProps' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
+      - export interface FunctionArgumentBaseType {
         data: Vertex; // current vertex data
         evalExpression: (expression: string, options: object) => any;
         graph: GraphInterface;
@@ -47,11 +49,11 @@ Attr Vertex:
         runWithOwner: <T>(fn: () => T) => T | undefined;
         runWithParentOwner: <T>(fn: () => T) => T | undefined;
       }
-      any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+      - any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
   - Basic components are considered 'Html' type (no componentName needed)
-    required properties:
-    1. as: string - specifies HTML tag (div, span, etc)
-      - If omitted, Item acts as a fragment (renders only children)
+    - required properties:
+      1. as: string - specifies HTML tag (div, span, etc)
+        - If omitted, Item acts as a fragment (renders only children)
   - Special components must specify 'componentName' as one of:
     * 'Html' - Basic HTML elements
     * 'Icon' - Icon components using iconify library
