@@ -18,10 +18,6 @@ export const graphInterfaceSchema = z.object({
     E: z.string().describe('End vertex ID of the edge'),
     S: z.string().describe('Start vertex ID of the edge'),
   })).describe('Array of Edge objects representing connections between vertices. return empty array if no edges').optional(),
-
-  // vertexLabelIdMap: z.record(z.string(), z.array(z.string()))
-  //   .describe('Map of vertex labels to arrays of vertex IDs having that label')
-  explanation: z.string(),
 });
 
 // define type for partial graph interface during generation

@@ -21,11 +21,14 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
 import { deleteRow } from '~/lib/graph/mutate/deleteRow';
 import { evalExpression } from '~/lib/expression_eval';
+import { useChat } from '@ai-sdk/solid';
+import { getTextFromDataUrl } from '@ai-sdk/ui-utils';
 
 interface Message {
   prompt: string;
   response: string;
   timestamp?: number;
+  attachments?: File[];
 }
 
 export function UseObjectAIPanel() {
@@ -52,10 +55,12 @@ export function UseObjectAIPanel() {
 
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const [showExamples, setShowExamples] = createSignal(false);
-  const [input, setInput] = createSignal('');
+  const [files, setFiles] = createSignal<FileList | undefined>(undefined);
+  const [frameCount, setFrameCount] = createSignal(0);
 
   let chatHistoryRef: HTMLDivElement | undefined;
   let examplesButtonRef: HTMLButtonElement | undefined;
+  let fileInputRef: HTMLInputElement | undefined;
 
   const examples = [
     "Generate a responsive navigation bar with logo and menu items",
@@ -72,16 +77,23 @@ export function UseObjectAIPanel() {
     "Create a portfolio grid with filtering options"
   ];
 
-  const { submit, isLoading, object, stop, error } = useObject({
-    api: '/api/use-object',
-    schema: graphInterfaceSchema,
-    onFinish(event) {
-      // console.log('FinishReason', event.error);
-      if (event.object && formStoreVertex()) {
-        const message = { 
-          prompt: input(), 
-          response: JSON.stringify(object()), 
-          timestamp: Date.now()
+  const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload } = useChat({
+    onResponse(response) {
+      setFrameCount(prev => prev + 1);
+    },
+    onFinish(message, { usage, finishReason }) {
+      if (formStoreVertex()) {
+        const messageData = {
+          prompt: input(),
+          response: (() => {
+            try {
+              return JSON.stringify(JSON.parse(message.content));
+            } catch {
+              return JSON.stringify({});
+            }
+          })(),
+          timestamp: Date.now(),
+          attachments: files() ? Array.from(files()!) : undefined
         } as Message;
         
         insertNewRow(
@@ -91,11 +103,15 @@ export function UseObjectAIPanel() {
           false,
           graph,
           setGraph,
-          message
+          messageData
         );
 
-        // setInput('');
-        // Scroll to bottom after adding new message
+        setFiles(undefined);
+        if (fileInputRef) {
+          fileInputRef.value = '';
+        }
+        setFrameCount(0);
+
         setTimeout(() => {
           if (chatHistoryRef) {
             chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
@@ -105,11 +121,13 @@ export function UseObjectAIPanel() {
     },
   });
 
-  const handleSubmit = (e: SubmitEvent | KeyboardEvent) => {
+  const handleSubmit2 = (e: SubmitEvent) => {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
-    submit({ prompt: input() });
-    // Scroll to bottom after submitting input
+    handleSubmit(e, {
+      experimental_attachments: files()
+    });
+    
     setTimeout(() => {
       if (chatHistoryRef) {
         chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
@@ -159,7 +177,7 @@ export function UseObjectAIPanel() {
   };
 
   const handleExampleClick = (example: string) => {
-    setInput(example);
+    handleInputChange({ target: { value: example } });
     setShowExamples(false);
   };
   return (
@@ -186,6 +204,21 @@ export function UseObjectAIPanel() {
                     />
                 </div>
                 <div>{message.P?.prompt}</div>
+                <Show when={message.P?.attachments?.length}>
+                  <div class="display:flex gap:8px margin-top:8px">
+                    <For each={message.P?.attachments}>
+                      {file => (
+                        <Show when={file.type.startsWith('image/')}>
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            class="width:64px height:64px object-fit:cover border-radius:4px"
+                          />
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                </Show>
               </div>
               <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
                 <div class="font-weight:500 margin-bottom:4px">Response:</div>
@@ -232,16 +265,21 @@ export function UseObjectAIPanel() {
         </For>
 
         <Show when={error()}>
-          {error => (
-            <div class="padding:16px margin-bottom:16px color:rgb(239,68,68) background:rgb(254,242,242) border-radius:6px">
-              An error occurred. {error()?.message}
-            </div>
-          )}
+          <div class="padding:16px margin-bottom:16px color:rgb(239,68,68) background:rgb(254,242,242) border-radius:6px">
+            An error occurred. {error()?.message}
+            <button
+              type="button"
+              class="padding:8px|16px margin-top:8px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
+              onClick={() => reload()}
+            >
+              Retry
+            </button>
+          </div>
         </Show>
 
         <Show when={isLoading()}>
           <div class="padding:16px color:rgb(107,114,128)">
-            <div>Loading...</div>
+            <div>Loading... (Frames received: {frameCount()})</div>
             <button
               type="button"
               class="padding:8px|16px margin-top:8px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
@@ -254,17 +292,45 @@ export function UseObjectAIPanel() {
       </div>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit2}
         class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
       >
         <div class="display:flex flex-direction:column gap:8px">
+          <div class="display:flex gap:8px">
+            <input
+              type="file"
+              onChange={e => setFiles(e.currentTarget.files ?? undefined)}
+              multiple
+              ref={fileInputRef}
+              class="flex:1"
+            />
+          </div>
+          
+          <div class="display:flex gap:8px">
+            <Show when={files()}>
+              <div class="display:flex gap:8px margin-bottom:8px">
+                <For each={Array.from(files()!)}>
+                  {file => (
+                    <Show when={file.type.startsWith('image/')}>
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        class="width:48px height:48px object-fit:cover border-radius:4px"
+                      />
+                    </Show>
+                  )}
+                </For>
+              </div>
+            </Show>
+          </div>
+
           <div class="display:flex gap:8px">
             <input
               class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed"
               value={input()}
               disabled={isLoading()}
               placeholder="Generate a page... (Press Cmd+Enter to submit)"
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
                   handleSubmit(e);
@@ -277,6 +343,13 @@ export function UseObjectAIPanel() {
               disabled={isLoading()}
               ref={examplesButtonRef}
               title="Show Examples"
+              size={22}
+            />
+            <IconButton
+              type="submit"
+              icon="ph:paper-plane-right"
+              disabled={isLoading() || !input().trim()}
+              title="Submit"
               size={22}
             />
           </div>
