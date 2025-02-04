@@ -123,6 +123,16 @@ export function UseObjectAIPanel() {
       
       handleMessageSave(messageData);
       setFrameCount(0);
+      
+      if (!error()) {
+        // clear input and files on successful completion
+        // @ts-expect-error ignore error
+        handleInputChange({ target: { value: '' } });
+        setFiles(undefined);
+        if (fileInputRef) {
+          fileInputRef.value = '';
+        }
+      }
     },
   });
 

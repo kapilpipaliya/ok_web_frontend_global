@@ -39,58 +39,38 @@ export function ChatInput(props: ChatInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
+      class="background:white border-top:1px|solid|rgb(229,231,235)"
     >
       <div class="display:flex flex-direction:column gap:8px">
-        <div class="display:flex gap:8px">
-          <input
-            type="file"
-            onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
-            multiple
-            ref={props.fileInputRef}
-            class="flex:1"
-          />
-        </div>
-        
-        <Show when={props.files()}>
-          <div class="display:flex gap:8px margin-bottom:8px">
-            <For each={Array.from(props.files()!)}>
-              {file => (
-                <Show when={file.type.startsWith('image/')}>
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                    class="width:48px height:48px object-fit:cover border-radius:4px"
-                  />
-                </Show>
-              )}
-            </For>
-          </div>
-        </Show>
+        <select
+          value={selectedModel()}
+          onChange={(e) => setSelectedModel(e.currentTarget.value)}
+          class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px width:fit-content"
+          disabled={props.isLoading()}
+        >
+          <For each={models}>
+            {model => (
+              <option value={model}>{model}</option>
+            )}
+          </For>
+        </select>
 
         <div class="display:flex gap:8px">
-          <select
-            value={selectedModel()}
-            onChange={(e) => setSelectedModel(e.currentTarget.value)}
-            class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-            disabled={props.isLoading()}
-          >
-            <For each={models}>
-              {model => (
-                <option value={model}>{model}</option>
-              )}
-            </For>
-          </select>
-          
-          <input
-            class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed"
+          <textarea
+            class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed min-height:40px resize:vertical"
             value={props.input()}
             disabled={props.isLoading()}
             placeholder="Generate a page... (Press Cmd+Enter to submit)"
             onChange={props.onInputChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !props.isLoading()) {
-                handleSubmit(e as any);
+              if (e.key === 'Enter') {
+                if ((e.metaKey || e.ctrlKey) && !props.isLoading()) {
+                  e.preventDefault(); // Prevent default to ensure command+enter works
+                  handleSubmit(e as any);
+                } else {
+                  // Prevent form submission on regular Enter
+                  e.stopPropagation(); 
+                }
               }
             }}
           />
@@ -110,6 +90,45 @@ export function ChatInput(props: ChatInputProps) {
             size={22}
           />
         </div>
+
+        <div class="display:flex gap:8px">
+          <input
+            type="file"
+            onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
+            multiple
+            ref={props.fileInputRef}
+            class="flex:1"
+          />
+          <Show when={props.files()}>
+            <IconButton
+              icon="ph:x-circle"
+              onClick={() => {
+                props.onFilesChange(undefined);
+                if (props.fileInputRef) {
+                  props.fileInputRef.value = '';
+                }
+              }}
+              title="Clear files"
+              size={22}
+            />
+          </Show>
+        </div>
+        
+        <Show when={props.files()}>
+          <div class="display:flex gap:8px margin-bottom:8px">
+            <For each={Array.from(props.files()!)}>
+              {file => (
+                <Show when={file.type.startsWith('image/')}>
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    class="width:48px height:48px object-fit:cover border-radius:4px"
+                  />
+                </Show>
+              )}
+            </For>
+          </div>
+        </Show>
 
         <Show when={props.showExamples()}>
           <DropdownMenu
