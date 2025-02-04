@@ -2,12 +2,8 @@ import { createMemo, createSignal, For, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { Id, useGraph, Vertex } from '~/lib/graph/graph';
 import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { IconButton } from '~/components/styled/IconButton';
-import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
-import { Preview } from './Preview';
-import { DropdownMenu } from '~/components/styled/DropdownMenu';
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
 import { deleteRow } from '~/lib/graph/mutate/deleteRow';
@@ -17,6 +13,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatResponse } from './ChatResponse';
 import { ChatInput } from './ChatInput';
 import { Message } from './types';
+import { themeConfig } from '~/cypher/get/themeConfig';
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -63,6 +60,8 @@ export function UseObjectAIPanel() {
     "Generate a services showcase with icons",
     "Create a portfolio grid with filtering options"
   ];
+
+  const globalTheme = themeConfig(graph);
 
   const handleMessageSave = (messageData: Message) => {
     if (!formStoreVertex()) return;
@@ -143,7 +142,17 @@ export function UseObjectAIPanel() {
     handleSubmit(e, {
       experimental_attachments: files(),
       body: {
-        model: model
+        model: model,
+        extraMessages: [
+          {
+            role: 'system',
+            content: `
+            You are a designer.
+            You are using the following colors in the css properties values:
+            ${JSON.stringify(globalTheme)}
+            `
+          }
+        ]
       }
     });
     
