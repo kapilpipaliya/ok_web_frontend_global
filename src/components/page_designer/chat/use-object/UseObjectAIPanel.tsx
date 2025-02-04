@@ -225,11 +225,14 @@ export function UseObjectAIPanel() {
         </Show>
 
         <Show when={isLoading()}>
-          <div class="padding:16px color:rgb(107,114,128)">
-            <div>Loading... (Frames received: {frameCount()})</div>
+          <div class="padding:16px color:rgb(107,114,128) display:flex gap:8px align-items:center">
+            <div class="display:flex align-items:center gap:8px">
+              <div class="width:16px height:16px border-radius:50% border:2px|solid|rgb(59,130,246) border-top-color:transparent @rotate|1s|infinite|linear"></div>
+              <span>AI is thinking...</span>
+            </div>
             <button
               type="button"
-              class="padding:8px|16px margin-top:8px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
+              class="padding:8px|16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255) cursor:pointer"
               onClick={() => stop()}
             >
               Stop

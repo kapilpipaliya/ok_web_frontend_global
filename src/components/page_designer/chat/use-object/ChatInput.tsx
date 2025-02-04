@@ -64,12 +64,12 @@ export function ChatInput(props: ChatInputProps) {
             onChange={props.onInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                if ((e.metaKey || e.ctrlKey) && !props.isLoading()) {
-                  e.preventDefault(); // Prevent default to ensure command+enter works
+                if ((e.metaKey || e.ctrlKey) && !props.isLoading() && (e.target as HTMLTextAreaElement).value.trim()) {
+                  (props.onInputChange as any)(e);
                   handleSubmit(e as any);
                 } else {
                   // Prevent form submission on regular Enter
-                  e.stopPropagation(); 
+                  e.stopPropagation();
                 }
               }
             }}
@@ -88,6 +88,7 @@ export function ChatInput(props: ChatInputProps) {
             disabled={props.isLoading() || !props.input().trim()}
             title="Submit"
             size={22}
+            class="cursor:pointer cursor:not-allowed:disabled"
           />
         </div>
 
@@ -97,7 +98,7 @@ export function ChatInput(props: ChatInputProps) {
             onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
             multiple
             ref={props.fileInputRef}
-            class="flex:1"
+            class="flex:1 cursor:pointer"
           />
           <Show when={props.files()}>
             <IconButton
@@ -113,7 +114,7 @@ export function ChatInput(props: ChatInputProps) {
             />
           </Show>
         </div>
-        
+
         <Show when={props.files()}>
           <div class="display:flex gap:8px margin-bottom:8px">
             <For each={Array.from(props.files()!)}>
