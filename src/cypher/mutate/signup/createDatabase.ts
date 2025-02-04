@@ -1,4 +1,5 @@
 import { auth, driver, type Driver } from "neo4j-driver";
+import { getDriver } from "~/cypher/driver";
 
 export async function createDatabase(
   subdomain: string,
@@ -8,10 +9,7 @@ export async function createDatabase(
   try {
     // Create a new database with the subdomain name
 
-    neo4JDriver = driver(
-      `bolt://localhost:7687`,
-      auth.basic("neo4j", "12345678")
-    );
+    neo4JDriver = await getDriver();
     const session = neo4JDriver.session();
     await session.run(`CREATE DATABASE ${subdomain}`);
     console.log(`Database ${subdomain} created successfully.`);
