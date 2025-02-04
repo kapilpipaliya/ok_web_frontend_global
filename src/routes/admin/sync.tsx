@@ -1,4 +1,5 @@
-import { SyncData } from "~/pages/SyncData";
+import { SyncData } from "~/pages/manage/SyncData";
+
 
 export default function Sync() {
   return <SyncData />;
