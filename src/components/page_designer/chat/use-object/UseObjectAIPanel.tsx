@@ -41,6 +41,7 @@ export function UseObjectAIPanel() {
   const [showExamples, setShowExamples] = createSignal(false);
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   const [frameCount, setFrameCount] = createSignal(0);
+  const [lastRequestPrompt, setLastRequestPrompt] = createSignal<string>('');
 
   let chatHistoryRef: HTMLDivElement | undefined;
   let examplesButtonRef: HTMLButtonElement | undefined;
@@ -113,7 +114,7 @@ export function UseObjectAIPanel() {
       }
 
       const messageData = {
-        prompt: input(),
+        prompt: lastRequestPrompt(),
         response: content,
         data: data,
         timestamp: Date.now(),
@@ -139,6 +140,8 @@ export function UseObjectAIPanel() {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
 
+    setLastRequestPrompt(input());
+
     handleSubmit(e, {
       experimental_attachments: files(),
       body: {
@@ -152,7 +155,7 @@ You are using the following color variable names in the css properties values:
 \`\`\`json
 ${JSON.stringify(globalTheme)}
 \`\`\`
-You should only use the color variable names in the css properties values, not the color values.
+You should only use the color variable names in the css properties values, not the color values. dont specify dark or light colors.
 `.trim()
           }
         ]
