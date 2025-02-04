@@ -34,6 +34,7 @@ export function DropdownMenu(
       flip: props.useFlip ?? true, // Automatically flip the dropdown if it doesn't fit
       offset: props.offset,
       shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
+      size: { matchSize: true, fitViewPort: true },
     }),
     placement: () => props.placement ?? "bottom-start",
     reference: () => props.parentRef ?? null,
@@ -66,6 +67,7 @@ export function DropdownMenu(
           left: `${floatingState().x ?? 0}px`,
           position: strategy(),
           top: `${floatingState().y ?? 0}px`,
+          'max-height': `${floatingState().maxHeight ?? 100}px`,
         }}
         {...rest}
       />
