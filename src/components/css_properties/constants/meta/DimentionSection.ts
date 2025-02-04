@@ -8,7 +8,6 @@ export const DimentionSection = {
   width: createGridOptions("grid", "Dimention", [
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "width",
       label: "Width",
       // type: "number",
@@ -16,7 +15,6 @@ export const DimentionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "min-width",
       label: "Min width",
       // type: "number",
@@ -24,7 +22,6 @@ export const DimentionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "max-width",
       label: "Max width",
       // type: "number",
@@ -35,7 +32,6 @@ export const DimentionSection = {
   height: createGridOptions("grid", "Dimention", [
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "height",
       label: "Height",
       // type: "number",
@@ -43,7 +39,6 @@ export const DimentionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "min-height",
       label: "Min height",
       // type: "number",
@@ -51,7 +46,6 @@ export const DimentionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "max-height",
       label: "Max height",
       // type: "number",

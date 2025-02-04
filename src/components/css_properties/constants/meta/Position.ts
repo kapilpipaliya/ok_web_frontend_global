@@ -10,7 +10,6 @@ export const PositionSection = {
   dimentions: createGridOptions("grid", "Position", [
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "top",
       label: "Top",
       // type: "number",
@@ -18,7 +17,6 @@ export const PositionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "right",
       label: "Right",
       // type: "number",
@@ -26,7 +24,6 @@ export const PositionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "bottom",
       label: "Bottom",
       // type: "number",
@@ -34,7 +31,6 @@ export const PositionSection = {
     } as TextFieldOptionsField,
     {
       componentName: "string",
-      isLabelOnTop: true,
       key: "left",
       label: "Left",
       // type: "number",
