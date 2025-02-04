@@ -1,35 +1,22 @@
-import { experimental_useObject as useObject } from '@ai-sdk/solid';
-import { graphInterfaceSchema } from '../../../../routes/api/use-object/schema';
 import { createMemo, createSignal, For, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
-import { GraphInterface, Id, useGraph, Vertex } from '~/lib/graph/graph';
-import { createStore, SetStoreFunction, Store } from 'solid-js/store';
-import { object } from 'zod';
-import { v7 as uuidv7 } from 'uuid';
-import PageView from '~/components/page_attr_render/PageView';
-import { DesignerFormIdContext, PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
+import { Id, useGraph, Vertex } from '~/lib/graph/graph';
+import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
 import { Preview } from './Preview';
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
 import { deleteRow } from '~/lib/graph/mutate/deleteRow';
 import { evalExpression } from '~/lib/expression_eval';
 import { useChat } from '@ai-sdk/solid';
-import { getTextFromDataUrl } from '@ai-sdk/ui-utils';
-
-interface Message {
-  prompt: string;
-  response: string;
-  timestamp?: number;
-  attachments?: File[];
-}
+import { ChatMessage } from './ChatMessage';
+import { ChatResponse } from './ChatResponse';
+import { ChatInput } from './ChatInput';
+import { Message } from './types';
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -42,14 +29,14 @@ export function UseObjectAIPanel() {
     const mainPanelId = layoutStoreVertex().P.mainPanel[0];
     return layoutStoreVertex().P[`mainPanel${mainPanelId}Tab`] as Id | null;
   };
+
   const formStoreVertex = () => formStoreId() ? graph.vertexes[formStoreId()!] as Vertex<FormStoreObject> : undefined;
 
   const messages = createMemo(() => {
     const formDataVertex = formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex()!.P.formDataId!] : undefined;
     if (!formDataVertex) return [];
     
-    const chatHistory = evalExpression("->ChatHistory", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || []
-
+    const chatHistory = evalExpression("->ChatHistory", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || [];
     return chatHistory.sort((a, b) => ((a.P?.timestamp || 0) - (b.P?.timestamp || 0))) as Vertex<Message>[];
   });
 
@@ -77,53 +64,58 @@ export function UseObjectAIPanel() {
     "Create a portfolio grid with filtering options"
   ];
 
+  const handleMessageSave = (messageData: Message) => {
+    if (!formStoreVertex()) return;
+
+    insertNewRow(
+      newTxnId, // formStoreVertex()!.P.txnId,
+      {P: {type: "ChatHistory"}} as unknown as Vertex,
+      graph.vertexes[formStoreVertex()!.P.formDataId!],
+      false,
+      graph,
+      setGraph,
+      messageData
+    );
+
+    setFiles(undefined);
+    if (fileInputRef) {
+      fileInputRef.value = '';
+    }
+    setFrameCount(0);
+
+    setTimeout(() => {
+      if (chatHistoryRef) {
+        chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+      }
+    }, 0);
+  };
+
   const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload } = useChat({
     onResponse(response) {
       setFrameCount(prev => prev + 1);
     },
     onFinish(message, { usage, finishReason }) {
-      if (formStoreVertex()) {
-        const messageData = {
-          prompt: input(),
-          response: (() => {
-            try {
-              return JSON.stringify(JSON.parse(message.content));
-            } catch {
-              return JSON.stringify({});
-            }
-          })(),
-          timestamp: Date.now(),
-          attachments: files() ? Array.from(files()!) : undefined
-        } as Message;
-        
-        insertNewRow(
-          newTxnId, // formStoreVertex()!.P.txnId,
-          {P: {type: "ChatHistory"}} as unknown as Vertex,
-          graph.vertexes[formStoreVertex()!.P.formDataId!],
-          false,
-          graph,
-          setGraph,
-          messageData
-        );
-
-        setFiles(undefined);
-        if (fileInputRef) {
-          fileInputRef.value = '';
-        }
-        setFrameCount(0);
-
-        setTimeout(() => {
-          if (chatHistoryRef) {
-            chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+      const messageData = {
+        prompt: input(),
+        response: (() => {
+          try {
+            return JSON.stringify(JSON.parse(message.content));
+          } catch {
+            return JSON.stringify({});
           }
-        }, 0);
-      }
+        })(),
+        timestamp: Date.now(),
+        attachments: files() ? Array.from(files()!) : undefined
+      } as Message;
+      
+      handleMessageSave(messageData);
     },
   });
 
   const handleSubmit2 = (e: SubmitEvent) => {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
+    
     handleSubmit(e, {
       experimental_attachments: files()
     });
@@ -136,22 +128,13 @@ export function UseObjectAIPanel() {
   };
 
   const handleInsert = (message: Vertex) => {
-    const formVertex = graph.vertexes[layoutStoreId];
     const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
-    if (!fromStoreVertex) {
+    if (!fromStoreVertex || layoutStoreVertex()?.P.formId === `${message.id}FormStore` || !layoutStoreVertex()?.P.formId) {
       return;
     }
-    if (layoutStoreVertex()?.P.formId === `${message.id}FormStore`) {
-      return;
-    }
-    if (!layoutStoreVertex()?.P.formId) {
-      return;
-    }
+
     const toStoreVertex = graph.vertexes[layoutStoreVertex().P.formId!] as Vertex<FormStoreObject>;
-    if (!toStoreVertex) {
-      return;
-    }
-    if (!graph.vertexes[toStoreVertex.P.selectedId!]) {
+    if (!toStoreVertex || !graph.vertexes[toStoreVertex.P.selectedId!]) {
       return;
     }
 
@@ -177,89 +160,26 @@ export function UseObjectAIPanel() {
   };
 
   const handleExampleClick = (example: string) => {
+    // @ts-expect-error ignore error
     handleInputChange({ target: { value: example } });
     setShowExamples(false);
   };
+
   return (
     <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
       <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
         <For each={messages()}>
           {(message) => (
             <div class="margin-bottom:24px">
-              <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
-                <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
-                  <div class="display:flex gap:8px align-items:center">
-                    <span>Prompt</span>
-                    {message.P?.timestamp && (
-                      <span class="font-size:12px color:rgb(107,114,128)">
-                        {new Date(message.P.timestamp).toLocaleTimeString()}
-                      </span>
-                    )}
-                  </div>
-                  <IconButton
-                      icon="ph:trash"
-                      class={`${headerIconButtonClass} color:rgb(239,68,68)`}
-                      onClick={() => handleDelete(message)}
-                      title="Delete"
-                    />
-                </div>
-                <div>{message.P?.prompt}</div>
-                <Show when={message.P?.attachments?.length}>
-                  <div class="display:flex gap:8px margin-top:8px">
-                    <For each={message.P?.attachments}>
-                      {file => (
-                        <Show when={file.type.startsWith('image/')}>
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            class="width:64px height:64px object-fit:cover border-radius:4px"
-                          />
-                        </Show>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-              </div>
-              <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
-                <div class="font-weight:500 margin-bottom:4px">Response:</div>
-                <div class="white-space:pre-wrap">{JSON.stringify(JSON.parse(message.P.response), null, 2)}</div>
-
-                <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
-                  <div class="font-weight:500 margin-bottom:8px">Preview:</div>
-                  <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-                    <Preview object={JSON.parse(message.P.response)} formId={`${message.id}FormStore`} />
-                  </div>
-
-                  <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
-                    <div class="display:flex gap:8px">
-                      <select
-                        class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-                        value={insertMode()}
-                        onChange={(e) => setInsertMode(e.currentTarget.value as any)}
-                      >
-                        <option value="before">Insert Before</option>
-                        <option value="after">Insert After</option>
-                        <option value="center">Insert Into</option>
-                      </select>
-
-                      <IconButton
-                        icon="ph:plus-circle"
-                        class={`${headerIconButtonClass}`}
-                        onClick={() => handleInsert(message)}
-                        title="Insert"
-                        disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
-                      />
-                    </div>
-
-                    <IconButton
-                      icon="ph:trash"
-                      class={`${headerIconButtonClass} color:rgb(239,68,68)`}
-                      onClick={() => handleDelete(message)}
-                      title="Delete"
-                    />
-                  </div>
-                </div>
-              </div>
+              <ChatMessage message={message} onDelete={handleDelete} />
+              <ChatResponse
+                message={message}
+                insertMode={insertMode}
+                setInsertMode={setInsertMode}
+                onInsert={handleInsert}
+                onDelete={handleDelete}
+                disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
+              />
             </div>
           )}
         </For>
@@ -291,91 +211,20 @@ export function UseObjectAIPanel() {
         </Show>
       </div>
 
-      <form
+      <ChatInput
+        input={input}
+        isLoading={isLoading}
+        files={files}
+        showExamples={showExamples}
+        examples={examples}
         onSubmit={handleSubmit2}
-        class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
-      >
-        <div class="display:flex flex-direction:column gap:8px">
-          <div class="display:flex gap:8px">
-            <input
-              type="file"
-              onChange={e => setFiles(e.currentTarget.files ?? undefined)}
-              multiple
-              ref={fileInputRef}
-              class="flex:1"
-            />
-          </div>
-          
-          <div class="display:flex gap:8px">
-            <Show when={files()}>
-              <div class="display:flex gap:8px margin-bottom:8px">
-                <For each={Array.from(files()!)}>
-                  {file => (
-                    <Show when={file.type.startsWith('image/')}>
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        class="width:48px height:48px object-fit:cover border-radius:4px"
-                      />
-                    </Show>
-                  )}
-                </For>
-              </div>
-            </Show>
-          </div>
-
-          <div class="display:flex gap:8px">
-            <input
-              class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed"
-              value={input()}
-              disabled={isLoading()}
-              placeholder="Generate a page... (Press Cmd+Enter to submit)"
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isLoading()) {
-                  handleSubmit(e);
-                }
-              }}
-            />
-            <IconButton
-              icon="ph:list"
-              onClick={() => setShowExamples(!showExamples())}
-              disabled={isLoading()}
-              ref={examplesButtonRef}
-              title="Show Examples"
-              size={22}
-            />
-            <IconButton
-              type="submit"
-              icon="ph:paper-plane-right"
-              disabled={isLoading() || !input().trim()}
-              title="Submit"
-              size={22}
-            />
-          </div>
-          <Show when={showExamples()}>
-            <DropdownMenu
-              parentRef={examplesButtonRef!}
-              onClickOutside={() => setShowExamples(false)}
-              onMouseLeave={() => setShowExamples(false)}
-            >
-              <div class="display:flex flex-direction:column gap:4px padding:8px">
-                <For each={examples}>
-                  {example => (
-                    <button
-                      type="button"
-                      class="text-align:left padding:8px background:rgb(243,244,246) border-radius:6px hover:background:rgb(229,231,235)"
-                      onClick={() => handleExampleClick(example)}
-                    >
-                      {example}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </DropdownMenu>
-          </Show>
-        </div>
-      </form>
+        onInputChange={handleInputChange}
+        onFilesChange={(files) => setFiles(files)}
+        onExamplesToggle={setShowExamples}
+        onExampleClick={handleExampleClick}
+        fileInputRef={fileInputRef}
+        examplesButtonRef={examplesButtonRef}
+      />
     </div>
   );
 }
