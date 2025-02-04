@@ -44,7 +44,7 @@ export function getComponentTree(): ComponentNode[] {
   - Match
   - ComponentChildren
   - Transition
-  - TransitionGroups
+  - TransitionGroup
 `
 
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
