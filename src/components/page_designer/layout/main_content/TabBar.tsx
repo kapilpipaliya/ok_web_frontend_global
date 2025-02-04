@@ -69,6 +69,16 @@ export function TabBar(props: {mainPanel: Id}) {
     mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: null });
   };
 
+  const moveFormsToPanel = (fromPanelId: Id, toPanelId: Id) => {
+    const formsToMove = layoutStore().openedFormIds.filter(id => 
+      graph.vertexes[id].P.mainPanel === fromPanelId
+    );
+    
+    for (const formId of formsToMove) {
+      mergeVertexProperties(0, formId, graph, setGraph, { mainPanel: toPanelId });
+    }
+  };
+
   return (
     <div class="display:flex gap:5px padding:5px border-bottom:1px|solid|#ccc bg:#f5f5f5"
     onDragOver={(e) => e.preventDefault()}
@@ -125,10 +135,20 @@ export function TabBar(props: {mainPanel: Id}) {
           </div>
         )}
       </For>
-      <Show when={props.mainPanel !== layoutStore().mainPanel[0]}>
+      <Show when={layoutStore().mainPanel.length > 1}>
         <IconButton
           icon="ph:x-circle"
+          class="ml:auto"
           onClick={() => {
+            const panelIndex = layoutStore().mainPanel.indexOf(props.mainPanel);
+            const previousPanelId = layoutStore().mainPanel[panelIndex - 1];
+            const nextPanelId = layoutStore().mainPanel[panelIndex + 1];
+            const targetPanelId = previousPanelId || nextPanelId;
+            
+            // Move all forms from current panel to target panel
+            moveFormsToPanel(props.mainPanel, targetPanelId);
+            
+            // Remove the current panel
             mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
               mainPanel: layoutStore().mainPanel.filter(id => id !== props.mainPanel)
             });
