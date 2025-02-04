@@ -90,7 +90,7 @@ export function UseObjectAIPanel() {
     }, 0);
   };
 
-  const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload } = useChat({
+  const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload, setMessages } = useChat({
     onResponse(response) {
       setFrameCount(prev => prev + 1);
     },
@@ -269,6 +269,8 @@ You should only use the color variable names in the css properties values, not t
         onExampleClick={handleExampleClick}
         fileInputRef={fileInputRef}
         examplesButtonRef={examplesButtonRef}
+        chatMessages={chatMessages()}
+        onClearMessages={() => setMessages([])}
       />
     </div>
   );

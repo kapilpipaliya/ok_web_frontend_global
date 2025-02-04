@@ -1,7 +1,7 @@
 import { GraphInterface, Vertex, GlobalProperties, Id } from "~/lib/graph/graph";
 
 export function getGlobalStore(graph: GraphInterface) {
-  return graph.vertexes["globalStoreId"] as Vertex<GlobalProperties> ?? { P: {} } as Vertex;
+  return graph.vertexes["globalStoreId"] as Vertex<GlobalProperties> ?? { P: {} } as Vertex<GlobalProperties>;
 }
 
 export function getVertexOldIdToNewIdMap(graph: GraphInterface) {

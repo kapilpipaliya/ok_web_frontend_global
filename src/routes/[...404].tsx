@@ -5,7 +5,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export default function Notfound() {
   return (
     <GetInitialData>
-      <AuthenticateUser>
+      <AuthenticateUser dontRedirectToLogin={true}>
         <PageViewWrapper
           pageId={""}
           pageVertexLabel={"Page"}

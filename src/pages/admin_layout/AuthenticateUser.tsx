@@ -8,6 +8,7 @@ import { useGraph } from "~/lib/graph/graph";
 
 import { loadUser } from "../../lib/graph/mutate/loadUser";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface AuthenticateUserProps {
   children: JSX.Element;
@@ -30,6 +31,7 @@ export function AuthenticateUser(props: Readonly<AuthenticateUserProps>) {
 
   return (
     <Switch>
+      <Match when={props.dontRedirectToLogin && getGlobalStore(graph)?.P.userRoles}>{props.children}</Match>
       <Match when={!getMemberVertex(graph)?.id}>Loading</Match>
       <Match when={getMemberVertex(graph)?.id}>{props.children}</Match>
     </Switch>

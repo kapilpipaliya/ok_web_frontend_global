@@ -10,6 +10,7 @@ import { PageViewWrapper } from '~/pages/PageViewWrapper';
 import { graphInterfaceSchema } from '~/routes/api/use-object/schema';
 import { IFramePreview } from '../../layout/IFramePreview';
 import { z } from 'zod';
+import { IconButton } from '~/components/styled/IconButton';
 
 
 export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; formId: string; }) {
@@ -17,6 +18,14 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   const metaTxnId = generateNewTxnId(graph, setGraph);
   // Store vertex IDs with no parents
   const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
+  const [isPreview, setIsPreview] = createSignal(true);
+
+  const handleRefresh = () => {
+    setIsPreview(false);
+    setTimeout(() => {
+      setIsPreview(true);
+    }, 100);
+  };
 
   // Add all vertices with new IDs
   const vertexIdMap = new Map<string, string>();
@@ -103,7 +112,14 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
     </div>
 
     <Show when={graph.vertexes[props.formId]}>
-      <IFramePreview formStoreId={props.formId} noMinHeight />
+        <IconButton
+          icon="ph:arrows-clockwise"
+          onClick={handleRefresh}
+          class="bg:transparent hover:bg:neutral-100 p:4 r:4"
+        />
+        <Show when={isPreview()}>
+          <IFramePreview formStoreId={props.formId} noMinHeight />
+        </Show>
     </Show>
   </>;
 }

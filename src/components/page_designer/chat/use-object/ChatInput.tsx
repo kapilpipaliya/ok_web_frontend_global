@@ -15,6 +15,8 @@ interface ChatInputProps {
   onExampleClick: (example: string) => void;
   fileInputRef: HTMLInputElement | undefined;
   examplesButtonRef: HTMLButtonElement | undefined;
+  chatMessages: any[];
+  onClearMessages: () => void;
 }
 
 export function ChatInput(props: ChatInputProps) {
@@ -87,6 +89,14 @@ export function ChatInput(props: ChatInputProps) {
             icon="ph:paper-plane-right"
             disabled={props.isLoading() || !props.input().trim()}
             title="Submit"
+            size={22}
+            class="cursor:pointer cursor:not-allowed:disabled"
+          />
+          <IconButton
+            icon="ph:trash"
+            onClick={props.onClearMessages}
+            disabled={props.chatMessages.length === 0}
+            title="Clear Messages"
             size={22}
             class="cursor:pointer cursor:not-allowed:disabled"
           />

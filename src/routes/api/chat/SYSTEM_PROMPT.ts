@@ -169,6 +169,7 @@ Styling System:
       type: string;
       value: string;
     }
+  - we are using Master CSS https://rc.css.master.co/ with full css property names, dont use short names like 'bg' or 'fg' use 'background-color' or 'color' instead.
   
 
 Reusable Components:
