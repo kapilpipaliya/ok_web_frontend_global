@@ -7,12 +7,12 @@ import { SYSTEM_PROMPT } from './SYSTEM_PROMPT';
 export const maxDuration = 30;
 
 export const POST = async (event: APIEvent) => {
-  // Extract the messages from the body of the request
-  const { messages } = await event.request.json();
+  // Extract the messages and model from the body of the request
+  const { messages, model } = await event.request.json();
 
   // Call the language model with streaming
   const result = streamText({
-    model: openai('gpt-4-turbo'),
+    model: openai(model || 'gpt-4-turbo'),
     messages: [
       {
         role: 'system',

@@ -1,4 +1,4 @@
-import { Show, For, JSX } from 'solid-js';
+import { Show, For, JSX, createSignal } from 'solid-js';
 import { IconButton } from '~/components/styled/IconButton';
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
 
@@ -8,7 +8,7 @@ interface ChatInputProps {
   files: () => FileList | undefined;
   showExamples: () => boolean;
   examples: string[];
-  onSubmit: (e: SubmitEvent) => void;
+  onSubmit: (e: SubmitEvent, model: string) => void;
   onInputChange: JSX.ChangeEventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, Event>;
   onFilesChange: (files: FileList | undefined) => void;
   onExamplesToggle: (show: boolean) => void;
@@ -18,9 +18,27 @@ interface ChatInputProps {
 }
 
 export function ChatInput(props: ChatInputProps) {
+  const [selectedModel, setSelectedModel] = createSignal<string>('gpt-4-turbo');
+
+  const models: string[] = [
+    'o1',
+    'o1-mini',
+    'o1-preview',
+    'gpt-4o',
+    'gpt-4o-mini',
+    'gpt-4-turbo',
+    'gpt-4',
+    'gpt-3.5-turbo'
+  ];
+
+  const handleSubmit = (e: SubmitEvent) => {
+    e.preventDefault();
+    props.onSubmit(e, selectedModel());
+  };
+
   return (
     <form
-      onSubmit={props.onSubmit}
+      onSubmit={handleSubmit}
       class="padding:16px background:white border-top:1px|solid|rgb(229,231,235)"
     >
       <div class="display:flex flex-direction:column gap:8px">
@@ -51,6 +69,19 @@ export function ChatInput(props: ChatInputProps) {
         </Show>
 
         <div class="display:flex gap:8px">
+          <select
+            value={selectedModel()}
+            onChange={(e) => setSelectedModel(e.currentTarget.value)}
+            class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
+            disabled={props.isLoading()}
+          >
+            <For each={models}>
+              {model => (
+                <option value={model}>{model}</option>
+              )}
+            </For>
+          </select>
+          
           <input
             class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed"
             value={props.input()}
@@ -59,7 +90,7 @@ export function ChatInput(props: ChatInputProps) {
             onChange={props.onInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !props.isLoading()) {
-                props.onSubmit(e as any);
+                handleSubmit(e as any);
               }
             }}
           />

@@ -112,12 +112,15 @@ export function UseObjectAIPanel() {
     },
   });
 
-  const handleSubmit2 = (e: SubmitEvent) => {
+  const handleSubmit2 = (e: SubmitEvent, model: string) => {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
     
     handleSubmit(e, {
-      experimental_attachments: files()
+      experimental_attachments: files(),
+      body: {
+        model: model
+      }
     });
     
     setTimeout(() => {
