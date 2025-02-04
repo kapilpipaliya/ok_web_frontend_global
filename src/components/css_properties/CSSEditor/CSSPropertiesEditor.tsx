@@ -24,7 +24,7 @@ import { ResetButton } from "./ResetButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
-const defaultStateLabel = "Default State";
+const defaultStateLabel = "Default";
 
 function getOptions(cssState: CSSStore) {
   const pseudoClasses = [

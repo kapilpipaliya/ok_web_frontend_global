@@ -20,7 +20,7 @@ export function UseObjectAIPanel() {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const newTxnId = generateNewTxnId(graph, setGraph);
-  
+
   // Get the first mainPanel's formId and formStore
   const formStoreId = () => {
     const mainPanelId = layoutStoreVertex().P.mainPanel[0];
@@ -32,7 +32,7 @@ export function UseObjectAIPanel() {
   const messages = createMemo(() => {
     const formDataVertex = formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex()!.P.formDataId!] : undefined;
     if (!formDataVertex) return [];
-    
+
     const chatHistory = evalExpression("->ChatHistory", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || [];
     return chatHistory.sort((a, b) => ((a.P?.timestamp || 0) - (b.P?.timestamp || 0))) as Vertex<Message>[];
   });
@@ -68,7 +68,7 @@ export function UseObjectAIPanel() {
 
     insertNewRow(
       newTxnId, // formStoreVertex()!.P.txnId,
-      {P: {type: "ChatHistory"}} as unknown as Vertex,
+      { P: { type: "ChatHistory" } } as unknown as Vertex,
       graph.vertexes[formStoreVertex()!.P.formDataId!],
       false,
       graph,
@@ -119,10 +119,10 @@ export function UseObjectAIPanel() {
         timestamp: Date.now(),
         attachments: files() ? Array.from(files()!) : undefined
       } as Message;
-      
+
       handleMessageSave(messageData);
       setFrameCount(0);
-      
+
       if (!error()) {
         // clear input and files on successful completion
         // @ts-expect-error ignore error
@@ -138,7 +138,7 @@ export function UseObjectAIPanel() {
   const handleSubmit2 = (e: SubmitEvent, model: string) => {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
-    
+
     handleSubmit(e, {
       experimental_attachments: files(),
       body: {
@@ -147,15 +147,18 @@ export function UseObjectAIPanel() {
           {
             role: 'system',
             content: `
-            You are a designer.
-            You are using the following colors in the css properties values:
-            ${JSON.stringify(globalTheme)}
-            `
+You are a designer.
+You are using the following color variable names in the css properties values:
+\`\`\`json
+${JSON.stringify(globalTheme)}
+\`\`\`
+You should only use the color variable names in the css properties values, not the color values.
+`.trim()
           }
         ]
       }
     });
-    
+
     setTimeout(() => {
       if (chatHistoryRef) {
         chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
