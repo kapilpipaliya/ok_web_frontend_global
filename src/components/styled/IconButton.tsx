@@ -6,7 +6,6 @@ export interface IconButtonProps
   iconClass?: string;
   iconClassList?: { [k: string]: boolean | undefined };
   noCenter?: boolean;
-  ref?: (element: HTMLButtonElement) => void;
   size?: number | string;
 }
 

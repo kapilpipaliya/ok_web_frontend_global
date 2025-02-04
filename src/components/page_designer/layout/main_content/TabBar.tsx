@@ -6,6 +6,7 @@ import { mergeVertexProperties, deleteVertex } from "~/lib/graph/mutate/vertex";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { v7 as uuidv7 } from "uuid";
+import { IconButton } from "~/components/styled/IconButton";
 
 export function TabBar(props: {mainPanel: Id}) {
   const [graph, setGraph] = useGraph();
@@ -73,7 +74,12 @@ export function TabBar(props: {mainPanel: Id}) {
     onDragOver={(e) => e.preventDefault()}
     onDrop={() => moveTab(props.mainPanel)}
     >
-      <button onClick={addMainPanel}>Add Main Panel</button>
+      <IconButton
+        icon="ph:plus-circle"
+        onClick={addMainPanel}
+        title="Add New Panel"
+        size={22}
+      />
       <For each={layoutStore().openedFormIds.filter(id => graph.vertexes[id].P.mainPanel === props.mainPanel)}>
         {(openedFormId, index) => (
           <div
@@ -88,8 +94,8 @@ export function TabBar(props: {mainPanel: Id}) {
               {graph.vertexes[openedFormId].P.label}
               {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
             </span>
-            <button
-              class="background:none border:none cursor:pointer font-size:14px padding:2px"
+            <IconButton
+              icon="ph:plus"
               onClick={() => {
                 const newView = createViewVertex({ view: "Mobile" }, graph, setGraph);
                 mergeVertexProperties<FormStoreObject>(
@@ -102,23 +108,35 @@ export function TabBar(props: {mainPanel: Id}) {
                   }
                 );
               }}
-            >
-              +
-            </button>
+              size={16}
+              title="Add View"
+            />
             <Show when={index() !== 0}>
-              <button
-                class="background:none border:none cursor:pointer font-size:14px padding:2px"
+              <IconButton
+                icon="ph:x"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleClose(openedFormId);
                 }}
-              >
-                ×
-              </button>
+                size={16}
+                title="Close Tab"
+              />
             </Show>
           </div>
         )}
       </For>
+      <Show when={props.mainPanel !== layoutStore().mainPanel[0]}>
+        <IconButton
+          icon="ph:x-circle"
+          onClick={() => {
+            mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+              mainPanel: layoutStore().mainPanel.filter(id => id !== props.mainPanel)
+            });
+          }}
+          title="Close Panel"
+          size={22}
+        />
+      </Show>
     </div>
   );
 }

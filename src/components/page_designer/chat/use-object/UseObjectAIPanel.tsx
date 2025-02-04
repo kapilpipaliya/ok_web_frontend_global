@@ -60,7 +60,16 @@ export function UseObjectAIPanel() {
   const examples = [
     "Generate a responsive navigation bar with logo and menu items",
     "Create a hero section with image, heading and call-to-action button",
-    "Design a contact form with name, email and message fields"
+    "Design a contact form with name, email and message fields",
+    "Create a pricing table with multiple tiers",
+    "Generate a footer with social media links and company info",
+    "Create a testimonials section with customer reviews",
+    "Design a product gallery with grid layout",
+    "Generate a FAQ accordion section",
+    "Create a blog post layout with featured image",
+    "Design a team members showcase section",
+    "Generate a services showcase with icons",
+    "Create a portfolio grid with filtering options"
   ];
 
   const { submit, isLoading, object, stop, error } = useObject({
@@ -262,15 +271,14 @@ export function UseObjectAIPanel() {
                 }
               }}
             />
-            <button
-              type="button"
-              class="padding:8px|16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
+            <IconButton
+              icon="ph:list"
               onClick={() => setShowExamples(!showExamples())}
               disabled={isLoading()}
               ref={examplesButtonRef}
-            >
-              Examples
-            </button>
+              title="Show Examples"
+              size={22}
+            />
           </div>
           <Show when={showExamples()}>
             <DropdownMenu

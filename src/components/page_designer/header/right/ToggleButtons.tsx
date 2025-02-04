@@ -14,6 +14,19 @@ export function ToggleButtons() {
     });
   };
 
+  const resetLayout = () => {
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      isLeftOpen: true,
+      isRight0Open: true,
+      isRight1Open: true,
+      isRight2Open: true,
+      leftWidth: 300,
+      rightWidth0: 300,
+      rightWidth1: 300,
+      rightWidth2: 300,
+    });
+  };
+
   return (
     <div class="flex ai:center gap:2 mr:3">
       <IconButton
@@ -44,6 +57,12 @@ export function ToggleButtons() {
         onClick={() => togglePanel('isRight2Open')}
         size={22}
         title="Toggle Settings Panel" />
+      <IconButton
+        icon="ph:arrows-counter-clockwise"
+        onClick={resetLayout}
+        size={22}
+        title="Reset Layout"
+      />
     </div>
   );
 }

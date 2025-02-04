@@ -14,7 +14,7 @@ import { IconButton } from "./IconButton";
 export const DIMENSIONS = {
   mobile: { id: "mobile", height: "570px", width: "360px", icon: "ph:device-mobile" },
   tablet: { id: "tablet", height: "1026px", width: "768px", icon: "ph:device-tablet" },
-  desktop: { id: "desktop", height: "1200px", width: "1200px", icon: "ph:desktop" },
+  desktop: { id: "desktop", height: "1200px", width: "1000px", icon: "ph:desktop" },
 };
 
 export function ResizableContainer(
@@ -50,7 +50,7 @@ export function ResizableContainer(
     }
   });
 
-  const handleMouseDown = (e: MouseEvent, direction: "horizontal" | "vertical") => {
+  const handlePointerDown = (e: PointerEvent, direction: "horizontal" | "vertical") => {
     e.preventDefault();
     const container = containerRef();
     if (!container) return;
@@ -61,7 +61,7 @@ export function ResizableContainer(
     const startX = e.clientX;
     const startY = e.clientY;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       if (!resizing()) return;
       
       if (direction === "horizontal") {
@@ -73,14 +73,16 @@ export function ResizableContainer(
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setResizing(false);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
   };
 
   const handleDragOver = (e: DragEvent) => {
@@ -122,12 +124,12 @@ export function ResizableContainer(
       >
         <div
           style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
-          onMouseDown={(e) => handleMouseDown(e, "horizontal")}
+          onPointerDown={(e) => handlePointerDown(e, "horizontal")}
         />
         {props.children}
         <div
           style={`width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
-          onMouseDown={(e) => handleMouseDown(e, "vertical")}
+          onPointerDown={(e) => handlePointerDown(e, "vertical")}
         />
       </div>
 

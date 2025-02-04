@@ -18,16 +18,16 @@ export function FormElementsWrapper() {
 
   return (
     <aside
-      class={"rel"}
-      classList={{
-        hidden: !layoutStore().isLeftOpen,
-      }}
+      // class={"rel"}
+      // classList={{
+      //   hidden: !layoutStore().isLeftOpen,
+      // }}
     >
-      <ZIndex>
+      {/* <ZIndex>
         <CloseIconTopRight
           onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isLeftOpen: false })}
         />
-      </ZIndex>
+      </ZIndex> */}
       <div
         class={`scrollbar-color:lightgrey flex {scrollbar-width:thin} border:1px|solid|lightgrey flex:column h:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5 r:5|5|5|5`}
       >

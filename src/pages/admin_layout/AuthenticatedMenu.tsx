@@ -44,7 +44,7 @@ export function AuthenticatedMenu(
       <hr class="color:rgb(223,223,223)" />
       <li class="m:5|10 mt:5px">
         <a
-          class="flex ai:center color:#333 cursor:default p:10px|7px r:5|5|5|5 text-decoration:none"
+            class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none cursor:pointer"
           onclick={async () => {
             props.onClose();
             mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { isLoadingPage: true });
