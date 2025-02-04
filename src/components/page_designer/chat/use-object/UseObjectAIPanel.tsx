@@ -95,20 +95,34 @@ export function UseObjectAIPanel() {
       setFrameCount(prev => prev + 1);
     },
     onFinish(message, { usage, finishReason }) {
+      const content = message.content;
+      let data: any = undefined;
+
+      // Try to parse the entire content as JSON first
+      try {
+        data = JSON.stringify(JSON.parse(content));
+      } catch {
+        // If that fails, try to find JSON code block
+        const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+          try {
+            data = JSON.stringify(JSON.parse(jsonMatch[1]));
+          } catch {
+            // If JSON parsing fails, leave data as undefined
+          }
+        }
+      }
+
       const messageData = {
         prompt: input(),
-        response: (() => {
-          try {
-            return JSON.stringify(JSON.parse(message.content));
-          } catch {
-            return JSON.stringify({});
-          }
-        })(),
+        response: content,
+        data: data,
         timestamp: Date.now(),
         attachments: files() ? Array.from(files()!) : undefined
       } as Message;
       
       handleMessageSave(messageData);
+      setFrameCount(0);
     },
   });
 

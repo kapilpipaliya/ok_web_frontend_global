@@ -18,12 +18,15 @@ export function ChatResponse(props: ChatResponseProps) {
   return (
     <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
       <div class="font-weight:500 margin-bottom:4px">Response:</div>
-      <div class="white-space:pre-wrap">{JSON.stringify(JSON.parse(props.message.P.response), null, 2)}</div>
+      <div class="white-space:pre-wrap">{props.message.P.response}</div>
 
       <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
         <div class="font-weight:500 margin-bottom:8px">Preview:</div>
         <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-          <Preview object={JSON.parse(props.message.P.response)} formId={`${props.message.id}FormStore`} />
+          <Preview 
+            object={JSON.parse(props.message.P.data || '{}')} 
+            formId={`${props.message.id}FormStore`} 
+          />
         </div>
 
         <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
