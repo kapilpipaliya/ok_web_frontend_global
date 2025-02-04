@@ -5,7 +5,7 @@ import { boltPort } from "./boltConstant";
 export async function getDriver() {
   return createDriver(
     `bolt://localhost:${boltPort}`,
-     auth.basic("neo4j", "12345678"),
+     auth.basic("neo4j", "Kapil@1234"),
     { disableLosslessIntegers: true }, // undefined
   );
 }
