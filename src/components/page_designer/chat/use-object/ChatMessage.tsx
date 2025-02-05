@@ -29,6 +29,8 @@ export function ChatMessage(props: ChatMessageProps) {
         />
       </div>
       <div>{props.message.P?.prompt}</div>
+      {/* Commenting out file attachments for now
+      // The file handling functionality can be revisited later when we have a proper solution for file storage.
       <Show when={props.message.P?.attachments?.length}>
         <div class="display:flex gap:8px margin-top:8px">
           <For each={props.message.P?.attachments}>
@@ -44,6 +46,7 @@ export function ChatMessage(props: ChatMessageProps) {
           </For>
         </div>
       </Show>
+      */}
     </div>
   );
 } 

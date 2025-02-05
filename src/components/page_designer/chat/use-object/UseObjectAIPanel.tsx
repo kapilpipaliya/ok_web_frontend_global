@@ -60,12 +60,17 @@ export function UseObjectAIPanel() {
         }
       }
 
+      // Create content preview from first 100 characters
+      const contentPreview = content.slice(0, 100) + (content.length > 100 ? '...' : '');
+
       const messageData = {
         prompt: lastRequestPrompt(),
         response: content,
         data: data,
         timestamp: Date.now(),
-        attachments: files() ? Array.from(files()!) : undefined
+        contentPreview,
+        // Removing attachments from DB storage
+        // attachments: files() ? Array.from(files()!) : undefined
       } as DBMessage;
 
       if (!formStoreVertex()) return;
