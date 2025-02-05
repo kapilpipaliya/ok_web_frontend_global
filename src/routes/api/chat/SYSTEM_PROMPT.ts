@@ -5,7 +5,7 @@ export const SYSTEM_PROMPT = `You are tasked with generating a graph JSON that f
   vertexes: [
     {
       id: string, // Unique identifier for the vertex
-      L: string[], // Labels/types associated with the vertex
+      L: string, // Label associated with the vertex
       P: object // Properties associated with the vertex
     }
   ],
@@ -175,14 +175,14 @@ Styling System:
 Reusable Components:
 - Can have variants and internal structure
 1. Create vertex with "Component" label
-2. Define variants:
+2. Add variants to the component:
   - Add "ComponentVariant" vertices
   - Connect with "ComponentVariant" edge
   - Specify key, type, defValue properties:
     - key: string - name of the variant
     - type: string - The data type ('string', 'number', 'boolean', 'array', 'object', etc)
     - defValue?: any - default value of the variant
-3. Add variant options:
+3. Add variant options to the variant:
   - Create "ComponentVariantOption" vertices
   - Connect with "ComponentVariantOption" edge
   - Specify key, value, description properties:

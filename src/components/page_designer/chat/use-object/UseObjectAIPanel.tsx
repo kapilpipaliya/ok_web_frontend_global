@@ -1,20 +1,23 @@
 import { createMemo, createSignal, For, Show } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
-import { Id, useGraph, Vertex } from '~/lib/graph/graph';
+import { GraphInterface, Id, useGraph, Vertex } from '~/lib/graph/graph';
 import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { handleDropAtPosition } from '../../functions/handleDropAtPosition';
 import { FormStoreObject } from '~/components/form/context/FormContext';
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
 import { deleteRow } from '~/lib/graph/mutate/deleteRow';
-import { evalExpression } from '~/lib/expression_eval';
 import { useChat } from '@ai-sdk/solid';
 import { ChatMessage } from './ChatMessage';
 import { ChatResponse } from './ChatResponse';
 import { ChatInput } from './ChatInput';
 import { Message } from './types';
 import { themeConfig } from '~/cypher/get/themeConfig';
+import { SetStoreFunction } from 'solid-js/store';
+import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
+import { getChatHistory } from './functions/getChatHistory';
+import { insertAtPosition } from './functions/insertAtPosition';
 
+// Get the first mainPanel's formId and formStore
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
@@ -28,14 +31,7 @@ export function UseObjectAIPanel() {
   };
 
   const formStoreVertex = () => formStoreId() ? graph.vertexes[formStoreId()!] as Vertex<FormStoreObject> : undefined;
-
-  const messages = createMemo(() => {
-    const formDataVertex = formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex()!.P.formDataId!] : undefined;
-    if (!formDataVertex) return [];
-
-    const chatHistory = evalExpression("->ChatHistory", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || [];
-    return chatHistory.sort((a, b) => ((a.P?.timestamp || 0) - (b.P?.timestamp || 0))) as Vertex<Message>[];
-  });
+  const messages = createMemo(() => getChatHistory(graph, setGraph, formStoreVertex));
 
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const [showExamples, setShowExamples] = createSignal(false);
@@ -47,48 +43,7 @@ export function UseObjectAIPanel() {
   let examplesButtonRef: HTMLButtonElement | undefined;
   let fileInputRef: HTMLInputElement | undefined;
 
-  const examples = [
-    "Generate a responsive navigation bar with logo and menu items",
-    "Create a hero section with image, heading and call-to-action button",
-    "Design a contact form with name, email and message fields",
-    "Create a pricing table with multiple tiers",
-    "Generate a footer with social media links and company info",
-    "Create a testimonials section with customer reviews",
-    "Design a product gallery with grid layout",
-    "Generate a FAQ accordion section",
-    "Create a blog post layout with featured image",
-    "Design a team members showcase section",
-    "Generate a services showcase with icons",
-    "Create a portfolio grid with filtering options"
-  ];
-
   const globalTheme = themeConfig(graph);
-
-  const handleMessageSave = (messageData: Message) => {
-    if (!formStoreVertex()) return;
-
-    insertNewRow(
-      newTxnId, // formStoreVertex()!.P.txnId,
-      { P: { type: "ChatHistory" } } as unknown as Vertex,
-      graph.vertexes[formStoreVertex()!.P.formDataId!],
-      false,
-      graph,
-      setGraph,
-      messageData
-    );
-
-    setFiles(undefined);
-    if (fileInputRef) {
-      fileInputRef.value = '';
-    }
-    setFrameCount(0);
-
-    setTimeout(() => {
-      if (chatHistoryRef) {
-        chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
-      }
-    }, 0);
-  };
 
   const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload, setMessages } = useChat({
     onResponse(response) {
@@ -121,8 +76,25 @@ export function UseObjectAIPanel() {
         attachments: files() ? Array.from(files()!) : undefined
       } as Message;
 
-      handleMessageSave(messageData);
+      if (!formStoreVertex()) return;
+
+      insertNewRow(
+        newTxnId, // formStoreVertex()!.P.txnId,
+        { P: { type: "ChatHistory" } } as unknown as Vertex,
+        graph.vertexes[formStoreVertex()!.P.formDataId!],
+        false,
+        graph,
+        setGraph,
+        messageData
+      );
+
       setFrameCount(0);
+
+      setTimeout(() => {
+        if (chatHistoryRef) {
+          chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+        }
+      }, 0);
 
       if (!error()) {
         // clear input and files on successful completion
@@ -169,38 +141,6 @@ You should only use the color variable names in the css properties values, not t
     }, 0);
   };
 
-  const handleInsert = (message: Vertex) => {
-    const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
-    if (!fromStoreVertex || layoutStoreVertex()?.P.formId === `${message.id}FormStore` || !layoutStoreVertex()?.P.formId) {
-      return;
-    }
-
-    const toStoreVertex = graph.vertexes[layoutStoreVertex().P.formId!] as Vertex<FormStoreObject>;
-    if (!toStoreVertex || !graph.vertexes[toStoreVertex.P.selectedId!]) {
-      return;
-    }
-
-    handleDropAtPosition(
-      graph,
-      setGraph,
-      toStoreVertex.P.txnId,
-      graph.vertexes[toStoreVertex.P.formDataId!],
-      graph.vertexes[fromStoreVertex.P.formDataId!],
-      graph.vertexes[toStoreVertex.P.selectedId!],
-      insertMode()
-    );
-  };
-
-  const handleDelete = (message: Vertex) => {
-    deleteRow(
-      message,
-      false,
-      graph,
-      setGraph,
-      newTxnId, // formStoreVertex()!.P.txnId
-    );
-  };
-
   const handleExampleClick = (example: string) => {
     // @ts-expect-error ignore error
     handleInputChange({ target: { value: example } });
@@ -213,13 +153,13 @@ You should only use the color variable names in the css properties values, not t
         <For each={messages()}>
           {(message) => (
             <div class="margin-bottom:24px">
-              <ChatMessage message={message} onDelete={handleDelete} />
+              <ChatMessage message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,newTxnId)} />
               <ChatResponse
                 message={message}
                 insertMode={insertMode}
                 setInsertMode={setInsertMode}
-                onInsert={handleInsert}
-                onDelete={handleDelete}
+                onInsert={(msg) => insertAtPosition(msg, insertMode(), graph, setGraph, layoutStoreVertex)}
+                onDelete={(msg) => deleteRow( msg, false,graph,setGraph,newTxnId)}
                 disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
               />
             </div>
@@ -261,7 +201,7 @@ You should only use the color variable names in the css properties values, not t
         isLoading={isLoading}
         files={files}
         showExamples={showExamples}
-        examples={examples}
+        examples={EXAMPLE_PROMPTS}
         onSubmit={handleSubmit2}
         onInputChange={handleInputChange}
         onFilesChange={(files) => setFiles(files)}

@@ -27,6 +27,7 @@ export function openInNewInternalTab(
       dataId: child.id,
       // @ts-expect-error ignore
       parentId: child.P.parentId,
+      formDataId: child.P.formDataId,
       mainPanel: layoutStore.mainPanel[0]
     });
     addNewVertex(0, newOpenVertex, graph, setGraph);

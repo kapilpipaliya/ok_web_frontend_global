@@ -29,6 +29,7 @@ export function FormConfig() {
             uuid={graph.vertexes[openedFormId].P.formId}
             // @ts-expect-error ignore
             parentId={graph.vertexes[openedFormId].P.parentId}
+            formDataId={graph.vertexes[openedFormId].P.formDataId}
             // openedFormId={openedFormId}
           />
         </div>

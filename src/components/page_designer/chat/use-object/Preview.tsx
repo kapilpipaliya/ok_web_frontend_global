@@ -32,10 +32,9 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   for (const vertex of props.object.vertexes || []) {
     const newId = generateNewVertexId(graph, setGraph);
     vertexIdMap.set(vertex.id, newId);
-
     const newVertex = {
       id: newId,
-      L: vertex.L,
+      L: Array.isArray(vertex.L) ? vertex.L : [vertex.L],
       P: {
         ...vertex.P,
         ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
@@ -88,14 +87,47 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   addNewVertex(metaTxnId, parentVertex, graph, setGraph);
 
   // Link parent to root vertices
-  setSelectionValue(
-    metaTxnId,
-    graph.vertexes[parentId],
-    graph,
-    setGraph,
-    { P: { type: "Attr" } } as unknown as Vertex,
-    rootVertexIds()
+  // First handle vertices with Label "Attr"
+  const attrRootIds = rootVertexIds().filter(id => 
+    graph.vertexes[id].L.includes('Attr')
   );
+  if (attrRootIds.length > 0) {
+    setSelectionValue(
+      metaTxnId,
+      graph.vertexes[parentId],
+      graph,
+      setGraph,
+      { P: { type: "Attr" } } as unknown as Vertex,
+      attrRootIds
+    );
+  }
+
+  // Then handle remaining vertices grouped by their labels
+  const remainingRootIds = rootVertexIds().filter(id => 
+    !graph.vertexes[id].L.includes('Attr')
+  );
+  
+  // Group remaining vertices by their first label
+  const labelGroups = new Map<string, string[]>();
+  for (const id of remainingRootIds) {
+    const label = graph.vertexes[id].L[0];
+    if (!labelGroups.has(label)) {
+      labelGroups.set(label, []);
+    }
+    labelGroups.get(label)!.push(id);
+  }
+
+  // Set selection for each label group
+  for (const [label, ids] of labelGroups) {
+    setSelectionValue(
+      metaTxnId,
+      graph.vertexes[parentId],
+      graph,
+      setGraph,
+      { P: { type: label } } as unknown as Vertex,
+      ids
+    );
+  }
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
