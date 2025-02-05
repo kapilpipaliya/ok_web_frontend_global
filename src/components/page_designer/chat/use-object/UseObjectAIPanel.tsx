@@ -10,7 +10,7 @@ import { useChat } from '@ai-sdk/solid';
 import { ChatMessage } from './ChatMessage';
 import { ChatResponse } from './ChatResponse';
 import { ChatInput } from './ChatInput';
-import { Message } from './types';
+import { DBMessage } from './types';
 import { themeConfig } from '~/cypher/get/themeConfig';
 import { SetStoreFunction } from 'solid-js/store';
 import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
@@ -24,13 +24,7 @@ export function UseObjectAIPanel() {
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const newTxnId = generateNewTxnId(graph, setGraph);
 
-  // Get the first mainPanel's formId and formStore
-  const formStoreId = () => {
-    const mainPanelId = layoutStoreVertex().P.mainPanel[0];
-    return layoutStoreVertex().P[`mainPanel${mainPanelId}Tab`] as Id | null;
-  };
-
-  const formStoreVertex = () => formStoreId() ? graph.vertexes[formStoreId()!] as Vertex<FormStoreObject> : undefined;
+  const formStoreVertex = () => layoutStoreVertex().P.mainFormId ? graph.vertexes[layoutStoreVertex().P.mainFormId!] as Vertex<FormStoreObject> : undefined;
   const messages = createMemo(() => getChatHistory(graph, setGraph, formStoreVertex));
 
   const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
@@ -74,7 +68,7 @@ export function UseObjectAIPanel() {
         data: data,
         timestamp: Date.now(),
         attachments: files() ? Array.from(files()!) : undefined
-      } as Message;
+      } as DBMessage;
 
       if (!formStoreVertex()) return;
 

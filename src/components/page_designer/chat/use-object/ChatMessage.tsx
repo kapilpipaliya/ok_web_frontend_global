@@ -2,10 +2,10 @@ import { Show } from 'solid-js';
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { Vertex } from '~/lib/graph/graph';
-import { Message } from './types';
+import { DBMessage } from './types';
 
 interface ChatMessageProps {
-  message: Vertex<Message>;
+  message: Vertex<DBMessage>;
   onDelete: (message: Vertex) => void;
 }
 

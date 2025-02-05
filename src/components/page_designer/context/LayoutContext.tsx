@@ -28,6 +28,7 @@ export function getInitialDesignerLayoutStore() {
     activeItem: null as Id | null | number,
     position: null as "after" | "before" | "center" | "left" | "right" | null,
     formId: null as Id | null,
+    mainFormId: null as Id | null,
     isLeftOpen: true,
     isRight0Open: true,
     isRight1Open: true,

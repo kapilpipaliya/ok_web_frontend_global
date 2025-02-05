@@ -2,11 +2,11 @@ import { Show } from 'solid-js';
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { Vertex } from '~/lib/graph/graph';
-import { Message } from './types';
+import { DBMessage } from './types';
 import { Preview } from './Preview';
 
 interface ChatResponseProps {
-  message: Vertex<Message>;
+  message: Vertex<DBMessage>;
   insertMode: () => 'before' | 'after' | 'center';
   setInsertMode: (mode: 'before' | 'after' | 'center') => void;
   onInsert: (message: Vertex) => void;

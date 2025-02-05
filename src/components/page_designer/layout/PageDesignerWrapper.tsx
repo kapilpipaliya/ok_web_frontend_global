@@ -51,10 +51,11 @@ export function PageDesignerWrapper(): JSX.Element {
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
   
-  const vertex = newVertex(initialStore.id, ["PageDesigner"], {
+  const vertex = newVertex<PageLayoutObject>(initialStore.id, ["PageDesigner"], {
     ...initialStore,
     openedFormIds: [newOpenVertex.id],
     formId,
+    mainFormId: formId,
     [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId
   });
   addNewVertex(0, vertex, graph, setGraph);

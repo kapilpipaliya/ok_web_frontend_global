@@ -1,4 +1,4 @@
-export interface Message {
+export interface DBMessage {
   prompt: string;
   response: string;
   data?: string;
