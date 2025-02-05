@@ -77,7 +77,7 @@ export function insertAtPosition(message: Vertex, insertMode: string, graph: Gra
       }
     }
 
-    const fromVertex1 = { ...componentVertex, P: {...componentVertex.P, componentName: "Fragment"}, L: ["Attr"] } as Vertex;
+    const fromVertex1 = { ...componentVertex, P: {...componentVertex.P, componentName: "Fragment"}, L: ["Page"] } as Vertex;
     handleDropAtPosition(
       graph,
       setGraph,

@@ -87,10 +87,10 @@ export function ChatInput(props: ChatInputProps) {
           <IconButton
             type="submit"
             icon="ph:paper-plane-right"
-            disabled={props.isLoading() || !props.input().trim()}
+            disabled={props.isLoading()}
             title="Submit"
             size={22}
-            class="cursor:pointer cursor:not-allowed:disabled"
+            class="cursor:pointer"
           />
           <IconButton
             icon="ph:trash"

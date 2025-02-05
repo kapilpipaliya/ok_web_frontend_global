@@ -152,7 +152,7 @@ export function RenderMainContent() {
   return (
     <div class={`
       display:grid
-      grid-template-cols:${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px|` : ''}${layoutStore().mainPanel?.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}${layoutStore().isRight0Open ? `|${layoutStore().rightWidth0}px` : ''}${layoutStore().isRight1Open ? `|${layoutStore().rightWidth1}px` : ''}${layoutStore().isRight2Open ? `|${layoutStore().rightWidth2}px` : ''}
+      grid-template-cols:${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px|` : ''}${layoutStore().mainPanel?.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel?.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}${layoutStore().isRight0Open ? `|${layoutStore().rightWidth0}px` : ''}${layoutStore().isRight1Open ? `|${layoutStore().rightWidth1}px` : ''}${layoutStore().isRight2Open ? `|${layoutStore().rightWidth2}px` : ''}
       height:calc(100vh-45px)
       width:100vw
     `}

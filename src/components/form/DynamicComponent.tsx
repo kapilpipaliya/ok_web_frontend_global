@@ -517,6 +517,13 @@ export function DynamicComponent(
                 }
               // });
             };
+        } else if (key.toLowerCase().endsWith("class")) {
+          result[key] = cssStateToString(
+            value,
+            { P: { key: key } } as unknown as Vertex,
+            props.meta,
+            graph,
+          );
         } else if (value !== null) {
           result[key] = value;
         }

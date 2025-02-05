@@ -33,10 +33,6 @@ export async function handleDropAtPosition(
   ) {
     return;
   }
-  const fromParentVertex = evalExpression("<-Attr", {
-    graph,
-    vertexes: [fromVertex],
-  })?.[0];
   const toParentVertex =
     position === "center"
       ? toVertex
@@ -88,9 +84,13 @@ export async function handleDropAtPosition(
       position,
     );
   }
+  const fromParentVertex = evalExpression("<-Attr", {
+    graph,
+    vertexes: [fromVertex],
+  })?.[0];
   if (
     position !== "center" &&
-    fromParentVertex.vertex?.id === toParentVertex?.id
+    fromParentVertex?.vertex?.id === toParentVertex?.id
   ) {
     sortChildren(
       graph,

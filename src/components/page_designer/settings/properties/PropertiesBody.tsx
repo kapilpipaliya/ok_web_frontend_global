@@ -211,6 +211,18 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         );
         return;
       }
+
+      if (!value.includes('return {')) {
+        throw new Error("Function must return an object");
+      }
+
+      setIsFunctionValid(true);
+      props.setPropertyValue(
+        { P: { key: "otherProps" } } as unknown as Vertex,
+        value,
+      );
+
+      /* Original validation code:
       const func = new Function("args", `${value}`);
       if (typeof func === "function") {
         const result = func({});
@@ -226,6 +238,8 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       } else {
         throw new Error("Input is not a function");
       }
+      */
+
     } catch (error) {
       console.error("Error evaluating function:", error);
       setIsFunctionValid(false);

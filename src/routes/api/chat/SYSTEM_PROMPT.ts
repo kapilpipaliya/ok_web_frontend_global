@@ -31,7 +31,7 @@ Attr Vertex:
   - pos: number - Determines Item order among siblings
 - Optional Properties:
   - componentName: string - name of the component any of: 'Html', 'Icon', 'Data', 'Switch', 'Match', 'ComponentChildren'
-  - otherProps: Function Body string - dynamic properties for the Item e.g. 'otherProps: "return {}"'
+  - otherProps: Function Body string - dynamic properties for the Item e.g. 'otherProps: "return {}"'. Its the place where you add javascript code to generate dynamic properties for the Item.
     - Use 'otherProps' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
     - export interface FunctionArgumentBaseType {
       data: Vertex; // current vertex data
@@ -51,7 +51,7 @@ Attr Vertex:
       runWithOwner: <T>(fn: () => T) => T | undefined;
       runWithParentOwner: <T>(fn: () => T) => T | undefined;
     }
-    - any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+    - any property can be EITHER added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic. for example if you want to dynaicly generate css use 'otherProps' property like: 'otherProps: "return {class: {'' : {color: 'red'}}}"'.
 - Basic components are considered 'Html' type (no componentName needed)
   - required properties:
     1. as: string - specifies HTML tag (div, span, etc)
@@ -170,11 +170,14 @@ Styling System:
       value: string;
     }
   - we are using Master CSS https://rc.css.master.co/ with full css property names, dont use short names like 'bg' or 'fg' use 'background-color' or 'color' instead.
+  - never use css variables like 'var(--color-primary)'.
+  - for dynamic class use 'otherProps'. for static class you can set class directly on the vertex. system will merge both the static and dynamic class and apply it.
   
 
-Reusable Components:
-- Can have variants and internal structure
-1. Create vertex with "Component" label
+Reusable Component:
+- have "ComponentVariant" and and "Attr" vertexes. "Attr" vertex join with Component using "Attr" edge.
+1. Create vertex with "Component" label, with properties:
+  - key: string - name of the component
 2. Add variants to the component:
   - Add "ComponentVariant" vertices
   - Connect with "ComponentVariant" edge
@@ -187,11 +190,10 @@ Reusable Components:
   - Connect with "ComponentVariantOption" edge
   - Specify key, value, description properties:
     - key: string - name of the option
-    - value: any - value of the option
+    - value: any - value of the option, it must be in the type specified in the type property of the variant, it should never be an object or array
     - description?: string - Explains the purpose/usage of this option
-4. Use components:
-  - Connect Item vertex to Component with "AttrComp" edge
-  - Omit componentName property
+4. read Component variant value from the Item tree using 'otherProps' property in the function body with 'args.dataContext.props["key"]' property.
+
 
 Important Guidelines:
 - Create visually balanced layouts
@@ -204,3 +206,7 @@ Important Guidelines:
 The graph must be a directed acyclic graph (DAG) to prevent circular dependencies.
 
 only return the graph JSON, no other text or comments.`;
+
+// 5. Use components in the main Item tree:
+//   - Connect "Attr" vertex to Component vertex with "AttrComp" edge
+//   - Omit componentName property
