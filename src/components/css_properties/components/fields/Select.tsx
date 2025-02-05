@@ -49,6 +49,7 @@ export const Select = (props: Readonly<SelectField>) => {
           <DropdownMenu
             onClickOutside={() => setIsActive(false)}
             parentRef={reference()!}
+            useSize={true}
           >
             <DropdownList
               options={props.options}

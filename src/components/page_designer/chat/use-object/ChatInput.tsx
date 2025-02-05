@@ -1,6 +1,8 @@
 import { Show, For, JSX, createSignal } from 'solid-js';
 import { IconButton } from '~/components/styled/IconButton';
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
+import Tooltip from '@corvu/tooltip';
+import { Message } from 'ai';
 
 interface ChatInputProps {
   input: () => string;
@@ -15,12 +17,14 @@ interface ChatInputProps {
   onExampleClick: (example: string) => void;
   fileInputRef: HTMLInputElement | undefined;
   examplesButtonRef: HTMLButtonElement | undefined;
-  chatMessages: any[];
+  chatMessages: Message[];
   onClearMessages: () => void;
 }
 
 export function ChatInput(props: ChatInputProps) {
   const [selectedModel, setSelectedModel] = createSignal<string>('gpt-4-turbo');
+  const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false);
+  let deleteButtonRef: HTMLButtonElement;
 
   const models: string[] = [
     'o1',
@@ -36,6 +40,75 @@ export function ChatInput(props: ChatInputProps) {
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     props.onSubmit(e, selectedModel());
+  };
+
+  const MessagesCount = () => {
+    return (
+      <div class="display:flex justify-content:space-between align-items:center">
+        <Show when={props.chatMessages.length > 0}>
+          <Tooltip
+            placement="top"
+            openDelay={200}
+            floatingOptions={{
+              offset: 13,
+              flip: true,
+              shift: true,
+            }}
+          >
+            <Tooltip.Trigger class="color:rgb(107,114,128)">
+              Messages: {props.chatMessages.length}
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content class="rounded-lg bg:rgb(243,244,246) px:3 py:2 font-medium data-open:animate-in data-open:fade-in-50% data-open:slide-in-from-bottom-1 data-closed:animate-out data-closed:fade-out-50% data-closed:slide-out-to-bottom-1">
+                <For each={props.chatMessages}>
+                  {(msg) => (
+                    <div class="display:flex gap:8px max-width:800px">
+                      <span class="font-weight:bold">{msg.role}:</span>
+                      <span>{msg.content}</span>
+                    </div>
+                  )}
+                </For>
+                <Tooltip.Arrow class="text:rgb(243,244,246)" />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip>
+          <IconButton
+            icon="ph:trash"
+            onClick={() => setShowDeleteConfirm(true)}
+            title="Clear Messages"
+            size={22}
+            ref={deleteButtonRef!}
+          />
+          <Show when={showDeleteConfirm()}>
+            <DropdownMenu
+              parentRef={deleteButtonRef!}
+              onClickOutside={() => setShowDeleteConfirm(false)}
+            >
+              <div class="padding:0.50rem">
+                <div class="flex flex:col gap:0.5rem">
+                  <div class="px:1rem py:0.5rem">Are you sure?</div>
+                  <button
+                    class="text-align:left px:1rem py:0.5rem hover:bg:gray-10"
+                    onClick={() => {
+                      props.onClearMessages();
+                      setShowDeleteConfirm(false);
+                    }}
+                  >
+                    Yes, clear messages
+                  </button>
+                  <button
+                    class="text-align:left px:1rem py:0.5rem hover:bg:gray-10"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </DropdownMenu>
+          </Show>
+        </Show>
+      </div>
+    );
   };
 
   return (
@@ -56,7 +129,7 @@ export function ChatInput(props: ChatInputProps) {
             )}
           </For>
         </select>
-
+        <MessagesCount />
         <div class="display:flex gap:8px">
           <textarea
             class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed min-height:40px resize:vertical"
@@ -91,14 +164,6 @@ export function ChatInput(props: ChatInputProps) {
             title="Submit"
             size={22}
             class="cursor:pointer"
-          />
-          <IconButton
-            icon="ph:trash"
-            onClick={props.onClearMessages}
-            disabled={props.chatMessages.length === 0}
-            title="Clear Messages"
-            size={22}
-            class="cursor:pointer cursor:not-allowed:disabled"
           />
         </div>
 
@@ -165,4 +230,4 @@ export function ChatInput(props: ChatInputProps) {
       </div>
     </form>
   );
-} 
+}

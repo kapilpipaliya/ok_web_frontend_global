@@ -24,6 +24,7 @@ export function SuggestionsDropdown(props: Readonly<SuggestionsDropdownProps>) {
           <DropdownMenu
             onClickOutside={() => props.setIsDropdownOpen(false)}
             parentRef={props.reference()!}
+            useSize={true}
           >
             <div class={"w:full"}>
               <For each={props.options}>

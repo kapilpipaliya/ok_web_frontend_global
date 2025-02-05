@@ -101,6 +101,7 @@ export function InsertButtonsMenu(
       class="padding:0.50rem"
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
+      useSize={true}
     >
       <ComponentList
         edgeName="ParentComp"

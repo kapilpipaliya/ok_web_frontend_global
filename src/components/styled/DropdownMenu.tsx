@@ -19,6 +19,9 @@ export function DropdownMenu(
     useAutoPlacement?: boolean;
     useFlip?: boolean;
     useShift?: boolean;
+    useSize?: boolean;
+    padding?: number;
+    boundary?: Element | null;
   } & JSX.HTMLAttributes<HTMLDivElement>,
 ) {
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
@@ -34,7 +37,7 @@ export function DropdownMenu(
       flip: props.useFlip ?? true, // Automatically flip the dropdown if it doesn't fit
       offset: props.offset,
       shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
-      size: { matchSize: true, fitViewPort: true },
+      size: props.useSize ? { matchSize: true, fitViewPort: true } : undefined,
     }),
     placement: () => props.placement ?? "bottom-start",
     reference: () => props.parentRef ?? null,
@@ -51,11 +54,20 @@ export function DropdownMenu(
   const [local, rest] = splitProps(props, ["ref", "parentRef", "class"]);
   const borderClass =
     "border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) outline-offset:2px:focus outline:2px|solid|transparent transform-origin:top|right";
+
   return (
     <Portal mount={document.body}>
       <div
         aria-orientation="vertical"
-        class={`${local.class ?? ""} ${(props.applyDefaultStyles ?? true) ? `${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem` : ""} z-index:${zIndex}`}
+        classList={{
+          [`${local.class ?? ""}`]: true,
+          [`${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem`]: props.applyDefaultStyles ?? true,
+          [`z-index:${zIndex}`]: true,
+          [`position:${strategy()}`]: true,
+          [`left:${floatingState().x ?? 0}px`]: true,
+          [`top:${floatingState().y ?? 0}px`]: true,
+          [`max-height:${floatingState().maxHeight ?? 100}px`]: props.useSize
+        }}
         ref={(el) => {
           setFloating(el);
           if (typeof local.ref === "function") {
@@ -63,12 +75,6 @@ export function DropdownMenu(
           }
         }}
         role="menu"
-        style={{
-          left: `${floatingState().x ?? 0}px`,
-          position: strategy(),
-          top: `${floatingState().y ?? 0}px`,
-          'max-height': `${floatingState().maxHeight ?? 100}px`,
-        }}
         {...rest}
       />
     </Portal>

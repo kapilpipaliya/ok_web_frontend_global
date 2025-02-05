@@ -36,6 +36,7 @@ export function UnitsDropdown(props: Readonly<DropDownProps>) {
           <DropdownMenu
             onClickOutside={() => props.setIsDropdownOpen(false)}
             parentRef={props.reference()!}
+            useSize={true}
           >
             <div class={"w:full"}>
               <input
