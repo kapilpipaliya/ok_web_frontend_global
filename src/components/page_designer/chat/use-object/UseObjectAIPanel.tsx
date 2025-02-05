@@ -17,12 +17,10 @@ import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
 import { getChatHistory } from './functions/getChatHistory';
 import { insertAtPosition } from './functions/insertAtPosition';
 
-// Get the first mainPanel's formId and formStore
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const newTxnId = generateNewTxnId(graph, setGraph);
 
   const formStoreVertex = () => layoutStoreVertex().P.mainFormId ? graph.vertexes[layoutStoreVertex().P.mainFormId!] as Vertex<FormStoreObject> : undefined;
   const messages = createMemo(() => getChatHistory(graph, setGraph, formStoreVertex));
@@ -73,7 +71,7 @@ export function UseObjectAIPanel() {
       if (!formStoreVertex()) return;
 
       insertNewRow(
-        newTxnId, // formStoreVertex()!.P.txnId,
+        formStoreVertex()!.P.txnId,
         { P: { type: "ChatHistory" } } as unknown as Vertex,
         graph.vertexes[formStoreVertex()!.P.formDataId!],
         false,
@@ -152,13 +150,13 @@ Choose colors that work well for the context and maintain good contrast ratios.
         <For each={messages()}>
           {(message) => (
             <div class="margin-bottom:24px">
-              <ChatMessage message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,newTxnId)} />
+              <ChatMessage message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)} />
               <ChatResponse
                 message={message}
                 insertMode={insertMode}
                 setInsertMode={setInsertMode}
                 onInsert={(msg) => insertAtPosition(msg, insertMode(), graph, setGraph, layoutStoreVertex)}
-                onDelete={(msg) => deleteRow( msg, false,graph,setGraph,newTxnId)}
+                onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)}
                 disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
               />
             </div>
