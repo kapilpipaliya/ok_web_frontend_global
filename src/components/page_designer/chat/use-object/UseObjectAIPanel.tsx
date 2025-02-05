@@ -117,11 +117,16 @@ export function UseObjectAIPanel() {
             role: 'system',
             content: `
 You are a designer.
-You are using the following color variable names in the css properties values:
+You have access to the following theme color variables:
 \`\`\`json
 ${JSON.stringify(globalTheme)}
 \`\`\`
-You should only use the color variable names in the css properties values, not the color values. dont specify dark or light colors.
+When specifying colors in css properties, you can use either:
+1. Theme color variables from above (preferred for consistency)
+2. Direct color values like hex codes, rgb(), etc when needed
+3. CSS color keywords
+
+Choose colors that work well for the context and maintain good contrast ratios.
 `.trim()
           }
         ]
