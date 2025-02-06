@@ -1,18 +1,19 @@
 import { createSelector, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { DeleteButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
+import { DuplicateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DuplicateButton";
 import { ImportHtmlButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ImportHtmlButton";
 import { InsertButtons } from "~/components/page_attr_render/page_attr_dnd_wrapper/InsertButtons";
+import { ParentButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ParentButton";
 import { SaveAsTemplateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { DuplicateButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DuplicateButton";
-import { DeleteButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
-import { ParentButton } from "~/components/page_attr_render/page_attr_dnd_wrapper/ParentButton";
-import { HideShowIcon, toggleHidden } from "./HideShowIcon";
 import { getComponentLabel } from "../../functions/getComponentLabel";
+import { HideShowIcon, } from "./HideShowIcon";
 
 export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef: HTMLElement }>) {
   const [graph, setGraph] = useGraph();
@@ -30,10 +31,10 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef:
   return (
     <DropdownMenu
       applyDefaultStyles={false}
-      placement="right"
-      parentRef={props.parentRef}
-      useFlip={false}
       offset={-32}
+      parentRef={props.parentRef}
+      placement="right"
+      useFlip={false}
     >
       <div class="flex flex:col ai:center bg:white">
         <Show
@@ -56,8 +57,8 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef:
             size={iconSize}
           />
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
-          <HideShowIcon metaVertex={props.metaVertex} iconSize={iconSize} />
-          <DeleteButton componentName={getComponent()!} item={props.metaVertex} size={iconSize} class="color:red" />
+          <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
+          <DeleteButton class="color:red" componentName={getComponent()!} item={props.metaVertex} size={iconSize} />
           &nbsp;
         </Show>
       </div>

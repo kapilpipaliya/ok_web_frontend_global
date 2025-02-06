@@ -1,26 +1,30 @@
-import { Component, createSignal, For, Show } from "solid-js";
+import { type Component, createSignal, For, Show } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { PageLayoutObject } from "../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
-import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
-import { FormElements } from './main_content/FormElements';
-import { TabBar } from './main_content/TabBar';
-import { PageViewComponent } from './main_content/PageViewComponent';
-import { Settings } from './main_content/Settings';
-import { PropertiesContent } from './main_content/PropertiesContent';
-import { DeleteConfirmation } from './main_content/DeleteConfirmation';
+import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
+
+import type { PageLayoutObject } from "../context/LayoutContext";
+
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
+import { DeleteConfirmation } from './main_content/DeleteConfirmation';
+import { FormElements } from './main_content/FormElements';
+import { PageViewComponent } from './main_content/PageViewComponent';
+import { PropertiesContent } from './main_content/PropertiesContent';
+import { Settings } from './main_content/Settings';
+import { TabBar } from './main_content/TabBar';
 
 interface ResizeHandleProps {
-  onPointerDown: (e: PointerEvent) => void;
+  activeResizeKey: null | string;
   isHorizontal?: boolean;
-  position: 'left' | 'right' | 'top' | 'bottom';
   isResizing: boolean;
+  onPointerDown: (e: PointerEvent) => void;
+  position: 'bottom' | 'left' | 'right' | 'top';
   resizeKey: string;
-  activeResizeKey: string | null;
 }
 
 const ResizeHandle: Component<ResizeHandleProps> = (props) => {
@@ -36,22 +40,22 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
         touch-action:none
         transition:background-color|0.2s
       `}
-      onPointerDown={props.onPointerDown}
       onMouseEnter={() => !props.isResizing && setIsHovered(true)}
       onMouseLeave={() => !props.isResizing && setIsHovered(false)}
+      onPointerDown={props.onPointerDown}
     />
   );
 };
 
 interface PanelProps {
+  activeResizeKey: null | string;
   children: any;
-  onResize?: (e: PointerEvent) => void;
-  resizePosition?: 'left' | 'right' | 'top' | 'bottom';
-  style?: any;
-  ref?: (el: HTMLDivElement) => void;
   isResizing: boolean;
+  onResize?: (e: PointerEvent) => void;
+  ref?: (el: HTMLDivElement) => void;
   resizeKey?: string;
-  activeResizeKey: string | null;
+  resizePosition?: 'bottom' | 'left' | 'right' | 'top';
+  style?: any;
 }
 
 const Panel: Component<PanelProps> = (props) => {
@@ -69,12 +73,12 @@ const Panel: Component<PanelProps> = (props) => {
     >
       <div style={{ display: props.resizePosition === 'left' && props.onResize ? 'block' : 'none' }}>
         <ResizeHandle
-          onPointerDown={props.onResize!}
-          position={props.resizePosition!}
+          activeResizeKey={props.activeResizeKey}
           isHorizontal={props.resizePosition !== 'top'}
           isResizing={props.isResizing}
+          onPointerDown={props.onResize!}
+          position={props.resizePosition!}
           resizeKey={props.resizeKey || ''}
-          activeResizeKey={props.activeResizeKey}
         />
       </div>
       <div style={{ "overflow": "auto" }}>
@@ -82,12 +86,12 @@ const Panel: Component<PanelProps> = (props) => {
       </div>
       <div style={{ display: props.resizePosition !== 'left' && props.onResize ? 'block' : 'none' }}>
         <ResizeHandle
-          onPointerDown={props.onResize!}
-          position={props.resizePosition || 'right'}
+          activeResizeKey={props.activeResizeKey}
           isHorizontal={props.resizePosition !== 'top'}
           isResizing={props.isResizing}
+          onPointerDown={props.onResize!}
+          position={props.resizePosition || 'right'}
           resizeKey={props.resizeKey || ''}
-          activeResizeKey={props.activeResizeKey}
         />
       </div>
     </div>
@@ -102,14 +106,14 @@ export function RenderMainContent() {
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [isResizing, setIsResizing] = createSignal(false);
-  const [activeResizeKey, setActiveResizeKey] = createSignal<string | null>(null);
+  const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(null);
   const [leftPanelRef, setLeftPanelRef] = createSignal<HTMLDivElement>();
   const [rightPanel0Ref, setRightPanel0Ref] = createSignal<HTMLDivElement>();
   const [rightPanel1Ref, setRightPanel1Ref] = createSignal<HTMLDivElement>();
   const [rightPanel2Ref, setRightPanel2Ref] = createSignal<HTMLDivElement>();
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{ [key: string]: HTMLDivElement }>({});
 
-  const createResizeHandler = (key: 'leftWidth' | 'rightWidth0' | 'rightWidth1' | 'rightWidth2' | 'bottomHeight' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
+  const createResizeHandler = (key: 'bottomHeight' | 'leftWidth' | 'rightWidth0' | 'rightWidth1' | 'rightWidth2' | `mainPanel${string}Width`, panelRef: () => HTMLDivElement | undefined, isHorizontal: boolean) => (e: PointerEvent) => {
     e.preventDefault();
     setIsResizing(true);
     setActiveResizeKey(key);
@@ -161,12 +165,12 @@ export function RenderMainContent() {
     >
       <div style={{ display: layoutStore().isLeftOpen ? 'block' : 'none' }}>
         <Panel 
-          ref={setLeftPanelRef}
-          onResize={createResizeHandler('leftWidth', leftPanelRef, true)} 
-          resizePosition="right"
-          isResizing={isResizing()}
-          resizeKey="leftWidth"
           activeResizeKey={activeResizeKey()}
+          isResizing={isResizing()} 
+          onResize={createResizeHandler('leftWidth', leftPanelRef, true)}
+          ref={setLeftPanelRef}
+          resizeKey="leftWidth"
+          resizePosition="right"
         >
           <FormElements />
         </Panel>
@@ -174,16 +178,16 @@ export function RenderMainContent() {
 
       <For each={layoutStore().mainPanel}>
         {(mainPanel) => (
-          <Panel style={{
+          <Panel activeResizeKey={activeResizeKey()}
+          isResizing={isResizing()}
+          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
+          onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
+          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
+          resizeKey={`mainPanel${mainPanel}Width`}
+          style={{
             // 'background-color': '#ffffff',
             overflow: 'auto'
           }}
-          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
-          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
-          onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
-          isResizing={isResizing()}
-          resizeKey={`mainPanel${mainPanel}Width`}
-          activeResizeKey={activeResizeKey()}
           >
             <TabBar mainPanel={mainPanel} />
             <PageViewComponent mainPanel={mainPanel} />
@@ -195,12 +199,12 @@ export function RenderMainContent() {
 
       <div style={{ display: layoutStore().isRight0Open ? 'block' : 'none' }}>
         <Panel 
-          ref={setRightPanel0Ref}
-          onResize={createResizeHandler('rightWidth0', rightPanel0Ref, true)} 
-          resizePosition="left"
-          isResizing={isResizing()}
-          resizeKey="rightWidth0"
           activeResizeKey={activeResizeKey()}
+          isResizing={isResizing()} 
+          onResize={createResizeHandler('rightWidth0', rightPanel0Ref, true)}
+          ref={setRightPanel0Ref}
+          resizeKey="rightWidth0"
+          resizePosition="left"
         >
           <div class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}>
             <UseObjectAIPanel />
@@ -210,12 +214,12 @@ export function RenderMainContent() {
 
       <div style={{ display: layoutStore().isRight1Open ? 'block' : 'none' }}>
         <Panel 
-          ref={setRightPanel1Ref}
-          onResize={createResizeHandler('rightWidth1', rightPanel1Ref, true)} 
-          resizePosition="left"
-          isResizing={isResizing()}
-          resizeKey="rightWidth1"
           activeResizeKey={activeResizeKey()}
+          isResizing={isResizing()} 
+          onResize={createResizeHandler('rightWidth1', rightPanel1Ref, true)}
+          ref={setRightPanel1Ref}
+          resizeKey="rightWidth1"
+          resizePosition="left"
         >
         {/* <Show
             fallback={
@@ -240,12 +244,12 @@ export function RenderMainContent() {
 
       <div style={{ display: layoutStore().isRight2Open ? 'block' : 'none' }}>
         <Panel 
-          ref={setRightPanel2Ref}
-          onResize={createResizeHandler('rightWidth2', rightPanel2Ref, true)} 
-          resizePosition="left"
-          isResizing={isResizing()}
-          resizeKey="rightWidth2"
           activeResizeKey={activeResizeKey()}
+          isResizing={isResizing()} 
+          onResize={createResizeHandler('rightWidth2', rightPanel2Ref, true)}
+          ref={setRightPanel2Ref}
+          resizeKey="rightWidth2"
+          resizePosition="left"
         >
           <Settings />
         </Panel>

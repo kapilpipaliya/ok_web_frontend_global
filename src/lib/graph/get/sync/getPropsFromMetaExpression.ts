@@ -4,6 +4,25 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 
+export function getPropsFromMetaExpression(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  metaVertex: Vertex,
+  data: Vertex,
+) {
+  const meta = metaVertex.P.meta;
+  if (!meta) {
+    return {};
+  }
+
+  const metaRows =
+    evalExpression(meta, {
+      graph,
+      vertexes: [data],
+    }) || [];
+  return getComponentProperties(graph, setGraph, metaRows);
+}
+
 function getComponentProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -26,23 +45,4 @@ function getComponentProperties(
     {} as { [key: string]: any },
   );
   return metaData;
-}
-
-export function getPropsFromMetaExpression(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  metaVertex: Vertex,
-  data: Vertex,
-) {
-  const meta = metaVertex.P.meta;
-  if (!meta) {
-    return {};
-  }
-
-  const metaRows =
-    evalExpression(meta, {
-      graph,
-      vertexes: [data],
-    }) || [];
-  return getComponentProperties(graph, setGraph, metaRows);
 }

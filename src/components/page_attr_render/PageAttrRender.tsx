@@ -1,23 +1,21 @@
-import { createMemo, For, Match, Show, Switch } from "solid-js";
+import { clientOnly } from "@solidjs/start";
+import { createMemo, For, Match, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
-import { usePreviewContext, PreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { usePreviewContext, } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
+import { type FormStoreObject, useFormContext } from "../form/context/FormContext";
 import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
-import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
-import { clientOnly } from "@solidjs/start";
 
 export function PageAttrRender(
   props: Readonly<{
     data?: Vertex;
     filter?: (vertex: Vertex) => boolean;
-    metaVertex: Vertex;
     isNoPermissionCheck: boolean;
+    metaVertex: Vertex;
   }>,
 ) {
   const parentItems = usePageRenderContext();
@@ -41,10 +39,10 @@ export function PageAttrRender(
             <DynamicComponent
               // data={props.data || getDataVertex(item) || parentData()}
               data={props.data}
+              isNoPermissionCheck={props.isNoPermissionCheck}
               // onChange={props.onChange}
               meta={item}
               txnId={formVertex()?.P.txnId}
-              isNoPermissionCheck={props.isNoPermissionCheck}
             />
           );
         };

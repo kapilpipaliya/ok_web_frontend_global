@@ -1,7 +1,10 @@
-import {GraphInterface} from "~/lib/graph/graph";
-import {SetStoreFunction} from "solid-js/store";
-import {addNewVertex, newVertex} from "~/lib/graph/mutate/vertex";
+import type {SetStoreFunction} from "solid-js/store";
+
 import {v7 as uuidv7} from "uuid";
+
+import type {GraphInterface} from "~/lib/graph/graph";
+
+import {addNewVertex, newVertex} from "~/lib/graph/mutate/vertex";
 
 export function createCompContextVertex(props: any, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   const viewVertexObject = newVertex(`${uuidv7()}-comp-value`, ["ComponentValue"], props);

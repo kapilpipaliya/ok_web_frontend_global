@@ -20,7 +20,7 @@ import { PreviewContext, usePreviewContext } from "~/components/page_designer/co
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
-
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import {
   type GraphInterface,
   IdAttr,
@@ -48,48 +48,8 @@ import { getComponentLabel } from "../page_designer/functions/getComponentLabel"
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { Label } from "../solid_blocks/Label";
 import { useToast } from "../styled/Toast";
-import { FormStoreObject, useFormContext } from "./context/FormContext";
+import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
-
-export function getText(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  dataContext: Vertex[],
-) {
-  try {
-    return (
-      (evalExpression(projection, {
-        graph,
-        setGraph,
-        vertexes: dataContext,
-      }) as string) || projection
-    );
-  } catch (error) {
-    console.error("Error in getText:", error);
-    return "";
-  }
-}
-
-export function getUrl(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  dataContext: Vertex[],
-) {
-  try {
-    const url = evalExpression(projection, {
-      graph,
-      setGraph,
-      vertexes: dataContext,
-    }) as string | undefined;
-    return typeof url === "string" && url.startsWith("/") ? url : undefined;
-  } catch (error) {
-    console.error("Error in getUrl:", error);
-    return undefined;
-  }
-}
 
 export function DynamicComponent(
   props: Readonly<{
@@ -217,7 +177,7 @@ export function DynamicComponent(
     //     return hasInsertPermission();
     } else {
       const permission = hasInsertPermission() || hasEditPermission();
-      return !permission ? true : undefined;
+      return permission ? undefined : true;
     }
   };
 
@@ -241,10 +201,17 @@ export function DynamicComponent(
       get data() {
         return props.data;
       },
+      get dataContext() {
+        return runWithOwner(owner, () => useRepeaterVertexContext());
+      },
       evalExpression,
+      fns: functionProxy,
       // formInitialValues,
       // formSchema,
       formId,
+      get graph() {
+        return graph;
+      },
       get hasDeletePermission() {
         return hasDeletePermission();
       },
@@ -266,12 +233,6 @@ export function DynamicComponent(
       get meta() {
         return props.meta;
       },
-      get graph() {
-        return graph;
-      },
-      get setGraph() {
-        return setGraph;
-      },
       mounted,
       onChange,
       owner,
@@ -284,16 +245,15 @@ export function DynamicComponent(
         return isReadOnly();
       },
       ref,
-      get dataContext() {
-        return runWithOwner(owner, () => useRepeaterVertexContext());
-      },
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
-      zIndex,
-      fns: functionProxy,
+      get setGraph() {
+        return setGraph;
+      },
       get txnId() {
         return props.txnId!;
-      }
+      },
+      zIndex
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
@@ -870,6 +830,45 @@ export function DynamicComponent(
       </PageRenderContextProvider>
     </>
   );
+}
+
+export function getText(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  dataContext: Vertex[],
+) {
+  try {
+    return (
+      (evalExpression(projection, {
+        graph,
+        setGraph,
+        vertexes: dataContext,
+      }) as string) || projection
+    );
+  } catch (error) {
+    console.error("Error in getText:", error);
+    return "";
+  }
+}
+
+export function getUrl(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  dataContext: Vertex[],
+) {
+  try {
+    const url = evalExpression(projection, {
+      graph,
+      setGraph,
+      vertexes: dataContext,
+    }) as string | undefined;
+    return typeof url === "string" && url.startsWith("/") ? url : undefined;
+  } catch (error) {
+    console.error("Error in getUrl:", error);
+    return undefined;
+  }
 }
 
 const _inputTypes = {

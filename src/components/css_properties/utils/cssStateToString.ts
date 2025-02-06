@@ -8,34 +8,6 @@ import type { CSSStore } from "../context/CssEditorContext";
 import { arrayToString } from "./arrayToString";
 import { getCssSelectedFileEdgeName } from "./getCssSelectedFileEdgeName";
 
-export function getUrl(data: Vertex) {
-  return `/api/file/download?fileId=${data.id}`;
-}
-
-export function replacePlaceholderWithUrl(
-  value: string,
-  edgeName: string,
-  data: Vertex,
-  graph: GraphInterface,
-): string {
-  if (!value.includes("$1")) {
-    return value;
-  }
-  
-  const files = evalExpression(`->${edgeName}`, {
-    graph,
-    setGraph: () => {},
-    vertexes: [data],
-  }) || [];
-  
-  if (files.length === 0) {
-    return value;
-  }
-  
-  const file = files[0];
-  return value.replaceAll("$1", getUrl(file));
-}
-
 export function cssStateToString(
   cssStore: CSSStore | string,
   meta: Vertex,
@@ -88,4 +60,32 @@ export function cssStateToString(
     })
     .filter(Boolean) // To remove any undefined entries
     .join("\n");
+}
+
+export function getUrl(data: Vertex) {
+  return `/api/file/download?fileId=${data.id}`;
+}
+
+export function replacePlaceholderWithUrl(
+  value: string,
+  edgeName: string,
+  data: Vertex,
+  graph: GraphInterface,
+): string {
+  if (!value.includes("$1")) {
+    return value;
+  }
+  
+  const files = evalExpression(`->${edgeName}`, {
+    graph,
+    setGraph: () => {},
+    vertexes: [data],
+  }) || [];
+  
+  if (files.length === 0) {
+    return value;
+  }
+  
+  const file = files[0];
+  return value.replaceAll("$1", getUrl(file));
 }

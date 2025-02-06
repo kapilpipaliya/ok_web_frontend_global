@@ -43,24 +43,6 @@ import {
 } from "./AccordionContext";
 import { ACCORDION_TAG } from "./tags";
 
-export type AccordionSingleControlledBaseProps<V> = Prettify<
-  SelectStateRenderProps<V> & SingleSelectStateControlledOptions<V>
->;
-
-export type AccordionSingleControlledProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessPropsWithRef<T, AccordionSingleControlledBaseProps<V>>;
-
-export type AccordionSingleUncontrolledBaseProps<V> = Prettify<
-  SelectStateRenderProps<V> & SingleSelectStateUncontrolledOptions<V>
->;
-
-export type AccordionSingleUncontrolledProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessPropsWithRef<T, AccordionSingleUncontrolledBaseProps<V>>;
-
 export type AccordionMultipleControlledBaseProps<V> = Prettify<
   MultipleSelectStateControlledOptions<V> & SelectStateRenderProps<V>
 >;
@@ -85,21 +67,23 @@ export type AccordionProps<V, T extends ValidConstructor = "div"> =
   | AccordionSingleControlledProps<V, T>
   | AccordionSingleUncontrolledProps<V, T>;
 
-function isAccordionUncontrolled<V, T extends ValidConstructor = "div">(
-  props: AccordionProps<V, T>,
-): props is
-  | AccordionMultipleUncontrolledProps<V, T>
-  | AccordionSingleUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
+export type AccordionSingleControlledBaseProps<V> = Prettify<
+  SelectStateRenderProps<V> & SingleSelectStateControlledOptions<V>
+>;
 
-function isAccordionMultiple<V, T extends ValidConstructor = "div">(
-  props: AccordionProps<V, T>,
-): props is
-  | AccordionMultipleControlledProps<V, T>
-  | AccordionMultipleUncontrolledProps<V, T> {
-  return !!props.multiple;
-}
+export type AccordionSingleControlledProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessPropsWithRef<T, AccordionSingleControlledBaseProps<V>>;
+
+export type AccordionSingleUncontrolledBaseProps<V> = Prettify<
+  SelectStateRenderProps<V> & SingleSelectStateUncontrolledOptions<V>
+>;
+
+export type AccordionSingleUncontrolledProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessPropsWithRef<T, AccordionSingleUncontrolledBaseProps<V>>;
 
 export function Accordion<V, T extends ValidConstructor = "div">(
   props: AccordionProps<V, T>,
@@ -207,4 +191,20 @@ export function Accordion<V, T extends ValidConstructor = "div">(
       value: controller,
     });
   }) as unknown as JSX.Element;
+}
+
+function isAccordionMultiple<V, T extends ValidConstructor = "div">(
+  props: AccordionProps<V, T>,
+): props is
+  | AccordionMultipleControlledProps<V, T>
+  | AccordionMultipleUncontrolledProps<V, T> {
+  return !!props.multiple;
+}
+
+function isAccordionUncontrolled<V, T extends ValidConstructor = "div">(
+  props: AccordionProps<V, T>,
+): props is
+  | AccordionMultipleUncontrolledProps<V, T>
+  | AccordionSingleUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

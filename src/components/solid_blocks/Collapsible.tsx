@@ -52,13 +52,13 @@ export function Collapsible(
         {props.title}
         <Icon
           icon={state() ? "mdi:minus" : "mdi:plus"}
+          noobserver
           style={{
             color: "white",
             float: "right",
             "font-size": "13px",
             "margin-left": "5px",
           }}
-          noobserver
         />
       </button>
       <div

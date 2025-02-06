@@ -1,8 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "../mutate/vertex";
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 
 export function saveUndoPoint(
   txnId: number,

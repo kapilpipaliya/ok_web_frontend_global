@@ -49,6 +49,9 @@ import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { componentMap } from "~/components/css_properties/components/componentMap";
 import { CheckboxField } from "~/components/fields/CheckboxField";
+import { ComponentChildrenField } from "~/components/fields/ComponentChildrenField";
+import { ComponentField } from "~/components/fields/ComponentField";
+import { DataField } from "~/components/fields/DataField";
 import { FragmentField } from "~/components/fields/FragmentField";
 import { IconField } from "~/components/fields/IconField";
 import { ImageField } from "~/components/fields/ImageField";
@@ -72,9 +75,6 @@ import { FormField } from "../../fields/FormField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../solid_blocks/FileUploader";
-import { DataField } from "~/components/fields/DataField";
-import { ComponentField } from "~/components/fields/ComponentField";
-import { ComponentChildrenField } from "~/components/fields/ComponentChildrenField";
 
 export const corvuComponents = {
   Accordion,
@@ -90,18 +90,22 @@ export const corvuComponents = {
 export const componentsMap: Record<string, any> = {
   ActiveStep: StepsContent,
   Box: BoxField,
-  Html: BoxField,
   Button: ButtonField,
   CheckBox: CheckboxField,
+  Component: ComponentField,
+  ComponentChildren: ComponentChildrenField,
+  // RadioGroup: RadioGroupField,
+  Data: DataField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
-  Table: TableInputField,
   // ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
   Fragment: FragmentField,
+  Html: BoxField,
   Icon: IconField,
   Image: ImageField,
+  Match,
   // HtmlEditor: KobalteTextField,
   MultiSelect: SelectField,
   // Link: Link,
@@ -110,22 +114,18 @@ export const componentsMap: Record<string, any> = {
   PullToRefresh,
   Radio: RadioField,
   RadioGroup: RadioGroupField,
-  // RadioGroup: RadioGroupField,
-  Data: DataField,
   Select: SelectField,
-  Component: ComponentField,
+  Show,
   Step,
   Steps: StepsRoot,
+  Switch,
+  Table: TableInputField,
   // TemplatePage: PageField,
   Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
-  Show,
-  Switch,
-  Match,
   Transition,
   TransitionGroup,
-  ComponentChildren: ComponentChildrenField,
   // ThankYouPage: PageField,
   ZIndex,
 };

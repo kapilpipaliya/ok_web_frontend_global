@@ -8,14 +8,6 @@ export type Id = string;
 
 export const IdAttr = "key";
 
-export interface Vertex<P extends object = { [key: string]: any }> {
-  id: Id;
-  IN: { [key: string]: Id[] };
-  L: string[];
-  OUT: { [key: string]: Id[] };
-  P: P;
-}
-
 export interface Edge {
   E: Id;
   id: Id;
@@ -24,8 +16,35 @@ export interface Edge {
   T: string;
 }
 
-export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };
+
+export interface GlobalProperties {
+  activeClickOutside: string[];
+  componentIdMap: { [key: string]: string };
+  globalThemeId: Id;
+  initialDataFetchError: string;
+  isDevelopment: boolean;
+  isLoadingPage?: boolean;
+  isSideBarOpen?: boolean;
+  isSubSideBarOpen?: boolean;
+  navBarHeight: number;
+  navigationData?: AnyObject[];
+  newVertexId_: number;
+  txnId_: number;
+  url: string;
+  userRoles: Id[];
+  userSettingId: Id;
+  // isAuthenticated: false,
+  // theme: "light" as "light" | "dark",
+  // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
+  // language: "en" as string,
+}
+export interface GraphInterface {
+  broadcastChannels: string[];
+  edges: EdgeMap;
+  vertexes: VertexMap;
+  vertexLabelIdMap: { [key: string]: Id[] };
+}
 
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
@@ -34,8 +53,6 @@ export type EdgeMap = { [key: string]: Edge };
 
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
-
-type AnyObject = { [key: string]: any };
 
 export interface TransactionDetail {
   activeUndoIndex: number;
@@ -47,34 +64,17 @@ export interface TransactionDetail {
   undoStepIndexes: number[];
 }
 
-export interface GlobalProperties {
-  txnId_: number;
-  newVertexId_: number;
-  activeClickOutside: string[];
-  componentIdMap: { [key: string]: string };
-  globalThemeId: Id;
-  isDevelopment: boolean;
-  isLoadingPage?: boolean;
-  isSideBarOpen?: boolean;
-  isSubSideBarOpen?: boolean;
-  navBarHeight: number;
-  navigationData?: AnyObject[];
-  userRoles: Id[];
-  userSettingId: Id;
-  url: string;
-  initialDataFetchError: string;
-  // isAuthenticated: false,
-  // theme: "light" as "light" | "dark",
-  // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
-  // language: "en" as string,
+export interface Vertex<P extends object = { [key: string]: any }> {
+  id: Id;
+  IN: { [key: string]: Id[] };
+  L: string[];
+  OUT: { [key: string]: Id[] };
+  P: P;
 }
 
-export interface GraphInterface {
-  edges: EdgeMap;
-  broadcastChannels: string[];
-  vertexes: VertexMap;
-  vertexLabelIdMap: { [key: string]: Id[] };
-}
+export type VertexMap = { [key: string]: Vertex };
+
+type AnyObject = { [key: string]: any };
 
 export const GraphContext =
   createContext<ReturnType<typeof createStore<GraphInterface>>>();

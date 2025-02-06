@@ -5,6 +5,10 @@ import FocusNavigator from "../../utils/focus-navigator";
 
 export const FeedContentContext = createContext<FocusNavigator>();
 
+export function createFeedArticleFocusNavigator(owner: string): FocusNavigator {
+  return new FocusNavigator(owner);
+}
+
 export function useFeedContentContext(componentName: string): FocusNavigator {
   const context = useContext(FeedContentContext);
   assert(
@@ -12,8 +16,4 @@ export function useFeedContentContext(componentName: string): FocusNavigator {
     new Error(`<${componentName}> must be used inside a <FeedContent>`),
   );
   return context;
-}
-
-export function createFeedArticleFocusNavigator(owner: string): FocusNavigator {
-  return new FocusNavigator(owner);
 }

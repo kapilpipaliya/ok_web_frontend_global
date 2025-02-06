@@ -34,6 +34,11 @@ interface ProfileData {
   username: string;
 }
 
+interface TabSectionProps {
+  selectedTab: Accessor<string>;
+  setSelectedTab: Setter<string>;
+}
+
 export function Settings(): JSX.Element {
   const [selectedTab, setSelectedTab] = createSignal<string>("General");
   const [isMainScreenLoad, setIsMainScreenLoad] = createSignal<boolean>(false);
@@ -156,11 +161,6 @@ export function Settings(): JSX.Element {
       </Show>
     </>
   );
-}
-
-interface TabSectionProps {
-  selectedTab: Accessor<string>;
-  setSelectedTab: Setter<string>;
 }
 
 const TabSection = (props: TabSectionProps): JSX.Element => {

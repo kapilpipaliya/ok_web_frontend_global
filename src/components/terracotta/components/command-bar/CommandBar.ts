@@ -46,6 +46,10 @@ export type CommandBarControlledBaseProps = Prettify<
 export type CommandBarControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CommandBarControlledBaseProps>;
 
+export type CommandBarProps<T extends ValidConstructor = "div"> =
+  | CommandBarControlledProps<T>
+  | CommandBarUncontrolledProps<T>;
+
 export type CommandBarUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps &
     DisclosureStateUncontrolledOptions &
@@ -54,16 +58,6 @@ export type CommandBarUncontrolledBaseProps = Prettify<
 
 export type CommandBarUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CommandBarUncontrolledBaseProps>;
-
-export type CommandBarProps<T extends ValidConstructor = "div"> =
-  | CommandBarControlledProps<T>
-  | CommandBarUncontrolledProps<T>;
-
-function isCommandBarUncontrolled<T extends ValidConstructor = "div">(
-  props: CommandBarProps<T>,
-): props is CommandBarUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function CommandBar<T extends ValidConstructor = "div">(
   props: CommandBarProps<T>,
@@ -155,4 +149,10 @@ export function CommandBar<T extends ValidConstructor = "div">(
       titleID,
     },
   });
+}
+
+function isCommandBarUncontrolled<T extends ValidConstructor = "div">(
+  props: CommandBarProps<T>,
+): props is CommandBarUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

@@ -14,23 +14,23 @@ import usePageVisibility from "solid-use/page-visibility";
 import assert from "../../utils/assert";
 import useEventListener from "../../utils/use-event-listener";
 
-export type NativeColorScheme = "dark" | "light";
 export type ColorScheme = "system" | NativeColorScheme;
-
 export interface ColorSchemeProviderControlledProps {
   children?: JSX.Element;
   onChange?: (scheme: ColorScheme) => void;
   value: ColorScheme;
 }
+
+export type ColorSchemeProviderProps =
+  | ColorSchemeProviderControlledProps
+  | ColorSchemeProviderUncontrolledProps;
 export interface ColorSchemeProviderUncontrolledProps {
   children?: JSX.Element;
   initialValue: ColorScheme;
   onChange?: (scheme: ColorScheme) => void;
 }
 
-export type ColorSchemeProviderProps =
-  | ColorSchemeProviderControlledProps
-  | ColorSchemeProviderUncontrolledProps;
+export type NativeColorScheme = "dark" | "light";
 
 interface ColorSchemeContextData {
   native: NativeColorScheme;
@@ -123,12 +123,6 @@ export function ColorSchemeProvider(
   });
 }
 
-function useColorSchemeContext(): ColorSchemeContextData {
-  const ctx = useContext(ColorSchemeContext);
-  assert(ctx, new Error("Missing <ColorSchemeProvider>"));
-  return ctx;
-}
-
 export function useColorScheme(): [
   () => ColorScheme,
   (newScheme: ColorScheme) => void,
@@ -145,4 +139,10 @@ export function useNativeColorScheme(): () => NativeColorScheme {
 export function usePreferredColorScheme(): () => NativeColorScheme {
   const ctx = useColorSchemeContext();
   return () => ctx.preferred;
+}
+
+function useColorSchemeContext(): ColorSchemeContextData {
+  const ctx = useContext(ColorSchemeContext);
+  assert(ctx, new Error("Missing <ColorSchemeProvider>"));
+  return ctx;
 }

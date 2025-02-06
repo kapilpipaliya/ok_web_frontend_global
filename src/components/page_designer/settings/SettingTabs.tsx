@@ -1,10 +1,12 @@
-import { Icon } from "@iconify-icon/solid";
+
 import { createMemo, For, type JSX, Show } from "solid-js";
 
-import { FormContext, FormStoreObject } from "~/components/form/context/FormContext";
+import { FormContext, type FormStoreObject } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext, DesignerFormIdContext } from "../context/LayoutContext";
+import { DesignerFormIdContext, type PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
 import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
@@ -19,9 +21,27 @@ import { Rules } from "./rules/Rules";
 import { SEOFormGroupProperties } from "./seo/SeoConfig";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { Variants } from "./variants/Variants";
+
+interface DividerProps {
+  borderColor?: string;
+  borderTopWidth?: string;
+  class?: string;
+  width?: string;
+}
+
+export function Divider(props: Readonly<DividerProps>): JSX.Element {
+  return (
+    <div
+      class={props.class || ""}
+      classList={{
+        [`border-color:${props.borderColor || "rgb(209,213,219)"}`]: true,
+        [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
+        [`width:${props.width || "100%"}`]: true,
+      }}
+    />
+  );
+}
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
@@ -88,7 +108,7 @@ export function SettingTabs() {
         <FormConfig />
       </div>
 
-      <Show when={formStoreVertex()?.id} keyed>
+      <Show keyed when={formStoreVertex()?.id}>
         <DesignerFormIdContext.Provider value={formStoreVertex().id}>
           <FormContext.Provider value={formStoreVertex().id}>
             <Show when={layoutStore().selectedTab === "status"}>
@@ -129,25 +149,5 @@ export function SettingTabs() {
         </DesignerFormIdContext.Provider>
       </Show>
     </>
-  );
-}
-
-interface DividerProps {
-  borderColor?: string;
-  borderTopWidth?: string;
-  class?: string;
-  width?: string;
-}
-
-export function Divider(props: Readonly<DividerProps>): JSX.Element {
-  return (
-    <div
-      class={props.class || ""}
-      classList={{
-        [`border-color:${props.borderColor || "rgb(209,213,219)"}`]: true,
-        [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
-        [`width:${props.width || "100%"}`]: true,
-      }}
-    />
   );
 }

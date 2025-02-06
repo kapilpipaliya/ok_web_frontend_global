@@ -1,13 +1,13 @@
-import { Store } from "solid-js/store";
+import type { Store } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export const getFormData = async (

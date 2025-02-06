@@ -1,17 +1,20 @@
-import { Show } from 'solid-js';
+
+import type { Vertex } from '~/lib/graph/graph';
+
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
-import { Vertex } from '~/lib/graph/graph';
-import { DBMessage } from './types';
+
+import type { DBMessage } from './types';
+
 import { Preview } from './Preview';
 
 interface ChatResponseProps {
-  message: Vertex<DBMessage>;
-  insertMode: () => 'before' | 'after' | 'center';
-  setInsertMode: (mode: 'before' | 'after' | 'center') => void;
-  onInsert: (message: Vertex) => void;
-  onDelete: (message: Vertex) => void;
   disabled?: boolean;
+  insertMode: () => 'after' | 'before' | 'center';
+  message: Vertex<DBMessage>;
+  onDelete: (message: Vertex) => void;
+  onInsert: (message: Vertex) => void;
+  setInsertMode: (mode: 'after' | 'before' | 'center') => void;
 }
 
 export function ChatResponse(props: ChatResponseProps) {
@@ -24,8 +27,8 @@ export function ChatResponse(props: ChatResponseProps) {
         <div class="font-weight:500 margin-bottom:8px">Preview:</div>
         <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
           <Preview 
-            object={JSON.parse(props.message.P.data || '{}')} 
             formId={`${props.message.id}FormStore`} 
+            object={JSON.parse(props.message.P.data || '{}')} 
           />
         </div>
 
@@ -33,8 +36,8 @@ export function ChatResponse(props: ChatResponseProps) {
           <div class="display:flex gap:8px">
             <select
               class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-              value={props.insertMode()}
               onChange={(e) => props.setInsertMode(e.currentTarget.value as any)}
+              value={props.insertMode()}
             >
               <option value="before">Insert Before</option>
               <option value="after">Insert After</option>
@@ -42,17 +45,17 @@ export function ChatResponse(props: ChatResponseProps) {
             </select>
 
             <IconButton
-              icon="ph:plus-circle"
               class={headerIconButtonClass}
+              disabled={props.disabled}
+              icon="ph:plus-circle"
               onClick={() => props.onInsert(props.message)}
               title="Insert"
-              disabled={props.disabled}
             />
           </div>
 
           <IconButton
-            icon="ph:trash"
             class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+            icon="ph:trash"
             onClick={() => props.onDelete(props.message)}
             title="Delete"
           />

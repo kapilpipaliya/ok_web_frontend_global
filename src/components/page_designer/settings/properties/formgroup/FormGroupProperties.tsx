@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import {
-  Accessor,
+  type Accessor,
   createMemo,
   createUniqueId,
   For,
@@ -10,6 +10,7 @@ import {
   Switch,
 } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -25,43 +26,57 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { PROPERTIES } from "../../../../styled/constants/constant";
 import {
-  type PageLayoutObject,
   useDesignerFormIdContext,
-  useDesignerLayoutStore,
 } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
-import { SelectRuleField } from "./rule_field/SelectRuleField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-
-function modifyMetaVertexExpr(meta: Vertex) {
-  return {
-    ...meta,
-    P: {
-      ...meta.P,
-      displayName: `${meta.P.displayName ?? meta.P.key} Expr`,
-      key: `${meta.P.key}`,
-    },
-  };
-}
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   onChange(meta: Vertex, data: unknown): void;
   selectedLayout: Vertex;
   txnId: number;
+}
+
+interface PropertyFieldProps {
+  meta: Vertex;
+  metaTxnId: number;
+  onChange: (meta: Vertex, data: unknown) => void;
+  selectedLayout: Vertex;
+  txnId: number;
+}
+
+export function createVertexIds() {
+  return {
+    as: `asVertex${createUniqueId()}`,
+    attrLabel: `attrNameVertex${createUniqueId()}`,
+    calculatedValue: `calculatedValueVertex${createUniqueId()}`,
+    class: `classVertex${createUniqueId()}`,
+    defaultValue: `defaultValueVertex${createUniqueId()}`,
+    disabled: `disabledVertex${createUniqueId()}`,
+    errorClass: `errorClassVertex${createUniqueId()}`,
+    height: `heightVertex${createUniqueId()}`,
+    hidden: `hiddenVertex${createUniqueId()}`,
+    icon: `iconVertex${createUniqueId()}`,
+    key: `nameVertex${createUniqueId()}`,
+    perm: `permissionVertex${createUniqueId()}`,
+    required: `requiredVertex${createUniqueId()}`,
+    src: `srcVertex${createUniqueId()}`,
+    thankYouPage: `thankYouPageVertex${createUniqueId()}`,
+    width: `widthVertex${createUniqueId()}`,
+  };
 }
 
 export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
@@ -116,25 +131,30 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   );
 }
 
-export function createVertexIds() {
-  return {
-    as: `asVertex${createUniqueId()}`,
-    attrLabel: `attrNameVertex${createUniqueId()}`,
-    calculatedValue: `calculatedValueVertex${createUniqueId()}`,
-    class: `classVertex${createUniqueId()}`,
-    defaultValue: `defaultValueVertex${createUniqueId()}`,
-    disabled: `disabledVertex${createUniqueId()}`,
-    errorClass: `errorClassVertex${createUniqueId()}`,
-    height: `heightVertex${createUniqueId()}`,
-    hidden: `hiddenVertex${createUniqueId()}`,
-    icon: `iconVertex${createUniqueId()}`,
-    key: `nameVertex${createUniqueId()}`,
-    perm: `permissionVertex${createUniqueId()}`,
-    required: `requiredVertex${createUniqueId()}`,
-    src: `srcVertex${createUniqueId()}`,
-    thankYouPage: `thankYouPageVertex${createUniqueId()}`,
-    width: `widthVertex${createUniqueId()}`,
-  };
+function clonePropAttributes(
+  metaAttributes: Vertex[],
+  txnId: number,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  return metaAttributes?.map((vertex) => {
+    const form = FormMetaData.Comp;
+    const _propAttribute = form.attributes.find((attr) => attr.key === "Prop")!;
+    // now we simplified this so user cant enter default value
+    // const valueAttribute = propAttribute.attributes!.find(
+    //   (attr) => attr.key === "value",
+    // )!;
+    return cloneVertexWithEdges(
+      txnId,
+      vertex,
+      {
+        // componentName: valueAttribute.componentName,
+        // meta: valueAttribute.meta,
+      },
+      graph,
+      setGraph,
+    );
+  });
 }
 
 function createVertices(
@@ -143,9 +163,9 @@ function createVertices(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const vertices: ({
+  const vertices: (Omit<Vertex, "IN" | "L" | "OUT"> & {
     attributes?: FieldAttribute[];
-  } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
+  })[] = [
       {
         id: vertexIds.key,
         P: {
@@ -269,30 +289,15 @@ function createVertices(
   }
 }
 
-function clonePropAttributes(
-  metaAttributes: Vertex[],
-  txnId: number,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  return metaAttributes?.map((vertex) => {
-    const form = FormMetaData.Comp;
-    const _propAttribute = form.attributes.find((attr) => attr.key === "Prop")!;
-    // now we simplified this so user cant enter default value
-    // const valueAttribute = propAttribute.attributes!.find(
-    //   (attr) => attr.key === "value",
-    // )!;
-    return cloneVertexWithEdges(
-      txnId,
-      vertex,
-      {
-        // componentName: valueAttribute.componentName,
-        // meta: valueAttribute.meta,
-      },
-      graph,
-      setGraph,
-    );
-  });
+function modifyMetaVertexExpr(meta: Vertex) {
+  return {
+    ...meta,
+    P: {
+      ...meta.P,
+      displayName: `${meta.P.displayName ?? meta.P.key} Expr`,
+      key: `${meta.P.key}`,
+    },
+  };
 }
 
 function moveClassToLast(
@@ -331,14 +336,6 @@ function moveClassToLast(
     ...(componentName === "Icon" ? [graph.vertexes[vertexIds.icon], graph.vertexes[vertexIds.width], graph.vertexes[vertexIds.height]] : []),
     ...nonCssVertices,
   ];
-}
-
-interface PropertyFieldProps {
-  meta: Vertex;
-  metaTxnId: number;
-  onChange: (meta: Vertex, data: unknown) => void;
-  selectedLayout: Vertex;
-  txnId: number;
 }
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {

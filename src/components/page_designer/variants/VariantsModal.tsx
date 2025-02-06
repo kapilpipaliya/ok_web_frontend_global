@@ -1,26 +1,23 @@
-import jsep from "jsep";
+
 import { klona } from "klona";
-import { createMemo, createSignal, onCleanup } from "solid-js";
-import { createStore, SetStoreFunction } from "solid-js/store";
+import { createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
+
+import type {
+  FormStoreObject,
+} from "~/components/form/context/FormContext";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
-import {
-  type FormStoreObject,
-  useFormContext,
-} from "~/components/form/context/FormContext";
-import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
-import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
-import { Overlay } from "../rules/Overlay";
 import { generateTableInputMeta } from "../rules/functions/generateTableInputMeta";
+import { Overlay } from "../rules/Overlay";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(

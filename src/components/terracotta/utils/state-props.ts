@@ -1,7 +1,9 @@
-type Booleanish = "" | undefined;
+interface ActiveProps {
+  "tc-active": Booleanish;
+}
 
-function toBooleanish(value?: boolean): Booleanish {
-  return value ? "" : undefined;
+interface ARIACheckedProps {
+  "aria-checked": "mixed" | boolean;
 }
 
 /**
@@ -11,6 +13,77 @@ function toBooleanish(value?: boolean): Booleanish {
 interface ARIADisabledProps {
   "aria-disabled"?: boolean;
   disabled?: boolean;
+}
+
+interface ARIAExpandedProps {
+  "aria-expanded"?: boolean;
+}
+
+interface ARIAPressedProps {
+  "aria-pressed": boolean;
+}
+
+interface ARIASelectedProps {
+  "aria-selected": boolean;
+}
+
+type Booleanish = "" | undefined;
+
+interface CheckedProps {
+  "tc-checked": "mixed" | Booleanish;
+}
+interface DisabledProps {
+  "tc-disabled"?: Booleanish;
+}
+
+interface ExpandedProps {
+  "tc-expanded"?: Booleanish;
+}
+
+interface HasActiveProps {
+  "tc-has-active": Booleanish;
+}
+
+interface HasQueryProps {
+  "tc-has-query": Booleanish;
+}
+
+/**
+ * Terracotta States Dont use these
+ */
+
+interface HasSelectedProps {
+  "tc-has-selected": Booleanish;
+}
+
+interface MatchesProps {
+  "tc-matches": Booleanish;
+}
+
+interface PressedProps {
+  "tc-pressed": Booleanish;
+}
+
+interface SelectedProps {
+  "tc-selected": Booleanish;
+}
+
+export function createActiveState(isActive: () => boolean): ActiveProps {
+  return {
+    get "tc-active"(): Booleanish {
+      return toBooleanish(isActive());
+    },
+  };
+}
+
+export function createARIACheckedState(
+  checked: () => boolean | undefined,
+): ARIACheckedProps {
+  return {
+    get "aria-checked"(): "mixed" | boolean {
+      return checked() ?? "mixed";
+    },
+  };
 }
 
 export function createARIADisabledState(
@@ -26,10 +99,6 @@ export function createARIADisabledState(
   };
 }
 
-interface ARIAExpandedProps {
-  "aria-expanded"?: boolean;
-}
-
 export function createARIAExpandedState(
   expanded: () => boolean | undefined,
 ): ARIAExpandedProps {
@@ -38,37 +107,6 @@ export function createARIAExpandedState(
       return expanded();
     },
   };
-}
-
-interface ARIACheckedProps {
-  "aria-checked": "mixed" | boolean;
-}
-
-export function createARIACheckedState(
-  checked: () => boolean | undefined,
-): ARIACheckedProps {
-  return {
-    get "aria-checked"(): "mixed" | boolean {
-      return checked() ?? "mixed";
-    },
-  };
-}
-interface ARIASelectedProps {
-  "aria-selected": boolean;
-}
-
-export function createARIASelectedState(
-  selected: () => boolean,
-): ARIASelectedProps {
-  return {
-    get "aria-selected"(): boolean {
-      return selected();
-    },
-  };
-}
-
-interface ARIAPressedProps {
-  "aria-pressed": boolean;
 }
 
 export function createARIAPressedState(
@@ -81,40 +119,14 @@ export function createARIAPressedState(
   };
 }
 
-/**
- * Terracotta States Dont use these
- */
-
-interface DisabledProps {
-  "tc-disabled"?: Booleanish;
-}
-
-export function createDisabledState(
-  disabled: () => boolean | undefined,
-): DisabledProps {
+export function createARIASelectedState(
+  selected: () => boolean,
+): ARIASelectedProps {
   return {
-    get "tc-disabled"(): Booleanish {
-      return toBooleanish(disabled());
+    get "aria-selected"(): boolean {
+      return selected();
     },
   };
-}
-
-interface ExpandedProps {
-  "tc-expanded"?: Booleanish;
-}
-
-export function createExpandedState(
-  expanded: () => boolean | undefined,
-): ExpandedProps {
-  return {
-    get "tc-expanded"(): Booleanish {
-      return toBooleanish(expanded());
-    },
-  };
-}
-
-interface CheckedProps {
-  "tc-checked": "mixed" | Booleanish;
 }
 
 export function createCheckedState(
@@ -128,44 +140,40 @@ export function createCheckedState(
   };
 }
 
-interface SelectedProps {
-  "tc-selected": Booleanish;
-}
-
-export function createSelectedState(isSelected: () => boolean): SelectedProps {
+export function createDisabledState(
+  disabled: () => boolean | undefined,
+): DisabledProps {
   return {
-    get "tc-selected"(): Booleanish {
-      return toBooleanish(isSelected());
+    get "tc-disabled"(): Booleanish {
+      return toBooleanish(disabled());
     },
   };
 }
 
-interface ActiveProps {
-  "tc-active": Booleanish;
-}
-
-export function createActiveState(isActive: () => boolean): ActiveProps {
+export function createExpandedState(
+  expanded: () => boolean | undefined,
+): ExpandedProps {
   return {
-    get "tc-active"(): Booleanish {
-      return toBooleanish(isActive());
+    get "tc-expanded"(): Booleanish {
+      return toBooleanish(expanded());
     },
   };
 }
 
-interface MatchesProps {
-  "tc-matches": Booleanish;
-}
-
-export function createMatchesState(matches: () => boolean): MatchesProps {
+export function createHasActiveState(hasActive: () => boolean): HasActiveProps {
   return {
-    get "tc-matches"(): Booleanish {
-      return toBooleanish(matches());
+    get "tc-has-active"(): Booleanish {
+      return toBooleanish(hasActive());
     },
   };
 }
 
-interface HasSelectedProps {
-  "tc-has-selected": Booleanish;
+export function createHasQueryState(hasQuery: () => boolean): HasQueryProps {
+  return {
+    get "tc-has-query"(): Booleanish {
+      return toBooleanish(hasQuery());
+    },
+  };
 }
 
 export function createHasSelectedState(
@@ -178,32 +186,12 @@ export function createHasSelectedState(
   };
 }
 
-interface HasActiveProps {
-  "tc-has-active": Booleanish;
-}
-
-export function createHasActiveState(hasActive: () => boolean): HasActiveProps {
+export function createMatchesState(matches: () => boolean): MatchesProps {
   return {
-    get "tc-has-active"(): Booleanish {
-      return toBooleanish(hasActive());
+    get "tc-matches"(): Booleanish {
+      return toBooleanish(matches());
     },
   };
-}
-
-interface HasQueryProps {
-  "tc-has-query": Booleanish;
-}
-
-export function createHasQueryState(hasQuery: () => boolean): HasQueryProps {
-  return {
-    get "tc-has-query"(): Booleanish {
-      return toBooleanish(hasQuery());
-    },
-  };
-}
-
-interface PressedProps {
-  "tc-pressed": Booleanish;
 }
 
 export function createPressedState(pressed: () => boolean): PressedProps {
@@ -212,4 +200,16 @@ export function createPressedState(pressed: () => boolean): PressedProps {
       return toBooleanish(pressed());
     },
   };
+}
+
+export function createSelectedState(isSelected: () => boolean): SelectedProps {
+  return {
+    get "tc-selected"(): Booleanish {
+      return toBooleanish(isSelected());
+    },
+  };
+}
+
+function toBooleanish(value?: boolean): Booleanish {
+  return value ? "" : undefined;
 }

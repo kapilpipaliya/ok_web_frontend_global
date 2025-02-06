@@ -4,14 +4,14 @@ export function getDnDBoxShadowArgs(
   inset = "inset",
 ) {
   const boxShadowProps = {
+    inset: inset,
     "offset-x": "0",
-    "offset-y": "0",
     // eslint-disable-next-line perfectionist/sort-objects
     blur: "0",
-    spread: "0",
+    "offset-y": "0",
     // eslint-disable-next-line perfectionist/sort-objects
     color: color,
-    inset: inset,
+    spread: "0",
   };
 
   switch (position) {

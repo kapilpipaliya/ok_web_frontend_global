@@ -3,13 +3,13 @@ import { type Accessor, createMemo } from "solid-js";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import type { FormStoreObject } from "../context/FormContext";
+
+import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
-import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import type { FormStoreObject } from "../context/FormContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function Step(
   props: Readonly<{ index: Accessor<number>; step: Vertex; steps: Vertex[] }>,

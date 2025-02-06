@@ -1,5 +1,7 @@
 import type { JSX } from "solid-js";
 
+export type DisplayComponentProps = {};
+
 export interface GenericComponentProps {
   children?: JSX.Element;
   componentName?: string;
@@ -13,5 +15,3 @@ export interface GenericComponentProps {
   txnId: number;
   value?: any;
 }
-
-export type DisplayComponentProps = {};

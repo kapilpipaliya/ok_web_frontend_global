@@ -1,35 +1,56 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { klona } from "klona/json";
 import { batch, untrack } from "solid-js";
 
-import {
-  type GraphInterface,
-  type Id,
-  IdAttr,
-  type Vertex,
+import type {
+  GraphInterface,
+  Id,
+  Vertex,
 } from "~/lib/graph/graph";
+
+import { evalExpression } from "~/lib/expression_eval";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 
 import { getInEdge } from "../../get/sync/getInEdge";
 import { getToEdge } from "../../get/sync/getToEdge";
 import { commitTxn } from "../../transaction/commitTxn";
-import { addNewEdge, newEdge } from "../edge";
-import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 import { generateNewTxnId } from "../../transaction/generateNewTxnId";
-import { evalExpression } from "~/lib/expression_eval";
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
+import { addNewEdge, newEdge } from "../edge";
 
-export function getSublistRowsForType(
+export function addNewRow(
+  txnId: number,
+  meta: Vertex,
   graph: Store<GraphInterface>,
-  type: string,
-  vertex: Vertex,
+  setGraph: SetStoreFunction<GraphInterface>,
+  parentVertex: Vertex,
+  properties: { [key: string]: any },
+  isRealTime: boolean,
 ) {
-  return (
-    evalExpression(`->${type}`, {
+  return untrack(() => {
+    if (isRealTime) {
+      txnId = generateNewTxnId(graph, setGraph);
+    }
+    const type = meta.P.inward
+      ? getInEdge(meta, parentVertex)
+      : getToEdge(meta, parentVertex);
+    const label = meta.P.label;
+
+    const newRowResult = newRow(
       graph,
-      vertexes: [vertex],
-    }) || []
-  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
+      setGraph,
+      txnId,
+      parentVertex,
+      label,
+      type,
+      properties,
+      meta.P.inward,
+    );
+    if (isRealTime) {
+      commitTxn(txnId, graph);
+    }
+    return newRowResult;
+  });
 }
 
 export function getSublistRows(
@@ -42,6 +63,19 @@ export function getSublistRows(
   }
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
+  return (
+    evalExpression(`->${type}`, {
+      graph,
+      vertexes: [vertex],
+    }) || []
+  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
+}
+
+export function getSublistRowsForType(
+  graph: Store<GraphInterface>,
+  type: string,
+  vertex: Vertex,
+) {
   return (
     evalExpression(`->${type}`, {
       graph,
@@ -95,39 +129,4 @@ export function newRow(
       vertexId: vertexNew.id,
     };
   }));
-}
-
-export function addNewRow(
-  txnId: number,
-  meta: Vertex,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  parentVertex: Vertex,
-  properties: { [key: string]: any },
-  isRealTime: boolean,
-) {
-  return untrack(() => {
-    if (isRealTime) {
-      txnId = generateNewTxnId(graph, setGraph);
-    }
-    const type = meta.P.inward
-      ? getInEdge(meta, parentVertex)
-      : getToEdge(meta, parentVertex);
-    const label = meta.P.label;
-
-    const newRowResult = newRow(
-      graph,
-      setGraph,
-      txnId,
-      parentVertex,
-      label,
-      type,
-      properties,
-      meta.P.inward,
-    );
-    if (isRealTime) {
-      commitTxn(txnId, graph);
-    }
-    return newRowResult;
-  });
 }

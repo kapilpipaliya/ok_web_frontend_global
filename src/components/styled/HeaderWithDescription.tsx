@@ -20,8 +20,8 @@ export function HeaderWithDescription(
       classList={{
         [`bg:${props.backgroundColor || "rgb(255,255,255)"}`]: true,
         [`border-color:${props.borderColor || "rgb(229,231,235)"}`]: true, // border-gray-200
-        [`px:${props.paddingX || "1rem"}`]: true,
         [`px:${props.paddingXSm || "1.5rem"}@sm`]: true,
+        [`px:${props.paddingX || "1rem"}`]: true,
         [`py:${props.paddingY || "1.25rem"}`]: true,
         "border-bottom-width:1px": true,
       }}

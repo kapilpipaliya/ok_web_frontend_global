@@ -1,12 +1,15 @@
 import { For, Show } from "solid-js";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { useGraph, Id, Vertex } from "~/lib/graph/graph";
-import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
-import { mergeVertexProperties, deleteVertex } from "~/lib/graph/mutate/vertex";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { v7 as uuidv7 } from "uuid";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { IconButton } from "~/components/styled/IconButton";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
+import { deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+
+import { type PageLayoutObject, useDesignerLayoutStore, } from "../../context/LayoutContext";
 
 export function TabBar(props: {mainPanel: Id}) {
   const [graph, setGraph] = useGraph();
@@ -22,8 +25,8 @@ export function TabBar(props: {mainPanel: Id}) {
       graph,
       setGraph,
       {
-        openedFormIds: layoutStore().openedFormIds.filter(f => f !== openedFormId),
-        formId: graph.vertexes[openTab!]?.P.formId || null
+        formId: graph.vertexes[openTab!]?.P.formId || null,
+        openedFormIds: layoutStore().openedFormIds.filter(f => f !== openedFormId)
       },
       { cloneProperties: false }
     );
@@ -37,8 +40,8 @@ export function TabBar(props: {mainPanel: Id}) {
       graph,
       setGraph,
       {
-        formId,
-        [`mainPanel${props.mainPanel}Tab`]: formId
+        [`mainPanel${props.mainPanel}Tab`]: formId,
+        formId
       }
     );
   };
@@ -87,17 +90,17 @@ export function TabBar(props: {mainPanel: Id}) {
       <IconButton
         icon="ph:plus-circle"
         onClick={addMainPanel}
-        title="Add New Panel"
         size={22}
+        title="Add New Panel"
       />
       <For each={layoutStore().openedFormIds.filter(id => graph.vertexes[id].P.mainPanel === props.mainPanel)}>
         {(openedFormId, index) => (
           <div
             class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "bb:2px|solid|red" : ""} cursor:move`}
-            onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
             draggable={true}
-            onDragStart={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: openedFormId })}
+            onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
             onDragOver={(e) => e.preventDefault()}
+            onDragStart={() => mergeVertexProperties(0, layoutStoreId, graph, setGraph, { draggedTab: openedFormId })}
             onDrop={() => moveTab(props.mainPanel)}
           >
             <span>
@@ -137,8 +140,8 @@ export function TabBar(props: {mainPanel: Id}) {
       </For>
       <Show when={layoutStore().mainPanel.length > 1}>
         <IconButton
-          icon="ph:x-circle"
           class="ml:auto"
+          icon="ph:x-circle"
           onClick={() => {
             const panelIndex = layoutStore().mainPanel.indexOf(props.mainPanel);
             const previousPanelId = layoutStore().mainPanel[panelIndex - 1];
@@ -153,8 +156,8 @@ export function TabBar(props: {mainPanel: Id}) {
               mainPanel: layoutStore().mainPanel.filter(id => id !== props.mainPanel)
             });
           }}
-          title="Close Panel"
           size={22}
+          title="Close Panel"
         />
       </Show>
     </div>

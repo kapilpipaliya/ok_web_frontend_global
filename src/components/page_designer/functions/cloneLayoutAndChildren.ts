@@ -3,10 +3,10 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { componentDrop } from "~/components/page_designer/functions/drop/componentDrop";
-  
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
-import { sortChildren } from "./sortChildren";
 import { evalExpression } from "~/lib/expression_eval";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+
+import { sortChildren } from "./sortChildren";
 
 export function cloneLayoutAndChildren(
   layoutVertex: Vertex,

@@ -14,14 +14,6 @@ export function Table(
   );
 }
 
-export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
-  return (
-    <div class="bg:#37c border:1px|solid|#347fdd color:white font-weight:600 p:10px text-align:center">
-      {props.children}
-    </div>
-  );
-}
-
 export function TableBodyCell(
   props: Readonly<{
     children: JSX.Element;
@@ -37,6 +29,14 @@ export function TableBodyCell(
         "bg:white": props.index ? props.index % 2 === 0 : false,
       }}
     >
+      {props.children}
+    </div>
+  );
+}
+
+export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
+  return (
+    <div class="bg:#37c border:1px|solid|#347fdd color:white font-weight:600 p:10px text-align:center">
       {props.children}
     </div>
   );

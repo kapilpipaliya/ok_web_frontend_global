@@ -2,8 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
 
-import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "../mutate/vertex";
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "./getLastTxnIndex";
 
 export function saveStepIndex(

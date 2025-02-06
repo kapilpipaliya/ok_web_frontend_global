@@ -1,11 +1,11 @@
-import { createSignal, For, onCleanup, type JSX } from "solid-js";
+import { createSignal, For, type JSX, onCleanup } from "solid-js";
 
-import { IconButton } from "./IconButton";
-import { DIMENSIONS, ResizableContainer } from "./ResizableDivView";
-import { Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/graph";
 import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
+
+import { IconButton } from "./IconButton";
+import { DIMENSIONS, ResizableContainer } from "./ResizableDivView";
 
 export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
   const [view, setView] = createSignal(DIMENSIONS.desktop);

@@ -7,6 +7,8 @@ import {
   Show,
 } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
 import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
@@ -16,13 +18,12 @@ import { resetDragDropState } from "~/components/page_designer/event_handler/res
 import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;

@@ -4,9 +4,19 @@ import "./radio/radio.css";
 
 export const tableContext = createContext<[] | []>([]);
 
-export type TableCellProps = {
+export type TableCellProps = JSX.HTMLAttributes<HTMLTableCellElement> & {
   disabled?: boolean;
-} & JSX.HTMLAttributes<HTMLTableCellElement>;
+};
+
+export type TableProps = JSX.HTMLAttributes<HTMLTableElement> & {};
+
+export function TableGroup(props: Readonly<TableProps>) {
+  return (
+    <tableContext.Provider value={[]}>
+      <table {...props} />
+    </tableContext.Provider>
+  );
+}
 
 export function TableHeader(props: Readonly<TableCellProps>) {
   const [] = useContext(tableContext);
@@ -18,14 +28,4 @@ export function TableRow(props: Readonly<TableCellProps>) {
   const [] = useContext(tableContext);
 
   return <td {...props} />;
-}
-
-export type TableProps = {} & JSX.HTMLAttributes<HTMLTableElement>;
-
-export function TableGroup(props: Readonly<TableProps>) {
-  return (
-    <tableContext.Provider value={[]}>
-      <table {...props} />
-    </tableContext.Provider>
-  );
 }

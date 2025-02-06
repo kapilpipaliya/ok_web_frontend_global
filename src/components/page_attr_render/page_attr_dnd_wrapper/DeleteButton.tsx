@@ -1,17 +1,17 @@
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
-import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function DeleteButton(props: {
+  class?: string;
   componentName: string;
   item: Vertex;
   size: number;
-  class?: string;
 }) {
   const [graph, setGraph] = useGraph();
   const { showSuccessToast } = useToast();

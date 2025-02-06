@@ -1,14 +1,15 @@
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import { openInNewInternalTab } from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
-import { Vertex, GraphInterface } from "~/lib/graph/graph";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { openInNewInternalTab } from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
 
 export function insertAtPosition(message: Vertex, insertMode: string, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStoreVertex: () => Vertex<PageLayoutObject>) {
   const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
@@ -34,8 +35,8 @@ export function insertAtPosition(message: Vertex, insertMode: string, graph: Gra
       newTxnId,
       {
         id: componentId,
-        L: ["Component"],
         IN: {},
+        L: ["Component"],
         OUT: {},
         P: { ...componentVertex.P }
       },
@@ -77,7 +78,7 @@ export function insertAtPosition(message: Vertex, insertMode: string, graph: Gra
       }
     }
 
-    const fromVertex1 = { ...componentVertex, P: {...componentVertex.P, componentName: "Fragment"}, L: ["Page"] } as Vertex;
+    const fromVertex1 = { ...componentVertex, L: ["Page"], P: {...componentVertex.P, componentName: "Fragment"} } as Vertex;
     handleDropAtPosition(
       graph,
       setGraph,
@@ -88,7 +89,7 @@ export function insertAtPosition(message: Vertex, insertMode: string, graph: Gra
       "center"
     );
 
-   openInNewInternalTab(layoutStoreVertex().id, { ...graph.vertexes[componentId], P: {parentId: fromStoreVertex.P.formDataId, formDataId: componentId, ...graph.vertexes[componentId].P} } as Vertex, graph, setGraph);
+   openInNewInternalTab(layoutStoreVertex().id, { ...graph.vertexes[componentId], P: {formDataId: componentId, parentId: fromStoreVertex.P.formDataId, ...graph.vertexes[componentId].P} } as Vertex, graph, setGraph);
   }
 
   handleDropAtPosition(

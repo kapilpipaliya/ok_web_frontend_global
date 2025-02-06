@@ -1,10 +1,13 @@
-import { SetStoreFunction } from "solid-js/store";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { evalExpression } from "~/lib/expression_eval";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { DBMessage } from "../types";
+import type { SetStoreFunction } from "solid-js/store";
 
-export function getChatHistory(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formStoreVertex: () => Vertex<FormStoreObject> | undefined) {
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { evalExpression } from "~/lib/expression_eval";
+
+import type { DBMessage } from "../types";
+
+export function getChatHistory(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formStoreVertex: () => undefined | Vertex<FormStoreObject>) {
   const formDataVertex = formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex()!.P.formDataId!] : undefined;
   if (!formDataVertex) return [];
 

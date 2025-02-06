@@ -11,10 +11,10 @@ import { useToast } from "~/components/styled/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,

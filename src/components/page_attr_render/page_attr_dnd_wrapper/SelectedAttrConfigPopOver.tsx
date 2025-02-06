@@ -1,9 +1,10 @@
 import { useZIndex } from "~/components/fields/ZIndex";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { type PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
@@ -12,8 +13,6 @@ import { InsertButtons } from "./InsertButtons";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
@@ -53,7 +52,7 @@ export function SelectedAttrConfigPopOver(
         <SaveAsTemplateButton item={props.item} size={iconSize} />
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
-        <DeleteButton componentName={getComponentName()!} item={props.item} size={iconSize} class="color:red" />
+        <DeleteButton class="color:red" componentName={getComponentName()!} item={props.item} size={iconSize} />
       </div>
     </span>
   );

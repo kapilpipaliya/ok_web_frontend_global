@@ -3,12 +3,11 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-
+import { evalExpression } from "~/lib/expression_eval";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { selectedValue } from "../../fields/utils/selectedValue";
 import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
-import { evalExpression } from "~/lib/expression_eval";
 
 export function getSelectNameValue(
   props: Readonly<{

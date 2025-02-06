@@ -1,32 +1,33 @@
 import { createSignal, onMount, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
 import { DialogFooter } from "../../styled/dialog/DialogFooter";
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { useToast } from "../../styled/Toast";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
-import { isNegative } from "~/lib/data_structure/number/isNegative";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
     item: Vertex;
-    onClose: () => void;
     onClickOutside?: () => void;
+    onClose: () => void;
     onMouseLeave?: () => void;
     parentRef: HTMLElement;
-    saveAsLabel: "Template" | "Component";
+    saveAsLabel: "Component" | "Template";
   }>,
 ) {
   let nameInputRef: HTMLInputElement;
@@ -147,9 +148,9 @@ export function SaveAsTemplateMenu(
         <div class="mt:2">
           <label class="display:flex gap:0.5rem align-items:center">
             <input
-              type="checkbox"
               checked={saveInCurrentPage()}
               onChange={(e) => setSaveInCurrentPage(e.target.checked)}
+              type="checkbox"
             />
             <span class="f:0.875rem">Save in current page</span>
           </label>

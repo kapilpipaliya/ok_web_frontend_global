@@ -38,30 +38,6 @@ function Backdrop() {
   );
 }
 
-function ModalContent() {
-  const zIndex = useZIndex();
-  return (
-    <div
-      class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}
-    >
-      <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
-        <ModalPanel />
-      </div>
-    </div>
-  );
-}
-
-function ModalPanel() {
-  return (
-    <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:32rem@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
-      <DismissButton />
-      <ModalHeader />
-      <ModalBody />
-      <ModalFooter />
-    </div>
-  );
-}
-
 function DismissButton() {
   const props = useContext(ModalContext)!;
   return (
@@ -87,6 +63,50 @@ function DismissButton() {
           />
         </svg>
       </button>
+    </div>
+  );
+}
+
+function ModalBody() {
+  const props = useContext(ModalContext)!;
+  return <div>{props.children}</div>;
+}
+
+function ModalContent() {
+  const zIndex = useZIndex();
+  return (
+    <div
+      class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}
+    >
+      <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
+        <ModalPanel />
+      </div>
+    </div>
+  );
+}
+
+function ModalFooter() {
+  const props = useContext(ModalContext)!;
+  return (
+    <div class="flex@sm flex-direction:row-reverse@sm mt:1.25rem mt:1rem@sm">
+      <Show when={props.confirmButtonText}>
+        <button
+          class="lh:1.25rem bg:rgb(220,38,38) bg:rgb(239,68,68):hover border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:rgb(255,255,255) display:inline-flex f:0.875rem font-weight:600 justify-content:center ml:0.75rem@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
+          onClick={props.onConfirm}
+          type="button"
+        >
+          {props.confirmButtonText ?? "Confirm"}
+        </button>
+      </Show>
+      <Show when={props.closeButtonText}>
+        <button
+          class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
+          onClick={props.onClose}
+          type="button"
+        >
+          {props.closeButtonText ?? "Close"}
+        </button>
+      </Show>
     </div>
   );
 }
@@ -128,33 +148,13 @@ function ModalHeader() {
   );
 }
 
-function ModalBody() {
-  const props = useContext(ModalContext)!;
-  return <div>{props.children}</div>;
-}
-
-function ModalFooter() {
-  const props = useContext(ModalContext)!;
+function ModalPanel() {
   return (
-    <div class="flex@sm flex-direction:row-reverse@sm mt:1.25rem mt:1rem@sm">
-      <Show when={props.confirmButtonText}>
-        <button
-          class="lh:1.25rem bg:rgb(220,38,38) bg:rgb(239,68,68):hover border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:rgb(255,255,255) display:inline-flex f:0.875rem font-weight:600 justify-content:center ml:0.75rem@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
-          onClick={props.onConfirm}
-          type="button"
-        >
-          {props.confirmButtonText ?? "Confirm"}
-        </button>
-      </Show>
-      <Show when={props.closeButtonText}>
-        <button
-          class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
-          onClick={props.onClose}
-          type="button"
-        >
-          {props.closeButtonText ?? "Close"}
-        </button>
-      </Show>
+    <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:32rem@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
+      <DismissButton />
+      <ModalHeader />
+      <ModalBody />
+      <ModalFooter />
     </div>
   );
 }

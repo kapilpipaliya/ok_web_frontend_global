@@ -1,18 +1,20 @@
-import { children, createEffect, createMemo, on, Show, splitProps } from "solid-js";
-import type { GenericComponentProps } from "./FieldType";
-import { Id, useGraph, Vertex } from "~/lib/graph/graph";
-import { PageAttrRender } from "../page_attr_render/PageAttrRender";
-import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
-import { ServerResult } from "~/cypher/types/ServerResult";
-import { evalExpression } from "~/lib/expression_eval";
+import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
+
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
-import { ComponentChildrenContext } from "./contexts/ComponentChildrenContext";
-import { PreviewContext, usePreviewContext } from "../page_designer/context/PreviewContext";
-import { RepeaterVertexContext, useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
-import { getComponentDefaultValues } from "./getComponentDefaultValues";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import type { GenericComponentProps } from "./FieldType";
+
+import { RepeaterVertexContext, useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
+import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "../page_attr_render/PageAttrRender";
+import { PreviewContext, usePreviewContext } from "../page_designer/context/PreviewContext";
+import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
+import { ComponentChildrenContext } from "./contexts/ComponentChildrenContext";
+import { getComponentDefaultValues } from "./getComponentDefaultValues";
 
 export function ComponentField(props: Readonly<GenericComponentProps & { componentId?: string }>) {
   const [local, otherProps] = splitProps(props, [

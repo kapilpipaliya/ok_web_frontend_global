@@ -1,60 +1,15 @@
-import { createStore } from 'solid-js/store';
-import { useGraph, Vertex } from '~/lib/graph/graph';
+
+import { createSignal, onMount, Show } from 'solid-js';
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { PageView } from "~/components/page_attr_render/PageView";
-import { DesignerFormIdContext, DesignerLayoutStoreContext, PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
-import { Show, createSignal, onMount } from 'solid-js';
-import { getChannel, handleChannelMessage } from '~/lib/graph/mutate/channel';
+import { DesignerFormIdContext, DesignerLayoutStoreContext, type PageLayoutObject, useDesignerLayoutStore } from '~/components/page_designer/context/LayoutContext';
 import { handleDrop } from '~/components/page_designer/event_handler/handleDrop';
-import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import { resetDragDropState } from '~/components/page_designer/event_handler/resetDragDropState';
-import { FormStoreObject } from "~/components/form/context/FormContext";
-
-function DroppableWrapper(props: { formStoreId: string; children: any }) {
-  const [graph, setGraph] = useGraph();
-  const [isDraggingOver, setIsDraggingOver] = createSignal(false);
-  const queryParams = new URLSearchParams(window.location.search);
-  const noMinHeight = queryParams.get('noMinHeight') === 'true';
-  // const { showErrorToast } = useToast();
-  const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const formStoreVertex = () => graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
-
-  return (
-    <div
-      class={noMinHeight ? undefined : "min-h:300px"}
-      classList={{
-        "bg:#f3f3f4": isDraggingOver(),
-      }}
-      onDragOver={(e) => {
-        e.preventDefault(); // Allow drop
-        setIsDraggingOver(true);
-      }}
-      onDragLeave={() => {
-        setIsDraggingOver(false);
-      }}
-      onDrop={async (e) => {
-        setIsDraggingOver(false);
-        mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-          activeItem: formStoreVertex()?.P.formDataId,
-          position: "center"
-        });
-
-        await handleDrop(
-          e,
-          layoutStoreVertex(),
-          formStoreVertex(),
-          graph,
-          setGraph,
-          // showErrorToast
-          error => console.error(error)
-        );
-        resetDragDropState(layoutStoreVertex(), graph, setGraph);
-      }}
-    >
-      {props.children}
-    </div>
-  );
-}
+import { useGraph, type Vertex } from '~/lib/graph/graph';
+import { getChannel, handleChannelMessage } from '~/lib/graph/mutate/channel';
+import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -92,5 +47,52 @@ export default function PageShareView() {
         </DesignerFormIdContext.Provider>
       </DesignerLayoutStoreContext.Provider>
     </Show>
+  );
+}
+
+function DroppableWrapper(props: { children: any; formStoreId: string; }) {
+  const [graph, setGraph] = useGraph();
+  const [isDraggingOver, setIsDraggingOver] = createSignal(false);
+  const queryParams = new URLSearchParams(window.location.search);
+  const noMinHeight = queryParams.get('noMinHeight') === 'true';
+  // const { showErrorToast } = useToast();
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const formStoreVertex = () => graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
+
+  return (
+    <div
+      class={noMinHeight ? undefined : "min-h:300px"}
+      classList={{
+        "bg:#f3f3f4": isDraggingOver(),
+      }}
+      onDragLeave={() => {
+        setIsDraggingOver(false);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault(); // Allow drop
+        setIsDraggingOver(true);
+      }}
+      onDrop={async (e) => {
+        setIsDraggingOver(false);
+        mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+          activeItem: formStoreVertex()?.P.formDataId,
+          position: "center"
+        });
+
+        await handleDrop(
+          e,
+          layoutStoreVertex(),
+          formStoreVertex(),
+          graph,
+          setGraph,
+          // showErrorToast
+          error => console.error(error)
+        );
+        resetDragDropState(layoutStoreVertex(), graph, setGraph);
+      }}
+    >
+      {props.children}
+    </div>
   );
 }

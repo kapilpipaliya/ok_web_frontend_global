@@ -1,15 +1,14 @@
 import { useNavigate } from "@solidjs/router";
-import { Show } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { IconButton } from "~/components/styled/IconButton";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 
+import { type PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { LeftToggleButton } from "./LeftToggleButton";
 
 export const LeftIcons = () => {
   const navigate = useNavigate();

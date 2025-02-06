@@ -1,11 +1,3 @@
-export interface IFormMetaData {
-  attributes: FieldAttribute[];
-  isInlineEditable?: boolean;
-  isRealTime?: boolean;
-  key: string; // required to create new vertex
-  title: string;
-}
-
 export interface FieldAttribute {
   [key: string]: any;
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
@@ -20,4 +12,12 @@ export interface FieldAttribute {
   tab?: string;
 
   validationRules?: Array<{}>;
+}
+
+export interface IFormMetaData {
+  attributes: FieldAttribute[];
+  isInlineEditable?: boolean;
+  isRealTime?: boolean;
+  key: string; // required to create new vertex
+  title: string;
 }

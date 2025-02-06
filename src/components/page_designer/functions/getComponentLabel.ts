@@ -2,10 +2,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 
-export function getComponentName(componentVertex: Vertex, attrVertex: Vertex): string {
-  return componentVertex?.P.key || attrVertex.P.componentName || "Html";
-}
-
 export function getComponentLabel(
   graph: GraphInterface, 
   vertex: Vertex,
@@ -16,4 +12,8 @@ export function getComponentLabel(
   });
 
   return getComponentName(vertexes?.[0], vertex);
+}
+
+export function getComponentName(componentVertex: Vertex, attrVertex: Vertex): string {
+  return componentVertex?.P.key || attrVertex.P.componentName || "Html";
 }

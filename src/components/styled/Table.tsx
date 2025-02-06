@@ -295,6 +295,19 @@ const Content = (props: { header: ColumnDef<any>; row: Vertex }) =>
     row: { original: props.row },
   }) ?? null;
 
+function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
+  return (
+    <div class="display:flex justify-content:end padding:5px|10px">
+      <button
+        class="bg:blue-50 br:5px cursor:pointer p:10px text:white"
+        onClick={props.onClick}
+      >
+        Load More
+      </button>
+    </div>
+  );
+}
+
 function TableBody(
   props: Readonly<{
     enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
@@ -354,18 +367,5 @@ function TableBody(
         </>
       )}
     </For>
-  );
-}
-
-function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
-  return (
-    <div class="display:flex justify-content:end padding:5px|10px">
-      <button
-        class="bg:blue-50 br:5px cursor:pointer p:10px text:white"
-        onClick={props.onClick}
-      >
-        Load More
-      </button>
-    </div>
   );
 }

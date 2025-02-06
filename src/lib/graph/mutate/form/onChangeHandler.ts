@@ -3,11 +3,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getId } from "~/lib/data_structure/string/getId";
 import { getLabel } from "~/lib/data_structure/string/getLabel";
+import { evalExpression } from "~/lib/expression_eval";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-
-import { evalExpression } from "~/lib/expression_eval";
 
 // Select On Change Handler
 export function onChangeHandler(

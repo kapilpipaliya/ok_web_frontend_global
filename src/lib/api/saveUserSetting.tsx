@@ -2,11 +2,11 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface } from "../graph/graph";
 
+import { getGlobalStore } from "../graph/get/sync/getGlobalStore";
 import { mergeVertexProperties } from "../graph/mutate/vertex";
 import { commitTxn } from "../graph/transaction/commitTxn";
-import { submitDataCall } from "./service/data/submitDataCall";
 import { generateNewTxnId } from "../graph/transaction/generateNewTxnId";
-import { getGlobalStore } from "../graph/get/sync/getGlobalStore";
+import { submitDataCall } from "./service/data/submitDataCall";
 
 export function saveUserSetting(
   properties: { [key: string]: any },

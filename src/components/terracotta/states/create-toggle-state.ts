@@ -17,12 +17,6 @@ export interface ToggleStateControlledOptions {
   pressed: boolean;
 }
 
-export interface ToggleStateUncontrolledOptions {
-  defaultPressed: boolean;
-  disabled?: boolean;
-  onChange?: (state: boolean) => void;
-}
-
 export type ToggleStateOptions =
   | ToggleStateControlledOptions
   | ToggleStateUncontrolledOptions;
@@ -34,6 +28,20 @@ export interface ToggleStateProperties {
   setState(newState: boolean): void;
   toggle(): void;
   uncheck(): void;
+}
+
+export interface ToggleStateProviderProps extends ToggleStateRenderProps {
+  state: ToggleStateProperties;
+}
+
+export interface ToggleStateRenderProps {
+  children?: ((state: ToggleStateProperties) => JSX.Element) | JSX.Element;
+}
+
+export interface ToggleStateUncontrolledOptions {
+  defaultPressed: boolean;
+  disabled?: boolean;
+  onChange?: (state: boolean) => void;
 }
 
 export function createToggleState(
@@ -97,15 +105,18 @@ export function createToggleState(
   };
 }
 
-export interface ToggleStateRenderProps {
-  children?: ((state: ToggleStateProperties) => JSX.Element) | JSX.Element;
-}
-
-export interface ToggleStateProviderProps extends ToggleStateRenderProps {
-  state: ToggleStateProperties;
-}
-
 const ToggleStateContext = createContext<ToggleStateProperties>();
+
+export function ToggleStateChild(props: ToggleStateRenderProps): JSX.Element {
+  const state = useToggleState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function ToggleStateProvider(
   props: ToggleStateProviderProps,
@@ -126,15 +137,4 @@ export function useToggleState(): ToggleStateProperties {
   const ctx = useContext(ToggleStateContext);
   assert(ctx, new Error("Missing <ToggleStateProvider>"));
   return ctx;
-}
-
-export function ToggleStateChild(props: ToggleStateRenderProps): JSX.Element {
-  const state = useToggleState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

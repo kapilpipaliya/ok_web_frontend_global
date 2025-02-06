@@ -8,36 +8,6 @@ import { useToast } from "~/components/styled/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/edge";
 import { mergeVertexProperties, updateVertexId } from "~/lib/graph/mutate/vertex";
 
-function handleInsertVertex(
-  oldId: string,
-  newId: string,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  mergeVertexProperties(0, "vertexOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
-  updateVertexId(oldId, newId, graph, setGraph);
-}
-
-function handleInsertEdge(
-  oldId: string,
-  newId: string,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  mergeVertexProperties(0, "edgeOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
-  updateEdgeId(oldId, newId, graph, setGraph);
-}
-
-function handleDeleteVertex(
-  error: boolean,
-  message: string,
-  showErrorToast: (msg: string) => void,
-) {
-  if (error) {
-    showErrorToast(message);
-  }
-}
-
 export function onMutatDataGet(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -95,4 +65,34 @@ export function onMutatDataGet(
       // commitTxn(txnId, graph);
     }*/
   });
+}
+
+function handleDeleteVertex(
+  error: boolean,
+  message: string,
+  showErrorToast: (msg: string) => void,
+) {
+  if (error) {
+    showErrorToast(message);
+  }
+}
+
+function handleInsertEdge(
+  oldId: string,
+  newId: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  mergeVertexProperties(0, "edgeOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
+  updateEdgeId(oldId, newId, graph, setGraph);
+}
+
+function handleInsertVertex(
+  oldId: string,
+  newId: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  mergeVertexProperties(0, "vertexOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
+  updateVertexId(oldId, newId, graph, setGraph);
 }

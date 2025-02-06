@@ -1,4 +1,4 @@
-import { sizeTypes } from "../csseditor_constants";
+
 import {
   createGridOptions,
   createSelectOptions,

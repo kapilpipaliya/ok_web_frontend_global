@@ -1,5 +1,6 @@
-import { SetStoreFunction } from "solid-js/store";
-import { GraphInterface, GraphContext, Id } from "~/lib/graph/graph";
+import type { SetStoreFunction } from "solid-js/store";
+
+import { GraphContext, type GraphInterface, type Id } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export function PreviewIsolated(props: { formId: Id; graph: GraphInterface; setGraph: SetStoreFunction<GraphInterface>; }) {
@@ -7,7 +8,7 @@ export function PreviewIsolated(props: { formId: Id; graph: GraphInterface; setG
     {/* Note: Its assuming the "Form" component type */}
     <PageViewWrapper
       formId={props.formId}
-      isNoPermissionCheck={true}
-      hideSaveCancelButton />
+      hideSaveCancelButton
+      isNoPermissionCheck={true} />
   </GraphContext.Provider>;
 }

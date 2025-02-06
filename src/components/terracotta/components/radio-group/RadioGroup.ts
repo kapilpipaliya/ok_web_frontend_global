@@ -50,6 +50,10 @@ export type RadioGroupControlledProps<
   T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, RadioGroupControlledBaseProps<V>>;
 
+export type RadioGroupProps<V, T extends ValidConstructor = "div"> =
+  | RadioGroupControlledProps<V, T>
+  | RadioGroupUncontrolledProps<V, T>;
+
 export type RadioGroupUncontrolledBaseProps<V> = Prettify<
   SelectStateRenderProps<V> & SingleSelectStateUncontrolledOptions<V>
 >;
@@ -58,16 +62,6 @@ export type RadioGroupUncontrolledProps<
   V,
   T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, RadioGroupUncontrolledBaseProps<V>>;
-
-export type RadioGroupProps<V, T extends ValidConstructor = "div"> =
-  | RadioGroupControlledProps<V, T>
-  | RadioGroupUncontrolledProps<V, T>;
-
-function isRadioGroupUncontrolled<V, T extends ValidConstructor = "div">(
-  props: RadioGroupProps<V, T>,
-): props is RadioGroupUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
 
 export function RadioGroup<V, T extends ValidConstructor = "div">(
   props: RadioGroupProps<V, T>,
@@ -174,4 +168,10 @@ export function RadioGroup<V, T extends ValidConstructor = "div">(
     },
     value: controller,
   });
+}
+
+function isRadioGroupUncontrolled<V, T extends ValidConstructor = "div">(
+  props: RadioGroupProps<V, T>,
+): props is RadioGroupUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

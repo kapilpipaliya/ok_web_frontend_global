@@ -17,12 +17,6 @@ export interface CheckStateControlledOptions {
   onChange?: (state?: boolean) => void;
 }
 
-export interface CheckStateUncontrolledOptions {
-  defaultChecked: boolean | undefined;
-  disabled?: boolean;
-  onChange?: (state?: boolean) => void;
-}
-
 export type CheckStateOptions =
   | CheckStateControlledOptions
   | CheckStateUncontrolledOptions;
@@ -35,6 +29,20 @@ export interface CheckStateProperties {
   setState(newState?: boolean): void;
   toggle(): void;
   uncheck(): void;
+}
+
+export interface CheckStateProviderProps extends CheckStateRenderProps {
+  state: CheckStateProperties;
+}
+
+export interface CheckStateRenderProps {
+  children?: ((state: CheckStateProperties) => JSX.Element) | JSX.Element;
+}
+
+export interface CheckStateUncontrolledOptions {
+  defaultChecked: boolean | undefined;
+  disabled?: boolean;
+  onChange?: (state?: boolean) => void;
 }
 
 export function createCheckState(
@@ -105,15 +113,18 @@ export function createCheckState(
   };
 }
 
-export interface CheckStateRenderProps {
-  children?: ((state: CheckStateProperties) => JSX.Element) | JSX.Element;
-}
-
-export interface CheckStateProviderProps extends CheckStateRenderProps {
-  state: CheckStateProperties;
-}
-
 const CheckStateContext = createContext<CheckStateProperties>();
+
+export function CheckStateChild(props: CheckStateRenderProps): JSX.Element {
+  const state = useCheckState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function CheckStateProvider(
   props: CheckStateProviderProps,
@@ -134,15 +145,4 @@ export function useCheckState(): CheckStateProperties {
   const ctx = useContext(CheckStateContext);
   assert(ctx, new Error("Missing <CheckStateProvider>"));
   return ctx;
-}
-
-export function CheckStateChild(props: CheckStateRenderProps): JSX.Element {
-  const state = useCheckState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

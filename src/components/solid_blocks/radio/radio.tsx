@@ -20,7 +20,12 @@ export const radioContext = createContext<
   [] | [Accessor<string>, Setter<string>, (value: string) => boolean, string]
 >([]);
 
-export type RadioProps = {
+export type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+  setValue?: (value: string) => void;
+  value?: Accessor<string>;
+};
+
+export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
   /**
    * align the checkbox inside its label
    * can be 'left' or 'right; default is 'left'
@@ -34,7 +39,7 @@ export type RadioProps = {
   required?: boolean;
   setChecked?: (checked?: boolean) => void;
   value?: string;
-} & JSX.HTMLAttributes<HTMLInputElement>;
+};
 
 export function Radio(props: Readonly<RadioProps>) {
   const [inputProps, content, labelProps] = splitProps(
@@ -83,7 +88,7 @@ export function Radio(props: Readonly<RadioProps>) {
             : content.checked
         }
         onChange={(
-          ev: { currentTarget: HTMLInputElement; target: Element } & Event,
+          ev: Event & { currentTarget: HTMLInputElement; target: Element },
         ): void => {
           runEvent(ev, content.onChange);
           content.setChecked?.(ev.currentTarget.checked);
@@ -96,11 +101,6 @@ export function Radio(props: Readonly<RadioProps>) {
     </label>
   );
 }
-
-export type RadioGroupProps = {
-  setValue?: (value: string) => void;
-  value?: Accessor<string>;
-} & JSX.HTMLAttributes<HTMLDivElement>;
 
 // This is just a wrapper that run setValue when value is changed.
 export function RadioGroup(props: Readonly<RadioGroupProps>) {

@@ -1,6 +1,8 @@
+import type { APIEvent } from '@solidjs/start/server';
+
 import { openai } from '@ai-sdk/openai';
-import { APIEvent } from '@solidjs/start/server';
 import { streamText } from 'ai';
+
 import { SYSTEM_PROMPT } from './SYSTEM_PROMPT';
 
 // Allow streaming responses up to 30 seconds
@@ -8,20 +10,20 @@ export const maxDuration = 30;
 
 export const POST = async (event: APIEvent) => {
   // Extract the messages, model, and extra message from the body of the request
-  const { messages, model, extraMessages } = await event.request.json();
+  const { extraMessages, messages, model } = await event.request.json();
 
   // Call the language model with streaming
   const result = streamText({
-    model: openai(model || 'gpt-4-turbo'),
     messages: [
       ...(extraMessages || []),
       {
-        role: 'system',
-        content: SYSTEM_PROMPT
+        content: SYSTEM_PROMPT,
+        role: 'system'
       },
       ...messages
     ],
-    async onFinish({ text, toolCalls, toolResults, usage, finishReason }) {
+    model: openai(model || 'gpt-4-turbo'),
+    async onFinish({ finishReason, text, toolCalls, toolResults, usage }) {
       // Implement custom logic for message storage and usage tracking
     },
   });

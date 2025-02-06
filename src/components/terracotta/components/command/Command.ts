@@ -47,31 +47,9 @@ export interface CommandBaseProps {
   horizontal?: boolean;
 }
 
-export type SingleCommandControlledBaseProps<V> = Prettify<
-  AutocompleteStateRenderProps<V> &
-    CommandBaseProps &
-    SingleAutocompleteStateControlledOptions<V>
->;
-
-export type SingleCommandControlledProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, SingleCommandControlledBaseProps<V>>;
-
-export type SingleCommandUncontrolledBaseProps<V> = Prettify<
-  AutocompleteStateRenderProps<V> &
-    CommandBaseProps &
-    SingleAutocompleteStateUncontrolledOptions<V>
->;
-
-export type SingleCommandUncontrolledProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, SingleCommandUncontrolledBaseProps<V>>;
-
-export type SingleCommandProps<V, T extends ValidConstructor = "div"> =
-  | SingleCommandControlledProps<V, T>
-  | SingleCommandUncontrolledProps<V, T>;
+export type CommandProps<V, T extends ValidConstructor = "div"> =
+  | MultipleCommandProps<V, T>
+  | SingleCommandProps<V, T>;
 
 export type MultipleCommandControlledBaseProps<V> = Prettify<
   AutocompleteStateRenderProps<V> &
@@ -84,6 +62,10 @@ export type MultipleCommandControlledProps<
   T extends ValidConstructor = "div",
 > = HeadlessProps<T, MultipleCommandControlledBaseProps<V>>;
 
+export type MultipleCommandProps<V, T extends ValidConstructor = "div"> =
+  | MultipleCommandControlledProps<V, T>
+  | MultipleCommandUncontrolledProps<V, T>;
+
 export type MultipleCommandUncontrolledBaseProps<V> = Prettify<
   AutocompleteStateRenderProps<V> &
     CommandBaseProps &
@@ -95,27 +77,31 @@ export type MultipleCommandUncontrolledProps<
   T extends ValidConstructor = "div",
 > = HeadlessProps<T, MultipleCommandUncontrolledBaseProps<V>>;
 
-export type MultipleCommandProps<V, T extends ValidConstructor = "div"> =
-  | MultipleCommandControlledProps<V, T>
-  | MultipleCommandUncontrolledProps<V, T>;
+export type SingleCommandControlledBaseProps<V> = Prettify<
+  AutocompleteStateRenderProps<V> &
+    CommandBaseProps &
+    SingleAutocompleteStateControlledOptions<V>
+>;
 
-export type CommandProps<V, T extends ValidConstructor = "div"> =
-  | MultipleCommandProps<V, T>
-  | SingleCommandProps<V, T>;
+export type SingleCommandControlledProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, SingleCommandControlledBaseProps<V>>;
 
-function isCommandMultiple<V, T extends ValidConstructor = "div">(
-  props: CommandProps<V, T>,
-): props is MultipleCommandProps<V, T> {
-  return !!props.multiple;
-}
+export type SingleCommandProps<V, T extends ValidConstructor = "div"> =
+  | SingleCommandControlledProps<V, T>
+  | SingleCommandUncontrolledProps<V, T>;
 
-function isCommandUncontrolled<V, T extends ValidConstructor = "div">(
-  props: CommandProps<V, T>,
-): props is
-  | MultipleCommandUncontrolledProps<V, T>
-  | SingleCommandUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
+export type SingleCommandUncontrolledBaseProps<V> = Prettify<
+  AutocompleteStateRenderProps<V> &
+    CommandBaseProps &
+    SingleAutocompleteStateUncontrolledOptions<V>
+>;
+
+export type SingleCommandUncontrolledProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, SingleCommandUncontrolledBaseProps<V>>;
 
 export function Command<V, T extends ValidConstructor = "div">(
   props: CommandProps<V, T>,
@@ -215,4 +201,18 @@ export function Command<V, T extends ValidConstructor = "div">(
       },
     });
   }) as unknown as JSX.Element;
+}
+
+function isCommandMultiple<V, T extends ValidConstructor = "div">(
+  props: CommandProps<V, T>,
+): props is MultipleCommandProps<V, T> {
+  return !!props.multiple;
+}
+
+function isCommandUncontrolled<V, T extends ValidConstructor = "div">(
+  props: CommandProps<V, T>,
+): props is
+  | MultipleCommandUncontrolledProps<V, T>
+  | SingleCommandUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

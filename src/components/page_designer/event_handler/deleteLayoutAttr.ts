@@ -1,10 +1,10 @@
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { deleteNestedLayout } from "../../../lib/graph/mutate/deleteNestedLayout";
@@ -14,6 +14,44 @@ import {
   getAllFieldsUsedInRootLevelSetting,
   isAttrUsedInRules,
 } from "../functions/generateFormMetaAttributes";
+
+export function deleteLayoutAttr(
+  formStoreVertex: Vertex<FormStoreObject>,
+  layoutVertex: Vertex,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
+  key: string,
+  showSuccessToast: (message: string) => void,
+) {
+
+  if (
+    validateLayoutDeletion(
+      formStoreVertex,
+      layoutVertex,
+      graph,
+      setGraph,
+    )
+  ) {
+    return;
+  }
+
+  batch(() => {
+    if (formStoreVertex?.P.selectedId === layoutVertex.id) {
+      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, {
+        selectedId: -1,
+      });
+    }
+    if (formStoreVertex?.P.hoverId === layoutVertex.id) {
+      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { hoverId: -1 });
+    }
+  });
+
+  deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
+  if (key) {
+    showSuccessToast(`${key} deleted successfully`);
+  }
+}
 
 function validateLayoutDeletion(
   formStoreVertex: Vertex<FormStoreObject>,
@@ -82,42 +120,4 @@ function validateLayoutDeletion(
   }
 
   return false;
-}
-
-export function deleteLayoutAttr(
-  formStoreVertex: Vertex<FormStoreObject>,
-  layoutVertex: Vertex,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number,
-  key: string,
-  showSuccessToast: (message: string) => void,
-) {
-
-  if (
-    validateLayoutDeletion(
-      formStoreVertex,
-      layoutVertex,
-      graph,
-      setGraph,
-    )
-  ) {
-    return;
-  }
-
-  batch(() => {
-    if (formStoreVertex?.P.selectedId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, {
-        selectedId: -1,
-      });
-    }
-    if (formStoreVertex?.P.hoverId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { hoverId: -1 });
-    }
-  });
-
-  deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
-  if (key) {
-    showSuccessToast(`${key} deleted successfully`);
-  }
 }

@@ -2,11 +2,11 @@ import type { JSX } from "solid-js";
 
 import "./meter.css";
 
-export type MeterProps = {
+export type MeterProps = JSX.HTMLAttributes<HTMLDivElement> & {
   max?: number | string;
   min?: number | string;
   value?: number | string;
-} & JSX.HTMLAttributes<HTMLDivElement>;
+};
 
 export function Meter(props: Readonly<MeterProps>) {
   return (

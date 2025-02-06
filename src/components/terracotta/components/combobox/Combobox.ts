@@ -54,88 +54,14 @@ export interface ComboboxBaseProps {
   onDisclosureChange?: (value: boolean) => void;
 }
 
-export interface ComboboxMultipleBaseProps<V> {
-  onSelectChange?: (value: V[]) => void;
-}
-
-export interface ComboboxSingleBaseProps<V> {
-  onSelectChange?: (value?: V) => void;
-}
-
-// SCSCD = Single, Controlled Select, Controlled Disclosure
-export type ComboboxSCSCDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxSingleBaseProps<V> &
-    Omit<DisclosureStateControlledOptions, "onChange"> &
-    Omit<SingleAutocompleteStateControlledOptions<V>, "onChange">
->;
-
-export type ComboboxSCSCDProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, ComboboxSCSCDBaseProps<V>>;
-
-// SCSCD = Single, Controlled Select, Uncontrolled Disclosure
-export type ComboboxSCSUDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxSingleBaseProps<V> &
-    Omit<DisclosureStateUncontrolledOptions, "onChange"> &
-    Omit<SingleAutocompleteStateControlledOptions<V>, "onChange">
->;
-
-export type ComboboxSCSUDProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, ComboboxSCSUDBaseProps<V>>;
-
-// SCSCD = Single, Uncontrolled Select, Controlled Disclosure
-export type ComboboxSUSCDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxSingleBaseProps<V> &
-    Omit<DisclosureStateControlledOptions, "onChange"> &
-    Omit<SingleAutocompleteStateUncontrolledOptions<V>, "onChange">
->;
-
-export type ComboboxSUSCDProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, ComboboxSUSCDBaseProps<V>>;
-
-// SCSCD = Single, Uncontrolled Select, Uncontrolled Disclosure
-export type ComboboxSUSUDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxSingleBaseProps<V> &
-    Omit<DisclosureStateUncontrolledOptions, "onChange"> &
-    Omit<SingleAutocompleteStateUncontrolledOptions<V>, "onChange">
->;
-
-export type ComboboxSUSUDProps<
-  V,
-  T extends ValidConstructor = "div",
-> = HeadlessProps<T, ComboboxSUSUDBaseProps<V>>;
-
-export type ComboboxSingleProps<V, T extends ValidConstructor = "div"> =
-  | ComboboxSCSCDProps<V, T>
-  | ComboboxSCSUDProps<V, T>
-  | ComboboxSUSCDProps<V, T>
-  | ComboboxSUSUDProps<V, T>;
-
 // MCSCD = Multiple, Controlled Select, Controlled Disclosure
 export type ComboboxMCSCDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxMultipleBaseProps<V> &
+  ComboboxBaseProps & ComboboxMultipleBaseProps<V> &
     Omit<DisclosureStateControlledOptions, "onChange"> &
-    Omit<MultipleAutocompleteStateControlledOptions<V>, "onChange">
+    Omit<MultipleAutocompleteStateControlledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
 >;
 
 export type ComboboxMCSCDProps<
@@ -145,12 +71,12 @@ export type ComboboxMCSCDProps<
 
 // MCSCD = Multiple, Controlled Select, Uncontrolled Disclosure
 export type ComboboxMCSUDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxMultipleBaseProps<V> &
+  ComboboxBaseProps & ComboboxMultipleBaseProps<V> &
     Omit<DisclosureStateUncontrolledOptions, "onChange"> &
-    Omit<MultipleAutocompleteStateControlledOptions<V>, "onChange">
+    Omit<MultipleAutocompleteStateControlledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
 >;
 
 export type ComboboxMCSUDProps<
@@ -158,14 +84,24 @@ export type ComboboxMCSUDProps<
   T extends ValidConstructor = "div",
 > = HeadlessProps<T, ComboboxMCSUDBaseProps<V>>;
 
+export interface ComboboxMultipleBaseProps<V> {
+  onSelectChange?: (value: V[]) => void;
+}
+
+export type ComboboxMultipleProps<V, T extends ValidConstructor = "div"> =
+  | ComboboxMCSCDProps<V, T>
+  | ComboboxMCSUDProps<V, T>
+  | ComboboxMUSCDProps<V, T>
+  | ComboboxMUSUDProps<V, T>;
+
 // MCSCD = Multiple, Uncontrolled Select, Controlled Disclosure
 export type ComboboxMUSCDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxMultipleBaseProps<V> &
+  ComboboxBaseProps & ComboboxMultipleBaseProps<V> &
     Omit<DisclosureStateControlledOptions, "onChange"> &
-    Omit<MultipleAutocompleteStateUncontrolledOptions<V>, "onChange">
+    Omit<MultipleAutocompleteStateUncontrolledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
 >;
 
 export type ComboboxMUSCDProps<
@@ -175,12 +111,12 @@ export type ComboboxMUSCDProps<
 
 // MCSCD = Multiple, Uncontrolled Select, Uncontrolled Disclosure
 export type ComboboxMUSUDBaseProps<V> = Prettify<
-  {
-    children?: JSX.Element;
-  } & ComboboxBaseProps &
-    ComboboxMultipleBaseProps<V> &
+  ComboboxBaseProps & ComboboxMultipleBaseProps<V> &
     Omit<DisclosureStateUncontrolledOptions, "onChange"> &
-    Omit<MultipleAutocompleteStateUncontrolledOptions<V>, "onChange">
+    Omit<MultipleAutocompleteStateUncontrolledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
 >;
 
 export type ComboboxMUSUDProps<
@@ -188,17 +124,79 @@ export type ComboboxMUSUDProps<
   T extends ValidConstructor = "div",
 > = HeadlessProps<T, ComboboxMUSUDBaseProps<V>>;
 
-export type ComboboxMultipleProps<V, T extends ValidConstructor = "div"> =
-  | ComboboxMCSCDProps<V, T>
-  | ComboboxMCSUDProps<V, T>
-  | ComboboxMUSCDProps<V, T>
-  | ComboboxMUSUDProps<V, T>;
+export type ComboboxProps<V, T extends ValidConstructor = "div"> =
+  | ComboboxMultipleProps<V, T>
+  | ComboboxSingleProps<V, T>;
 
-type ComboboxSelectUncontrolledProps<V, T extends ValidConstructor = "div"> =
-  | ComboboxMUSCDProps<V, T>
-  | ComboboxMUSUDProps<V, T>
+// SCSCD = Single, Controlled Select, Controlled Disclosure
+export type ComboboxSCSCDBaseProps<V> = Prettify<
+  ComboboxBaseProps & ComboboxSingleBaseProps<V> &
+    Omit<DisclosureStateControlledOptions, "onChange"> &
+    Omit<SingleAutocompleteStateControlledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
+>;
+
+export type ComboboxSCSCDProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, ComboboxSCSCDBaseProps<V>>;
+
+// SCSCD = Single, Controlled Select, Uncontrolled Disclosure
+export type ComboboxSCSUDBaseProps<V> = Prettify<
+  ComboboxBaseProps & ComboboxSingleBaseProps<V> &
+    Omit<DisclosureStateUncontrolledOptions, "onChange"> &
+    Omit<SingleAutocompleteStateControlledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
+>;
+
+export type ComboboxSCSUDProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, ComboboxSCSUDBaseProps<V>>;
+
+export interface ComboboxSingleBaseProps<V> {
+  onSelectChange?: (value?: V) => void;
+}
+
+export type ComboboxSingleProps<V, T extends ValidConstructor = "div"> =
+  | ComboboxSCSCDProps<V, T>
+  | ComboboxSCSUDProps<V, T>
   | ComboboxSUSCDProps<V, T>
   | ComboboxSUSUDProps<V, T>;
+
+// SCSCD = Single, Uncontrolled Select, Controlled Disclosure
+export type ComboboxSUSCDBaseProps<V> = Prettify<
+  ComboboxBaseProps & ComboboxSingleBaseProps<V> &
+    Omit<DisclosureStateControlledOptions, "onChange"> &
+    Omit<SingleAutocompleteStateUncontrolledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
+>;
+
+export type ComboboxSUSCDProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, ComboboxSUSCDBaseProps<V>>;
+
+// SCSCD = Single, Uncontrolled Select, Uncontrolled Disclosure
+export type ComboboxSUSUDBaseProps<V> = Prettify<
+  ComboboxBaseProps & ComboboxSingleBaseProps<V> &
+    Omit<DisclosureStateUncontrolledOptions, "onChange"> &
+    Omit<SingleAutocompleteStateUncontrolledOptions<V>, "onChange"> &
+    {
+    children?: JSX.Element;
+  }
+>;
+
+export type ComboboxSUSUDProps<
+  V,
+  T extends ValidConstructor = "div",
+> = HeadlessProps<T, ComboboxSUSUDBaseProps<V>>;
 
 type ComboboxDisclosureUncontrolledProps<
   V,
@@ -209,101 +207,11 @@ type ComboboxDisclosureUncontrolledProps<
   | ComboboxSCSUDProps<V, T>
   | ComboboxSUSUDProps<V, T>;
 
-export type ComboboxProps<V, T extends ValidConstructor = "div"> =
-  | ComboboxMultipleProps<V, T>
-  | ComboboxSingleProps<V, T>;
-
-function isComboboxMultiple<V, T extends ValidConstructor = "div">(
-  props: ComboboxProps<V, T>,
-): props is ComboboxMultipleProps<V, T> {
-  return !!props.multiple;
-}
-
-function isComboboxSelectUncontrolled<V, T extends ValidConstructor = "div">(
-  props: ComboboxProps<V, T>,
-): props is ComboboxSelectUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
-
-function isComboboxDisclosureUncontrolled<
-  V,
-  T extends ValidConstructor = "div",
->(
-  props: ComboboxProps<V, T>,
-): props is ComboboxDisclosureUncontrolledProps<V, T> {
-  return "defaultOpen" in props;
-}
-
-function getProps<V, T extends ValidConstructor = "div">(
-  props: ComboboxProps<V, T>,
-): DynamicProps<T> {
-  if (isComboboxSelectUncontrolled(props)) {
-    if (isComboboxDisclosureUncontrolled(props)) {
-      return omitProps(props, [
-        "as",
-        "by",
-        "children",
-        "defaultOpen",
-        "defaultValue",
-        "disabled",
-        "matchBy",
-        "multiple",
-        "onClose",
-        "onDisclosureChange",
-        "onOpen",
-        "onSelectChange",
-        "toggleable",
-      ]) as DynamicProps<T>;
-    }
-    return omitProps(props, [
-      "as",
-      "by",
-      "children",
-      "defaultValue",
-      "disabled",
-      "isOpen",
-      "matchBy",
-      "multiple",
-      "onClose",
-      "onDisclosureChange",
-      "onOpen",
-      "onSelectChange",
-      "toggleable",
-    ]) as DynamicProps<T>;
-  }
-  if (isComboboxDisclosureUncontrolled(props)) {
-    return omitProps(props, [
-      "as",
-      "by",
-      "children",
-      "defaultOpen",
-      "disabled",
-      "matchBy",
-      "multiple",
-      "onClose",
-      "onDisclosureChange",
-      "onOpen",
-      "onSelectChange",
-      "toggleable",
-      "value",
-    ]) as DynamicProps<T>;
-  }
-  return omitProps(props, [
-    "as",
-    "by",
-    "children",
-    "disabled",
-    "isOpen",
-    "matchBy",
-    "multiple",
-    "onClose",
-    "onDisclosureChange",
-    "onOpen",
-    "onSelectChange",
-    "toggleable",
-    "value",
-  ]) as DynamicProps<T>;
-}
+type ComboboxSelectUncontrolledProps<V, T extends ValidConstructor = "div"> =
+  | ComboboxMUSCDProps<V, T>
+  | ComboboxMUSUDProps<V, T>
+  | ComboboxSUSCDProps<V, T>
+  | ComboboxSUSUDProps<V, T>;
 
 export function Combobox<V, T extends ValidConstructor = "div">(
   props: ComboboxProps<V, T>,
@@ -415,4 +323,96 @@ export function Combobox<V, T extends ValidConstructor = "div">(
       },
     });
   }) as unknown as JSX.Element;
+}
+
+function getProps<V, T extends ValidConstructor = "div">(
+  props: ComboboxProps<V, T>,
+): DynamicProps<T> {
+  if (isComboboxSelectUncontrolled(props)) {
+    if (isComboboxDisclosureUncontrolled(props)) {
+      return omitProps(props, [
+        "as",
+        "by",
+        "children",
+        "defaultOpen",
+        "defaultValue",
+        "disabled",
+        "matchBy",
+        "multiple",
+        "onClose",
+        "onDisclosureChange",
+        "onOpen",
+        "onSelectChange",
+        "toggleable",
+      ]) as DynamicProps<T>;
+    }
+    return omitProps(props, [
+      "as",
+      "by",
+      "children",
+      "defaultValue",
+      "disabled",
+      "isOpen",
+      "matchBy",
+      "multiple",
+      "onClose",
+      "onDisclosureChange",
+      "onOpen",
+      "onSelectChange",
+      "toggleable",
+    ]) as DynamicProps<T>;
+  }
+  if (isComboboxDisclosureUncontrolled(props)) {
+    return omitProps(props, [
+      "as",
+      "by",
+      "children",
+      "defaultOpen",
+      "disabled",
+      "matchBy",
+      "multiple",
+      "onClose",
+      "onDisclosureChange",
+      "onOpen",
+      "onSelectChange",
+      "toggleable",
+      "value",
+    ]) as DynamicProps<T>;
+  }
+  return omitProps(props, [
+    "as",
+    "by",
+    "children",
+    "disabled",
+    "isOpen",
+    "matchBy",
+    "multiple",
+    "onClose",
+    "onDisclosureChange",
+    "onOpen",
+    "onSelectChange",
+    "toggleable",
+    "value",
+  ]) as DynamicProps<T>;
+}
+
+function isComboboxDisclosureUncontrolled<
+  V,
+  T extends ValidConstructor = "div",
+>(
+  props: ComboboxProps<V, T>,
+): props is ComboboxDisclosureUncontrolledProps<V, T> {
+  return "defaultOpen" in props;
+}
+
+function isComboboxMultiple<V, T extends ValidConstructor = "div">(
+  props: ComboboxProps<V, T>,
+): props is ComboboxMultipleProps<V, T> {
+  return !!props.multiple;
+}
+
+function isComboboxSelectUncontrolled<V, T extends ValidConstructor = "div">(
+  props: ComboboxProps<V, T>,
+): props is ComboboxSelectUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

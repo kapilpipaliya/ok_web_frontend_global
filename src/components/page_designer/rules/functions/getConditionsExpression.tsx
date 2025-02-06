@@ -4,19 +4,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 
-export function getTextValue(value: any) {
-  if (typeof value === "string") {
-    return `"${value}"`;
-  }
-  if (typeof value === "boolean") {
-    return value ? "true" : "false";
-  }
-  if (typeof value === "object") {
-    return JSON.stringify(value);
-  }
-  return value;
-}
-
 export function getConditionsExpression(
   rule: Vertex,
   formVertex: Vertex,
@@ -66,4 +53,17 @@ export function getConditionsExpression(
     }
     return expression;
   }, "");
+}
+
+export function getTextValue(value: any) {
+  if (typeof value === "string") {
+    return `"${value}"`;
+  }
+  if (typeof value === "boolean") {
+    return value ? "true" : "false";
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+  return value;
 }

@@ -5,8 +5,8 @@ import type { GenericComponentProps } from "./FieldType";
 import { useRadioGroupContext } from "./contexts/RadioGroupContext";
 
 interface RadioFieldProps
-  extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">,
-    GenericComponentProps {
+  extends GenericComponentProps,
+    Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
   errorClass?: string;
   inputProps: JSX.InputHTMLAttributes<HTMLInputElement>;
 }

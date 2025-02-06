@@ -4,11 +4,11 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
 import { signOutCall } from "~/lib/api/service/user/signOutCall";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();

@@ -35,22 +35,16 @@ export type DisclosureControlledBaseProps = Prettify<
 export type DisclosureControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DisclosureControlledBaseProps>;
 
+export type DisclosureProps<T extends ValidConstructor = "div"> =
+  | DisclosureControlledProps<T>
+  | DisclosureUncontrolledProps<T>;
+
 export type DisclosureUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
 export type DisclosureUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DisclosureUncontrolledBaseProps>;
-
-export type DisclosureProps<T extends ValidConstructor = "div"> =
-  | DisclosureControlledProps<T>
-  | DisclosureUncontrolledProps<T>;
-
-function isDisclosureUncontrolled<T extends ValidConstructor = "div">(
-  props: DisclosureProps<T>,
-): props is DisclosureUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function Disclosure<T extends ValidConstructor = "div">(
   props: DisclosureProps<T>,
@@ -107,4 +101,10 @@ export function Disclosure<T extends ValidConstructor = "div">(
       panelID,
     },
   });
+}
+
+function isDisclosureUncontrolled<T extends ValidConstructor = "div">(
+  props: DisclosureProps<T>,
+): props is DisclosureUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

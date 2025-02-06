@@ -1,19 +1,20 @@
 import { createSignal, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 import { RulesModal } from "../../../rules/RulesModal";
 import { AddNewRule } from "../../rules/AddNewRule";
 import { Label } from "./Label";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function SelectPermField(
   props: Readonly<{

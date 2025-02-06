@@ -10,6 +10,10 @@ interface SelectContextData {
 
 export const SelectContext = createContext<SelectContextData>();
 
+export function createSelectOptionFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId());
+}
+
 export function useSelectContext(componentName: string): SelectContextData {
   const context = useContext(SelectContext);
   assert(
@@ -17,8 +21,4 @@ export function useSelectContext(componentName: string): SelectContextData {
     new Error(`<${componentName}> must be used inside a <Select>`),
   );
   return context;
-}
-
-export function createSelectOptionFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId());
 }

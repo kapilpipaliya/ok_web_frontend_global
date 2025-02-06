@@ -6,11 +6,11 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
@@ -211,10 +211,10 @@ export function FormStatus() {
 
 function createVertexIds() {
   return {
-    formStatus: `formStatusVertex${createUniqueId()}`,
+    expirationTime: `expirationTimeVertex${createUniqueId()}`,
     // eslint-disable-next-line perfectionist/sort-objects
     expirationDate: `expirationDateVertex${createUniqueId()}`,
-    expirationTime: `expirationTimeVertex${createUniqueId()}`,
+    formStatus: `formStatusVertex${createUniqueId()}`,
     submissionLimit: `submissionLimitVertex${createUniqueId()}`,
     warningMessage: `warningMessageVertex${createUniqueId()}`,
   };
@@ -225,9 +225,9 @@ function createVertices(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const vertices: ({
+  const vertices: (Omit<Vertex, "IN" | "L" | "OUT"> & {
     attributes?: FieldAttribute[];
-  } & Omit<Vertex, "IN" | "L" | "OUT">)[] = [
+  })[] = [
     {
       id: vertexIds.formStatus,
       P: {

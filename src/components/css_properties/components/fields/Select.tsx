@@ -92,7 +92,7 @@ const DropdownButton = (props: DropdownButtonProps) => (
       </span>
       <span class="arrow" />
     </button>
-    <Icon height={22} icon={"teenyicons:down-small-outline"} width={22} noobserver />
+    <Icon height={22} icon={"teenyicons:down-small-outline"} noobserver width={22} />
   </div>
 );
 
@@ -124,8 +124,8 @@ const DropdownList = (props: DropdownListProps) => (
                 class="color:dodgerblue"
                 height={22}
                 icon={"icon-park-outline:check-one"}
-                width={22}
                 noobserver
+                width={22}
               />
             </Show>
           </li>

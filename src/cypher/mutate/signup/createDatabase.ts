@@ -1,4 +1,5 @@
-import { auth, driver, type Driver } from "neo4j-driver";
+import type { Driver } from "neo4j-driver";
+
 import { getDriver } from "~/cypher/driver";
 
 export async function createDatabase(

@@ -6,8 +6,11 @@ import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
+export type DataGridState = ReturnType<typeof getInitialGridState>;
+export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
 export function getInitialGridState(graph: GraphInterface) {
   return {
     allConfiguredPermission: (() => []) as Accessor<Vertex[]>,
@@ -19,10 +22,10 @@ export function getInitialGridState(graph: GraphInterface) {
       limit?: number,
       isLoadMore?: boolean,
     ) => Promise<
+      | ServerResult
       | {
           error: string;
         }
-      | ServerResult
     >,
     filteredData: [] as Vertex[],
     formId: null as Id | null,
@@ -48,8 +51,6 @@ export function getInitialGridState(graph: GraphInterface) {
     },
   };
 }
-export type DataGridState = ReturnType<typeof getInitialGridState>;
-export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
 export const DataGridStoreContext = createContext<DataGridStore>();
 
 const DataGridContext = createContext<DataGridStore>();

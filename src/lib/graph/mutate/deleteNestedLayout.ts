@@ -2,8 +2,9 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { deleteRow } from "./deleteRow";
 import { evalExpression } from "~/lib/expression_eval";
+
+import { deleteRow } from "./deleteRow";
 
 export function deleteNestedLayout(
   graph: Store<GraphInterface>,

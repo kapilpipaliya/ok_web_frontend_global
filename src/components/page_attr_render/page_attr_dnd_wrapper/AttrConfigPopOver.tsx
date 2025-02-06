@@ -1,14 +1,14 @@
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer";
 import { createSelector, Match, Switch } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
+
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
-import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const [graph] = useGraph();

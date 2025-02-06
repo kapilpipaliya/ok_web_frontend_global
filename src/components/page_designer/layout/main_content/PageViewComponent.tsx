@@ -1,11 +1,14 @@
-import { For, Show, createSignal } from "solid-js";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { createSignal, For, Show } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
-import { Id, useGraph, Vertex } from "~/lib/graph/graph";
-import { useDesignerLayoutStore, PageLayoutObject } from "../../context/LayoutContext";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import { type PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { IFramePreview } from "../IFramePreview";
 import { PageTabBar } from "./PageTabBar";
-import { deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function PageViewComponent(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();
@@ -47,14 +50,14 @@ export function PageViewComponent(props: { mainPanel: Id }) {
               <For each={formStoreVertex()?.P.openedViews}>
                 {(openedViewId, index) => (
                   <ResizableContainer
-                    view={openedViewId}
                     class={isActive() ? '' : 'hidden'}
+                    view={openedViewId}
                   >
                     <PageTabBar 
                       formStoreId={graph.vertexes[openedFormId].P.formId} 
-                      openIndex={index()} 
-                      handleRefresh={handleRefresh}
+                      handleRefresh={handleRefresh} 
                       onClose={() => handleClose(openedFormId, openedViewId)}
+                      openIndex={index()}
                       previewsLength={formStoreVertex()?.P.openedViews.length}
                     />
                     <Show when={isPreview()}>

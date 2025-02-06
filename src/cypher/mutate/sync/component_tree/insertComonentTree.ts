@@ -1,30 +1,6 @@
-import { type Session, type Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import type { ComponentNode } from "./ComponentTreeType";
-
-async function addEdgeIfNotExists(
-  dbSession: Session | Transaction,
-  parentId: number | string,
-  childId: number,
-): Promise<void> {
-  // Check if the edge already exists
-  const findEdgeResult = await dbSession.run(
-    `MATCH (parent:Comp)<-[r:ParentComp]-(child:Comp)
-     WHERE elementId(parent) = $parentId AND elementId(child) = $childId
-     RETURN r`,
-    { childId: childId, parentId: parentId },
-  );
-
-  if (findEdgeResult.records.length === 0) {
-    // Create the edge if it doesn't exist
-    await dbSession.run(
-      `MATCH (parent:Comp), (child:Comp)
-       WHERE elementId(parent) = $parentId AND elementId(child) = $childId
-       CREATE (parent)<-[:ParentComp]-(child)`,
-      { childId: childId, parentId: parentId },
-    );
-  }
-}
 
 export async function insertComponentTree(
   dbSession: Session | Transaction,
@@ -60,4 +36,28 @@ export async function insertComponentTree(
     await insertComponentTree(dbSession, component.children || [], nodeId);
   }
   return { success: true };
+}
+
+async function addEdgeIfNotExists(
+  dbSession: Session | Transaction,
+  parentId: number | string,
+  childId: number,
+): Promise<void> {
+  // Check if the edge already exists
+  const findEdgeResult = await dbSession.run(
+    `MATCH (parent:Comp)<-[r:ParentComp]-(child:Comp)
+     WHERE elementId(parent) = $parentId AND elementId(child) = $childId
+     RETURN r`,
+    { childId: childId, parentId: parentId },
+  );
+
+  if (findEdgeResult.records.length === 0) {
+    // Create the edge if it doesn't exist
+    await dbSession.run(
+      `MATCH (parent:Comp), (child:Comp)
+       WHERE elementId(parent) = $parentId AND elementId(child) = $childId
+       CREATE (parent)<-[:ParentComp]-(child)`,
+      { childId: childId, parentId: parentId },
+    );
+  }
 }

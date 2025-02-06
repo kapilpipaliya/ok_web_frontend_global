@@ -1,8 +1,10 @@
-import { Show } from 'solid-js';
+
+import type { Vertex } from '~/lib/graph/graph';
+
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
-import { Vertex } from '~/lib/graph/graph';
-import { DBMessage } from './types';
+
+import type { DBMessage } from './types';
 
 interface ChatMessageProps {
   message: Vertex<DBMessage>;
@@ -22,8 +24,8 @@ export function ChatMessage(props: ChatMessageProps) {
           )}
         </div>
         <IconButton
-          icon="ph:trash"
           class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+          icon="ph:trash"
           onClick={() => props.onDelete(props.message)}
           title="Delete"
         />

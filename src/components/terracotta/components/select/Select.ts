@@ -45,36 +45,6 @@ import {
 } from "./SelectContext";
 import { SELECT_TAG } from "./tags";
 
-export interface SelectBaseProps {
-  horizontal?: boolean;
-}
-
-export type SingleSelectControlledBaseProps<V> = Prettify<
-  SelectBaseProps &
-    SelectStateRenderProps<V> &
-    SingleSelectStateControlledOptions<V>
->;
-
-export type SingleSelectControlledProps<
-  V,
-  T extends ValidConstructor = "ul",
-> = HeadlessPropsWithRef<T, SingleSelectControlledBaseProps<V>>;
-
-export type SingleSelectUncontrolledBaseProps<V> = Prettify<
-  SelectBaseProps &
-    SelectStateRenderProps<V> &
-    SingleSelectStateUncontrolledOptions<V>
->;
-
-export type SingleSelectUncontrolledProps<
-  V,
-  T extends ValidConstructor = "ul",
-> = HeadlessPropsWithRef<T, SingleSelectUncontrolledBaseProps<V>>;
-
-export type SingleSelectProps<V, T extends ValidConstructor = "ul"> =
-  | SingleSelectControlledProps<V, T>
-  | SingleSelectUncontrolledProps<V, T>;
-
 export type MultipleSelectControlledBaseProps<V> = Prettify<
   MultipleSelectStateControlledOptions<V> &
     SelectBaseProps &
@@ -85,6 +55,10 @@ export type MultipleSelectControlledProps<
   V,
   T extends ValidConstructor = "ul",
 > = HeadlessPropsWithRef<T, MultipleSelectControlledBaseProps<V>>;
+
+export type MultipleSelectProps<V, T extends ValidConstructor = "ul"> =
+  | MultipleSelectControlledProps<V, T>
+  | MultipleSelectUncontrolledProps<V, T>;
 
 export type MultipleSelectUncontrolledBaseProps<V> = Prettify<
   MultipleSelectStateUncontrolledOptions<V> &
@@ -97,27 +71,39 @@ export type MultipleSelectUncontrolledProps<
   T extends ValidConstructor = "ul",
 > = HeadlessPropsWithRef<T, MultipleSelectUncontrolledBaseProps<V>>;
 
-export type MultipleSelectProps<V, T extends ValidConstructor = "ul"> =
-  | MultipleSelectControlledProps<V, T>
-  | MultipleSelectUncontrolledProps<V, T>;
+export interface SelectBaseProps {
+  horizontal?: boolean;
+}
 
 export type SelectProps<V, T extends ValidConstructor = "ul"> =
   | MultipleSelectProps<V, T>
   | SingleSelectProps<V, T>;
 
-function isSelectMultiple<V, T extends ValidConstructor = "ul">(
-  props: SelectProps<V, T>,
-): props is MultipleSelectProps<V, T> {
-  return !!props.multiple;
-}
+export type SingleSelectControlledBaseProps<V> = Prettify<
+  SelectBaseProps &
+    SelectStateRenderProps<V> &
+    SingleSelectStateControlledOptions<V>
+>;
 
-function isSelectUncontrolled<V, T extends ValidConstructor = "ul">(
-  props: SelectProps<V, T>,
-): props is
-  | MultipleSelectUncontrolledProps<V, T>
-  | SingleSelectUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
+export type SingleSelectControlledProps<
+  V,
+  T extends ValidConstructor = "ul",
+> = HeadlessPropsWithRef<T, SingleSelectControlledBaseProps<V>>;
+
+export type SingleSelectProps<V, T extends ValidConstructor = "ul"> =
+  | SingleSelectControlledProps<V, T>
+  | SingleSelectUncontrolledProps<V, T>;
+
+export type SingleSelectUncontrolledBaseProps<V> = Prettify<
+  SelectBaseProps &
+    SelectStateRenderProps<V> &
+    SingleSelectStateUncontrolledOptions<V>
+>;
+
+export type SingleSelectUncontrolledProps<
+  V,
+  T extends ValidConstructor = "ul",
+> = HeadlessPropsWithRef<T, SingleSelectUncontrolledBaseProps<V>>;
 
 export function Select<V, T extends ValidConstructor = "ul">(
   props: SelectProps<V, T>,
@@ -280,4 +266,18 @@ export function Select<V, T extends ValidConstructor = "ul">(
       },
     });
   }) as unknown as JSX.Element;
+}
+
+function isSelectMultiple<V, T extends ValidConstructor = "ul">(
+  props: SelectProps<V, T>,
+): props is MultipleSelectProps<V, T> {
+  return !!props.multiple;
+}
+
+function isSelectUncontrolled<V, T extends ValidConstructor = "ul">(
+  props: SelectProps<V, T>,
+): props is
+  | MultipleSelectUncontrolledProps<V, T>
+  | SingleSelectUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

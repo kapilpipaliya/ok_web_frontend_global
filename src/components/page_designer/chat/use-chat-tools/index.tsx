@@ -3,7 +3,7 @@ import { useChat } from '@ai-sdk/solid';
 import { For, Show } from 'solid-js';
 
 export function UseChatTools() {
-  const { messages, input, handleInputChange, handleSubmit, addToolResult } =
+  const { addToolResult, handleInputChange, handleSubmit, input, messages } =
     useChat({
       api: '/api/use-chat-tools',
       maxSteps: 5,
@@ -34,13 +34,13 @@ export function UseChatTools() {
                 <Show
                   fallback={
                     <Show
-                      when={'result' in toolInvocation && toolInvocation}
-                      keyed
                       fallback={
                         <div class="text-gray-500">
                           Calling {toolInvocation.toolName}...
                         </div>
                       }
+                      keyed
+                      when={'result' in toolInvocation && toolInvocation}
                     >
                       {toolInvocation => (
                         <div class="text-gray-500">
@@ -50,11 +50,11 @@ export function UseChatTools() {
                       )}
                     </Show>
                   }
+                  keyed
                   when={
                     toolInvocation.toolName === 'askForConfirmation' &&
                     toolInvocation
                   }
-                  keyed
                 >
                   {toolInvocation => (
                     <div class="text-gray-500">
@@ -67,8 +67,8 @@ export function UseChatTools() {
                                 class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
                                 onClick={() =>
                                   addToolResult({
-                                    toolCallId: toolInvocation.toolCallId,
                                     result: 'Yes, confirmed.',
+                                    toolCallId: toolInvocation.toolCallId,
                                   })
                                 }
                               >
@@ -78,8 +78,8 @@ export function UseChatTools() {
                                 class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700"
                                 onClick={() =>
                                   addToolResult({
-                                    toolCallId: toolInvocation.toolCallId,
                                     result: 'No, denied',
+                                    toolCallId: toolInvocation.toolCallId,
                                   })
                                 }
                               >
@@ -87,8 +87,8 @@ export function UseChatTools() {
                               </button>
                             </>
                           }
-                          when={'result' in toolInvocation && toolInvocation}
                           keyed
+                          when={'result' in toolInvocation && toolInvocation}
                         >
                           {toolInvocation => <b>{toolInvocation.result}</b>}
                         </Show>
@@ -107,9 +107,9 @@ export function UseChatTools() {
       <form onSubmit={handleSubmit}>
         <input
           class="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
-          value={input()}
-          placeholder="Say something..."
           onChange={handleInputChange}
+          placeholder="Say something..."
+          value={input()}
         />
       </form>
     </div>

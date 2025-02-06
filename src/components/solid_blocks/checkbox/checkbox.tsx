@@ -3,7 +3,7 @@ import { type JSX, Show, splitProps } from "solid-js";
 import { runEvent } from "../tools";
 import "./checkbox.css";
 
-export type CheckboxProps = {
+export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {
   /**
    * align the checkbox inside its label
    * can be 'left' or 'right; default is 'left'
@@ -19,7 +19,7 @@ export type CheckboxProps = {
   switch?: boolean;
   value?: string;
   wrapperClass?: string;
-} & JSX.HTMLAttributes<HTMLInputElement>;
+};
 
 export function Checkbox(props: Readonly<CheckboxProps>) {
   const [inputProps, content, labelProps] = splitProps(

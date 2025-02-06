@@ -1,44 +1,44 @@
-import type { createStore, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import { Accessor, createContext, useContext } from "solid-js";
-import { v7 as uuidv7 } from "uuid";
+import { createContext, useContext } from "solid-js";
 
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { IDToRuleMap } from "~/components/page_designer/functions/generateFormMetaAttributes";
+import type { GraphInterface, Id, } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
 import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
-import { IDToRuleMap } from "~/components/page_designer/functions/generateFormMetaAttributes";
+
+import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
+
+export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 
 export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   return {
     ...InitialPermissions,
+    componentValue: null as Id | null,
     count: 1,
     discardPopup: false,
     error: undefined as string | undefined,
     formDataId: undefined as unknown as string,
-    formMetaId: undefined as unknown as string,
     formMetaData: null as IFormMetaData | null,
+    formMetaId: undefined as unknown as string,
+    hiddenNodes: [] as Array<Id | number>,
+    hoverId: -1 as Id | number,
     id: undefined as string | undefined,
     isPreview: false,
     mounted: false,
-    txnId: generateNewTxnId(graph, setGraph),
-    hiddenNodes: [] as Array<Id | number>,
-    hoverId: -1 as Id | number,
     multiHighlight: [] as Array<Id | number>,
-    selectedId: -1 as Id | number,
+    openedViews: [] as Array<Id>,
 
+    selectedId: -1 as Id | number,
     // check if at least one form in the layout tree when deleting a layout item, it display a dialog
     shouldContainAtLeastOneForm: false,
+    txnId: generateNewTxnId(graph, setGraph),
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
-    openedViews: [] as Array<Id>,
-    componentValue: null as Id | null,
   };
 }
-
-export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 
 export const FormContext = createContext<Id>();
 

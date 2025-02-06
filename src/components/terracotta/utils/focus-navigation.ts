@@ -7,96 +7,6 @@ const enum Direction {
   Prev = -1,
 }
 
-function isFocusable(el: HTMLElement): boolean {
-  return !el.matches(DISABLED_NODE);
-}
-
-// Gets the next focusable element
-function getNextFocusable(
-  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
-  anchor: number,
-  direction: Direction,
-  loop: boolean,
-): HTMLElement | undefined {
-  let current = anchor + direction;
-  if (loop) {
-    if (direction === Direction.Next && current === nodes.length) {
-      current = 0;
-    }
-    if (direction === Direction.Prev && current === -1) {
-      current = nodes.length - 1;
-    }
-    while (anchor !== current) {
-      if (isFocusable(nodes[current])) {
-        return nodes[current];
-      }
-      current += direction;
-      if (direction === Direction.Next && current >= nodes.length) {
-        current = 0;
-      }
-      if (direction === Direction.Prev && current < 0) {
-        current = nodes.length - 1;
-      }
-    }
-    return undefined;
-  }
-  while (current >= 0 && current < nodes.length) {
-    if (isFocusable(nodes[current])) {
-      return nodes[current];
-    }
-    current += direction;
-  }
-  return undefined;
-}
-
-export function focusNode(
-  node: HTMLElement | undefined,
-  virtual: boolean,
-): HTMLElement | undefined {
-  if (node) {
-    if (virtual) {
-      focusVirtually(node);
-    } else {
-      node.focus();
-    }
-  }
-  return node;
-}
-
-export function focusNext(
-  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
-  targetNode: HTMLElement,
-  loop: boolean,
-  virtual: boolean,
-): HTMLElement | undefined {
-  for (let i = 0, len = nodes.length; i < len; i += 1) {
-    if (targetNode === nodes[i] || nodes[i].contains(targetNode)) {
-      return focusNode(
-        getNextFocusable(nodes, i, Direction.Next, loop),
-        virtual,
-      );
-    }
-  }
-  return undefined;
-}
-
-export function focusPrev(
-  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
-  targetNode: HTMLElement,
-  loop: boolean,
-  virtual: boolean,
-): HTMLElement | undefined {
-  for (let i = 0, len = nodes.length; i < len; i += 1) {
-    if (nodes[i].contains(targetNode)) {
-      return focusNode(
-        getNextFocusable(nodes, i, Direction.Prev, loop),
-        virtual,
-      );
-    }
-  }
-  return undefined;
-}
-
 export function focusFirst(
   nodes: HTMLElement[] | NodeListOf<HTMLElement>,
   virtual: boolean,
@@ -138,6 +48,54 @@ export function focusMatch(
   return undefined;
 }
 
+export function focusNext(
+  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
+  targetNode: HTMLElement,
+  loop: boolean,
+  virtual: boolean,
+): HTMLElement | undefined {
+  for (let i = 0, len = nodes.length; i < len; i += 1) {
+    if (targetNode === nodes[i] || nodes[i].contains(targetNode)) {
+      return focusNode(
+        getNextFocusable(nodes, i, Direction.Next, loop),
+        virtual,
+      );
+    }
+  }
+  return undefined;
+}
+
+export function focusNode(
+  node: HTMLElement | undefined,
+  virtual: boolean,
+): HTMLElement | undefined {
+  if (node) {
+    if (virtual) {
+      focusVirtually(node);
+    } else {
+      node.focus();
+    }
+  }
+  return node;
+}
+
+export function focusPrev(
+  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
+  targetNode: HTMLElement,
+  loop: boolean,
+  virtual: boolean,
+): HTMLElement | undefined {
+  for (let i = 0, len = nodes.length; i < len; i += 1) {
+    if (nodes[i].contains(targetNode)) {
+      return focusNode(
+        getNextFocusable(nodes, i, Direction.Prev, loop),
+        virtual,
+      );
+    }
+  }
+  return undefined;
+}
+
 export function lockFocus(
   ref: HTMLElement,
   reverse: boolean,
@@ -159,4 +117,46 @@ export function lockFocus(
     return focusFirst(nodes, virtual);
   }
   return focusNext(nodes, document.activeElement as HTMLElement, true, virtual);
+}
+
+// Gets the next focusable element
+function getNextFocusable(
+  nodes: HTMLElement[] | NodeListOf<HTMLElement>,
+  anchor: number,
+  direction: Direction,
+  loop: boolean,
+): HTMLElement | undefined {
+  let current = anchor + direction;
+  if (loop) {
+    if (direction === Direction.Next && current === nodes.length) {
+      current = 0;
+    }
+    if (direction === Direction.Prev && current === -1) {
+      current = nodes.length - 1;
+    }
+    while (anchor !== current) {
+      if (isFocusable(nodes[current])) {
+        return nodes[current];
+      }
+      current += direction;
+      if (direction === Direction.Next && current >= nodes.length) {
+        current = 0;
+      }
+      if (direction === Direction.Prev && current < 0) {
+        current = nodes.length - 1;
+      }
+    }
+    return undefined;
+  }
+  while (current >= 0 && current < nodes.length) {
+    if (isFocusable(nodes[current])) {
+      return nodes[current];
+    }
+    current += direction;
+  }
+  return undefined;
+}
+
+function isFocusable(el: HTMLElement): boolean {
+  return !el.matches(DISABLED_NODE);
 }

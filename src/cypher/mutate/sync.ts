@@ -1,8 +1,7 @@
-import neo4j from "neo4j-driver";
+
 
 import { transferNodeTypes } from "~/cypher/mutate/sync/transferNodeTypes";
 
-import { boltPort } from "../boltConstant";
 import { getDriver } from "../driver";
 
 // Main function to initiate the migration process.

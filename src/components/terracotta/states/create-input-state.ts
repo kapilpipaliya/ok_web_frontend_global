@@ -16,12 +16,6 @@ export interface InputStateControlledOptions {
   value: string | undefined;
 }
 
-export interface InputStateUncontrolledOptions {
-  defaultValue: string | undefined;
-  disabled?: boolean;
-  onChange?: (state?: string) => void;
-}
-
 export type InputStateOptions =
   | InputStateControlledOptions
   | InputStateUncontrolledOptions;
@@ -30,6 +24,20 @@ export interface InputStateProperties {
   disabled(): boolean;
   setState(newState?: string): void;
   value(): string | undefined;
+}
+
+export interface InputStateProviderProps extends InputStateRenderProps {
+  state: InputStateProperties;
+}
+
+export interface InputStateRenderProps {
+  children?: ((state: InputStateProperties) => JSX.Element) | JSX.Element;
+}
+
+export interface InputStateUncontrolledOptions {
+  defaultValue: string | undefined;
+  disabled?: boolean;
+  onChange?: (state?: string) => void;
 }
 
 export function createInputState(
@@ -73,15 +81,18 @@ export function createInputState(
   };
 }
 
-export interface InputStateRenderProps {
-  children?: ((state: InputStateProperties) => JSX.Element) | JSX.Element;
-}
-
-export interface InputStateProviderProps extends InputStateRenderProps {
-  state: InputStateProperties;
-}
-
 const InputStateContext = createContext<InputStateProperties>();
+
+export function InputStateChild(props: InputStateRenderProps): JSX.Element {
+  const state = useInputState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function InputStateProvider(
   props: InputStateProviderProps,
@@ -102,15 +113,4 @@ export function useInputState(): InputStateProperties {
   const ctx = useContext(InputStateContext);
   assert(ctx, new Error("Missing <InputStateProvider>"));
   return ctx;
-}
-
-export function InputStateChild(props: InputStateRenderProps): JSX.Element {
-  const state = useInputState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

@@ -1,29 +1,30 @@
-import { createEffect, createSignal, For, Show, type JSX } from "solid-js";
+import { createEffect, createSignal, type JSX, Show } from "solid-js";
 
-import { Id, useGraph, Vertex } from "~/lib/graph/graph";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import type { FormStoreObject } from "../form/context/FormContext";
+
+import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
-import { useToast } from "./Toast";
-import { FormStoreObject } from "../form/context/FormContext";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { ResizeOverlay } from "./ResizeOverlay";
-import { IconButton } from "./IconButton";
+import { useToast } from "./Toast";
 
 export const DIMENSIONS = {
-  mobile: { id: "mobile", height: "570px", width: "360px", icon: "ph:device-mobile" },
-  tablet: { id: "tablet", height: "1026px", width: "768px", icon: "ph:device-tablet" },
-  desktop: { id: "desktop", height: "1200px", width: "1000px", icon: "ph:desktop" },
+  desktop: { height: "1200px", icon: "ph:desktop", id: "desktop", width: "1000px" },
+  mobile: { height: "570px", icon: "ph:device-mobile", id: "mobile", width: "360px" },
+  tablet: { height: "1026px", icon: "ph:device-tablet", id: "tablet", width: "768px" },
 };
 
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
+    class?: string;
+    height?: string;
     view: Id;
     width?: string;
-    height?: string;
-    class?: string;
   }>,
 ) {
   const [width, setWidth] = createSignal(props.width || "");
@@ -108,28 +109,28 @@ export function ResizableContainer(
   return (
     <div class={`scrollbar-color:lightgrey grid ${props.class} overflow:auto  {scrollbar-width:thin}  flex-shrink:0`}>
       <div
-        ref={setContainerRef}
         class="scrollbar-color:lightgrey {scrollbar-width:thin} justify-self:center overflow:auto position:relative r:10|10|10|10 flex flex:col"
         classList={{
           "bg:#f3f3f4": isDraggingOver(),
           "user-select:none": resizing(),
         }}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDropEvent}
+        ref={setContainerRef}
         style={{
           height: height(),
           width: width()
         }}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDropEvent}
       >
         <div
-          style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
           onPointerDown={(e) => handlePointerDown(e, "horizontal")}
+          style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
         />
         {props.children}
         <div
-          style={`width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
           onPointerDown={(e) => handlePointerDown(e, "vertical")}
+          style={`width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
         />
       </div>
 

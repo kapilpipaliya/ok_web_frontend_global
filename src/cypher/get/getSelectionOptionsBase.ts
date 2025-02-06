@@ -10,7 +10,7 @@ export async function getSelectionOptionsBase(
   vertex: Vertex[],
   collection: string,
   tx: Transaction,
-): Promise<{ error: boolean } & Partial<ServerResult>> {
+): Promise<Partial<ServerResult> & { error: boolean }> {
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
 

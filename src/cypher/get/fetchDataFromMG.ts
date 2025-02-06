@@ -1,4 +1,4 @@
-import { Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Edge, Vertex } from "~/lib/graph/graph";
@@ -13,7 +13,7 @@ import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,
-  context: { fetchTemplate?: boolean } & ContextType = {
+  context: ContextType & { fetchTemplate?: boolean } = {
     nodes: {} as { [key: string]: Vertex },
     relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,
@@ -22,7 +22,7 @@ export async function fetchDataFromMG(
 ): Promise<ServerResult> {
   "use server";
   let dbSession: Session;
-  let subDomain: string = "";
+  let subDomain = "";
   // @ts-expect-error ignore
   if (expression.fetchTemplate) {
     context.fetchTemplate = true;

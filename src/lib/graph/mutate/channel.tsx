@@ -1,18 +1,30 @@
 import { BroadcastChannel } from 'broadcast-channel';
-import { SetStoreFunction, reconcile } from 'solid-js/store';
-import { GraphInterface } from '~/lib/graph/graph';
-import { addNewEdge, replaceEdgeProperties, replaceEdgeStart, replaceEdgeEnd, deleteEdge, updateEdgeId } from '~/lib/graph/mutate/edge';
-import { updateVertex, updateEdge } from '~/lib/graph/mutate/setGraphData';
-import { addNewVertex, replaceVertexProperties, mergeVertexProperties, deleteVertex, updateVertexId } from '~/lib/graph/mutate/vertex';
+import { reconcile, type SetStoreFunction } from 'solid-js/store';
+
+import type { GraphInterface } from '~/lib/graph/graph';
+
+import { addNewEdge, deleteEdge, replaceEdgeEnd, replaceEdgeProperties, replaceEdgeStart, updateEdgeId } from '~/lib/graph/mutate/edge';
+import { updateEdge, updateVertex } from '~/lib/graph/mutate/setGraphData';
+import { addNewVertex, deleteVertex, mergeVertexProperties, replaceVertexProperties, updateVertexId } from '~/lib/graph/mutate/vertex';
 
 const channels = new Map<string, BroadcastChannel>();
 
+export function broadcastToAllChannels(channels: string[], skipChannel: string, message: any) {
+  const messageString = JSON.stringify(message);
+  for (const channelName of channels) {
+    if (channelName !== skipChannel) {
+      const channel = getChannel(channelName);
+      channel.postMessage(messageString);
+    }
+  }
+}
 export function getChannel(name: string): BroadcastChannel {
   if (!channels.has(name)) {
     channels.set(name, new BroadcastChannel(name));
   }
   return channels.get(name)!;
 }
+
 //  currently we assume that each iframe has unique channel ID
 export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, id: string, addChannelId?: string) {
   const data = JSON.parse(msg);
@@ -65,15 +77,5 @@ export function handleChannelMessage(msg: any, graph: GraphInterface, setGraph: 
   }
   if (data.updateEdge) {
     updateEdge(data.updateEdge.edgeId, data.updateEdge.edge, graph, setGraph, { ...(data.updateEdge.options ?? {}), skipPostMessage: id });
-  }
-}
-
-export function broadcastToAllChannels(channels: string[], skipChannel: string, message: any) {
-  const messageString = JSON.stringify(message);
-  for (const channelName of channels) {
-    if (channelName !== skipChannel) {
-      const channel = getChannel(channelName);
-      channel.postMessage(messageString);
-    }
   }
 }

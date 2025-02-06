@@ -7,20 +7,20 @@ import {
   Switch,
 } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
+import { createAppState } from "~/createAppState";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
+import { GetInitialData } from "~/GetInitialData";
 import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
 
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
-import { createAppState } from "~/createAppState";
-import { GetInitialData } from "~/GetInitialData";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -119,10 +119,10 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 {(item) => (
                   <PageItem
                     child={item}
-                    previewPageId={previewPageId()}
-                    setPreviewPageId={setPreviewPageId}
                     previewGraph={previewGraph}
+                    previewPageId={previewPageId()}
                     setPreviewGraph={setPreviewGraph}
+                    setPreviewPageId={setPreviewPageId}
                   />
                 )}
               </For>

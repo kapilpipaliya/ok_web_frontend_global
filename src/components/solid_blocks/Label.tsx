@@ -8,8 +8,9 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import { type FormStoreObject, useFormContext } from "../form/context/FormContext";
 
 interface LabeledFieldProps {
   children: JSX.Element;
@@ -19,6 +20,34 @@ interface LabeledFieldProps {
   position?: "bottom" | "left" | "right" | "system" | "top";
   required?: boolean;
 }
+
+export function isFirstElementSupportedByLabel(
+  node: HTMLElement | HTMLElement[],
+): boolean {
+  if (!node) {
+    return false;
+  }
+
+  const firstElement = Array.isArray(node) ? node[0] : node;
+  if (!firstElement) {
+    return false;
+  }
+  if (typeof firstElement === "string") {
+    return true;
+  }
+
+  const supportedTags = [
+    "input",
+    "select",
+    "textarea",
+    "output",
+    "meter",
+    "progress",
+  ];
+  return supportedTags.includes(firstElement.tagName.toLowerCase());
+}
+
+// Other label component: https://github.com/radix-ui/primitives/blob/main/packages/react/label/src/Label.tsx
 
 export function Label(
   props: Readonly<
@@ -100,32 +129,4 @@ export function Label(
       </Switch>
     </Dynamic>
   );
-}
-
-// Other label component: https://github.com/radix-ui/primitives/blob/main/packages/react/label/src/Label.tsx
-
-export function isFirstElementSupportedByLabel(
-  node: HTMLElement | HTMLElement[],
-): boolean {
-  if (!node) {
-    return false;
-  }
-
-  const firstElement = Array.isArray(node) ? node[0] : node;
-  if (!firstElement) {
-    return false;
-  }
-  if (typeof firstElement === "string") {
-    return true;
-  }
-
-  const supportedTags = [
-    "input",
-    "select",
-    "textarea",
-    "output",
-    "meter",
-    "progress",
-  ];
-  return supportedTags.includes(firstElement.tagName.toLowerCase());
 }

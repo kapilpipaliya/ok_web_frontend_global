@@ -1,12 +1,11 @@
 import { For } from "solid-js";
 
-import { IconButton } from "~/components/styled/IconButton";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export const ResizeViewButtons = (props: { formStoreId: string, openIndex: number }) => {
   const [graph, setGraph] = useGraph();

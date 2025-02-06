@@ -4,13 +4,13 @@ import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { GlobalProperties, useGraph, Vertex } from "~/lib/graph/graph";
+import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
+import { getGlobalStore } from "../../../lib/graph/get/sync/getGlobalStore";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { getGlobalStore } from "../../../lib/graph/get/sync/getGlobalStore";
 
 export interface navbarDataI {
   children: navbarDataI[];

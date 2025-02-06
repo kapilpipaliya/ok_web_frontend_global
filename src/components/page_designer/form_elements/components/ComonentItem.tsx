@@ -1,40 +1,41 @@
+import type { SetStoreFunction } from "solid-js/store";
+
 import { Icon } from "@iconify-icon/solid";
-import { children, createMemo, createSignal, For, Show } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
-import { GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { IconButton } from "~/components/styled/IconButton";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
+import { type GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
-import { OpenComponentSettings } from "../../OpenComponentSettings";
+import type { PageLayoutObject } from "../../context/LayoutContext";
 
-import { onCompDragStart } from "./onCompDragStart";
-import { TreeItemContainer } from "../../settings/layout/TreeItemContainer";
-import { resetDragDropState } from "../../event_handler/resetDragDropState";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
-import { PageLayoutObject } from "../../context/LayoutContext";
-import { getCompChildren } from "./getCompChildren";
+import { resetDragDropState } from "../../event_handler/resetDragDropState";
+import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { TreeItemContainer } from "../../settings/layout/TreeItemContainer";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
-import { SetStoreFunction } from "solid-js/store";
-import { IconButton } from "~/components/styled/IconButton";
 import { openInNewInternalTab } from "../pages/openInNewInternalTab";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { toTitle } from "case-switcher-js";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
-import { isNegative } from "~/lib/data_structure/number/isNegative";
+import { getCompChildren } from "./getCompChildren";
+import { onCompDragStart } from "./onCompDragStart";
 
 export function ComponentItem(
   props: Readonly<{
     child: Vertex;
-    expandedKeys: string[];
     edgeName: string;
+    expandedKeys: string[];
     onDoubleClick?: (fromVertex: Vertex) => void;
-    toggleExpand: (itemId: Id) => void;
-    previewPageId: Id | null;
-    setPreviewPageId: (id: Id | null) => void;
     previewGraph: GraphInterface;
+    previewPageId: Id | null;
     setPreviewGraph: SetStoreFunction<GraphInterface>;
+    setPreviewPageId: (id: Id | null) => void;
+    toggleExpand: (itemId: Id) => void;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -100,9 +101,12 @@ export function ComponentItem(
   return (
     <>
       <TreeItemContainer
+        class={isNegative(props.child.id) ? "bg:#e8ffe8" : ""}
         draggable={true}
         hasChildren={!!children().length}
         isHovered={isHovered()}
+        onClick={() => props.toggleExpand(props.child.id)}
+        onDblClick={() => props.onDoubleClick?.(props.child)}
         onDragEnd={onDragEnd}
         onDragStart={(e) => {
           // props.setPreviewPageId(null);
@@ -110,11 +114,8 @@ export function ComponentItem(
             setSelectedComponents);
         }
         }
-        onDblClick={() => props.onDoubleClick?.(props.child)}
-        onClick={() => props.toggleExpand(props.child.id)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        class={isNegative(props.child.id) ? "bg:#e8ffe8" : ""}
         ref={menuRef!}
       >
         <div
@@ -157,8 +158,8 @@ export function ComponentItem(
                   iconMap[props.child?.P.key as keyof typeof iconMap] ??
                   "material-symbols:widgets-outline-rounded"
                 }
-                width={24}
                 noobserver
+                width={24}
               />
             </Show>
             <span
@@ -180,6 +181,7 @@ export function ComponentItem(
       </TreeItemContainer>
       <Show when={props.child.L[0] !== "Comp" && props.previewPageId === props.child.id}>
         <DropdownMenu
+          offset={{crossAxis: 30}}
           onClickOutside={() => props.setPreviewPageId(null)}
           onMouseLeave={(e) => {
             if (!menuRef?.contains(e.relatedTarget as Node)) {
@@ -188,7 +190,6 @@ export function ComponentItem(
           }}
           parentRef={menuRef!}
           ref={setFloating}
-          offset={{crossAxis: 30}}
         >
           {/* {toTitle(props.child.P.key)} Preview */}
           <PreviewIsolated formId={props.child.id} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
@@ -199,15 +200,15 @@ export function ComponentItem(
           <For each={children()}>
             {(child) =>
               <ComponentItem
-                expandedKeys={props.expandedKeys}
-                edgeName={props.edgeName}
                 child={child}
-                toggleExpand={props.toggleExpand}
+                edgeName={props.edgeName}
+                expandedKeys={props.expandedKeys}
                 onDoubleClick={props.onDoubleClick}
-                previewPageId={props.previewPageId}
-                setPreviewPageId={props.setPreviewPageId}
                 previewGraph={props.previewGraph}
+                previewPageId={props.previewPageId}
                 setPreviewGraph={props.setPreviewGraph}
+                setPreviewPageId={props.setPreviewPageId}
+                toggleExpand={props.toggleExpand}
               />
             }
           </For>

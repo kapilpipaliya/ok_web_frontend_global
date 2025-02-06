@@ -16,11 +16,11 @@ import { isServer } from "solid-js/web";
 import { getElements } from "../tools";
 import "./menu.css";
 
-export type MenuProps = {
+export type MenuProps = JSX.HTMLAttributes<HTMLDivElement> & {
   align?: "center" | "left" | "right";
   ontoggle?: (open?: boolean) => void;
   open?: boolean;
-} & JSX.HTMLAttributes<HTMLDivElement>;
+};
 
 const getFirstMenuButton = (open: Accessor<boolean>) => {
   let counter = 0;
@@ -52,6 +52,20 @@ const getMenuItems = () => {
     return !isFirstMenuButton;
   };
 };
+
+export type MenuButtonProps = JSX.HTMLAttributes<HTMLButtonElement>;
+
+export type MenuItemGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
+  title?: JSX.Element;
+};
+
+export type MenuItemProps = JSX.HTMLAttributes<HTMLDivElement>;
+
+export type MenuOptionsContextValue = [
+  value: Accessor<string[]>,
+  change: (value: string) => void,
+  type?: "checkbox" | "radio",
+];
 
 export function Menu(props: Readonly<MenuProps>) {
   const [open, setOpen] = createSignal(!!props.open);
@@ -188,21 +202,13 @@ export function Menu(props: Readonly<MenuProps>) {
   );
 }
 
-export type MenuButtonProps = JSX.HTMLAttributes<HTMLButtonElement>;
-
 export function MenuButton(props: Readonly<MenuButtonProps>) {
   return <button {...props} aria-haspopup="menu" />;
 }
 
-export type MenuItemProps = JSX.HTMLAttributes<HTMLDivElement>;
-
 export function MenuItem(props: Readonly<MenuItemProps>) {
   return <div tabIndex="0" {...props} role="menuitem" />;
 }
-
-export type MenuItemGroupProps = {
-  title?: JSX.Element;
-} & JSX.HTMLAttributes<HTMLDivElement>;
 
 export function MenuItemGroup(props: Readonly<MenuItemGroupProps>) {
   const [local, divProps] = splitProps(props, ["title", "children"]);
@@ -216,21 +222,31 @@ export function MenuItemGroup(props: Readonly<MenuItemGroupProps>) {
   );
 }
 
-export type MenuOptionsContextValue = [
-  value: Accessor<string[]>,
-  change: (value: string) => void,
-  type?: "checkbox" | "radio",
-];
-
 export const MenuOptionsContext = createContext<MenuOptionsContextValue>([
   () => [],
   (value) => console.warn("context default!", value),
 ]);
 
-export type MenuOptionProps = {
+export type MenuOptionGroupProps = Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange"> &
+  (
+  | {
+      onchange?: (value: string) => void;
+      title?: JSX.Element;
+      type?: "radio" | undefined;
+      value?: [string] | string;
+    }
+  | {
+      onchange?: (value: string[]) => void;
+      title?: JSX.Element;
+      type: "checkbox";
+      value?: string[];
+    }
+);
+
+export type MenuOptionProps = Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange"> & {
   onchange?: (checked?: boolean) => void;
   value: string;
-} & Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
+};
 
 export function MenuOption(props: Readonly<MenuOptionProps>) {
   const [_local, divProps] = splitProps(props, ["value", "onchange"]);
@@ -266,22 +282,6 @@ export function MenuOption(props: Readonly<MenuOptionProps>) {
     />
   );
 }
-
-export type MenuOptionGroupProps = (
-  | {
-      onchange?: (value: string) => void;
-      title?: JSX.Element;
-      type?: "radio" | undefined;
-      value?: [string] | string;
-    }
-  | {
-      onchange?: (value: string[]) => void;
-      title?: JSX.Element;
-      type: "checkbox";
-      value?: string[];
-    }
-) &
-  Omit<JSX.HTMLAttributes<HTMLDivElement>, "onchange">;
 
 export function MenuOptionGroup(
   props: Readonly<MenuOptionGroupProps>,

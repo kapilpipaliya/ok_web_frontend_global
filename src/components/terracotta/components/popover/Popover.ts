@@ -41,22 +41,16 @@ export type PopoverControlledBaseProps = Prettify<
 export type PopoverControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, PopoverControlledBaseProps>;
 
+export type PopoverProps<T extends ValidConstructor = "div"> =
+  | PopoverControlledProps<T>
+  | PopoverUncontrolledProps<T>;
+
 export type PopoverUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
 export type PopoverUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, PopoverUncontrolledBaseProps>;
-
-export type PopoverProps<T extends ValidConstructor = "div"> =
-  | PopoverControlledProps<T>
-  | PopoverUncontrolledProps<T>;
-
-function isPopoverUncontrolled<T extends ValidConstructor = "div">(
-  props: PopoverProps<T>,
-): props is PopoverUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function Popover<T extends ValidConstructor = "div">(
   props: PopoverProps<T>,
@@ -125,4 +119,10 @@ export function Popover<T extends ValidConstructor = "div">(
       panelID,
     },
   });
+}
+
+function isPopoverUncontrolled<T extends ValidConstructor = "div">(
+  props: PopoverProps<T>,
+): props is PopoverUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

@@ -11,8 +11,8 @@ import { replacePlaceholderWithUrl } from "../css_properties/utils/cssStateToStr
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 
 interface ImageFieldProps
-  extends Omit<JSX.ImgHTMLAttributes<HTMLImageElement>, "onChange">,
-    GenericComponentProps {}
+  extends GenericComponentProps,
+    Omit<JSX.ImgHTMLAttributes<HTMLImageElement>, "onChange"> {}
 
 export function ImageField(props: ImageFieldProps) {
   const [graph] = useGraph();

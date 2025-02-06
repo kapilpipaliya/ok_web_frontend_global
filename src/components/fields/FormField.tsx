@@ -1,5 +1,4 @@
 import { createMemo, onCleanup } from "solid-js";
-import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
@@ -10,24 +9,23 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
 import { FormContext, type FormStoreObject, useFormContext } from "../form/context/FormContext";
 import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
-import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(
   props: Readonly<
-    {
+    GenericComponentProps & {
       id?: string;
       // For Root Level Forms we use Parent vertex label as form key
       label?: string;
       submitButton?: any;
-    } & GenericComponentProps
+    }
   >,
 ) {
   const [graph, setGraph] = useGraph();
@@ -61,7 +59,9 @@ export function FormField(
   const form = generateFormMetaAttributes(graph, () => {}, meta());
   setFormStore("formMetaData", form);
 
-  if (!id()) {
+  if (id()) {
+    loadData();
+  } else {
     const defaultValues = form.attributes.reduce(
       (acc, attr) => {
         acc[attr.key] = attr.defaultValue;
@@ -85,8 +85,6 @@ export function FormField(
       formMetaId: meta().id,
       txnId,
     });
-  } else {
-    loadData();
   }
   async function loadData() {
     if (!id()) {

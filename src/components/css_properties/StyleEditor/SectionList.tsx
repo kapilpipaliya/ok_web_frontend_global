@@ -56,8 +56,8 @@ export const CollapsibleSection = (
           class={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
           height={25}
           icon="ph:caret-up"
-          width={25}
           noobserver
+          width={25}
         />
         <span class="f:15 font-weight:600">{props.title}</span>
       </button>
@@ -100,8 +100,8 @@ export const SectionList = (
             class="transition:transform|0.2s|linear"
             height={25}
             icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
-            width={25}
             noobserver
+            width={25}
           />
         </button>
         <button class="btn ml:2" onClick={collapseAll} title="Collapse all">
@@ -109,8 +109,8 @@ export const SectionList = (
             class="transition:transform|0.2s|linear"
             height={25}
             icon="ph:arrows-in"
-            width={25}
             noobserver
+            width={25}
           />
         </button>
         <button class="btn ml:2" onClick={expandAll} title="Expand all">
@@ -118,8 +118,8 @@ export const SectionList = (
             class="transition:transform|0.2s|linear"
             height={25}
             icon="ph:arrows-out"
-            width={25}
             noobserver
+            width={25}
           />
         </button>
       </div>

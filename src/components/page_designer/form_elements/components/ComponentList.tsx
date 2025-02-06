@@ -1,26 +1,26 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
+import { createAppState } from "~/createAppState";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { getCompChildren } from "./getCompChildren";
-import { createStore } from "solid-js/store";
 import { ComponentItem } from "./ComonentItem";
-import { createAppState } from "~/createAppState";
+import { getCompChildren } from "./getCompChildren";
 
 export function ComponentList(props: {
+  edgeName: string;
+  isFetchData?: boolean;
   onDoubleClick?: (fromVertex: Vertex) => void;
   rootExpression?: string;
-  edgeName: string;
   rootVertexes?: Vertex[];
-  isFetchData?: boolean;
 }) {
   const [graph, setGraph] = useGraph();
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -118,15 +118,15 @@ export function ComponentList(props: {
               <>
                 <div class={"font-weight:600 my:8px"}>
                   <ComponentItem
-                    edgeName={props.edgeName}
                     child={item}
+                    edgeName={props.edgeName}
                     expandedKeys={expandedKeys}
-                    toggleExpand={toggleExpand}
                     onDoubleClick={props.onDoubleClick}
-                    previewPageId={previewPageId()}
-                    setPreviewPageId={setPreviewPageId}
                     previewGraph={previewGraph}
+                    previewPageId={previewPageId()}
                     setPreviewGraph={setPreviewGraph}
+                    setPreviewPageId={setPreviewPageId}
+                    toggleExpand={toggleExpand}
                   />
                 </div>
               </>

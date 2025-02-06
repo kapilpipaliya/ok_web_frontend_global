@@ -13,10 +13,6 @@ import {
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
 
-export function useRuntimeCSS() {
-  return useContext(RuntimeCSSContext);
-}
-
 // https://github.com/master-co/css/blob/beta/packages/react/src/CSSProvider.tsx
 export function CSSRuntimeProvider(
   props: Readonly<{
@@ -120,4 +116,8 @@ export function CSSRuntimeProvider(
       {props.children}
     </RuntimeCSSContext.Provider>
   );
+}
+
+export function useRuntimeCSS() {
+  return useContext(RuntimeCSSContext);
 }

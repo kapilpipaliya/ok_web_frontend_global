@@ -1,15 +1,16 @@
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
-
-import { pageAttr } from "./pageAttr";
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { evalExpression } from "~/lib/expression_eval";
-import { parentComponentAttribute, parentTemplateAttribute } from "../base/Comp";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import { parentComponentAttribute, parentTemplateAttribute } from "../base/Comp";
+import { pageAttr } from "./pageAttr";
 
 export const wrapWithTitle = (title: string, required: boolean, children: any) => {
   return {
+    as: "div",
     attributes: [
       {
         attributes: required ? [{
@@ -27,7 +28,6 @@ export const wrapWithTitle = (title: string, required: boolean, children: any) =
     ],
     class: "flex ai:center gap:2 justify-content:space-between mt:6",
     componentName: "Box",
-    as: "div",
     key: "box1"
   }
 };
@@ -35,6 +35,7 @@ export const wrapWithTitle = (title: string, required: boolean, children: any) =
 export const Page: IFormMetaData = {
   attributes: [
     {
+      as: "div",
       attributes: [
         wrapWithTitle("Title", false, {
               class: `${PROPERTIES.Css.TextField} flex:1`,
@@ -140,7 +141,6 @@ export const Page: IFormMetaData = {
       ],
       class: "d:flex flex:col gap:8",
       componentName: "Box",
-      as: "div",
       key: "box",
     },
   ],
@@ -152,8 +152,8 @@ export const Page: IFormMetaData = {
 export const variantAttributes =  {
   attributes: [
     {
-      componentName: "TextInput",
       class: PROPERTIES.Css.TextField,
+      componentName: "TextInput",
       displayName: "Variant Name",
       key: "key",
     },
@@ -168,12 +168,11 @@ string`,
 // number
     },
     {
-      componentName: "Box",
       as: "div",
-      displayName: "Default Value",
-      class: "flex ai:center gap:2",
       attributes: [
         {
+          displayName: "Default Value",
+          key: "defValue",
           // componentName: "::'P.type'",
           otherProps: (options: FunctionArgumentType) => {
             const type = options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
@@ -182,12 +181,17 @@ string`,
               componentName: type,
             }
           },
-          displayName: "Default Value",
-          key: "defValue",
         },
         {
-          componentName: "Button",
+          attributes: [
+            {
+              componentName: "Icon",
+              icon: "ph:x",
+              size: 16,
+            }
+          ],
           class: "flex ai:center gap:2 color:red",
+          componentName: "Button",
           key: "button",
           otherProps: (options: FunctionArgumentType) => {
             return {
@@ -200,16 +204,12 @@ string`,
                 })
               }
             }
-          },
-          attributes: [
-            {
-              componentName: "Icon",
-              icon: "ph:x",
-              size: 16,
-            }
-          ]
+          }
         }
-      ]
+      ],
+      class: "flex ai:center gap:2",
+      componentName: "Box",
+      displayName: "Default Value"
     },
     // {
     //   // componentName: "::'P.type'",
@@ -229,6 +229,8 @@ string`,
           key: "key",
         }, 
         {
+          displayName: "Value",
+          key: "value",
           otherProps: (options: FunctionArgumentType) => {
             const type = evalExpression("<-$0::'P.type'", {
               graph: options.graph,
@@ -239,8 +241,6 @@ string`,
               componentName: type === "boolean" ? "CheckBox" : "TextInput"
             };
           },
-          displayName: "Value",
-          key: "value",
         },
       ],
       componentName: "DynamicTable",

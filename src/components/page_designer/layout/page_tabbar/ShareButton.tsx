@@ -2,9 +2,9 @@ import { createSignal } from "solid-js";
 
 import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { PageShare } from "./PageShare";
-import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function ShareButton(props: { formStoreId: string }) {
   const [openDialog, setOpenDialog] = createSignal(false);

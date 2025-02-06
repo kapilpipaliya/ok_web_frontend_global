@@ -1,54 +1,52 @@
-import type { createStore } from "solid-js/store";
+
 import { createContext, useContext } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { FormStoreObject } from "../../form/context/FormContext";
-import type { IDToRuleMap } from "../functions/generateFormMetaAttributes";
+import type { Id, } from "~/lib/graph/graph";
 
 export interface OpenFormInfo {
-  formId: Id, label: string, dataId: Id, mainPanel: Id
+  dataId: Id, formId: Id, label: string, mainPanel: Id
 }
+
+export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
 export function getInitialDesignerLayoutStore() {
   const mainPanel = uuidv7();
   return {
-    id: uuidv7(),
-    mainPanel: [mainPanel],
-    leftWidth: 190,
-    rightWidth0: 305,
-    rightWidth1: 305,
-    rightWidth2: 300,
-    bottomHeight: 300,
-    [`mainPanel${mainPanel}Width` as `mainPanel${string}Width`]: '1fr',
     [`mainPanel${mainPanel}Tab` as `mainPanel${string}Tab`]: null as Id | null,
-    draggedTab: null as Id | null,
-    openedFormIds: [] as Id[],
-    draggedVertexIds: [] as Id[],
+    [`mainPanel${mainPanel}Width` as `mainPanel${string}Width`]: '1fr',
     activeItem: null as Id | null | number,
-    position: null as "after" | "before" | "center" | "left" | "right" | null,
+    bottomHeight: 300,
+    draggedTab: null as Id | null,
+    draggedVertexIds: [] as Id[],
     formId: null as Id | null,
-    mainFormId: null as Id | null,
+    id: uuidv7(),
     isLeftOpen: true,
     isRight0Open: true,
     isRight1Open: true,
     isRight2Open: true,
     isSmallScreen: false,
+    leftWidth: 190,
+    mainFormId: null as Id | null,
+    mainPanel: [mainPanel],
+    openedFormIds: [] as Id[],
+    position: null as "after" | "before" | "center" | "left" | "right" | null,
+    rightWidth0: 305,
+    rightWidth1: 305,
+    rightWidth2: 300,
     selectedSection: "build",
     selectedTab: "settings",
 
   };
 }
 
-export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
-
 export const DesignerLayoutStoreContext = createContext<Id>();
 export const DesignerFormIdContext = createContext<Id>();
 
-export function useDesignerLayoutStore() {
-  return useContext(DesignerLayoutStoreContext)!;
-}
-
 export function useDesignerFormIdContext() {
   return useContext(DesignerFormIdContext);
+}
+
+export function useDesignerLayoutStore() {
+  return useContext(DesignerLayoutStoreContext)!;
 }

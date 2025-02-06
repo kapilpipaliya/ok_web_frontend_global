@@ -1,10 +1,13 @@
-import { createMemo, For, Switch, Match, Show } from "solid-js";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { createMemo, For, Match, Show, Switch } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { PROPERTIES } from "~/components/styled/constants/constant";
-import { evalExpression } from "~/lib/expression_eval";
-import { type Vertex, useGraph } from "~/lib/graph/graph";
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 
 export function ComponentVariantsInput(props: { compVertex: Vertex; dataVertex: Vertex; setPropertyValue: (meta: Vertex, value: any) => void; }) {
   const [graph, setGraph] = useGraph();
@@ -40,8 +43,8 @@ export function ComponentVariantsInput(props: { compVertex: Vertex; dataVertex: 
                   <Match when={options()}>
                     <select
                       class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
-                      value={props.dataVertex.P[variant.P.key] || ""}
                       onChange={(e) => props.setPropertyValue(variant, e.currentTarget.value)}
+                      value={props.dataVertex.P[variant.P.key] || ""}
                     >
                       <option value="">Select...</option>
                       <For each={options()}>
@@ -53,34 +56,34 @@ export function ComponentVariantsInput(props: { compVertex: Vertex; dataVertex: 
                   </Match>
                   <Match when={variant.P.type?.toLowerCase() === "boolean"}>
                     <input
-                      type="checkbox"
-                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
                       checked={props.dataVertex.P[variant.P.key] || false}
-                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.checked)} />
+                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.checked)}
+                      type="checkbox" />
                   </Match>
                   <Match when={variant.P.type?.toLowerCase() === "number" || variant.P.type?.toLowerCase() === "date"}>
                     <input
-                      type={variant.P.type?.toLowerCase()}
                       class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
-                      value={props.dataVertex.P[variant.P.key] || ""}
                       onChange={(e) => props.setPropertyValue(variant,
                         variant.P.type?.toLowerCase() === "number" ? Number(e.currentTarget.value) : e.currentTarget.value
-                      )} />
+                      )}
+                      type={variant.P.type?.toLowerCase()}
+                      value={props.dataVertex.P[variant.P.key] || ""} />
                   </Match>
                   <Match when={true}>
                     <input
-                      type="text"
                       class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
-                      value={props.dataVertex.P[variant.P.key] || ""}
-                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.value)} />
+                      onChange={(e) => props.setPropertyValue(variant, e.currentTarget.value)}
+                      type="text"
+                      value={props.dataVertex.P[variant.P.key] || ""} />
                   </Match>
                 </Switch>
                 <Show when={props.dataVertex.P[variant.P.key] !== undefined && props.dataVertex.P[variant.P.key] !== null}>
                   <IconButton
-                    icon="ph:x"
                     class="color:red"
-                    size={16}
+                    icon="ph:x"
                     onClick={() => props.setPropertyValue(variant, null)}
+                    size={16}
                   />
                 </Show>
               </div>

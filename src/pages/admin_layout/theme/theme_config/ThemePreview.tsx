@@ -11,7 +11,7 @@ export function ThemePreview(props: { item: Vertex }) {
     }
   });
 
-  const getColorClass = (color?: { "@light": string } | string) => {
+  const getColorClass = (color?: string | { "@light": string }) => {
     return typeof color === "string"
       ? `bg:${color}`
       : color

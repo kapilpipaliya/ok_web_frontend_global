@@ -5,6 +5,10 @@ import FocusNavigator from "../../utils/focus-navigator";
 
 export const RadioGroupRootContext = createContext<FocusNavigator>();
 
+export function createRadioGroupOptionFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId());
+}
+
 export function useRadioGroupRootContext(
   componentName: string,
 ): FocusNavigator {
@@ -14,8 +18,4 @@ export function useRadioGroupRootContext(
     new Error(`<${componentName}> must be used inside a <RadioGroup>`),
   );
   return context;
-}
-
-export function createRadioGroupOptionFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId());
 }

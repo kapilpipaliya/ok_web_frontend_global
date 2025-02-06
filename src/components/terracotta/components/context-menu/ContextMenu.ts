@@ -41,22 +41,16 @@ export type ContextMenuControlledBaseProps = Prettify<
 export type ContextMenuControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, ContextMenuControlledBaseProps>;
 
+export type ContextMenuProps<T extends ValidConstructor = "div"> =
+  | ContextMenuControlledProps<T>
+  | ContextMenuUncontrolledProps<T>;
+
 export type ContextMenuUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps & DisclosureStateUncontrolledOptions
 >;
 
 export type ContextMenuUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, ContextMenuUncontrolledBaseProps>;
-
-export type ContextMenuProps<T extends ValidConstructor = "div"> =
-  | ContextMenuControlledProps<T>
-  | ContextMenuUncontrolledProps<T>;
-
-function isContextMenuUncontrolled<T extends ValidConstructor = "div">(
-  props: ContextMenuProps<T>,
-): props is ContextMenuUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function ContextMenu<T extends ValidConstructor = "div">(
   props: ContextMenuProps<T>,
@@ -124,4 +118,10 @@ export function ContextMenu<T extends ValidConstructor = "div">(
       panelID,
     },
   });
+}
+
+function isContextMenuUncontrolled<T extends ValidConstructor = "div">(
+  props: ContextMenuProps<T>,
+): props is ContextMenuUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

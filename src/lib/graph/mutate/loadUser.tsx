@@ -5,6 +5,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
+
 import { addNewVertex, mergeVertexProperties, replaceVertexProperties } from "./vertex";
 
 export function handleUserData(
@@ -35,22 +36,6 @@ export function handleUserData(
   }
 }
 
-export function saveUser(
-  user: any,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (!graph.vertexes["member"]) {
-    addNewVertex(0, {
-      ...user,
-      L: ["member"],
-      id: "member"
-    }, graph, setGraph);
-  } else {
-    replaceVertexProperties(0, "member", graph, setGraph, user, {cloneProperties: false});
-  }
-}
-
 export async function loadUser(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -78,5 +63,21 @@ export async function loadUser(
     return false;
   } finally {
     mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isLoadingPage: false });
+  }
+}
+
+export function saveUser(
+  user: any,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  if (graph.vertexes["member"]) {
+    replaceVertexProperties(0, "member", graph, setGraph, user, {cloneProperties: false});
+  } else {
+    addNewVertex(0, {
+      ...user,
+      id: "member",
+      L: ["member"]
+    }, graph, setGraph);
   }
 }

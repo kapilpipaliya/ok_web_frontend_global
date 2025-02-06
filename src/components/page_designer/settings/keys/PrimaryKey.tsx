@@ -1,8 +1,8 @@
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";

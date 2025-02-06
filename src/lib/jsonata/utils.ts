@@ -5,53 +5,6 @@
  */
 
 /**
- * Check if value is a finite number
- * @param {float} n - number to evaluate
- * @returns {boolean} True if n is a finite number
- */
-export function isNumeric(n) {
-  let isNum = false;
-  if (typeof n === "number") {
-    isNum = !Number.isNaN(n);
-    if (isNum && !Number.isFinite(n)) {
-      throw {
-        code: "D1001",
-        stack: new Error().stack,
-        value: n,
-      };
-    }
-  }
-  return isNum;
-}
-
-/**
- * Returns true if the arg is an array of strings
- * @param {*} arg - the item to test
- * @returns {boolean} True if arg is an array of strings
- */
-export function isArrayOfStrings(arg) {
-  let result = false;
-  /* istanbul ignore else */
-  if (Array.isArray(arg)) {
-    result = arg.filter((item) => typeof item !== "string").length === 0;
-  }
-  return result;
-}
-
-/**
- * Returns true if the arg is an array of numbers
- * @param {*} arg - the item to test
- * @returns {boolean} True if arg is an array of numbers
- */
-export function isArrayOfNumbers(arg) {
-  let result = false;
-  if (Array.isArray(arg)) {
-    result = arg.filter((item) => !isNumeric(item)).length === 0;
-  }
-  return result;
-}
-
-/**
  * Create an empty sequence to contain query results
  * @returns {Array} - empty sequence
  */
@@ -62,27 +15,6 @@ export function createSequence() {
     sequence.push(arguments[0]);
   }
   return sequence;
-}
-
-/**
- * Tests if a value is a sequence
- * @param {*} value the value to test
- * @returns {boolean} true if it's a sequence
- */
-export function isSequence(value) {
-  return value.sequence === true && Array.isArray(value);
-}
-
-/**
- *
- * @param {Object} arg - expression to test
- * @returns {boolean} - true if it is a function (lambda or built-in)
- */
-export function isFunction(arg) {
-  return (
-    (arg && (arg._jsonata_function === true || arg._jsonata_lambda === true)) ||
-    typeof arg === "function"
-  );
 }
 
 /**
@@ -103,6 +35,45 @@ export function getFunctionArity(func) {
 }
 
 /**
+ * Returns true if the arg is an array of numbers
+ * @param {*} arg - the item to test
+ * @returns {boolean} True if arg is an array of numbers
+ */
+export function isArrayOfNumbers(arg) {
+  let result = false;
+  if (Array.isArray(arg)) {
+    result = arg.filter((item) => !isNumeric(item)).length === 0;
+  }
+  return result;
+}
+
+/**
+ * Returns true if the arg is an array of strings
+ * @param {*} arg - the item to test
+ * @returns {boolean} True if arg is an array of strings
+ */
+export function isArrayOfStrings(arg) {
+  let result = false;
+  /* istanbul ignore else */
+  if (Array.isArray(arg)) {
+    result = arg.filter((item) => typeof item !== "string").length === 0;
+  }
+  return result;
+}
+
+/**
+ *
+ * @param {Object} arg - expression to test
+ * @returns {boolean} - true if it is a function (lambda or built-in)
+ */
+export function isFunction(arg) {
+  return (
+    (arg && (arg._jsonata_function === true || arg._jsonata_lambda === true)) ||
+    typeof arg === "function"
+  );
+}
+
+/**
  * Tests whether arg is a lambda function
  * @param {*} arg - the value to test
  * @returns {boolean} - true if it is a lambda function
@@ -111,23 +82,38 @@ export function isLambda(arg) {
   return arg && arg._jsonata_lambda === true;
 }
 
+/**
+ * Check if value is a finite number
+ * @param {float} n - number to evaluate
+ * @returns {boolean} True if n is a finite number
+ */
+export function isNumeric(n) {
+  let isNum = false;
+  if (typeof n === "number") {
+    isNum = !Number.isNaN(n);
+    if (isNum && !Number.isFinite(n)) {
+      throw {
+        code: "D1001",
+        stack: new Error().stack,
+        value: n,
+      };
+    }
+  }
+  return isNum;
+}
+
+/**
+ * Tests if a value is a sequence
+ * @param {*} value the value to test
+ * @returns {boolean} true if it's a sequence
+ */
+export function isSequence(value) {
+  return value.sequence === true && Array.isArray(value);
+}
+
 // istanbul ignore next
 const iteratorSymbol =
   (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
-
-/**
- * @param {Object} arg - expression to test
- * @returns {boolean} - true if it is iterable
- */
-export function isIterable(arg) {
-  return (
-    typeof arg === "object" &&
-    arg !== null &&
-    iteratorSymbol in arg &&
-    "next" in arg &&
-    typeof arg.next === "function"
-  );
-}
 
 /**
  * Compares two values for equality
@@ -183,6 +169,20 @@ export function isDeepEqual(lhs, rhs) {
     return true;
   }
   return false;
+}
+
+/**
+ * @param {Object} arg - expression to test
+ * @returns {boolean} - true if it is iterable
+ */
+export function isIterable(arg) {
+  return (
+    typeof arg === "object" &&
+    arg !== null &&
+    iteratorSymbol in arg &&
+    "next" in arg &&
+    typeof arg.next === "function"
+  );
 }
 
 /**

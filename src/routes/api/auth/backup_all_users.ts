@@ -7,6 +7,18 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/getSubDomain";
 
+export async function GET({ request }: APIEvent) {
+  // const { formName, formId } = await request.json();
+  const _subdomain = await getSubDomain(request.headers.get("host")!);
+
+  try {
+    return saveGraphToCypherQL();
+  } catch (error) {
+    console.error("Failed to backup all users", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
+}
+
 export async function saveGraphToCypherQL() {
   const subDomain = "default"; // Adjust this as needed
   const dbSession = (await getDriver()).session({database: subDomain});
@@ -61,17 +73,5 @@ export async function saveGraphToCypherQL() {
     console.error("Error saving graph to CypherQL:", error);
   } finally {
     await dbSession.close();
-  }
-}
-
-export async function GET({ request }: APIEvent) {
-  // const { formName, formId } = await request.json();
-  const _subdomain = await getSubDomain(request.headers.get("host")!);
-
-  try {
-    return saveGraphToCypherQL();
-  } catch (error) {
-    console.error("Failed to backup all users", error);
-    return new Response("Internal Server Error", { status: 500 });
   }
 }

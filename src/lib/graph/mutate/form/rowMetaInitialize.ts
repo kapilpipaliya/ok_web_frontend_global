@@ -6,52 +6,12 @@ import { batch, onCleanup } from "solid-js";
 import type { GraphInterface, Id, Vertex } from "../../graph";
 
 import { cloneVertexWithEdges } from "../../get/sync/cloneVertexWithEdges";
-import { addNewEdge, newEdge } from "../edge";
-import { mergeVertexProperties } from "../vertex";
-import { newRow } from "./addNewRow";
 import { generateNewTxnId } from "../../transaction/generateNewTxnId";
 import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 import { revertTransaction } from "../../transaction/revertTransaction";
-
-export function rowMetaInitialize(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  tableMetaInstance: Vertex,
-  tableColumnsTemplate: Vertex[],
-  joinVertex: Vertex,
-) {
-  // const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], tableMeta);
-
-  const metaTxnId = generateNewTxnId(graph, setGraph);
-  const rows = klona(tableMetaInstance?.P.rows || {});
-
-  if (!(rows[joinVertex.id] && graph.vertexes[rows[joinVertex.id]])) {
-    createNewMetaInstance(
-      graph,
-      setGraph,
-      metaTxnId,
-      joinVertex,
-      tableMetaInstance,
-      tableColumnsTemplate,
-      rows,
-    );
-  } else {
-    updateExistingMetaInstance(
-      graph,
-      setGraph,
-      metaTxnId,
-      graph.vertexes[rows[joinVertex.id]],
-      tableColumnsTemplate,
-      rows,
-    );
-  }
-
-  onCleanup(() => {
-    revertTransaction(metaTxnId, graph, setGraph);
-  });
-
-  return metaTxnId;
-}
+import { addNewEdge, newEdge } from "../edge";
+import { mergeVertexProperties } from "../vertex";
+import { newRow } from "./addNewRow";
 
 export function createNewMetaInstance(
   graph: Store<GraphInterface>,
@@ -86,7 +46,7 @@ export function createNewMetaInstance(
       { cloneProperties: false },
     );
 
-    let columns = {};
+    const columns = {};
     createAttributeRows(
       graph,
       setGraph,
@@ -101,10 +61,50 @@ export function createNewMetaInstance(
       metaInstanceResult.vertexId!,
       graph,
       setGraph,
-      { metaTxnId, columns },
+      { columns, metaTxnId },
     );
     return metaInstanceResult.vertexId
   });
+}
+
+export function rowMetaInitialize(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  tableMetaInstance: Vertex,
+  tableColumnsTemplate: Vertex[],
+  joinVertex: Vertex,
+) {
+  // const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], tableMeta);
+
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+  const rows = klona(tableMetaInstance?.P.rows || {});
+
+  if ((rows[joinVertex.id] && graph.vertexes[rows[joinVertex.id]])) {
+    updateExistingMetaInstance(
+      graph,
+      setGraph,
+      metaTxnId,
+      graph.vertexes[rows[joinVertex.id]],
+      tableColumnsTemplate,
+      rows,
+    );
+  } else {
+    createNewMetaInstance(
+      graph,
+      setGraph,
+      metaTxnId,
+      joinVertex,
+      tableMetaInstance,
+      tableColumnsTemplate,
+      rows,
+    );
+  }
+
+  onCleanup(() => {
+    revertTransaction(metaTxnId, graph, setGraph);
+  });
+
+  return metaTxnId;
 }
 
 export function updateExistingMetaInstance(

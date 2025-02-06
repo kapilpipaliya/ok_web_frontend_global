@@ -1,28 +1,28 @@
 import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { createLongPress } from "~/lib/hooks/createLongPress";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { useGraph } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "./FieldType";
+
 import { replacePlaceholderWithUrl } from "../css_properties/utils/cssStateToString";
-import { useGraph } from "~/lib/graph/graph";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 // HtmlField
 export function BoxField(
-  props: {
+  props: JSX.HTMLAttributes<HTMLDivElement> & Readonly<GenericComponentProps> &
+    {
     as?: string;
+    childrenBefore?: JSX.Element;
     class?: string;
     isViewMode?: boolean;
     longPressDuration?: number;
     onLongPress?: (event: Event) => void;
-    viewModeClass?: string;
-    text?: string;
-    childrenBefore?: JSX.Element;
     src?: string;
-  } & JSX.HTMLAttributes<HTMLDivElement> &
-    Readonly<GenericComponentProps>,
+    text?: string;
+    viewModeClass?: string;
+  },
 ) {
   const [graph] = useGraph();
   const parentItems = usePageRenderContext();

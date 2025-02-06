@@ -1,7 +1,8 @@
-import { useKeyedContext } from "@corvu/utils/create/keyedContext";
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import { GraphContext, GraphInterface } from "~/lib/graph/graph";
+import { useKeyedContext } from "@corvu/utils/create/keyedContext";
+
+import { GraphContext, type GraphInterface } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 // Just for example, dont use it anywhere.

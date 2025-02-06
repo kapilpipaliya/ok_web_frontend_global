@@ -11,9 +11,9 @@ import { useToast } from "~/components/styled/Toast";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
+import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 import { addNewVertex, newVertex } from "../vertex";
 import { newRow } from "./addNewRow";
-import { generateNewVertexId } from "../../transaction/generateNewVertexId";
 
 export function addMetaVertexes(
   graph: Store<GraphInterface>,

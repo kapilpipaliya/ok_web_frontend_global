@@ -30,113 +30,15 @@ export interface AutocompleteStateProperties<T> {
   setQuery(value: string): void;
 }
 
-export interface SingleAutocompleteStateControlledOptions<T> {
-  by?: (a: T, b: T) => boolean;
-  disabled?: boolean;
-  matchBy: (value: T, query: string) => boolean;
-  multiple?: false;
-  onChange?: (value?: T) => void;
-  toggleable?: boolean;
-  value: T;
+export interface AutocompleteStateProviderProps<T>
+  extends AutocompleteStateRenderProps<T> {
+  state: AutocompleteStateProperties<T>;
 }
 
-export interface SingleAutocompleteStateUncontrolledOptions<T> {
-  by?: (a: T, b: T) => boolean;
-  defaultValue: T;
-  disabled?: boolean;
-  matchBy: (value: T, query: string) => boolean;
-  multiple?: false;
-  onChange?: (value?: T) => void;
-  toggleable?: boolean;
-}
-
-export type SingleAutocompleteStateOptions<T> =
-  | SingleAutocompleteStateControlledOptions<T>
-  | SingleAutocompleteStateUncontrolledOptions<T>;
-
-export function createSingleAutocompleteState<T>(
-  options: SingleAutocompleteStateOptions<T>,
-): AutocompleteStateProperties<T> {
-  const [active, setActive] = createSignal<Ref<T>>();
-
-  let selectedValue: Accessor<T | undefined>;
-  let setSelectedValue: (value: T | undefined) => void;
-
-  const equals = options.by || isEqual;
-
-  if ("defaultValue" in options) {
-    const [selected, setSelected] = createSignal<T | undefined>(
-      options.defaultValue,
-    );
-    selectedValue = selected;
-    setSelectedValue = (value): void => {
-      setSelected(() => value);
-      if (options.onChange) {
-        options.onChange(value);
-      }
-    };
-  } else {
-    selectedValue = createMemo(() => options.value);
-    setSelectedValue = (value): void => {
-      if (options.onChange) {
-        options.onChange(value);
-      }
-    };
-  }
-
-  const isDisabled = createMemo(() => !!options.disabled);
-
-  const [input, setInput] = createInputReader();
-
-  return {
-    blur(): void {
-      if (!untrack(isDisabled)) {
-        setActive(undefined);
-      }
-    },
-    disabled: isDisabled,
-    focus(value): void {
-      if (!untrack(isDisabled)) {
-        setActive({
-          value,
-        });
-      }
-    },
-    hasActive(): boolean {
-      return !!active();
-    },
-    hasQuery: createMemo(() => !!input()),
-    hasSelected(): boolean {
-      return selectedValue() != null;
-    },
-    isActive(value): boolean {
-      const ref = active();
-      return ref ? equals(value, ref.value) : false;
-    },
-    isSelected(value): boolean {
-      return isEqual(value, selectedValue());
-    },
-    matches(value): boolean {
-      return options.matchBy(value, input());
-    },
-    query(): string {
-      return input();
-    },
-    select(value): void {
-      if (!untrack(isDisabled)) {
-        if (options.toggleable && equals(untrack(selectedValue) as T, value)) {
-          setSelectedValue(undefined);
-        } else {
-          setSelectedValue(value);
-        }
-      }
-    },
-    setQuery(value): void {
-      if (!untrack(isDisabled)) {
-        setInput(value);
-      }
-    },
-  };
+export interface AutocompleteStateRenderProps<T> {
+  children?:
+    | ((state: AutocompleteStateProperties<T>) => JSX.Element)
+    | JSX.Element;
 }
 
 export interface MultipleAutocompleteStateControlledOptions<T> {
@@ -149,6 +51,10 @@ export interface MultipleAutocompleteStateControlledOptions<T> {
   value: T[];
 }
 
+export type MultipleAutocompleteStateOptions<T> =
+  | MultipleAutocompleteStateControlledOptions<T>
+  | MultipleAutocompleteStateUncontrolledOptions<T>;
+
 export interface MultipleAutocompleteStateUncontrolledOptions<T> {
   by?: (a: T, b: T) => boolean;
   defaultValue: T[];
@@ -159,9 +65,29 @@ export interface MultipleAutocompleteStateUncontrolledOptions<T> {
   toggleable?: boolean;
 }
 
-export type MultipleAutocompleteStateOptions<T> =
-  | MultipleAutocompleteStateControlledOptions<T>
-  | MultipleAutocompleteStateUncontrolledOptions<T>;
+export interface SingleAutocompleteStateControlledOptions<T> {
+  by?: (a: T, b: T) => boolean;
+  disabled?: boolean;
+  matchBy: (value: T, query: string) => boolean;
+  multiple?: false;
+  onChange?: (value?: T) => void;
+  toggleable?: boolean;
+  value: T;
+}
+
+export type SingleAutocompleteStateOptions<T> =
+  | SingleAutocompleteStateControlledOptions<T>
+  | SingleAutocompleteStateUncontrolledOptions<T>;
+
+export interface SingleAutocompleteStateUncontrolledOptions<T> {
+  by?: (a: T, b: T) => boolean;
+  defaultValue: T;
+  disabled?: boolean;
+  matchBy: (value: T, query: string) => boolean;
+  multiple?: false;
+  onChange?: (value?: T) => void;
+  toggleable?: boolean;
+}
 
 export function createMultipleAutocompleteState<T>(
   options: MultipleAutocompleteStateOptions<T>,
@@ -268,19 +194,106 @@ export function createMultipleAutocompleteState<T>(
   };
 }
 
-export interface AutocompleteStateRenderProps<T> {
-  children?:
-    | ((state: AutocompleteStateProperties<T>) => JSX.Element)
-    | JSX.Element;
-}
+export function createSingleAutocompleteState<T>(
+  options: SingleAutocompleteStateOptions<T>,
+): AutocompleteStateProperties<T> {
+  const [active, setActive] = createSignal<Ref<T>>();
 
-export interface AutocompleteStateProviderProps<T>
-  extends AutocompleteStateRenderProps<T> {
-  state: AutocompleteStateProperties<T>;
+  let selectedValue: Accessor<T | undefined>;
+  let setSelectedValue: (value: T | undefined) => void;
+
+  const equals = options.by || isEqual;
+
+  if ("defaultValue" in options) {
+    const [selected, setSelected] = createSignal<T | undefined>(
+      options.defaultValue,
+    );
+    selectedValue = selected;
+    setSelectedValue = (value): void => {
+      setSelected(() => value);
+      if (options.onChange) {
+        options.onChange(value);
+      }
+    };
+  } else {
+    selectedValue = createMemo(() => options.value);
+    setSelectedValue = (value): void => {
+      if (options.onChange) {
+        options.onChange(value);
+      }
+    };
+  }
+
+  const isDisabled = createMemo(() => !!options.disabled);
+
+  const [input, setInput] = createInputReader();
+
+  return {
+    blur(): void {
+      if (!untrack(isDisabled)) {
+        setActive(undefined);
+      }
+    },
+    disabled: isDisabled,
+    focus(value): void {
+      if (!untrack(isDisabled)) {
+        setActive({
+          value,
+        });
+      }
+    },
+    hasActive(): boolean {
+      return !!active();
+    },
+    hasQuery: createMemo(() => !!input()),
+    hasSelected(): boolean {
+      return selectedValue() != null;
+    },
+    isActive(value): boolean {
+      const ref = active();
+      return ref ? equals(value, ref.value) : false;
+    },
+    isSelected(value): boolean {
+      return isEqual(value, selectedValue());
+    },
+    matches(value): boolean {
+      return options.matchBy(value, input());
+    },
+    query(): string {
+      return input();
+    },
+    select(value): void {
+      if (!untrack(isDisabled)) {
+        if (options.toggleable && equals(untrack(selectedValue) as T, value)) {
+          setSelectedValue(undefined);
+        } else {
+          setSelectedValue(value);
+        }
+      }
+    },
+    setQuery(value): void {
+      if (!untrack(isDisabled)) {
+        setInput(value);
+      }
+    },
+  };
 }
 
 const AutocompleteStateContext =
   createContext<AutocompleteStateProperties<unknown>>();
+
+export function AutocompleteStateChild<T>(
+  props: AutocompleteStateRenderProps<T>,
+): JSX.Element {
+  const state = useAutocompleteState<T>();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function AutocompleteStateProvider<T>(
   props: AutocompleteStateProviderProps<T>,
@@ -301,17 +314,4 @@ export function useAutocompleteState<T>(): AutocompleteStateProperties<T> {
   const ctx = useContext(AutocompleteStateContext);
   assert(ctx, new Error("Missing <AutocompleteStateProvider>"));
   return ctx;
-}
-
-export function AutocompleteStateChild<T>(
-  props: AutocompleteStateRenderProps<T>,
-): JSX.Element {
-  const state = useAutocompleteState<T>();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

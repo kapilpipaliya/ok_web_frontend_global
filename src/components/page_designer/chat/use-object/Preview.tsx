@@ -1,5 +1,11 @@
+import type { z } from 'zod';
+
 import { createSignal, onCleanup, Show } from 'solid-js';
-import { useGraph, Vertex } from '~/lib/graph/graph';
+
+import type { graphInterfaceSchema } from '~/routes/api/use-object/schema';
+
+import { IconButton } from '~/components/styled/IconButton';
+import { useGraph, type Vertex } from '~/lib/graph/graph';
 import { addNewEdge } from '~/lib/graph/mutate/edge';
 import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
 import { addNewVertex } from '~/lib/graph/mutate/vertex';
@@ -7,13 +13,11 @@ import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
 import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
 import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
-import { graphInterfaceSchema } from '~/routes/api/use-object/schema';
+
 import { IFramePreview } from '../../layout/IFramePreview';
-import { z } from 'zod';
-import { IconButton } from '~/components/styled/IconButton';
 
 
-export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; formId: string; }) {
+export function Preview(props: { formId: string; object: z.infer<typeof graphInterfaceSchema>; }) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   // Store vertex IDs with no parents
@@ -34,13 +38,13 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
     vertexIdMap.set(vertex.id, newId);
     const newVertex = {
       id: newId,
+      IN: {},
       L: Array.isArray(vertex.L) ? vertex.L : [vertex.L],
+      OUT: {},
       P: {
         ...vertex.P,
         ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
-      },
-      IN: {},
-      OUT: {}
+      }
     };
 
     addNewVertex(metaTxnId, newVertex, graph, setGraph);
@@ -53,11 +57,11 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
     const endId = vertexIdMap.get(edge.E)!;
 
     const newEdge = {
+      E: endId,
       id: newId,
-      T: edge.T,
       P: {},
       S: startId,
-      E: endId
+      T: edge.T
     };
 
     addNewEdge(metaTxnId, newEdge, graph, setGraph);
@@ -78,10 +82,10 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   const parentId = generateNewVertexId(graph, setGraph);
   const parentVertex = {
     id: parentId,
-    L: ['Page'],
-    P: { key: "Page" },
     IN: {},
-    OUT: {}
+    L: ['Page'],
+    OUT: {},
+    P: { key: "Page" }
   };
 
   addNewVertex(metaTxnId, parentVertex, graph, setGraph);
@@ -136,18 +140,18 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   return <>
     <div class="display:none">
       <PageViewWrapper
-        uuid={props.formId}
-        pageVertexName="Page"
-        isNoPermissionCheck={true}
+        formDataId={parentId}
         hideSaveCancelButton
-        formDataId={parentId} />
+        isNoPermissionCheck={true}
+        pageVertexName="Page"
+        uuid={props.formId} />
     </div>
 
     <Show when={graph.vertexes[props.formId]}>
         <IconButton
+          class="bg:transparent hover:bg:neutral-100 p:4 r:4"
           icon="ph:arrows-clockwise"
           onClick={handleRefresh}
-          class="bg:transparent hover:bg:neutral-100 p:4 r:4"
         />
         <Show when={isPreview()}>
           <IFramePreview formStoreId={props.formId} noMinHeight />

@@ -7,10 +7,9 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { GlobalProperties, useGraph } from "~/lib/graph/graph";
-import { validateEmail } from "~/lib/validation/validateEmail";
-import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { useGraph } from "~/lib/graph/graph";
 import { saveUser } from "~/lib/graph/mutate/loadUser";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
 type GeneralProps = {
   originalProfileData: { [key: string]: any };

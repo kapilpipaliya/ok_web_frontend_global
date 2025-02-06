@@ -2,10 +2,10 @@ import { type JSX, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
 
-export type SelectProps = {
+export type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
   label: JSX.Element;
   setValue?: (value: string) => void;
-} & JSX.SelectHTMLAttributes<HTMLSelectElement>;
+};
 
 export function Select(props: Readonly<SelectProps>) {
   const [local, fieldProps] = splitProps(props, [

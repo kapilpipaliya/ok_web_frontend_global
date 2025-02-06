@@ -1,6 +1,6 @@
-import type { Store, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import { untrack } from "solid-js";
-import { klona } from "klona";
 
 import type { GraphInterface, TransactionDetail } from "../graph";
 import type { TransactionValue } from "./TransactionType";
@@ -50,10 +50,10 @@ export function transactionDetailAdd(
 
     const newTxnValue = {
       ...existingTxnValue,
-      steps,
-      undoStepIndexes,
+      activeUndoIndex: newActiveUndoIndex,
       revertSteps,
-      activeUndoIndex: newActiveUndoIndex
+      steps,
+      undoStepIndexes
     };
 
     replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, { cloneProperties: false, skipPostMessage: options?.skipPostMessage });

@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import {
   useRepeaterVertexContext,
@@ -8,15 +8,14 @@ import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptio
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-
+import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
-import { evalExpression } from "~/lib/expression_eval";
 import { RepeaterInternal } from "./RepeaterInternal";
 
-export const DataField = (props: { data: any[] | (() => any[]), expression: string }) => {
+export const DataField = (props: { data: (() => any[]) | any[], expression: string }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -93,12 +92,12 @@ export const DataField = (props: { data: any[] | (() => any[]), expression: stri
       <Match when={Array.isArray(options()) && !props.noRepeat}>
         <For each={options()}>
           {(value, index) => {
-            return <RepeaterInternal name={props.name} meta={meta()} data={data()} index={index()} repeaterValue={value} />;
+            return <RepeaterInternal data={data()} index={index()} meta={meta()} name={props.name} repeaterValue={value} />;
           }}
         </For>
       </Match>
       <Match when={options()}>
-        <RepeaterInternal name={props.name} meta={meta()} data={data()} index={0} repeaterValue={options()} />
+        <RepeaterInternal data={data()} index={0} meta={meta()} name={props.name} repeaterValue={options()} />
       </Match>
     </Switch>
   );

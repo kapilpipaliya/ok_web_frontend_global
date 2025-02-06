@@ -1,7 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { evalExpression } from "~/lib/expression_eval";
 
 import type { GraphInterface } from "~/lib/graph/graph";
+
+import { evalExpression } from "~/lib/expression_eval";
 
 
 

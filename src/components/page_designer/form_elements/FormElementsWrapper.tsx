@@ -1,14 +1,11 @@
-import { ZIndex } from "~/components/fields/ZIndex";
+
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
+
 import type { PageLayoutObject } from "../context/LayoutContext";
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
-import { CloseIconTopRight } from "./CloseIconTopRight";
 import { FormElementTabs } from "./FormElementTabs";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 export function FormElementsWrapper() {
   const [graph, setGraph] = useGraph();

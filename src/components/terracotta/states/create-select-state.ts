@@ -14,6 +14,28 @@ import type { Ref } from "../utils/types";
 import assert from "../utils/assert";
 import isEqual from "../utils/is-equal";
 
+export interface MultipleSelectStateControlledOptions<T> {
+  by?: (a: T, b: T) => boolean;
+  disabled?: boolean;
+  multiple: true;
+  onChange?: (value: T[]) => void;
+  toggleable?: boolean;
+  value: T[];
+}
+
+export type MultipleSelectStateOptions<T> =
+  | MultipleSelectStateControlledOptions<T>
+  | MultipleSelectStateUncontrolledOptions<T>;
+
+export interface MultipleSelectStateUncontrolledOptions<T> {
+  by?: (a: T, b: T) => boolean;
+  defaultValue: T[];
+  disabled?: boolean;
+  multiple: true;
+  onChange?: (value: T[]) => void;
+  toggleable?: boolean;
+}
+
 export interface SelectStateProperties<T> {
   blur(): void;
   disabled(): boolean;
@@ -25,6 +47,14 @@ export interface SelectStateProperties<T> {
   select(value: T): void;
 }
 
+export interface SelectStateProviderProps<T> extends SelectStateRenderProps<T> {
+  state: SelectStateProperties<T>;
+}
+
+export interface SelectStateRenderProps<T> {
+  children?: ((state: SelectStateProperties<T>) => JSX.Element) | JSX.Element;
+}
+
 export interface SingleSelectStateControlledOptions<T> {
   by?: (a: T, b: T) => boolean;
   disabled?: boolean;
@@ -34,6 +64,10 @@ export interface SingleSelectStateControlledOptions<T> {
   value: T;
 }
 
+export type SingleSelectStateOptions<T> =
+  | SingleSelectStateControlledOptions<T>
+  | SingleSelectStateUncontrolledOptions<T>;
+
 export interface SingleSelectStateUncontrolledOptions<T> {
   by?: (a: T, b: T) => boolean;
   defaultValue: T;
@@ -42,103 +76,6 @@ export interface SingleSelectStateUncontrolledOptions<T> {
   onChange?: (value?: T) => void;
   toggleable?: boolean;
 }
-
-export type SingleSelectStateOptions<T> =
-  | SingleSelectStateControlledOptions<T>
-  | SingleSelectStateUncontrolledOptions<T>;
-
-export function createSingleSelectState<T>(
-  options: SingleSelectStateOptions<T>,
-): SelectStateProperties<T> {
-  const [active, setActive] = createSignal<Ref<T>>();
-
-  let selectedValue: Accessor<T | undefined>;
-  let setSelectedValue: (value: T | undefined) => void;
-
-  const equals = options.by || isEqual;
-
-  if ("defaultValue" in options) {
-    const [selected, setSelected] = createSignal<T | undefined>(
-      options.defaultValue,
-    );
-    selectedValue = selected;
-    setSelectedValue = (value): void => {
-      setSelected(() => value);
-      if (options.onChange) {
-        options.onChange(value);
-      }
-    };
-  } else {
-    selectedValue = createMemo(() => options.value);
-    setSelectedValue = (value): void => {
-      if (options.onChange) {
-        options.onChange(value);
-      }
-    };
-  }
-
-  const isDisabled = createMemo(() => !!options.disabled);
-
-  return {
-    blur(): void {
-      if (!untrack(isDisabled)) {
-        setActive(undefined);
-      }
-    },
-    disabled: isDisabled,
-    focus(value): void {
-      if (!untrack(isDisabled)) {
-        setActive({
-          value,
-        });
-      }
-    },
-    hasActive(): boolean {
-      return !!active();
-    },
-    hasSelected(): boolean {
-      return selectedValue() != null;
-    },
-    isActive(value): boolean {
-      const ref = active();
-      return ref ? equals(value, ref.value) : false;
-    },
-    isSelected(value): boolean {
-      return isEqual(value, selectedValue());
-    },
-    select(value): void {
-      if (!untrack(isDisabled)) {
-        if (options.toggleable && equals(untrack(selectedValue) as T, value)) {
-          setSelectedValue(undefined);
-        } else {
-          setSelectedValue(value);
-        }
-      }
-    },
-  };
-}
-
-export interface MultipleSelectStateControlledOptions<T> {
-  by?: (a: T, b: T) => boolean;
-  disabled?: boolean;
-  multiple: true;
-  onChange?: (value: T[]) => void;
-  toggleable?: boolean;
-  value: T[];
-}
-
-export interface MultipleSelectStateUncontrolledOptions<T> {
-  by?: (a: T, b: T) => boolean;
-  defaultValue: T[];
-  disabled?: boolean;
-  multiple: true;
-  onChange?: (value: T[]) => void;
-  toggleable?: boolean;
-}
-
-export type MultipleSelectStateOptions<T> =
-  | MultipleSelectStateControlledOptions<T>
-  | MultipleSelectStateUncontrolledOptions<T>;
 
 export function createMultipleSelectState<T>(
   options: MultipleSelectStateOptions<T>,
@@ -233,15 +170,91 @@ export function createMultipleSelectState<T>(
   };
 }
 
-export interface SelectStateRenderProps<T> {
-  children?: ((state: SelectStateProperties<T>) => JSX.Element) | JSX.Element;
-}
+export function createSingleSelectState<T>(
+  options: SingleSelectStateOptions<T>,
+): SelectStateProperties<T> {
+  const [active, setActive] = createSignal<Ref<T>>();
 
-export interface SelectStateProviderProps<T> extends SelectStateRenderProps<T> {
-  state: SelectStateProperties<T>;
+  let selectedValue: Accessor<T | undefined>;
+  let setSelectedValue: (value: T | undefined) => void;
+
+  const equals = options.by || isEqual;
+
+  if ("defaultValue" in options) {
+    const [selected, setSelected] = createSignal<T | undefined>(
+      options.defaultValue,
+    );
+    selectedValue = selected;
+    setSelectedValue = (value): void => {
+      setSelected(() => value);
+      if (options.onChange) {
+        options.onChange(value);
+      }
+    };
+  } else {
+    selectedValue = createMemo(() => options.value);
+    setSelectedValue = (value): void => {
+      if (options.onChange) {
+        options.onChange(value);
+      }
+    };
+  }
+
+  const isDisabled = createMemo(() => !!options.disabled);
+
+  return {
+    blur(): void {
+      if (!untrack(isDisabled)) {
+        setActive(undefined);
+      }
+    },
+    disabled: isDisabled,
+    focus(value): void {
+      if (!untrack(isDisabled)) {
+        setActive({
+          value,
+        });
+      }
+    },
+    hasActive(): boolean {
+      return !!active();
+    },
+    hasSelected(): boolean {
+      return selectedValue() != null;
+    },
+    isActive(value): boolean {
+      const ref = active();
+      return ref ? equals(value, ref.value) : false;
+    },
+    isSelected(value): boolean {
+      return isEqual(value, selectedValue());
+    },
+    select(value): void {
+      if (!untrack(isDisabled)) {
+        if (options.toggleable && equals(untrack(selectedValue) as T, value)) {
+          setSelectedValue(undefined);
+        } else {
+          setSelectedValue(value);
+        }
+      }
+    },
+  };
 }
 
 const SelectStateContext = createContext<SelectStateProperties<unknown>>();
+
+export function SelectStateChild<T>(
+  props: SelectStateRenderProps<T>,
+): JSX.Element {
+  const state = useSelectState<T>();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function SelectStateProvider<T>(
   props: SelectStateProviderProps<T>,
@@ -262,17 +275,4 @@ export function useSelectState<T>(): SelectStateProperties<T> {
   const ctx = useContext(SelectStateContext);
   assert(ctx, new Error("Missing <SelectStateProvider>"));
   return ctx;
-}
-
-export function SelectStateChild<T>(
-  props: SelectStateRenderProps<T>,
-): JSX.Element {
-  const state = useSelectState<T>();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

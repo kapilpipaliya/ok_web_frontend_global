@@ -5,8 +5,8 @@ import type { GlobalProperties, GraphInterface, Id, Vertex } from "~/lib/graph/g
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
-import { setGraphData } from "./setGraphData";
 import { getGlobalStore } from "../get/sync/getGlobalStore";
+import { setGraphData } from "./setGraphData";
 import { mergeVertexProperties } from "./vertex";
 
 export function getInitialDataAndSetToGraph(

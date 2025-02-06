@@ -35,22 +35,16 @@ export type CheckboxControlledBaseProps = Prettify<
 export type CheckboxControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CheckboxControlledBaseProps>;
 
+export type CheckboxProps<T extends ValidConstructor = "div"> =
+  | CheckboxControlledProps<T>
+  | CheckboxUncontrolledProps<T>;
+
 export type CheckboxUncontrolledBaseProps = Prettify<
   CheckStateRenderProps & CheckStateUncontrolledOptions
 >;
 
 export type CheckboxUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, CheckboxUncontrolledBaseProps>;
-
-export type CheckboxProps<T extends ValidConstructor = "div"> =
-  | CheckboxControlledProps<T>
-  | CheckboxUncontrolledProps<T>;
-
-function isCheckboxUncontrolled<T extends ValidConstructor = "div">(
-  props: CheckboxProps<T>,
-): props is CheckboxUncontrolledProps<T> {
-  return "defaultChecked" in props;
-}
 
 export function Checkbox<T extends ValidConstructor = "div">(
   props: CheckboxProps<T>,
@@ -106,4 +100,10 @@ export function Checkbox<T extends ValidConstructor = "div">(
       ownerID,
     },
   });
+}
+
+function isCheckboxUncontrolled<T extends ValidConstructor = "div">(
+  props: CheckboxProps<T>,
+): props is CheckboxUncontrolledProps<T> {
+  return "defaultChecked" in props;
 }

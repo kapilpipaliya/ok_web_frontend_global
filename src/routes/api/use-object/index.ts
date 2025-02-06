@@ -1,7 +1,8 @@
+import type { APIHandler } from '@solidjs/start/server';
+
 import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 
-import { APIHandler } from '@solidjs/start/server';
 import { graphInterfaceSchema } from './schema';
 
 // Allow streaming responses up to 30 seconds
@@ -13,10 +14,8 @@ export const POST: APIHandler = async ({ request }) => {
   const context = await request.json();
   
   const result = streamObject({
-      model: openai('gpt-4o'),
       messages: [
         {
-          role: 'system',
           content: `You are tasked with generating a graph structure for a Page Builder application Item tree. Follow these specifications carefully:
 
 Basic Structure:
@@ -198,20 +197,22 @@ Important Guidelines:
 - Never abbreviate or skip components
 - Do not skip any vertexes or edges.
 
-The graph must be a directed acyclic graph (DAG) to prevent circular dependencies.`
+The graph must be a directed acyclic graph (DAG) to prevent circular dependencies.`,
+          role: 'system'
         },
         // Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
         // Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
         {
-          role: 'user',
-          content: context.prompt
+          content: context.prompt,
+          role: 'user'
         }
       ],
-      schema: graphInterfaceSchema,
-    async onFinish({ object, usage, error, warnings, providerOptions, experimental_providerMetadata }) {
+      model: openai('gpt-4o'),
+      async onFinish({ error, experimental_providerMetadata, object, providerOptions, usage, warnings }) {
       // implement your own logic here, e.g. for storing messages
       // or recording token usage
     },
+    schema: graphInterfaceSchema,
   });
 
   return result.toTextStreamResponse(); 

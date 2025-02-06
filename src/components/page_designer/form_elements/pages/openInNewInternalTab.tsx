@@ -1,9 +1,11 @@
-import {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
-import type {NavItem} from "~/components/page_designer/form_elements/getTreeData";
-import {OpenFormInfo, PageLayoutObject} from "~/components/page_designer/context/LayoutContext";
-import {SetStoreFunction} from "solid-js/store";
-import {addNewVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
+import type {SetStoreFunction} from "solid-js/store";
+
 import {v7 as uuidv7} from "uuid";
+
+import type {OpenFormInfo, PageLayoutObject} from "~/components/page_designer/context/LayoutContext";
+import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
+
+import {addNewVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
 
 export function openInNewInternalTab(
   layoutStoreId: Id,
@@ -20,15 +22,22 @@ export function openInNewInternalTab(
     }
   );
 
-  if (!exists) {
+  if (exists) {
+    // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
+    // if (openFormId) {
+    //   mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+    //     formId: graph.vertexes[openFormId].P.formId
+    //   });
+    // }
+  } else {
     const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
+      dataId: child.id,
+      formDataId: child.P.formDataId,
       formId: uuidv7(),
       label: child.L[0],
-      dataId: child.id,
+      mainPanel: layoutStore.mainPanel[0],
       // @ts-expect-error ignore
-      parentId: child.P.parentId,
-      formDataId: child.P.formDataId,
-      mainPanel: layoutStore.mainPanel[0]
+      parentId: child.P.parentId
     });
     addNewVertex(0, newOpenVertex, graph, setGraph);
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
@@ -42,12 +51,5 @@ export function openInNewInternalTab(
       },
       {cloneProperties: false}
     );
-  } else {
-    // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
-    // if (openFormId) {
-    //   mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-    //     formId: graph.vertexes[openFormId].P.formId
-    //   });
-    // }
   }
 }

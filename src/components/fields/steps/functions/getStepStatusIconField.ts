@@ -40,6 +40,26 @@ export function getStatus(
   return "completed";
 }
 
+export function getStepBorder(
+  requiredFields: string[],
+  options: FunctionArgumentType,
+) {
+  const status = getStatus(options, requiredFields);
+  let className = " ";
+  switch (status) {
+    case "completed":
+      className += "border-primary/90";
+      break;
+    case "semi-completed":
+      className += "border-primary/90";
+      break;
+    default:
+      className += "border-gray/30";
+      break;
+  }
+  return className;
+}
+
 export function getStepStatusIconField(
   requiredFields?: string[],
 ): GenericField {
@@ -78,24 +98,4 @@ export function getStepStatusIconField(
     },
     width: 22,
   } as IconField;
-}
-
-export function getStepBorder(
-  requiredFields: string[],
-  options: FunctionArgumentType,
-) {
-  const status = getStatus(options, requiredFields);
-  let className = " ";
-  switch (status) {
-    case "completed":
-      className += "border-primary/90";
-      break;
-    case "semi-completed":
-      className += "border-primary/90";
-      break;
-    default:
-      className += "border-gray/30";
-      break;
-  }
-  return className;
 }

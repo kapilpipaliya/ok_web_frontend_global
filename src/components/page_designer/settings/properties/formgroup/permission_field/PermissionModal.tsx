@@ -3,6 +3,8 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
 import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
@@ -13,7 +15,6 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 const getMetaAttributes = (_selectedPermission?: null | Vertex) => {
   const metaAttribute = klona(

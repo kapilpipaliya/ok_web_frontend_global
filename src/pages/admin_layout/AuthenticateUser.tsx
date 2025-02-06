@@ -4,11 +4,11 @@ import { useNavigate } from "@solidjs/router";
 import { type JSX, Match, onMount, Switch } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 
 import { loadUser } from "../../lib/graph/mutate/loadUser";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface AuthenticateUserProps {
   children: JSX.Element;

@@ -10,12 +10,12 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { handleDataSubmission } from "~/lib/graph/mutate/handleDataSubmission";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 
 import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SelectThemeMenu() {
   const [graph, setGraph] = useGraph();

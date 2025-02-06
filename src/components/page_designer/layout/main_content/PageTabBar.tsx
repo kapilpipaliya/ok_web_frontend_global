@@ -1,20 +1,23 @@
-import { Id } from "~/lib/graph/graph";
+import { Show } from "solid-js";
+
+import type { Id } from "~/lib/graph/graph";
+
+import { IconButton } from "~/components/styled/IconButton";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
+
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { PreviewButton } from "../page_tabbar/PreviewButton";
+import { RefreshButton } from "../page_tabbar/RefreshButton";
 import { ResizeViewButtons } from "../page_tabbar/ResizeViewButtons";
 import { SaveIconButton } from "../page_tabbar/SaveIconButton";
 import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
-import { RefreshButton } from "../page_tabbar/RefreshButton";
-import { Show } from "solid-js";
-import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export function PageTabBar(props: { 
   formStoreId: Id; 
-  openIndex: number; 
-  handleRefresh: () => void;
+  handleRefresh: () => void; 
   onClose?: () => void;
+  openIndex: number;
   previewsLength?: number;
 }) {
   return (
@@ -38,8 +41,8 @@ export function PageTabBar(props: {
         <ShareButton formStoreId={props.formStoreId} />
         <Show when={props.previewsLength && props.previewsLength > 1}>
           <IconButton
-            icon="ph:x-circle"
             class={headerIconButtonClass}
+            icon="ph:x-circle"
             onClick={props.onClose}
             title="Close Tab"
           />

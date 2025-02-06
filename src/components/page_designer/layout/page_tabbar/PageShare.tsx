@@ -1,12 +1,10 @@
 import { createEffect, createSignal } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { PageLayoutObject } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 export function PageShare(props: { formStoreId: string }) {
   const [graph] = useGraph();

@@ -1,10 +1,12 @@
-import { VariantsHeader } from "./header/VariantsHeader";
-import { VariantsList } from "./body/VariantsList";
-import { ComponentVariantsInput } from "../properties/ComponentVariantsInput";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import { useDesignerFormIdContext, } from "../../context/LayoutContext";
+import { ComponentVariantsInput } from "../properties/ComponentVariantsInput";
+import { VariantsList } from "./body/VariantsList";
+import { VariantsHeader } from "./header/VariantsHeader";
 
 export function Variants() {
   const [graph, setGraph] = useGraph();
@@ -23,9 +25,9 @@ export function Variants() {
       <VariantsHeader />
       <VariantsList />
       <ComponentVariantsInput
-        setPropertyValue={setPropertyValue}
         compVertex={graph.vertexes[formStoreVertex()?.P.formDataId]}
         dataVertex={graph.vertexes[formStoreVertex()?.P.componentValue!]}
+        setPropertyValue={setPropertyValue}
       />
     </div>
   );

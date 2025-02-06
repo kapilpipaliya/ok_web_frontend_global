@@ -4,6 +4,9 @@ import { createContext, type JSX, useContext } from "solid-js";
 
 import type { FunctionArgumentType } from "../../form/FieldSchemaType";
 
+export type RenderObject = ReturnType<typeof getInitialPageRenderStore>;
+
+export type RenderStore = ReturnType<typeof createStore<RenderObject>>;
 export function getInitialPageRenderStore() {
   return {
     context: {} as FunctionArgumentType,
@@ -16,9 +19,6 @@ export function getInitialPageRenderStore() {
     readOnly: undefined as boolean | undefined,
   };
 }
-
-export type RenderObject = ReturnType<typeof getInitialPageRenderStore>;
-export type RenderStore = ReturnType<typeof createStore<RenderObject>>;
 export const RenderContext = createContext<RenderStore[]>();
 
 export function useRenderContext() {

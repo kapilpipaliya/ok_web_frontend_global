@@ -15,12 +15,12 @@ export default [
     ...tseslint.configs.recommended,
     {
         files: ['**/*.ts', '**/*.tsx'],
-        plugins: masterCssPlugin.configs.flat.plugins,
-        rules: masterCssPlugin.configs.flat.rules
+        plugins: {
+            '@master/css': masterCssPlugin
+        },
     },
     {
         files: ['**/*.js', '**/*.cjs']
     },
     perfectionist.configs['recommended-natural'],
-  
 ];

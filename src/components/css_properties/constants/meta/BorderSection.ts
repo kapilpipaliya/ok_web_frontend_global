@@ -1,6 +1,5 @@
 import type { FieldWithCustomProperty } from "../FieldSchemaType";
 
-import { defaultPixelSizeTypes, sizeTypes } from "../csseditor_constants";
 import { extraPropertyValues } from "./CSSMetadata";
 
 export const BorderSection: { [key: string]: FieldWithCustomProperty } = {

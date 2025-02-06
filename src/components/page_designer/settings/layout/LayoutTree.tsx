@@ -1,9 +1,10 @@
 import { createSignal, For, Show } from "solid-js";
 
-import { useGraph, type Id, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {
