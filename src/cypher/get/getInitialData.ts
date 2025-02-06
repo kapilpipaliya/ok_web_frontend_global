@@ -13,31 +13,34 @@ export async function getInitialData(dbSession: Session) {
   const relationshipObj: Record<string, Edge> = {};
 
   try {
-    await fetchFromMGAndSaveToArray(
-      dbSession,
-      "MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
-      {},
-      nodeObj,
-      relationshipObj,
-    );
-    await fetchFromMGAndSaveToArray(
-      dbSession,
-      "MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
-      {},
-      nodeObj,
-      relationshipObj,
-    );
+    // await fetchFromMGAndSaveToArray(
+    //   dbSession,
+    //   "MATCH (n:DataType) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+    //   {},
+    //   nodeObj,
+    //   relationshipObj,
+    // );
+    // await fetchFromMGAndSaveToArray(
+    //   dbSession,
+    //   "MATCH (n:CompCategory) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+    //   {},
+    //   nodeObj,
+    //   relationshipObj,
+    // );
 
-    await fetchFromMGAndSaveToArray(
-      dbSession,
-      "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
-      {},
-      nodeObj,
-      relationshipObj,
-    );
 
-    await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
-    await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
+
+    // await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
+    // await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
+
+    // Not needed
+    // await fetchFromMGAndSaveToArray(
+    //   dbSession,
+    //   "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+    //   {},
+    //   nodeObj,
+    //   relationshipObj,
+    // );
     await fetchAndSaveFormMetaData("GlobalSetting", nodeObj, relationshipObj, dbSession);
   } catch (error: any) {
     return { error: error.message };
