@@ -42,10 +42,7 @@ import {createViewVertex} from "~/lib/graph/mutate/createViewVertex";
 import { createCompContextVertex } from "~/lib/graph/mutate/createCompContextVertex";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
-
-const PageView = clientOnly(
-  () => import("~/components/page_attr_render/PageView"),
-);
+import { PageView } from "~/components/page_attr_render/PageView";
 
 export function PageViewWrapper(
   props: Readonly<{

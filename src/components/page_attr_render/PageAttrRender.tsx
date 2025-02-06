@@ -9,8 +9,8 @@ import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
 import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
-import { PageAttrDnDWrapper } from "./page_attr_dnd_wrapper/PageAttrDnDWrapper";
 import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
+import { clientOnly } from "@solidjs/start";
 
 export function PageAttrRender(
   props: Readonly<{
@@ -46,6 +46,17 @@ export function PageAttrRender(
               txnId={formVertex()?.P.txnId}
               isNoPermissionCheck={props.isNoPermissionCheck}
             />
+          );
+        };
+        const DnDWrapper = () => {
+          const PageAttrDnDWrapper = clientOnly(
+            () => import("./page_attr_dnd_wrapper/PageAttrDnDWrapper"),
+          );
+
+          return (
+            <PageAttrDnDWrapper item={item}>
+              <Content />
+            </PageAttrDnDWrapper>
           );
         };
 
@@ -91,9 +102,7 @@ export function PageAttrRender(
                   <Content />
                 </Match>
                 <Match when={true}>
-                  <PageAttrDnDWrapper item={item}>
-                    <Content />
-                  </PageAttrDnDWrapper>
+                  <DnDWrapper/>
                 </Match>
               </Switch>
             </Match>

@@ -136,3 +136,5 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     </div>
   );
 }
+
+export default PageAttrDnDWrapper;
