@@ -5,7 +5,7 @@ import { v7 as uuidv7 } from "uuid";
 import type { Id, } from "~/lib/graph/graph";
 
 export interface OpenFormInfo {
-  dataId: Id, formId: Id, label: string, mainPanel: Id
+  dataId: Id, formDataId?: Id, formId: Id, label: string, mainPanel: Id, parentId?: Id, txnId: Id
 }
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;

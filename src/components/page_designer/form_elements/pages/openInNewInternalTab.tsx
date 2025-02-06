@@ -36,8 +36,8 @@ export function openInNewInternalTab(
       formId: uuidv7(),
       label: child.L[0],
       mainPanel: layoutStore.mainPanel[0],
-      // @ts-expect-error ignore
-      parentId: child.P.parentId
+      parentId: child.P.parentId,
+      txnId: child.P.txnId,
     });
     addNewVertex(0, newOpenVertex, graph, setGraph);
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.

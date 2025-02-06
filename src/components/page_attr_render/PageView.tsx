@@ -121,6 +121,3 @@ export function PageView(
     </Show>
   );
 }
-
-// export default to make it client only
-export default PageView;

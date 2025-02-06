@@ -18,6 +18,7 @@ export function TabBar(props: {mainPanel: Id}) {
 
   const handleClose = (openedFormId: Id) => {
     const openTab = layoutStore().openedFormIds.find(f => f !== openedFormId);
+    const prevFormId = graph.vertexes[openTab!]?.P.formId || null;
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,
@@ -25,7 +26,8 @@ export function TabBar(props: {mainPanel: Id}) {
       graph,
       setGraph,
       {
-        formId: graph.vertexes[openTab!]?.P.formId || null,
+        [`mainPanel${props.mainPanel}Tab`]: prevFormId,
+        formId: prevFormId,
         openedFormIds: layoutStore().openedFormIds.filter(f => f !== openedFormId)
       },
       { cloneProperties: false }

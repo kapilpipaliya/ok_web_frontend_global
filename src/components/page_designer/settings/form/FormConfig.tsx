@@ -29,6 +29,7 @@ export function FormConfig() {
             pageVertexName={graph.vertexes[openedFormId].P.label}
             // @ts-expect-error ignore
             parentId={graph.vertexes[openedFormId].P.parentId}
+            txnId={graph.vertexes[openedFormId].P.txnId}
             uuid={graph.vertexes[openedFormId].P.formId}
             // openedFormId={openedFormId}
           />

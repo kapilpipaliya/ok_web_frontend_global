@@ -58,6 +58,8 @@ export function PageViewWrapper(
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
+    parentId?: Id;
+    txnId?: string;
     uuid?: string;
     // openedFormId?: Id;
   }>,
@@ -69,12 +71,14 @@ export function PageViewWrapper(
   const layoutStoreId = props.uuid ?? uuidv7();
   const viewVertexObject = createViewVertex({view: "Desktop"}, graph, setGraph);
   const componentVertexObject = createCompContextVertex({}, graph, setGraph);
+  const initialFormStore = getInitialFormStore(graph, setGraph);
   const pageFormVertexObject = newVertex(layoutStoreId, ["PageForm"], {
-    ...getInitialFormStore(graph, setGraph),
+    ...initialFormStore,
     componentValue: componentVertexObject.id,
     formId: props.pageVertexName,
     id: id()!,
     openedViews: [viewVertexObject.id],
+    txnId: props.txnId ?? initialFormStore.txnId
   });
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
@@ -321,7 +325,7 @@ export function PageViewWrapper(
       //     dataId: createResult.vertex!.id
       //   });
       // }
-      // @ts-expect-error ignore. Link to parent page
+      // Link to parent page
       if (props.parentId && (props.pageVertexName === "Template" || props.pageVertexName === "Component")) {
         const parentComponentMetaVertex = {
           id: "",
@@ -336,7 +340,6 @@ export function PageViewWrapper(
           graph,
           setGraph,
           parentComponentMetaVertex,
-          // @ts-expect-error ignore
           props.parentId
         );
       }
@@ -357,7 +360,9 @@ export function PageViewWrapper(
       }
     }
     saveUndoPoint(formStore().P.txnId, graph, setGraph);
-    setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
+    if (!props.parentId && !props.txnId) {
+      setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
+    }
     saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
     props.initializeFormStoreParent?.(pageFormVertexObject.id);
     await loadData();
