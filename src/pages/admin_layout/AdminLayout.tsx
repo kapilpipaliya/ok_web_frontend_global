@@ -5,7 +5,6 @@ import { GlobalProperties, useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex, newVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
 
-import { AuthenticateUser } from "./AuthenticateUser";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 interface AdminLayoutProps {
@@ -39,7 +38,6 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   });
 
   return (
-    <AuthenticateUser>
       <div
         class="flex {scrollbar-width:thin} flex:column overflow:auto"
         classList={{
@@ -48,6 +46,5 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
       >
         {props.children}
       </div>
-    </AuthenticateUser>
   );
 }

@@ -4,7 +4,7 @@ import { GetInitialData } from "~/GetInitialData";
 
 export default function AuthLayout(props: Readonly<RouteSectionProps>) {
   return (
-    <GetInitialData>
+    <GetInitialData authenticate={true} dontRedirectToLogin={true}>
       {props.children}
     </GetInitialData>
   );

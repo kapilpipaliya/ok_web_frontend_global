@@ -15,6 +15,7 @@ interface AuthenticateUserProps {
   dontRedirectToLogin?: boolean;
 }
 
+// Depricated
 export function AuthenticateUser(props: Readonly<AuthenticateUserProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
