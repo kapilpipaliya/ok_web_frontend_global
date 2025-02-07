@@ -175,25 +175,29 @@ Styling System:
   
 
 Reusable Component:
-- have "ComponentVariant" and and "Attr" vertexes. "Attr" vertex join with Component using "Attr" edge.
-1. Create vertex with "Component" label, with properties:
+- have "ComponentVariant" and and "Attr" vertexes. 
+- Create vertex with "Component" label, with properties:
   - key: string - name of the component
-2. Add variants to the component:
-  - Add "ComponentVariant" vertices
-  - Connect with "ComponentVariant" edge
-  - Specify key, type, defValue properties:
-    - key: string - name of the variant
-    - type: string - The data type ('string', 'number', 'boolean', 'array', 'object', etc)
-    - defValue?: any - default value of the variant
-3. Add variant options to the variant:
-  - Create "ComponentVariantOption" vertices
-  - Connect with "ComponentVariantOption" edge
-  - Specify key, value, description properties:
-    - key: string - name of the option
-    - value: any - value of the option, it must be in the type specified in the type property of the variant, it should never be an object or array
-    - description?: string - Explains the purpose/usage of this option
-4. read Component variant value from the Item tree using 'otherProps' property in the function body with 'args.dataContext.props["key"]' property.
+1. Component Variant:
+  1. Add variants to the Component:
+    - Add "ComponentVariant" vertices
+    - Connect with "ComponentVariant" edge
+    - Specify key, type, defValue properties:
+      - key: string - name of the variant
+      - type: string - The data type ('string', 'number', 'boolean', 'array', 'object', etc)
+      - defValue?: any - default value of the variant
+  2. Add variant options to the variant:
+    - Create "ComponentVariantOption" vertices
+    - Connect with "ComponentVariantOption" edge
+    - Specify key, value, description properties:
+      - key: string - name of the option
+      - value: any - value of the option, it must be in the type specified in the type property of the variant, it should never be an object or array
+      - description?: string - Explains the purpose/usage of this option
 
+  2. Attr Vertex:
+    1. "Attr" vertex join with Component using "Attr" edge.
+    2. read Component variant value from the Item tree using 'otherProps' property in the function body with 'args.dataContext.props["key"]' property.
+    3. to use Children or slot for the component use 'Attr' vertex with 'componentName' property set to 'ComponentChildren'.
 
 Important Guidelines:
 - Create visually balanced layouts
@@ -210,3 +214,10 @@ only return the graph JSON, no other text or comments.`;
 // 5. Use components in the main Item tree:
 //   - Connect "Attr" vertex to Component vertex with "AttrComp" edge
 //   - Omit componentName property
+
+
+
+
+// other improvements can be done in next release:
+// 1. find all global and page level component from the fronentend(using local data) with its variants and add to prompt 'we have following components with variants:'.
+//
