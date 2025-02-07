@@ -1,17 +1,14 @@
-import { Show } from 'solid-js';
+// Start of Selection
+import { Show, For } from 'solid-js';
 import { IconButton } from '~/components/styled/IconButton';
 import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import { Vertex } from '~/lib/graph/graph';
 import { DBMessage } from './types';
 import { Preview } from './Preview';
+import { isObject } from '~/lib/data_structure/object/isObject';
 
 interface ChatResponseProps {
   message: Vertex<DBMessage>;
-  insertMode: () => 'before' | 'after' | 'center';
-  setInsertMode: (mode: 'before' | 'after' | 'center') => void;
-  onInsert: (message: Vertex) => void;
-  onDelete: (message: Vertex) => void;
-  disabled?: boolean;
 }
 
 export function ChatResponse(props: ChatResponseProps) {
@@ -23,13 +20,20 @@ export function ChatResponse(props: ChatResponseProps) {
       <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
         <div class="font-weight:500 margin-bottom:8px">Preview:</div>
         <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-          <Preview 
-            object={JSON.parse(props.message.P.data || '{}')} 
-            formId={`${props.message.id}FormStore`} 
-          />
+            <For each={(() => {
+              const parsed = JSON.parse(props.message.P.data || '[]');
+              return Array.isArray(parsed) ? parsed : (isObject(parsed) ? [parsed] : []);
+            })()}>
+              {(dataObj) => (
+                <Preview 
+                  object={dataObj} 
+                  message={props.message}
+                />
+              )}
+            </For>
         </div>
 
-        <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
+        {/* <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
           <div class="display:flex gap:8px">
             <select
               class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
@@ -56,7 +60,7 @@ export function ChatResponse(props: ChatResponseProps) {
             onClick={() => props.onDelete(props.message)}
             title="Delete"
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -11,14 +11,21 @@ import { graphInterfaceSchema } from '~/routes/api/use-object/schema';
 import { IFramePreview } from '../../layout/IFramePreview';
 import { z } from 'zod';
 import { IconButton } from '~/components/styled/IconButton';
+import { evalExpression } from '~/lib/expression_eval';
+import { headerIconButtonClass, toolBarClass } from '~/pages/admin_layout/constant';
+import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
+import { insertAtPosition } from './functions/insertAtPosition';
 
 
-export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; formId: string; }) {
+export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>;  message: Vertex;}) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
+  const layoutStoreId = useDesignerLayoutStore();
+  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   // Store vertex IDs with no parents
   const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
   const [isPreview, setIsPreview] = createSignal(true);
+  const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
 
   const handleRefresh = () => {
     setIsPreview(false);
@@ -88,7 +95,7 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
 
   // Link parent to root vertices
   // First handle vertices with Label "Attr"
-  const attrRootIds = rootVertexIds().filter(id => 
+  const attrRootIds = rootVertexIds().filter(id =>
     graph.vertexes[id].L.includes('Attr')
   );
   if (attrRootIds.length > 0) {
@@ -103,10 +110,10 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
   }
 
   // Then handle remaining vertices grouped by their labels
-  const remainingRootIds = rootVertexIds().filter(id => 
+  const remainingRootIds = rootVertexIds().filter(id =>
     !graph.vertexes[id].L.includes('Attr')
   );
-  
+
   // Group remaining vertices by their first label
   const labelGroups = new Map<string, string[]>();
   for (const id of remainingRootIds) {
@@ -133,25 +140,60 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; f
     revertTransaction(metaTxnId, graph, setGraph);
   });
 
-  return <>
-    <div class="display:none">
-      <PageViewWrapper
-        uuid={props.formId}
-        pageVertexName="Page"
-        isNoPermissionCheck={true}
-        hideSaveCancelButton
-        formDataId={parentId} />
-    </div>
+  const formId = () => `${props.message.id}FormStore`
+  return (
+    <div>
+      <Show
+        when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0 || (evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}
+        fallback={<div class="text-align:center padding:16px color:gray-600">No Preview Available</div>}
+      >
+        <div class="display:none">
+          <PageViewWrapper
+            uuid={formId()}
+            pageVertexName="Page"
+            isNoPermissionCheck={true}
+            hideSaveCancelButton
+            formDataId={parentId} />
+        </div>
 
-    <Show when={graph.vertexes[props.formId]}>
-        <IconButton
-          icon="ph:arrows-clockwise"
-          onClick={handleRefresh}
-          class="bg:transparent hover:bg:neutral-100 p:4 r:4"
-        />
-        <Show when={isPreview()}>
-          <IFramePreview formStoreId={props.formId} noMinHeight />
+        <Show when={graph.vertexes[formId()]}>
+          <div class={toolBarClass}>
+            <IconButton
+              icon="ph:arrows-clockwise"
+              onClick={handleRefresh}
+              class="bg:transparent hover:bg:neutral-100 p:4 r:4"
+          />
+          </div>
+          <Show when={isPreview()}>
+            <IFramePreview formStoreId={formId()} noMinHeight />
+          </Show>
+
+
+          <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
+            <div class="display:flex gap:8px">
+              <select
+                class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
+                value={insertMode()}
+                onChange={(e) => setInsertMode(e.currentTarget.value as any)}
+              >
+                <option value="before">Insert Before</option>
+                <option value="after">Insert After</option>
+                <option value="center">Insert Into</option>
+              </select>
+
+              <IconButton
+                icon="ph:plus-circle"
+                class={headerIconButtonClass}
+                onClick={() => insertAtPosition(props.message, insertMode(), graph, setGraph, layoutStoreVertex)}
+                title="Insert"
+                disabled={layoutStoreVertex()?.P.formId === formId()}
+              />
+            </div>
+          </div>
+
         </Show>
-    </Show>
-  </>;
+      </Show>
+    </div>
+  );
 }
+// onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)}

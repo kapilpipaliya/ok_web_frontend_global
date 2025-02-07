@@ -8,7 +8,7 @@ import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
 import { RefreshButton } from "../page_tabbar/RefreshButton";
 import { Show } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/admin_layout/constant";
+import { headerIconButtonClass, toolBarClass } from "~/pages/admin_layout/constant";
 
 export function PageTabBar(props: { 
   formStoreId: Id; 
@@ -18,7 +18,7 @@ export function PageTabBar(props: {
   previewsLength?: number;
 }) {
   return (
-    <header class="flex bg:#f3f3f4 gap:6 r:7">
+    <header class={toolBarClass}>
       <div class="flex ai:center gap:6">
         <UndoRedoIcons formStoreId={props.formStoreId} />
         <ResizeViewButtons formStoreId={props.formStoreId} openIndex={props.openIndex} />

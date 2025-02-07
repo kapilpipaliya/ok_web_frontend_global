@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from 'solid-js';
+import { createMemo, createSignal, For, Show, onMount } from 'solid-js';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { GraphInterface, Id, useGraph, Vertex } from '~/lib/graph/graph';
 import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
@@ -25,7 +25,6 @@ export function UseObjectAIPanel() {
   const formStoreVertex = () => layoutStoreVertex().P.mainFormId ? graph.vertexes[layoutStoreVertex().P.mainFormId!] as Vertex<FormStoreObject> : undefined;
   const messages = createMemo(() => getChatHistory(graph, setGraph, formStoreVertex));
 
-  const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
   const [showExamples, setShowExamples] = createSignal(false);
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   const [frameCount, setFrameCount] = createSignal(0);
@@ -37,25 +36,34 @@ export function UseObjectAIPanel() {
 
   const globalTheme = themeConfig(graph);
 
+  // Add onMount to scroll to bottom initially
+  onMount(() => {
+    if (chatHistoryRef) {
+      chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+    }
+  });
+
   const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload, setMessages } = useChat({
     onResponse(response) {
       setFrameCount(prev => prev + 1);
     },
     onFinish(message, { usage, finishReason }) {
       const content = message.content;
-      let data: any = undefined;
+      let data: any[] = [];
 
-      // Try to parse the entire content as JSON first
+      // Try to parse the entire content as JSON array first
       try {
-        data = JSON.stringify(JSON.parse(content));
+        const parsed = JSON.parse(content);
+        data = Array.isArray(parsed) ? parsed : [parsed];
       } catch {
-        // If that fails, try to find JSON code block
-        const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch) {
+        // If that fails, try to find JSON code blocks
+        const jsonMatches = [...content.matchAll(/```json\n([\s\S]*?)\n```/g)];
+        if (jsonMatches.length > 0) {
           try {
-            data = JSON.stringify(JSON.parse(jsonMatch[1]));
+            const parsed = JSON.parse(jsonMatches[0][1]);
+            data = Array.isArray(parsed) ? parsed : [parsed];
           } catch {
-            // If JSON parsing fails, leave data as undefined
+            // If JSON parsing fails, leave data as empty array
           }
         }
       }
@@ -66,7 +74,7 @@ export function UseObjectAIPanel() {
       const messageData = {
         prompt: lastRequestPrompt(),
         response: content,
-        data: data,
+        data: JSON.stringify(data),
         timestamp: Date.now(),
         contentPreview,
         // Removing attachments from DB storage
@@ -158,11 +166,6 @@ Choose colors that work well for the context and maintain good contrast ratios.
               <ChatMessage message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)} />
               <ChatResponse
                 message={message}
-                insertMode={insertMode}
-                setInsertMode={setInsertMode}
-                onInsert={(msg) => insertAtPosition(msg, insertMode(), graph, setGraph, layoutStoreVertex)}
-                onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)}
-                disabled={layoutStoreVertex()?.P.formId === `${message.id}FormStore`}
               />
             </div>
           )}
