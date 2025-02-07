@@ -178,7 +178,7 @@ export function FileUploader(props: FileUploaderProps) {
   );
 }
 
-async function uploadFile(file: File, apiUrl: string) {
+export async function uploadFile(file: File, apiUrl: string) {
   const formData = new FormData();
   formData.append("file", file);
 

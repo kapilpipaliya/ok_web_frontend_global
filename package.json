@@ -64,6 +64,7 @@
     "klona": "^2.0.6",
     "madge": "^8.0.0",
     "merge": "^2.1.1",
+    "modern-screenshot": "^4.5.5",
     "nanoid": "^5.0.9",
     "neo4j-driver": "^5.28.0",
     "node-fetch": "^4.0.0-beta.4",
