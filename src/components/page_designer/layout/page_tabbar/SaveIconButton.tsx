@@ -9,7 +9,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { API } from '~/lib/api/endpoints';
 import { submitDataCall } from '~/lib/api/service/data/submitDataCall';
-import { isNegative } from '~/lib/data_structure/number/isNegative';
 import { evalExpression } from '~/lib/expression_eval';
 import { getToEdge } from '~/lib/graph/get/sync/getToEdge';
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -34,7 +33,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
   const capturePreview = async (apiUrl: string, method = "POST") => {
     // Get the first opened view's iframe
-    const iframe = document.querySelector('iframe') as HTMLIFrameElement;
+    const iframe = document.querySelector(`iframe[name="${props.formStoreId}"]`) as HTMLIFrameElement;
     if (!iframe) return;
 
     try {
