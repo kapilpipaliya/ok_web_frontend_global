@@ -184,7 +184,7 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>;  
               <IconButton
                 icon="ph:plus-circle"
                 class={headerIconButtonClass}
-                onClick={() => insertAtPosition(props.message, insertMode(), graph, setGraph, layoutStoreVertex)}
+                onClick={() => insertAtPosition(graph.vertexes[formId()], insertMode(), graph, setGraph, layoutStoreVertex)}
                 title="Insert"
                 disabled={layoutStoreVertex()?.P.formId === formId()}
               />

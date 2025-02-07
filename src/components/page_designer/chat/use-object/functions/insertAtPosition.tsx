@@ -10,12 +10,11 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { openInNewInternalTab } from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
 
-// TODO: modify this functin to accept formStoreVertex.
-export function insertAtPosition(message: Vertex, insertMode: string, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStoreVertex: () => Vertex<PageLayoutObject>) {
-  const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
-  if (!fromStoreVertex || layoutStoreVertex()?.P.formId === `${message.id}FormStore` || !layoutStoreVertex()?.P.formId) {
-    return;
-  }
+export function insertAtPosition(fromStoreVertex: Vertex, insertMode: string, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStoreVertex: () => Vertex<PageLayoutObject>) {
+  // const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
+  // if (!fromStoreVertex || layoutStoreVertex()?.P.formId === `${message.id}FormStore` || !layoutStoreVertex()?.P.formId) {
+  //   return;
+  // }
 
   const toStoreVertex = graph.vertexes[layoutStoreVertex().P.formId!] as Vertex<FormStoreObject>;
   if (!toStoreVertex || !graph.vertexes[toStoreVertex.P.selectedId!]) {
