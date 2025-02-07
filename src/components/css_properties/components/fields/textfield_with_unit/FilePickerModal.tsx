@@ -1,4 +1,4 @@
-import { Accessor } from "solid-js";
+import type { Accessor } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";

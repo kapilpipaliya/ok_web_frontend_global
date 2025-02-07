@@ -1,7 +1,8 @@
 import type { Store } from "solid-js/store";
-import { evalExpression } from "~/lib/expression_eval";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { evalExpression } from "~/lib/expression_eval";
 
 
 

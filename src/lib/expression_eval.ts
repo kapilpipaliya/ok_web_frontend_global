@@ -33,6 +33,7 @@ const _DEFAULT_PRECEDENCE = {
   "&&": 2,
   "*": 10,
   "+": 9,
+  "-": 9,
   "/": 10,
   "<": 7,
   "<<": 8,
@@ -46,7 +47,6 @@ const _DEFAULT_PRECEDENCE = {
   "^": 4,
   "|": 3,
   "||": 1,
-  "-": 9,
 };
 
 export const binopsInitial = {
@@ -57,6 +57,7 @@ export const binopsInitial = {
   "&&": (a, b) => a && b,
   "*": (a, b) => a * b,
   "+": (a, b) => a + b,
+  "-": (a, b) => a - b,
   "/": (a, b) => a / b,
   "<": (a, b) => a < b,
   "<<": (a, b) => a << b,
@@ -70,7 +71,6 @@ export const binopsInitial = {
   "^": (a, b) => a ^ b,
   "|": (a, b) => a | b,
   "||": (a, b) => a || b,
-  "-": (a, b) => a - b,
 } as { [key: string]: (v1: any, v2: any, context: object) => any };
 
 export const binops = { ...binopsInitial };
@@ -78,122 +78,59 @@ export const binops = { ...binopsInitial };
 export const unaryOperatorsInitial = {
   "!": (a) => !a,
   "+": (a) => +a,
-  "~": (a) => ~a,
   "-": (a) => -a,
+  "~": (a) => ~a,
 } as { [key: string]: (v: any, context: any) => any };
 
 export const unops = { ...unaryOperatorsInitial };
 
-declare type operand = any | number | string;
-declare type unaryCallback = (a: operand, context: object) => operand;
 declare type binaryCallback = (
   a: operand,
   b: operand,
   context: object,
 ) => operand;
+declare type operand = any | number | string;
+declare type unaryCallback = (a: operand, context: object) => operand;
 
-function evaluateArray(list: jsep.Expression[], context: object) {
-  return list.map((v) => evaluate(v, context));
+// Added functions to inject Custom Binary Operators (and override existing ones)
+// modified function for simple to use
+export function addBinaryOp(
+  operator: string,
+  precedence: number,
+  rightToLeft: boolean,
+  _function: binaryCallback,
+  _asyncFunction?: binaryCallback,
+): void {
+  jsep.addBinaryOp(operator, precedence, rightToLeft);
+  binops[operator] = _function;
+  if (_asyncFunction) {
+    binops[`${operator}_async`] = _asyncFunction;
+  }
 }
 
-async function evaluateArrayAsync(list: jsep.Expression[], context: object) {
-  const res = await Promise.all(list.map((v) => evalAsync(v, context)));
-  return res;
+// Added functions to inject Custom Unary Operators (and override existing ones)
+export function addUnaryOp(
+  operator: string,
+  _function: unaryCallback,
+  _asyncFunction?: unaryCallback,
+): void {
+  jsep.addUnaryOp(operator);
+  unops[operator] = _function;
+  if (_asyncFunction) {
+    unops[`${operator}_async`] = _asyncFunction;
+  }
 }
 
-function evaluateMember(node: jsep.MemberExpression, context: object) {
-  const object = evaluate(node.object, context);
-  let key: string;
-  if (node.computed) {
-    key = evaluate(node.property, context);
-  } else {
-    key = (node.property as jsep.Identifier).name;
-  }
-  if (/^__proto__|prototype|constructor$/.test(key)) {
-    throw Error(`Access to member "${key}" disallowed.`);
-  }
-  return [object, object[key]];
+export function compile(
+  expression: jsep.Expression | string,
+): (context: object) => any {
+  return evaluate.bind(null, jsep(expression));
 }
 
-async function evaluateMemberAsync(
-  node: jsep.MemberExpression,
-  context: object,
-) {
-  const object: any = await evalAsync(node.object, context);
-  let key: string;
-  if (node.computed) {
-    key = await evalAsync(node.property, context);
-  } else {
-    key = (node.property as jsep.Identifier).name;
-  }
-  if (/^__proto__|prototype|constructor$/.test(key)) {
-    throw Error(`Access to member "${key}" disallowed.`);
-  }
-  return [object, object[key]];
-}
-
-export function evaluate(_node: jsep.Expression, context: object): any {
-  const node = _node as jsep.CoreExpression;
-
-  switch (node.type) {
-    case "ArrayExpression":
-      return evaluateArray(node.elements, context);
-
-    case "BinaryExpression": {
-      if (node.operator === "||") {
-        return evaluate(node.left, context) || evaluate(node.right, context);
-      }
-      if (node.operator === "&&") {
-        return evaluate(node.left, context) && evaluate(node.right, context);
-      }
-      return binops[node.operator](
-        evaluate(node.left, context),
-        evaluate(node.right, context),
-        context,
-      );
-    }
-
-    case "CallExpression": {
-      let caller;
-      let fn;
-      let assign;
-      if (node.callee.type === "MemberExpression") {
-        assign = evaluateMember(node.callee as jsep.MemberExpression, context);
-        caller = assign[0];
-        fn = assign[1];
-      } else {
-        fn = evaluate(node.callee, context);
-      }
-      if (typeof fn !== "function") {
-        return undefined;
-      }
-      return fn.apply(caller, evaluateArray(node.arguments, context));
-    }
-
-    case "ConditionalExpression":
-      return evaluate(node.test, context)
-        ? evaluate(node.consequent, context)
-        : evaluate(node.alternate, context);
-
-    case "Identifier":
-      // return context[node.name];
-      return node.name;
-
-    case "Literal":
-      return node.value;
-
-    case "MemberExpression":
-      return evaluateMember(node, context)[1];
-
-    case "ThisExpression":
-      return context;
-
-    case "UnaryExpression":
-      return unops[node.operator](evaluate(node.argument, context), context);
-
-    default:
-      return undefined;
-  }
+export function compileAsync(
+  expression: jsep.Expression | string,
+): (context: object) => Promise<any> {
+  return evalAsync.bind(null, jsep(expression));
 }
 
 export async function evalAsync(
@@ -292,44 +229,67 @@ export async function evalAsync(
   }
 }
 
-export function compile(
-  expression: jsep.Expression | string,
-): (context: object) => any {
-  return evaluate.bind(null, jsep(expression));
-}
+export function evaluate(_node: jsep.Expression, context: object): any {
+  const node = _node as jsep.CoreExpression;
 
-export function compileAsync(
-  expression: jsep.Expression | string,
-): (context: object) => Promise<any> {
-  return evalAsync.bind(null, jsep(expression));
-}
+  switch (node.type) {
+    case "ArrayExpression":
+      return evaluateArray(node.elements, context);
 
-// Added functions to inject Custom Unary Operators (and override existing ones)
-export function addUnaryOp(
-  operator: string,
-  _function: unaryCallback,
-  _asyncFunction?: unaryCallback,
-): void {
-  jsep.addUnaryOp(operator);
-  unops[operator] = _function;
-  if (_asyncFunction) {
-    unops[`${operator}_async`] = _asyncFunction;
-  }
-}
+    case "BinaryExpression": {
+      if (node.operator === "||") {
+        return evaluate(node.left, context) || evaluate(node.right, context);
+      }
+      if (node.operator === "&&") {
+        return evaluate(node.left, context) && evaluate(node.right, context);
+      }
+      return binops[node.operator](
+        evaluate(node.left, context),
+        evaluate(node.right, context),
+        context,
+      );
+    }
 
-// Added functions to inject Custom Binary Operators (and override existing ones)
-// modified function for simple to use
-export function addBinaryOp(
-  operator: string,
-  precedence: number,
-  rightToLeft: boolean,
-  _function: binaryCallback,
-  _asyncFunction?: binaryCallback,
-): void {
-  jsep.addBinaryOp(operator, precedence, rightToLeft);
-  binops[operator] = _function;
-  if (_asyncFunction) {
-    binops[`${operator}_async`] = _asyncFunction;
+    case "CallExpression": {
+      let caller;
+      let fn;
+      let assign;
+      if (node.callee.type === "MemberExpression") {
+        assign = evaluateMember(node.callee as jsep.MemberExpression, context);
+        caller = assign[0];
+        fn = assign[1];
+      } else {
+        fn = evaluate(node.callee, context);
+      }
+      if (typeof fn !== "function") {
+        return undefined;
+      }
+      return fn.apply(caller, evaluateArray(node.arguments, context));
+    }
+
+    case "ConditionalExpression":
+      return evaluate(node.test, context)
+        ? evaluate(node.consequent, context)
+        : evaluate(node.alternate, context);
+
+    case "Identifier":
+      // return context[node.name];
+      return node.name;
+
+    case "Literal":
+      return node.value;
+
+    case "MemberExpression":
+      return evaluateMember(node, context)[1];
+
+    case "ThisExpression":
+      return context;
+
+    case "UnaryExpression":
+      return unops[node.operator](evaluate(node.argument, context), context);
+
+    default:
+      return undefined;
   }
 }
 
@@ -345,6 +305,7 @@ export function getChildrenUnaray(collection: string, context: object) {
   }
   return binops["->"](context.vertexes, collection, context);
 }
+
 export function getChildrenUnarayAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = Number.parseInt(collection.slice(1));
@@ -355,6 +316,45 @@ export function getChildrenUnarayAsync(collection: string, context: object) {
     return [];
   }
   return binops["->_async"](context.vertexes, collection, context);
+}
+
+function evaluateArray(list: jsep.Expression[], context: object) {
+  return list.map((v) => evaluate(v, context));
+}
+
+async function evaluateArrayAsync(list: jsep.Expression[], context: object) {
+  const res = await Promise.all(list.map((v) => evalAsync(v, context)));
+  return res;
+}
+
+function evaluateMember(node: jsep.MemberExpression, context: object) {
+  const object = evaluate(node.object, context);
+  let key: string;
+  if (node.computed) {
+    key = evaluate(node.property, context);
+  } else {
+    key = (node.property as jsep.Identifier).name;
+  }
+  if (/^__proto__|prototype|constructor$/.test(key)) {
+    throw Error(`Access to member "${key}" disallowed.`);
+  }
+  return [object, object[key]];
+}
+async function evaluateMemberAsync(
+  node: jsep.MemberExpression,
+  context: object,
+) {
+  const object: any = await evalAsync(node.object, context);
+  let key: string;
+  if (node.computed) {
+    key = await evalAsync(node.property, context);
+  } else {
+    key = (node.property as jsep.Identifier).name;
+  }
+  if (/^__proto__|prototype|constructor$/.test(key)) {
+    throw Error(`Access to member "${key}" disallowed.`);
+  }
+  return [object, object[key]];
 }
 
 addUnaryOp("->", getChildrenUnaray, getChildrenUnarayAsync);
@@ -567,20 +567,13 @@ addUnaryOp("T:", (value: any) => {
 });
 addUnaryOp("::", projectedValueUnOps);
 
-function resolveProjection(projection: string, context: any): string {
-  // Check if the projection contains any variable references
-  // Example: If projection is "$variableName", it will be processed to retrieve its value.
-  const variableMatch = projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g);
-  if (variableMatch) {
-    return projection.replace(
-      /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      (_match: string, p1: string, _offset: number, _string: string) =>
-        projectedValueUnOps(p1, context),
-    );
-  }
-  return projection;
+export function evalExpression(expression: string, context: object) {
+  return evaluate(jsep(expression), context);
 }
 
+export function evalExpressionAsync(expression: string, context: object) {
+  return evalAsync(jsep(expression), context);
+}
 function getVertexBinOps(context: any): any {
   if (Array.isArray(context)) {
     return context[0] || {};
@@ -589,15 +582,6 @@ function getVertexBinOps(context: any): any {
   } else {
     return {};
   }
-}
-function getVertexUnOps(context: any): any {
-  if (Array.isArray(context?.vertexes)) {
-    return context.vertexes[0] || {};
-  } 
-  if (isObject(context?.vertexes)) {
-    return context.vertexes;
-  } 
-  return context || {};
 }
 
 //
@@ -615,6 +599,16 @@ function getVertexUnOps(context: any): any {
 //     return idValue;
 // }
 
+function getVertexUnOps(context: any): any {
+  if (Array.isArray(context?.vertexes)) {
+    return context.vertexes[0] || {};
+  } 
+  if (isObject(context?.vertexes)) {
+    return context.vertexes;
+  } 
+  return context || {};
+}
+
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   const resolvedProjection = resolveProjection(projection, vertexes1);
   const vertex = getVertexBinOps(vertexes1);
@@ -627,10 +621,16 @@ function projectedValueUnOps(projection: any, context: any) {
   return getTextValue(path(resolvedProjection, vertex));
 }
 
-export function evalExpression(expression: string, context: object) {
-  return evaluate(jsep(expression), context);
-}
-
-export function evalExpressionAsync(expression: string, context: object) {
-  return evalAsync(jsep(expression), context);
+function resolveProjection(projection: string, context: any): string {
+  // Check if the projection contains any variable references
+  // Example: If projection is "$variableName", it will be processed to retrieve its value.
+  const variableMatch = projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g);
+  if (variableMatch) {
+    return projection.replace(
+      /\$([A-Za-z][\w+]?[:\w.]*)/g,
+      (_match: string, p1: string, _offset: number, _string: string) =>
+        projectedValueUnOps(p1, context),
+    );
+  }
+  return projection;
 }

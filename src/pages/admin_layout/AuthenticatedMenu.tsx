@@ -3,7 +3,7 @@ import type { JSX } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/Toast";
-import { GlobalProperties, useGraph } from "~/lib/graph/graph";
+import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export interface AuthenticatedMenuProps {

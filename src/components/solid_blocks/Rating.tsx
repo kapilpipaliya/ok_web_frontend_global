@@ -3,8 +3,8 @@ import { createSignal, For, type JSX } from "solid-js";
 
 export function StarRating(
   props: Readonly<
-    { etc: any; heading?: string } & JSX.HTMLAttributes<HTMLDivElement> &
-      JSX.IntrinsicAttributes
+    JSX.HTMLAttributes<HTMLDivElement> & JSX.IntrinsicAttributes &
+      { etc: any; heading?: string }
   >,
 ) {
   const [rating, setRating] = createSignal(0);
@@ -28,11 +28,11 @@ export function StarRating(
                 } cursor:pointer h:20 mr:15 w:8`}
                 height={24}
                 icon="mdi:star"
+                noobserver
                 onClick={() => setRating(ratingValue)}
                 onMouseEnter={() => setHover(ratingValue)}
                 onMouseLeave={() => setHover(0)}
                 width={24}
-                noobserver
               />
             );
           }}

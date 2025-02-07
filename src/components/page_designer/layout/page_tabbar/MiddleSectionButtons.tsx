@@ -1,12 +1,12 @@
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import type { PageLayoutObject } from "../../context/LayoutContext";
-import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export const MiddleSectionButtons = () => {
   const layoutStoreId = useDesignerLayoutStore();

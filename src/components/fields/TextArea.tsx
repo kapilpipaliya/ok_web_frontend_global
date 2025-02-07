@@ -9,11 +9,11 @@ import {
 import type { GenericComponentProps } from "./FieldType";
 
 interface TextAreaFieldProps
-  extends Omit<
+  extends GenericComponentProps,
+    Omit<
       JSX.TextareaHTMLAttributes<HTMLTextAreaElement>,
       "onChange" | "value"
-    >,
-    GenericComponentProps {
+    > {
   errorClass?: string;
   inputProps?: JSX.TextareaHTMLAttributes<HTMLTextAreaElement>;
   isViewMode?: boolean;

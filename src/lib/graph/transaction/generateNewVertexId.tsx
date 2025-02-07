@@ -1,5 +1,7 @@
-import { createStore, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
+
 import type { GraphInterface } from "../graph";
+
 import { mergeVertexProperties } from "../mutate/vertex";
 
 export function generateNewVertexId(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>): string {

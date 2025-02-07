@@ -1,35 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+
 import { parse } from "yaml";
 
 import type { ComponentNode } from "./ComponentTreeType";
 
-type ParsedYamlNode = { [key: string]: ParsedYamlNode[] } | string;
-
-function convertToRequiredFormat(data: ParsedYamlNode[]): ComponentNode[] {
-  return data.map((item) => {
-    if (typeof item === "string") {
-      return { Component: item };
-    }
-    const key = Object.keys(item)[0];
-    return {
-      children: item[key] ? convertToRequiredFormat(item[key]) : undefined,
-      Component: key,
-    };
-  });
-}
-
-function cleanFormat(data: ComponentNode[]): ComponentNode[] {
-  return data.map((item) => {
-    if (item.children && item.children.length > 0) {
-      item.children = cleanFormat(item.children);
-    } else {
-      delete item.children;
-    }
-    return item;
-  });
-}
+type ParsedYamlNode = string | { [key: string]: ParsedYamlNode[] };
 
 export function getComponentTree(): ComponentNode[] {
   const yamlContent = `- Root:
@@ -49,6 +23,30 @@ export function getComponentTree(): ComponentNode[] {
 
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));
+}
+
+function cleanFormat(data: ComponentNode[]): ComponentNode[] {
+  return data.map((item) => {
+    if (item.children && item.children.length > 0) {
+      item.children = cleanFormat(item.children);
+    } else {
+      delete item.children;
+    }
+    return item;
+  });
+}
+
+function convertToRequiredFormat(data: ParsedYamlNode[]): ComponentNode[] {
+  return data.map((item) => {
+    if (typeof item === "string") {
+      return { Component: item };
+    }
+    const key = Object.keys(item)[0];
+    return {
+      children: item[key] ? convertToRequiredFormat(item[key]) : undefined,
+      Component: key,
+    };
+  });
 }
 
 /*

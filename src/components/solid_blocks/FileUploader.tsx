@@ -15,7 +15,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "./tools";
 
-export type FileUploaderProps = {
+export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
   data?: Vertex;
   label?: string;
   media?: string;
@@ -23,29 +23,7 @@ export type FileUploaderProps = {
   onUploadSuccess?: (data: any) => void;
   setValue?: (file: File) => void;
   txnId?: number;
-} & JSX.HTMLAttributes<HTMLLabelElement>;
-
-async function uploadFile(file: File, apiUrl: string) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch(apiUrl, {
-      body: formData,
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok " + response.statusText);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("There was a problem with the file upload:", error);
-    throw error;
-  }
-}
+};
 
 export function FileUploader(props: FileUploaderProps) {
   const [graph, setGraph] = useGraph();
@@ -198,4 +176,26 @@ export function FileUploader(props: FileUploaderProps) {
       </Switch>
     </div>
   );
+}
+
+async function uploadFile(file: File, apiUrl: string) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch(apiUrl, {
+      body: formData,
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok " + response.statusText);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("There was a problem with the file upload:", error);
+    throw error;
+  }
 }

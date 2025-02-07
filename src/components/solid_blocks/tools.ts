@@ -10,18 +10,6 @@ import {
 
 export type WrappedElement<P> = (props: P) => JSX.Element;
 
-export function toStyleObject(style: JSX.CSSProperties | string) {
-  if (typeof style === "object") {
-    return style;
-  }
-  const styleObject: JSX.CSSProperties = {};
-  (style || "").replace(/([\w-]+)\s*:\s*([^;]+)/g, (_, prop, value) => {
-    styleObject[prop] = value;
-    return "";
-  });
-  return styleObject;
-}
-
 export function composeStyles(...styles: (JSX.CSSProperties | string)[]) {
   return Object.assign({}, ...styles.map(toStyleObject));
 }
@@ -40,15 +28,20 @@ export function getNearestNode(
   return nearest;
 }
 
-export const maxRandom = 8;
-let lastItem = 0;
-export function getRandom() {
-  const nextItem =
-    1 + Math.floor(Math.random() * (maxRandom - (lastItem ? 1 : 0)));
-  lastItem = lastItem ? nextItem + (nextItem === lastItem ? 1 : 0) : nextItem;
-  return lastItem;
+export function toStyleObject(style: JSX.CSSProperties | string) {
+  if (typeof style === "object") {
+    return style;
+  }
+  const styleObject: JSX.CSSProperties = {};
+  (style || "").replace(/([\w-]+)\s*:\s*([^;]+)/g, (_, prop, value) => {
+    styleObject[prop] = value;
+    return "";
+  });
+  return styleObject;
 }
 
+export const maxRandom = 8;
+let lastItem = 0;
 export type MediaQueryItem =
   | "all"
   | "print"
@@ -72,35 +65,12 @@ export type MediaQueryItem =
           | "contrast"
           | "reduced-motion"
           | "reduced-transparency"}`}: ${string})`;
+
 export type MediaQueryOperator = ", " | " and " | " not " | " only ";
 export type MediaQueryString =
   | `${MediaQueryItem}${MediaQueryOperator}${MediaQueryItem}`
   | MediaQueryItem;
-
-export function useMediaQuery(query: MediaQueryString): Accessor<boolean> {
-  const matcher = window.matchMedia(query);
-  const [matches, setMatches] = createSignal(matcher.matches);
-
-  const changeHandler = (ev: MediaQueryListEvent) => setMatches(ev.matches);
-  matcher.addEventListener("change", changeHandler);
-  onCleanup(() => matcher.removeEventListener("change", changeHandler));
-
-  return matches;
-}
-
-function parseStorage<T extends any | string>(
-  data: null | string | undefined,
-  useJson: boolean,
-): T | undefined {
-  return useJson ? (data ? JSON.parse(data) : undefined) : (data ?? undefined);
-}
-
-function putStorage<T extends any | string>(key: string, data: T): void {
-  return localStorage.setItem(
-    key,
-    typeof data === "string" ? data : JSON.stringify(data),
-  );
-}
+export type NodeName = string;
 
 export function createLocalStorageSignal<T extends any | string>(
   key: string,
@@ -122,23 +92,6 @@ export function createLocalStorageSignal<T extends any | string>(
 
   return [value, setValue];
 }
-
-export function useDarkMode(localStorageKey = "COLOR_SCHEME") {
-  const mediaQueryPrefersDark = useMediaQuery("(prefers-color-scheme: dark)");
-  const [storedPrefersDark, setStoredPrefersDark] =
-    createLocalStorageSignal<boolean>(localStorageKey, undefined, true);
-  const darkMode = createMemo(
-    () => storedPrefersDark() ?? mediaQueryPrefersDark(),
-  );
-
-  createEffect(() => {
-    document.body.classList.toggle("dark-mode", darkMode());
-  });
-
-  return [darkMode, setStoredPrefersDark];
-}
-
-export type NodeName = string;
 
 export function getElements(
   children: ((...args: any[]) => JSX.Element) | JSX.Element,
@@ -167,11 +120,18 @@ export function getElements(
   return result;
 }
 
+export function getRandom() {
+  const nextItem =
+    1 + Math.floor(Math.random() * (maxRandom - (lastItem ? 1 : 0)));
+  lastItem = lastItem ? nextItem + (nextItem === lastItem ? 1 : 0) : nextItem;
+  return lastItem;
+}
+
 // TODO: types
 export function runEvent<
   E extends Event,
   T extends HTMLElement,
-  EV = { currentTarget: T; target: Element } & E,
+  EV = E & { currentTarget: T; target: Element },
   EU = JSX.EventHandlerUnion<T, E>,
 >(ev: EV, handler?: EU): void {
   if (Array.isArray(handler)) {
@@ -179,4 +139,44 @@ export function runEvent<
   } else if (typeof handler === "function") {
     handler(ev);
   }
+}
+
+export function useDarkMode(localStorageKey = "COLOR_SCHEME") {
+  const mediaQueryPrefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const [storedPrefersDark, setStoredPrefersDark] =
+    createLocalStorageSignal<boolean>(localStorageKey, undefined, true);
+  const darkMode = createMemo(
+    () => storedPrefersDark() ?? mediaQueryPrefersDark(),
+  );
+
+  createEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode());
+  });
+
+  return [darkMode, setStoredPrefersDark];
+}
+
+export function useMediaQuery(query: MediaQueryString): Accessor<boolean> {
+  const matcher = window.matchMedia(query);
+  const [matches, setMatches] = createSignal(matcher.matches);
+
+  const changeHandler = (ev: MediaQueryListEvent) => setMatches(ev.matches);
+  matcher.addEventListener("change", changeHandler);
+  onCleanup(() => matcher.removeEventListener("change", changeHandler));
+
+  return matches;
+}
+
+function parseStorage<T extends any | string>(
+  data: null | string | undefined,
+  useJson: boolean,
+): T | undefined {
+  return useJson ? (data ? JSON.parse(data) : undefined) : (data ?? undefined);
+}
+
+function putStorage<T extends any | string>(key: string, data: T): void {
+  return localStorage.setItem(
+    key,
+    typeof data === "string" ? data : JSON.stringify(data),
+  );
 }

@@ -1,19 +1,21 @@
-import { createEffect, createSignal, For, Match, ParentProps, Show, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, type ParentProps, Show, Switch } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { IconButton } from "~/components/styled/IconButton";
+import { useToast } from "~/components/styled/Toast";
+import { isNegative } from "~/lib/data_structure/number/isNegative";
+import { evalExpression, } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
+
+import { DesignerFormIdContext, type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
+import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer, TabStickyContainer } from "./TabsContainer";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { evalExpression, evalExpressionAsync } from "~/lib/expression_eval";
-import { DesignerFormIdContext, PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-import { IconButton } from "~/components/styled/IconButton";
-import { openInNewInternalTab } from "./pages/openInNewInternalTab";
-import { isNegative } from "~/lib/data_structure/number/isNegative";
-import { useToast } from "~/components/styled/Toast";
 
 export const UlContainer = (props: ParentProps) => (
   <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto flex-wrap:nowrap">
@@ -52,7 +54,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   return (
     <div>
       <div class="flex ai:center gap:2">
-        {!props.rootLevel ? <div class="p:1rem font-weight:500">Components</div> : null}
+        {props.rootLevel ? null : <div class="p:1rem font-weight:500">Components</div>}
         <IconButton icon="ph:file"
           onClick={() => {
             if (!props.rootLevel) {
@@ -61,11 +63,11 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
                 return;
               }
             }
-            return openInNewInternalTab(layoutStoreId, { L: ["Component"], id: "new", P: {parentId: props.rootLevel ? null :formStoreVertex().P.formDataId} , IN: {}, OUT: {} } as Vertex, graph, setGraph);
+            return openInNewInternalTab(layoutStoreId, { id: "new", IN: {}, L: ["Component"] , OUT: {}, P: {parentId: props.rootLevel ? null :formStoreVertex().P.formDataId} } as Vertex, graph, setGraph);
           }}
         />
       </div>
-      <ComponentList edgeName="ParentComponent" rootVertexes={rootVertexes()} isFetchData={false} />
+      <ComponentList edgeName="ParentComponent" isFetchData={false} rootVertexes={rootVertexes()} />
     </div>
   );
 };
@@ -113,14 +115,14 @@ export function FormElementTabs() {
       <Switch>
         <Match when={selectedTab().collection === "Comp"}>
           <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
-          <Show when={formStoreVertex()?.id} keyed>
+          <Show keyed when={formStoreVertex()?.id}>
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <PageLevelComponents rootLevel={false} />
             </DesignerFormIdContext.Provider>
           </Show>
         </Match>
         <Match when={selectedTab().collection === "Component"}>
-          <Show when={formStoreVertex()?.id} keyed>
+          <Show keyed when={formStoreVertex()?.id}>
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <PageLevelComponents rootLevel={true} />
             </DesignerFormIdContext.Provider>

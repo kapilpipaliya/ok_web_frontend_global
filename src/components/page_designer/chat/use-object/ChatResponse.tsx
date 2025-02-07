@@ -1,11 +1,12 @@
-// Start of Selection
-import { Show, For } from 'solid-js';
-import { IconButton } from '~/components/styled/IconButton';
-import { headerIconButtonClass } from '~/pages/admin_layout/constant';
-import { Vertex } from '~/lib/graph/graph';
-import { DBMessage } from './types';
-import { Preview } from './Preview';
+import {For} from 'solid-js';
+
+import type { Vertex } from '~/lib/graph/graph';
+
 import { isObject } from '~/lib/data_structure/object/isObject';
+
+import type { DBMessage } from './types';
+
+import { Preview } from './Preview';
 
 interface ChatResponseProps {
   message: Vertex<DBMessage>;
@@ -25,8 +26,8 @@ export function ChatResponse(props: ChatResponseProps) {
               return Array.isArray(parsed) ? parsed : (isObject(parsed) ? [parsed] : []);
             })()}>
               {(dataObj) => (
-                <Preview 
-                  object={dataObj} 
+                <Preview
+                  object={dataObj}
                   message={props.message}
                 />
               )}
@@ -37,8 +38,8 @@ export function ChatResponse(props: ChatResponseProps) {
           <div class="display:flex gap:8px">
             <select
               class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
-              value={props.insertMode()}
               onChange={(e) => props.setInsertMode(e.currentTarget.value as any)}
+              value={props.insertMode()}
             >
               <option value="before">Insert Before</option>
               <option value="after">Insert After</option>
@@ -46,17 +47,17 @@ export function ChatResponse(props: ChatResponseProps) {
             </select>
 
             <IconButton
-              icon="ph:plus-circle"
               class={headerIconButtonClass}
+              disabled={props.disabled}
+              icon="ph:plus-circle"
               onClick={() => props.onInsert(props.message)}
               title="Insert"
-              disabled={props.disabled}
             />
           </div>
 
           <IconButton
-            icon="ph:trash"
             class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+            icon="ph:trash"
             onClick={() => props.onDelete(props.message)}
             title="Delete"
           />

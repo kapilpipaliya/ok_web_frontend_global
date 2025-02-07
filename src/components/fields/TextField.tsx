@@ -4,7 +4,7 @@ import { Dynamic } from "solid-js/web";
 import type { GenericComponentProps } from "./FieldType";
 
 export function TextField(
-  props: Readonly<{ as?: string; text?: string } & GenericComponentProps>,
+  props: Readonly<GenericComponentProps & { as?: string; text?: string }>,
 ) {
   const [local, others] = splitProps(props, [
     "componentName",

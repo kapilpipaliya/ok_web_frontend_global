@@ -5,8 +5,8 @@ import { splitProps } from "solid-js";
 import type { GenericComponentProps } from "./FieldType";
 
 interface UrlFieldProps
-  extends Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, "onChange">,
-    GenericComponentProps {
+  extends GenericComponentProps,
+    Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, "onChange"> {
   href?: string;
 }
 

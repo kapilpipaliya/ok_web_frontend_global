@@ -18,29 +18,28 @@ import { AddNewButton } from "~/components/grid/AddNewButton";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-
+import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { evalExpression } from "~/lib/expression_eval";
 
 export function TableInputField(
   props: Readonly<
-    {
+    GenericComponentProps & {
       data?: Vertex;
       isNoPermissionCheck?: boolean;
       isRealTime?: boolean;
       isTableInside?: boolean;
       meta?: Vertex;
       txnId?: number;
-    } & GenericComponentProps
+    }
   >,
 ) {
   const [graph, setGraph] = useGraph();
@@ -134,8 +133,8 @@ export function TableInputField(
         <div
           class="m:2 overflow:auto r:10"
           classList={{
-            "{scrollbar-width:thin}": true,
             "border:1px|solid|#37c": sortedVertexes().length > 0, // slate-70
+            "{scrollbar-width:thin}": true,
           }}
         >
           <table
@@ -191,13 +190,13 @@ export function TableInputField(
                     isRealTime={props.isRealTime ?? false}
                     joinVertex={vertex}
                     meta={meta()!}
+                    metaInstance={graph.vertexes[metaVertexId]}
                     onChange={props.onChange}
                     rowIndex={index()}
                     setDragFromIndex={setDragFromIndex}
                     setDragToIndex={setDragToIndex}
                     tableColumnsTemplate={tableColumnsTemplate}
                     txnId={props.txnId ?? 0}
-                    metaInstance={graph.vertexes[metaVertexId]}
                   />
                 )}
               </For>

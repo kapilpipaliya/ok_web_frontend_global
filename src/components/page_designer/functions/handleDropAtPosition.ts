@@ -6,11 +6,11 @@ import { handlePageDrag } from "~/components/page_designer/functions/handlePageD
 import { handleParentChange } from "~/components/page_designer/functions/handleParentChange";
 import { sortChildren } from "~/components/page_designer/functions/sortChildren";
 import { validateDragOver } from "~/components/page_designer/functions/validateDragOver";
+import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 
-import { PageDesignerLabels } from "./PageDesignerLabels";
 import { componentDrop } from "./drop/componentDrop";
-import { evalExpression } from "~/lib/expression_eval";
+import { PageDesignerLabels } from "./PageDesignerLabels";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,

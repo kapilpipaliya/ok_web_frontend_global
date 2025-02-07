@@ -2,15 +2,15 @@ import type { JSX } from "solid-js";
 
 import { createMemo } from "solid-js";
 
-export interface MenuProperties {
-  disabled: () => boolean;
+export interface MenuChildProps {
+  children?: JSX.Element | MenuChildRenderProp;
+  disabled?: boolean;
 }
 
 export type MenuChildRenderProp = (properties: MenuProperties) => JSX.Element;
 
-export interface MenuChildProps {
-  children?: JSX.Element | MenuChildRenderProp;
-  disabled?: boolean;
+export interface MenuProperties {
+  disabled: () => boolean;
 }
 
 export function MenuChild(props: MenuChildProps): JSX.Element {

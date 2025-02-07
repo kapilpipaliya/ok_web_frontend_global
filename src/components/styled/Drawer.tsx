@@ -8,11 +8,11 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface DrawerProps {
   children: JSX.Element;

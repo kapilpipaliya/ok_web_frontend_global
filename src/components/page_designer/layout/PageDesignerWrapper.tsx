@@ -1,32 +1,32 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
 import { Title } from "@solidjs/meta";
-import { type JSX, onCleanup, onMount, createEffect } from "solid-js";
-import { createStore } from "solid-js/store";
+import { useParams } from "@solidjs/router";
+import { clientOnly } from "@solidjs/start";
+import { openDB } from 'idb';
+import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
+import { v7 as uuidv7 } from "uuid";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { getTableData } from "~/components/grid/functions/getTableData";
-import { v7 as uuidv7 } from "uuid";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
-  PageLayoutObject,
+  type PageLayoutObject,
   useDesignerFormIdContext,
 } from "~/components/page_designer/context/LayoutContext";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
-import { clientOnly } from "@solidjs/start";
-import { useParams } from "@solidjs/router";
-import { openDB } from 'idb';
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -44,19 +44,19 @@ export function PageDesignerWrapper(): JSX.Element {
   const formId = uuidv7();
 
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
+    dataId: params.id,
     formId,
     label: params.entity,
-    dataId: params.id,
     mainPanel: initialStore.mainPanel[0],
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
   
   const vertex = newVertex<PageLayoutObject>(initialStore.id, ["PageDesigner"], {
     ...initialStore,
-    openedFormIds: [newOpenVertex.id],
+    [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
     formId,
     mainFormId: formId,
-    [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId
+    openedFormIds: [newOpenVertex.id]
   });
   addNewVertex(0, vertex, graph, setGraph);
 
@@ -112,14 +112,14 @@ export function PageDesignerWrapper(): JSX.Element {
     if (!layoutVertex) return;
 
     const widthProps = {
-      leftWidth: layoutVertex.P.leftWidth,
-      rightWidth0: layoutVertex.P.rightWidth0,
-      rightWidth1: layoutVertex.P.rightWidth1,
-      rightWidth2: layoutVertex.P.rightWidth2,
       isLeftOpen: layoutVertex.P.isLeftOpen,
       isRight0Open: layoutVertex.P.isRight0Open,
       isRight1Open: layoutVertex.P.isRight1Open,
       isRight2Open: layoutVertex.P.isRight2Open,
+      leftWidth: layoutVertex.P.leftWidth,
+      rightWidth0: layoutVertex.P.rightWidth0,
+      rightWidth1: layoutVertex.P.rightWidth1,
+      rightWidth2: layoutVertex.P.rightWidth2,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
       ...layoutVertex.P.mainPanel.reduce((acc, panel) => ({
         ...acc,

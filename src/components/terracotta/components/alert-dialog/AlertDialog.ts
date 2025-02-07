@@ -45,6 +45,10 @@ export type AlertDialogControlledBaseProps = Prettify<
 export type AlertDialogControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, AlertDialogControlledBaseProps>;
 
+export type AlertDialogProps<T extends ValidConstructor = "div"> =
+  | AlertDialogControlledProps<T>
+  | AlertDialogUncontrolledProps<T>;
+
 export type AlertDialogUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps &
     DisclosureStateUncontrolledOptions &
@@ -53,16 +57,6 @@ export type AlertDialogUncontrolledBaseProps = Prettify<
 
 export type AlertDialogUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, AlertDialogUncontrolledBaseProps>;
-
-export type AlertDialogProps<T extends ValidConstructor = "div"> =
-  | AlertDialogControlledProps<T>
-  | AlertDialogUncontrolledProps<T>;
-
-function isAlertDialogUncontrolled<T extends ValidConstructor = "div">(
-  props: AlertDialogProps<T>,
-): props is AlertDialogUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function AlertDialog<T extends ValidConstructor = "div">(
   props: AlertDialogProps<T>,
@@ -144,4 +138,10 @@ export function AlertDialog<T extends ValidConstructor = "div">(
       titleID,
     },
   });
+}
+
+function isAlertDialogUncontrolled<T extends ValidConstructor = "div">(
+  props: AlertDialogProps<T>,
+): props is AlertDialogUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

@@ -1,9 +1,10 @@
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { uniqueNameKey } from "~/components/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/components/page_designer/functions/generateFormMetaAttributes";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { Label } from "./Label";

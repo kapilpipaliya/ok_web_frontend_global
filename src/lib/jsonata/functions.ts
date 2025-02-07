@@ -18,63 +18,63 @@ import {
 } from "./utils";
 
 /**
- * Sum function
- * @param {Object} args - Arguments
- * @returns {number} Total value of arguments
+ * Absolute value of a number
+ * @param {Number} arg - Argument
+ * @returns {Number} absolute value of argument
  */
-export function sum(args) {
+export function abs(arg) {
+  let result;
+
   // undefined inputs always return undefined
-  if (typeof args === "undefined") {
+  if (typeof arg === "undefined") {
     return undefined;
   }
 
-  let total = 0;
-  args.forEach((num) => {
-    total += num;
-  });
-  return total;
+  result = Math.abs(arg);
+  return result;
 }
 
 /**
- * Count function
- * @param {Object} args - Arguments
- * @returns {number} Number of elements in the array
+ * Append second argument to first
+ * @param {Array|Object} arg1 - First argument
+ * @param {Array|Object} arg2 - Second argument
+ * @returns {*} Appended arguments
  */
-export function count(args) {
-  // undefined inputs always return undefined
-  if (typeof args === "undefined") {
-    return 0;
+export function append(arg1, arg2) {
+  // disregard undefined args
+  if (typeof arg1 === "undefined") {
+    return arg2;
   }
-
-  return args.length;
+  if (typeof arg2 === "undefined") {
+    return arg1;
+  }
+  // if either argument is not an array, make it so
+  if (!Array.isArray(arg1)) {
+    arg1 = createSequence(arg1);
+  }
+  if (!Array.isArray(arg2)) {
+    arg2 = [arg2];
+  }
+  return arg1.concat(arg2);
 }
 
 /**
- * Max function
- * @param {Object} args - Arguments
- * @returns {number} Max element in the array
+ *
+ * @param {boolean} condition - the condition to evaluate
+ * @param {string} [message] - the message to attach to the error
+ * @throws custom error with code 'D3137'
+ * @returns {undefined}
  */
-export function max(args) {
-  // undefined inputs always return undefined
-  if (typeof args === "undefined" || args.length === 0) {
-    return undefined;
+export function assert(condition, message) {
+  if (!condition) {
+    throw {
+      code: "D3141",
+      message: message || "$assert() statement failed",
+      stack: new Error().stack,
+    };
   }
 
-  return Math.max.apply(Math, args);
-}
-
-/**
- * Min function
- * @param {Object} args - Arguments
- * @returns {number} Min element in the array
- */
-export function min(args) {
-  // undefined inputs always return undefined
-  if (typeof args === "undefined" || args.length === 0) {
-    return undefined;
-  }
-
-  return Math.min.apply(Math, args);
+  return undefined;
 }
 
 /**
@@ -96,250 +96,112 @@ export function average(args) {
 }
 
 /**
- * Stringify arguments
- * @param {Object} arg - Arguments
- * @param {boolean} [prettify] - Pretty print the result
- * @returns {String} String from arguments
+ * Base64 decode a string
+ * @param {String} str - string
+ * @returns {String} Base 64 encoding of the binary data
  */
-export function string(arg, prettify = false) {
+export function base64decode(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+  // Use btoa in a browser, or Buffer in Node.js
+  const atob =
+    typeof window !== "undefined"
+      ? /* istanbul ignore next */ window.atob
+      : (str) => {
+          // Simply doing `new Buffer` at this point causes Browserify to pull
+          // in the entire Buffer browser library, which is large and unnecessary.
+          // Using `global.Buffer` defeats this.
+          return new global.Buffer.from(str, "base64").toString("binary");
+        };
+  return atob(str);
+}
+
+/**
+ * Base64 encode a string
+ * @param {String} str - string
+ * @returns {String} Base 64 encoding of the binary data
+ */
+export function base64encode(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+  // Use btoa in a browser, or Buffer in Node.js
+
+  const btoa =
+    typeof window !== "undefined"
+      ? /* istanbul ignore next */ window.btoa
+      : (str) => {
+          // Simply doing `new Buffer` at this point causes Browserify to pull
+          // in the entire Buffer browser library, which is large and unnecessary.
+          // Using `global.Buffer` defeats this.
+          return new global.Buffer.from(str, "binary").toString("base64");
+        };
+  return btoa(str);
+}
+
+/**
+ * Evaluate an input and return a boolean
+ * @param {*} arg - Arguments
+ * @returns {boolean} Boolean
+ */
+export function boolean(arg) {
+  // cast arg to its effective boolean value
+  // boolean: unchanged
+  // string: zero-length -> false; otherwise -> true
+  // number: 0 -> false; otherwise -> true
+  // null -> false
+  // array: empty -> false; length > 1 -> true
+  // object: empty -> false; non-empty -> true
+  // function -> false
+
   // undefined inputs always return undefined
   if (typeof arg === "undefined") {
     return undefined;
   }
 
-  let str;
-
-  if (typeof arg === "string") {
-    // already a string
-    str = arg;
-  } else if (isFunction(arg)) {
-    // functions (built-in and lambda convert to empty string
-    str = "";
-  } else if (typeof arg === "number" && !Number.isFinite(arg)) {
-    throw {
-      code: "D3001",
-      stack: new Error().stack,
-      value: arg,
-    };
-  } else {
-    const space = prettify ? 2 : 0;
-    if (Array.isArray(arg) && arg.outerWrapper) {
-      arg = arg[0];
+  let result = false;
+  if (Array.isArray(arg)) {
+    if (arg.length === 1) {
+      result = boolean(arg[0]);
+    } else if (arg.length > 1) {
+      const trues = arg.filter((val) => boolean(val));
+      result = trues.length > 0;
     }
-    str = JSON.stringify(
-      arg,
-      (_key, val) =>
-        typeof val !== "undefined" &&
-        val !== null &&
-        val.toPrecision &&
-        isNumeric(val)
-          ? Number(val.toPrecision(15))
-          : val && isFunction(val)
-            ? ""
-            : val,
-      space,
-    );
-  }
-  return str;
-}
-
-/**
- * Create substring based on character number and length
- * @param {String} str - String to evaluate
- * @param {Integer} start - Character number to start substring
- * @param {Integer} [length] - Number of characters in substring
- * @returns {string|*} Substring
- */
-export function substring(str, start, length) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  const strArray = stringToArray(str);
-  const strLength = strArray.length;
-
-  if (strLength + start < 0) {
-    start = 0;
-  }
-
-  if (typeof length !== "undefined") {
-    if (length <= 0) {
-      return "";
+  } else if (typeof arg === "string") {
+    if (arg.length > 0) {
+      result = true;
     }
-    const end = start >= 0 ? start + length : strLength + start + length;
-    return strArray.slice(start, end).join("");
-  }
-
-  return strArray.slice(start).join("");
-}
-
-/**
- * Create substring up until a character
- * @param {String} str - String to evaluate
- * @param {String} chars - Character to define substring boundary
- * @returns {*} Substring
- */
-export function substringBefore(str, chars) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  const pos = str.indexOf(chars);
-  if (pos > -1) {
-    return str.substr(0, pos);
-  }
-  return str;
-}
-
-/**
- * Create substring after a character
- * @param {String} str - String to evaluate
- * @param {String} chars - Character to define substring boundary
- * @returns {*} Substring
- */
-export function substringAfter(str, chars) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  const pos = str.indexOf(chars);
-  if (pos > -1) {
-    return str.substr(pos + chars.length);
-  }
-  return str;
-}
-
-/**
- * Lowercase a string
- * @param {String} str - String to evaluate
- * @returns {string} Lowercase string
- */
-export function lowercase(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  return str.toLowerCase();
-}
-
-/**
- * Uppercase a string
- * @param {String} str - String to evaluate
- * @returns {string} Uppercase string
- */
-export function uppercase(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  return str.toUpperCase();
-}
-
-/**
- * length of a string
- * @param {String} str - string
- * @returns {Number} The number of characters in the string
- */
-export function length(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  return stringToArray(str).length;
-}
-
-/**
- * Normalize and trim whitespace within a string
- * @param {string} str - string to be trimmed
- * @returns {string} - trimmed string
- */
-export function trim(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  // normalize whitespace
-  let result = str.replace(/[ \t\n\r]+/gm, " ");
-  if (result.charAt(0) === " ") {
-    // strip leading space
-    result = result.substring(1);
-  }
-  if (result.charAt(result.length - 1) === " ") {
-    // strip trailing space
-    result = result.substring(0, result.length - 1);
+  } else if (isNumeric(arg)) {
+    if (arg !== 0) {
+      result = true;
+    }
+  } else if (arg !== null && typeof arg === "object") {
+    if (Object.keys(arg).length > 0) {
+      result = true;
+    }
+  } else if (typeof arg === "boolean" && arg === true) {
+    result = true;
   }
   return result;
 }
 
 /**
- * Pad a string to a minimum width by adding characters to the start or end
- * @param {string} str - string to be padded
- * @param {number} width - the minimum width; +ve pads to the right, -ve pads to the left
- * @param {string} [char] - the pad character(s); defaults to ' '
- * @returns {string} - padded string
+ * Rounds a number up to integer
+ * @param {Number} arg - Argument
+ * @returns {Number} rounded integer
  */
-export function pad(str, width, char) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  if (typeof char === "undefined" || char.length === 0) {
-    char = " ";
-  }
-
+export function ceil(arg) {
   let result;
-  const padLength = Math.abs(width) - length(str);
-  if (padLength > 0) {
-    let padding = new Array(padLength + 1).join(char);
-    if (char.length > 1) {
-      padding = substring(padding, 0, padLength);
-    }
-    if (width > 0) {
-      result = str + padding;
-    } else {
-      result = padding + str;
-    }
-  } else {
-    result = str;
-  }
-  return result;
-}
 
-/**
- * Evaluate the matcher function against the str arg
- *
- * @param {*} matcher - matching function (native or lambda)
- * @param {string} str - the string to match against
- * @returns {object} - structure that represents the match(es)
- */
-export function evaluateMatcher(matcher, str) {
-  const result = matcher.apply(this, [str]);
-  // if(isPromise(result)) {
-  //     result = await result;
-  // }
-  if (
-    result &&
-    !(
-      typeof result.start === "number" ||
-      result.end === "number" ||
-      Array.isArray(result.groups) ||
-      isFunction(result.next)
-    )
-  ) {
-    // the matcher function didn't return the correct structure
-    throw {
-      code: "T1010",
-      stack: new Error().stack,
-    };
+  // undefined inputs always return undefined
+  if (typeof arg === "undefined") {
+    return undefined;
   }
+
+  result = Math.ceil(arg);
   return result;
 }
 
@@ -368,254 +230,25 @@ export function contains(str, token) {
 }
 
 /**
- * Match a string with a regex returning an array of object containing details of each match
- * @param {String} str - string
- * @param {String} regex - the regex applied to the string
- * @param {Integer} [limit] - max number of matches to return
- * @returns {Array} The array of match objects
+ * Count function
+ * @param {Object} args - Arguments
+ * @returns {number} Number of elements in the array
  */
-export function match(str, regex, limit) {
+export function count(args) {
   // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
+  if (typeof args === "undefined") {
+    return 0;
   }
 
-  // limit, if specified, must be a non-negative number
-  if (limit < 0) {
-    throw {
-      code: "D3040",
-      index: 3,
-      stack: new Error().stack,
-      value: limit,
-    };
-  }
-
-  const result = createSequence();
-
-  if (typeof limit === "undefined" || limit > 0) {
-    let count = 0;
-    let matches = evaluateMatcher(regex, str);
-    if (typeof matches !== "undefined") {
-      while (
-        typeof matches !== "undefined" &&
-        (typeof limit === "undefined" || count < limit)
-      ) {
-        result.push({
-          groups: matches.groups,
-          index: matches.start,
-          match: matches.match,
-        });
-        matches = evaluateMatcher(matches.next);
-        count++;
-      }
-    }
-  }
-
-  return result;
+  return args.length;
 }
 
 /**
- * Match a string with a regex returning an array of object containing details of each match
- * @param {String} str - string
- * @param {String} pattern - the substring/regex applied to the string
- * @param {String} replacement - text to replace the matched substrings
- * @param {Integer} [limit] - max number of matches to return
- * @returns {Array} The array of match objects
+ * Decode a string from a url
+ * @param {String} str - String to decode
+ * @returns {string} Decoded string
  */
-export function replace(str, pattern, replacement, limit) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  // pattern cannot be an empty string
-  if (pattern === "") {
-    throw {
-      code: "D3010",
-      index: 2,
-      stack: new Error().stack,
-      value: pattern,
-    };
-  }
-
-  // limit, if specified, must be a non-negative number
-  if (limit < 0) {
-    throw {
-      code: "D3011",
-      index: 4,
-      stack: new Error().stack,
-      value: limit,
-    };
-  }
-
-  let replacer;
-  if (typeof replacement === "string") {
-    replacer = (regexMatch) => {
-      let substitute = "";
-      // scan forward, copying the replacement text into the substitute string
-      // and replace any occurrence of $n with the values matched by the regex
-      let position = 0;
-      let index = replacement.indexOf("$", position);
-      while (index !== -1 && position < replacement.length) {
-        substitute += replacement.substring(position, index);
-        position = index + 1;
-        const dollarVal = replacement.charAt(position);
-        if (dollarVal === "$") {
-          // literal $
-          substitute += "$";
-          position++;
-        } else if (dollarVal === "0") {
-          substitute += regexMatch.match;
-          position++;
-        } else {
-          let maxDigits;
-          if (regexMatch.groups.length === 0) {
-            // no sub-matches; any $ followed by a digit will be replaced by an empty string
-            maxDigits = 1;
-          } else {
-            // max number of digits to parse following the $
-            maxDigits =
-              Math.floor(Math.log(regexMatch.groups.length) * Math.LOG10E) + 1;
-          }
-          index = Number.parseInt(
-            replacement.substring(position, position + maxDigits),
-            10,
-          );
-          if (maxDigits > 1 && index > regexMatch.groups.length) {
-            index = Number.parseInt(
-              replacement.substring(position, position + maxDigits - 1),
-              10,
-            );
-          }
-          if (Number.isNaN(index)) {
-            // not a capture group, treat the $ as literal
-            substitute += "$";
-          } else {
-            if (regexMatch.groups.length > 0) {
-              const submatch = regexMatch.groups[index - 1];
-              if (typeof submatch !== "undefined") {
-                substitute += submatch;
-              }
-            }
-            position += index.toString().length;
-          }
-        }
-        index = replacement.indexOf("$", position);
-      }
-      substitute += replacement.substring(position);
-      return substitute;
-    };
-  } else {
-    replacer = replacement;
-  }
-
-  let result = "";
-  let position = 0;
-
-  if (typeof limit === "undefined" || limit > 0) {
-    let count = 0;
-    if (typeof pattern === "string") {
-      let index = str.indexOf(pattern, position);
-      while (index !== -1 && (typeof limit === "undefined" || count < limit)) {
-        result += str.substring(position, index);
-        result += replacement;
-        position = index + pattern.length;
-        count++;
-        index = str.indexOf(pattern, position);
-      }
-      result += str.substring(position);
-    } else {
-      let matches = evaluateMatcher(pattern, str);
-      if (typeof matches !== "undefined") {
-        while (
-          typeof matches !== "undefined" &&
-          (typeof limit === "undefined" || count < limit)
-        ) {
-          result += str.substring(position, matches.start);
-          const replacedWith = replacer.apply(this, [matches]);
-          // if (isPromise(replacedWith)) {
-          //     replacedWith = await replacedWith;
-          // }
-          // check replacedWith is a string
-          if (typeof replacedWith === "string") {
-            result += replacedWith;
-          } else {
-            // not a string - throw error
-            throw {
-              code: "D3012",
-              stack: new Error().stack,
-              value: replacedWith,
-            };
-          }
-          position = matches.start + matches.match.length;
-          count++;
-          matches = evaluateMatcher(matches.next);
-        }
-        result += str.substring(position);
-      } else {
-        result = str;
-      }
-    }
-  } else {
-    result = str;
-  }
-
-  return result;
-}
-
-/**
- * Base64 encode a string
- * @param {String} str - string
- * @returns {String} Base 64 encoding of the binary data
- */
-export function base64encode(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-  // Use btoa in a browser, or Buffer in Node.js
-
-  const btoa =
-    typeof window !== "undefined"
-      ? /* istanbul ignore next */ window.btoa
-      : (str) => {
-          // Simply doing `new Buffer` at this point causes Browserify to pull
-          // in the entire Buffer browser library, which is large and unnecessary.
-          // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "binary").toString("base64");
-        };
-  return btoa(str);
-}
-
-/**
- * Base64 decode a string
- * @param {String} str - string
- * @returns {String} Base 64 encoding of the binary data
- */
-export function base64decode(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-  // Use btoa in a browser, or Buffer in Node.js
-  const atob =
-    typeof window !== "undefined"
-      ? /* istanbul ignore next */ window.atob
-      : (str) => {
-          // Simply doing `new Buffer` at this point causes Browserify to pull
-          // in the entire Buffer browser library, which is large and unnecessary.
-          // Using `global.Buffer` defeats this.
-          return new global.Buffer.from(str, "base64").toString("binary");
-        };
-  return atob(str);
-}
-
-/**
- * Encode a string into a component for a url
- * @param {String} str - String to encode
- * @returns {string} Encoded string
- */
-export function encodeUrlComponent(str) {
+export function decodeUrl(str) {
   // undefined inputs always return undefined
   if (typeof str === "undefined") {
     return undefined;
@@ -624,37 +257,11 @@ export function encodeUrlComponent(str) {
   // Catch URIErrors when URI sequence is malformed
   let returnVal;
   try {
-    returnVal = encodeURIComponent(str);
+    returnVal = decodeURI(str);
   } catch (_e) {
     throw {
       code: "D3140",
-      functionName: "encodeUrlComponent",
-      stack: new Error().stack,
-      value: str,
-    };
-  }
-  return returnVal;
-}
-
-/**
- * Encode a string into a url
- * @param {String} str - String to encode
- * @returns {string} Encoded string
- */
-export function encodeUrl(str) {
-  // undefined inputs always return undefined
-  if (typeof str === "undefined") {
-    return undefined;
-  }
-
-  // Catch URIErrors when URI sequence is malformed
-  let returnVal;
-  try {
-    returnVal = encodeURI(str);
-  } catch (_e) {
-    throw {
-      code: "D3140",
-      functionName: "encodeUrl",
+      functionName: "decodeUrl",
       stack: new Error().stack,
       value: str,
     };
@@ -689,11 +296,66 @@ export function decodeUrlComponent(str) {
 }
 
 /**
- * Decode a string from a url
- * @param {String} str - String to decode
- * @returns {string} Decoded string
+ * Returns the values that appear in a sequence, with duplicates eliminated.
+ * @param {Array} arr - An array or sequence of values
+ * @returns {Array} - sequence of distinct values
  */
-export function decodeUrl(str) {
+export function distinct(arr) {
+  // undefined inputs always return undefined
+  if (typeof arr === "undefined") {
+    return undefined;
+  }
+
+  if (!Array.isArray(arr) || arr.length <= 1) {
+    return arr;
+  }
+
+  const results = isSequence(arr) ? createSequence() : [];
+
+  for (let ii = 0; ii < arr.length; ii++) {
+    const value = arr[ii];
+    // is this value already in the result sequence?
+    let includes = false;
+    for (let jj = 0; jj < results.length; jj++) {
+      if (deepEquals(value, results[jj])) {
+        includes = true;
+        break;
+      }
+    }
+    if (!includes) {
+      results.push(value);
+    }
+  }
+  return results;
+}
+
+/**
+ *
+ * @param {*} obj - the input object to iterate over
+ * @param {*} func - the function to apply to each key/value pair
+ * @returns {Array} - the resultant array
+ */
+export function each(obj, func) {
+  const result = createSequence();
+
+  for (const key in obj) {
+    const func_args = hofFuncArgs(func, obj[key], key, obj);
+    // invoke func
+    const val = func.apply(this, func_args);
+    if (typeof val !== "undefined") {
+      result.push(val);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Encode a string into a url
+ * @param {String} str - String to encode
+ * @returns {string} Encoded string
+ */
+export function encodeUrl(str) {
   // undefined inputs always return undefined
   if (typeof str === "undefined") {
     return undefined;
@@ -702,11 +364,11 @@ export function decodeUrl(str) {
   // Catch URIErrors when URI sequence is malformed
   let returnVal;
   try {
-    returnVal = decodeURI(str);
+    returnVal = encodeURI(str);
   } catch (_e) {
     throw {
       code: "D3140",
-      functionName: "decodeUrl",
+      functionName: "encodeUrl",
       stack: new Error().stack,
       value: str,
     };
@@ -715,53 +377,107 @@ export function decodeUrl(str) {
 }
 
 /**
- * Split a string into an array of substrings
- * @param {String} str - string
- * @param {String} separator - the token or regex that splits the string
- * @param {Integer} [limit] - max number of substrings
- * @returns {Array} The array of string
+ * Encode a string into a component for a url
+ * @param {String} str - String to encode
+ * @returns {string} Encoded string
  */
-export function split(str, separator, limit) {
+export function encodeUrlComponent(str) {
   // undefined inputs always return undefined
   if (typeof str === "undefined") {
     return undefined;
   }
 
-  // limit, if specified, must be a non-negative number
-  if (limit < 0) {
+  // Catch URIErrors when URI sequence is malformed
+  let returnVal;
+  try {
+    returnVal = encodeURIComponent(str);
+  } catch (_e) {
     throw {
-      code: "D3020",
-      index: 3,
+      code: "D3140",
+      functionName: "encodeUrlComponent",
       stack: new Error().stack,
-      value: limit,
+      value: str,
     };
   }
+  return returnVal;
+}
 
-  let result = [];
+/**
+ *
+ * @param {string} [message] - the message to attach to the error
+ * @throws custom error with code 'D3137'
+ */
+export function error(message) {
+  throw {
+    code: "D3137",
+    message: message || "$error() function evaluated",
+    stack: new Error().stack,
+  };
+}
 
-  if (typeof limit === "undefined" || limit > 0) {
-    if (typeof separator === "string") {
-      result = str.split(separator, limit);
-    } else {
-      let count = 0;
-      let matches = evaluateMatcher(separator, str);
-      if (typeof matches !== "undefined") {
-        let start = 0;
-        while (
-          typeof matches !== "undefined" &&
-          (typeof limit === "undefined" || count < limit)
-        ) {
-          result.push(str.substring(start, matches.start));
-          start = matches.end;
-          matches = evaluateMatcher(matches.next);
-          count++;
-        }
-        if (typeof limit === "undefined" || count < limit) {
-          result.push(str.substring(start));
-        }
-      } else {
-        result.push(str);
-      }
+/**
+ * Evaluate the matcher function against the str arg
+ *
+ * @param {*} matcher - matching function (native or lambda)
+ * @param {string} str - the string to match against
+ * @returns {object} - structure that represents the match(es)
+ */
+export function evaluateMatcher(matcher, str) {
+  const result = matcher.apply(this, [str]);
+  // if(isPromise(result)) {
+  //     result = await result;
+  // }
+  if (
+    result &&
+    !(
+      typeof result.start === "number" ||
+      result.end === "number" ||
+      Array.isArray(result.groups) ||
+      isFunction(result.next)
+    )
+  ) {
+    // the matcher function didn't return the correct structure
+    throw {
+      code: "T1010",
+      stack: new Error().stack,
+    };
+  }
+  return result;
+}
+
+/**
+ * Determines if the argument is undefined
+ * @param {*} arg - argument
+ * @returns {boolean} False if argument undefined, otherwise true
+ */
+export function exists(arg) {
+  if (typeof arg === "undefined") {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Create a map from an array of arguments
+ * @param {Array} [arr] - array to filter
+ * @param {Function} func - predicate function
+ * @returns {Array} Map array
+ */
+export function filter(arr, func) {
+  // undefined inputs always return undefined
+  if (typeof arr === "undefined") {
+    return undefined;
+  }
+
+  const result = createSequence();
+
+  for (let i = 0; i < arr.length; i++) {
+    const entry = arr[i];
+    const func_args = hofFuncArgs(func, entry, i, arr);
+    // invoke func
+    const res = func.apply(this, func_args);
+    if (boolean(res)) {
+      result.push(entry);
     }
   }
 
@@ -769,23 +485,101 @@ export function split(str, separator, limit) {
 }
 
 /**
- * Join an array of strings
- * @param {Array} strs - array of string
- * @param {String} [separator] - the token that splits the string
- * @returns {String} The concatenated string
+ * Rounds a number down to integer
+ * @param {Number} arg - Argument
+ * @returns {Number} rounded integer
  */
-export function join(strs, separator) {
+export function floor(arg) {
+  let result;
+
   // undefined inputs always return undefined
-  if (typeof strs === "undefined") {
+  if (typeof arg === "undefined") {
     return undefined;
   }
 
-  // if separator is not specified, default to empty string
-  if (typeof separator === "undefined") {
-    separator = "";
+  result = Math.floor(arg);
+  return result;
+}
+
+/**
+ * Fold left function
+ * @param {Array} sequence - Sequence
+ * @param {Function} func - Function
+ * @param {Object} init - Initial value
+ * @returns {*} Result
+ */
+export function foldLeft(sequence, func, init) {
+  // undefined inputs always return undefined
+  if (typeof sequence === "undefined") {
+    return undefined;
   }
 
-  return strs.join(separator);
+  let result;
+
+  const arity = getFunctionArity(func);
+  if (arity < 2) {
+    throw {
+      code: "D3050",
+      index: 1,
+      stack: new Error().stack,
+    };
+  }
+
+  let index;
+  if (typeof init === "undefined" && sequence.length > 0) {
+    result = sequence[0];
+    index = 1;
+  } else {
+    result = init;
+    index = 0;
+  }
+
+  while (index < sequence.length) {
+    const args = [result, sequence[index]];
+    if (arity >= 3) {
+      args.push(index);
+    }
+    if (arity >= 4) {
+      args.push(sequence);
+    }
+    result = func.apply(this, args);
+    index++;
+  }
+
+  return result;
+}
+
+/**
+ * Converts a number to a string using a specified number base
+ * @param {number} value - the number to convert
+ * @param {number} [radix] - the number base; must be between 2 and 36. Defaults to 10
+ * @returns {string} - the converted string
+ */
+export function formatBase(value, radix) {
+  // undefined inputs always return undefined
+  if (typeof value === "undefined") {
+    return undefined;
+  }
+
+  value = round(value);
+
+  if (typeof radix === "undefined") {
+    radix = 10;
+  } else {
+    radix = round(radix);
+  }
+
+  if (radix < 2 || radix > 36) {
+    throw {
+      code: "D3100",
+      stack: new Error().stack,
+      value: radix,
+    };
+  }
+
+  const result = value.toString(radix);
+
+  return result;
 }
 
 /**
@@ -1287,36 +1081,261 @@ export function formatNumber(value, picture, options) {
 }
 
 /**
- * Converts a number to a string using a specified number base
- * @param {number} value - the number to convert
- * @param {number} [radix] - the number base; must be between 2 and 36. Defaults to 10
- * @returns {string} - the converted string
+ * Helper function to build the arguments to be supplied to the function arg of the
+ * HOFs map, filter, each, sift and single
+ * @param {function} func - the function to be invoked
+ * @param {*} arg1 - the first (required) arg - the value
+ * @param {*} arg2 - the second (optional) arg - the position (index or key)
+ * @param {*} arg3 - the third (optional) arg - the whole structure (array or object)
+ * @returns {*[]} the argument list
  */
-export function formatBase(value, radix) {
+export function hofFuncArgs(func, arg1, arg2, arg3) {
+  const func_args = [arg1]; // the first arg (the value) is required
+  // the other two are optional - only supply it if the function can take it
+  const length = getFunctionArity(func);
+  if (length >= 2) {
+    func_args.push(arg2);
+  }
+  if (length >= 3) {
+    func_args.push(arg3);
+  }
+  return func_args;
+}
+
+/**
+ * Join an array of strings
+ * @param {Array} strs - array of string
+ * @param {String} [separator] - the token that splits the string
+ * @returns {String} The concatenated string
+ */
+export function join(strs, separator) {
   // undefined inputs always return undefined
-  if (typeof value === "undefined") {
+  if (typeof strs === "undefined") {
     return undefined;
   }
 
-  value = round(value);
-
-  if (typeof radix === "undefined") {
-    radix = 10;
-  } else {
-    radix = round(radix);
+  // if separator is not specified, default to empty string
+  if (typeof separator === "undefined") {
+    separator = "";
   }
 
-  if (radix < 2 || radix > 36) {
+  return strs.join(separator);
+}
+
+/**
+ * Return keys for an object
+ * @param {Object} arg - Object
+ * @returns {Array} Array of keys
+ */
+export function keys(arg) {
+  let result = createSequence();
+
+  if (Array.isArray(arg)) {
+    // merge the keys of all of the items in the array
+    const merge = {};
+    arg.forEach((item) => {
+      const allkeys = keys(item);
+      allkeys.forEach((key) => {
+        merge[key] = true;
+      });
+    });
+    result = keys(merge);
+  } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
+    Object.keys(arg).forEach((key) => result.push(key));
+  }
+  return result;
+}
+
+/**
+ * length of a string
+ * @param {String} str - string
+ * @returns {Number} The number of characters in the string
+ */
+export function length(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  return stringToArray(str).length;
+}
+
+/**
+ * Return value from an object for a given key
+ * @param {Object} input - Object/Array
+ * @param {String} key - Key in object
+ * @returns {*} Value of key in object
+ */
+export function lookup(input, key) {
+  // lookup the 'name' item in the input
+  let result;
+  if (Array.isArray(input)) {
+    result = createSequence();
+    for (let ii = 0; ii < input.length; ii++) {
+      const res = lookup(input[ii], key);
+      if (typeof res !== "undefined") {
+        if (Array.isArray(res)) {
+          res.forEach((val) => result.push(val));
+        } else {
+          result.push(res);
+        }
+      }
+    }
+  } else if (input !== null && typeof input === "object") {
+    result = input[key];
+  }
+  return result;
+}
+
+/**
+ * Lowercase a string
+ * @param {String} str - String to evaluate
+ * @returns {string} Lowercase string
+ */
+export function lowercase(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  return str.toLowerCase();
+}
+
+/**
+ * Create a map from an array of arguments
+ * @param {Array} [arr] - array to map over
+ * @param {Function} func - function to apply
+ * @returns {Array} Map array
+ */
+export function map(arr, func) {
+  // undefined inputs always return undefined
+  if (typeof arr === "undefined") {
+    return undefined;
+  }
+
+  const result = createSequence();
+  // do the map - iterate over the arrays, and invoke func
+  for (let i = 0; i < arr.length; i++) {
+    const func_args = hofFuncArgs(func, arr[i], i, arr);
+    // invoke func
+    const res = func.apply(this, func_args);
+    if (typeof res !== "undefined") {
+      result.push(res);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Match a string with a regex returning an array of object containing details of each match
+ * @param {String} str - string
+ * @param {String} regex - the regex applied to the string
+ * @param {Integer} [limit] - max number of matches to return
+ * @returns {Array} The array of match objects
+ */
+export function match(str, regex, limit) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  // limit, if specified, must be a non-negative number
+  if (limit < 0) {
     throw {
-      code: "D3100",
+      code: "D3040",
+      index: 3,
       stack: new Error().stack,
-      value: radix,
+      value: limit,
     };
   }
 
-  const result = value.toString(radix);
+  const result = createSequence();
+
+  if (typeof limit === "undefined" || limit > 0) {
+    let count = 0;
+    let matches = evaluateMatcher(regex, str);
+    if (typeof matches !== "undefined") {
+      while (
+        typeof matches !== "undefined" &&
+        (typeof limit === "undefined" || count < limit)
+      ) {
+        result.push({
+          groups: matches.groups,
+          index: matches.start,
+          match: matches.match,
+        });
+        matches = evaluateMatcher(matches.next);
+        count++;
+      }
+    }
+  }
 
   return result;
+}
+
+/**
+ * Max function
+ * @param {Object} args - Arguments
+ * @returns {number} Max element in the array
+ */
+export function max(args) {
+  // undefined inputs always return undefined
+  if (typeof args === "undefined" || args.length === 0) {
+    return undefined;
+  }
+
+  return Math.max.apply(Math, args);
+}
+
+/**
+ * Merges an array of objects into a single object.  Duplicate properties are
+ * overridden by entries later in the array
+ * @param {*} arg - the objects to merge
+ * @returns {*} - the object
+ */
+export function merge(arg) {
+  // undefined inputs always return undefined
+  if (typeof arg === "undefined") {
+    return undefined;
+  }
+
+  const result = {};
+
+  arg.forEach((obj) => {
+    for (const prop in obj) {
+      result[prop] = obj[prop];
+    }
+  });
+  return result;
+}
+
+/**
+ * Min function
+ * @param {Object} args - Arguments
+ * @returns {number} Min element in the array
+ */
+export function min(args) {
+  // undefined inputs always return undefined
+  if (typeof args === "undefined" || args.length === 0) {
+    return undefined;
+  }
+
+  return Math.min.apply(Math, args);
+}
+
+/**
+ * returns the Boolean NOT of the arg
+ * @param {*} arg - argument
+ * @returns {boolean} - NOT arg
+ */
+export function not(arg) {
+  // undefined inputs always return undefined
+  if (typeof arg === "undefined") {
+    return undefined;
+  }
+
+  return !boolean(arg);
 }
 
 /**
@@ -1365,28 +1384,47 @@ export function number(arg) {
 }
 
 /**
- * Absolute value of a number
- * @param {Number} arg - Argument
- * @returns {Number} absolute value of argument
+ * Pad a string to a minimum width by adding characters to the start or end
+ * @param {string} str - string to be padded
+ * @param {number} width - the minimum width; +ve pads to the right, -ve pads to the left
+ * @param {string} [char] - the pad character(s); defaults to ' '
+ * @returns {string} - padded string
  */
-export function abs(arg) {
-  let result;
-
+export function pad(str, width, char) {
   // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
+  if (typeof str === "undefined") {
     return undefined;
   }
 
-  result = Math.abs(arg);
+  if (typeof char === "undefined" || char.length === 0) {
+    char = " ";
+  }
+
+  let result;
+  const padLength = Math.abs(width) - length(str);
+  if (padLength > 0) {
+    let padding = new Array(padLength + 1).join(char);
+    if (char.length > 1) {
+      padding = substring(padding, 0, padLength);
+    }
+    if (width > 0) {
+      result = str + padding;
+    } else {
+      result = padding + str;
+    }
+  } else {
+    result = str;
+  }
   return result;
 }
 
 /**
- * Rounds a number down to integer
- * @param {Number} arg - Argument
+ * Raises number to the power of the second number
+ * @param {Number} arg - the base
+ * @param {Number} exp - the exponent
  * @returns {Number} rounded integer
  */
-export function floor(arg) {
+export function power(arg, exp) {
   let result;
 
   // undefined inputs always return undefined
@@ -1394,24 +1432,199 @@ export function floor(arg) {
     return undefined;
   }
 
-  result = Math.floor(arg);
+  result = arg ** exp;
+
+  if (!Number.isFinite(result)) {
+    throw {
+      code: "D3061",
+      exp: exp,
+      index: 1,
+      stack: new Error().stack,
+      value: arg,
+    };
+  }
+
   return result;
 }
 
 /**
- * Rounds a number up to integer
- * @param {Number} arg - Argument
- * @returns {Number} rounded integer
+ * Returns a random number 0 <= n < 1
+ * @returns {number} random number
  */
-export function ceil(arg) {
-  let result;
+export function random() {
+  return Math.random();
+}
 
+/**
+ * Match a string with a regex returning an array of object containing details of each match
+ * @param {String} str - string
+ * @param {String} pattern - the substring/regex applied to the string
+ * @param {String} replacement - text to replace the matched substrings
+ * @param {Integer} [limit] - max number of matches to return
+ * @returns {Array} The array of match objects
+ */
+export function replace(str, pattern, replacement, limit) {
   // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
+  if (typeof str === "undefined") {
     return undefined;
   }
 
-  result = Math.ceil(arg);
+  // pattern cannot be an empty string
+  if (pattern === "") {
+    throw {
+      code: "D3010",
+      index: 2,
+      stack: new Error().stack,
+      value: pattern,
+    };
+  }
+
+  // limit, if specified, must be a non-negative number
+  if (limit < 0) {
+    throw {
+      code: "D3011",
+      index: 4,
+      stack: new Error().stack,
+      value: limit,
+    };
+  }
+
+  let replacer;
+  if (typeof replacement === "string") {
+    replacer = (regexMatch) => {
+      let substitute = "";
+      // scan forward, copying the replacement text into the substitute string
+      // and replace any occurrence of $n with the values matched by the regex
+      let position = 0;
+      let index = replacement.indexOf("$", position);
+      while (index !== -1 && position < replacement.length) {
+        substitute += replacement.substring(position, index);
+        position = index + 1;
+        const dollarVal = replacement.charAt(position);
+        if (dollarVal === "$") {
+          // literal $
+          substitute += "$";
+          position++;
+        } else if (dollarVal === "0") {
+          substitute += regexMatch.match;
+          position++;
+        } else {
+          let maxDigits;
+          if (regexMatch.groups.length === 0) {
+            // no sub-matches; any $ followed by a digit will be replaced by an empty string
+            maxDigits = 1;
+          } else {
+            // max number of digits to parse following the $
+            maxDigits =
+              Math.floor(Math.log(regexMatch.groups.length) * Math.LOG10E) + 1;
+          }
+          index = Number.parseInt(
+            replacement.substring(position, position + maxDigits),
+            10,
+          );
+          if (maxDigits > 1 && index > regexMatch.groups.length) {
+            index = Number.parseInt(
+              replacement.substring(position, position + maxDigits - 1),
+              10,
+            );
+          }
+          if (Number.isNaN(index)) {
+            // not a capture group, treat the $ as literal
+            substitute += "$";
+          } else {
+            if (regexMatch.groups.length > 0) {
+              const submatch = regexMatch.groups[index - 1];
+              if (typeof submatch !== "undefined") {
+                substitute += submatch;
+              }
+            }
+            position += index.toString().length;
+          }
+        }
+        index = replacement.indexOf("$", position);
+      }
+      substitute += replacement.substring(position);
+      return substitute;
+    };
+  } else {
+    replacer = replacement;
+  }
+
+  let result = "";
+  let position = 0;
+
+  if (typeof limit === "undefined" || limit > 0) {
+    let count = 0;
+    if (typeof pattern === "string") {
+      let index = str.indexOf(pattern, position);
+      while (index !== -1 && (typeof limit === "undefined" || count < limit)) {
+        result += str.substring(position, index);
+        result += replacement;
+        position = index + pattern.length;
+        count++;
+        index = str.indexOf(pattern, position);
+      }
+      result += str.substring(position);
+    } else {
+      let matches = evaluateMatcher(pattern, str);
+      if (typeof matches !== "undefined") {
+        while (
+          typeof matches !== "undefined" &&
+          (typeof limit === "undefined" || count < limit)
+        ) {
+          result += str.substring(position, matches.start);
+          const replacedWith = replacer.apply(this, [matches]);
+          // if (isPromise(replacedWith)) {
+          //     replacedWith = await replacedWith;
+          // }
+          // check replacedWith is a string
+          if (typeof replacedWith === "string") {
+            result += replacedWith;
+          } else {
+            // not a string - throw error
+            throw {
+              code: "D3012",
+              stack: new Error().stack,
+              value: replacedWith,
+            };
+          }
+          position = matches.start + matches.match.length;
+          count++;
+          matches = evaluateMatcher(matches.next);
+        }
+        result += str.substring(position);
+      } else {
+        result = str;
+      }
+    }
+  } else {
+    result = str;
+  }
+
+  return result;
+}
+
+/**
+ * Reverses the order of items in an array
+ * @param {Array} arr - the array to reverse
+ * @returns {Array} - the reversed array
+ */
+export function reverse(arr) {
+  // undefined inputs always return undefined
+  if (typeof arr === "undefined") {
+    return undefined;
+  }
+
+  if (arr.length <= 1) {
+    return arr;
+  }
+
+  const length = arr.length;
+  const result = new Array(length);
+  for (let i = 0; i < length; i++) {
+    result[length - i - 1] = arr[i];
+  }
+
   return result;
 }
 
@@ -1465,199 +1678,57 @@ export function round(arg, precision) {
 }
 
 /**
- * Square root of number
- * @param {Number} arg - Argument
- * @returns {Number} square root
+ * Randomly shuffles the contents of an array
+ * @param {Array} arr - the input array
+ * @returns {Array} the shuffled array
  */
-export function sqrt(arg) {
-  let result;
-
-  // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
-    return undefined;
-  }
-
-  if (arg < 0) {
-    throw {
-      code: "D3060",
-      index: 1,
-      stack: new Error().stack,
-      value: arg,
-    };
-  }
-
-  result = Math.sqrt(arg);
-
-  return result;
-}
-
-/**
- * Raises number to the power of the second number
- * @param {Number} arg - the base
- * @param {Number} exp - the exponent
- * @returns {Number} rounded integer
- */
-export function power(arg, exp) {
-  let result;
-
-  // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
-    return undefined;
-  }
-
-  result = arg ** exp;
-
-  if (!Number.isFinite(result)) {
-    throw {
-      code: "D3061",
-      exp: exp,
-      index: 1,
-      stack: new Error().stack,
-      value: arg,
-    };
-  }
-
-  return result;
-}
-
-/**
- * Returns a random number 0 <= n < 1
- * @returns {number} random number
- */
-export function random() {
-  return Math.random();
-}
-
-/**
- * Evaluate an input and return a boolean
- * @param {*} arg - Arguments
- * @returns {boolean} Boolean
- */
-export function boolean(arg) {
-  // cast arg to its effective boolean value
-  // boolean: unchanged
-  // string: zero-length -> false; otherwise -> true
-  // number: 0 -> false; otherwise -> true
-  // null -> false
-  // array: empty -> false; length > 1 -> true
-  // object: empty -> false; non-empty -> true
-  // function -> false
-
-  // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
-    return undefined;
-  }
-
-  let result = false;
-  if (Array.isArray(arg)) {
-    if (arg.length === 1) {
-      result = boolean(arg[0]);
-    } else if (arg.length > 1) {
-      const trues = arg.filter((val) => boolean(val));
-      result = trues.length > 0;
-    }
-  } else if (typeof arg === "string") {
-    if (arg.length > 0) {
-      result = true;
-    }
-  } else if (isNumeric(arg)) {
-    if (arg !== 0) {
-      result = true;
-    }
-  } else if (arg !== null && typeof arg === "object") {
-    if (Object.keys(arg).length > 0) {
-      result = true;
-    }
-  } else if (typeof arg === "boolean" && arg === true) {
-    result = true;
-  }
-  return result;
-}
-
-/**
- * returns the Boolean NOT of the arg
- * @param {*} arg - argument
- * @returns {boolean} - NOT arg
- */
-export function not(arg) {
-  // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
-    return undefined;
-  }
-
-  return !boolean(arg);
-}
-
-/**
- * Helper function to build the arguments to be supplied to the function arg of the
- * HOFs map, filter, each, sift and single
- * @param {function} func - the function to be invoked
- * @param {*} arg1 - the first (required) arg - the value
- * @param {*} arg2 - the second (optional) arg - the position (index or key)
- * @param {*} arg3 - the third (optional) arg - the whole structure (array or object)
- * @returns {*[]} the argument list
- */
-export function hofFuncArgs(func, arg1, arg2, arg3) {
-  const func_args = [arg1]; // the first arg (the value) is required
-  // the other two are optional - only supply it if the function can take it
-  const length = getFunctionArity(func);
-  if (length >= 2) {
-    func_args.push(arg2);
-  }
-  if (length >= 3) {
-    func_args.push(arg3);
-  }
-  return func_args;
-}
-
-/**
- * Create a map from an array of arguments
- * @param {Array} [arr] - array to map over
- * @param {Function} func - function to apply
- * @returns {Array} Map array
- */
-export function map(arr, func) {
+export function shuffle(arr) {
   // undefined inputs always return undefined
   if (typeof arr === "undefined") {
     return undefined;
   }
 
-  const result = createSequence();
-  // do the map - iterate over the arrays, and invoke func
+  if (arr.length <= 1) {
+    return arr;
+  }
+
+  // shuffle using the 'inside-out' variant of the Fisher-Yates algorithm
+  const result = new Array(arr.length);
   for (let i = 0; i < arr.length; i++) {
-    const func_args = hofFuncArgs(func, arr[i], i, arr);
-    // invoke func
-    const res = func.apply(this, func_args);
-    if (typeof res !== "undefined") {
-      result.push(res);
+    const j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
+    if (i !== j) {
+      result[i] = result[j];
     }
+    result[j] = arr[i];
   }
 
   return result;
 }
 
 /**
- * Create a map from an array of arguments
- * @param {Array} [arr] - array to filter
- * @param {Function} func - predicate function
- * @returns {Array} Map array
+ * Applies a predicate function to each key/value pair in an object, and returns an object containing
+ * only the key/value pairs that passed the predicate
+ *
+ * @param {object} arg - the object to be sifted
+ * @param {object} func - the predicate function (lambda or native)
+ * @returns {object} - sifted object
  */
-export function filter(arr, func) {
-  // undefined inputs always return undefined
-  if (typeof arr === "undefined") {
-    return undefined;
-  }
+export function sift(arg, func) {
+  let result = {};
 
-  const result = createSequence();
-
-  for (let i = 0; i < arr.length; i++) {
-    const entry = arr[i];
-    const func_args = hofFuncArgs(func, entry, i, arr);
+  for (const item in arg) {
+    const entry = arg[item];
+    const func_args = hofFuncArgs(func, entry, item, arg);
     // invoke func
     const res = func.apply(this, func_args);
     if (boolean(res)) {
-      result.push(entry);
+      result[item] = entry;
     }
+  }
+
+  // empty objects should be changed to undefined
+  if (Object.keys(result).length === 0) {
+    result = undefined;
   }
 
   return result;
@@ -1709,330 +1780,6 @@ export function single(arr, func) {
   }
 
   return result;
-}
-
-/**
- * Convolves (zips) each value from a set of arrays
- * @param {Array} [args] - arrays to zip
- * @returns {Array} Zipped array
- */
-export function zip() {
-  // this can take a variable number of arguments
-  const result = [];
-  const args = Array.prototype.slice.call(arguments);
-  // length of the shortest array
-  const length = Math.min.apply(
-    Math,
-    args.map((arg) => {
-      if (Array.isArray(arg)) {
-        return arg.length;
-      }
-      return 0;
-    }),
-  );
-  for (let i = 0; i < length; i++) {
-    const tuple = args.map((arg) => {
-      return arg[i];
-    });
-    result.push(tuple);
-  }
-  return result;
-}
-
-/**
- * Fold left function
- * @param {Array} sequence - Sequence
- * @param {Function} func - Function
- * @param {Object} init - Initial value
- * @returns {*} Result
- */
-export function foldLeft(sequence, func, init) {
-  // undefined inputs always return undefined
-  if (typeof sequence === "undefined") {
-    return undefined;
-  }
-
-  let result;
-
-  const arity = getFunctionArity(func);
-  if (arity < 2) {
-    throw {
-      code: "D3050",
-      index: 1,
-      stack: new Error().stack,
-    };
-  }
-
-  let index;
-  if (typeof init === "undefined" && sequence.length > 0) {
-    result = sequence[0];
-    index = 1;
-  } else {
-    result = init;
-    index = 0;
-  }
-
-  while (index < sequence.length) {
-    const args = [result, sequence[index]];
-    if (arity >= 3) {
-      args.push(index);
-    }
-    if (arity >= 4) {
-      args.push(sequence);
-    }
-    result = func.apply(this, args);
-    index++;
-  }
-
-  return result;
-}
-
-/**
- * Return keys for an object
- * @param {Object} arg - Object
- * @returns {Array} Array of keys
- */
-export function keys(arg) {
-  let result = createSequence();
-
-  if (Array.isArray(arg)) {
-    // merge the keys of all of the items in the array
-    const merge = {};
-    arg.forEach((item) => {
-      const allkeys = keys(item);
-      allkeys.forEach((key) => {
-        merge[key] = true;
-      });
-    });
-    result = keys(merge);
-  } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
-    Object.keys(arg).forEach((key) => result.push(key));
-  }
-  return result;
-}
-
-/**
- * Return value from an object for a given key
- * @param {Object} input - Object/Array
- * @param {String} key - Key in object
- * @returns {*} Value of key in object
- */
-export function lookup(input, key) {
-  // lookup the 'name' item in the input
-  let result;
-  if (Array.isArray(input)) {
-    result = createSequence();
-    for (let ii = 0; ii < input.length; ii++) {
-      const res = lookup(input[ii], key);
-      if (typeof res !== "undefined") {
-        if (Array.isArray(res)) {
-          res.forEach((val) => result.push(val));
-        } else {
-          result.push(res);
-        }
-      }
-    }
-  } else if (input !== null && typeof input === "object") {
-    result = input[key];
-  }
-  return result;
-}
-
-/**
- * Append second argument to first
- * @param {Array|Object} arg1 - First argument
- * @param {Array|Object} arg2 - Second argument
- * @returns {*} Appended arguments
- */
-export function append(arg1, arg2) {
-  // disregard undefined args
-  if (typeof arg1 === "undefined") {
-    return arg2;
-  }
-  if (typeof arg2 === "undefined") {
-    return arg1;
-  }
-  // if either argument is not an array, make it so
-  if (!Array.isArray(arg1)) {
-    arg1 = createSequence(arg1);
-  }
-  if (!Array.isArray(arg2)) {
-    arg2 = [arg2];
-  }
-  return arg1.concat(arg2);
-}
-
-/**
- * Determines if the argument is undefined
- * @param {*} arg - argument
- * @returns {boolean} False if argument undefined, otherwise true
- */
-export function exists(arg) {
-  if (typeof arg === "undefined") {
-    return false;
-  }
-  return true;
-}
-
-/**
- * Splits an object into an array of object with one property each
- * @param {*} arg - the object to split
- * @returns {*} - the array
- */
-export function spread(arg) {
-  let result = createSequence();
-
-  if (Array.isArray(arg)) {
-    // spread all of the items in the array
-    arg.forEach((item) => {
-      result = append(result, spread(item));
-    });
-  } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
-    for (const key in arg) {
-      const obj = {};
-      obj[key] = arg[key];
-      result.push(obj);
-    }
-  } else {
-    result = arg;
-  }
-  return result;
-}
-
-/**
- * Merges an array of objects into a single object.  Duplicate properties are
- * overridden by entries later in the array
- * @param {*} arg - the objects to merge
- * @returns {*} - the object
- */
-export function merge(arg) {
-  // undefined inputs always return undefined
-  if (typeof arg === "undefined") {
-    return undefined;
-  }
-
-  const result = {};
-
-  arg.forEach((obj) => {
-    for (const prop in obj) {
-      result[prop] = obj[prop];
-    }
-  });
-  return result;
-}
-
-/**
- * Reverses the order of items in an array
- * @param {Array} arr - the array to reverse
- * @returns {Array} - the reversed array
- */
-export function reverse(arr) {
-  // undefined inputs always return undefined
-  if (typeof arr === "undefined") {
-    return undefined;
-  }
-
-  if (arr.length <= 1) {
-    return arr;
-  }
-
-  const length = arr.length;
-  const result = new Array(length);
-  for (let i = 0; i < length; i++) {
-    result[length - i - 1] = arr[i];
-  }
-
-  return result;
-}
-
-/**
- *
- * @param {*} obj - the input object to iterate over
- * @param {*} func - the function to apply to each key/value pair
- * @returns {Array} - the resultant array
- */
-export function each(obj, func) {
-  const result = createSequence();
-
-  for (const key in obj) {
-    const func_args = hofFuncArgs(func, obj[key], key, obj);
-    // invoke func
-    const val = func.apply(this, func_args);
-    if (typeof val !== "undefined") {
-      result.push(val);
-    }
-  }
-
-  return result;
-}
-
-/**
- *
- * @param {string} [message] - the message to attach to the error
- * @throws custom error with code 'D3137'
- */
-export function error(message) {
-  throw {
-    code: "D3137",
-    message: message || "$error() function evaluated",
-    stack: new Error().stack,
-  };
-}
-
-/**
- *
- * @param {boolean} condition - the condition to evaluate
- * @param {string} [message] - the message to attach to the error
- * @throws custom error with code 'D3137'
- * @returns {undefined}
- */
-export function assert(condition, message) {
-  if (!condition) {
-    throw {
-      code: "D3141",
-      message: message || "$assert() statement failed",
-      stack: new Error().stack,
-    };
-  }
-
-  return undefined;
-}
-
-/**
- *
- * @param {*} [value] - the input to which the type will be checked
- * @returns {string} - the type of the input
- */
-export function type(value) {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (value === null) {
-    return "null";
-  }
-
-  if (isNumeric(value)) {
-    return "number";
-  }
-
-  if (typeof value === "string") {
-    return "string";
-  }
-
-  if (typeof value === "boolean") {
-    return "boolean";
-  }
-
-  if (Array.isArray(value)) {
-    return "array";
-  }
-
-  if (isFunction(value)) {
-    return "function";
-  }
-
-  return "object";
 }
 
 /**
@@ -2109,92 +1856,345 @@ export function sort(arr, comparator) {
 }
 
 /**
- * Randomly shuffles the contents of an array
- * @param {Array} arr - the input array
- * @returns {Array} the shuffled array
+ * Split a string into an array of substrings
+ * @param {String} str - string
+ * @param {String} separator - the token or regex that splits the string
+ * @param {Integer} [limit] - max number of substrings
+ * @returns {Array} The array of string
  */
-export function shuffle(arr) {
+export function split(str, separator, limit) {
   // undefined inputs always return undefined
-  if (typeof arr === "undefined") {
+  if (typeof str === "undefined") {
     return undefined;
   }
 
-  if (arr.length <= 1) {
-    return arr;
+  // limit, if specified, must be a non-negative number
+  if (limit < 0) {
+    throw {
+      code: "D3020",
+      index: 3,
+      stack: new Error().stack,
+      value: limit,
+    };
   }
 
-  // shuffle using the 'inside-out' variant of the Fisher-Yates algorithm
-  const result = new Array(arr.length);
-  for (let i = 0; i < arr.length; i++) {
-    const j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
-    if (i !== j) {
-      result[i] = result[j];
+  let result = [];
+
+  if (typeof limit === "undefined" || limit > 0) {
+    if (typeof separator === "string") {
+      result = str.split(separator, limit);
+    } else {
+      let count = 0;
+      let matches = evaluateMatcher(separator, str);
+      if (typeof matches !== "undefined") {
+        let start = 0;
+        while (
+          typeof matches !== "undefined" &&
+          (typeof limit === "undefined" || count < limit)
+        ) {
+          result.push(str.substring(start, matches.start));
+          start = matches.end;
+          matches = evaluateMatcher(matches.next);
+          count++;
+        }
+        if (typeof limit === "undefined" || count < limit) {
+          result.push(str.substring(start));
+        }
+      } else {
+        result.push(str);
+      }
     }
-    result[j] = arr[i];
   }
 
   return result;
 }
 
 /**
- * Returns the values that appear in a sequence, with duplicates eliminated.
- * @param {Array} arr - An array or sequence of values
- * @returns {Array} - sequence of distinct values
+ * Splits an object into an array of object with one property each
+ * @param {*} arg - the object to split
+ * @returns {*} - the array
  */
-export function distinct(arr) {
-  // undefined inputs always return undefined
-  if (typeof arr === "undefined") {
-    return undefined;
-  }
+export function spread(arg) {
+  let result = createSequence();
 
-  if (!Array.isArray(arr) || arr.length <= 1) {
-    return arr;
-  }
-
-  const results = isSequence(arr) ? createSequence() : [];
-
-  for (let ii = 0; ii < arr.length; ii++) {
-    const value = arr[ii];
-    // is this value already in the result sequence?
-    let includes = false;
-    for (let jj = 0; jj < results.length; jj++) {
-      if (deepEquals(value, results[jj])) {
-        includes = true;
-        break;
-      }
+  if (Array.isArray(arg)) {
+    // spread all of the items in the array
+    arg.forEach((item) => {
+      result = append(result, spread(item));
+    });
+  } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
+    for (const key in arg) {
+      const obj = {};
+      obj[key] = arg[key];
+      result.push(obj);
     }
-    if (!includes) {
-      results.push(value);
-    }
+  } else {
+    result = arg;
   }
-  return results;
+  return result;
 }
 
 /**
- * Applies a predicate function to each key/value pair in an object, and returns an object containing
- * only the key/value pairs that passed the predicate
- *
- * @param {object} arg - the object to be sifted
- * @param {object} func - the predicate function (lambda or native)
- * @returns {object} - sifted object
+ * Square root of number
+ * @param {Number} arg - Argument
+ * @returns {Number} square root
  */
-export function sift(arg, func) {
-  let result = {};
+export function sqrt(arg) {
+  let result;
 
-  for (const item in arg) {
-    const entry = arg[item];
-    const func_args = hofFuncArgs(func, entry, item, arg);
-    // invoke func
-    const res = func.apply(this, func_args);
-    if (boolean(res)) {
-      result[item] = entry;
+  // undefined inputs always return undefined
+  if (typeof arg === "undefined") {
+    return undefined;
+  }
+
+  if (arg < 0) {
+    throw {
+      code: "D3060",
+      index: 1,
+      stack: new Error().stack,
+      value: arg,
+    };
+  }
+
+  result = Math.sqrt(arg);
+
+  return result;
+}
+
+/**
+ * Stringify arguments
+ * @param {Object} arg - Arguments
+ * @param {boolean} [prettify] - Pretty print the result
+ * @returns {String} String from arguments
+ */
+export function string(arg, prettify = false) {
+  // undefined inputs always return undefined
+  if (typeof arg === "undefined") {
+    return undefined;
+  }
+
+  let str;
+
+  if (typeof arg === "string") {
+    // already a string
+    str = arg;
+  } else if (isFunction(arg)) {
+    // functions (built-in and lambda convert to empty string
+    str = "";
+  } else if (typeof arg === "number" && !Number.isFinite(arg)) {
+    throw {
+      code: "D3001",
+      stack: new Error().stack,
+      value: arg,
+    };
+  } else {
+    const space = prettify ? 2 : 0;
+    if (Array.isArray(arg) && arg.outerWrapper) {
+      arg = arg[0];
     }
+    str = JSON.stringify(
+      arg,
+      (_key, val) =>
+        typeof val !== "undefined" &&
+        val !== null &&
+        val.toPrecision &&
+        isNumeric(val)
+          ? Number(val.toPrecision(15))
+          : val && isFunction(val)
+            ? ""
+            : val,
+      space,
+    );
+  }
+  return str;
+}
+
+/**
+ * Create substring based on character number and length
+ * @param {String} str - String to evaluate
+ * @param {Integer} start - Character number to start substring
+ * @param {Integer} [length] - Number of characters in substring
+ * @returns {string|*} Substring
+ */
+export function substring(str, start, length) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
   }
 
-  // empty objects should be changed to undefined
-  if (Object.keys(result).length === 0) {
-    result = undefined;
+  const strArray = stringToArray(str);
+  const strLength = strArray.length;
+
+  if (strLength + start < 0) {
+    start = 0;
   }
 
+  if (typeof length !== "undefined") {
+    if (length <= 0) {
+      return "";
+    }
+    const end = start >= 0 ? start + length : strLength + start + length;
+    return strArray.slice(start, end).join("");
+  }
+
+  return strArray.slice(start).join("");
+}
+
+/**
+ * Create substring after a character
+ * @param {String} str - String to evaluate
+ * @param {String} chars - Character to define substring boundary
+ * @returns {*} Substring
+ */
+export function substringAfter(str, chars) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  const pos = str.indexOf(chars);
+  if (pos > -1) {
+    return str.substr(pos + chars.length);
+  }
+  return str;
+}
+
+/**
+ * Create substring up until a character
+ * @param {String} str - String to evaluate
+ * @param {String} chars - Character to define substring boundary
+ * @returns {*} Substring
+ */
+export function substringBefore(str, chars) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  const pos = str.indexOf(chars);
+  if (pos > -1) {
+    return str.substr(0, pos);
+  }
+  return str;
+}
+
+/**
+ * Sum function
+ * @param {Object} args - Arguments
+ * @returns {number} Total value of arguments
+ */
+export function sum(args) {
+  // undefined inputs always return undefined
+  if (typeof args === "undefined") {
+    return undefined;
+  }
+
+  let total = 0;
+  args.forEach((num) => {
+    total += num;
+  });
+  return total;
+}
+
+/**
+ * Normalize and trim whitespace within a string
+ * @param {string} str - string to be trimmed
+ * @returns {string} - trimmed string
+ */
+export function trim(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  // normalize whitespace
+  let result = str.replace(/[ \t\n\r]+/gm, " ");
+  if (result.charAt(0) === " ") {
+    // strip leading space
+    result = result.substring(1);
+  }
+  if (result.charAt(result.length - 1) === " ") {
+    // strip trailing space
+    result = result.substring(0, result.length - 1);
+  }
+  return result;
+}
+
+/**
+ *
+ * @param {*} [value] - the input to which the type will be checked
+ * @returns {string} - the type of the input
+ */
+export function type(value) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null) {
+    return "null";
+  }
+
+  if (isNumeric(value)) {
+    return "number";
+  }
+
+  if (typeof value === "string") {
+    return "string";
+  }
+
+  if (typeof value === "boolean") {
+    return "boolean";
+  }
+
+  if (Array.isArray(value)) {
+    return "array";
+  }
+
+  if (isFunction(value)) {
+    return "function";
+  }
+
+  return "object";
+}
+
+/**
+ * Uppercase a string
+ * @param {String} str - String to evaluate
+ * @returns {string} Uppercase string
+ */
+export function uppercase(str) {
+  // undefined inputs always return undefined
+  if (typeof str === "undefined") {
+    return undefined;
+  }
+
+  return str.toUpperCase();
+}
+
+/**
+ * Convolves (zips) each value from a set of arrays
+ * @param {Array} [args] - arrays to zip
+ * @returns {Array} Zipped array
+ */
+export function zip() {
+  // this can take a variable number of arguments
+  const result = [];
+  const args = Array.prototype.slice.call(arguments);
+  // length of the shortest array
+  const length = Math.min.apply(
+    Math,
+    args.map((arg) => {
+      if (Array.isArray(arg)) {
+        return arg.length;
+      }
+      return 0;
+    }),
+  );
+  for (let i = 0; i < length; i++) {
+    const tuple = args.map((arg) => {
+      return arg[i];
+    });
+    result.push(tuple);
+  }
   return result;
 }

@@ -48,8 +48,8 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                       <div class="flex align-items:center ">
                         <Icon
                           icon={"octicon:chevron-right-12"}
-                          style={{ color: "rgb(156,163,175)" }}
                           noobserver
+                          style={{ color: "rgb(156,163,175)" }}
                         />
                         <span class="ms-1 lh:1.25rem md:ms-2 color:rgb(107,114,128)  color:rgb(156,163,175)@dark  f:0.875rem font-weight:500">
                           {item.key}
@@ -65,8 +65,8 @@ export function Breadcrumb(props: Readonly<PageHeaderProps>) {
                             class="color:rgb(156,163,175) mr:5"
                             height={20}
                             icon={item.icon!}
-                            width={20}
                             noobserver
+                            width={20}
                           />
                         </Show>
                         <a

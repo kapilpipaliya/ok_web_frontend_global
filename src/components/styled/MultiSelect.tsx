@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
-import { createMemo, createSignal, For, type JSX, Show, getOwner, runWithOwner } from "solid-js";
+import { createMemo, createSignal, For, getOwner, type JSX, runWithOwner, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -13,13 +13,13 @@ import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
 
 export type Option =
+  | string
+  | Vertex
   | {
       children?: Option[];
       id: string;
       label: string;
-    }
-  | string
-  | Vertex;
+    };
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(
   props: Readonly<{

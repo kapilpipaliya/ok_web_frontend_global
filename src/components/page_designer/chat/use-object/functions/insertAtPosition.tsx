@@ -1,14 +1,17 @@
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
+import { openInNewInternalTab } from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
-import { Vertex, GraphInterface } from "~/lib/graph/graph";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { openInNewInternalTab } from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
+import {setPreventUndoAtOrBeforeIndex} from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
 
 export function insertAtPosition(fromStoreVertex: Vertex, insertMode: string, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, layoutStoreVertex: () => Vertex<PageLayoutObject>) {
   // const fromStoreVertex = graph.vertexes[`${message.id}FormStore`];
@@ -22,20 +25,21 @@ export function insertAtPosition(fromStoreVertex: Vertex, insertMode: string, gr
   }
 
   const formDataVertex = graph.vertexes[fromStoreVertex.P.formDataId!];
-  const newTxnId = toStoreVertex.P.txnId // generateNewTxnId(graph, setGraph);
 
+  const Attrs = evalExpression("->Attr", { graph, setGraph, vertexes: [formDataVertex] }) || [];
   // Check for Component and insert if exists
   const componentVertexes = evalExpression("->Component", { graph, setGraph, vertexes: [formDataVertex] }) as Vertex[] || [];
   
   for (const componentVertex of componentVertexes) {
+    const newTxnId = Attrs.length === 0 ? generateNewTxnId(graph, setGraph) : toStoreVertex.P.txnId;
     // Insert Component
     const componentId = generateNewVertexId(graph, setGraph);
     const componentResult = addNewVertex(
       newTxnId,
       {
         id: componentId,
-        L: ["Component"],
         IN: {},
+        L: ["Component"],
         OUT: {},
         P: { ...componentVertex.P }
       },
@@ -44,6 +48,8 @@ export function insertAtPosition(fromStoreVertex: Vertex, insertMode: string, gr
     );
 
     if (componentResult.error) continue;
+
+    setPreventUndoAtOrBeforeIndex(newTxnId, graph, setGraph);
 
     // Check for ComponentVariant
     const variantVertexes = evalExpression("->ComponentVariant", { graph, setGraph, vertexes: [componentVertex] }) as Vertex[] || [];
@@ -77,20 +83,21 @@ export function insertAtPosition(fromStoreVertex: Vertex, insertMode: string, gr
       }
     }
 
-    const fromVertex1 = { ...componentVertex, P: {...componentVertex.P, componentName: "Fragment"}, L: ["Page"] } as Vertex;
+    const fromVertex1 = { ...componentVertex, L: ["Page"], P: {...componentVertex.P, componentName: "Fragment"} } as Vertex;
     handleDropAtPosition(
       graph,
       setGraph,
-      toStoreVertex.P.txnId,
+      newTxnId,
       graph.vertexes[componentId],
       fromVertex1,
       graph.vertexes[componentId],
       "center"
     );
 
-   openInNewInternalTab(layoutStoreVertex().id, { ...graph.vertexes[componentId], P: {parentId: fromStoreVertex.P.formDataId, formDataId: componentId, ...graph.vertexes[componentId].P} } as Vertex, graph, setGraph);
+   openInNewInternalTab(layoutStoreVertex().id, { ...graph.vertexes[componentId], P: {formDataId: componentId, parentId: fromStoreVertex.P.formDataId, txnId: newTxnId, ...graph.vertexes[componentId].P} } as Vertex, graph, setGraph);
   }
 
+  // TODO: modify function to use new component Ids for component connected with "Attr".
   handleDropAtPosition(
     graph,
     setGraph,

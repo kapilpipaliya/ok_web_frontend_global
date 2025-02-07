@@ -9,17 +9,20 @@ import {
 } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
-
+import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
 
 import { ensureArray } from "../../lib/data_structure/array/ensureArray";
 import { useFormContext } from "../form/context/FormContext";
@@ -27,22 +30,18 @@ import { usePageRenderContext } from "../page_attr_render/context/PageRenderCont
 import { isStaticOptions } from "./utils/isStaticOptions";
 import { selectedValue } from "./utils/selectedValue";
 import { setSelectValueHelper } from "./utils/setSelectValueHelper";
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
-import { evalExpression } from "~/lib/expression_eval";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
   props: Readonly<
-    {
+    GenericComponentProps & {
       componentName: string;
       data?: Vertex;
       isRealTime?: boolean;
       meta?: Vertex;
       title: string;
       txnId?: number;
-    } & GenericComponentProps
+    }
   >,
 ) {
   const [graph, setGraph] = useGraph();
@@ -68,7 +67,7 @@ export function SelectField(
   });
 
   const getStaticOptions = (
-    options: { label: string; value: string }[] | string,
+    options: string | { label: string; value: string }[],
   ) => {
     if (typeof options === "string") {
       const lines = options.split("\n");
@@ -262,6 +261,7 @@ export function SelectField(
             ? meta().P.labelKey
             : "::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         }
+        error={error()}
         isLoadingOptions={loading()}
         loadOptions={loadOptions}
         onRemove={(e) => onChangeSelect(e, true)}
@@ -291,7 +291,6 @@ export function SelectField(
           });
         }}
         selectionLimit={getComponent() === "Select" ? 1 : undefined}
-        error={error()}
       />
     </Show>
   );

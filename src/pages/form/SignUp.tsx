@@ -6,12 +6,20 @@ import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/styled/Toast";
 import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
+
+interface InputFieldProps {
+  label: string;
+  name: string;
+  onInput: (e: Event & { currentTarget: HTMLInputElement }) => void;
+  placeholder: string;
+  value: string;
+}
 
 export function SignUp(): JSX.Element {
   const [graph, setGraph] = useGraph();
@@ -175,14 +183,6 @@ export function SignUp(): JSX.Element {
   );
 }
 
-interface InputFieldProps {
-  label: string;
-  name: string;
-  onInput: (e: { currentTarget: HTMLInputElement } & Event) => void;
-  placeholder: string;
-  value: string;
-}
-
 const InputField = (props: InputFieldProps): JSX.Element => (
   <div class="m:10|0|0|0">
     <label
@@ -212,7 +212,7 @@ const InputField = (props: InputFieldProps): JSX.Element => (
 interface PasswordFieldProps {
   label: string;
   name: string;
-  onInput: (e: { currentTarget: HTMLInputElement } & Event) => void;
+  onInput: (e: Event & { currentTarget: HTMLInputElement }) => void;
   placeholder: string;
   showPassword: boolean;
   togglePasswordVisibility: () => void;
@@ -247,8 +247,8 @@ const PasswordField = (props: PasswordFieldProps): JSX.Element => (
         aria-label="Toggle password visibility"
         class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
         icon={props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}
-        onClick={props.togglePasswordVisibility}
         noobserver
+        onClick={props.togglePasswordVisibility}
       />
     </div>
   </div>

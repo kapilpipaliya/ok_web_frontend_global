@@ -1,12 +1,11 @@
 import type { SetStoreFunction } from "solid-js/store";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { loadPageData } from "~/components/page_designer/functions/loadPageData";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { PageDesignerLabels } from "../functions/PageDesignerLabels";
 import { onLayoutItemClick } from "./onLayoutItemClick";

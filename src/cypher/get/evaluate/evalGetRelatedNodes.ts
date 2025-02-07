@@ -1,4 +1,4 @@
-import { int, type Session, type Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -66,7 +66,7 @@ function buildQuery(
 ) {
   const ids = vertexes.map((v) => v.id);
   let query = "";
-  let params: { [key: string]: unknown } | undefined;
+  let params: undefined | { [key: string]: unknown };
 
   if (relationType === "child") {
     const type = getEdgeType(edgeType, vertexes);
@@ -161,15 +161,21 @@ RETURN n`;
   return { params, query };
 }
 
+async function closeSession(dbSession: null | Session, context: ContextType) {
+  if (!context.dbSession && dbSession) {
+    await dbSession.close();
+  }
+}
+
+function getEdgeType(edgeType: string, vertexes: Vertex[]) {
+  return edgeType.replaceAll("$0", vertexes[0].L[0]);
+}
+
 async function getSession(context: ContextType) {
   if (context.tx) {
     return null;
   }
   return context.dbSession || (await getDBSessionForSubdomain()).dbSession;
-}
-
-function getEdgeType(edgeType: string, vertexes: Vertex[]) {
-  return edgeType.replaceAll("$0", vertexes[0].L[0]);
 }
 
 async function runQuery(
@@ -182,12 +188,6 @@ async function runQuery(
     return await tx.run(query, params);
   }
   return await dbSession!.run(query, params);
-}
-
-async function closeSession(dbSession: null | Session, context: ContextType) {
-  if (!context.dbSession && dbSession) {
-    await dbSession.close();
-  }
 }
 
 // typed-neo4j/src/db.ts

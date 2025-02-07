@@ -1,18 +1,20 @@
-import { createMemo, createSignal, For, Show, onMount } from 'solid-js';
-import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
-import { GraphInterface, Id, useGraph, Vertex } from '~/lib/graph/graph';
-import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { FormStoreObject } from '~/components/form/context/FormContext';
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
-import { deleteRow } from '~/lib/graph/mutate/deleteRow';
 import { useChat } from '@ai-sdk/solid';
+import { createMemo, createSignal, For, Show } from 'solid-js';
+
+import type { FormStoreObject } from '~/components/form/context/FormContext';
+
+import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
+import { themeConfig } from '~/cypher/get/themeConfig';
+import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
+import { useGraph, type Vertex } from '~/lib/graph/graph';
+import { deleteRow } from '~/lib/graph/mutate/deleteRow';
+
+import type { DBMessage } from './types';
+
+import { type PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
+import { ChatInput } from './ChatInput';
 import { ChatMessage } from './ChatMessage';
 import { ChatResponse } from './ChatResponse';
-import { ChatInput } from './ChatInput';
-import { DBMessage } from './types';
-import { themeConfig } from '~/cypher/get/themeConfig';
-import { SetStoreFunction } from 'solid-js/store';
 import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
 import { getChatHistory } from './functions/getChatHistory';
 import { insertAtPosition } from './functions/insertAtPosition';
@@ -120,12 +122,9 @@ export function UseObjectAIPanel() {
     setLastRequestPrompt(input());
 
     handleSubmit(e, {
-      experimental_attachments: files(),
       body: {
-        model: model,
         extraMessages: [
           {
-            role: 'system',
             content: `
 You are a designer.
 You have access to the following theme color variables:
@@ -138,10 +137,13 @@ When specifying colors in css properties, you can use either:
 3. CSS color keywords
 
 Choose colors that work well for the context and maintain good contrast ratios.
-`.trim()
+`.trim(),
+            role: 'system'
           }
-        ]
-      }
+        ],
+        model: model
+      },
+      experimental_attachments: files()
     });
 
     setTimeout(() => {
@@ -175,9 +177,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
           <div class="padding:16px margin-bottom:16px color:rgb(239,68,68) background:rgb(254,242,242) border-radius:6px">
             An error occurred. {error()?.message}
             <button
-              type="button"
               class="padding:8px|16px margin-top:8px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
               onClick={() => reload()}
+              type="button"
             >
               Retry
             </button>
@@ -191,9 +193,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
               <span>AI is thinking...</span>
             </div>
             <button
-              type="button"
               class="padding:8px|16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255) cursor:pointer"
               onClick={() => stop()}
+              type="button"
             >
               Stop
             </button>
@@ -202,20 +204,20 @@ Choose colors that work well for the context and maintain good contrast ratios.
       </div>
 
       <ChatInput
+        chatMessages={chatMessages()}
+        examples={EXAMPLE_PROMPTS}
+        examplesButtonRef={examplesButtonRef}
+        fileInputRef={fileInputRef}
+        files={files}
         input={input}
         isLoading={isLoading}
-        files={files}
-        showExamples={showExamples}
-        examples={EXAMPLE_PROMPTS}
-        onSubmit={handleSubmit2}
-        onInputChange={handleInputChange}
-        onFilesChange={(files) => setFiles(files)}
-        onExamplesToggle={setShowExamples}
-        onExampleClick={handleExampleClick}
-        fileInputRef={fileInputRef}
-        examplesButtonRef={examplesButtonRef}
-        chatMessages={chatMessages()}
         onClearMessages={() => setMessages([])}
+        onExampleClick={handleExampleClick}
+        onExamplesToggle={setShowExamples}
+        onFilesChange={(files) => setFiles(files)}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit2}
+        showExamples={showExamples}
       />
     </div>
   );

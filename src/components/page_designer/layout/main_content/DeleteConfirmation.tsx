@@ -1,7 +1,10 @@
 import { Show } from "solid-js";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { ZIndex } from "~/components/fields/ZIndex";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { DeleteAttributeDialog } from "../DeleteRuleDialog";
 

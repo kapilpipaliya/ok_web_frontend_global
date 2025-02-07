@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
+
 import { clientOnly } from "@solidjs/start";
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
 const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));

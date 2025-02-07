@@ -58,8 +58,8 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
         <Icon
           class={"cursor:pointer"}
           icon={"ph:plus-circle"}
-          onClick={addOption}
           noobserver
+          onClick={addOption}
         />
       </div>
       <For each={props.value as unknown as { [key: string]: string }[]}>

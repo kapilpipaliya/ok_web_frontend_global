@@ -2,10 +2,10 @@ import { createSignal, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 
 export function SaveAsTemplateButton(props: {
   class?: string;
@@ -15,9 +15,9 @@ export function SaveAsTemplateButton(props: {
   let saveAsTemplateRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [showTemplateMenu, setShowTemplateMenu] = createSignal(false);
-  const [saveAsLabel, setSaveAsLabel] = createSignal<"Template" | "Component">("Template");
+  const [saveAsLabel, setSaveAsLabel] = createSignal<"Component" | "Template">("Template");
 
-  const handleMenuSelect = (label: "Template" | "Component") => {
+  const handleMenuSelect = (label: "Component" | "Template") => {
     setSaveAsLabel(label);
     setShowModal(false);
     setShowTemplateMenu(true);
@@ -64,9 +64,9 @@ export function SaveAsTemplateButton(props: {
       <Show when={showTemplateMenu()}>
         <SaveAsTemplateMenu
           item={props.item}
-          onClose={() => setShowTemplateMenu(false)}
           // onMouseLeave={() => setShowTemplateMenu(false)}
           onClickOutside={() => setShowTemplateMenu(false)}
+          onClose={() => setShowTemplateMenu(false)}
           parentRef={saveAsTemplateRef!}
           saveAsLabel={saveAsLabel()}
         />

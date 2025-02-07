@@ -1,7 +1,5 @@
 import type { Session } from "neo4j-driver";
 
-import { int } from "neo4j-driver";
-
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function getFileMetadataFromNeo4j(

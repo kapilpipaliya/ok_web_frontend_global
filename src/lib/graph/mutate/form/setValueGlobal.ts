@@ -7,8 +7,8 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { commitTxn } from "../../transaction/commitTxn";
-import { onChangeHandler } from "./onChangeHandler";
 import { generateNewTxnId } from "../../transaction/generateNewTxnId";
+import { onChangeHandler } from "./onChangeHandler";
 
 export function setValueGlobal(
   graph: Store<GraphInterface>,

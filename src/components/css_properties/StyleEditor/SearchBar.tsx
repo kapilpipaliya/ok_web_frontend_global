@@ -3,9 +3,9 @@ import { type JSX, splitProps } from "solid-js";
 
 export function SearchBar(
   props: Readonly<
-    {
+    JSX.InputHTMLAttributes<HTMLInputElement> & {
       handleChange: (value: string) => void;
-    } & JSX.InputHTMLAttributes<HTMLInputElement>
+    }
   >,
 ) {
   const [_local, inputProps] = splitProps(props, ["handleChange"]);

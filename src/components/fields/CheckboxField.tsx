@@ -9,8 +9,8 @@ import {
 import type { GenericComponentProps } from "./FieldType";
 
 interface CheckboxFieldProps
-  extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">,
-    GenericComponentProps {
+  extends GenericComponentProps,
+    Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
   errorClass?: string;
   inputProps: JSX.InputHTMLAttributes<HTMLInputElement>;
   isViewMode?: boolean;
@@ -63,10 +63,10 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
     }
     if (typeof local.onClick === "function") {
       local.onClick(
-        event as {
+        event as MouseEvent & {
           currentTarget: HTMLInputElement;
           target: Element;
-        } & MouseEvent,
+        },
       );
     }
   };

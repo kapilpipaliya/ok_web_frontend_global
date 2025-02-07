@@ -1,65 +1,10 @@
-import type { Store, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
-import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
+
 import { replaceVertexProperties } from "../mutate/vertex";
-
-export function undoAllowed(
-  txnId: number,
-  graph: Store<GraphInterface>
-): boolean {
-  if (!txnId) {
-    return false;
-  }
-
-  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  if (txnValue.steps.length <= 1) {
-    return false;
-  }
-
-  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
-  return activeUndoIndex > 0;
-}
-
-export function redoAllowed(
-  txnId: number,
-  graph: Store<GraphInterface>
-): boolean {
-  if (!txnId) {
-    return false;
-  }
-
-  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
-
-  return activeUndoIndex < txnValue.steps.length - 1;
-}
-
-export function undo(
-  txnId: number,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-) {
-  if (!undoAllowed(txnId, graph)) {
-    return;
-  }
-
-  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
-
-  const nearestLowestIndex = txnValue.undoStepIndexes
-    .slice()
-    .reverse()
-    .find((index) => index < activeUndoIndex);
-
-  const newUndoIndex =
-    nearestLowestIndex !== undefined ? nearestLowestIndex : activeUndoIndex - 1;
-
-  txnValue.steps.slice(newUndoIndex + 1, activeUndoIndex + 1);
-  txnValue.activeUndoIndex = newUndoIndex;
-
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue);
-}
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 
 export function redo(
   txnId: number,
@@ -88,6 +33,20 @@ export function redo(
   }
 
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue);
+}
+
+export function redoAllowed(
+  txnId: number,
+  graph: Store<GraphInterface>
+): boolean {
+  if (!txnId) {
+    return false;
+  }
+
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+
+  return activeUndoIndex < txnValue.steps.length - 1;
 }
 
 export function saveUndoPoint(
@@ -162,6 +121,49 @@ export function transactionDetailAdd(
   existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
 
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {cloneProperties: false});
+}
+
+export function undo(
+  txnId: number,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>
+) {
+  if (!undoAllowed(txnId, graph)) {
+    return;
+  }
+
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+
+  const nearestLowestIndex = txnValue.undoStepIndexes
+    .slice()
+    .reverse()
+    .find((index) => index < activeUndoIndex);
+
+  const newUndoIndex =
+    nearestLowestIndex !== undefined ? nearestLowestIndex : activeUndoIndex - 1;
+
+  txnValue.steps.slice(newUndoIndex + 1, activeUndoIndex + 1);
+  txnValue.activeUndoIndex = newUndoIndex;
+
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue);
+}
+
+export function undoAllowed(
+  txnId: number,
+  graph: Store<GraphInterface>
+): boolean {
+  if (!txnId) {
+    return false;
+  }
+
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  if (txnValue.steps.length <= 1) {
+    return false;
+  }
+
+  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+  return activeUndoIndex > 0;
 }
 
 transactionDetailAdd(1, { a: 1 });

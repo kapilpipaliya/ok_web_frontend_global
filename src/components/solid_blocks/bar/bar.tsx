@@ -3,12 +3,12 @@ import { Portal } from "solid-js/web";
 
 import "./bar.css";
 
-export type BarProps = {
+export type BarProps = JSX.HTMLAttributes<HTMLDivElement> & {
   mount?: HTMLElement;
   placement?: "bottom" | "left" | "right" | "top";
   portal?: boolean;
   position?: Omit<JSX.CSSProperties["position"], "static">;
-} & JSX.HTMLAttributes<HTMLDivElement>;
+};
 
 export function Bar(props: Readonly<BarProps>) {
   const [local, rest] = splitProps(props, [

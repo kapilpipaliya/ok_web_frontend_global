@@ -14,8 +14,8 @@ export function resetDragDropState(
 ) {
   batch(() => {
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-      draggedVertexIds: [],
       activeItem: null,
+      draggedVertexIds: [],
       position: null,
     });
   });

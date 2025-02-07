@@ -43,8 +43,8 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
                   }`}
                   height={24}
                   icon={props.mainIcon[navNode.P.url]}
-                  width={24}
                   noobserver
+                  width={24}
                 />
               </a>
             </Show>
@@ -58,13 +58,13 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
               ? "mingcute:arrows-right-line"
               : "mingcute:arrows-left-line"
           }
+          noobserver
           onClick={props.toggleCollapse}
           style={{
             "box-shadow": "1px 0px 9px darkgrey",
             color: "rgb(161,161,169)",
           }}
           width={19}
-          noobserver
         />
       </div>
     </nav>

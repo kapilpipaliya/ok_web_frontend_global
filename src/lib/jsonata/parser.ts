@@ -7,7 +7,6 @@
 import { parseSignature } from "./signature.js";
 
 const operators = {
-  ",": 0,
   "!": 0, // not an operator, but needed as a stop character for name tokens
   "!=": 40,
   "#": 80,
@@ -18,6 +17,8 @@ const operators = {
   "*": 60,
   "**": 60,
   "+": 50,
+  ",": 0,
+  "-": 50,
   ".": 75,
   "..": 20,
   "/": 60,
@@ -34,15 +35,14 @@ const operators = {
   "[": 80,
   "]": 0,
   "^": 40,
+  and: 30,
+  in: 40,
+  or: 25,
   "{": 70,
   "|": 20,
   "}": 0,
   "~": 0, // not an operator, but needed as a stop character for name tokens
   "~>": 40,
-  "-": 50,
-  and: 30,
-  in: 40,
-  or: 25,
 };
 
 const escapes = {

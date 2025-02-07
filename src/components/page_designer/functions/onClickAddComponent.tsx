@@ -2,10 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import { sortChildren } from "./sortChildren";
-import { componentDrop } from "./drop/componentDrop";
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
 import { evalExpression } from "~/lib/expression_eval";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+
+import { componentDrop } from "./drop/componentDrop";
+import { sortChildren } from "./sortChildren";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,
@@ -15,7 +16,7 @@ export function onClickAddComponent(
   formData: any,
   toVertexId: Id | number,
 ) {
-  let toVertex = graph.vertexes[toVertexId];
+  const toVertex = graph.vertexes[toVertexId];
   const component = evalExpression("->$0Comp", {
     graph,
     vertexes: [toVertex],

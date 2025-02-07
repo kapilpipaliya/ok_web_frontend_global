@@ -5,6 +5,10 @@ import FocusNavigator from "../../utils/focus-navigator";
 
 export const TabListContext = createContext<FocusNavigator>();
 
+export function createTabFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId());
+}
+
 export function useTabListContext(componentName: string): FocusNavigator {
   const context = useContext(TabListContext);
   assert(
@@ -12,8 +16,4 @@ export function useTabListContext(componentName: string): FocusNavigator {
     new Error(`<${componentName}> must be used inside a <TabList>`),
   );
   return context;
-}
-
-export function createTabFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId());
 }

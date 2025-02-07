@@ -5,6 +5,17 @@ import type {
 
 import { JSONSchema } from "../constants/CssPropertiesMap";
 
+export function filterPropertyFieldMap(
+  propertyFieldMap: { [key: string]: GenericField },
+  query: string,
+) {
+  return Object.fromEntries(
+    Object.entries(propertyFieldMap).filter(([, field]) =>
+      shouldIncludeProperty(field, query),
+    ),
+  );
+}
+
 export function filterSections(query: string) {
   return Object.entries(JSONSchema).reduce(
     (acc, [sectionName, propertyFieldMap]) => {
@@ -21,17 +32,6 @@ export function filterSections(query: string) {
       return acc;
     },
     {} as CSSJSONSchemaSearchType,
-  );
-}
-
-export function filterPropertyFieldMap(
-  propertyFieldMap: { [key: string]: GenericField },
-  query: string,
-) {
-  return Object.fromEntries(
-    Object.entries(propertyFieldMap).filter(([, field]) =>
-      shouldIncludeProperty(field, query),
-    ),
   );
 }
 

@@ -2,26 +2,9 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
 
-import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "../mutate/vertex";
+import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { redoTxn } from "./redoTxn";
-
-export function redoAllowed(
-  txnId: number,
-  graph: Store<GraphInterface>,
-): boolean {
-  if (!txnId) {
-    return false;
-  }
-  const txnVertex = graph.vertexes[`txn${txnId}`];
-  if (!txnVertex) {
-    return false;
-  }
-
-  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
-  return activeUndoIndex < txnValue.steps.length - 1;
-}
 
 export function redo(
   txnId: number, 
@@ -52,4 +35,21 @@ export function redo(
   }
 
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
+}
+
+export function redoAllowed(
+  txnId: number,
+  graph: Store<GraphInterface>,
+): boolean {
+  if (!txnId) {
+    return false;
+  }
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return false;
+  }
+
+  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+  return activeUndoIndex < txnValue.steps.length - 1;
 }

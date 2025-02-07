@@ -1,9 +1,8 @@
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
-import { OpenComponentSettings } from "../../OpenComponentSettings";
-import { OpenComponentURL } from "../../OpenComponentURL";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 
 export function PropertiesHeader() {
   const [graph] = useGraph();

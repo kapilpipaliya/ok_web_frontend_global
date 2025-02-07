@@ -11,34 +11,14 @@ import { DATA_SET_NAMESPACE, DISABLED_NODE } from "./namespace";
 
 const OWNER = `${DATA_SET_NAMESPACE}-owner` as const;
 
-function queryNodes<T extends Element>(
-  el: T,
-  ownerID: string,
-  condition = "",
-): NodeListOf<HTMLElement> {
-  // We only query nodes that are:
-  // - owned by the root component via ownerID
-  // - node isn't disabled
-  // - extra condition
-  const query = `[${OWNER}="${ownerID}"]:not(${DISABLED_NODE})${condition}`;
-  const nodes = el.querySelectorAll<HTMLElement>(query);
-  return nodes;
+export interface FocusNavigatorOptions {
+  base: string;
+  virtual: boolean;
 }
 
 type OwnerAttribute = {
   [key in typeof OWNER]: string;
 };
-
-export function createOwnerAttribute(ownerID: string): OwnerAttribute {
-  return {
-    [OWNER]: ownerID,
-  };
-}
-
-export interface FocusNavigatorOptions {
-  base: string;
-  virtual: boolean;
-}
 
 export default class FocusNavigator {
   private current: HTMLElement | undefined;
@@ -55,10 +35,6 @@ export default class FocusNavigator {
       base: options.base ?? "",
       virtual: options.virtual ?? false,
     };
-  }
-
-  private query(ref: HTMLElement, condition = ""): NodeListOf<HTMLElement> {
-    return queryNodes(ref, this.ownerID, `${this.options.base}${condition}`);
   }
 
   clearRef(): void {
@@ -147,4 +123,28 @@ export default class FocusNavigator {
   setRef(ref: HTMLElement): void {
     this.internalRef = ref;
   }
+
+  private query(ref: HTMLElement, condition = ""): NodeListOf<HTMLElement> {
+    return queryNodes(ref, this.ownerID, `${this.options.base}${condition}`);
+  }
+}
+
+export function createOwnerAttribute(ownerID: string): OwnerAttribute {
+  return {
+    [OWNER]: ownerID,
+  };
+}
+
+function queryNodes<T extends Element>(
+  el: T,
+  ownerID: string,
+  condition = "",
+): NodeListOf<HTMLElement> {
+  // We only query nodes that are:
+  // - owned by the root component via ownerID
+  // - node isn't disabled
+  // - extra condition
+  const query = `[${OWNER}="${ownerID}"]:not(${DISABLED_NODE})${condition}`;
+  const nodes = el.querySelectorAll<HTMLElement>(query);
+  return nodes;
 }

@@ -36,6 +36,36 @@ export type FileManagerStore = ReturnType<
 >;
 export const FileManagerStoreContext = createContext<FileManagerStore>();
 
+// fetch current children and children of children
+export async function fetchChildrenDataBatch(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  toParentEdgeType: string,
+  expandedKeys: string[],
+) {
+  if (expandedKeys.length === 0) {
+    return;
+  }
+  const data = await getFilesData(
+    graph,
+    setGraph,
+    toParentEdgeType,
+    expandedKeys,
+  );
+  if (
+    "result" in data &&
+    Array.isArray(data.result) &&
+    data.result.length > 0
+  ) {
+    await getFilesData(
+      graph,
+      setGraph,
+      toParentEdgeType,
+      data.result.map((v) => v.id),
+    );
+  }
+}
+
 export function FileManagerStoreProvider(
   props: Readonly<{
     children: JSX.Element;
@@ -155,34 +185,4 @@ async function fetchRootData(
   }
 
   return { expandedKeys, root, selectedItem };
-}
-
-// fetch current children and children of children
-export async function fetchChildrenDataBatch(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  toParentEdgeType: string,
-  expandedKeys: string[],
-) {
-  if (expandedKeys.length === 0) {
-    return;
-  }
-  const data = await getFilesData(
-    graph,
-    setGraph,
-    toParentEdgeType,
-    expandedKeys,
-  );
-  if (
-    "result" in data &&
-    Array.isArray(data.result) &&
-    data.result.length > 0
-  ) {
-    await getFilesData(
-      graph,
-      setGraph,
-      toParentEdgeType,
-      data.result.map((v) => v.id),
-    );
-  }
 }

@@ -5,9 +5,9 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 import type { DataGridState } from "../DataGridContext";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function useDeleteRowConfirm(gridState: DataGridState) {
   const [graph, setGraph] = useGraph();

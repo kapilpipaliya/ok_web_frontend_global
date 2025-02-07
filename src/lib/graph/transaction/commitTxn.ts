@@ -1,14 +1,15 @@
 import type { Store } from "solid-js/store";
 
+import { klona } from "klona";
+
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
 import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
-import { updateVertexIdsToNew } from "../mutate/vertex";
 import { updateEdgeIdsToNew } from "../mutate/edge";
-import { klona } from "klona";
+import { updateVertexIdsToNew } from "../mutate/vertex";
 
 export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   if(!txnId) {

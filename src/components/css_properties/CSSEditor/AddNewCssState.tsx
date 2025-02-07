@@ -2,12 +2,12 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
 import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 
 import { PROPERTIES } from "../../styled/constants/constant";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
-import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
@@ -77,7 +77,7 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
         </label>
 
         <button onClick={addNewState}>
-          <Icon class="ml:2" height={21} icon="ic:round-check" width={21} noobserver />
+          <Icon class="ml:2" height={21} icon="ic:round-check" noobserver width={21} />
         </button>
       </div>
     </div>

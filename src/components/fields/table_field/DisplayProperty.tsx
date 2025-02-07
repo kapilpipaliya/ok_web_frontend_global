@@ -13,23 +13,17 @@ import {
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getPropsFromMetaExpressionMGCall } from "~/cypher/get/client/getPropsFromMetaExpressionMGCall";
+import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
-import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
-
+import { evalExpression } from "~/lib/expression_eval";
 import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
-import { type Id, IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
+import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
-import { klona } from "klona/json";
-import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
-import { evalExpression } from "~/lib/expression_eval";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {

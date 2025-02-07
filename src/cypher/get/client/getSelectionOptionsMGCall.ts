@@ -16,7 +16,7 @@ export async function getSelectionOptionsMGCall(
   mutationData?: any,
   maxRetries?: number,
   _strict?: boolean,
-): Promise<{ error: boolean } & Partial<ServerResult>> {
+): Promise<Partial<ServerResult> & { error: boolean }> {
   "use server";
 
   try {

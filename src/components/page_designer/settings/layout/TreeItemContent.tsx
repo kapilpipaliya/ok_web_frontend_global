@@ -1,16 +1,17 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createMemo } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
+import { getComponentName } from "../../functions/getComponentLabel";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
-import { getComponentLabel, getComponentName } from "../../functions/getComponentLabel";
-import { evalExpression } from "~/lib/expression_eval";
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
@@ -53,8 +54,8 @@ export function TreeItemContent(
           iconMap[componentName() as keyof typeof iconMap] ??
           "ph:circle"
         }
-        width={17}
         noobserver
+        width={17}
       />
       {nameExpr(props.metaVertex, componentName(), graph)}
     </div>

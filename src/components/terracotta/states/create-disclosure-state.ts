@@ -18,14 +18,6 @@ export interface DisclosureStateControlledOptions {
   onClose?: () => void;
   onOpen?: () => void;
 }
-export interface DisclosureStateUncontrolledOptions {
-  defaultOpen: boolean;
-  disabled?: boolean;
-  onChange?: (state: boolean) => void;
-  onClose?: () => void;
-  onOpen?: () => void;
-}
-
 export type DisclosureStateOptions =
   | DisclosureStateControlledOptions
   | DisclosureStateUncontrolledOptions;
@@ -37,6 +29,23 @@ export interface DisclosureStateProperties {
   open(): void;
   setState(newState: boolean): void;
   toggle(): void;
+}
+
+export interface DisclosureStateProviderProps
+  extends DisclosureStateRenderProps {
+  state: DisclosureStateProperties;
+}
+
+export interface DisclosureStateRenderProps {
+  children?: ((state: DisclosureStateProperties) => JSX.Element) | JSX.Element;
+}
+
+export interface DisclosureStateUncontrolledOptions {
+  defaultOpen: boolean;
+  disabled?: boolean;
+  onChange?: (state: boolean) => void;
+  onClose?: () => void;
+  onOpen?: () => void;
 }
 
 export function createDisclosureState(
@@ -105,16 +114,20 @@ export function createDisclosureState(
   };
 }
 
-export interface DisclosureStateRenderProps {
-  children?: ((state: DisclosureStateProperties) => JSX.Element) | JSX.Element;
-}
-
-export interface DisclosureStateProviderProps
-  extends DisclosureStateRenderProps {
-  state: DisclosureStateProperties;
-}
-
 const DisclosureStateContext = createContext<DisclosureStateProperties>();
+
+export function DisclosureStateChild(
+  props: DisclosureStateRenderProps,
+): JSX.Element {
+  const state = useDisclosureState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function DisclosureStateProvider(
   props: DisclosureStateProviderProps,
@@ -135,17 +148,4 @@ export function useDisclosureState(): DisclosureStateProperties {
   const ctx = useContext(DisclosureStateContext);
   assert(ctx, new Error("Missing <DisclosureStateProvider>"));
   return ctx;
-}
-
-export function DisclosureStateChild(
-  props: DisclosureStateRenderProps,
-): JSX.Element {
-  const state = useDisclosureState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

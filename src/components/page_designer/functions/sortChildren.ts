@@ -10,9 +10,9 @@ export function sortChildren(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  fromVertex: Vertex | undefined,
+  fromVertex: undefined | Vertex,
   toParentVertex: Vertex,
-  toVertex: Vertex | undefined,
+  toVertex: undefined | Vertex,
   position: string,
 ) {
   let pos = 1;

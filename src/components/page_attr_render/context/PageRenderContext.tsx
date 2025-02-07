@@ -4,15 +4,15 @@ import { createContext, type JSX, useContext } from "solid-js";
 
 import type { FunctionArgumentType } from "../../form/FieldSchemaType";
 
+export type PageRenderObject = ReturnType<typeof getInitialPageRenderStore>;
+
+export type PageRenderStore = ReturnType<typeof createStore<PageRenderObject>>;
 export function getInitialPageRenderStore() {
   return {
     // ...InitialPermissions,
     context: {} as FunctionArgumentType,
   };
 }
-
-export type PageRenderObject = ReturnType<typeof getInitialPageRenderStore>;
-export type PageRenderStore = ReturnType<typeof createStore<PageRenderObject>>;
 export const PageRenderContext = createContext<PageRenderStore[]>();
 
 export function usePageRenderContext() {

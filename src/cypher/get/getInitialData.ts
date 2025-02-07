@@ -3,7 +3,6 @@ import type { Session } from "neo4j-driver";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { fetchFromMGAndSaveToArray } from "~/cypher/get/fetchFromMGAndSaveToArray";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 

@@ -25,6 +25,17 @@ export interface SelectOptionStateProperties {
   select(): void;
 }
 
+export interface SelectOptionStateProviderProps
+  extends SelectOptionStateRenderProps {
+  state: SelectOptionStateProperties;
+}
+
+export interface SelectOptionStateRenderProps {
+  children?:
+    | ((state: SelectOptionStateProperties) => JSX.Element)
+    | JSX.Element;
+}
+
 export function createSelectOptionState<T>(
   options: SelectOptionStateOptions<T>,
 ): SelectOptionStateProperties {
@@ -52,18 +63,20 @@ export function createSelectOptionState<T>(
   };
 }
 
-export interface SelectOptionStateRenderProps {
-  children?:
-    | ((state: SelectOptionStateProperties) => JSX.Element)
-    | JSX.Element;
-}
-
-export interface SelectOptionStateProviderProps
-  extends SelectOptionStateRenderProps {
-  state: SelectOptionStateProperties;
-}
-
 const SelectOptionStateContext = createContext<SelectOptionStateProperties>();
+
+export function SelectOptionStateChild(
+  props: SelectOptionStateRenderProps,
+): JSX.Element {
+  const state = useSelectOptionState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function SelectOptionStateProvider(
   props: SelectOptionStateProviderProps,
@@ -84,17 +97,4 @@ export function useSelectOptionState(): SelectOptionStateProperties {
   const ctx = useContext(SelectOptionStateContext);
   assert(ctx, new Error("Missing <SelectOptionStateProvider>"));
   return ctx;
-}
-
-export function SelectOptionStateChild(
-  props: SelectOptionStateRenderProps,
-): JSX.Element {
-  const state = useSelectOptionState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

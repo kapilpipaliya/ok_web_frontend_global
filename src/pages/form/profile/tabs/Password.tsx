@@ -32,7 +32,7 @@ export const PasswordSection = (
   });
 
   const handleInputChange = (
-    e: { currentTarget: HTMLInputElement } & Event,
+    e: Event & { currentTarget: HTMLInputElement },
   ) => {
     const { name, value } = e.currentTarget;
     setPasswordData({ ...passwordData, [name]: value });
@@ -163,7 +163,7 @@ export const PasswordSection = (
 interface PasswordFieldProps {
   label: string;
   name: string;
-  onChange?: (e: { currentTarget: HTMLInputElement } & Event) => void;
+  onChange?: (e: Event & { currentTarget: HTMLInputElement }) => void;
   readOnly?: boolean;
   showPassword?: boolean;
   togglePasswordVisibility?: () => void;
@@ -189,8 +189,8 @@ const PasswordField = (props: PasswordFieldProps): JSX.Element => {
           icon={
             props.showPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"
           }
-          onClick={props.togglePasswordVisibility}
           noobserver
+          onClick={props.togglePasswordVisibility}
         />
       </Show>
     </div>

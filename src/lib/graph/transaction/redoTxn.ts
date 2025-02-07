@@ -1,9 +1,11 @@
-import { Store, SetStoreFunction } from "solid-js/store";
-import { getVertexOldIdToNewIdMap, getEdgeOldIdToNewIdMap } from "../get/sync/getGlobalStore";
+import type { SetStoreFunction, Store } from "solid-js/store";
+
 import type { GraphInterface } from "../graph";
-import { deleteEdge, addNewEdge, updateEdgeIdsToNew, replaceEdgeProperties, replaceEdgeStart, replaceEdgeEnd } from "../mutate/edge";
-import { addNewVertex, updateVertexIdsToNew, deleteVertex, replaceVertexProperties, mergeVertexProperties } from "../mutate/vertex";
-import { TransactionValue } from "./TransactionType";
+import type { TransactionValue } from "./TransactionType";
+
+import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
+import { addNewEdge, deleteEdge, replaceEdgeEnd, replaceEdgeProperties, replaceEdgeStart, updateEdgeIdsToNew } from "../mutate/edge";
+import { addNewVertex, deleteVertex, mergeVertexProperties, replaceVertexProperties, updateVertexIdsToNew } from "../mutate/vertex";
 
 
 export function redoTxn(
@@ -12,22 +14,26 @@ export function redoTxn(
   setGraph: SetStoreFunction<GraphInterface>
 ) {
 
-  const {  id, originalData, data, ...actions } = txnDetail;
+  const {  data, id, originalData, ...actions } = txnDetail;
 
   for (const action in actions) {
     if (actions.hasOwnProperty(action)) {
       switch (action) {
-        case "insert":
-          addNewVertex(0, updateVertexIdsToNew(data, graph), graph, setGraph);
+        case "deleteEdge": {
+          const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
+          deleteEdge(0, actualVertexId2, graph, setGraph);
           break;
+        }
         case "deleteVertex": {
           const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
           deleteVertex(0, actualVertexId2, graph, setGraph);
           break;
         }
-        case "replace": {
-          const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          replaceVertexProperties(0, actualVertexId2, graph, setGraph, data.P);
+        case "insert":
+          addNewVertex(0, updateVertexIdsToNew(data, graph), graph, setGraph);
+          break;
+        case "insertEdge": {
+          addNewEdge(0, updateEdgeIdsToNew(data, graph), graph, setGraph);
           break;
         }
         case "merge": {
@@ -35,13 +41,9 @@ export function redoTxn(
           mergeVertexProperties(0, actualVertexId2, graph, setGraph, data.P);
           break;
         }
-        case "deleteEdge": {
+        case "replace": {
           const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          deleteEdge(0, actualVertexId2, graph, setGraph);
-          break;
-        }
-        case "insertEdge": {
-          addNewEdge(0, updateEdgeIdsToNew(data, graph), graph, setGraph);
+          replaceVertexProperties(0, actualVertexId2, graph, setGraph, data.P);
           break;
         }
         case "replaceEdge": {
@@ -49,14 +51,14 @@ export function redoTxn(
           replaceEdgeProperties(0, actualEdgeId2, graph, setGraph, data.P);
           break;
         }
-        case "replaceEdgeStart": {
-          const actualEdgeId2 = getEdgeOldIdToNewIdMap(graph)[id] || id;
-          replaceEdgeStart(0, actualEdgeId2, graph, setGraph, data.S);
-          break;
-        }
         case "replaceEdgeEnd": {
           const actualEdgeId2 = getEdgeOldIdToNewIdMap(graph)[id] || id;
           replaceEdgeEnd(0, actualEdgeId2, graph, setGraph, data.E);
+          break;
+        }
+        case "replaceEdgeStart": {
+          const actualEdgeId2 = getEdgeOldIdToNewIdMap(graph)[id] || id;
+          replaceEdgeStart(0, actualEdgeId2, graph, setGraph, data.S);
           break;
         }
         default:

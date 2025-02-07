@@ -1,11 +1,11 @@
 import { For } from "solid-js";
 
+import { useGraph, } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
 import type { PageLayoutObject } from "../../context/LayoutContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormConfig() {
   const [graph, setGraph] = useGraph();
@@ -23,13 +23,14 @@ export function FormConfig() {
         >
           <PageViewWrapper
             dataId={graph.vertexes[openedFormId].P.dataId}
+            formDataId={graph.vertexes[openedFormId].P.formDataId}
             hideSaveCancelButton={true}
             isNoPermissionCheck={true}
             pageVertexName={graph.vertexes[openedFormId].P.label}
-            uuid={graph.vertexes[openedFormId].P.formId}
             // @ts-expect-error ignore
             parentId={graph.vertexes[openedFormId].P.parentId}
-            formDataId={graph.vertexes[openedFormId].P.formDataId}
+            txnId={graph.vertexes[openedFormId].P.txnId}
+            uuid={graph.vertexes[openedFormId].P.formId}
             // openedFormId={openedFormId}
           />
         </div>

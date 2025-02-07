@@ -4,15 +4,6 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 
-function getExpressionForParentData(
-  toParentEdgeType: string,
-  folderId?: string,
-  fileId?: string,
-) {
-  // -> operator not return current vertex
-  return `id:'${folderId || fileId}'->'${toParentEdgeType}*'`;
-}
-
 export async function getParentData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -30,4 +21,13 @@ export async function getParentData(
   }
 
   return await fetchAndSetGraphData(graph, setGraph, expression, {});
+}
+
+function getExpressionForParentData(
+  toParentEdgeType: string,
+  folderId?: string,
+  fileId?: string,
+) {
+  // -> operator not return current vertex
+  return `id:'${folderId || fileId}'->'${toParentEdgeType}*'`;
 }

@@ -1,9 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { useDesignerFormIdContext, type PageLayoutObject } from "~/components/page_designer/context/LayoutContext";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { generateFormMetaAttributes } from "../../functions/generateFormMetaAttributes";
 

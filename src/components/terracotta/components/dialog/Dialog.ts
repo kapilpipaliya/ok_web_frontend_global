@@ -45,6 +45,10 @@ export type DialogControlledBaseProps = Prettify<
 export type DialogControlledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DialogControlledBaseProps>;
 
+export type DialogProps<T extends ValidConstructor = "div"> =
+  | DialogControlledProps<T>
+  | DialogUncontrolledProps<T>;
+
 export type DialogUncontrolledBaseProps = Prettify<
   DisclosureStateRenderProps &
     DisclosureStateUncontrolledOptions &
@@ -53,16 +57,6 @@ export type DialogUncontrolledBaseProps = Prettify<
 
 export type DialogUncontrolledProps<T extends ValidConstructor = "div"> =
   HeadlessProps<T, DialogUncontrolledBaseProps>;
-
-export type DialogProps<T extends ValidConstructor = "div"> =
-  | DialogControlledProps<T>
-  | DialogUncontrolledProps<T>;
-
-function isDialogUncontrolled<T extends ValidConstructor = "div">(
-  props: DialogProps<T>,
-): props is DialogUncontrolledProps<T> {
-  return "defaultOpen" in props;
-}
 
 export function Dialog<T extends ValidConstructor = "div">(
   props: DialogProps<T>,
@@ -144,4 +138,10 @@ export function Dialog<T extends ValidConstructor = "div">(
       titleID,
     },
   });
+}
+
+function isDialogUncontrolled<T extends ValidConstructor = "div">(
+  props: DialogProps<T>,
+): props is DialogUncontrolledProps<T> {
+  return "defaultOpen" in props;
 }

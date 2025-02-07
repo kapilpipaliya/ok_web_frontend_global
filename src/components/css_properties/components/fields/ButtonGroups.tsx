@@ -1,5 +1,5 @@
-import { clientOnly } from "@solidjs/start";
 import { Icon } from "@iconify-icon/solid";
+import { clientOnly } from "@solidjs/start";
 import { For, type JSX, splitProps } from "solid-js";
 
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
@@ -53,7 +53,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
                   >
                     {option.icon ? (
-                      <Icon height={23} icon={option.icon} width={23} noobserver />
+                      <Icon height={23} icon={option.icon} noobserver width={23} />
                     ) : (
                       option.key
                     )}

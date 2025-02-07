@@ -7,6 +7,7 @@ export const iconMap = {
   CheckBox: "ph:check-square",
   Collapsible: "ph:arrows-in",
   ColorBox: "ph:paint-brush",
+  Component: "ph:puzzle-piece",
   DateBox: "ph:calendar",
   Divider: "ph:minus-horizontal",
   FileUploader: "ph:upload",
@@ -14,6 +15,7 @@ export const iconMap = {
   FormCancel: "ph:x-circle",
   FormSubmit: "ph:check-circle",
   Heading: "ph:text-h",
+  Html: "ph:file-html",
   HtmlEditor: "ph:code",
   Icon: "ph:info",
   Image: "ph:image",
@@ -43,6 +45,4 @@ export const iconMap = {
   TreeView: "ph:tree-structure",
   TreeViewChild: "ph:tree",
   TreeViewItem: "ph:list-tree",
-  Html: "ph:file-html",
-  Component: "ph:puzzle-piece",
 };

@@ -66,6 +66,63 @@ export function parseSignature(signature) {
     };
 
     switch (symbol) {
+      case "(": {
+        // choice of types
+        // search forward for matching ')'
+        const endParen = findClosingBracket(signature, position, "(", ")");
+        const choice = signature.substring(position + 1, endParen);
+        if (choice.indexOf("<") === -1) {
+          // no parameterized types, simple regex
+          param.regex = "[" + choice + "m]";
+        } else {
+          // TODO harder
+          throw {
+            code: "S0402",
+            offset: position,
+            stack: new Error().stack,
+            value: choice,
+          };
+        }
+        param.type = "(" + choice + ")";
+        position = endParen;
+        next();
+        break;
+      }
+      case "+":
+      case "?": // optional param // one or more
+        prevParam.regex += symbol;
+        break;
+      case "-": {
+        // use context if param not supplied
+        prevParam.context = true;
+        prevParam.contextRegex = new RegExp(prevParam.regex); // pre-compiled to test the context type at runtime
+        prevParam.regex += "?";
+        break;
+      }
+      case "<": // type parameter - can only be applied to 'a' and 'f'
+        if (prevParam.type === "a" || prevParam.type === "f") {
+          // search forward for matching '>'
+          const endPos = findClosingBracket(signature, position, "<", ">");
+          prevParam.subtype = signature.substring(position + 1, endPos);
+          position = endPos;
+        } else {
+          throw {
+            code: "S0401",
+            offset: position,
+            stack: new Error().stack,
+            value: prevParam.type,
+          };
+        }
+        break;
+      case "a": {
+        // array
+        //  normally treat any value as singleton array
+        param.regex = "[asnblfom]";
+        param.type = symbol;
+        param.array = true;
+        next();
+        break;
+      }
       case "b": // boolean
       case "l": // not so sure about expecting null?
       case "n": // number
@@ -74,15 +131,6 @@ export function parseSignature(signature) {
         // object
         param.regex = "[" + symbol + "m]";
         param.type = symbol;
-        next();
-        break;
-      }
-      case "a": {
-        // array
-        //  normally treat any value as singleton array
-        param.regex = "[asnblfom]";
-        param.type = symbol;
-        param.array = true;
         next();
         break;
       }
@@ -107,54 +155,6 @@ export function parseSignature(signature) {
         next();
         break;
       }
-      case "-": {
-        // use context if param not supplied
-        prevParam.context = true;
-        prevParam.contextRegex = new RegExp(prevParam.regex); // pre-compiled to test the context type at runtime
-        prevParam.regex += "?";
-        break;
-      }
-      case "+":
-      case "?": // optional param // one or more
-        prevParam.regex += symbol;
-        break;
-      case "(": {
-        // choice of types
-        // search forward for matching ')'
-        const endParen = findClosingBracket(signature, position, "(", ")");
-        const choice = signature.substring(position + 1, endParen);
-        if (choice.indexOf("<") === -1) {
-          // no parameterized types, simple regex
-          param.regex = "[" + choice + "m]";
-        } else {
-          // TODO harder
-          throw {
-            code: "S0402",
-            offset: position,
-            stack: new Error().stack,
-            value: choice,
-          };
-        }
-        param.type = "(" + choice + ")";
-        position = endParen;
-        next();
-        break;
-      }
-      case "<": // type parameter - can only be applied to 'a' and 'f'
-        if (prevParam.type === "a" || prevParam.type === "f") {
-          // search forward for matching '>'
-          const endPos = findClosingBracket(signature, position, "<", ">");
-          prevParam.subtype = signature.substring(position + 1, endPos);
-          position = endPos;
-        } else {
-          throw {
-            code: "S0401",
-            offset: position,
-            stack: new Error().stack,
-            value: prevParam.type,
-          };
-        }
-        break;
     }
     position++;
   }

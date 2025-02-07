@@ -8,9 +8,8 @@ import {
   Show,
   useContext,
 } from "solid-js";
+
 import { evalExpression } from "~/lib/expression_eval";
-
-
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 export const treeContext = createContext<[Accessor<Id[]>, Setter<Id[]>] | null>(
@@ -53,6 +52,7 @@ export function TreeView(
               <Icon
                 class="flex-1"
                 icon={"mdi:chevron-right"}
+                noobserver
                 style={{
                   "border-radius": "50%",
                   "font-size": "24px",
@@ -61,7 +61,6 @@ export function TreeView(
                   }`,
                   transition: "transform 0.2s linear",
                 }}
-                noobserver
               />
             </span>
           </Show>

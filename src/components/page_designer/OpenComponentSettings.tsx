@@ -10,6 +10,7 @@ export function OpenComponentSettings(
       class={`${props.class ?? ""}`}
       height={21}
       icon={"solar:settings-linear"}
+      noobserver
       onClick={() => {
         const currentURL = window.location.href;
         const navigateUrl = `${currentURL
@@ -19,7 +20,6 @@ export function OpenComponentSettings(
         window.open(navigateUrl, "_blank");
       }}
       width={21}
-      noobserver
     />
   );
 }

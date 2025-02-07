@@ -1,19 +1,20 @@
 import { createSignal, onCleanup, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { useDesignerFormIdContext, } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
 import { CommonAddComponent } from "./CommonAddComponent";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 
 export function AddNewRule(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,

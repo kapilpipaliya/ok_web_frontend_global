@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 
 import { Icon } from "@iconify-icon/solid";
-import { A, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 import { createSignal, onMount, Show } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
@@ -10,10 +10,10 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { signInCall } from "~/lib/api/service/user/signInCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
 
@@ -272,8 +272,8 @@ function PasswordInput(props: PasswordInputProps): JSX.Element {
         aria-label="Toggle password visibility"
         class="abs flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50% right:5 top:8"
         icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-        onClick={togglePasswordVisibility}
         noobserver
+        onClick={togglePasswordVisibility}
       />
     </div>
   );

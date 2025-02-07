@@ -1,13 +1,8 @@
 import {
   type Accessor,
-  batch,
-  createComputed,
-  createEffect,
   createMemo,
   createSignal,
   For,
-  on,
-  onCleanup,
   Show,
 } from "solid-js";
 
@@ -15,33 +10,30 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
-import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowMetaInitialize";
 
-import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
+import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { evalExpression } from "~/lib/expression_eval";
 
 export const SortableRow = (
   props: Readonly<
-    {
+    GenericComponentProps & {
       dragFromIndex: Accessor<null | number>;
-      metaInstance: Vertex;
       dragToIndex: Accessor<null | number>;
       handleDrop: (event: DragEvent) => void;
       isNoPermissionCheck?: boolean;
       isRealTime: boolean;
       joinVertex: Vertex;
       meta: Vertex;
+      metaInstance: Vertex;
       rowIndex: number;
       setDragFromIndex: (index: number) => void;
       setDragToIndex: (index: number) => void;
       tableColumnsTemplate: Accessor<Vertex[]>;
       txnId: number;
-    } & GenericComponentProps
+    }
   >,
 ) => {
   const [graph, setGraph] = useGraph();

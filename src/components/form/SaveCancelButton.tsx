@@ -1,11 +1,12 @@
+import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show } from "solid-js";
 
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
+import { useToast } from "../styled/Toast";
+import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";
-import { FormStoreObject, useFormContext } from "./context/FormContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
-import { useToast } from "../styled/Toast";
-import { useNavigate } from "@solidjs/router";
 
 export function SaveCancelButton(
   props: Readonly<{

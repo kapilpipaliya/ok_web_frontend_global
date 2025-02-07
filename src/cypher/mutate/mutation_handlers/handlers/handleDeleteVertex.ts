@@ -1,4 +1,4 @@
-import { int } from "neo4j-driver";
+
 
 export async function handleDeleteVertex(
   deleteVertex: any,

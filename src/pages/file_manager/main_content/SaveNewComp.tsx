@@ -15,10 +15,10 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute } from "~/lib/meta/base/Comp";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function SaveNewComp(
   props: Readonly<{

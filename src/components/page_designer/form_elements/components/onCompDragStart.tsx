@@ -1,8 +1,10 @@
-import type { GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { useDesignerFormIdContext, type PageLayoutObject } from "../../context/LayoutContext";
-import { SetStoreFunction } from "solid-js/store";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+
+import type { PageLayoutObject } from "../../context/LayoutContext";
 
 export function onCompDragStart(
   e: DragEvent,

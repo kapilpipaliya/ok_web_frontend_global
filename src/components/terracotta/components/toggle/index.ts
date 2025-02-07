@@ -43,6 +43,10 @@ export type ToggleControlledProps<T extends ValidConstructor = "button"> =
     OmitAndMerge<ToggleControlledBaseProps, ButtonProps<T>>
   >;
 
+export type ToggleProps<T extends ValidConstructor = "button"> =
+  | ToggleControlledProps<T>
+  | ToggleUncontrolledProps<T>;
+
 export type ToggleUncontrolledBaseProps = Prettify<
   ToggleStateRenderProps & ToggleStateUncontrolledOptions
 >;
@@ -52,16 +56,6 @@ export type ToggleUncontrolledProps<T extends ValidConstructor = "button"> =
     T,
     OmitAndMerge<ToggleUncontrolledBaseProps, ButtonProps<T>>
   >;
-
-export type ToggleProps<T extends ValidConstructor = "button"> =
-  | ToggleControlledProps<T>
-  | ToggleUncontrolledProps<T>;
-
-function isToggleUncontrolled<T extends ValidConstructor = "button">(
-  props: ToggleProps<T>,
-): props is ToggleUncontrolledProps<T> {
-  return "defaultPressed" in props;
-}
 
 export function Toggle<T extends ValidConstructor = "button">(
   props: ToggleProps<T>,
@@ -114,4 +108,10 @@ export function Toggle<T extends ValidConstructor = "button">(
       createARIADisabledState(() => state.disabled()),
     ) as DynamicProps<T>,
   );
+}
+
+function isToggleUncontrolled<T extends ValidConstructor = "button">(
+  props: ToggleProps<T>,
+): props is ToggleUncontrolledProps<T> {
+  return "defaultPressed" in props;
 }

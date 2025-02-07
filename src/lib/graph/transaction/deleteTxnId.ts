@@ -1,6 +1,7 @@
-import type { Store, SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../graph";
+
 import { deleteVertex } from "../mutate/vertex";
 
 export function deleteTxnId(

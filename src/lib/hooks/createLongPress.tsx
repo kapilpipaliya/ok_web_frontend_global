@@ -1,10 +1,10 @@
 import { createSignal, type JSX, onCleanup } from "solid-js";
 
 export function createLongPress<T extends HTMLElement>(
-  props: {
+  props: Omit<JSX.HTMLAttributes<T>, "onClick"> & {
     longPressDuration?: number;
     onLongPress?: (event: Event) => void;
-  } & Omit<JSX.HTMLAttributes<T>, "onClick">,
+  },
 ) {
   const [pressTimer, setPressTimer] = createSignal<NodeJS.Timeout | null>(null);
 

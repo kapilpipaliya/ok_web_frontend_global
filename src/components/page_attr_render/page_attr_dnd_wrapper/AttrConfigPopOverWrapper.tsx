@@ -1,18 +1,17 @@
 import type { Strategy } from "@floating-ui/dom";
 
 import createFloating from "@corvu/utils/create/floating";
-import { type Accessor, createSignal, Show } from "solid-js";
-import { Portal } from "solid-js/web";
 import { getFloatingStyle } from '@corvu/utils/floating'
-
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { type Accessor, createSignal, } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import { ZIndex } from "~/components/fields/ZIndex";
+import { type PageLayoutObject, useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
-import { createClickOutside } from "~/lib/hooks/createClickOutside";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { PageLayoutObject, useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 
 export function AttrConfigPopOverWrapper(
   props: Readonly<{
@@ -32,16 +31,16 @@ export function AttrConfigPopOverWrapper(
     options: () => ({
       flip: {
         padding: {
-          top: 28,
-          bottom: 28
+          bottom: 28,
+          top: 28
         },
         // this seems not working now
         // fallbackPlacements: ['top', 'top-end', 'bottom-start'],
       },
-      shift: {},
       offset: ({ placement }) => {
         return placement.startsWith('bottom') ? 30 : 1;
-      }
+      },
+      shift: {}
     }),
     placement: () => (props.isSelectedLayoutId ? "top-start" : "top-start"),
     reference: () => props.reference() ?? null,
@@ -64,8 +63,8 @@ export function AttrConfigPopOverWrapper(
           ref={setFloating}
           style={{
             ...getFloatingStyle({
-              strategy: () => strategy(),
               floatingState: () => floatingState(),
+              strategy: () => strategy(),
             })(),
           }}
         >

@@ -9,9 +9,9 @@ export function CloseIconTopRight(props: Readonly<{ onClick: () => void }>) {
       class={`cursor:pointer fg:#c1c1c1 position:absolute right:0rem z:${zIndex}`}
       height={30}
       icon={"iconamoon:close-duotone"}
+      noobserver
       onClick={props.onClick}
       width={30}
-      noobserver
     />
   );
 }

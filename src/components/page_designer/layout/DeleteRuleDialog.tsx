@@ -1,13 +1,12 @@
 import { For, Show } from "solid-js";
-import { reconcile } from "solid-js/store";
 
-import { type GraphInterface, type Id, useGraph, Vertex } from "~/lib/graph/graph";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
+import { type GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { PageLayoutObject, useDesignerFormIdContext } from "../context/LayoutContext";
 
 import { SimpleWithDismissButton } from "../../styled/SimpleModal";
-import { useDesignerLayoutStore } from "../context/LayoutContext";
+import { useDesignerFormIdContext } from "../context/LayoutContext";
 
 const getAttributeNames = (
   graph: GraphInterface,
@@ -45,10 +44,10 @@ export function DeleteAttributeDialog() {
 
   const handleClose = () => {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      usedAttrsInRules: {},
-      usedAttrsInNameKeys: [],
-      usedAttrsInUniqueConstraints: [],
       shouldContainAtLeastOneForm: false,
+      usedAttrsInNameKeys: [],
+      usedAttrsInRules: {},
+      usedAttrsInUniqueConstraints: [],
     });
   };
 

@@ -1,16 +1,17 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { SimpleWithDismissButton } from "../../../../styled/SimpleModal";
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
+import { useDesignerFormIdContext, } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();

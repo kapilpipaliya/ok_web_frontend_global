@@ -1,11 +1,10 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, type JSX } from "solid-js";
 
-import { GlobalProperties, useGraph, Vertex } from "~/lib/graph/graph";
-import { addNewVertex, newVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
-
+import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
 
 interface AdminLayoutProps {
   children?: JSX.Element;

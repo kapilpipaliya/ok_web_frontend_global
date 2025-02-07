@@ -15,7 +15,7 @@ import { Dynamic } from "solid-js/web";
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
-import { FormStoreObject, useFormContext } from "~/components/form/context/FormContext";
+import { type FormStoreObject, useFormContext } from "~/components/form/context/FormContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
@@ -47,7 +47,7 @@ export function DynamicCSSComponent(
     componentMap[props.meta.componentName] || NotFoundComponent;
 
   const [, otherMeta] = splitProps(
-    props.meta as { children: GenericField[] } & FormField,
+    props.meta as FormField & { children: GenericField[] },
     ["children", "projections"],
   );
   const [, otherProps] = splitProps(props, ["meta", "projections"]);

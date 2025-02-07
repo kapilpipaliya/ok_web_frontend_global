@@ -36,35 +36,6 @@ interface TransitionCounter {
 const TransitionRootContext = createContext<TransitionRootBaseProps>();
 const TransitionCounterContext = createContext<TransitionCounter>();
 
-function useTransitionRootContext(
-  componentName: string,
-): TransitionRootBaseProps {
-  const context = useContext(TransitionRootContext);
-  assert(
-    context,
-    new Error(`<${componentName}> must be used inside a <Transition>`),
-  );
-  return context;
-}
-
-function createTransitionCounter(): TransitionCounter {
-  // Set of currently transitioning TransitionChilds nested within a TransitionChild
-  const [size, setSize] = createSignal(0);
-
-  return {
-    done(): boolean {
-      return size() === 0;
-    },
-    // Reactive set
-    register(): void {
-      setSize((c) => c + 1);
-    },
-    unregister(): void {
-      setSize((c) => c - 1);
-    },
-  };
-}
-
 export interface TransitionBaseChildProps extends UnmountableProps {
   afterEnter?: () => void;
   afterLeave?: () => void;
@@ -80,25 +51,12 @@ export interface TransitionBaseChildProps extends UnmountableProps {
   leaveTo?: string;
 }
 
-function getClassList(classes?: string): string[] {
-  return classes ? classes.split(" ") : [];
-}
-
-function addClassList(ref: HTMLElement, classes: string[]): void {
-  const filtered = classes.filter((value) => value);
-  if (filtered.length) {
-    ref.classList.add(...filtered);
-  }
-}
-function removeClassList(ref: HTMLElement, classes: string[]): void {
-  const filtered = classes.filter((value) => value);
-  if (filtered.length) {
-    ref.classList.remove(...filtered);
-  }
-}
-
 export type TransitionChildProps<T extends ValidConstructor = "div"> =
   HeadlessPropsWithRef<T, TransitionBaseChildProps>;
+
+export type TransitionProps<T extends ValidConstructor = "div"> = Prettify<
+  TransitionChildProps<T> & TransitionRootBaseProps
+>;
 
 type TransitionStates =
   | "enter-from"
@@ -107,6 +65,19 @@ type TransitionStates =
   | "leave-from"
   | "leave-to";
 
+export function Transition<T extends ValidConstructor = "div">(
+  props: TransitionProps<T>,
+): JSX.Element {
+  return createComponent(TransitionRootContext.Provider, {
+    get children() {
+      return createComponent(
+        TransitionChild,
+        omitProps(props, ["show"]) as TransitionChildProps<T>,
+      );
+    },
+    value: props,
+  });
+}
 export function TransitionChild<T extends ValidConstructor = "div">(
   props: TransitionChildProps<T>,
 ): JSX.Element {
@@ -249,20 +220,49 @@ export function TransitionChild<T extends ValidConstructor = "div">(
   });
 }
 
-export type TransitionProps<T extends ValidConstructor = "div"> = Prettify<
-  TransitionChildProps<T> & TransitionRootBaseProps
->;
+function addClassList(ref: HTMLElement, classes: string[]): void {
+  const filtered = classes.filter((value) => value);
+  if (filtered.length) {
+    ref.classList.add(...filtered);
+  }
+}
 
-export function Transition<T extends ValidConstructor = "div">(
-  props: TransitionProps<T>,
-): JSX.Element {
-  return createComponent(TransitionRootContext.Provider, {
-    get children() {
-      return createComponent(
-        TransitionChild,
-        omitProps(props, ["show"]) as TransitionChildProps<T>,
-      );
+function createTransitionCounter(): TransitionCounter {
+  // Set of currently transitioning TransitionChilds nested within a TransitionChild
+  const [size, setSize] = createSignal(0);
+
+  return {
+    done(): boolean {
+      return size() === 0;
     },
-    value: props,
-  });
+    // Reactive set
+    register(): void {
+      setSize((c) => c + 1);
+    },
+    unregister(): void {
+      setSize((c) => c - 1);
+    },
+  };
+}
+
+function getClassList(classes?: string): string[] {
+  return classes ? classes.split(" ") : [];
+}
+
+function removeClassList(ref: HTMLElement, classes: string[]): void {
+  const filtered = classes.filter((value) => value);
+  if (filtered.length) {
+    ref.classList.remove(...filtered);
+  }
+}
+
+function useTransitionRootContext(
+  componentName: string,
+): TransitionRootBaseProps {
+  const context = useContext(TransitionRootContext);
+  assert(
+    context,
+    new Error(`<${componentName}> must be used inside a <Transition>`),
+  );
+  return context;
 }

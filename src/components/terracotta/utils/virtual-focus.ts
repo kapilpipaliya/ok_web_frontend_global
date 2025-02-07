@@ -4,14 +4,6 @@ type FocusListener = (el: HTMLElement) => void;
 
 const LISTENERS = new Set<FocusListener>();
 
-export function useVirtualFocus(listener: FocusListener): void {
-  LISTENERS.add(listener);
-
-  onCleanup(() => {
-    LISTENERS.delete(listener);
-  });
-}
-
 // This is just a way to emulate focus without actually losing the focused element
 // This is useful in combination with `aria-activedescendant`
 // References
@@ -21,4 +13,12 @@ export function focusVirtually<T extends HTMLElement>(el: T): void {
   for (const listener of LISTENERS.keys()) {
     listener(el);
   }
+}
+
+export function useVirtualFocus(listener: FocusListener): void {
+  LISTENERS.add(listener);
+
+  onCleanup(() => {
+    LISTENERS.delete(listener);
+  });
 }

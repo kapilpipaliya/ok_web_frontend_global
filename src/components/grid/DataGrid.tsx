@@ -9,7 +9,6 @@ import {
   type JSX,
   Match,
   on,
-  onMount,
   Show,
   Switch,
 } from "solid-js";
@@ -24,8 +23,10 @@ import { CommonTable } from "~/components/styled/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
+import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -46,8 +47,6 @@ import {
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./GridHeader";
-import { saveUserSetting } from "~/lib/api/saveUserSetting";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {
@@ -118,11 +117,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   };
 
   createEffect(() => {
-    if (!props.tableId) {
-      setGridState("error", "No tableId provided");
-    } else {
+    if (props.tableId) {
       setGridState("error", undefined);
       initializeDataGrid();
+    } else {
+      setGridState("error", "No tableId provided");
     }
   });
 

@@ -2,6 +2,10 @@ import { createContext, type JSX, useContext } from "solid-js";
 
 const ZIndexContext = createContext<number>();
 
+export function useZIndex(): number {
+  const context = useContext(ZIndexContext);
+  return context !== undefined ? context : 0;
+}
 export function ZIndex(
   props: Readonly<{ children: JSX.Element }>,
 ): JSX.Element {
@@ -19,8 +23,4 @@ export function ZIndex(
       {props.children}
     </ZIndexContext.Provider>
   );
-}
-export function useZIndex(): number {
-  const context = useContext(ZIndexContext);
-  return context !== undefined ? context : 0;
 }

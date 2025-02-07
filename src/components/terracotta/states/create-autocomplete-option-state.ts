@@ -26,6 +26,17 @@ export interface AutocompleteOptionStateProperties {
   select(): void;
 }
 
+export interface AutocompleteOptionStateProviderProps
+  extends AutocompleteOptionStateRenderProps {
+  state: AutocompleteOptionStateProperties;
+}
+
+export interface AutocompleteOptionStateRenderProps {
+  children?:
+    | ((state: AutocompleteOptionStateProperties) => JSX.Element)
+    | JSX.Element;
+}
+
 export function createAutocompleteOptionState<T>(
   options: AutocompleteOptionStateOptions<T>,
 ): AutocompleteOptionStateProperties {
@@ -54,19 +65,21 @@ export function createAutocompleteOptionState<T>(
   };
 }
 
-export interface AutocompleteOptionStateRenderProps {
-  children?:
-    | ((state: AutocompleteOptionStateProperties) => JSX.Element)
-    | JSX.Element;
-}
-
-export interface AutocompleteOptionStateProviderProps
-  extends AutocompleteOptionStateRenderProps {
-  state: AutocompleteOptionStateProperties;
-}
-
 const AutocompleteOptionStateContext =
   createContext<AutocompleteOptionStateProperties>();
+
+export function AutocompleteOptionStateChild(
+  props: AutocompleteOptionStateRenderProps,
+): JSX.Element {
+  const state = useAutocompleteOptionState();
+  return createMemo(() => {
+    const current = props.children;
+    if (typeof current === "function" && current.length === 1) {
+      return createMemo(() => current(state));
+    }
+    return current;
+  }) as unknown as JSX.Element;
+}
 
 export function AutocompleteOptionStateProvider(
   props: AutocompleteOptionStateProviderProps,
@@ -87,17 +100,4 @@ export function useAutocompleteOptionState(): AutocompleteOptionStateProperties 
   const ctx = useContext(AutocompleteOptionStateContext);
   assert(ctx, new Error("Missing <AutocompleteOptionStateProvider>"));
   return ctx;
-}
-
-export function AutocompleteOptionStateChild(
-  props: AutocompleteOptionStateRenderProps,
-): JSX.Element {
-  const state = useAutocompleteOptionState();
-  return createMemo(() => {
-    const current = props.children;
-    if (typeof current === "function" && current.length === 1) {
-      return createMemo(() => current(state));
-    }
-    return current;
-  }) as unknown as JSX.Element;
 }

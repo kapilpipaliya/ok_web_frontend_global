@@ -4,14 +4,16 @@ import { reconcile } from "solid-js/store";
 
 import { TextEditor } from "~/components/css_properties/CSSEditor/TextEditor";
 import { StyleEditor } from "~/components/css_properties/StyleEditor/StyleEditor";
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 
 import { ZIndex } from "../../fields/ZIndex";
+import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
 import { DynamicComponent } from "../../form/DynamicComponent";
-import { useFormContext, type FormStoreObject } from "../../form/context/FormContext";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { MultiSelectField } from "../../styled/MultiSelect";
 import { useCssEditor } from "../context/CssEditorContext";
@@ -21,37 +23,8 @@ import { cssStateToString } from "../utils/cssStateToString";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
-import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 
 const defaultStateLabel = "Default";
-
-function getOptions(cssState: CSSStore) {
-  const pseudoClasses = [
-    "",
-    ":active",
-    ":hover",
-    ":focus",
-    ":disabled",
-    ":visited",
-    ":focus-within",
-    ":focus-visible",
-    ":target",
-    "@xs",
-    "@sm",
-    "@md",
-    "@lg",
-  ];
-  const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
-
-  return Array.from(uniqueStates).map((value) => {
-    const label =
-      value in cssState
-        ? `${value === "" ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
-        : value;
-    return { id: value, label };
-  });
-}
 
 export function CSSPropertiesEditor(props: Readonly<{}>) {
   const cssEditorProps = useCssEditorProps();
@@ -149,11 +122,11 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
           <button class="ai:center d:inline-flex" onClick={removeState} title="Remove State">
-            <Icon height={21} icon="ph:minus" width={21} noobserver />
+            <Icon height={21} icon="ph:minus" noobserver width={21} />
           </button>
         </Show>
         <button class="ai:center d:inline-flex" onClick={handleAddNewClick} title="Add New State">
-          <Icon height={21} icon="ph:plus" width={21} noobserver />
+          <Icon height={21} icon="ph:plus" noobserver width={21} />
         </button>
         <IframeHelpDialog
           icon="ph:question"
@@ -177,4 +150,31 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
       <StyleEditor />
     </>
   );
+}
+
+function getOptions(cssState: CSSStore) {
+  const pseudoClasses = [
+    "",
+    ":active",
+    ":hover",
+    ":focus",
+    ":disabled",
+    ":visited",
+    ":focus-within",
+    ":focus-visible",
+    ":target",
+    "@xs",
+    "@sm",
+    "@md",
+    "@lg",
+  ];
+  const uniqueStates = new Set([...Object.keys(cssState), ...pseudoClasses]);
+
+  return Array.from(uniqueStates).map((value) => {
+    const label =
+      value in cssState
+        ? `${value === "" ? defaultStateLabel : value} (${Object.values(cssState[value]).length})`
+        : value;
+    return { id: value, label };
+  });
 }

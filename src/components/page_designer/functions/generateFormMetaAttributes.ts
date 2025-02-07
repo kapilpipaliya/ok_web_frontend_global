@@ -16,6 +16,56 @@ import { uniqueNameKey } from "../constants/constant";
 import { getChildrenAttrs } from "./getChildrenAttrs";
 import { getComponentLabel } from "./getComponentLabel";
 
+export type IDToRuleMap = { [id: string]: string[] };
+type RuleToIDMap = { [RuleId: string]: Id[] };
+
+export function allFormAttrsInPageFromLevel(
+  graph: Store<GraphInterface>,
+  parent: Vertex,
+  componentLabel: string,
+  excludeVertices: Id[] = [],
+): Id[] {
+  const verticesWithFormAttr: Id[] = [];
+
+  function collectFormProperties(vertex: Vertex): void {
+    if (excludeVertices.includes(vertex.id)) {
+      return;
+    }
+    const compLabel = getComponentLabel(graph, vertex);
+
+    if (compLabel === componentLabel) {
+      verticesWithFormAttr.push(vertex.id);
+    }
+
+    const children =
+      evalExpression("->Attr", { graph, vertexes: [vertex] }) || [];
+    for (const child of children) {
+      collectFormProperties(child);
+    }
+  }
+
+  collectFormProperties(parent);
+
+  return verticesWithFormAttr;
+}
+
+export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
+  const idToRuleMap: IDToRuleMap = {};
+
+  for (const ruleId in ruleToIDMap) {
+    const idArrays = ruleToIDMap[ruleId];
+
+    idArrays.forEach((id) => {
+      if (!idToRuleMap[id]) {
+        idToRuleMap[id] = [];
+      }
+      idToRuleMap[id].push(ruleId);
+    });
+  }
+
+  return idToRuleMap;
+}
+
 // todo: write test for this function
 export function generateFormMetaAttributes(
   graph: Store<GraphInterface>,
@@ -81,6 +131,54 @@ export function generateFormMetaAttributes(
     title: rootVertex.P.title,
   };
 }
+export function getAllFieldsUsedInAllRules(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+): IDToRuleMap {
+  if (!formVertex) {
+    return {};
+  }
+  const rules =
+    evalExpression("->Rule", { graph, setGraph, vertexes: [formVertex] }) || [];
+  const ruleToIDMap: RuleToIDMap = {};
+  rules.forEach((rule: Vertex) => {
+    ruleToIDMap[rule.id] = (
+      evalExpression("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)", {
+        graph,
+        setGraph,
+        vertexes: [rule],
+      }) || []
+    ).map((vertex: Vertex) => vertex.id);
+  });
+  return convertToIdToRuleMap(ruleToIDMap);
+}
+
+export function getAllFieldsUsedInRootLevelSetting(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
+  layoutVertex: Vertex,
+  projection: string,
+): Id[] {
+  const allUniqueKeys =
+    evalExpression(projection, { graph, setGraph, vertexes: [formVertex] }) ||
+    [];
+  const allUniqueKeyIds = allUniqueKeys.map((key: Vertex) => key.id);
+
+  const fieldsUsedInUniqueConstraints = [] as Id[];
+
+  function collectUniqueConstraints(vertex: Vertex) {
+    if (allUniqueKeyIds.includes(vertex.id)) {
+      fieldsUsedInUniqueConstraints.push(vertex.id);
+    }
+    getChildrenAttrs(graph, setGraph, vertex).forEach(collectUniqueConstraints);
+  }
+  collectUniqueConstraints(layoutVertex);
+
+  return fieldsUsedInUniqueConstraints;
+}
+
 // use it when new field is drag and drop.
 export function getUniqueName(
   txnId: number,
@@ -109,27 +207,6 @@ export function getUniqueName(
   return `unique_${uniqueId}`;
 }
 
-export function isUniqueIdUsed(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formVertex: Vertex,
-  layoutVertex: Vertex,
-  key: string,
-) {
-  function checkVertex(attrVertex: Vertex) {
-    if (
-      attrVertex.P[uniqueNameKey] === key &&
-      attrVertex.id !== layoutVertex.id
-    ) {
-      return true;
-    }
-
-    return getChildrenAttrs(graph, setGraph, attrVertex).some(checkVertex);
-  }
-
-  return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
-}
-
 export function isAnyFieldInvalid(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -152,49 +229,6 @@ export function isAnyFieldInvalid(
   }
 
   return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
-}
-
-type RuleToIDMap = { [RuleId: string]: Id[] };
-export type IDToRuleMap = { [id: string]: string[] };
-
-export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
-  const idToRuleMap: IDToRuleMap = {};
-
-  for (const ruleId in ruleToIDMap) {
-    const idArrays = ruleToIDMap[ruleId];
-
-    idArrays.forEach((id) => {
-      if (!idToRuleMap[id]) {
-        idToRuleMap[id] = [];
-      }
-      idToRuleMap[id].push(ruleId);
-    });
-  }
-
-  return idToRuleMap;
-}
-
-export function getAllFieldsUsedInAllRules(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formVertex: Vertex,
-): IDToRuleMap {
-  if (!formVertex) {
-    return {};
-  }
-  const rules =
-    evalExpression("->Rule", { graph, setGraph, vertexes: [formVertex] }) || [];
-  const ruleToIDMap: RuleToIDMap = {};
-  rules.forEach((rule: Vertex) => {
-    ruleToIDMap[rule.id] = (
-      evalExpression("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)", {
-        graph,
-        setGraph,
-        vertexes: [rule],
-      }) || []
-    ).map((vertex: Vertex) => vertex.id);
-  });
-  return convertToIdToRuleMap(ruleToIDMap);
 }
 
 export function isAttrUsedInRules(
@@ -224,57 +258,23 @@ export function isAttrUsedInRules(
   return result;
 }
 
-export function getAllFieldsUsedInRootLevelSetting(
+export function isUniqueIdUsed(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formVertex: Vertex,
   layoutVertex: Vertex,
-  projection: string,
-): Id[] {
-  const allUniqueKeys =
-    evalExpression(projection, { graph, setGraph, vertexes: [formVertex] }) ||
-    [];
-  const allUniqueKeyIds = allUniqueKeys.map((key: Vertex) => key.id);
-
-  const fieldsUsedInUniqueConstraints = [] as Id[];
-
-  function collectUniqueConstraints(vertex: Vertex) {
-    if (allUniqueKeyIds.includes(vertex.id)) {
-      fieldsUsedInUniqueConstraints.push(vertex.id);
-    }
-    getChildrenAttrs(graph, setGraph, vertex).forEach(collectUniqueConstraints);
-  }
-  collectUniqueConstraints(layoutVertex);
-
-  return fieldsUsedInUniqueConstraints;
-}
-
-export function allFormAttrsInPageFromLevel(
-  graph: Store<GraphInterface>,
-  parent: Vertex,
-  componentLabel: string,
-  excludeVertices: Id[] = [],
-): Id[] {
-  const verticesWithFormAttr: Id[] = [];
-
-  function collectFormProperties(vertex: Vertex): void {
-    if (excludeVertices.includes(vertex.id)) {
-      return;
-    }
-    const compLabel = getComponentLabel(graph, vertex);
-
-    if (compLabel === componentLabel) {
-      verticesWithFormAttr.push(vertex.id);
+  key: string,
+) {
+  function checkVertex(attrVertex: Vertex) {
+    if (
+      attrVertex.P[uniqueNameKey] === key &&
+      attrVertex.id !== layoutVertex.id
+    ) {
+      return true;
     }
 
-    const children =
-      evalExpression("->Attr", { graph, vertexes: [vertex] }) || [];
-    for (const child of children) {
-      collectFormProperties(child);
-    }
+    return getChildrenAttrs(graph, setGraph, attrVertex).some(checkVertex);
   }
 
-  collectFormProperties(parent);
-
-  return verticesWithFormAttr;
+  return getChildrenAttrs(graph, setGraph, formVertex).some(checkVertex);
 }

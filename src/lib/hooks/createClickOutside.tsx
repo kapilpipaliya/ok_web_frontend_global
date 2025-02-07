@@ -4,8 +4,8 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import { createActiveClickOutside } from "./createActiveClickOutside";
 import { getGlobalStore } from "../graph/get/sync/getGlobalStore";
+import { createActiveClickOutside } from "./createActiveClickOutside";
 
 export function createClickOutside(
   graph: Store<GraphInterface>,

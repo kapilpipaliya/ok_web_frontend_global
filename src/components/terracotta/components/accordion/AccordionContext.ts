@@ -5,6 +5,10 @@ import FocusNavigator from "../../utils/focus-navigator";
 
 export const AccordionContext = createContext<FocusNavigator>();
 
+export function createAccordionFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId());
+}
+
 export function useAccordionContext(componentName: string): FocusNavigator {
   const context = useContext(AccordionContext);
   assert(
@@ -12,8 +16,4 @@ export function useAccordionContext(componentName: string): FocusNavigator {
     new Error(`<${componentName}> must be used inside a <Accordion>`),
   );
   return context;
-}
-
-export function createAccordionFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId());
 }

@@ -1,105 +1,26 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { Accessor, onCleanup } from "solid-js";
+import { type Accessor, onCleanup } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-
+import { evalExpression } from "~/lib/expression_eval";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
 import {
-  type PageLayoutObject,
   useDesignerFormIdContext,
-  useDesignerLayoutStore,
 } from "../../context/LayoutContext";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { evalExpression } from "~/lib/expression_eval";
-
-function initializeMetaVertex(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  const metaVertexId = generateNewVertexId(graph, setGraph);
-  const metaTxnId = generateNewTxnId(graph, setGraph);
-
-  addNewVertex(
-    metaTxnId,
-    newVertex(metaVertexId, ["Attr"], {
-      key: "Attr",
-      label: "Attr",
-      type: "Attr",
-    }),
-    graph,
-    setGraph,
-  );
-
-  return { metaTxnId, metaVertexId };
-}
-
-function createFieldAttributes(
-  graph: GraphInterface,
-  formStoreVertex: Accessor<Vertex<FormStoreObject>>,
-): FieldAttribute[] {
-  return [
-    {
-      collection: "g:'ALL_LABELS'",
-      componentName: "Select",
-      displayName: "Collection",
-      key: "collection",
-      saveValue: true,
-    },
-    {
-      collection: () =>
-        graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection
-          ? `g:'${graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection}'`
-          : "",
-      componentName: "Select",
-      key: "data",
-    },
-    {
-      class: PROPERTIES.Css.TextField,
-      componentName: "TextInput",
-      key: "expression",
-    },
-  ];
-}
-
-function handleCollectionChange(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formStoreVertex: () => Vertex<FormStoreObject>,
-  collMetaVertex: Vertex[],
-) {
-  return (value: string) => {
-    setValueGlobal(
-      graph,
-      setGraph,
-      formStoreVertex()?.P.txnId,
-      collMetaVertex[0],
-      graph.vertexes[formStoreVertex()?.P.selectedId],
-      value,
-      false,
-    );
-    setSelectionValue(
-      formStoreVertex()?.P.txnId,
-      graph.vertexes[formStoreVertex()?.P.selectedId],
-      graph,
-      setGraph,
-      collMetaVertex[1],
-      undefined,
-    );
-  };
-}
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
@@ -178,4 +99,80 @@ export function CollAndData() {
       />
     </>
   );
+}
+
+function createFieldAttributes(
+  graph: GraphInterface,
+  formStoreVertex: Accessor<Vertex<FormStoreObject>>,
+): FieldAttribute[] {
+  return [
+    {
+      collection: "g:'ALL_LABELS'",
+      componentName: "Select",
+      displayName: "Collection",
+      key: "collection",
+      saveValue: true,
+    },
+    {
+      collection: () =>
+        graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection
+          ? `g:'${graph.vertexes[formStoreVertex()?.P.selectedId]?.P?.collection}'`
+          : "",
+      componentName: "Select",
+      key: "data",
+    },
+    {
+      class: PROPERTIES.Css.TextField,
+      componentName: "TextInput",
+      key: "expression",
+    },
+  ];
+}
+
+function handleCollectionChange(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  formStoreVertex: () => Vertex<FormStoreObject>,
+  collMetaVertex: Vertex[],
+) {
+  return (value: string) => {
+    setValueGlobal(
+      graph,
+      setGraph,
+      formStoreVertex()?.P.txnId,
+      collMetaVertex[0],
+      graph.vertexes[formStoreVertex()?.P.selectedId],
+      value,
+      false,
+    );
+    setSelectionValue(
+      formStoreVertex()?.P.txnId,
+      graph.vertexes[formStoreVertex()?.P.selectedId],
+      graph,
+      setGraph,
+      collMetaVertex[1],
+      undefined,
+    );
+  };
+}
+
+function initializeMetaVertex(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  const metaVertexId = generateNewVertexId(graph, setGraph);
+  const metaTxnId = generateNewTxnId(graph, setGraph);
+
+  addNewVertex(
+    metaTxnId,
+    newVertex(metaVertexId, ["Attr"], {
+      key: "Attr",
+      label: "Attr",
+      type: "Attr",
+    }),
+    graph,
+    setGraph,
+  );
+
+  return { metaTxnId, metaVertexId };
 }

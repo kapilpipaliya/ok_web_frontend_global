@@ -80,6 +80,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                           <Icon
                             class={"transform 2s ease-in-out"}
                             icon="mingcute:down-fill"
+                            noobserver
                             style={{
                               "margin-top": "7px",
                               transform: `${
@@ -89,7 +90,6 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                               }`,
                               transition: "transform 0.2s linear",
                             }}
-                            noobserver
                           />
                         </button>
                       </div>
@@ -114,8 +114,8 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
                                 }`}
                                 height={24}
                                 icon={props.mainIcon[child.P.url]}
-                                width={24}
                                 noobserver
+                                width={24}
                               />
                               <span class="color:#4B5563 ml:8 ">
                                 {child.P.key}

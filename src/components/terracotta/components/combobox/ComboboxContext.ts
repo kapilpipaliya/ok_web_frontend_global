@@ -19,6 +19,13 @@ interface ComboboxContextData {
 
 export const ComboboxContext = createContext<ComboboxContextData>();
 
+export function createComboboxOptionFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId(), {
+    base: MATCHES_NODE,
+    virtual: true,
+  });
+}
+
 export function useComboboxContext(componentName: string): ComboboxContextData {
   const context = useContext(ComboboxContext);
   assert(
@@ -26,11 +33,4 @@ export function useComboboxContext(componentName: string): ComboboxContextData {
     new Error(`<${componentName}> must be used inside a <Combobox>`),
   );
   return context;
-}
-
-export function createComboboxOptionFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId(), {
-    base: MATCHES_NODE,
-    virtual: true,
-  });
 }

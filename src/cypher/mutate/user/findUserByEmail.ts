@@ -13,24 +13,6 @@ interface UserResult {
   userSetting: null | Vertex;
 }
 
-async function getGuestRole(dbSession: Session): Promise<Vertex> {
-  const guestQuery = `
-    MATCH (r:Role {key: 'Guest'})
-    RETURN r
-  `;
-  const guestResult = await dbSession.run(guestQuery);
-  return convertNodeToJson(guestResult.records[0].get("r") as Node);
-}
-
-async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
-  const guestRole = await getGuestRole(dbSession);
-  return {
-    roles: [guestRole],
-    user: null,
-    userSetting: null,
-  };
-}
-
 export async function findUserByEmail(
   dbSession: Session,
   email?: null | string,
@@ -72,4 +54,22 @@ export async function findUserByEmail(
     user,
     userSetting,
   };
+}
+
+async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
+  const guestRole = await getGuestRole(dbSession);
+  return {
+    roles: [guestRole],
+    user: null,
+    userSetting: null,
+  };
+}
+
+async function getGuestRole(dbSession: Session): Promise<Vertex> {
+  const guestQuery = `
+    MATCH (r:Role {key: 'Guest'})
+    RETURN r
+  `;
+  const guestResult = await dbSession.run(guestQuery);
+  return convertNodeToJson(guestResult.records[0].get("r") as Node);
 }

@@ -1,8 +1,9 @@
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { Label } from "./Label";
 

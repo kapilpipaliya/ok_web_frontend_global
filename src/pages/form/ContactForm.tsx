@@ -6,6 +6,30 @@ import { useToast } from "~/components/styled/Toast";
 import { contactUsCall } from "~/lib/api/service/support/contactUsCall";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
+interface FormHeaderProps {
+  subtitle: string;
+  title: string;
+}
+
+interface InputFieldProps {
+  id: string;
+  label: string;
+  name: string;
+  onInput: (e: Event & { currentTarget: HTMLInputElement }) => void;
+  placeholder: string;
+  type: string;
+  value: string;
+}
+
+interface TextAreaFieldProps {
+  id: string;
+  label: string;
+  name: string;
+  onInput: (e: Event & { currentTarget: HTMLTextAreaElement }) => void;
+  placeholder: string;
+  value: string;
+}
+
 // Deprecated: This component will be replaced in the next major version.
 export function ContactForm(): JSX.Element {
   const navigate = useNavigate();
@@ -113,14 +137,15 @@ export function ContactForm(): JSX.Element {
   );
 }
 
-interface InputFieldProps {
-  id: string;
-  label: string;
-  name: string;
-  onInput: (e: { currentTarget: HTMLInputElement } & Event) => void;
-  placeholder: string;
-  type: string;
-  value: string;
+function FormHeader(props: Readonly<FormHeaderProps>): JSX.Element {
+  return (
+    <>
+      <div class="flex f:20 font-weight:bold jc:left mb:5">{props.title}</div>
+      <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
+        {props.subtitle}
+      </div>
+    </>
+  );
 }
 
 function InputField(props: Readonly<InputFieldProps>): JSX.Element {
@@ -143,15 +168,6 @@ function InputField(props: Readonly<InputFieldProps>): JSX.Element {
   );
 }
 
-interface TextAreaFieldProps {
-  id: string;
-  label: string;
-  name: string;
-  onInput: (e: { currentTarget: HTMLTextAreaElement } & Event) => void;
-  placeholder: string;
-  value: string;
-}
-
 function TextAreaField(props: Readonly<TextAreaFieldProps>): JSX.Element {
   return (
     <div class="mb:10px|0">
@@ -170,21 +186,5 @@ function TextAreaField(props: Readonly<TextAreaFieldProps>): JSX.Element {
         value={props.value}
       />
     </div>
-  );
-}
-
-interface FormHeaderProps {
-  subtitle: string;
-  title: string;
-}
-
-function FormHeader(props: Readonly<FormHeaderProps>): JSX.Element {
-  return (
-    <>
-      <div class="flex f:20 font-weight:bold jc:left mb:5">{props.title}</div>
-      <div class="flex color:rgb(152,152,153) f:15 font-weight:medium jc:left mb:10">
-        {props.subtitle}
-      </div>
-    </>
   );
 }

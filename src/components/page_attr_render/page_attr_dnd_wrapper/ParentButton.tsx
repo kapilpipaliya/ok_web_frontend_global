@@ -1,10 +1,11 @@
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
 import { IconButton } from "~/components/styled/IconButton";
+import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
-import { evalExpression } from "~/lib/expression_eval";
+import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
 
 export function ParentButton(props: { item: Vertex; size: number }) {
   const [graph, setGraph] = useGraph();

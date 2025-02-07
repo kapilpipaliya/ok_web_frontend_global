@@ -71,13 +71,13 @@ export const Stepper = () => {
               <Icon
                 height={20}
                 icon="mdi:plus"
+                noobserver
                 onClick={(e) => {
                   e.stopPropagation();
                   addStepBefore(step.id);
                 }}
                 style="cursor:pointer; color:rgb(37,99,235);padding: 5px 0px;"
                 width={20}
-                noobserver
               />
               <li
                 onClick={() => setCurrentStep(step.id)}
@@ -112,6 +112,7 @@ export const Stepper = () => {
                 <Icon
                   height={20}
                   icon="mdi:plus"
+                  noobserver
                   onClick={(e) => {
                     e.stopPropagation();
                     addStepAfter(step.id);
@@ -120,7 +121,6 @@ export const Stepper = () => {
                     "padding:5px 0px;cursor:pointer; color:rgb(37,99,235);"
                   }
                   width={20}
-                  noobserver
                 />
               </Show>
             </>

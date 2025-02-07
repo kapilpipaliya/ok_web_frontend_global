@@ -8,10 +8,10 @@ import {
 } from "solid-js";
 
 export function JsonEditorField(
-  props: {
+  props: JSX.HTMLAttributes<HTMLDivElement> & {
     json: any;
     onChange: (updatedContent: any) => void;
-  } & JSX.HTMLAttributes<HTMLDivElement>,
+  },
 ) {
   const [local, divProps] = splitProps(props, ["json", "onChange"]);
   let containerRef: HTMLDivElement | undefined;

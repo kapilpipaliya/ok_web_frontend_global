@@ -1,4 +1,4 @@
-import { int, type Transaction } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 

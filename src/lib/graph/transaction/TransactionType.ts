@@ -14,5 +14,5 @@ export type InsertFn = {
     | "replaceEdgeStart"]?: string;
 };
 
-export type TransactionValue = { id: Id,originalData: any, data: any } & InsertFn;
+export type TransactionValue = InsertFn & { data: any;id: Id, originalData: any, };
 

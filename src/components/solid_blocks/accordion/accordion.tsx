@@ -39,10 +39,10 @@ const accordionContext = createContext<
     ]
 >([]);
 
-export type AccordionProps = {
+export type AccordionProps = JSX.HTMLAttributes<HTMLDetailsElement> & {
   open?: boolean;
   setOpen?: (isOpen: boolean) => void;
-} & JSX.HTMLAttributes<HTMLDetailsElement>;
+};
 
 export const Accordion: Component<AccordionProps> = (props) => {
   const [local, detailsProps] = splitProps(props, ["setOpen"]);
@@ -117,12 +117,12 @@ export const AccordionHeader: Component<AccordionHeaderProps> = (props) => (
   />
 );
 
-export type AccordionGroupProps = {
+export type AccordionGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
   /** opening another accordion does not close the last opened one */
   allowMultiple?: boolean;
   /** the last open accordion may be closed */
   allowToggle?: boolean;
-} & JSX.HTMLAttributes<HTMLDivElement>;
+};
 
 export const AccordionGroup: Component<AccordionGroupProps> = (props) => {
   const [local, divProps] = splitProps(props, ["allowMultiple", "allowToggle"]);

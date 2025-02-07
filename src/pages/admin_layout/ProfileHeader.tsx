@@ -1,6 +1,6 @@
 import { type JSX, Show } from "solid-js";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 export interface ProfileHeaderProps {
   profileImage: string;

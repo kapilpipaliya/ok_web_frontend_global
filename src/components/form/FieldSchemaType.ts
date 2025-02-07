@@ -1,36 +1,25 @@
 
 import type { Accessor, Owner } from "solid-js";
+import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import type { PageRenderObject, PageRenderStore } from "../page_attr_render/context/PageRenderContext";
 import type { FormStoreObject } from "./context/FormContext";
-import { SetStoreFunction } from "solid-js/store";
 
-export interface RegexValidation {
-  enabled: boolean;
-  message: string;
-  value: string;
-}
-
-export type RequiredFnType =
-  | ((formStore: FormStoreObject) => boolean)
-  | boolean;
-
-export type HiddenFnType =
-  | ((options: FunctionArgumentType) => boolean)
-  | boolean;
+export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
   data: Vertex;
+  dataContext: Record<string | symbol, any>;
   evalExpression: (expression: string, options: object) => any;
+  fns: (name: string) => Function | undefined;
+  graph: GraphInterface;
   hasDeletePermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
   hasInsertPermission: boolean | null | undefined;
   hasViewPermission: boolean | null | undefined;
   isNoPermissionCheck: boolean | null | undefined;
-  graph: GraphInterface;
-  setGraph: SetStoreFunction<GraphInterface>;
   isViewMode: boolean | null | undefined;
   // formInitialValues: FormStoreObject;
   // formValueStore: FormStoreObject;
@@ -43,14 +32,13 @@ export interface FunctionArgumentBaseType {
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
   ref: Accessor<HTMLDivElement | null>;
-  dataContext: Record<string | symbol, any>;
-  fns: (name: string) => Function | undefined;
   runWithOwner: <T>(fn: () => T) => T | undefined;
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
+  setGraph: SetStoreFunction<GraphInterface>;
+  txnId: number;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   zIndex: number;
-  txnId: number;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {
@@ -59,4 +47,16 @@ export interface FunctionArgumentType extends FunctionArgumentBaseType {
   value: any;
 }
 
-export type ComponentNameType = (options: FunctionArgumentType) => string;
+export type HiddenFnType =
+  | ((options: FunctionArgumentType) => boolean)
+  | boolean;
+
+export interface RegexValidation {
+  enabled: boolean;
+  message: string;
+  value: string;
+}
+
+export type RequiredFnType =
+  | ((formStore: FormStoreObject) => boolean)
+  | boolean;

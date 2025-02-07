@@ -31,56 +31,16 @@ interface ToastContextData {
 
 const ToastContext = createContext<ToastContextData>();
 
-function useToastContext(componentName: string): ToastContextData {
-  const context = useContext(ToastContext);
-  assert(
-    context,
-    new Error(`<${componentName}> must be used inside a <Toaster>`),
-  );
-  return context;
-}
-
-export type ToastProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
-
-export function Toast<T extends ValidConstructor = "div">(
-  props: ToastProps<T>,
-): JSX.Element {
-  useToastContext("Toast");
-
-  return createDynamic(
-    () => props.as || ("div" as T),
-    mergeProps(omitProps(props, ["as"]), TOAST_TAG, {
-      "aria-live": "polite",
-      role: "status",
-    }) as DynamicProps<T>,
-  );
-}
-
-export type ToasterProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
-
-export function Toaster<T extends ValidConstructor = "div">(
-  props: ToasterProps<T>,
-): JSX.Element {
-  const ownerID = createUniqueId();
-
-  return createComponent(ToastContext.Provider, {
-    get children() {
-      return createDynamic(
-        () => props.as || ("div" as T),
-        mergeProps(omitProps(props, ["as"]), TOASTER_TAG) as DynamicProps<T>,
-      );
-    },
-    value: {
-      ownerID,
-    },
-  });
-}
 export interface ToastData<T> {
   data: T;
   id: string;
 }
 
 export type ToasterListener<T> = (queue: ToastData<T>[]) => void;
+
+export type ToasterProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
+
+export type ToastProps<T extends ValidConstructor = "div"> = HeadlessProps<T>;
 
 export class ToasterStore<T> {
   private static toasterID = 0;
@@ -96,13 +56,6 @@ export class ToasterStore<T> {
   constructor() {
     this.id = ToasterStore.toasterID;
     ToasterStore.toasterID += 1;
-  }
-
-  private notify(): void {
-    const clone = [...this.queue];
-    for (const listener of this.listeners.keys()) {
-      listener(clone);
-    }
   }
 
   clear(): void {
@@ -136,6 +89,44 @@ export class ToasterStore<T> {
       this.listeners.delete(callback);
     };
   }
+
+  private notify(): void {
+    const clone = [...this.queue];
+    for (const listener of this.listeners.keys()) {
+      listener(clone);
+    }
+  }
+}
+export function Toast<T extends ValidConstructor = "div">(
+  props: ToastProps<T>,
+): JSX.Element {
+  useToastContext("Toast");
+
+  return createDynamic(
+    () => props.as || ("div" as T),
+    mergeProps(omitProps(props, ["as"]), TOAST_TAG, {
+      "aria-live": "polite",
+      role: "status",
+    }) as DynamicProps<T>,
+  );
+}
+
+export function Toaster<T extends ValidConstructor = "div">(
+  props: ToasterProps<T>,
+): JSX.Element {
+  const ownerID = createUniqueId();
+
+  return createComponent(ToastContext.Provider, {
+    get children() {
+      return createDynamic(
+        () => props.as || ("div" as T),
+        mergeProps(omitProps(props, ["as"]), TOASTER_TAG) as DynamicProps<T>,
+      );
+    },
+    value: {
+      ownerID,
+    },
+  });
 }
 
 export function useToaster<T>(toaster: ToasterStore<T>): () => ToastData<T>[] {
@@ -146,4 +137,13 @@ export function useToaster<T>(toaster: ToasterStore<T>): () => ToastData<T>[] {
   });
 
   return signal;
+}
+
+function useToastContext(componentName: string): ToastContextData {
+  const context = useContext(ToastContext);
+  assert(
+    context,
+    new Error(`<${componentName}> must be used inside a <Toaster>`),
+  );
+  return context;
 }

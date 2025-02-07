@@ -1,14 +1,14 @@
-import { createSignal, type JSX, Match, onMount, ParentProps, Switch } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { createSignal, Match, onMount, type ParentProps, Switch } from "solid-js";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/lib/graph/mutate/getInitialDataAndSetToGraph";
 import { loadUser } from "~/lib/graph/mutate/loadUser";
 
-import { GlobalProperties, useGraph } from "./lib/graph/graph";
-import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
-import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
-import { useNavigate } from "@solidjs/router";
 import { useToast } from "./components/styled/Toast";
+import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
+import { type GlobalProperties, useGraph } from "./lib/graph/graph";
+import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;

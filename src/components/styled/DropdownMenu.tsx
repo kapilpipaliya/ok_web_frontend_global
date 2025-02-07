@@ -1,7 +1,7 @@
 import type { OffsetOptions, Placement, Strategy } from "@floating-ui/dom";
 
 import createFloating from "@corvu/utils/create/floating";
-import { createSignal, type JSX, onMount, splitProps } from "solid-js";
+import { createSignal, type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
@@ -10,19 +10,19 @@ import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { useZIndex } from "../fields/ZIndex";
 
 export function DropdownMenu(
-  props: {
+  props: JSX.HTMLAttributes<HTMLDivElement> & {
     applyDefaultStyles?: boolean;
+    boundary?: Element | null;
     offset?: OffsetOptions;
     onClickOutside?: () => void;
+    padding?: number;
     parentRef: HTMLElement;
     placement?: Placement;
     useAutoPlacement?: boolean;
     useFlip?: boolean;
     useShift?: boolean;
     useSize?: boolean;
-    padding?: number;
-    boundary?: Element | null;
-  } & JSX.HTMLAttributes<HTMLDivElement>,
+  },
 ) {
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [graph, setGraph] = useGraph();
@@ -37,7 +37,7 @@ export function DropdownMenu(
       flip: props.useFlip ?? true, // Automatically flip the dropdown if it doesn't fit
       offset: props.offset,
       shift: { boundary: props.boundary, padding: props.padding ?? 8 }, // Adjust the dropdown to stay within the viewport with a padding of 8px
-      size: props.useSize ? { matchSize: true, fitViewPort: true } : undefined,
+      size: props.useSize ? { fitViewPort: true, matchSize: true } : undefined,
     }),
     placement: () => props.placement ?? "bottom-start",
     reference: () => props.parentRef ?? null,
@@ -60,13 +60,13 @@ export function DropdownMenu(
       <div
         aria-orientation="vertical"
         classList={{
-          [`${local.class ?? ""}`]: true,
           [`${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem`]: props.applyDefaultStyles ?? true,
-          [`z-index:${zIndex}`]: true,
-          [`position:${strategy()}`]: true,
+          [`${local.class ?? ""}`]: true,
           [`left:${floatingState().x ?? 0}px`]: true,
+          [`max-height:${floatingState().maxHeight ?? 100}px`]: props.useSize,
+          [`position:${strategy()}`]: true,
           [`top:${floatingState().y ?? 0}px`]: true,
-          [`max-height:${floatingState().maxHeight ?? 100}px`]: props.useSize
+          [`z-index:${zIndex}`]: true
         }}
         ref={(el) => {
           setFloating(el);

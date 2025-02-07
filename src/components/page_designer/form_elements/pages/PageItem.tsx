@@ -1,27 +1,30 @@
+import type {SetStoreFunction} from "solid-js/store";
+
 import {Icon} from "@iconify-icon/solid";
 import {toTitle} from "case-switcher-js";
 import {createSignal, onCleanup, Show} from "solid-js";
 
-import type {NavItem} from "../getTreeData";
+import type {FormStoreObject} from "~/components/form/context/FormContext";
 
+import {openInNewInternalTab} from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
 import {onClickAddComponent} from "~/components/page_designer/functions/onClickAddComponent";
 import {DropdownMenu} from "~/components/styled/DropdownMenu";
-import {GraphInterface, type Id, useGraph, type Vertex} from "~/lib/graph/graph";
-import {FormStoreObject} from "~/components/form/context/FormContext";
-import {PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore} from "../../context/LayoutContext";
 import {IconButton} from "~/components/styled/IconButton";
+import {type GraphInterface, type Id, useGraph, type Vertex} from "~/lib/graph/graph";
 import {mergeVertexProperties} from "~/lib/graph/mutate/vertex";
-import {SetStoreFunction} from "solid-js/store";
-import {openInNewInternalTab} from "~/components/page_designer/form_elements/pages/openInNewInternalTab";
+
+import type {NavItem} from "../getTreeData";
+
+import {type PageLayoutObject, useDesignerLayoutStore} from "../../context/LayoutContext";
 import { PreviewIsolated } from "./PreviewIsolated";
 
 export function PageItem(
   props: Readonly<{
     child: NavItem;
-    previewPageId: Id | null;
-    setPreviewPageId: (id: Id | null) => void;
     previewGraph: GraphInterface;
+    previewPageId: Id | null;
     setPreviewGraph: SetStoreFunction<GraphInterface>;
+    setPreviewPageId: (id: Id | null) => void;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -109,7 +112,7 @@ export function PageItem(
         onMouseLeave={handleMouseLeave}
         ref={menuRef!}
       >
-        <Icon height={22} icon={"iconoir:multiple-pages"} width={22} noobserver />
+        <Icon height={22} icon={"iconoir:multiple-pages"} noobserver width={22} />
         <div class="font-size:14px">{toTitle(props.child.key)}</div>
         <div class="margin-left:auto">
           <IconButton

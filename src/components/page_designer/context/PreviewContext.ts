@@ -5,6 +5,9 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
 
+export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
+
+type PreviewStore = ReturnType<typeof createStore<PreviewStoreObject>>;
 export function getInitialPreviewStore() {
   return {
     ...InitialPermissions,
@@ -16,9 +19,6 @@ export function getInitialPreviewStore() {
     previewMeta: undefined as undefined | Vertex,
   };
 }
-
-export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
-type PreviewStore = ReturnType<typeof createStore<PreviewStoreObject>>;
 export const PreviewContext = createContext<PreviewStore>(
   createStore(getInitialPreviewStore()),
 );

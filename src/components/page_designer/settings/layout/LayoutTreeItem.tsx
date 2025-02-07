@@ -1,5 +1,7 @@
 import { type Accessor, createMemo, createSelector, createSignal, For, Show } from "solid-js";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
 import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
 import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
@@ -8,16 +10,15 @@ import { resetDragDropState } from "~/components/page_designer/event_handler/res
 import { getDnDBoxShadowArgs } from "~/components/page_designer/functions/getDnDBoxShadowArgs";
 import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { useDesignerLayoutStore, PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
+import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
+import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
-import { HideShowIcon } from "./HideShowIcon";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -165,7 +166,7 @@ export function LayoutTreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
         />
-        <HideShowIcon metaVertex={props.metaVertex} iconSize={20} />
+        <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
         <Show
           when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}
         >

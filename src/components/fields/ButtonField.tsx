@@ -24,7 +24,7 @@ import { createLongPress } from "~/lib/hooks/createLongPress";
 import type { FunctionArgumentType } from "../form/FieldSchemaType";
 import type { GenericComponentProps } from "./FieldType";
 
-import { useFormContext, type FormStoreObject } from "../form/context/FormContext";
+import { type FormStoreObject, useFormContext } from "../form/context/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { useToast } from "../styled/Toast";
@@ -32,11 +32,11 @@ import { createForwardRef } from "../terracotta/utils/dynamic-prop";
 import useEventListener from "../terracotta/utils/use-event-listener";
 
 interface ButtonProps
-  extends Omit<
+  extends GenericComponentProps,
+    Omit<
       JSX.ButtonHTMLAttributes<HTMLButtonElement>,
       "onChange" | "onClick" | "value"
-    >,
-    GenericComponentProps {
+    > {
   as?: string;
   buttonType: "cancel" | "reset" | "submit";
   href?: string;

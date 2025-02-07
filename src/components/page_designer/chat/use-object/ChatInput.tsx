@@ -1,24 +1,26 @@
-import { Show, For, JSX, createSignal } from 'solid-js';
-import { IconButton } from '~/components/styled/IconButton';
-import { DropdownMenu } from '~/components/styled/DropdownMenu';
+import type { Message } from 'ai';
+
 import Tooltip from '@corvu/tooltip';
-import { Message } from 'ai';
+import { createSignal, For, type JSX, Show } from 'solid-js';
+
+import { DropdownMenu } from '~/components/styled/DropdownMenu';
+import { IconButton } from '~/components/styled/IconButton';
 
 interface ChatInputProps {
+  chatMessages: Message[];
+  examples: string[];
+  examplesButtonRef: HTMLButtonElement | undefined;
+  fileInputRef: HTMLInputElement | undefined;
+  files: () => FileList | undefined;
   input: () => string;
   isLoading: () => boolean;
-  files: () => FileList | undefined;
-  showExamples: () => boolean;
-  examples: string[];
-  onSubmit: (e: SubmitEvent, model: string) => void;
-  onInputChange: JSX.ChangeEventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, Event>;
-  onFilesChange: (files: FileList | undefined) => void;
-  onExamplesToggle: (show: boolean) => void;
-  onExampleClick: (example: string) => void;
-  fileInputRef: HTMLInputElement | undefined;
-  examplesButtonRef: HTMLButtonElement | undefined;
-  chatMessages: Message[];
   onClearMessages: () => void;
+  onExampleClick: (example: string) => void;
+  onExamplesToggle: (show: boolean) => void;
+  onFilesChange: (files: FileList | undefined) => void;
+  onInputChange: JSX.ChangeEventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, Event>;
+  onSubmit: (e: SubmitEvent, model: string) => void;
+  showExamples: () => boolean;
 }
 
 export function ChatInput(props: ChatInputProps) {
@@ -47,13 +49,13 @@ export function ChatInput(props: ChatInputProps) {
       <div class="display:flex justify-content:space-between align-items:center">
         <Show when={props.chatMessages.length > 0}>
           <Tooltip
-            placement="top"
-            openDelay={200}
             floatingOptions={{
-              offset: 13,
               flip: true,
+              offset: 13,
               shift: true,
             }}
+            openDelay={200}
+            placement="top"
           >
             <Tooltip.Trigger class="color:rgb(107,114,128)">
               Messages: {props.chatMessages.length}
@@ -75,14 +77,14 @@ export function ChatInput(props: ChatInputProps) {
           <IconButton
             icon="ph:trash"
             onClick={() => setShowDeleteConfirm(true)}
-            title="Clear Messages"
-            size={22}
             ref={deleteButtonRef!}
+            size={22}
+            title="Clear Messages"
           />
           <Show when={showDeleteConfirm()}>
             <DropdownMenu
-              parentRef={deleteButtonRef!}
               onClickOutside={() => setShowDeleteConfirm(false)}
+              parentRef={deleteButtonRef!}
             >
               <div class="padding:0.50rem">
                 <div class="flex flex:col gap:0.5rem">
@@ -113,15 +115,15 @@ export function ChatInput(props: ChatInputProps) {
 
   return (
     <form
-      onSubmit={handleSubmit}
       class="background:white border-top:1px|solid|rgb(229,231,235)"
+      onSubmit={handleSubmit}
     >
       <div class="display:flex flex-direction:column gap:8px">
         <select
-          value={selectedModel()}
-          onChange={(e) => setSelectedModel(e.currentTarget.value)}
           class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px width:fit-content"
           disabled={props.isLoading()}
+          onChange={(e) => setSelectedModel(e.currentTarget.value)}
+          value={selectedModel()}
         >
           <For each={models}>
             {model => (
@@ -133,9 +135,7 @@ export function ChatInput(props: ChatInputProps) {
         <div class="display:flex gap:8px">
           <textarea
             class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed min-height:40px resize:vertical"
-            value={props.input()}
             disabled={props.isLoading()}
-            placeholder="Generate a page... (Press Cmd+Enter to submit)"
             onChange={props.onInputChange}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -148,32 +148,34 @@ export function ChatInput(props: ChatInputProps) {
                 }
               }
             }}
+            placeholder="Generate a page... (Press Cmd+Enter to submit)"
+            value={props.input()}
           />
           <IconButton
+            disabled={props.isLoading()}
             icon="ph:list"
             onClick={() => props.onExamplesToggle(!props.showExamples())}
-            disabled={props.isLoading()}
             ref={props.examplesButtonRef}
-            title="Show Examples"
             size={22}
+            title="Show Examples"
           />
           <IconButton
-            type="submit"
-            icon="ph:paper-plane-right"
-            disabled={props.isLoading()}
-            title="Submit"
-            size={22}
             class="cursor:pointer"
+            disabled={props.isLoading()}
+            icon="ph:paper-plane-right"
+            size={22}
+            title="Submit"
+            type="submit"
           />
         </div>
 
         <div class="display:flex gap:8px">
           <input
-            type="file"
-            onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
-            multiple
-            ref={props.fileInputRef}
             class="flex:1 cursor:pointer"
+            multiple
+            onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
+            ref={props.fileInputRef}
+            type="file"
           />
           <Show when={props.files()}>
             <IconButton
@@ -184,8 +186,8 @@ export function ChatInput(props: ChatInputProps) {
                   props.fileInputRef.value = '';
                 }
               }}
-              title="Clear files"
               size={22}
+              title="Clear files"
             />
           </Show>
         </div>
@@ -196,9 +198,9 @@ export function ChatInput(props: ChatInputProps) {
               {file => (
                 <Show when={file.type.startsWith('image/')}>
                   <img
-                    src={URL.createObjectURL(file)}
                     alt={file.name}
                     class="width:48px height:48px object-fit:cover border-radius:4px"
+                    src={URL.createObjectURL(file)}
                   />
                 </Show>
               )}
@@ -208,17 +210,17 @@ export function ChatInput(props: ChatInputProps) {
 
         <Show when={props.showExamples()}>
           <DropdownMenu
-            parentRef={props.examplesButtonRef!}
             onClickOutside={() => props.onExamplesToggle(false)}
             onMouseLeave={() => props.onExamplesToggle(false)}
+            parentRef={props.examplesButtonRef!}
           >
             <div class="display:flex flex-direction:column gap:4px padding:8px">
               <For each={props.examples}>
                 {example => (
                   <button
-                    type="button"
                     class="text-align:left padding:8px background:rgb(243,244,246) border-radius:6px hover:background:rgb(229,231,235)"
                     onClick={() => props.onExampleClick(example)}
+                    type="button"
                   >
                     {example}
                   </button>

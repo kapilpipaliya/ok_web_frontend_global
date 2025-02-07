@@ -1,15 +1,14 @@
 import { klona } from "klona";
-import { createStore } from "solid-js/store";
+
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { PageRenderContextProvider } from "~/components/page_attr_render/context/PageRenderContext";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
 import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
-import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function UniqueConstrains() {
   const [graph, setGraph] = useGraph();

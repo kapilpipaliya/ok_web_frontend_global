@@ -49,6 +49,10 @@ export type TabGroupControlledProps<
   T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, TabGroupControlledBaseProps<V>>;
 
+export type TabGroupProps<V, T extends ValidConstructor = "div"> =
+  | TabGroupControlledProps<V, T>
+  | TabGroupUncontrolledProps<V, T>;
+
 export type TabGroupUncontrolledBaseProps<V> = Prettify<
   SelectStateRenderProps<V> &
     SingleSelectStateUncontrolledOptions<V> &
@@ -59,16 +63,6 @@ export type TabGroupUncontrolledProps<
   V,
   T extends ValidConstructor = "div",
 > = HeadlessPropsWithRef<T, TabGroupUncontrolledBaseProps<V>>;
-
-export type TabGroupProps<V, T extends ValidConstructor = "div"> =
-  | TabGroupControlledProps<V, T>
-  | TabGroupUncontrolledProps<V, T>;
-
-function isTabGroupUncontrolled<V, T extends ValidConstructor = "div">(
-  props: TabGroupProps<V, T>,
-): props is TabGroupUncontrolledProps<V, T> {
-  return "defaultValue" in props;
-}
 
 export function TabGroup<V, T extends ValidConstructor = "div">(
   props: TabGroupProps<V, T>,
@@ -140,4 +134,10 @@ export function TabGroup<V, T extends ValidConstructor = "div">(
       },
     });
   }) as unknown as JSX.Element;
+}
+
+function isTabGroupUncontrolled<V, T extends ValidConstructor = "div">(
+  props: TabGroupProps<V, T>,
+): props is TabGroupUncontrolledProps<V, T> {
+  return "defaultValue" in props;
 }

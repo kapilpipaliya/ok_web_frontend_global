@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { For, createSignal } from 'solid-js';
 import { useChat } from '@ai-sdk/solid';
 import { getTextFromDataUrl } from '@ai-sdk/ui-utils';
+import { createSignal, For } from 'solid-js';
 
 export function UseChatAttachments() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -9,15 +9,15 @@ export function UseChatAttachments() {
 
   const {
     error,
-    input,
-    isLoading,
     handleInputChange,
     handleSubmit,
+    input,
+    isLoading,
     messages,
     reload,
     stop,
   } = useChat({
-    onFinish(message, { usage, finishReason }) {
+    onFinish(message, { finishReason, usage }) {
       console.log('Usage', usage);
       console.log('FinishReason', finishReason);
     },
@@ -53,9 +53,9 @@ export function UseChatAttachments() {
                     {(attachment, index) =>
                       attachment.contentType?.includes('image/') ? (
                         <img
+                          alt={attachment.name}
                           class="w-24 rounded-md"
                           src={attachment.url}
-                          alt={attachment.name}
                         />
                       ) : attachment.contentType?.includes('text/') ? (
                         <div class="w-32 h-24 rounded-md text-xs overflow-hidden p-2 text-zinc-500 border">
@@ -75,9 +75,9 @@ export function UseChatAttachments() {
         <div class="mt-4 text-gray-500">
           <div>Loading...</div>
           <button
-            type="button"
             class="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
             onClick={stop}
+            type="button"
           >
             Stop
           </button>
@@ -88,9 +88,9 @@ export function UseChatAttachments() {
         <div class="mt-4">
           <div class="text-red-500">An error occurred.</div>
           <button
-            type="button"
             class="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
             onClick={() => reload()}
+            type="button"
           >
             Retry
           </button>
@@ -98,8 +98,8 @@ export function UseChatAttachments() {
       )}
 
       <form
-        onSubmit={onSend}
         class="flex flex-col gap-2 fixed bottom-0 p-2 w-full bg-white"
+        onSubmit={onSend}
       >
         <div class="flex flex-row gap-2 fixed right-2 bottom-14 items-end">
           <For each={files() ? Array.from(files()!) : []}>
@@ -108,9 +108,9 @@ export function UseChatAttachments() {
               return type.startsWith('image/') ? (
                 <div>
                   <img
+                    alt={attachment.name}
                     class="w-24 rounded-md"
                     src={URL.createObjectURL(attachment)}
-                    alt={attachment.name}
                   />
                   <span class="text-sm text-zinc-500">{attachment.name}</span>
                 </div>
@@ -125,18 +125,18 @@ export function UseChatAttachments() {
         </div>
 
         <input
-          type="file"
-          onChange={e => setFiles(e.currentTarget.files ?? undefined)}
           multiple
+          onChange={e => setFiles(e.currentTarget.files ?? undefined)}
           ref={fileInputRef}
+          type="file"
         />
 
         <input
-          value={input()}
-          placeholder="Send message..."
-          onInput={handleInputChange}
           class="bg-zinc-100 w-full p-2"
           disabled={isLoading()}
+          onInput={handleInputChange}
+          placeholder="Send message..."
+          value={input()}
         />
       </form>
     </div>

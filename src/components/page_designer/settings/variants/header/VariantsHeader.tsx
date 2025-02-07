@@ -1,6 +1,5 @@
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 
-import { AddNewVariantButton } from "./AddNewVariantButton";
 import { DisplayAllVariants } from "./DisplayAllVariants";
 
 export function VariantsHeader() {

@@ -2,29 +2,6 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 
-// helper function to find all the vertex ids of the label
-export function findVertexIdsByLabel(
-  graph: Store<GraphInterface>,
-  label: string,
-): Id[] {
-  return graph.vertexLabelIdMap[label] || [];
-}
-
-export function findVertexByLabelAndUniqueId(
-  graph: Store<GraphInterface>,
-  label: string,
-  attribute: string,
-  value: number | string,
-) {
-  if (!value) {
-    return undefined;
-  }
-  const vertexId = (graph.vertexLabelIdMap[label] || []).find(
-    (vertexId) => value === graph.vertexes[vertexId].P[attribute],
-  );
-  return vertexId ? graph.vertexes[vertexId] : undefined;
-}
-
 export function findVertexByLabelAndPks(
   label: string,
   value: {
@@ -46,6 +23,21 @@ export function findVertexByLabelAndPks(
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
 
+export function findVertexByLabelAndUniqueId(
+  graph: Store<GraphInterface>,
+  label: string,
+  attribute: string,
+  value: number | string,
+) {
+  if (!value) {
+    return undefined;
+  }
+  const vertexId = (graph.vertexLabelIdMap[label] || []).find(
+    (vertexId) => value === graph.vertexes[vertexId].P[attribute],
+  );
+  return vertexId ? graph.vertexes[vertexId] : undefined;
+}
+
 export function findVertexByLabelAndUniqueIdWithSkip(
   label: string,
   attribute: string,
@@ -62,4 +54,12 @@ export function findVertexByLabelAndUniqueIdWithSkip(
   );
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
+}
+
+// helper function to find all the vertex ids of the label
+export function findVertexIdsByLabel(
+  graph: Store<GraphInterface>,
+  label: string,
+): Id[] {
+  return graph.vertexLabelIdMap[label] || [];
 }

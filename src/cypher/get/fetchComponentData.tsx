@@ -1,8 +1,10 @@
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
-import { Vertex, GraphInterface } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 

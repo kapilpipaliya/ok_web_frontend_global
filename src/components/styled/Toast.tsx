@@ -24,8 +24,6 @@ const DismissButton: Component<{
   );
 };
 
-type ValueOrFunction<T, Args> = ((args: Args) => T) | T;
-
 interface LoadingToastParams<T extends { [key: string]: any }> {
   errorJSXFn?: ValueOrFunction<Renderable, any>;
   errorMessage?: string;
@@ -36,6 +34,8 @@ interface LoadingToastParams<T extends { [key: string]: any }> {
   successJSXFn?: ValueOrFunction<Renderable, T>;
   successMessage?: string;
 }
+
+type ValueOrFunction<T, Args> = ((args: Args) => T) | T;
 
 export function useToast() {
   function showCustomToast(message: string, showDismiss: boolean) {
@@ -108,9 +108,9 @@ export function useToast() {
         <Icon
           height={27}
           icon={"mingcute:warning-line"}
+          noobserver
           style={{ color: "#009cfa" }}
           width={27}
-          noobserver
         />
       ),
     });

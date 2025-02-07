@@ -1,14 +1,16 @@
 import type { Vertex } from "~/lib/graph/graph";
+
 import { isVertex } from "~/lib/graph/mutate/vertex";
-import { useRepeaterVertexContext, RepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
+
+import { RepeaterVertexContext, useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
 import { PageAttrRender } from "../page_attr_render/PageAttrRender";
 
 export function RepeaterInternal(props: {
-  meta: Vertex;
   data: any;
   index: number;
-  repeaterValue: any;
+  meta: Vertex;
   name: string;
+  repeaterValue: any;
 }) {
   const context = useRepeaterVertexContext();
   const repeaterStore = new Proxy(context, {

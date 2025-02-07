@@ -1,7 +1,13 @@
+export interface CypherQueryResult {
+  params: { [key: string]: any };
+  query: string;
+}
+
 export type MongoFilter =
   | { $and?: MongoFilter[] }
   | { $not?: MongoFilter }
   | { $or?: MongoFilter[] }
+  | { [key: string]: any }
   | {
       [key: string]: {
         $gt?: any;
@@ -10,13 +16,7 @@ export type MongoFilter =
         $lte?: any;
         $ne?: any;
       };
-    }
-  | { [key: string]: any };
-
-export interface CypherQueryResult {
-  params: { [key: string]: any };
-  query: string;
-}
+    };
 
 export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
   if (!filter || Object.keys(filter).length === 0) {

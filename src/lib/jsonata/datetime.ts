@@ -188,6 +188,40 @@ const romanNumerals = [
 const romanValues = { C: 100, D: 500, I: 1, L: 50, M: 1000, V: 5, X: 10 };
 
 /**
+ * Formats an integer as specified by the XPath fn:format-integer function
+ * See https://www.w3.org/TR/xpath-functions-31/#func-format-integer
+ * @param {number} value - the number to be formatted
+ * @param {string} picture - the picture string that specifies the format
+ * @returns {string} - the formatted number
+ */
+export function formatInteger(value, picture) {
+  if (typeof value === "undefined") {
+    return undefined;
+  }
+
+  value = Math.floor(value);
+
+  const format = analyseIntegerPicture(picture);
+  return _formatInteger(value, format);
+}
+
+/**
+ * converts a number to spreadsheet style letters
+ * @param {number} value - the number
+ * @param {string} aChar - the character representing the start of the sequence, e.g. 'A'
+ * @returns {string} - the letters
+ */
+function decimalToLetters(value, aChar) {
+  const letters = [];
+  const aCode = aChar.charCodeAt(0);
+  while (value > 0) {
+    letters.unshift(String.fromCharCode(((value - 1) % 26) + aCode));
+    value = Math.floor((value - 1) / 26);
+  }
+  return letters.join("");
+}
+
+/**
  * converts a number to roman numerals
  * @param {number} value - the number
  * @returns {string} - the number in roman numerals
@@ -200,6 +234,22 @@ function decimalToRoman(value) {
     }
   }
   return "";
+}
+
+/**
+ * converts spreadsheet style letters to a number
+ * @param {string} letters - the letters
+ * @param {string} aChar - the character representing the start of the sequence, e.g. 'A'
+ * @returns {number} - the numeric value
+ */
+function lettersToDecimal(letters, aChar) {
+  const aCode = aChar.charCodeAt(0);
+  let decimal = 0;
+  for (let i = 0; i < letters.length; i++) {
+    decimal +=
+      (letters.charCodeAt(letters.length - i - 1) - aCode + 1) * 26 ** i;
+  }
+  return decimal;
 }
 
 /**
@@ -221,56 +271,6 @@ function romanToDecimal(roman) {
     }
   }
   return decimal;
-}
-
-/**
- * converts a number to spreadsheet style letters
- * @param {number} value - the number
- * @param {string} aChar - the character representing the start of the sequence, e.g. 'A'
- * @returns {string} - the letters
- */
-function decimalToLetters(value, aChar) {
-  const letters = [];
-  const aCode = aChar.charCodeAt(0);
-  while (value > 0) {
-    letters.unshift(String.fromCharCode(((value - 1) % 26) + aCode));
-    value = Math.floor((value - 1) / 26);
-  }
-  return letters.join("");
-}
-
-/**
- * converts spreadsheet style letters to a number
- * @param {string} letters - the letters
- * @param {string} aChar - the character representing the start of the sequence, e.g. 'A'
- * @returns {number} - the numeric value
- */
-function lettersToDecimal(letters, aChar) {
-  const aCode = aChar.charCodeAt(0);
-  let decimal = 0;
-  for (let i = 0; i < letters.length; i++) {
-    decimal +=
-      (letters.charCodeAt(letters.length - i - 1) - aCode + 1) * 26 ** i;
-  }
-  return decimal;
-}
-
-/**
- * Formats an integer as specified by the XPath fn:format-integer function
- * See https://www.w3.org/TR/xpath-functions-31/#func-format-integer
- * @param {number} value - the number to be formatted
- * @param {string} picture - the picture string that specifies the format
- * @returns {string} - the formatted number
- */
-export function formatInteger(value, picture) {
-  if (typeof value === "undefined") {
-    return undefined;
-  }
-
-  value = Math.floor(value);
-
-  const format = analyseIntegerPicture(picture);
-  return _formatInteger(value, format);
 }
 
 const formats = {
@@ -299,28 +299,6 @@ function _formatInteger(value, format) {
   const negative = value < 0;
   value = Math.abs(value);
   switch (format.primary) {
-    case formats.LETTERS:
-      formattedInteger = decimalToLetters(
-        value,
-        format.case === tcase.UPPER ? "A" : "a",
-      );
-      break;
-    case formats.ROMAN: {
-      formattedInteger = decimalToRoman(value);
-      if (format.case === tcase.UPPER) {
-        formattedInteger = formattedInteger.toUpperCase();
-      }
-      break;
-    }
-    case formats.WORDS: {
-      formattedInteger = numberToWords(value, format.ordinal);
-      if (format.case === tcase.UPPER) {
-        formattedInteger = formattedInteger.toUpperCase();
-      } else if (format.case === tcase.LOWER) {
-        formattedInteger = formattedInteger.toLowerCase();
-      }
-      break;
-    }
     case formats.DECIMAL: {
       formattedInteger = "" + value;
       // TODO use functionPad
@@ -373,6 +351,28 @@ function _formatInteger(value, format) {
           suffix = "th";
         }
         formattedInteger += suffix;
+      }
+      break;
+    }
+    case formats.LETTERS:
+      formattedInteger = decimalToLetters(
+        value,
+        format.case === tcase.UPPER ? "A" : "a",
+      );
+      break;
+    case formats.ROMAN: {
+      formattedInteger = decimalToRoman(value);
+      if (format.case === tcase.UPPER) {
+        formattedInteger = formattedInteger.toUpperCase();
+      }
+      break;
+    }
+    case formats.WORDS: {
+      formattedInteger = numberToWords(value, format.ordinal);
+      if (format.case === tcase.UPPER) {
+        formattedInteger = formattedInteger.toUpperCase();
+      } else if (format.case === tcase.LOWER) {
+        formattedInteger = formattedInteger.toLowerCase();
       }
       break;
     }
@@ -442,14 +442,14 @@ function analyseIntegerPicture(picture) {
       format.primary = formats.WORDS;
       break;
     }
+    case "w":
+      format.primary = formats.WORDS;
+      break;
     case "Ww": {
       format.case = tcase.TITLE;
       format.primary = formats.WORDS;
       break;
     }
-    case "w":
-      format.primary = formats.WORDS;
-      break;
     default: {
       // this is a decimal-digit-pattern if it contains a decimal digit (from any unicode decimal digit group)
       let zeroCode = null;
@@ -959,6 +959,26 @@ const getDateTimeFragment = (date, component) => {
 let iso8601Spec = null;
 
 /**
+ * parse a string containing an integer as specified by the picture string
+ * @param {string} value - the string to parse
+ * @param {string} picture - the picture string
+ * @returns {number} - the parsed number
+ */
+export function parseInteger(value, picture) {
+  if (typeof value === "undefined") {
+    return undefined;
+  }
+
+  const formatSpec = analyseIntegerPicture(picture);
+  const matchSpec = generateRegex(formatSpec);
+  //const fullRegex = '^' + matchSpec.regex + '$';
+  //const matcher = new RegExp(fullRegex);
+  // TODO validate input based on the matcher regex
+  const result = matchSpec.parse(value);
+  return result;
+}
+
+/**
  * formats the date/time as specified by the XPath fn:format-dateTime function
  * @param {number} millis - the timestamp to be formatted, in millis since the epoch
  * @param {string} picture - the picture string that specifies the format
@@ -1198,25 +1218,6 @@ function generateRegex(formatSpec) {
     }
 
     switch (formatSpec.primary) {
-      case formats.LETTERS: {
-        matcher.regex = isUpper ? "[A-Z]+" : "[a-z]+";
-        matcher.parse = (value) => lettersToDecimal(value, isUpper ? "A" : "a");
-        break;
-      }
-      case formats.ROMAN: {
-        matcher.regex = isUpper ? "[MDCLXVI]+" : "[mdclxvi]+";
-        matcher.parse = (value) =>
-          romanToDecimal(isUpper ? value : value.toUpperCase());
-        break;
-      }
-      case formats.WORDS: {
-        matcher.regex =
-          "(?:" +
-          Object.keys(wordValues).concat("and", "[\\-, ]").join("|") +
-          ")+";
-        matcher.parse = (value) => wordsToNumber(value.toLowerCase());
-        break;
-      }
       case formats.DECIMAL: {
         matcher.regex = `[0-9]${occurrences}`;
         if (formatSpec.ordinal) {
@@ -1252,6 +1253,25 @@ function generateRegex(formatSpec) {
         };
         break;
       }
+      case formats.LETTERS: {
+        matcher.regex = isUpper ? "[A-Z]+" : "[a-z]+";
+        matcher.parse = (value) => lettersToDecimal(value, isUpper ? "A" : "a");
+        break;
+      }
+      case formats.ROMAN: {
+        matcher.regex = isUpper ? "[MDCLXVI]+" : "[mdclxvi]+";
+        matcher.parse = (value) =>
+          romanToDecimal(isUpper ? value : value.toUpperCase());
+        break;
+      }
+      case formats.WORDS: {
+        matcher.regex =
+          "(?:" +
+          Object.keys(wordValues).concat("and", "[\\-, ]").join("|") +
+          ")+";
+        matcher.parse = (value) => wordsToNumber(value.toLowerCase());
+        break;
+      }
       case formats.SEQUENCE:
         throw {
           code: "D3130",
@@ -1260,26 +1280,6 @@ function generateRegex(formatSpec) {
     }
   }
   return matcher;
-}
-
-/**
- * parse a string containing an integer as specified by the picture string
- * @param {string} value - the string to parse
- * @param {string} picture - the picture string
- * @returns {number} - the parsed number
- */
-export function parseInteger(value, picture) {
-  if (typeof value === "undefined") {
-    return undefined;
-  }
-
-  const formatSpec = analyseIntegerPicture(picture);
-  const matchSpec = generateRegex(formatSpec);
-  //const fullRegex = '^' + matchSpec.regex + '$';
-  //const matcher = new RegExp(fullRegex);
-  // TODO validate input based on the matcher regex
-  const result = matchSpec.parse(value);
-  return result;
 }
 
 /**
@@ -1475,6 +1475,22 @@ const iso8601regex =
   /^\d{4}(-[01]\d)*(-[0-3]\d)*(T[0-2]\d:[0-5]\d:[0-5]\d)*(\.\d+)?([+-][0-2]\d:?[0-5]\d|Z)?$/;
 
 /**
+ * Converts milliseconds since the epoch to an ISO 8601 timestamp
+ * @param {Number} millis - milliseconds since the epoch to be converted
+ * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
+ * @param {string} [timezone] - the timezone to format the timestamp in (defaults to UTC)
+ * @returns {String} - the formatted timestamp
+ */
+export function fromMillis(millis, picture, timezone) {
+  // undefined inputs always return undefined
+  if (typeof millis === "undefined") {
+    return undefined;
+  }
+
+  return formatDateTime.call(this, millis, picture, timezone);
+}
+
+/**
  * Converts an ISO 8601 timestamp to milliseconds since the epoch
  *
  * @param {string} timestamp - the timestamp to be converted
@@ -1499,20 +1515,4 @@ export function toMillis(timestamp, picture) {
     return Date.parse(timestamp);
   }
   return parseDateTime.call(this, timestamp, picture);
-}
-
-/**
- * Converts milliseconds since the epoch to an ISO 8601 timestamp
- * @param {Number} millis - milliseconds since the epoch to be converted
- * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
- * @param {string} [timezone] - the timezone to format the timestamp in (defaults to UTC)
- * @returns {String} - the formatted timestamp
- */
-export function fromMillis(millis, picture, timezone) {
-  // undefined inputs always return undefined
-  if (typeof millis === "undefined") {
-    return undefined;
-  }
-
-  return formatDateTime.call(this, millis, picture, timezone);
 }

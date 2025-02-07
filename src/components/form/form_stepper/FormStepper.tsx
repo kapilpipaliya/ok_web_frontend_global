@@ -4,12 +4,12 @@ import { createMemo, For, Show } from "solid-js";
 import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import type { FormStoreObject } from "../context/FormContext";
+
+import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";
-import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-import type { FormStoreObject } from "../context/FormContext";
 
 export function FormStepper() {
   const formStoreId = useDesignerFormIdContext();
@@ -52,9 +52,9 @@ export function FormStepper() {
               class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
               height={20}
               icon="mdi:plus"
+              noobserver
               onClick={(e) => handleAddStepBefore(e, step)}
               width={20}
-              noobserver
             />
             <Step index={index} step={step} steps={steps()} />
             <Show when={index() === steps().length - 1}>
@@ -62,9 +62,9 @@ export function FormStepper() {
                 class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
                 height={20}
                 icon="mdi:plus"
+                noobserver
                 onClick={(e) => handleAddStepAfter(e, step)}
                 width={20}
-                noobserver
               />
             </Show>
           </>

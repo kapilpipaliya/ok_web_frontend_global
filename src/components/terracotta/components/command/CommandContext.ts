@@ -18,6 +18,13 @@ interface CommandContextData {
 
 export const CommandContext = createContext<CommandContextData>();
 
+export function createCommandOptionFocusNavigator(): FocusNavigator {
+  return new FocusNavigator(createUniqueId(), {
+    base: MATCHES_NODE,
+    virtual: true,
+  });
+}
+
 export function useCommandContext(componentName: string): CommandContextData {
   const context = useContext(CommandContext);
   assert(
@@ -25,11 +32,4 @@ export function useCommandContext(componentName: string): CommandContextData {
     new Error(`<${componentName}> must be used inside a <Command>`),
   );
   return context;
-}
-
-export function createCommandOptionFocusNavigator(): FocusNavigator {
-  return new FocusNavigator(createUniqueId(), {
-    base: MATCHES_NODE,
-    virtual: true,
-  });
 }

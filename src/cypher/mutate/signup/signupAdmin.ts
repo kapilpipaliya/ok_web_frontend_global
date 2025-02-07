@@ -8,8 +8,8 @@ import type { SignupRequestData } from "./SignupRequestData";
 import { createDatabase } from "./createDatabase";
 import { createRootFolder } from "./createRootFolder";
 import { createUserInSuperDB, createUserInUserDB } from "./createUserInDB";
-import { newAdminValidations } from "./newAdminValidations";
 import { insertComponents } from "./insertComponents";
+import { newAdminValidations } from "./newAdminValidations";
 
 export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
   // Check if the user already exists
