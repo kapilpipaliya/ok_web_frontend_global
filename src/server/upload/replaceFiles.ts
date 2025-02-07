@@ -30,6 +30,9 @@ export async function replaceFiles(
   if (!fileId) {
     return { error: "fileId is required" };
   }
+  if (data.length > 1) {
+    return { error: "Only one file is allowed to be replaced" };
+  }
 
   const oldFileMetadata = await getFileMetadataFromNeo4j(neo4jSession, fileId);
   if (!oldFileMetadata) {
@@ -61,7 +64,7 @@ export async function replaceFiles(
         version: newVersion,
       };
 
-      return await saveFileMetadataToNeo4j(neo4jSession, newMetadata);
+      return await saveFileMetadataToNeo4j(neo4jSession, newMetadata, fileId);
     }),
   );
 

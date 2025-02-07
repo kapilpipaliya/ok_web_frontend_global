@@ -7,8 +7,18 @@ import { formSubmit } from "~/components/form/functions/formSubmit";
 import { uploadFile } from "~/components/solid_blocks/FileUploader";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
+import { API } from '~/lib/api/endpoints';
+import { submitDataCall } from '~/lib/api/service/data/submitDataCall';
+import { isNegative } from '~/lib/data_structure/number/isNegative';
+import { evalExpression } from '~/lib/expression_eval';
+import { getToEdge } from '~/lib/graph/get/sync/getToEdge';
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
+import { addNewEdge } from '~/lib/graph/mutate/edge';
+import { newEdge } from '~/lib/graph/mutate/edge';
+import { setGraphData } from '~/lib/graph/mutate/setGraphData';
+import { commitTxn } from '~/lib/graph/transaction/commitTxn';
+import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
+import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
@@ -22,7 +32,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
     () => !!txnId() && isDisabledTxn(txnId()!, graph),
   );
 
-  const capturePreview = async () => {
+  const capturePreview = async (apiUrl: string, method = "POST") => {
     // Get the first opened view's iframe
     const iframe = document.querySelector('iframe') as HTMLIFrameElement;
     if (!iframe) return;
@@ -30,10 +40,10 @@ export function SaveIconButton(props: { formStoreId: string }) {
     try {
       // Wait for iframe to load
       // await new Promise(resolve => iframe.addEventListener('load', resolve, { once: true }));
-      
+
       // Capture the iframe content using modern-screenshot
       const dataUrl = await domToPng(iframe.contentDocument!.body);
-      
+
       // Convert data URL to blob
       const res = await fetch(dataUrl);
       const blob = await res.blob();
@@ -41,8 +51,12 @@ export function SaveIconButton(props: { formStoreId: string }) {
       // Create file from blob
       const file = new File([blob], 'preview.png', { type: 'image/png' });
 
-      const data = await uploadFile(file, '/api/file/upload');
-      return data.result;
+      const data = await uploadFile(file, apiUrl, method);
+      if (data?.graph) {
+        setGraphData(graph, setGraph, data.graph);
+      }
+
+      return data;
     } catch (error) {
       console.error('Failed to capture preview:', error);
       return null;
@@ -50,25 +64,62 @@ export function SaveIconButton(props: { formStoreId: string }) {
   };
 
   const handleSave = async () => {
-    const previewData = await capturePreview();
-
-    // Add preview URL to form data before submitting
-    // if (previewUrl) {
-    //   mergeVertexProperties(txnId()!, formStoreVertex().id, graph, setGraph, {
-    //     preview: previewUrl
-    //   });
-    // }
-
     // Call original form submit
-    await formSubmit(
+    const formSubmitError = await formSubmit(
       formStoreVertex,
       graph,
       setGraph,
-      () => {},
+      () => { },
       showErrorToast,
       showLoadingToast,
       showWarningToast
     )();
+
+    if (formSubmitError) {
+      return;
+    }
+
+    const imgSaveTxnId = generateNewTxnId(graph, setGraph);
+    const existingPreview = evalExpression("->$0Preview", {
+      graph,
+      setGraph,
+      vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]!],
+    }) || [];
+
+    if (existingPreview.length > 0) {
+      const preview = existingPreview[existingPreview.length - 1];
+      const previewData = await capturePreview(`${API.replaceFileUrl}?fileId=${preview.id}`, "PUT");
+      if (!previewData?.result) {
+        showErrorToast("Failed to capture preview");
+        return;
+      }
+      // const data = commitTxn(imgSaveTxnId, graph);
+      // submitDataCall(data, graph, setGraph, imgSaveTxnId);
+    } else {
+      const previewData = await capturePreview(API.uploadFileUrl);
+      if (!previewData?.result) {
+        showErrorToast("Failed to capture preview");
+        return;
+      }
+      const previewVertexId = previewData.result[previewData.result.length - 1].id;
+      const previewEdge = newEdge(
+        generateNewVertexId(graph, setGraph),
+        getToEdge({ P: { key: "Preview" } } as unknown as Vertex, graph.vertexes[formStoreVertex().P.formDataId!]),
+        {},
+        formStoreVertex().P.formDataId,
+        previewVertexId
+      );
+      const addNewEdgeResult = addNewEdge(imgSaveTxnId, previewEdge, graph, setGraph);
+      if (addNewEdgeResult.error) {
+        showErrorToast(addNewEdgeResult.error as string);
+        return;
+      }
+      const data = commitTxn(imgSaveTxnId, graph);
+      if (data) {
+        submitDataCall(data, graph, setGraph, imgSaveTxnId)
+      }
+    }
+
   };
 
   return (

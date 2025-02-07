@@ -10,6 +10,7 @@ import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/ge
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
+// TODO: is error is handle in all functions?
 export function addNewEdge(
   txnId: number,
   edge: Edge,

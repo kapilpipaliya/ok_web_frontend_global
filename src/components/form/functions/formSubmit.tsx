@@ -1,5 +1,3 @@
-
-
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -14,25 +12,29 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
 
 export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, closePopUp: () => void, showErrorToast: (message: string) => void, showLoadingToast: (options: { loadMessage: string, onSuccess: (value: any) => void, promise: Promise<any>, successMessage: string }) => void, showWarningToast: (message: string) => void) {
-  return async () => {
+  return async (): Promise<string | void> => {
     const navigateToParentRoute = () => {
       // navigate(removeLastPathSegment());
     };
 
     const label = graph.vertexes[formStoreVertex().P.formDataId!]?.L[0].replace(/([A-Z])/g, " $1").trim();
     if (graph.vertexes[`txn${formStoreVertex().P.txnId}`]?.P.steps.length === 0) {
-      showWarningToast(`There is nothing to save for ${label}.`);
+      const warningMessage = `There is nothing to save for ${label}.`;
+      showWarningToast(warningMessage);
+      return warningMessage;
     } else if (isDisabledTxn(formStoreVertex().P.txnId, graph)) {
-      showWarningToast(`${label} is already saved or not changed.`);
-      return;
+      const warningMessage = `${label} is already saved or not changed.`;
+      showWarningToast(warningMessage);
+      return warningMessage;
     }
 
     const isValid = true;
     const isRealTime = false;
 
     if (!isValid) {
-      showWarningToast("please fix all errors");
-      return false;
+      const warningMessage = "Please fix all errors";
+      showWarningToast(warningMessage);
+      return warningMessage;
     }
     let data;
     // TODO: add validation on form that AttrsTableData keys should not available.
@@ -40,8 +42,9 @@ export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph:
     if (!isRealTime) {
       data = commitTxn(formStoreVertex().P.txnId, graph);
       if (!data) {
-        showWarningToast("No data to Submit");
-        return;
+        const warningMessage = "No data to Submit";
+        showWarningToast(warningMessage);
+        return warningMessage;
       }
 
       const key = graph.vertexes[formStoreVertex().P.formDataId!]?.P.key;
@@ -49,8 +52,9 @@ export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph:
       const res = await checkUniqueConstrains(graph.vertexes[formStoreVertex().P.formDataId!]);
 
       if (!isValidResponse(res)) {
-        showErrorToast(getErrorMessage(res));
-        return;
+        const errorMessage = getErrorMessage(res);
+        showErrorToast(errorMessage);
+        return errorMessage;
       }
 
       await showLoadingToast({
@@ -90,6 +94,6 @@ export function formSubmit(formStoreVertex: () => Vertex<FormStoreObject>,graph:
       return;
     }
 
-    return isValid;
+    return;
   };
 }

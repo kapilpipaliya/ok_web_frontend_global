@@ -178,14 +178,14 @@ export function FileUploader(props: FileUploaderProps) {
   );
 }
 
-export async function uploadFile(file: File, apiUrl: string) {
+export async function uploadFile(file: File, apiUrl: string, method = "POST") {
   const formData = new FormData();
   formData.append("file", file);
 
   try {
     const response = await fetch(apiUrl, {
       body: formData,
-      method: "POST",
+      method,
     });
 
     if (!response.ok) {
