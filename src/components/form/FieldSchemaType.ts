@@ -13,7 +13,7 @@ export interface FunctionArgumentBaseType {
   data: Vertex;
   dataContext: Record<string | symbol, any>;
   evalExpression: (expression: string, options: object) => any;
-  fns: (name: string) => Function | undefined;
+  fns?: (name: string) => Function | undefined;
   graph: GraphInterface;
   hasDeletePermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;

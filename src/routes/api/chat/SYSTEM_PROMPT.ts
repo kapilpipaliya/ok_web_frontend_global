@@ -47,7 +47,7 @@ Attr Vertex:
       readOnly: boolean | null | undefined;
       ref: Accessor<HTMLDivElement | null>;
       dataContext: Record<string | symbol, any>; // Data sharing between Items
-      fns: (name: string) => Function | undefined;
+      fns?: (name: string) => Function | undefined;
       runWithOwner: <T>(fn: () => T) => T | undefined;
       runWithParentOwner: <T>(fn: () => T) => T | undefined;
     }

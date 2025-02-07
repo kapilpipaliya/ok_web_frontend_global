@@ -3,7 +3,7 @@ import { Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/admin_layout/constant";
+import { headerIconButtonClass, toolBarClass } from "~/pages/admin_layout/constant";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { PreviewButton } from "../page_tabbar/PreviewButton";

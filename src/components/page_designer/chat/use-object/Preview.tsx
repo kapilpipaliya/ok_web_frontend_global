@@ -1,10 +1,12 @@
 import type { z } from 'zod';
 
-import { createSignal, onCleanup, Show } from 'solid-js';
+import { createSignal, For, onCleanup, Show } from 'solid-js';
 
 import type { graphInterfaceSchema } from '~/routes/api/use-object/schema';
+import { v7 as uuidv7 } from 'uuid';
 
 import { IconButton } from '~/components/styled/IconButton';
+import { evalExpression } from '~/lib/expression_eval';
 import { useGraph, type Vertex } from '~/lib/graph/graph';
 import { addNewEdge } from '~/lib/graph/mutate/edge';
 import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
@@ -12,32 +14,21 @@ import { addNewVertex } from '~/lib/graph/mutate/vertex';
 import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
 import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
 import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
+import { headerIconButtonClass, toolBarClass } from '~/pages/admin_layout/constant';
 import { PageViewWrapper } from '~/pages/PageViewWrapper';
 
-import { IFramePreview } from '../../layout/IFramePreview';
-import { evalExpression } from '~/lib/expression_eval';
-import { headerIconButtonClass, toolBarClass } from '~/pages/admin_layout/constant';
 import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { insertAtPosition } from './functions/insertAtPosition';
+import { IFramePreview } from '../../layout/IFramePreview';
+import { insertAtPosition, insertComponents } from './functions/insertAtPosition';
 
 
-export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>;  message: Vertex;}) {
+export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>; message: Vertex; }) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   // Store vertex IDs with no parents
   const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
-  const [isPreview, setIsPreview] = createSignal(true);
-  const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
-
-  const handleRefresh = () => {
-    setIsPreview(false);
-    setTimeout(() => {
-      setIsPreview(true);
-    }, 100);
-  };
-
   // Add all vertices with new IDs
   const vertexIdMap = new Map<string, string>();
   for (const vertex of props.object.vertexes || []) {
@@ -144,32 +135,39 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>;  
     revertTransaction(metaTxnId, graph, setGraph);
   });
 
-  const formId = () => `${props.message.id}FormStore`
-  return (
-    <div>
-      <Show
-        when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0 || (evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}
-        fallback={<div class="text-align:center padding:16px color:gray-600">No Preview Available</div>}
-      >
+  const MainPreview = () => {
+    const [isPreview, setIsPreview] = createSignal(true);
+    const [insertMode, setInsertMode] = createSignal<'before' | 'after' | 'center'>('after');
+
+    const handleRefresh = () => {
+      setIsPreview(false);
+      setTimeout(() => {
+        setIsPreview(true);
+      }, 100);
+    };
+
+    const formId = uuidv7();
+    return (
+      <Show when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}>
         <div class="display:none">
           <PageViewWrapper
-            uuid={formId()}
+            uuid={formId}
             pageVertexName="Page"
             isNoPermissionCheck={true}
             hideSaveCancelButton
             formDataId={parentId} />
         </div>
 
-        <Show when={graph.vertexes[formId()]}>
+        <Show when={graph.vertexes[formId]}>
           <div class={toolBarClass}>
             <IconButton
               icon="ph:arrows-clockwise"
               onClick={handleRefresh}
               class="bg:transparent hover:bg:neutral-100 p:4 r:4"
-          />
+            />
           </div>
           <Show when={isPreview()}>
-            <IFramePreview formStoreId={formId()} noMinHeight />
+            <IFramePreview formStoreId={formId} noMinHeight />
           </Show>
 
 
@@ -187,15 +185,79 @@ export function Preview(props: { object: z.infer<typeof graphInterfaceSchema>;  
 
               <IconButton
                 icon="ph:plus-circle"
-                class={headerIconButtonClass}
-                onClick={() => insertAtPosition(graph.vertexes[formId()], insertMode(), graph, setGraph, layoutStoreVertex)}
+                class={`${headerIconButtonClass} cursor:not-allowed:disabled opacity:.5:disabled`}
+                onClick={() => insertAtPosition(graph.vertexes[formId], insertMode(), graph, setGraph, layoutStoreVertex)}
                 title="Insert"
-                disabled={layoutStoreVertex()?.P.formId === formId()}
+                disabled={layoutStoreVertex()?.P.formId === formId || !layoutStoreVertex()?.P.formId || !graph.vertexes[graph.vertexes[layoutStoreVertex()?.P.formId!]?.P.selectedId!]}
               />
             </div>
           </div>
 
         </Show>
+      </Show>
+    )
+  }
+
+  const ComponentPreview = () => {
+    const componentVertexes = () => evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || [];
+
+    return (
+      <For each={componentVertexes()}>
+        {(componentVertex) => {
+          const [isPreview, setIsPreview] = createSignal(true);
+          const formId = uuidv7();
+          return (
+            <div class="margin-bottom:24px">
+              <div class="display:none">
+                <PageViewWrapper
+                  uuid={formId}
+                  pageVertexName="Component"
+                  isNoPermissionCheck={true}
+                  hideSaveCancelButton
+                  formDataId={componentVertex.id}
+                />
+              </div>
+
+              <Show when={graph.vertexes[formId]}>
+                <div class={toolBarClass}>
+                  <IconButton
+                    icon="ph:arrows-clockwise"
+                    onClick={() => {
+                      setIsPreview(false);
+                      setTimeout(() => setIsPreview(true), 100);
+                    }}
+                    class="bg:transparent hover:bg:neutral-100 p:4 r:4"
+                  />
+                </div>
+
+                <Show when={isPreview()}>
+                  <IFramePreview formStoreId={formId} noMinHeight />
+                </Show>
+
+                <div class="display:flex gap:8px margin-top:12px">
+                  <IconButton
+                    icon="ph:plus-circle"
+                    class={headerIconButtonClass}
+                    onClick={() => insertComponents([componentVertex], graph, setGraph, layoutStoreVertex)}
+                    title="Insert Component"
+                    disabled={layoutStoreVertex()?.P.formId === formId || !layoutStoreVertex()?.P.formId}
+                  />
+                </div>
+              </Show>
+            </div>
+          );
+        }}
+      </For>
+    );
+  }
+  return (
+    <div>
+      <Show
+        when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0 || (evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}
+        fallback={<div class="text-align:center padding:16px color:gray-600">No Preview Available</div>}
+      >
+        <MainPreview />
+        <ComponentPreview />
       </Show>
     </div>
   );

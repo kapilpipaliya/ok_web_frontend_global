@@ -1,5 +1,5 @@
 import { useChat } from '@ai-sdk/solid';
-import { createMemo, createSignal, For, Show } from 'solid-js';
+import { createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import type { FormStoreObject } from '~/components/form/context/FormContext';
 
@@ -41,7 +41,9 @@ export function UseObjectAIPanel() {
   // Add onMount to scroll to bottom initially
   onMount(() => {
     if (chatHistoryRef) {
-      chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+      setTimeout(() => {
+        chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
+      }, 1500);
     }
   });
 
