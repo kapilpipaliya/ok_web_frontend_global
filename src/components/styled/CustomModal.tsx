@@ -11,6 +11,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";
+import { STYLES } from "./constants/styles";
 
 interface CustomModalProps {
   bodyClass?: string;
@@ -76,7 +77,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       >
         <Header />
         <hr class="fg:lightgrey" />
-        <div class={`${props.bodyClass ?? ""} overflow:auto p:3`}>
+        <div class={`${props.bodyClass ?? ""} ${STYLES.overflow} p:3`}>
           {props.children}
         </div>
         {props.footer?.(setOpen)}

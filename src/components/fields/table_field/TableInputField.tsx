@@ -29,6 +29,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
+import { STYLES } from "~/components/styled/constants/styles";
 
 export function TableInputField(
   props: Readonly<
@@ -131,10 +132,9 @@ export function TableInputField(
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <div
-          class="m:2 overflow:auto r:10"
+          class={`m:2 ${STYLES.overflow} r:10`}
           classList={{
             "border:1px|solid|#37c": sortedVertexes().length > 0, // slate-70
-            "{scrollbar-width:thin}": true,
           }}
         >
           <table

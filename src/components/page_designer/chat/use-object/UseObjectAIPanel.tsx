@@ -18,6 +18,7 @@ import { ChatResponse } from './ChatResponse';
 import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
 import { getChatHistory } from './functions/getChatHistory';
 import { insertAtPosition } from './functions/insertAtPosition';
+import { STYLES } from '~/components/styled/constants/styles';
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -163,7 +164,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
 
   return (
     <div class="display:grid grid-template-rows:1fr|auto height:100%">
-      <div class="overflow:auto chat-history" ref={chatHistoryRef!}>
+      <div class={`${STYLES.overflow} chat-history`} ref={chatHistoryRef!}>
         <For each={messages()}>
           {(message) => (
             <div class="margin-bottom:24px">

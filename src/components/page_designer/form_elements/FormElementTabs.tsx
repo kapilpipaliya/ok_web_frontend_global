@@ -2,6 +2,7 @@ import { createEffect, createSignal, For, Match, type ParentProps, Show, Switch 
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { STYLES } from "~/components/styled/constants/styles";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
@@ -16,9 +17,10 @@ import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 export const UlContainer = (props: ParentProps) => (
-  <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto flex-wrap:nowrap">
+  <ul class={`flex ${STYLES.overflow} jc:space-around margin-bottom:-1px flex-wrap:nowrap`}>
     {props.children}
   </ul>
 );
@@ -29,7 +31,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
   const { showWarningToast } = useToast();
-  
+
   createEffect(async () => {
     if (props.rootLevel) {
       // Fetch children level Components
@@ -54,16 +56,18 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   return (
     <div>
       <div class="flex ai:center gap:2">
-        {props.rootLevel ? null : <div class="p:1rem font-weight:500">Components</div>}
-        <IconButton icon="ph:file"
+        {props.rootLevel ? null : <div class="p:12 font-weight:500">Components</div>}
+        <IconButton
+          class={`${headerIconButtonClass} ml:1px cursor:not-allowed:disabled opacity:.5:disabled`}
+          icon="ph:plus-circle"
           onClick={() => {
             if (!props.rootLevel) {
-              if(isNegative(formStoreVertex().P.formDataId)) {
+              if (isNegative(formStoreVertex().P.formDataId)) {
                 showWarningToast("Please Save Current Page first.");
                 return;
               }
             }
-            return openInNewInternalTab(layoutStoreId, { id: "new", IN: {}, L: ["Component"] , OUT: {}, P: {parentId: props.rootLevel ? null :formStoreVertex().P.formDataId} } as Vertex, graph, setGraph);
+            return openInNewInternalTab(layoutStoreId, { id: "new", IN: {}, L: ["Component"], OUT: {}, P: { parentId: props.rootLevel ? null : formStoreVertex().P.formDataId } } as Vertex, graph, setGraph);
           }}
         />
       </div>
@@ -112,7 +116,7 @@ export function FormElementTabs() {
         </TabsContainer>
       </div>
 
-      <div class="flex:1 overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} ">
+      <div class={`flex:1 ${STYLES.overflow}`}>
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
             <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />

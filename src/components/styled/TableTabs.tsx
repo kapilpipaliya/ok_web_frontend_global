@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal, For } from "solid-js";
 
 import { LoaderNew } from "./LoaderSimple";
+import { STYLES } from "./constants/styles";
 
 interface TableTabProps {
   setActiveTab?: (tab: string) => string;
@@ -36,7 +37,7 @@ export function TableTabs(props: Readonly<TableTabProps>) {
   };
 
   return (
-    <div class="flex bb:#E0E0E0 border-bottom:0.7 flex:row gap-x:30 mt:1rem overflow:auto">
+    <div class={`flex bb:#E0E0E0 border-bottom:0.7 flex:row gap-x:30 mt:1rem ${STYLES.overflow}`}>
       <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
           <button

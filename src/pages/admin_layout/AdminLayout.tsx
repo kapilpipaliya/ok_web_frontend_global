@@ -1,5 +1,6 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, type JSX } from "solid-js";
+import { STYLES } from "~/components/styled/constants/styles";
 
 import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
@@ -38,7 +39,7 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
 
   return (
       // <div
-      //   class="flex {scrollbar-width:thin} flex:column overflow:auto"
+        // class={`flex ${STYLES.overflow} flex:column`}
       //   classList={{
       //     "flex-grow:1": (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSideBarOpen || (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSubSideBarOpen,
       //   }}

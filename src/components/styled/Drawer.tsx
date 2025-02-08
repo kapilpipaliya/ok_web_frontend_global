@@ -13,6 +13,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";
+import { STYLES } from "./constants/styles";
 
 interface DrawerProps {
   children: JSX.Element;
@@ -118,7 +119,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <ResizerBorder>
-        <div class={`${props.drawerClass} h:100% overflow:auto`}>
+        <div class={`${props.drawerClass} h:100% ${STYLES.overflow}`}>
           {props.children}
         </div>
         <Resizer />

@@ -14,6 +14,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
+import { STYLES } from "~/components/styled/constants/styles";
 
 export function ComponentList(props: {
   edgeName: string;
@@ -101,7 +102,7 @@ export function ComponentList(props: {
         ref={el => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
         value={searchQuery()}
       />
-      <div class="scrollbar-color:lightgrey {scrollbar-width:thin}">
+      <div class={`${STYLES.overflow}`}>
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}
           when={!isFetchingData()}

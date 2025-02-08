@@ -3,6 +3,7 @@ import { type Component, createSignal, For, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/components/page_designer/context/LayoutContext";
+import { STYLES } from "~/components/styled/constants/styles";
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -12,11 +13,11 @@ import type { PageLayoutObject } from "../context/LayoutContext";
 
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 import { HeaderRow } from "../header/header_row/HeaderRow";
+import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteConfirmation } from './main_content/DeleteConfirmation';
 import { FormElements } from './main_content/FormElements';
 import { PageViewComponent } from './main_content/PageViewComponent';
 import { PropertiesContent } from './main_content/PropertiesContent';
-import { Settings } from './main_content/Settings';
 import { TabBar } from './main_content/TabBar';
 
 interface ResizeHandleProps {
@@ -63,6 +64,7 @@ interface PanelProps {
 const Panel: Component<PanelProps> = (props) => {
   return (
     <div
+      class={`${STYLES.overflow}`}
       ref={props.ref}
       style={{
         // 'background-color': '#f0f0f0',
@@ -71,7 +73,6 @@ const Panel: Component<PanelProps> = (props) => {
         'grid-template-columns': props.resizePosition === 'left' ? '3px 1fr' : '1fr 3px',
         'grid-template-rows': props.resizePosition === 'top' ? '3px 1fr' : '1fr',
         height: '100%',
-        'overflow': 'auto',
         ...props.style
       }}
     >
@@ -85,7 +86,7 @@ const Panel: Component<PanelProps> = (props) => {
           resizeKey={props.resizeKey || ''}
         />
       </div>
-      <div style={{ "overflow": "auto" }}>
+      <div class={`${STYLES.overflow}`}>
         {props.children}
       </div>
       <div style={{ display: props.resizePosition !== 'left' && props.onResize ? 'block' : 'none' }}>
@@ -171,7 +172,7 @@ export function RenderMainContent() {
 
       <HeaderRow class="height:36px" style={{ 'grid-column': `1 / span ${layoutStore().mainPanel?.length + 1 + 4}` }} />
 
-      <div class="overflow-y:auto" style={{ display: layoutStore().isLeftOpen ? 'block' : 'none' }}>
+      <div class={`${STYLES.overflow}`} style={{ display: layoutStore().isLeftOpen ? 'block' : 'none' }}>
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
@@ -194,7 +195,6 @@ export function RenderMainContent() {
             resizeKey={`mainPanel${mainPanel}Width`}
             style={{
               // 'background-color': '#ffffff',
-              overflow: 'auto'
             }}
           >
             <TabBar mainPanel={mainPanel} />
@@ -205,7 +205,7 @@ export function RenderMainContent() {
 
       <div />
 
-      <div class="overflow:auto" style={{ display: layoutStore().isRight0Open ? 'block' : 'none' }}>
+      <div class={STYLES.overflow} style={{ display: layoutStore().isRight0Open ? 'block' : 'none' }}>
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
@@ -214,13 +214,11 @@ export function RenderMainContent() {
           resizeKey="rightWidth0"
           resizePosition="left"
         >
-          {/* <div class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey height:100% overflow:auto p:5`}> */}
           <UseObjectAIPanel />
-          {/* </div> */}
         </Panel>
       </div>
 
-      <div class="overflow:auto" style={{ display: layoutStore().isRight1Open ? 'block' : 'none' }}>
+      <div class={STYLES.overflow} style={{ display: layoutStore().isRight1Open ? 'block' : 'none' }}>
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
@@ -241,16 +239,12 @@ export function RenderMainContent() {
               graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
           > */}
-          <div
-            class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey overflow:auto p:5`}
-          >
             <PropertiesContent />
-          </div>
           {/* </Show> */}
         </Panel>
       </div>
 
-      <div style={{ display: layoutStore().isRight2Open ? 'block' : 'none' }}>
+      <div class={STYLES.overflow} style={{ display: layoutStore().isRight2Open ? 'block' : 'none' }}>
         <Panel
           activeResizeKey={activeResizeKey()}
           isResizing={isResizing()}
@@ -259,7 +253,7 @@ export function RenderMainContent() {
           resizeKey="rightWidth2"
           resizePosition="left"
         >
-          <Settings />
+          <SettingsWrapper />
         </Panel>
       </div>
 

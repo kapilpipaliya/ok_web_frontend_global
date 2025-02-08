@@ -11,6 +11,7 @@ import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
 import { ResizeOverlay } from "./ResizeOverlay";
 import { useToast } from "./Toast";
+import { STYLES } from "./constants/styles";
 
 export const DIMENSIONS = {
   desktop: { height: "1200px", icon: "ph:desktop", id: "desktop", width: "1000px" },
@@ -107,9 +108,9 @@ export function ResizableContainer(
   };
 
   return (
-    <div class={`scrollbar-color:lightgrey grid ${props.class} overflow:auto  {scrollbar-width:thin}  flex-shrink:0`}>
+    <div class={`grid ${props.class} ${STYLES.overflow}  flex-shrink:0`}>
       <div
-        class="scrollbar-color:lightgrey {scrollbar-width:thin} justify-self:center overflow:auto position:relative r:10|10|10|10 flex flex:col"
+        class={`${STYLES.overflow} justify-self:center position:relative r:10|10|10|10 flex flex:col`}
         classList={{
           "bg:#f3f3f4": isDraggingOver(),
           "user-select:none": resizing(),

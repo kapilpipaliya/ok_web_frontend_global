@@ -3,6 +3,7 @@ import { useLocation } from "@solidjs/router";
 import { type Accessor, For, type Setter, Show } from "solid-js";
 
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
+import { STYLES } from "~/components/styled/constants/styles";
 
 type MainSideBarProps = {
   activeSection: Accessor<string>;
@@ -40,7 +41,7 @@ export const SubSideBar = (props: Readonly<MainSideBarProps>) => {
           value={props.searchTerm()}
         />
         <nav
-          class="{scrollbar-width:thin} ml:-12 mr:-12 mt:10 overflow:auto"
+          class={`${STYLES.overflow} ml:-12 mr:-12 mt:10`}
           style={{
             "max-height": "calc(100vh - 5rem)",
             "overflow-y": "auto",

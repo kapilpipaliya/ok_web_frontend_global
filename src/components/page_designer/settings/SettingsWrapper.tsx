@@ -5,6 +5,7 @@ import type { PageLayoutObject, } from "../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { SettingTabs } from "./SettingTabs";
+import { STYLES } from "~/components/styled/constants/styles";
 
 export function SettingsWrapper() {
   const [graph] = useGraph();
@@ -18,7 +19,7 @@ export function SettingsWrapper() {
       // }}
     >
       <div
-        class={`scrollbar-color:lightgrey {scrollbar-width:thin} border:1|solid|lightgrey flex:column overflow:auto p:5 r:5|5|5|5`}
+        class={`border:1|solid|lightgrey flex:column ${STYLES.overflow} p:5 r:5|5|5|5`}
       >
         <SettingTabs />
       </div>

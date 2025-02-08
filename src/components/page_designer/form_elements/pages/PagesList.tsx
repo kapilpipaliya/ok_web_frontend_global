@@ -21,6 +21,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
+import { STYLES } from "~/components/styled/constants/styles";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -107,7 +108,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
               placeholder={`Search ${props.coll}...`}
               value={searchQuery()}
             />
-            <div class="scrollbar-color:lightgrey grid {scrollbar-width:thin} overflow:auto">
+            <div class={`${STYLES.overflow} grid `}>
               <For
                 each={filteredData()}
                 fallback={

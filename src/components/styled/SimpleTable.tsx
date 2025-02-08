@@ -1,12 +1,13 @@
 import type { JSX } from "solid-js";
+import { STYLES } from "./constants/styles";
 
 export function Table(
   props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,
 ) {
   return (
-    <div class="{scrollbar-width:thin} overflow:visible position:relative r:10">
+    <div class={`${STYLES.overflow} position:relative r:10`}>
       <div
-        class={`${props.class || ""} grid {scrollbar-width:thin} bb:2px|solid|#37c font-size:0.9em grid-template-columns:repeat(${props.headers},1fr) overflow:auto r:10 width:100%`}
+        class={`${props.class || ""} grid bb:2px|solid|#37c font-size:0.9em grid-template-columns:repeat(${props.headers},1fr) ${STYLES.overflow} r:10 width:100%`}
       >
         {props.children}
       </div>

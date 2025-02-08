@@ -11,6 +11,7 @@ import { useZIndex, ZIndex } from "../fields/ZIndex";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
+import { STYLES } from "./constants/styles";
 
 export type Option =
   | string
@@ -283,7 +284,7 @@ export function MultiSelectField(
 
     return (
       <div
-        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px overflow:auto w:100% z-index:${zIndex}`}
+        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px ${STYLES.overflow} w:100% z-index:${zIndex}`}
       >
         <Show
           fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>}

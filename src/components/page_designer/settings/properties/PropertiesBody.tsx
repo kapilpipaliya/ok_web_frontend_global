@@ -225,7 +225,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   return (
     <>
       <div class="mt:5">
-        <span class="flex ai:center">Other Props (JavaScript Function)
+        <span class="flex ai:center">Props Function
           <IconButton
             class="ml:6"
             icon="ph:arrow-square-out"
@@ -238,7 +238,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         </span>
         <EditorContent height="200px" />
       </div>
-      <CustomModal open={isModalOpen} setOpen={setIsModalOpen} title="Edit Other Props" >
+      <CustomModal open={isModalOpen} setOpen={setIsModalOpen} title="Edit Props Function" >
         <div class="p:3 width:600px height:600px">
           <EditorContent height="560px" />
         </div>

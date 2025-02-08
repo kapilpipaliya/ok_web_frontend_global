@@ -6,6 +6,7 @@ import {
   onMount,
   splitProps,
 } from "solid-js";
+import { STYLES } from "../styled/constants/styles";
 
 export function JsonEditorField(
   props: JSX.HTMLAttributes<HTMLDivElement> & {
@@ -69,7 +70,7 @@ export function JsonEditorField(
   return (
     <div
       {...divProps}
-      class="h:200px overflow:auto"
+      class={`h:200px ${STYLES.overflow}`}
       ref={(el) => (containerRef = el)}
     ></div>
   );

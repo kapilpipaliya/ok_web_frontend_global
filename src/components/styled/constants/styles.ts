@@ -20,6 +20,7 @@ export const STYLES = {
   // Label styles
   label: "flex ai:center font-weight:400 f:14 gap:5 white-space:nowrap",
 
+  overflow: "overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}",
   // Tooltip styles
   tooltip: {
     animation: "corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1",
