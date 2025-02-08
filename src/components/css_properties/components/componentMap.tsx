@@ -1,6 +1,6 @@
 import { splitProps } from "solid-js";
 
-import { BoxField } from "~/components/fields/BoxField";
+import { HtmlField } from "~/components/fields/HtmlField";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 
 import { ArrayComponent } from "./fields/ArrayComponent";
@@ -13,6 +13,7 @@ import { Select } from "./fields/Select";
 import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
+
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);
 
@@ -28,7 +29,7 @@ const NumberF = (props: any) => {
 export const componentMap: Record<string, any> = {
   array: ArrayComponent,
   boolean: CheckboxField,
-  box: BoxField,
+  box: HtmlField,
   buttonGroups: ButtonGroups,
   colorPicker: ColorPickerInput,
   dataEditor: DataEditWithCustomDialog,

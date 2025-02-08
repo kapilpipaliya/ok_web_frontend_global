@@ -1,4 +1,4 @@
-import { FileUploader } from "~/components/solid_blocks/FileUploader";
+import { FileUploader } from "~/components/styled/FileUploader";
 import { useToast } from "~/components/styled/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

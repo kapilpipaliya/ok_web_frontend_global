@@ -4,6 +4,7 @@ import { mergeRefs, } from "@solid-primitives/refs";
 import { useNavigate } from "@solidjs/router";
 import {
   createEffect,
+  createSignal,
   getOwner,
   runWithOwner,
   Show,
@@ -28,8 +29,6 @@ import { type FormStoreObject, useFormContext } from "../form/context/FormContex
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { useToast } from "../styled/Toast";
-import { createForwardRef } from "../terracotta/utils/dynamic-prop";
-import useEventListener from "../terracotta/utils/use-event-listener";
 
 interface ButtonProps
   extends GenericComponentProps,
@@ -46,6 +45,7 @@ interface ButtonProps
   text?: string;
 }
 
+// Deprecated
 export function ButtonField(props: Readonly<ButtonProps>) {
   const owner = getOwner();
   const parentItems = usePageRenderContext();
@@ -58,7 +58,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
-  const [internalRef, setInternalRef] = createForwardRef(props);
+  const [internalRef, setInternalRef] = createSignal<HTMLButtonElement | null>(null);
 
   const [local, others] = splitProps(props, [
     "as",
@@ -78,24 +78,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     "onTouchCancel",
     "buttonType",
   ]);
-
-  createEffect(() => {
-    const current = internalRef();
-    if (current instanceof HTMLElement) {
-      // This behavior is redundant for buttons
-      if (current.tagName !== "BUTTON") {
-        useEventListener(current, "keydown", (e) => {
-          switch (e.key) {
-            case " ":
-            case "Enter": {
-              onClick();
-              break;
-            }
-          }
-        });
-      }
-    }
-  });
 
   const onSubmit = async () => {
     if (isAnyFieldInvalid(graph, setGraph, meta(), graph.vertexes[formVertex()!.P.formDataId!])) {

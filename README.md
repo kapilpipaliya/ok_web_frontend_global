@@ -181,27 +181,6 @@ Add Column Filtering
 Add Column Grouping
 Add Column Pinning
 
-Add Component:
-TableHeader - if not provided children, take it from the TableRow. just need to add TableHeader component in the tree.
-TableBody
-TableFooter
-Table
-TableRow - wrap with Repeter component. For Insert, Delete, Update, need to add saparate component in the TableRow. In the TableRow, add TableCell components`.
-TableCell
-TableColumn
-TableColumnGroup
-TableGroup
-TableExpand
-TableExpandRow
-TableExpandColumn
-TablePagination
-TableFilter
-TableSort
-TablePin
-TableColumnFilter
-TableColumnPin
-TableColumnSort
-
 Find a good table component libraries:
 https://www.npmjs.com/package/@tanstack/react-table
 and study the code.

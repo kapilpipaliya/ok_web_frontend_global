@@ -1,12 +1,11 @@
-import Accordion from "@corvu/accordion";
-import Dialog from "@corvu/dialog";
-import Disclosure from "@corvu/disclosure";
-import Drawer from "@corvu/drawer";
+// import Accordion from "@corvu/accordion";
+// import Dialog from "@corvu/dialog";
+// import Disclosure from "@corvu/disclosure";
+// import Drawer from "@corvu/drawer";
 // This will not work with server side rendering, because keys are lost
 import { clientOnly } from "@solidjs/start";
-const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
-// @ts-expect-error ignore
-OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
+// const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
+// OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
 const Popover = clientOnly(() => import("~/components/ssr/popover/Popover"));
 // @ts-expect-error ignore
 Popover.Anchor = clientOnly(() => import("~/components/ssr/popover/PopoverAnchor"));
@@ -26,11 +25,9 @@ Popover.Overlay = clientOnly(() => import("~/components/ssr/popover/PopoverOverl
 Popover.Portal = clientOnly(() => import("~/components/ssr/popover/PopoverPortal"));
 // @ts-expect-error ignore
 Popover.Trigger = clientOnly(() => import("~/components/ssr/popover/PopoverTrigger"));
-const Resizable = clientOnly(() => import("~/components/ssr/resizer/Resizable"));
-// @ts-expect-error ignore
-Resizable.Handle = clientOnly(() => import("~/components/ssr/resizer/Handle"));
-// @ts-expect-error ignore
-Resizable.Panel = clientOnly(() => import("~/components/ssr/resizer/Panel"));
+// const Resizable = clientOnly(() => import("~/components/ssr/resizer/Resizable"));
+// Resizable.Handle = clientOnly(() => import("~/components/ssr/resizer/Handle"));
+// Resizable.Panel = clientOnly(() => import("~/components/ssr/resizer/Panel"));
 
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
 // @ts-expect-error ignore
@@ -48,85 +45,66 @@ import { Match, Portal, Show, Switch } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { componentMap } from "~/components/css_properties/components/componentMap";
-import { CheckboxField } from "~/components/fields/CheckboxField";
-import { ComponentChildrenField } from "~/components/fields/ComponentChildrenField";
-import { ComponentField } from "~/components/fields/ComponentField";
-import { DataField } from "~/components/fields/DataField";
+import { CheckboxField } from "~/components/css_properties/components/fields/CheckboxField";
+import { TextAreaField } from "~/components/css_properties/components/fields/TextArea";
+import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
+import { ComponentField } from "~/components/fields/component/ComponentField";
+import { DataField } from "~/components/fields/data/DataField";
 import { FragmentField } from "~/components/fields/FragmentField";
 import { IconField } from "~/components/fields/IconField";
-import { ImageField } from "~/components/fields/ImageField";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
-import { PullToRefresh } from "~/components/fields/PullToRefresh";
-import { RadioField } from "~/components/fields/RadioField";
-import { RadioGroupField } from "~/components/fields/RadioGroupField";
 // import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/SelectField";
-import { StepsContent } from "~/components/fields/steps/ActiveStepContent";
-import { Step } from "~/components/fields/steps/Step";
-import { StepsRoot } from "~/components/fields/steps/StepsRoot";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { TextAreaField } from "~/components/fields/TextArea";
 import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
 
-import { BoxField } from "../../fields/BoxField";
 import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
+import { HtmlField } from "../../fields/HtmlField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
-import { FileUploader } from "../../solid_blocks/FileUploader";
+import { FileUploader } from "../../styled/FileUploader";
 
 export const corvuComponents = {
-  Accordion,
-  Dialog,
-  Disclosure,
-  Drawer,
-  OtpField,
+  // Accordion,
+  // Dialog,
+  // Disclosure,
+  // Drawer,
+  // OtpField,
   Popover,
-  Resizable,
+  // Resizable,
   Tooltip,
 };
 
 export const componentsMap: Record<string, any> = {
-  ActiveStep: StepsContent,
-  Box: BoxField,
+  Box: HtmlField,
   Button: ButtonField,
-  CheckBox: CheckboxField,
   Component: ComponentField,
   ComponentChildren: ComponentChildrenField,
-  // RadioGroup: RadioGroupField,
+  CheckBox: CheckboxField,
   Data: DataField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
-  // ErrorPage: PageField,
   FileUploader: FileUploader,
   Form: FormField,
   Fragment: FragmentField,
-  Html: BoxField,
+  Html: HtmlField,
   Icon: IconField,
-  Image: ImageField,
   Match,
-  // HtmlEditor: KobalteTextField,
   MultiSelect: SelectField,
-  // Link: Link,
   Page: PageField,
   Portal,
-  PullToRefresh,
-  Radio: RadioField,
-  RadioGroup: RadioGroupField,
   Select: SelectField,
   Show,
-  Step,
-  Steps: StepsRoot,
   Switch,
   Table: TableInputField,
-  // TemplatePage: PageField,
+  // keep as its used in metadata
   Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
   Transition,
   TransitionGroup,
-  // ThankYouPage: PageField,
   ZIndex,
 };
 
@@ -154,7 +132,6 @@ export function getDynamicComponent(component: string) {
 }
 
 /*
-Alert,
 Calendar...,
 Dialog...,
 Disclosure...,

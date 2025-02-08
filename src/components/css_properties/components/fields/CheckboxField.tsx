@@ -19,6 +19,7 @@ interface CheckboxFieldProps
   viewModeClass?: string;
 }
 
+// keep as its used in metadata
 export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
   const [local, others] = splitProps(props, [
     "id",
@@ -31,11 +32,16 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
     "isViewMode",
     "onViewClick",
     "viewModeClass",
+    "onClick",
   ]);
 
   const [reference, setReference] = createSignal<HTMLInputElement | null>(null);
 
   const handleChange = (event: Event) => {
+    event.stopPropagation();
+    if (others.disabled || others.readOnly) {
+      return;
+    }
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
     local.onChange?.((target as HTMLInputElement).checked);
   };
@@ -49,6 +55,23 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
     }, 100);
   };
 
+  // In HTML, the readonly attribute does not apply to checkboxes.
+  // So we need to prevent the default behavior of the checkbox when it is readonly
+  const onClick = (event: Event) => {
+    if (others.readOnly) {
+      event.preventDefault();
+      return;
+    }
+    if (typeof local.onClick === "function") {
+      local.onClick(
+        event as MouseEvent & {
+          currentTarget: HTMLInputElement;
+          target: Element;
+        },
+      );
+    }
+  };
+
   return (
     <Show
       fallback={
@@ -59,13 +82,14 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
       when={!local.isViewMode}
     >
       <input
-        type="checkbox"
         {...others}
         {...local.inputProps}
         checked={local.value}
         class={`${others.class || ""} ${local.error && local.errorClass ? local.errorClass : ""}`}
         onChange={handleChange}
+        onClick={onClick}
         ref={setReference}
+        type="checkbox"
       />
     </Show>
   );

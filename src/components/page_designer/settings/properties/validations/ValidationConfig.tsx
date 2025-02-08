@@ -14,11 +14,7 @@ interface ValidationProps {
 
 export const validations = {
   CheckBox: "required",
-  CheckBoxGroup: "required",
-  DropDown: "required|minLength|maxLength|regex",
-  RadioButton: "required",
-  RadioButtonGroup: "required",
-  TextField: "required|email|minLength|maxLength|regex",
+  TextInputField: "required|email|minLength|maxLength|regex",
 };
 
 export interface ValidationConfigType {

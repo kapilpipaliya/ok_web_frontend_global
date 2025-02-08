@@ -6,7 +6,6 @@ import { createMemo, createSignal, For, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
-import { Checkbox } from "~/components/solid_blocks/checkbox/checkbox";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
@@ -143,11 +142,12 @@ export function ComponentItem(
               selectedComponents().has(graph.vertexes[props.child.id])
             }
           >
-            <Checkbox
+            <input
               checked={selectedComponents().has(graph.vertexes[props.child.id])}
               class="left:7px position:absolute top:2px"
               onChange={(e) => handleCheckboxChange(e, props.child.id)}
-              wrapperClass="height:19px width:19px"
+              type="checkbox"
+              // wrapperClass="height:19px width:19px"
             />
           </Show>
           <div class="flex cursor:pointer gap:5px pt:5px">

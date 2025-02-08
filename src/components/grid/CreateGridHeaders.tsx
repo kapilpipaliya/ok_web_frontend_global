@@ -70,7 +70,7 @@ export function CreateGridHeaders(
             })}
           </Match>
 
-          <Match when={attribute.componentName === "CheckBox" || attribute.componentName === "CheckBox"}>
+          <Match when={typeof info.getValue() === "boolean"}>
             <span>
               {info.getValue() === true
                 ? "Yes"

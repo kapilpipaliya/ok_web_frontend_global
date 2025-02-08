@@ -12,7 +12,7 @@ import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 
-import { getComponentDefaultValues } from "../fields/getComponentDefaultValues";
+import { getComponentDefaultValues } from "../fields/component/functions/getComponentDefaultValues";
 import { useDesignerFormIdContext } from "../page_designer/context/LayoutContext";
 import { RepeaterVertexContext, useRepeaterVertexContext } from "./context/PageAttrContext";
 
