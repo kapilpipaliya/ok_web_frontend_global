@@ -7,9 +7,9 @@ export function TabsContainer(props: ParentProps) {
     </div>
   );
 }
-
 export function TabStickyContainer(props: ParentProps) {
   return (
     <div class={"bg:white p:4 position:sticky top:0"}>{props.children}</div>
   );
 }
+

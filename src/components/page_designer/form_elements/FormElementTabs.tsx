@@ -15,7 +15,7 @@ import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
-import { TabsContainer, TabStickyContainer } from "./TabsContainer";
+import { TabsContainer } from "./TabsContainer";
 
 export const UlContainer = (props: ParentProps) => (
   <ul class="flex {scrollbar-width:thin} jc:space-around margin-bottom:-1px overflow-x:auto flex-wrap:nowrap">
@@ -105,36 +105,38 @@ export function FormElementTabs() {
   );
 
   return (
-    <>
-      <TabStickyContainer>
+    <div class="flex flex:column h:100%">
+      <div class="bg:white p:4">
         <TabsContainer>
           <TabList />
         </TabsContainer>
-      </TabStickyContainer>
+      </div>
 
-      <Switch>
-        <Match when={selectedTab().collection === "Comp"}>
-          <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
-          <Show keyed when={formStoreVertex()?.id}>
-            <DesignerFormIdContext.Provider value={formStoreVertex().id}>
-              <PageLevelComponents rootLevel={false} />
-            </DesignerFormIdContext.Provider>
-          </Show>
-        </Match>
-        <Match when={selectedTab().collection === "Component"}>
-          <Show keyed when={formStoreVertex()?.id}>
-            <DesignerFormIdContext.Provider value={formStoreVertex().id}>
-              <PageLevelComponents rootLevel={true} />
-            </DesignerFormIdContext.Provider>
-          </Show>
-        </Match>
-        <Match
-          keyed
-          when={PageDesignerLabels.find((v) => v === selectedTab().collection)}
-        >
-          <PagesList coll={selectedTab().collection} />
-        </Match>
-      </Switch>
-    </>
+      <div class="flex:1 overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin} ">
+        <Switch>
+          <Match when={selectedTab().collection === "Comp"}>
+            <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
+            <Show keyed when={formStoreVertex()?.id}>
+              <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+                <PageLevelComponents rootLevel={false} />
+              </DesignerFormIdContext.Provider>
+            </Show>
+          </Match>
+          <Match when={selectedTab().collection === "Component"}>
+            <Show keyed when={formStoreVertex()?.id}>
+              <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+                <PageLevelComponents rootLevel={true} />
+              </DesignerFormIdContext.Provider>
+            </Show>
+          </Match>
+          <Match
+            keyed
+            when={PageDesignerLabels.find((v) => v === selectedTab().collection)}
+          >
+            <PagesList coll={selectedTab().collection} />
+          </Match>
+        </Switch>
+      </div>
+    </div>
   );
 }

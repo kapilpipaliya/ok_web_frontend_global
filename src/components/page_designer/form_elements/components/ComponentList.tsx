@@ -101,7 +101,7 @@ export function ComponentList(props: {
         ref={el => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
         value={searchQuery()}
       />
-      <div class="scrollbar-color:lightgrey {scrollbar-width:thin} h:full overflow:auto">
+      <div class="scrollbar-color:lightgrey {scrollbar-width:thin}">
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}
           when={!isFetchingData()}
