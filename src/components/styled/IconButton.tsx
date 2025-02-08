@@ -1,5 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
+
+import { STYLES } from "./constants/styles";
+
 export interface IconButtonProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: string;
@@ -22,7 +25,7 @@ export function IconButton(props: Readonly<IconButtonProps>) {
 
   return (
     <button
-      class={`${local.class ?? ""} ${local.noCenter ? "" : "ai:center d:inline-flex"}`}
+      class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
       type="button"
       {...others}
     >

@@ -1,10 +1,10 @@
 import type { Message } from 'ai';
 
-import Tooltip from '@corvu/tooltip';
 import { createSignal, For, type JSX, Show } from 'solid-js';
 
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
 import { IconButton } from '~/components/styled/IconButton';
+import { TooltipWrapper } from '~/components/styled/TooltipWrapper';
 
 interface ChatInputProps {
   chatMessages: Message[];
@@ -48,32 +48,24 @@ export function ChatInput(props: ChatInputProps) {
     return (
       <div class="display:flex justify-content:space-between align-items:center">
         <Show when={props.chatMessages.length > 0}>
-          <Tooltip
-            floatingOptions={{
-              flip: true,
-              offset: 13,
-              shift: true,
-            }}
-            openDelay={200}
-            placement="top"
+          <TooltipWrapper
+            arrowClass="text:rgb(243,244,246)"
+            content={
+              <For each={props.chatMessages}>
+                {(msg) => (
+                  <div class="display:flex gap:8px max-width:800px">
+                    <span class="font-weight:bold">{msg.role}:</span>
+                    <span>{msg.content}</span>
+                  </div>
+                )}
+              </For>
+            }
+            triggerClass="color:rgb(107,114,128)"
           >
-            <Tooltip.Trigger class="color:rgb(107,114,128)">
+            <span class="color:rgb(107,114,128)">
               Messages: {props.chatMessages.length}
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content class="rounded-lg bg:rgb(243,244,246) px:3 py:2 font-medium data-open:animate-in data-open:fade-in-50% data-open:slide-in-from-bottom-1 data-closed:animate-out data-closed:fade-out-50% data-closed:slide-out-to-bottom-1">
-                <For each={props.chatMessages}>
-                  {(msg) => (
-                    <div class="display:flex gap:8px max-width:800px">
-                      <span class="font-weight:bold">{msg.role}:</span>
-                      <span>{msg.content}</span>
-                    </div>
-                  )}
-                </For>
-                <Tooltip.Arrow class="text:rgb(243,244,246)" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip>
+            </span>
+          </TooltipWrapper>
           <IconButton
             icon="ph:trash"
             onClick={() => setShowDeleteConfirm(true)}

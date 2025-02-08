@@ -1,16 +1,12 @@
-import { clientOnly } from "@solidjs/start";
-const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
-const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
-const TooltipPortal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
-const TooltipContent = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
-const TooltipArrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
+import { STYLES } from "~/components/styled/constants/styles";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { TooltipWrapper } from '~/components/styled/TooltipWrapper';
 /*
 ┌───────────┐
 │Title x ?  │
@@ -40,39 +36,25 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
     >
       {props.title}
       <Show when={props.info}>
-        <Tooltip
-          floatingOptions={{
-            flip: true,
-            offset: 13,
-            shift: true,
-          }}
-          openDelay={200}
-          placement="top"
+        <TooltipWrapper
+          content={
+            <div class={STYLES.tooltip.content}>
+              <Show when={props.title}>
+                <div class={"f:14 font-weight:500"}>{props.title}</div>
+              </Show>
+              {"Click for more Info"}
+            </div>
+          }
+          triggerAs="a"
         >
-          <TooltipTrigger
-            as="a"
+          <a
             class="flex ai:center"
             href={getUrl()}
             target="_blank"
           >
             <Icon height={14} icon="ph:info" noobserver width={14} />
-          </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
-              <div
-                class={
-                  "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
-                }
-              >
-                <Show when={props.title}>
-                  <div class={"f:14 font-weight:500"}>{props.title}</div>
-                </Show>
-                {"Click for more Info"}
-              </div>
-              <TooltipArrow class="" />
-            </TooltipContent>
-          </TooltipPortal>
-        </Tooltip>
+          </a>
+        </TooltipWrapper>
       </Show>
       <Show when={props.showResetIcon ?? false}>
         <Icon

@@ -1,12 +1,6 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { clientOnly } from "@solidjs/start";
-const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
-const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
-const TooltipPortal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
-const TooltipContent = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
-const TooltipArrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
 import { createSignal, Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id } from "~/lib/graph/graph";
@@ -21,7 +15,9 @@ import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
 
 import type { DataGridState } from "./DataGridContext";
 
+import { STYLES } from "../styled/constants/styles";
 import { IconButton } from "../styled/IconButton";
+import { TooltipWrapper } from "../styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
 
 export function CreateGridHeaders(
@@ -80,38 +76,23 @@ export function CreateGridHeaders(
             </span>
           </Match>
           <Match when={tableId === "File" && attribute.key === "fileName"}>
-            <Tooltip
-              floatingOptions={{
-                flip: true,
-                offset: 13,
-                shift: true,
-              }}
-              openDelay={200}
-              placement="top"
+            <TooltipWrapper
+              content={
+                <div class={STYLES.tooltip.content}>
+                  <Show when={info.getValue<string>()}>
+                    <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
+                  </Show>
+                  {getDownloadLink(info.row.original)}
+                  <img alt="File Preview" src={getDownloadLink(info.row.original)} />
+                </div>
+              }
+              triggerAs="span"
+              triggerClass="flex ai:center"
             >
-              <TooltipTrigger
-                as="span"
-                class="flex ai:center"
-              >
+              <span class="flex ai:center">
                 {info.getValue<string>()}
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
-                  <div
-                    class={
-                      "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
-                    }
-                  >
-                    <Show when={info.getValue<string>()}>
-                      <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
-                    </Show>
-                    {getDownloadLink(info.row.original)}
-                    <img alt="File Preview" src={getDownloadLink(info.row.original)} />
-                  </div>
-                  <TooltipArrow class="" />
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
+              </span>
+            </TooltipWrapper>
           </Match>
 
           <Match when={true}>{info.getValue<string>()}</Match>
