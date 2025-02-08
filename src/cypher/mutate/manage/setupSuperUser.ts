@@ -1,3 +1,4 @@
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import {getDriver} from "~/cypher/driver";
 import {createDatabase} from "~/cypher/mutate/signup/createDatabase";
 
@@ -11,14 +12,14 @@ export async function setupSuperUser(): Promise<{ error?: string; status: number
   const dbSession = driver.session();
   try {
     const result = await dbSession.run("SHOW DATABASES");
-    const superDatabase = result.records.find(record => record.get("name") === "super");
+    const superDatabase = result.records.find(record => record.get("name") === SYSTEM_DB_NAME);
     if (superDatabase) {
       return { error: "Super user already exists", status: 400, user: null };
     } else {
-      await createDatabase("super");
+      await createDatabase(SYSTEM_DB_NAME);
 
       const driver = await getDriver();
-      const dbSession = driver.session({database: "super"});
+      const dbSession = driver.session({database: SYSTEM_DB_NAME});
       try {
         const user = await createSuperUser(
           superUserData.email,
@@ -40,15 +41,15 @@ export async function setupSuperUser(): Promise<{ error?: string; status: number
     
         return { status: 200, user };
       } catch (error) {
-        console.error("Error creating super user:", error);
-        return { error: "Failed to create super user", status: 500 };
+        console.error(`Error creating ${SYSTEM_DB_NAME} user:`, error);
+        return { error: `Failed to create ${SYSTEM_DB_NAME} user`, status: 500 };
       } finally {
         await dbSession.close();
       }
     }
   } catch (error) {
-    console.error("Error setting up super user:", error);
-    return { error: "Failed to setup super user", status: 500 };
+    console.error(`Error setting up ${SYSTEM_DB_NAME} user:`, error);
+    return { error: `Failed to setup ${SYSTEM_DB_NAME} user`, status: 500 };
   } finally {
     await dbSession.close();
   }

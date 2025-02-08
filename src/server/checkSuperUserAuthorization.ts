@@ -1,5 +1,7 @@
 import type { Session } from "neo4j-driver";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+
 import { superUserData } from "../../tests/auth/data/signUpData";
 import { findUserByEmail } from "../cypher/mutate/user/findUserByEmail";
 import { getUserEmailFromSession } from "./getUserEmailFromSession";
@@ -9,7 +11,7 @@ export async function checkSuperUserAuthorization(
   dbSession: Session,
   isMutate = false,
 ) {
-  if (subDomain === "super") {
+  if (subDomain === SYSTEM_DB_NAME) {
     return null; // return null because now email is not required
     const email = await getUserEmailFromSession();
     if (!email) {

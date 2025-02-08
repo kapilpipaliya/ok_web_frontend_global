@@ -15,7 +15,7 @@ export async function deleteUserAndDatabase(userName: string) {
     // Delete the Neo4j database named subDomain
     await dbSessionSource.run(`DROP DATABASE ${subDomain}`);
 
-    // TODO: delete user from super user database too
+    // TODO: delete user from system user database too
     // TODO: delete user directory from server
     return {
       error: false,

@@ -3,6 +3,7 @@ import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
@@ -57,7 +58,7 @@ export async function POST({ request }: APIEvent) {
 }
 
 async function authenticateSuperUser(superUser: Vertex, password: string) {
-  const superDbSession = (await getDriver()).session({database: "super"});
+  const superDbSession = (await getDriver()).session({database: SYSTEM_DB_NAME});
 
   try {
     const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
@@ -92,7 +93,7 @@ async function authenticateUser(
 
     const user = convertNodeToJson(result.records[0].get("u"));
 
-    // when super user, check password from super db
+    // when system user, check password from system db
     if (user.P.isSuper) {
       return await authenticateSuperUser(user, password);
     }

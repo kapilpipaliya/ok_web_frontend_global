@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Transaction } from "neo4j-driver";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { updateSession } from "~/cypher/mutate/signup/updateSession";
 
@@ -38,7 +39,7 @@ async function handleSignup(
   try {
     let user;
 
-    if (subDomain === "super") {
+    if (subDomain === SYSTEM_DB_NAME) {
       user = await signupAdmin(tx, data);
     } else {
       user = await signupUser(tx, data);

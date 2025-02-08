@@ -1,5 +1,6 @@
 import type { Session } from "neo4j-driver";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function createSuperUser(
@@ -29,7 +30,7 @@ export async function createSuperUser(
         uuid: randomUUID()
       })
       CREATE (s:SubDomain {
-        key: "super"
+        key: $systemDbName
       })
       CREATE (u)-[:UserSubDomain]->(s)
       RETURN u, s
@@ -37,17 +38,18 @@ export async function createSuperUser(
     const result = await superDbSession.run(query, {
       email,
       password,
+      systemDbName: SYSTEM_DB_NAME,
       username,
     });
 
     if (result.records.length === 0) {
-      return { error: "Failed to create super user." };
+      return { error: `Failed to create ${SYSTEM_DB_NAME} user.` };
     }
 
     const user = convertNodeToJson(result.records[0].get("u"));
     return user;
   } catch (error) {
-    console.error("Error creating super user:", error);
+    console.error(`Error creating ${SYSTEM_DB_NAME} user:`, error);
     throw error;
   }
 }
