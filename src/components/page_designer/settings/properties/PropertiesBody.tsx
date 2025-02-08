@@ -126,7 +126,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
-  const getOtherProps = () => graph.vertexes[formStoreVertex()?.P.selectedId].P.otherProps ?? "";
+  const getOtherProps = () => graph.vertexes[formStoreVertex()?.P.selectedId].P.props ?? "";
   const [editorValue, setEditorValue] = createSignal(getOtherProps());
   const [isModalOpen, setIsModalOpen] = createSignal(false);
 
@@ -148,7 +148,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
       if (!value) {
         setIsFunctionValid(true);
         props.setPropertyValue(
-          { P: { key: "otherProps" } } as unknown as Vertex,
+          { P: { key: "props" } } as unknown as Vertex,
           value,
         );
         return;
@@ -160,7 +160,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 
       setIsFunctionValid(true);
       props.setPropertyValue(
-        { P: { key: "otherProps" } } as unknown as Vertex,
+        { P: { key: "props" } } as unknown as Vertex,
         value,
       );
 
@@ -171,7 +171,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         if (typeof result === "object") {
           setIsFunctionValid(true);
           props.setPropertyValue(
-            { P: { key: "otherProps" } } as unknown as Vertex,
+            { P: { key: "props" } } as unknown as Vertex,
             value,
           );
         } else {

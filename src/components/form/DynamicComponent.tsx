@@ -366,7 +366,7 @@ export function DynamicComponent(
     "children",
     "onChange",
     "projections",
-    "otherProps",
+    "props",
     "onMount",
     "beforeMount",
     "mounted",
@@ -497,21 +497,21 @@ export function DynamicComponent(
 
   const dynamicProps = createMemo(() => {
     try {
-      if (typeof props.meta.P.otherProps === "function") {
+      if (typeof props.meta.P.props === "function") {
         const dynamicPropsObj =
-          props.meta.P.otherProps!(getFunctionArgumentWithValue()) || {};
+          props.meta.P.props!(getFunctionArgumentWithValue()) || {};
         return getMetaProps(dynamicPropsObj, []);
-      } else if (typeof props.meta.P.otherProps === "string") {
+      } else if (typeof props.meta.P.props === "string") {
         try {
           const otherPropsFunction = new Function(
             "args",
-            props.meta.P.otherProps,
+            props.meta.P.props,
           );
           const dynamicPropsObj =
             otherPropsFunction(getFunctionArgumentWithValue()) || {};
           return getMetaProps(dynamicPropsObj, []);
         } catch (error) {
-          console.error("Error evaluating otherProps function:", error);
+          console.error("Error evaluating props function:", error);
           return {};
         }
       }

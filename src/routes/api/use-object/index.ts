@@ -28,8 +28,8 @@ Attr Vertex:
     - pos: number - Determines Item order among siblings
   - Optional Properties:
     - componentName: string - name of the component
-    - otherProps: Function Body string - dynamic properties for the Item e.g. 'otherProps: "return {}"'
-      - Use 'otherProps' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
+    - props: Function Body string - dynamic properties for the Item e.g. 'props: "return {}"'
+      - Use 'props' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
       - export interface FunctionArgumentBaseType {
         data: Vertex; // current vertex data
         evalExpression: (expression: string, options: object) => any;
@@ -48,7 +48,7 @@ Attr Vertex:
         runWithOwner: <T>(fn: () => T) => T | undefined;
         runWithParentOwner: <T>(fn: () => T) => T | undefined;
       }
-      - any property can be either added to the 'otherProps' function body return value or directly to the vertex, prefer the 'otherProps' when value is dynamic.
+      - any property can be either added to the 'props' function body return value or directly to the vertex, prefer the 'props' when value is dynamic.
   - Basic components are considered 'Html' type (no componentName needed)
     - required properties:
       1. as: string - specifies HTML tag (div, span, etc)
@@ -61,8 +61,8 @@ Attr Vertex:
     * 'Data' - For repeating Item patterns
       - required properties:
         - name: string - name of the data context, must not be empty
-      - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'otherProps' function body pass data key the array of values it should iterate over.
-      - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'otherProps' function body use 'args.dataContext["name"]' property.
+      - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'props' function body pass data key the array of values it should iterate over.
+      - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.dataContext["name"]' property.
       - use 'Data' Item whenever possible.
     * 'Switch' - Conditional rendering
     * 'Match' - Pattern matching
@@ -70,7 +70,7 @@ Attr Vertex:
   - Text Content:
     Add text via 'text' property either:
     - Directly on vertex
-    - In otherProps return value
+    - In props return value
     Renders as: <>{text}{children}</>
 
 Styling System:

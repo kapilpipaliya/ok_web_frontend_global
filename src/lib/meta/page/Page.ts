@@ -183,7 +183,7 @@ string`,
           displayName: "Default Value",
           key: "defValue",
           // componentName: "::'P.type'",
-          otherProps: (options: FunctionArgumentType) => {
+          props: (options: FunctionArgumentType) => {
             const type = options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
               class: type === "CheckBox" ? PROPERTIES.Css.CheckBox : PROPERTIES.Css.TextField,
@@ -202,7 +202,7 @@ string`,
           class: "flex ai:center gap:2 color:red",
           componentName: "Button",
           key: "button",
-          otherProps: (options: FunctionArgumentType) => {
+          props: (options: FunctionArgumentType) => {
             return {
               hidden: (options: FunctionArgumentType) => {
                 return options.data.P.defValue === undefined || options.data.P.defValue === null;
@@ -222,7 +222,7 @@ string`,
     },
     // {
     //   // componentName: "::'P.type'",
-    //   otherProps: (options: FunctionArgumentType) => {
+    //   props: (options: FunctionArgumentType) => {
     //     return {
     //       componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
     //     }
@@ -240,7 +240,7 @@ string`,
         {
           displayName: "Value",
           key: "value",
-          otherProps: (options: FunctionArgumentType) => {
+          props: (options: FunctionArgumentType) => {
             const type = evalExpression("<-$0::'P.type'", {
               graph: options.graph,
               setGraph: options.setGraph,
