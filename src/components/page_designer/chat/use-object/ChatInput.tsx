@@ -107,7 +107,7 @@ export function ChatInput(props: ChatInputProps) {
 
   return (
     <form
-      class="background:white border-top:1px|solid|rgb(229,231,235)"
+      class="background:white border-top:1px|solid|rgb(229,231,235) p:4 mb:4"
       onSubmit={handleSubmit}
     >
       <div class="display:flex flex-direction:column gap:8px">

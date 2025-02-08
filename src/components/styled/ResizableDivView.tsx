@@ -30,7 +30,7 @@ export function ResizableContainer(
   const [width, setWidth] = createSignal(props.width || "");
   const [graph, setGraph] = useGraph();
   const [height, setHeight] = createSignal(
-    props.height || `calc(100vh - ${getGlobalStore(graph).P.navBarHeight + 2}px)`
+    props.height || ""
   );
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [resizing, setResizing] = createSignal(false);

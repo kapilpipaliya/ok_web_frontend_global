@@ -11,6 +11,7 @@ import { mergeVertexProperties } from '~/lib/graph/mutate/vertex';
 import type { PageLayoutObject } from "../context/LayoutContext";
 
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
+import { HeaderRow } from "../header/header_row/HeaderRow";
 import { DeleteConfirmation } from './main_content/DeleteConfirmation';
 import { FormElements } from './main_content/FormElements';
 import { PageViewComponent } from './main_content/PageViewComponent';
@@ -39,6 +40,7 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
         ${(isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey)) ? 'bg:gray-60' : 'bg:transparent'}
         touch-action:none
         transition:background-color|0.2s
+        height:100%
       `}
       onMouseEnter={() => !props.isResizing && setIsHovered(true)}
       onMouseLeave={() => !props.isResizing && setIsHovered(false)}
@@ -60,7 +62,7 @@ interface PanelProps {
 
 const Panel: Component<PanelProps> = (props) => {
   return (
-    <div 
+    <div
       ref={props.ref}
       style={{
         // 'background-color': '#f0f0f0',
@@ -68,6 +70,8 @@ const Panel: Component<PanelProps> = (props) => {
         'display': 'grid',
         'grid-template-columns': props.resizePosition === 'left' ? '3px 1fr' : '1fr 3px',
         'grid-template-rows': props.resizePosition === 'top' ? '3px 1fr' : '1fr',
+        height: '100%',
+        'overflow': 'auto',
         ...props.style
       }}
     >
@@ -120,7 +124,7 @@ export function RenderMainContent() {
     const startPos = isHorizontal ? e.pageX : e.pageY;
     const panel = panelRef();
     if (!panel) return;
-    
+
     const startWidth = panel.getBoundingClientRect().width;
     const pointerId = e.pointerId;
 
@@ -157,16 +161,20 @@ export function RenderMainContent() {
     <div class={`
       display:grid
       grid-template-cols:${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px|` : ''}${layoutStore().mainPanel?.map((panel) => layoutStore()[`mainPanel${panel}Width`] ?? '1fr').join('|')}${layoutStore().mainPanel?.findIndex(panel => layoutStore()[`mainPanel${panel}Width`] === '1fr') !== -1 ? '|0px' : '|1fr'}${layoutStore().isRight0Open ? `|${layoutStore().rightWidth0}px` : ''}${layoutStore().isRight1Open ? `|${layoutStore().rightWidth1}px` : ''}${layoutStore().isRight2Open ? `|${layoutStore().rightWidth2}px` : ''}
-      height:calc(100vh-45px)
       width:100vw
+      height:100vh
+      grid-template-rows:36px|1fr
     `}
     // overflow:hidden
     //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
-      <div style={{ display: layoutStore().isLeftOpen ? 'block' : 'none' }}>
-        <Panel 
+
+      <HeaderRow class="height:36px" style={{ 'grid-column': `1 / span ${layoutStore().mainPanel?.length + 1 + 4}` }} />
+
+      <div class="overflow-y:auto" style={{ display: layoutStore().isLeftOpen ? 'block' : 'none' }}>
+        <Panel
           activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()} 
+          isResizing={isResizing()}
           onResize={createResizeHandler('leftWidth', leftPanelRef, true)}
           ref={setLeftPanelRef}
           resizeKey="leftWidth"
@@ -179,15 +187,15 @@ export function RenderMainContent() {
       <For each={layoutStore().mainPanel}>
         {(mainPanel) => (
           <Panel activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()}
-          // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
-          onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
-          ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
-          resizeKey={`mainPanel${mainPanel}Width`}
-          style={{
-            // 'background-color': '#ffffff',
-            overflow: 'auto'
-          }}
+            isResizing={isResizing()}
+            // onResize={index() < layoutStore().mainPanel.length - 1 ? createResizeHandler(`mainPanel${index()}` as `mainPanel${string}`, () => mainPanelRefs()[`mainPanel${index()}`], true) : undefined}
+            onResize={createResizeHandler(`mainPanel${mainPanel}Width` as `mainPanel${string}Width`, () => mainPanelRefs()[`mainPanel${mainPanel}`], true)}
+            ref={(el) => setMainPanelRefs((prev) => ({ ...prev, [`mainPanel${mainPanel}`]: el }))}
+            resizeKey={`mainPanel${mainPanel}Width`}
+            style={{
+              // 'background-color': '#ffffff',
+              overflow: 'auto'
+            }}
           >
             <TabBar mainPanel={mainPanel} />
             <PageViewComponent mainPanel={mainPanel} />
@@ -195,33 +203,33 @@ export function RenderMainContent() {
         )}
       </For>
 
-      <div/>
+      <div />
 
-      <div style={{ display: layoutStore().isRight0Open ? 'block' : 'none' }}>
-        <Panel 
+      <div class="overflow:auto" style={{ display: layoutStore().isRight0Open ? 'block' : 'none' }}>
+        <Panel
           activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()} 
+          isResizing={isResizing()}
           onResize={createResizeHandler('rightWidth0', rightPanel0Ref, true)}
           ref={setRightPanel0Ref}
           resizeKey="rightWidth0"
           resizePosition="left"
         >
-          <div class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}>
-            <UseObjectAIPanel />
-          </div>
+          {/* <div class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey height:100% overflow:auto p:5`}> */}
+          <UseObjectAIPanel />
+          {/* </div> */}
         </Panel>
       </div>
 
-      <div style={{ display: layoutStore().isRight1Open ? 'block' : 'none' }}>
-        <Panel 
+      <div class="overflow:auto" style={{ display: layoutStore().isRight1Open ? 'block' : 'none' }}>
+        <Panel
           activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()} 
+          isResizing={isResizing()}
           onResize={createResizeHandler('rightWidth1', rightPanel1Ref, true)}
           ref={setRightPanel1Ref}
           resizeKey="rightWidth1"
           resizePosition="left"
         >
-        {/* <Show
+          {/* <Show
             fallback={
               <div class="bl:1|solid|lightgrey pl:8 pt:8">
                 Element is not selected
@@ -234,18 +242,18 @@ export function RenderMainContent() {
             }
           > */}
           <div
-            class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey max-height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 2}px) overflow:auto p:5`}
+            class={`scrollbar-color:lightgrey {scrollbar-width:thin} bl:1|solid|lightgrey overflow:auto p:5`}
           >
             <PropertiesContent />
           </div>
-        {/* </Show> */}
+          {/* </Show> */}
         </Panel>
       </div>
 
       <div style={{ display: layoutStore().isRight2Open ? 'block' : 'none' }}>
-        <Panel 
+        <Panel
           activeResizeKey={activeResizeKey()}
-          isResizing={isResizing()} 
+          isResizing={isResizing()}
           onResize={createResizeHandler('rightWidth2', rightPanel2Ref, true)}
           ref={setRightPanel2Ref}
           resizeKey="rightWidth2"

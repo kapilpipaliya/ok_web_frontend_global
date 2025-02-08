@@ -162,8 +162,8 @@ Choose colors that work well for the context and maintain good contrast ratios.
   };
 
   return (
-    <div class={`display:flex flex-direction:column height:calc(100vh-${getGlobalStore(graph).P.navBarHeight + 12}px) width:100% max-width:md margin:0|auto`}>
-      <div class="flex:1 overflow:auto padding:16px chat-history" ref={chatHistoryRef!}>
+    <div class="display:grid grid-template-rows:1fr|auto height:100%">
+      <div class="overflow:auto chat-history" ref={chatHistoryRef!}>
         <For each={messages()}>
           {(message) => (
             <div class="margin-bottom:24px">

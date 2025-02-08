@@ -50,7 +50,7 @@ export function PageDesignerWrapper(): JSX.Element {
     mainPanel: initialStore.mainPanel[0],
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
-  
+
   const vertex = newVertex<PageLayoutObject>(initialStore.id, ["PageDesigner"], {
     ...initialStore,
     [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
@@ -86,7 +86,7 @@ export function PageDesignerWrapper(): JSX.Element {
     if (isServer) {
       return;
     }
-    
+
     // Get stored layout properties
     const storedLayout = await (await dbPromise).get('keyval', 'page_designer_layout');
     if (storedLayout) {
@@ -107,7 +107,7 @@ export function PageDesignerWrapper(): JSX.Element {
   // Save layout properties on change
   createEffect(() => {
     if (isServer) return;
-    
+
     const layoutVertex = graph.vertexes[initialStore.id] as Vertex<PageLayoutObject>;
     if (!layoutVertex) return;
 
@@ -157,7 +157,6 @@ export function PageDesignerWrapper(): JSX.Element {
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
         <Title>{getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}</Title>
-        <HeaderRow />
         <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",

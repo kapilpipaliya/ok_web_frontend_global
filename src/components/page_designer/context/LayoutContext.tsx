@@ -1,4 +1,3 @@
-
 import { createContext, useContext } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
@@ -10,13 +9,21 @@ export interface OpenFormInfo {
 
 export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 
+export const INITIAL_WIDTHS = {
+  bottom: 300,
+  left: 190,
+  right0: 305,
+  right1: 305,
+  right2: 300,
+} as const;
+
 export function getInitialDesignerLayoutStore() {
   const mainPanel = uuidv7();
   return {
     [`mainPanel${mainPanel}Tab` as `mainPanel${string}Tab`]: null as Id | null,
     [`mainPanel${mainPanel}Width` as `mainPanel${string}Width`]: '1fr',
     activeItem: null as Id | null | number,
-    bottomHeight: 300,
+    bottomHeight: INITIAL_WIDTHS.bottom,
     draggedTab: null as Id | null,
     draggedVertexIds: [] as Id[],
     formId: null as Id | null,
@@ -26,17 +33,16 @@ export function getInitialDesignerLayoutStore() {
     isRight1Open: true,
     isRight2Open: true,
     isSmallScreen: false,
-    leftWidth: 190,
+    leftWidth: INITIAL_WIDTHS.left,
     mainFormId: null as Id | null,
     mainPanel: [mainPanel],
     openedFormIds: [] as Id[],
     position: null as "after" | "before" | "center" | "left" | "right" | null,
-    rightWidth0: 305,
-    rightWidth1: 305,
-    rightWidth2: 300,
+    rightWidth0: INITIAL_WIDTHS.right0,
+    rightWidth1: INITIAL_WIDTHS.right1,
+    rightWidth2: INITIAL_WIDTHS.right2,
     selectedSection: "build",
     selectedTab: "settings",
-
   };
 }
 

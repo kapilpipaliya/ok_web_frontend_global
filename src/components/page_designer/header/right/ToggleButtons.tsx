@@ -2,7 +2,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { type PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
+import { INITIAL_WIDTHS, type PageLayoutObject, useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function ToggleButtons() {
   const [graph, setGraph] = useGraph();
@@ -21,10 +21,10 @@ export function ToggleButtons() {
       isRight0Open: true,
       isRight1Open: true,
       isRight2Open: true,
-      leftWidth: 300,
-      rightWidth0: 300,
-      rightWidth1: 300,
-      rightWidth2: 300,
+      leftWidth: INITIAL_WIDTHS.left,
+      rightWidth0: INITIAL_WIDTHS.right0,
+      rightWidth1: INITIAL_WIDTHS.right1,
+      rightWidth2: INITIAL_WIDTHS.right2,
     });
   };
 
