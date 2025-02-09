@@ -8,6 +8,7 @@ interface GraphViewProps {
   nodes: any[];
 }
 
+// TODO: use https://github.com/Nhogs/popoto to generate cypher queries and graph view library both.
 export function GraphView() {
   const GraphView = (props: Readonly<GraphViewProps>) => {
     const [json, setJson] = createSignal({});
