@@ -6,7 +6,6 @@ import type { FormStoreObject } from '~/components/form/context/FormContext';
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
 import { STYLES } from '~/components/styled/constants/styles';
 import { themeConfig } from '~/cypher/get/themeConfig';
-import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { useGraph, type Vertex } from '~/lib/graph/graph';
 import { deleteRow } from '~/lib/graph/mutate/deleteRow';
 
@@ -18,7 +17,6 @@ import { ChatMessage } from './ChatMessage';
 import { ChatResponse } from './ChatResponse';
 import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
 import { getChatHistory } from './functions/getChatHistory';
-import { insertAtPosition } from './functions/insertAtPosition';
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -30,7 +28,6 @@ export function UseObjectAIPanel() {
 
   const [showExamples, setShowExamples] = createSignal(false);
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
-  const [frameCount, setFrameCount] = createSignal(0);
   const [lastRequestPrompt, setLastRequestPrompt] = createSignal<string>('');
   const [lastSelectedModel, setLastSelectedModel] = createSignal<string>('');
 
@@ -50,9 +47,9 @@ export function UseObjectAIPanel() {
   });
 
   const { error, handleInputChange, handleSubmit, input, isLoading, messages: chatMessages, reload, setMessages, stop } = useChat({
-    onFinish(message, { finishReason, usage }) {
+    onFinish(message) {
       const content = message.content;
-      let data: any[] = [];
+      let data: unknown[] = [];
 
       // Try to parse the entire content as JSON array first
       try {
@@ -98,8 +95,6 @@ export function UseObjectAIPanel() {
         messageData
       );
 
-      setFrameCount(0);
-
       setTimeout(() => {
         if (chatHistoryRef) {
           chatHistoryRef.scrollTop = chatHistoryRef.scrollHeight;
@@ -116,12 +111,11 @@ export function UseObjectAIPanel() {
         }
       }
     },
-    onResponse(response) {
-      setFrameCount(prev => prev + 1);
+    onResponse() {
     },
   });
 
-  const handleSubmit2 = (e: SubmitEvent, model: string) => {
+  const handleChatSubmit = (e: SubmitEvent, model: string) => {
     e.preventDefault();
     if (!input().trim() || isLoading()) return;
 
@@ -171,7 +165,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
         <For each={messages()}>
           {(message, index) => (
             <div class="margin-bottom:24px">
-              <ChatMessage index={index() + 1} message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)} />
+              <ChatMessage index={index() + 1} message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph, formStoreVertex()!.P.txnId!)} />
               <ChatResponse
                 message={message}
               />
@@ -222,7 +216,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
         onExamplesToggle={setShowExamples}
         onFilesChange={(files) => setFiles(files)}
         onInputChange={handleInputChange}
-        onSubmit={handleSubmit2}
+        onSubmit={handleChatSubmit}
         showExamples={showExamples}
       />
     </div>
