@@ -22,7 +22,18 @@ import { IconButton } from "../styled/IconButton";
 import { TooltipWrapper } from "../styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
 
-const getPreviewURL = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
+function ImageWrapper(props: { alt?: string; class?: string; src: string; }) {
+  return (
+    <Show when={props.src}>
+      <img 
+        alt={props.alt || "Preview"} 
+        class={props.class}
+        src={props.src}
+      />
+    </Show>
+  );
+}
+const getPreviewVertex = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
   const vertexId = selectedValue(
     {
       P: attribute,
@@ -30,12 +41,15 @@ const getPreviewURL = (attribute: FieldAttribute, data: Vertex, graph: Store<Gra
     data,
     graph,
   )?.[0];
-  if (vertexId) {
-    return getDownloadLink(graph.vertexes[vertexId]);
+  return vertexId ? graph.vertexes[vertexId] : undefined;
+};
+const getPreviewURL = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
+  const vertex = getPreviewVertex(attribute, data, graph);
+  if (vertex) {
+    return getDownloadLink(vertex);
   }
   return "";
 };
-
 export function CreateGridHeaders(
   gridState: DataGridState,
   formNew: IFormMetaData,
@@ -65,20 +79,19 @@ export function CreateGridHeaders(
                   <Show when={info.getValue<string>()}>
                     <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
                   </Show>
-                  {getPreviewURL(attribute, info.row.original, graph)}
-                  <img alt="File Preview" src={getPreviewURL(attribute, info.row.original, graph)} />
+                  {getPreviewVertex(attribute, info.row.original, graph)?.P.fileName}
+                  <ImageWrapper alt="Preview" src={getPreviewURL(attribute, info.row.original, graph)} />
                 </div>
               }
               triggerAs="span"
               triggerClass="flex ai:center"
             >
-              <span class="flex ai:center">
-                {getSelectNameValue({
-                  attribute: attribute,
-                  graph: graph,
-                  info: info,
-                  setGraph: setGraph,
-                })}
+              <span class="flex ai:center gap:8px">
+                <ImageWrapper 
+                  alt="Preview"
+                  class="r:4px h:30px object-fit:cover"
+                  src={getPreviewURL(attribute, info.row.original, graph)}
+                />
               </span>
             </TooltipWrapper>
           </Match>
@@ -123,7 +136,7 @@ export function CreateGridHeaders(
                     <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
                   </Show>
                   {getDownloadLink(info.row.original)}
-                  <img alt="File Preview" src={getDownloadLink(info.row.original)} />
+                  <ImageWrapper src={getDownloadLink(info.row.original)} alt="File Preview" />
                 </div>
               }
               triggerAs="span"
@@ -140,8 +153,8 @@ export function CreateGridHeaders(
     };
     column.header = (_info) =>
       capitalizeFirstLetter(
-        attribute.label ||
         attribute.title ||
+        attribute.label ||
         attribute.displayName ||
         attribute.key,
       );

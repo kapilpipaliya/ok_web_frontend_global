@@ -4,6 +4,7 @@ import { createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import type { FormStoreObject } from '~/components/form/context/FormContext';
 
 import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
+import { STYLES } from '~/components/styled/constants/styles';
 import { themeConfig } from '~/cypher/get/themeConfig';
 import { getGlobalStore } from '~/lib/graph/get/sync/getGlobalStore';
 import { useGraph, type Vertex } from '~/lib/graph/graph';
@@ -18,7 +19,6 @@ import { ChatResponse } from './ChatResponse';
 import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
 import { getChatHistory } from './functions/getChatHistory';
 import { insertAtPosition } from './functions/insertAtPosition';
-import { STYLES } from '~/components/styled/constants/styles';
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -32,6 +32,7 @@ export function UseObjectAIPanel() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
   const [frameCount, setFrameCount] = createSignal(0);
   const [lastRequestPrompt, setLastRequestPrompt] = createSignal<string>('');
+  const [lastSelectedModel, setLastSelectedModel] = createSignal<string>('');
 
   let chatHistoryRef: HTMLDivElement | undefined;
   let examplesButtonRef: HTMLButtonElement | undefined;
@@ -48,11 +49,8 @@ export function UseObjectAIPanel() {
     }
   });
 
-  const { handleSubmit, isLoading, input, handleInputChange, messages: chatMessages, stop, error, reload, setMessages } = useChat({
-    onResponse(response) {
-      setFrameCount(prev => prev + 1);
-    },
-    onFinish(message, { usage, finishReason }) {
+  const { error, handleInputChange, handleSubmit, input, isLoading, messages: chatMessages, reload, setMessages, stop } = useChat({
+    onFinish(message, { finishReason, usage }) {
       const content = message.content;
       let data: any[] = [];
 
@@ -77,13 +75,13 @@ export function UseObjectAIPanel() {
       const contentPreview = content.slice(0, 100) + (content.length > 100 ? '...' : '');
 
       const messageData = {
+        contentPreview,
+        data: JSON.stringify(data),
+        hasFile: files() ? true : false,
+        model: lastSelectedModel(),
         prompt: lastRequestPrompt(),
         response: content,
-        data: JSON.stringify(data),
         timestamp: Date.now(),
-        contentPreview,
-        model: selectedModel(),
-        hasFile: files() ? true : false,
         // Removing attachments from DB storage
         // attachments: files() ? Array.from(files()!) : undefined
       } as DBMessage;
@@ -118,6 +116,9 @@ export function UseObjectAIPanel() {
         }
       }
     },
+    onResponse(response) {
+      setFrameCount(prev => prev + 1);
+    },
   });
 
   const handleSubmit2 = (e: SubmitEvent, model: string) => {
@@ -125,7 +126,7 @@ export function UseObjectAIPanel() {
     if (!input().trim() || isLoading()) return;
 
     setLastRequestPrompt(input());
-
+    setLastSelectedModel(model);
     handleSubmit(e, {
       body: {
         extraMessages: [

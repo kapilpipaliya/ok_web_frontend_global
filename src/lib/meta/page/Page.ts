@@ -145,6 +145,7 @@ export const Page: IFormMetaData = {
           key: "Preview",
           label: "File",
           labelKey: "::'P.fileName'",
+          title: "Preview",
           // type: "Preview",
         },
       ],
