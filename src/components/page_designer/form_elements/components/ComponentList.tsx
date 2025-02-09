@@ -110,8 +110,8 @@ export function ComponentList(props: {
           <For
             each={filteredChildren()}
             fallback={
-              <div class="font-weight:bold m:20px|0px p:3 text-align:center">
-                No Component Found !
+              <div class="m:20px|0px p:3 text-align:center">
+                No Component Found!
               </div>
             }
           >

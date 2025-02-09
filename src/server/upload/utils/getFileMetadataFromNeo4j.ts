@@ -9,7 +9,11 @@ export async function getFileMetadataFromNeo4j(
   try {
     const query = "MATCH (f:File) WHERE elementId(f) = $fileId RETURN f";
     const result = await dbSession.run(query, { fileId: fileId });
-    return convertNodeToJson(result.records[0].get("f"));
+    if (result.records.length > 0) {
+      return convertNodeToJson(result.records[0].get("f"));
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error("Error retrieving file metadata from Neo4j:", error);
     throw error;

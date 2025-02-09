@@ -3,8 +3,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { createSignal, Match, Show, Switch } from "solid-js";
 
-import type { GraphInterface, Id } from "~/lib/graph/graph";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/components/grid/functions/getTagValue";
@@ -15,10 +15,26 @@ import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
 
 import type { DataGridState } from "./DataGridContext";
 
+import { selectedValue } from "../fields/utils/selectedValue";
+import { PageDesignerLabels } from "../page_designer/functions/PageDesignerLabels";
 import { STYLES } from "../styled/constants/styles";
 import { IconButton } from "../styled/IconButton";
 import { TooltipWrapper } from "../styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
+
+const getPreviewURL = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
+  const vertexId = selectedValue(
+    {
+      P: attribute,
+    } as unknown as Vertex,
+    data,
+    graph,
+  )?.[0];
+  if (vertexId) {
+    return getDownloadLink(graph.vertexes[vertexId]);
+  }
+  return "";
+};
 
 export function CreateGridHeaders(
   gridState: DataGridState,
@@ -36,12 +52,36 @@ export function CreateGridHeaders(
     if (attribute.componentName === "Table" || attribute.componentName === "DynamicTable") {
       continue;
     }
-    // @ts-ignore
+    // @ts-expect-error ignore
     column.accessorKey = `P.${attribute.key}`;
     column.id = attribute.key;
     column.cell = (info) => {
       return (
         <Switch>
+          <Match when={(PageDesignerLabels.includes(tableId) || tableId === "Component") && attribute.key === "Preview"}>
+            <TooltipWrapper
+              content={
+                <div class={STYLES.tooltip.content}>
+                  <Show when={info.getValue<string>()}>
+                    <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
+                  </Show>
+                  {getPreviewURL(attribute, info.row.original, graph)}
+                  <img alt="File Preview" src={getPreviewURL(attribute, info.row.original, graph)} />
+                </div>
+              }
+              triggerAs="span"
+              triggerClass="flex ai:center"
+            >
+              <span class="flex ai:center">
+                {getSelectNameValue({
+                  attribute: attribute,
+                  graph: graph,
+                  info: info,
+                  setGraph: setGraph,
+                })}
+              </span>
+            </TooltipWrapper>
+          </Match>
           <Match
             when={attribute.componentName === "Select" && !attribute.options}
           >
@@ -94,7 +134,6 @@ export function CreateGridHeaders(
               </span>
             </TooltipWrapper>
           </Match>
-
           <Match when={true}>{info.getValue<string>()}</Match>
         </Switch>
       );
@@ -102,9 +141,9 @@ export function CreateGridHeaders(
     column.header = (_info) =>
       capitalizeFirstLetter(
         attribute.label ||
-          attribute.title ||
-          attribute.displayName ||
-          attribute.key,
+        attribute.title ||
+        attribute.displayName ||
+        attribute.key,
       );
     column.footer = (_info) =>
       capitalizeFirstLetter(

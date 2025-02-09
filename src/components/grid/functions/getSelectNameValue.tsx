@@ -31,6 +31,7 @@ export function getSelectNameValue(
           props.graph,
           props.attribute.collection,
         ) ||
+        props.attribute.labelKey ||
         `::'P.${IdAttr}'`,
       {
         graph: props.graph,
