@@ -82,6 +82,8 @@ export function UseObjectAIPanel() {
         data: JSON.stringify(data),
         timestamp: Date.now(),
         contentPreview,
+        model: selectedModel(),
+        hasFile: files() ? true : false,
         // Removing attachments from DB storage
         // attachments: files() ? Array.from(files()!) : undefined
       } as DBMessage;
@@ -166,9 +168,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
     <div class="display:grid grid-template-rows:1fr|auto height:100%">
       <div class={`${STYLES.overflow} chat-history`} ref={chatHistoryRef!}>
         <For each={messages()}>
-          {(message) => (
+          {(message, index) => (
             <div class="margin-bottom:24px">
-              <ChatMessage message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)} />
+              <ChatMessage index={index() + 1} message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph,formStoreVertex()?.P.txnId!)} />
               <ChatResponse
                 message={message}
               />

@@ -1,3 +1,4 @@
+import { Icon } from '@iconify-icon/solid';
 
 import type { Vertex } from '~/lib/graph/graph';
 
@@ -7,6 +8,7 @@ import { headerIconButtonClass } from '~/pages/admin_layout/constant';
 import type { DBMessage } from './types';
 
 interface ChatMessageProps {
+  index: number;
   message: Vertex<DBMessage>;
   onDelete: (message: Vertex) => void;
 }
@@ -16,11 +18,17 @@ export function ChatMessage(props: ChatMessageProps) {
     <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
       <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
         <div class="display:flex gap:8px align-items:center">
-          <span>Prompt</span>
+          <span>Prompt #{props.index}</span>
           {props.message.P?.timestamp && (
             <span class="font-size:12px color:rgb(107,114,128)">
               {new Date(props.message.P.timestamp).toLocaleTimeString()}
             </span>
+          )}
+          <span class="font-size:12px color:rgb(107,114,128)">
+            Model: {props.message.P?.model}
+          </span>
+          {props.message.P?.hasFile && (
+            <Icon class="font-size:12px color:rgb(107,114,128)" icon="ph:paperclip" />
           )}
         </div>
         <IconButton

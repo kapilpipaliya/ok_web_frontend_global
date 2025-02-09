@@ -1,6 +1,6 @@
 import type { Message } from 'ai';
 
-import { createSignal, For, type JSX, Show } from 'solid-js';
+import { createSignal, For, type JSX, Match, Show, Switch } from 'solid-js';
 
 import { DropdownMenu } from '~/components/styled/DropdownMenu';
 import { IconButton } from '~/components/styled/IconButton';
@@ -162,43 +162,72 @@ export function ChatInput(props: ChatInputProps) {
         </div>
 
         <div class="display:flex gap:8px">
+          <IconButton
+            class="cursor:pointer"
+            icon="ph:paperclip"
+            onClick={() => props.fileInputRef?.click()}
+            size={22}
+            title="Select File"
+          />
           <input
-            class="flex:1 cursor:pointer"
+            class="hidden"
             multiple
             onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
             ref={props.fileInputRef}
             type="file"
           />
           <Show when={props.files()}>
-            <IconButton
-              icon="ph:x-circle"
-              onClick={() => {
-                props.onFilesChange(undefined);
-                if (props.fileInputRef) {
-                  props.fileInputRef.value = '';
-                }
-              }}
-              size={22}
-              title="Clear files"
-            />
+            <div class="display:flex gap:8px margin-bottom:8px">
+              <For each={Array.from(props.files()!)}>
+                {file => (
+                  <div class="relative">
+                    <Switch fallback={
+                      <div class="width:48px height:48px display:flex justify-content:center align-items:center background:rgb(243,244,246) border-radius:4px">
+                        <span class="font-size:24px">📄</span>
+                      </div>
+                    }>
+                      <Match when={file.type.startsWith('image/')}>
+                        <img
+                          alt={file.name}
+                          class="width:48px height:48px object-fit:cover border-radius:4px"
+                          src={URL.createObjectURL(file)}
+                        />
+                      </Match>
+                      <Match when={file.type.startsWith('video/')}>
+                        <video
+                          class="width:48px height:48px object-fit:cover border-radius:4px"
+                          src={URL.createObjectURL(file)}
+                        />
+                      </Match>
+                      <Match when={file.type.startsWith('audio/')}>
+                        <div class="width:48px height:48px display:flex justify-content:center align-items:center background:rgb(243,244,246) border-radius:4px">
+                          <span class="font-size:24px">🎵</span>
+                        </div>
+                      </Match>
+                    </Switch>
+                    <IconButton
+                      icon="ph:x-circle"
+                      onClick={() => {
+                        const files = props.files();
+                        if (files) {
+                          const newFiles = Array.from(files).filter(f => f !== file);
+                          props.onFilesChange(newFiles.length > 0 ? newFiles : undefined);
+                          if (newFiles.length === 0) {
+                            if (props.fileInputRef) {
+                              props.fileInputRef.value = '';
+                            }
+                          }
+                        }
+                      }}
+                      size={22}
+                      title="Clear file"
+                    />
+                  </div>
+                )}
+              </For>
+            </div>
           </Show>
         </div>
-
-        <Show when={props.files()}>
-          <div class="display:flex gap:8px margin-bottom:8px">
-            <For each={Array.from(props.files()!)}>
-              {file => (
-                <Show when={file.type.startsWith('image/')}>
-                  <img
-                    alt={file.name}
-                    class="width:48px height:48px object-fit:cover border-radius:4px"
-                    src={URL.createObjectURL(file)}
-                  />
-                </Show>
-              )}
-            </For>
-          </div>
-        </Show>
 
         <Show when={props.showExamples()}>
           <DropdownMenu

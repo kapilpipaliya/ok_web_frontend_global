@@ -1,6 +1,8 @@
 export interface DBMessage {
   contentPreview?: string;
   data?: string;
+  hasFile?: boolean;
+  model?: string;
   prompt: string;
   response: string;
   timestamp?: number;
