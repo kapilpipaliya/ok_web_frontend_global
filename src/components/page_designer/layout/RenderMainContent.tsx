@@ -10,6 +10,7 @@ import { STYLES } from "~/components/styled/constants/styles";
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { GraphView } from "~/pages/debug/GraphView";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
 
@@ -155,6 +156,8 @@ export function RenderMainContent() {
   const [mainPanelRefs, setMainPanelRefs] = createSignal<{
     [key: string]: HTMLDivElement;
   }>({});
+
+  const [showGraphView, setShowGraphView] = createSignal(false);
 
   const createResizeHandler =
     (
@@ -370,6 +373,15 @@ export function RenderMainContent() {
       <DeleteConfirmation />
       <Show when={isResizing()}>
         <ResizeOverlay />
+      </Show>
+      <button
+        onClick={() => setShowGraphView(!showGraphView())}
+        style={{ display: "none" }}
+      >
+        Toggle GraphView
+      </button>
+      <Show when={showGraphView()}>
+        <GraphView />
       </Show>
     </div>
   );
