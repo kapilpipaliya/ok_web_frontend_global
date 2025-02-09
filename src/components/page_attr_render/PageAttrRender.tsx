@@ -2,11 +2,14 @@ import { clientOnly } from "@solidjs/start";
 import { createMemo, For, Match, Switch } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { usePreviewContext, } from "~/components/page_designer/context/PreviewContext";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { type FormStoreObject, useFormContext } from "../form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "../form/context/FormContext";
 import { getChildrenAttrs } from "../page_designer/functions/getChildrenAttrs";
 import { usePageRenderContext } from "./context/PageRenderContext";
 
@@ -19,11 +22,12 @@ export function PageAttrRender(
   }>,
 ) {
   const parentItems = usePageRenderContext();
-  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const _parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
-  const [previewStore, setPreviewStore] = usePreviewContext();
+  const formVertex = () =>
+    formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
+  const [previewStore, _setPreviewStore] = usePreviewContext();
 
   const childrenAttrs = createMemo(() => {
     const attrs = getChildrenAttrs(graph, setGraph, props.metaVertex);
@@ -33,7 +37,6 @@ export function PageAttrRender(
   return (
     <For each={childrenAttrs()}>
       {(item, _index) => {
-
         const Content = () => {
           return (
             <DynamicComponent
@@ -100,7 +103,7 @@ export function PageAttrRender(
                   <Content />
                 </Match>
                 <Match when={true}>
-                  <DnDWrapper/>
+                  <DnDWrapper />
                 </Match>
               </Switch>
             </Match>

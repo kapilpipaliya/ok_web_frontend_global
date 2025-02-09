@@ -6,7 +6,10 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/edge";
-import { mergeVertexProperties, updateVertexId } from "~/lib/graph/mutate/vertex";
+import {
+  mergeVertexProperties,
+  updateVertexId,
+} from "~/lib/graph/mutate/vertex";
 
 export function onMutatDataGet(
   graph: GraphInterface,
@@ -83,7 +86,9 @@ function handleInsertEdge(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  mergeVertexProperties(0, "edgeOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
+  mergeVertexProperties(0, "edgeOldIdToNewIdMap", graph, setGraph, {
+    [oldId]: newId,
+  });
   updateEdgeId(oldId, newId, graph, setGraph);
 }
 
@@ -93,6 +98,8 @@ function handleInsertVertex(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  mergeVertexProperties(0, "vertexOldIdToNewIdMap", graph, setGraph, {[oldId]: newId});
+  mergeVertexProperties(0, "vertexOldIdToNewIdMap", graph, setGraph, {
+    [oldId]: newId,
+  });
   updateVertexId(oldId, newId, graph, setGraph);
 }

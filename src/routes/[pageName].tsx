@@ -8,11 +8,11 @@ export default function PageShareView() {
 
   return (
     <GetInitialData authenticate={true} dontRedirectToLogin={true}>
-        <PageViewWrapper
-          pageId={""}
-          pageVertexLabel={"Page"}
-          pageVertexName={params.pageName}
-        />
+      <PageViewWrapper
+        pageId={""}
+        pageVertexLabel={"Page"}
+        pageVertexName={params.pageName}
+      />
     </GetInitialData>
   );
 }

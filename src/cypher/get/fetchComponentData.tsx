@@ -8,11 +8,16 @@ import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-
-export async function fetchComponentData(vertexes: Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
-  const { incoming, outgoing } = getEdgesFromRowsAttr(FormMetaData.Component.attributes);
+export async function fetchComponentData(
+  vertexes: Vertex[],
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  const { incoming, outgoing } = getEdgesFromRowsAttr(
+    FormMetaData.Component.attributes,
+  );
   const componentData = await fetchDataFromMG({
-    expression: `id:'${vertexes.map(v => v.id).join("|")}'`,
+    expression: `id:'${vertexes.map((v) => v.id).join("|")}'`,
     [getGlobalStore(graph).P.url]: true,
     incoming,
     outgoing,

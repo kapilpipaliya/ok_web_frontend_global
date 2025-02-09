@@ -13,20 +13,24 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/getComponentLabel";
-import { HideShowIcon, } from "./HideShowIcon";
+import { HideShowIcon } from "./HideShowIcon";
 
-export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef: HTMLElement }>) {
-  const [graph, setGraph] = useGraph();
+export function AttrConfigIcons(
+  props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,
+) {
+  const [graph, _setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedLayoutId = createSelector(
+    () => formStoreVertex()?.P.selectedId,
+  );
   // const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
 
   const iconSize = 32;
 
-  const getComponent = () =>
-    getComponentLabel(graph, props.metaVertex);
+  const getComponent = () => getComponentLabel(graph, props.metaVertex);
 
   return (
     <DropdownMenu
@@ -37,28 +41,22 @@ export function AttrConfigIcons(props: Readonly<{ metaVertex: Vertex, parentRef:
       useFlip={false}
     >
       <div class="flex flex:col ai:center bg:white">
-        <Show
-          when={
-            isSelectedLayoutId(props.metaVertex.id)
-          }
-        >
+        <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <InsertButtons item={props.metaVertex} size={iconSize} />
         </Show>
 
-        <Show
-          when={
-            isSelectedLayoutId(props.metaVertex.id)
-          }
-        >
+        <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <ParentButton item={props.metaVertex} size={iconSize} />
           <DuplicateButton item={props.metaVertex} size={iconSize} />
-          <SaveAsTemplateButton
+          <SaveAsTemplateButton item={props.metaVertex} size={iconSize} />
+          <ImportHtmlButton item={props.metaVertex} size={iconSize} />
+          <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
+          <DeleteButton
+            class="color:red"
+            componentName={getComponent()!}
             item={props.metaVertex}
             size={iconSize}
           />
-          <ImportHtmlButton item={props.metaVertex} size={iconSize} />
-          <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
-          <DeleteButton class="color:red" componentName={getComponent()!} item={props.metaVertex} size={iconSize} />
           &nbsp;
         </Show>
       </div>

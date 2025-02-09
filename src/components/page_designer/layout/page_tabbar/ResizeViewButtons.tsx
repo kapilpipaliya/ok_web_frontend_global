@@ -7,11 +7,16 @@ import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-export const ResizeViewButtons = (props: { formStoreId: string, openIndex: number }) => {
+export const ResizeViewButtons = (props: {
+  formStoreId: string;
+  openIndex: number;
+}) => {
   const [graph, setGraph] = useGraph();
-  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const openedView = () => formStoreVertex()?.P.openedViews[props.openIndex];
-  const viewVertex = () => graph.vertexes[openedView()] as Vertex<{view: string}>;
+  const viewVertex = () =>
+    graph.vertexes[openedView()] as Vertex<{ view: string }>;
   return (
     <div class="flex">
       <For each={Object.values(DIMENSIONS)}>
@@ -28,7 +33,9 @@ export const ResizeViewButtons = (props: { formStoreId: string, openIndex: numbe
             }}
             icon={view.icon}
             onclick={() => {
-              mergeVertexProperties(0, openedView(), graph, setGraph, { view: view.id });
+              mergeVertexProperties(0, openedView(), graph, setGraph, {
+                view: view.id,
+              });
             }}
             size={22}
             title={view.id}

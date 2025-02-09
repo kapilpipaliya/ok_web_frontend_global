@@ -1,10 +1,4 @@
-import {
-  type Accessor,
-  createMemo,
-  createSignal,
-  For,
-  Show,
-} from "solid-js";
+import { type Accessor, createMemo, createSignal, For, Show } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
@@ -14,7 +8,10 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 
-import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "../../form/context/FormContext";
 import { DisplayProperty } from "./DisplayProperty";
 
 export const SortableRow = (
@@ -39,14 +36,16 @@ export const SortableRow = (
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
   const formId = useFormContext();
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
+  const _formVertex = () =>
+    formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const [expanded, setExpanded] = createSignal(true);
   const [disabled] = createSignal(false);
 
   const attributesResult = () => props.tableColumnsTemplate();
 
-  const rowColumnsMetaAttrs = createMemo(() =>
-    attributesResult()?.filter((vertex) => vertex.P.tab !== "expand") ?? [],
+  const rowColumnsMetaAttrs = createMemo(
+    () =>
+      attributesResult()?.filter((vertex) => vertex.P.tab !== "expand") ?? [],
   );
   const expandVertex = createMemo(() =>
     attributesResult()?.find((vertex) => vertex.P.tab === "expand"),

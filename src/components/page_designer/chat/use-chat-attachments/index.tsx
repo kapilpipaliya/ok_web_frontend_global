@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { useChat } from '@ai-sdk/solid';
-import { getTextFromDataUrl } from '@ai-sdk/ui-utils';
-import { createSignal, For } from 'solid-js';
+import { useChat } from "@ai-sdk/solid";
+import { getTextFromDataUrl } from "@ai-sdk/ui-utils";
+import { createSignal, For } from "solid-js";
 
 export function UseChatAttachments() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -17,10 +17,7 @@ export function UseChatAttachments() {
     reload,
     stop,
   } = useChat({
-    onFinish(message, { finishReason, usage }) {
-      console.log('Usage', usage);
-      console.log('FinishReason', finishReason);
-    },
+    onFinish(_message, { finishReason, usage }) {},
   });
 
   const onSend = async (e: Event) => {
@@ -31,7 +28,7 @@ export function UseChatAttachments() {
 
     setFiles(undefined);
     if (fileInputRef) {
-      fileInputRef.value = '';
+      fileInputRef.value = "";
     }
   };
 
@@ -39,7 +36,7 @@ export function UseChatAttachments() {
     <div class="flex flex-col gap-2">
       <div class="flex flex-col p-2 gap-2">
         <For each={messages()}>
-          {message => (
+          {(message) => (
             <div class="flex flex-row gap-2">
               <div class="w-24 text-zinc-500 flex-shrink-0">
                 {`${message.role}: `}
@@ -50,14 +47,14 @@ export function UseChatAttachments() {
 
                 <div class="flex flex-row gap-2">
                   <For each={message.experimental_attachments}>
-                    {(attachment, index) =>
-                      attachment.contentType?.includes('image/') ? (
+                    {(attachment, _index) =>
+                      attachment.contentType?.includes("image/") ? (
                         <img
                           alt={attachment.name}
                           class="w-24 rounded-md"
                           src={attachment.url}
                         />
-                      ) : attachment.contentType?.includes('text/') ? (
+                      ) : attachment.contentType?.includes("text/") ? (
                         <div class="w-32 h-24 rounded-md text-xs overflow-hidden p-2 text-zinc-500 border">
                           {getTextFromDataUrl(attachment.url)}
                         </div>
@@ -103,9 +100,9 @@ export function UseChatAttachments() {
       >
         <div class="flex flex-row gap-2 fixed right-2 bottom-14 items-end">
           <For each={files() ? Array.from(files()!) : []}>
-            {attachment => {
+            {(attachment) => {
               const type = attachment.type;
-              return type.startsWith('image/') ? (
+              return type.startsWith("image/") ? (
                 <div>
                   <img
                     alt={attachment.name}
@@ -114,7 +111,7 @@ export function UseChatAttachments() {
                   />
                   <span class="text-sm text-zinc-500">{attachment.name}</span>
                 </div>
-              ) : type.startsWith('text/') ? (
+              ) : type.startsWith("text/") ? (
                 <div class="w-24 text-zinc-500 flex-shrink-0 text-sm flex flex-col gap-1">
                   <div class="w-16 h-20 bg-zinc-100 rounded-md" />
                   {attachment.name}
@@ -126,7 +123,7 @@ export function UseChatAttachments() {
 
         <input
           multiple
-          onChange={e => setFiles(e.currentTarget.files ?? undefined)}
+          onChange={(e) => setFiles(e.currentTarget.files ?? undefined)}
           ref={fileInputRef}
           type="file"
         />

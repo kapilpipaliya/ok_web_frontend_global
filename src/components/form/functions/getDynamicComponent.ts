@@ -8,38 +8,66 @@ import { clientOnly } from "@solidjs/start";
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
 const Popover = clientOnly(() => import("~/components/ssr/popover/Popover"));
 // @ts-expect-error ignore
-Popover.Anchor = clientOnly(() => import("~/components/ssr/popover/PopoverAnchor"));
+Popover.Anchor = clientOnly(
+  () => import("~/components/ssr/popover/PopoverAnchor"),
+);
 // @ts-expect-error ignore
-Popover.Arrow = clientOnly(() => import("~/components/ssr/popover/PopoverArrow"));
+Popover.Arrow = clientOnly(
+  () => import("~/components/ssr/popover/PopoverArrow"),
+);
 // @ts-expect-error ignore
-Popover.Close = clientOnly(() => import("~/components/ssr/popover/PopoverClose"));
+Popover.Close = clientOnly(
+  () => import("~/components/ssr/popover/PopoverClose"),
+);
 // @ts-expect-error ignore
-Popover.Content = clientOnly(() => import("~/components/ssr/popover/PopoverContent"));
+Popover.Content = clientOnly(
+  () => import("~/components/ssr/popover/PopoverContent"),
+);
 // @ts-expect-error ignore
-Popover.Description = clientOnly(() => import("~/components/ssr/popover/PopoverDescription"));
+Popover.Description = clientOnly(
+  () => import("~/components/ssr/popover/PopoverDescription"),
+);
 // @ts-expect-error ignore
-Popover.Label = clientOnly(() => import("~/components/ssr/popover/PopoverLabel"));
+Popover.Label = clientOnly(
+  () => import("~/components/ssr/popover/PopoverLabel"),
+);
 // @ts-expect-error ignore
-Popover.Overlay = clientOnly(() => import("~/components/ssr/popover/PopoverOverlay"));
+Popover.Overlay = clientOnly(
+  () => import("~/components/ssr/popover/PopoverOverlay"),
+);
 // @ts-expect-error ignore
-Popover.Portal = clientOnly(() => import("~/components/ssr/popover/PopoverPortal"));
+Popover.Portal = clientOnly(
+  () => import("~/components/ssr/popover/PopoverPortal"),
+);
 // @ts-expect-error ignore
-Popover.Trigger = clientOnly(() => import("~/components/ssr/popover/PopoverTrigger"));
+Popover.Trigger = clientOnly(
+  () => import("~/components/ssr/popover/PopoverTrigger"),
+);
 // const Resizable = clientOnly(() => import("~/components/ssr/resizer/Resizable"));
 // Resizable.Handle = clientOnly(() => import("~/components/ssr/resizer/Handle"));
 // Resizable.Panel = clientOnly(() => import("~/components/ssr/resizer/Panel"));
 
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
 // @ts-expect-error ignore
-Tooltip.Anchor = clientOnly(() => import("~/components/ssr/tooltip/TooltipAnchor"));
+Tooltip.Anchor = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipAnchor"),
+);
 // @ts-expect-error ignore
-Tooltip.Arrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
+Tooltip.Arrow = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipArrow"),
+);
 // @ts-expect-error ignore
-Tooltip.Content = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
+Tooltip.Content = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipContent"),
+);
 // @ts-expect-error ignore
-Tooltip.Portal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
+Tooltip.Portal = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipPortal"),
+);
 // @ts-expect-error ignore
-Tooltip.Trigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
+Tooltip.Trigger = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipTrigger"),
+);
 
 import { Match, Portal, Show, Switch } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
@@ -80,9 +108,9 @@ export const corvuComponents = {
 export const componentsMap: Record<string, any> = {
   Box: HtmlField,
   Button: ButtonField,
+  CheckBox: CheckboxField,
   Component: ComponentField,
   ComponentChildren: ComponentChildrenField,
-  CheckBox: CheckboxField,
   Data: DataField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
@@ -122,8 +150,8 @@ export function getDynamicComponent(component: string) {
   if (corvuComponents[componentKey as keyof typeof corvuComponents]) {
     return subComponent
       ? // @ts-expect-error ignore
-      corvuComponents[componentKey as keyof typeof corvuComponents][
-        subComponent
+        corvuComponents[componentKey as keyof typeof corvuComponents][
+          subComponent
         ] || NotFoundComponent
       : corvuComponents[componentKey as keyof typeof corvuComponents];
   }

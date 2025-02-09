@@ -18,12 +18,24 @@ export function onLayoutItemClick(
 ) {
   batch(() => {
     if (layoutStoreVertex.P.formId !== formStoreVertex.id) {
-      mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-        formId: formStoreVertex.id,
-      });
+      mergeVertexProperties<PageLayoutObject>(
+        0,
+        layoutStoreVertex.id,
+        graph,
+        setGraph,
+        {
+          formId: formStoreVertex.id,
+        },
+      );
     }
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id, graph, setGraph, {
-      selectedId: layoutVertexId ?? -1,
-    });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreVertex.id,
+      graph,
+      setGraph,
+      {
+        selectedId: layoutVertexId ?? -1,
+      },
+    );
   });
 }

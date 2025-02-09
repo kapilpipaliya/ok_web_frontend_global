@@ -8,7 +8,7 @@ interface IframeHelpDialogProps {
   iconSize?: number;
   iframeSrc?: string;
   iframeTitle?: string;
-  title?: string; 
+  title?: string;
 }
 
 export function IframeHelpDialog(props: IframeHelpDialogProps) {
@@ -23,7 +23,8 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
       <IconButton
         icon={props.icon}
         onClick={handleIconClick}
-        size={props.iconSize || 24} />
+        size={props.iconSize || 24}
+      />
       <Show when={open()}>
         <CustomModal
           bodyClass="h:100%"
@@ -31,11 +32,7 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
           footer={() => (
             <div class="flex ai:center jc:center mt:auto">
               <div class="b:1.5px|solid|lightseagreen ml:auto r:5">
-                <button
-                  class=""
-                  onClick={() => setOpen(false)}
-                  type="button"
-                >
+                <button class="" onClick={() => setOpen(false)} type="button">
                   Close
                 </button>
               </div>
@@ -50,7 +47,8 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
             allow="clipboard-write"
             class="h:full w:full"
             src={props.iframeSrc}
-            title={props.iframeTitle} />
+            title={props.iframeTitle}
+          />
         </CustomModal>
       </Show>
     </>

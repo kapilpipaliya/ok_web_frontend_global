@@ -1,35 +1,46 @@
-import { useChat } from '@ai-sdk/solid';
-import { createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { useChat } from "@ai-sdk/solid";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 
-import type { FormStoreObject } from '~/components/form/context/FormContext';
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { insertNewRow } from '~/components/fields/table_field/insertNewRow';
-import { STYLES } from '~/components/styled/constants/styles';
-import { themeConfig } from '~/cypher/get/themeConfig';
-import { useGraph, type Vertex } from '~/lib/graph/graph';
-import { deleteRow } from '~/lib/graph/mutate/deleteRow';
+import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
+import { STYLES } from "~/components/styled/constants/styles";
+import { themeConfig } from "~/cypher/get/themeConfig";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 
-import type { DBMessage } from './types';
+import type { DBMessage } from "./types";
 
-import { type PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { ChatInput } from './ChatInput';
-import { ChatMessage } from './ChatMessage';
-import { ChatResponse } from './ChatResponse';
-import { EXAMPLE_PROMPTS } from './constants/EXAMPLE_PROMPTS';
-import { getChatHistory } from './functions/getChatHistory';
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../context/LayoutContext";
+import { ChatInput } from "./ChatInput";
+import { ChatMessage } from "./ChatMessage";
+import { ChatResponse } from "./ChatResponse";
+import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
+import { getChatHistory } from "./functions/getChatHistory";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
-  const formStoreVertex = () => layoutStoreVertex().P.mainFormId ? graph.vertexes[layoutStoreVertex().P.mainFormId!] as Vertex<FormStoreObject> : undefined;
-  const messages = createMemo(() => getChatHistory(graph, setGraph, formStoreVertex));
+  const formStoreVertex = () =>
+    layoutStoreVertex().P.mainFormId
+      ? (graph.vertexes[
+          layoutStoreVertex().P.mainFormId!
+        ] as Vertex<FormStoreObject>)
+      : undefined;
+  const messages = createMemo(() =>
+    getChatHistory(graph, setGraph, formStoreVertex),
+  );
 
   const [showExamples, setShowExamples] = createSignal(false);
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
-  const [lastRequestPrompt, setLastRequestPrompt] = createSignal<string>('');
-  const [lastSelectedModel, setLastSelectedModel] = createSignal<string>('');
+  const [lastRequestPrompt, setLastRequestPrompt] = createSignal<string>("");
+  const [lastSelectedModel, setLastSelectedModel] = createSignal<string>("");
 
   let chatHistoryRef: HTMLDivElement | undefined;
   let examplesButtonRef: HTMLButtonElement | undefined;
@@ -46,7 +57,17 @@ export function UseObjectAIPanel() {
     }
   });
 
-  const { error, handleInputChange, handleSubmit, input, isLoading, messages: chatMessages, reload, setMessages, stop } = useChat({
+  const {
+    error,
+    handleInputChange,
+    handleSubmit,
+    input,
+    isLoading,
+    messages: chatMessages,
+    reload,
+    setMessages,
+    stop,
+  } = useChat({
     onFinish(message) {
       const content = message.content;
       let data: unknown[] = [];
@@ -69,12 +90,13 @@ export function UseObjectAIPanel() {
       }
 
       // Create content preview from first 100 characters
-      const contentPreview = content.slice(0, 100) + (content.length > 100 ? '...' : '');
+      const contentPreview =
+        content.slice(0, 100) + (content.length > 100 ? "..." : "");
 
       const messageData = {
         contentPreview,
         data: JSON.stringify(data),
-        hasFile: files() ? true : false,
+        hasFile: !!files(),
         model: lastSelectedModel(),
         prompt: lastRequestPrompt(),
         response: content,
@@ -83,7 +105,9 @@ export function UseObjectAIPanel() {
         // attachments: files() ? Array.from(files()!) : undefined
       } as DBMessage;
 
-      if (!formStoreVertex()) return;
+      if (!formStoreVertex()) {
+        return;
+      }
 
       insertNewRow(
         formStoreVertex()!.P.txnId,
@@ -92,7 +116,7 @@ export function UseObjectAIPanel() {
         false,
         graph,
         setGraph,
-        messageData
+        messageData,
       );
 
       setTimeout(() => {
@@ -104,20 +128,21 @@ export function UseObjectAIPanel() {
       if (!error()) {
         // clear input and files on successful completion
         // @ts-expect-error ignore error
-        handleInputChange({ target: { value: '' } });
+        handleInputChange({ target: { value: "" } });
         setFiles(undefined);
         if (fileInputRef) {
-          fileInputRef.value = '';
+          fileInputRef.value = "";
         }
       }
     },
-    onResponse() {
-    },
+    onResponse() {},
   });
 
   const handleChatSubmit = (e: SubmitEvent, model: string) => {
     e.preventDefault();
-    if (!input().trim() || isLoading()) return;
+    if (!input().trim() || isLoading()) {
+      return;
+    }
 
     setLastRequestPrompt(input());
     setLastSelectedModel(model);
@@ -138,12 +163,12 @@ When specifying colors in css properties, you can use either:
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),
-            role: 'system'
-          }
+            role: "system",
+          },
         ],
-        model: model
+        model: model,
       },
-      experimental_attachments: files()
+      experimental_attachments: files(),
     });
 
     setTimeout(() => {
@@ -165,10 +190,20 @@ Choose colors that work well for the context and maintain good contrast ratios.
         <For each={messages()}>
           {(message, index) => (
             <div class="margin-bottom:24px">
-              <ChatMessage index={index() + 1} message={message} onDelete={(msg) => deleteRow( msg, false,graph,setGraph, formStoreVertex()!.P.txnId!)} />
-              <ChatResponse
+              <ChatMessage
+                index={index() + 1}
                 message={message}
+                onDelete={(msg) =>
+                  deleteRow(
+                    msg,
+                    false,
+                    graph,
+                    setGraph,
+                    formStoreVertex()!.P.txnId!,
+                  )
+                }
               />
+              <ChatResponse message={message} />
             </div>
           )}
         </For>
@@ -189,7 +224,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
         <Show when={isLoading()}>
           <div class="padding:16px color:rgb(107,114,128) display:flex gap:8px align-items:center">
             <div class="display:flex align-items:center gap:8px">
-              <div class="width:16px height:16px border-radius:50% border:2px|solid|rgb(59,130,246) border-top-color:transparent @rotate|1s|infinite|linear"></div>
+              <div class="width:16px height:16px border-radius:50% border:2px|solid|rgb(59,130,246) border-top-color:transparent @rotate|1s|infinite|linear" />
               <span>AI is thinking...</span>
             </div>
             <button

@@ -3,7 +3,10 @@ import { Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass, toolBarClass } from "~/pages/admin_layout/constant";
+import {
+  headerIconButtonClass,
+  toolBarClass,
+} from "~/pages/admin_layout/constant";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { PreviewButton } from "../page_tabbar/PreviewButton";
@@ -13,8 +16,8 @@ import { SaveIconButton } from "../page_tabbar/SaveIconButton";
 import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
 
-export function PageTabBar(props: { 
-  formStoreId: Id; 
+export function PageTabBar(props: {
+  formStoreId: Id;
   handleRefresh: () => void;
   onClose?: () => void;
   openIndex: number;
@@ -24,7 +27,10 @@ export function PageTabBar(props: {
     <header class={toolBarClass}>
       <div class="flex ai:center gap:6">
         <UndoRedoIcons formStoreId={props.formStoreId} />
-        <ResizeViewButtons formStoreId={props.formStoreId} openIndex={props.openIndex} />
+        <ResizeViewButtons
+          formStoreId={props.formStoreId}
+          openIndex={props.openIndex}
+        />
         {/* <SettingPageIcon /> */}
       </div>
 

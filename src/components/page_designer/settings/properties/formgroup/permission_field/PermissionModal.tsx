@@ -41,11 +41,11 @@ export function PermissionModal(
   createActiveClickOutside(graph, setGraph);
   const formStoreId = useDesignerFormIdContext();
 
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
-    props.prevTxnIndex ??
-    getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
+    props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
 
   const { metaVertexId } = generateTableInputMeta(
     getMetaAttributes(props.selectedAttr),
@@ -72,7 +72,6 @@ export function PermissionModal(
     }
     props.closeModal();
   };
-  const repeaterStore = createStore({});
 
   return (
     <Portal>

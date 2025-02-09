@@ -36,11 +36,14 @@ export function FilePickerModal(props: {
     >
       <div>
         <FileManager
-          enableRowSelection={(vertex) => (vertex as unknown as Vertex).L[0] === "File"}
+          enableRowSelection={(vertex) =>
+            (vertex as unknown as Vertex).L[0] === "File"
+          }
           fileId={props.selectedFileVertex[0]?.id}
           parentVertexLabel="Folder"
           setFileManagerStore={props.setFileManagerStore}
-          toParentEdgeType="ParentFolder" />
+          toParentEdgeType="ParentFolder"
+        />
       </div>
     </CustomModal>
   );

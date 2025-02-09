@@ -61,7 +61,7 @@ export function processChildrenAttrs(
         setGraph,
         attrCompMetaVertex,
         compVertex.id,
-        );
+      );
     }
     processChildrenAttrs(
       formVertex,

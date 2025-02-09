@@ -1,8 +1,6 @@
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
-import {
-  useRepeaterVertexContext,
-} from "~/components/page_attr_render/context/PageAttrContext";
+import { useRepeaterVertexContext } from "~/components/page_attr_render/context/PageAttrContext";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
@@ -15,7 +13,10 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { usePageRenderContext } from "../../page_attr_render/context/PageRenderContext";
 import { RepeaterInternal } from "./RepeaterInternal";
 
-export const DataField = (props: { data: (() => any[]) | any[], expression: string }) => {
+export const DataField = (props: {
+  data: (() => any[]) | any[];
+  expression: string;
+}) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -44,7 +45,7 @@ export const DataField = (props: { data: (() => any[]) | any[], expression: stri
       );
     } else {
       setOptions([]);
-      setErrorMessage(getErrorMessage(result)); 
+      setErrorMessage(getErrorMessage(result));
     }
 
     setIsFetching(false);
@@ -53,7 +54,7 @@ export const DataField = (props: { data: (() => any[]) | any[], expression: stri
   createEffect(() => {
     if (props.data) {
       // using function will clone the data
-      if (typeof props.data === 'function') {
+      if (typeof props.data === "function") {
         setOptions(props.data());
       } else {
         setOptions(props.data);
@@ -92,12 +93,26 @@ export const DataField = (props: { data: (() => any[]) | any[], expression: stri
       <Match when={Array.isArray(options()) && !props.noRepeat}>
         <For each={options()}>
           {(value, index) => {
-            return <RepeaterInternal data={data()} index={index()} meta={meta()} name={props.name} repeaterValue={value} />;
+            return (
+              <RepeaterInternal
+                data={data()}
+                index={index()}
+                meta={meta()}
+                name={props.name}
+                repeaterValue={value}
+              />
+            );
           }}
         </For>
       </Match>
       <Match when={options()}>
-        <RepeaterInternal data={data()} index={0} meta={meta()} name={props.name} repeaterValue={options()} />
+        <RepeaterInternal
+          data={data()}
+          index={0}
+          meta={meta()}
+          name={props.name}
+          repeaterValue={options()}
+        />
       </Match>
     </Switch>
   );

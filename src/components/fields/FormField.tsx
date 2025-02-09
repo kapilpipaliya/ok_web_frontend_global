@@ -9,10 +9,19 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
-import { FormContext, type FormStoreObject, useFormContext } from "../form/context/FormContext";
+import {
+  FormContext,
+  type FormStoreObject,
+  useFormContext,
+} from "../form/context/FormContext";
 import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
@@ -33,10 +42,11 @@ export function FormField(
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta!;
-  const data = () => parentRenderContext()?.context.data!;
+  const _data = () => parentRenderContext()?.context.data!;
   const txnId = generateNewTxnId(graph, setGraph);
   const formId = useFormContext();
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
+  const formVertex = () =>
+    formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
 
   const pageFormVertexObject = newVertex(uuidv7(), ["PageForm"], {
     txnId,
@@ -46,16 +56,26 @@ export function FormField(
 
   onCleanup(() => {
     deleteVertex(0, pageFormVertexObject.id, graph, setGraph);
-  })
+  });
 
   const id = createMemo(() => props.id ?? formVertex()?.P.id);
-  const label = createMemo(() => props.label ?? previewStore.previewMeta?.P[IdAttr] ?? meta().P[IdAttr]);
-  
-  const formStore = () => graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;
+  const label = createMemo(
+    () =>
+      props.label ?? previewStore.previewMeta?.P[IdAttr] ?? meta().P[IdAttr],
+  );
+
+  const formStore = () =>
+    graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;
   const setFormStore = (key: string, value: any) => {
-    mergeVertexProperties<FormStoreObject>(0, pageFormVertexObject.id, graph, setGraph, { [key]: value });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      pageFormVertexObject.id,
+      graph,
+      setGraph,
+      { [key]: value },
+    );
   };
-  
+
   const form = generateFormMetaAttributes(graph, () => {}, meta());
   setFormStore("formMetaData", form);
 
@@ -80,11 +100,17 @@ export function FormField(
       setFormStore("error", createResult.error);
       return;
     }
-    mergeVertexProperties<FormStoreObject>(0, pageFormVertexObject.id, graph, setGraph, {
-      formDataId: createResult.vertex!.id,
-      formMetaId: meta().id,
-      txnId,
-    });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      pageFormVertexObject.id,
+      graph,
+      setGraph,
+      {
+        formDataId: createResult.vertex!.id,
+        formMetaId: meta().id,
+        txnId,
+      },
+    );
   }
   async function loadData() {
     if (!id()) {
@@ -94,7 +120,7 @@ export function FormField(
       const { data, error } = await getFormData(
         graph,
         formStore().P.formMetaData!.attributes,
-        id()!
+        id()!,
       );
 
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
@@ -112,7 +138,10 @@ export function FormField(
   return (
     <FormContext.Provider value={pageFormVertexObject.id}>
       <div class="">
-        <PageAttrRender data={graph.vertexes[formStore().P.formDataId!]} metaVertex={meta()!} />
+        <PageAttrRender
+          data={graph.vertexes[formStore().P.formDataId!]}
+          metaVertex={meta()!}
+        />
       </div>
       <div />
     </FormContext.Provider>

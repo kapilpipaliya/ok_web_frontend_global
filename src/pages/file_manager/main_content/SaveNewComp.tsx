@@ -40,9 +40,15 @@ export function SaveNewComp(
 
     const newFormTxnId = generateNewTxnId(graph, setGraph);
 
-    const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Comp", {
-      key: componentName(),
-    });
+    const createResult = createFormVertex(
+      graph,
+      setGraph,
+      newFormTxnId,
+      "Comp",
+      {
+        key: componentName(),
+      },
+    );
     const dataVertex = createResult.vertex!;
 
     const parentFolderMetaVertex = {

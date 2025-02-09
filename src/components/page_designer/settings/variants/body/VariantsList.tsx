@@ -10,17 +10,20 @@ import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { SimpleWithDismissButton } from "../../../../styled/SimpleModal";
-import { useDesignerFormIdContext, } from "../../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();
-  const [selectedVariant, setSelectedVariant] = createSignal<null | Vertex>(null);
+  const [selectedVariant, setSelectedVariant] = createSignal<null | Vertex>(
+    null,
+  );
   const [selectedVariantToDelete, setSelectedVariantToDelete] =
     createSignal<null | Vertex>(null);
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const variants = createMemo(() => {
     if (formStoreVertex()?.P.formDataId) {
@@ -51,7 +54,7 @@ export function VariantsList() {
       }
     }
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      multiHighlight: incomingIds
+      multiHighlight: incomingIds,
     });
   };
 
@@ -69,7 +72,7 @@ export function VariantsList() {
 
   const unhighlightVariant = () => {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      multiHighlight: []
+      multiHighlight: [],
     });
   };
 
@@ -81,13 +84,7 @@ export function VariantsList() {
         vertexes: [variant],
       }) || [];
     for (const value of values) {
-      deleteRow(
-        value,
-        false,
-        graph,
-        setGraph,
-        formStoreVertex()?.P.txnId,
-      );
+      deleteRow(value, false, graph, setGraph, formStoreVertex()?.P.txnId);
     }
   };
 
@@ -98,7 +95,9 @@ export function VariantsList() {
   };
 
   const DeleteConfirmDialog = () => {
-    const variantUsage = createMemo(() => variantUsageCount(selectedVariantToDelete()!));
+    const variantUsage = createMemo(() =>
+      variantUsageCount(selectedVariantToDelete()!),
+    );
     return (
       <ZIndex>
         <SimpleWithDismissButton
@@ -111,8 +110,8 @@ export function VariantsList() {
         >
           <div class="mt:1rem">
             <p>
-              The variant is used at {variantUsage().length} attributes. It will be
-              removed from all places where it is used.
+              The variant is used at {variantUsage().length} attributes. It will
+              be removed from all places where it is used.
             </p>
             <For each={variantUsage()}>
               {(id) => <div>{graph.vertexes[id].P.key}</div>}

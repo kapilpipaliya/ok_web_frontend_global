@@ -10,7 +10,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import {
   dialogCancelButtonClass,
   DialogFooter,
@@ -31,7 +31,8 @@ export function ImportMenu(
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [htmlContent, setHtmlContent] = createSignal("");
   const [error] = createSignal("");
@@ -40,7 +41,12 @@ export function ImportMenu(
   const metaVertexId = generateNewVertexId(graph, setGraph);
   const dataVertexId = generateNewVertexId(graph, setGraph);
 
-  addNewVertex(0, { id: dataVertexId, IN: {}, L: [], OUT: {}, P: {} }, graph, setGraph);
+  addNewVertex(
+    0,
+    { id: dataVertexId, IN: {}, L: [], OUT: {}, P: {} },
+    graph,
+    setGraph,
+  );
 
   onCleanup(() => {
     deleteVertex(0, metaVertexId, graph, setGraph);

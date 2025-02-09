@@ -3,14 +3,29 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
-import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
-import { addNewEdge, deleteEdge, replaceEdgeEnd, replaceEdgeStart, updateEdgeIdsToNew } from "../mutate/edge";
-import { addNewVertex, deleteVertex, mergeVertexProperties, replaceVertexProperties, updateVertexIdsToNew } from "../mutate/vertex";
+import {
+  getEdgeOldIdToNewIdMap,
+  getVertexOldIdToNewIdMap,
+} from "../get/sync/getGlobalStore";
+import {
+  addNewEdge,
+  deleteEdge,
+  replaceEdgeEnd,
+  replaceEdgeStart,
+  updateEdgeIdsToNew,
+} from "../mutate/edge";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  replaceVertexProperties,
+  updateVertexIdsToNew,
+} from "../mutate/vertex";
 
 export function undoTxn(
   txnDetail: TransactionValue,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const { data, id, originalData, ...actions } = txnDetail;
   for (const action in actions) {
@@ -36,12 +51,24 @@ export function undoTxn(
         }
         case "merge": {
           const actualVertexId3 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          mergeVertexProperties(0, actualVertexId3, graph, setGraph, originalData);
+          mergeVertexProperties(
+            0,
+            actualVertexId3,
+            graph,
+            setGraph,
+            originalData,
+          );
           break;
         }
         case "replace": {
           const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          replaceVertexProperties(0, actualVertexId2, graph, setGraph, originalData);
+          replaceVertexProperties(
+            0,
+            actualVertexId2,
+            graph,
+            setGraph,
+            originalData,
+          );
           break;
         }
         case "replaceEdge": {

@@ -5,14 +5,20 @@ import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../../page_designer/context/LayoutContext";
 
 export function ParentButton(props: { item: Vertex; size: number }) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton

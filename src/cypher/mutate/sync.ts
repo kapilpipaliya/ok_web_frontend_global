@@ -1,5 +1,3 @@
-
-
 import { transferNodeTypes } from "~/cypher/mutate/sync/transferNodeTypes";
 
 import { SYSTEM_DB_NAME } from "../boltConstant";
@@ -14,8 +12,8 @@ export async function syncNodesMGCall(args: {
 
   const nodesToTransfer = args.nodesToTransfer;
   const driver = await getDriver();
-  const dbSessionSource = driver.session({database: SYSTEM_DB_NAME });
-  const dbSessionTarget = driver.session({database: args.subDomain});
+  const dbSessionSource = driver.session({ database: SYSTEM_DB_NAME });
+  const dbSessionTarget = driver.session({ database: args.subDomain });
 
   try {
     await transferNodeTypes(dbSessionSource, dbSessionTarget, nodesToTransfer);

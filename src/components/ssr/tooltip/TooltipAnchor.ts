@@ -1,3 +1,3 @@
-import { Anchor as TooltipAnchor } from '@corvu/tooltip';
+import { Anchor as TooltipAnchor } from "@corvu/tooltip";
 
 export default TooltipAnchor;

@@ -4,8 +4,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 
-
-
 export function getCompPropsObj(
   graph: Store<GraphInterface>,
   componentVertex: Vertex,

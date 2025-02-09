@@ -22,7 +22,7 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
   if (!filter || Object.keys(filter).length === 0) {
     return {
       params: {},
-      query: ``,
+      query: "",
     };
   }
 
@@ -34,18 +34,20 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
       .map(([key, value]) => {
         if (key === "$and" && Array.isArray(value)) {
           return "(" + value.map(translateFilter).join(" AND ") + ")";
-        } else if (key === "$or" && Array.isArray(value)) {
-          return "(" + value.map(translateFilter).join(" OR ") + ")";
-        } else if (key === "$not" && typeof value === "object") {
-          return "NOT (" + translateFilter(value as MongoFilter) + ")";
-        } else if (typeof value === "object" && !Array.isArray(value)) {
-          return handleOperators(key, value);
-        } else {
-          // Direct equality
-          const paramName = `param${paramIndex++}`;
-          params[paramName] = value;
-          return `n.${key} = $${paramName}`;
         }
+        if (key === "$or" && Array.isArray(value)) {
+          return "(" + value.map(translateFilter).join(" OR ") + ")";
+        }
+        if (key === "$not" && typeof value === "object") {
+          return "NOT (" + translateFilter(value as MongoFilter) + ")";
+        }
+        if (typeof value === "object" && !Array.isArray(value)) {
+          return handleOperators(key, value);
+        }
+        // Direct equality
+        const paramName = `param${paramIndex++}`;
+        params[paramName] = value;
+        return `n.${key} = $${paramName}`;
       })
       .join(" AND ");
   };

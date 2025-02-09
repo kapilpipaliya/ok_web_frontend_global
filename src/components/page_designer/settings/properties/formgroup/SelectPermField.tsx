@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
@@ -28,7 +28,8 @@ export function SelectPermField(
   let buttonRef: HTMLInputElement;
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     const [isOpenRule, setIsOpenRule] = createSignal(false);

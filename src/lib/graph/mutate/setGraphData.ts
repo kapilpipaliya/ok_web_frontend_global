@@ -35,20 +35,20 @@ export function setGraphData(
 ) {
   batch(() => {
     for (const vertexId in args.vertexes) {
-      updateVertex(
-        vertexId,
-        args.vertexes[vertexId],
-        graph,
-        setGraph,
-        options,
-      );
+      updateVertex(vertexId, args.vertexes[vertexId], graph, setGraph, options);
     }
 
     for (const edgeId in args.edges) {
       updateEdge(edgeId, args.edges[edgeId], graph, setGraph, options);
     }
 
-    handleDeletions(args.deleted_edges, args.deleted_vertexes, graph, setGraph, options);
+    handleDeletions(
+      args.deleted_edges,
+      args.deleted_vertexes,
+      graph,
+      setGraph,
+      options,
+    );
   });
 }
 
@@ -82,7 +82,11 @@ export function updateEdge(
         : [edge.id],
     );
   }
-  broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateEdge: { edge, edgeId, options } });
+  broadcastToAllChannels(
+    graph.broadcastChannels,
+    options?.skipPostMessage ?? "",
+    { updateEdge: { edge, edgeId, options } },
+  );
 }
 
 export function updateVertex(
@@ -114,7 +118,11 @@ export function updateVertex(
         : [vertexData.id];
     });
   }
-  broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", { updateVertex: { options, vertexData, vertexId } });
+  broadcastToAllChannels(
+    graph.broadcastChannels,
+    options?.skipPostMessage ?? "",
+    { updateVertex: { options, vertexData, vertexId } },
+  );
 }
 
 function handleDeletions(

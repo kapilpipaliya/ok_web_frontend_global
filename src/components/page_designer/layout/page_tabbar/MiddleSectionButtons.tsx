@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph, } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -30,9 +30,15 @@ export const MiddleSectionButtons = () => {
               : "solar:settings-linear"
           }
           onclick={() =>
-            mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-              selectedSection: section.toLowerCase(),
-            })
+            mergeVertexProperties<PageLayoutObject>(
+              0,
+              layoutStoreId,
+              graph,
+              setGraph,
+              {
+                selectedSection: section.toLowerCase(),
+              },
+            )
           }
           size={22}
           title={section}

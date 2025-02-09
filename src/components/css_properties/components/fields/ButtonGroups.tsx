@@ -3,10 +3,18 @@ import { clientOnly } from "@solidjs/start";
 import { For, type JSX, splitProps } from "solid-js";
 
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
-const TooltipTrigger = clientOnly(() => import("~/components/ssr/tooltip/TooltipTrigger"));
-const TooltipPortal = clientOnly(() => import("~/components/ssr/tooltip/TooltipPortal"));
-const TooltipContent = clientOnly(() => import("~/components/ssr/tooltip/TooltipContent"));
-const TooltipArrow = clientOnly(() => import("~/components/ssr/tooltip/TooltipArrow"));
+const TooltipTrigger = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipTrigger"),
+);
+const TooltipPortal = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipPortal"),
+);
+const TooltipContent = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipContent"),
+);
+const TooltipArrow = clientOnly(
+  () => import("~/components/ssr/tooltip/TooltipArrow"),
+);
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
@@ -53,7 +61,12 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
                   >
                     {option.icon ? (
-                      <Icon height={23} icon={option.icon} noobserver width={23} />
+                      <Icon
+                        height={23}
+                        icon={option.icon}
+                        noobserver
+                        width={23}
+                      />
                     ) : (
                       option.key
                     )}

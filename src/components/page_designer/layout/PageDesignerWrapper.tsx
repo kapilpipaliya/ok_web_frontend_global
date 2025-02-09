@@ -3,7 +3,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import { Title } from "@solidjs/meta";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { openDB } from 'idb';
+import { openDB } from "idb";
 import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
@@ -22,10 +22,14 @@ import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
-import { HeaderRow } from "../header/header_row/HeaderRow";
 import { getPageTitle } from "./getPageTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
@@ -35,9 +39,9 @@ export function PageDesignerWrapper(): JSX.Element {
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const dbPromise = openDB('keyval-store', 1, {
+  const dbPromise = openDB("keyval-store", 1, {
     upgrade(db) {
-      db.createObjectStore('keyval');
+      db.createObjectStore("keyval");
     },
   });
 
@@ -51,13 +55,17 @@ export function PageDesignerWrapper(): JSX.Element {
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
 
-  const vertex = newVertex<PageLayoutObject>(initialStore.id, ["PageDesigner"], {
-    ...initialStore,
-    [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
-    formId,
-    mainFormId: formId,
-    openedFormIds: [newOpenVertex.id]
-  });
+  const vertex = newVertex<PageLayoutObject>(
+    initialStore.id,
+    ["PageDesigner"],
+    {
+      ...initialStore,
+      [`mainPanel${initialStore.mainPanel[0]}Tab`]: formId,
+      formId,
+      mainFormId: formId,
+      openedFormIds: [newOpenVertex.id],
+    },
+  );
   addNewVertex(0, vertex, graph, setGraph);
 
   onCleanup(() => {
@@ -65,7 +73,7 @@ export function PageDesignerWrapper(): JSX.Element {
       deleteVertex(0, vertexId, graph, setGraph);
     }
     deleteVertex(0, initialStore.id, graph, setGraph);
-  })
+  });
 
   const handleResize = () => {
     const isSmallScreen = window.innerWidth < 840;
@@ -76,7 +84,7 @@ export function PageDesignerWrapper(): JSX.Element {
       setGraph,
       {
         isSmallScreen,
-      }
+      },
     );
   };
 
@@ -88,14 +96,17 @@ export function PageDesignerWrapper(): JSX.Element {
     }
 
     // Get stored layout properties
-    const storedLayout = await (await dbPromise).get('keyval', 'page_designer_layout');
+    const storedLayout = await (await dbPromise).get(
+      "keyval",
+      "page_designer_layout",
+    );
     if (storedLayout) {
       mergeVertexProperties<PageLayoutObject>(
         0,
         initialStore.id,
         graph,
         setGraph,
-        storedLayout
+        storedLayout,
       );
     }
 
@@ -106,10 +117,16 @@ export function PageDesignerWrapper(): JSX.Element {
 
   // Save layout properties on change
   createEffect(() => {
-    if (isServer) return;
+    if (isServer) {
+      return;
+    }
 
-    const layoutVertex = graph.vertexes[initialStore.id] as Vertex<PageLayoutObject>;
-    if (!layoutVertex) return;
+    const layoutVertex = graph.vertexes[
+      initialStore.id
+    ] as Vertex<PageLayoutObject>;
+    if (!layoutVertex) {
+      return;
+    }
 
     const widthProps = {
       isLeftOpen: layoutVertex.P.isLeftOpen,
@@ -121,14 +138,17 @@ export function PageDesignerWrapper(): JSX.Element {
       rightWidth1: layoutVertex.P.rightWidth1,
       rightWidth2: layoutVertex.P.rightWidth2,
       // Note: this does not work because we use uuidv7 for the mainPanel ids
-      ...layoutVertex.P.mainPanel.reduce((acc, panel) => ({
-        ...acc,
-        [`mainPanel${panel}Width`]: layoutVertex.P[`mainPanel${panel}Width`]
-      }), {})
+      ...layoutVertex.P.mainPanel.reduce(
+        (acc, panel) => ({
+          ...acc,
+          [`mainPanel${panel}Width`]: layoutVertex.P[`mainPanel${panel}Width`],
+        }),
+        {},
+      ),
     };
 
     (async () => {
-      await (await dbPromise).put('keyval', widthProps, 'page_designer_layout');
+      await (await dbPromise).put("keyval", widthProps, "page_designer_layout");
     })();
   });
 
@@ -149,14 +169,18 @@ export function PageDesignerWrapper(): JSX.Element {
     }
   };
 
-  const layoutStore = () => graph.vertexes[initialStore.id].P as PageLayoutObject;
+  const layoutStore = () =>
+    graph.vertexes[initialStore.id].P as PageLayoutObject;
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <Title>{getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}</Title>
+        <Title>
+          {getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}
+        </Title>
         <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",

@@ -86,15 +86,19 @@ export const SectionList = (
 
   const collapseAll = () => setSetAllOpen(false);
   const expandAll = () => setSetAllOpen(true);
-  const toggleConfigured = () => setShowConfiguredOnly(prev => !prev);
+  const toggleConfigured = () => setShowConfiguredOnly((prev) => !prev);
 
   return (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
       <div class="flex jc:end mb:2 w:100%">
-        <button 
-          class="btn" 
-          onClick={toggleConfigured} 
-          title={showConfiguredOnly() ? "Show all fields" : "Show configured fields only"}
+        <button
+          class="btn"
+          onClick={toggleConfigured}
+          title={
+            showConfiguredOnly()
+              ? "Show all fields"
+              : "Show configured fields only"
+          }
         >
           <Icon
             class="transition:transform|0.2s|linear"

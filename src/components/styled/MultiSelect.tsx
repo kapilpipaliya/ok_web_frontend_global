@@ -1,6 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
-import { createMemo, createSignal, For, getOwner, type JSX, runWithOwner, Show } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  For,
+  getOwner,
+  type JSX,
+  runWithOwner,
+  Show,
+} from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -8,10 +16,10 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 
 import { useZIndex, ZIndex } from "../fields/ZIndex";
+import { STYLES } from "./constants/styles";
 import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
 import { useToast } from "./Toast";
-import { STYLES } from "./constants/styles";
 
 export type Option =
   | string
@@ -232,7 +240,7 @@ export function MultiSelectField(
                 runWithOwner(owner, () => {
                   (!p.option[childrenKey()] ||
                     p.option[childrenKey()].length === 0) &&
-                    handleSelectChange(p.option)
+                    handleSelectChange(p.option);
                 })
               }
             >
@@ -307,7 +315,7 @@ export function MultiSelectField(
     <div
       class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
       classList={{
-        "b:1px|solid|#ff0000": !!props.error
+        "b:1px|solid|#ff0000": !!props.error,
       }}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
@@ -317,9 +325,11 @@ export function MultiSelectField(
         <For each={selectedValue()}>
           {(tag) => (
             <div class="c:#000 ai:center bg:#e0e0e0 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-              <span class="white-space:nowrap">{props.renderLabel
-                ? props.renderLabel(tag, true)
-                : getOptionLabel(tag)}</span>
+              <span class="white-space:nowrap">
+                {props.renderLabel
+                  ? props.renderLabel(tag, true)
+                  : getOptionLabel(tag)}
+              </span>
               <IconButton
                 icon="ic:round-close"
                 onClick={(e) => {

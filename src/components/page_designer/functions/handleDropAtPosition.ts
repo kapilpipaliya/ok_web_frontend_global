@@ -42,7 +42,7 @@ export async function handleDropAtPosition(
         })?.[0];
 
   if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Component") {
-    const layoutRowId = componentDrop (
+    const layoutRowId = componentDrop(
       formData,
       txnId,
       fromVertex,
@@ -55,9 +55,9 @@ export async function handleDropAtPosition(
     if (layoutRowId === -1) {
       return layoutRowId;
     }
-  
+
     fromVertex = graph.vertexes[layoutRowId];
-  
+
     sortChildren(
       graph,
       setGraph,

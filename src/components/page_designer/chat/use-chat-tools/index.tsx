@@ -1,21 +1,21 @@
 /* eslint-disable react/jsx-key */
-import { useChat } from '@ai-sdk/solid';
-import { For, Show } from 'solid-js';
+import { useChat } from "@ai-sdk/solid";
+import { For, Show } from "solid-js";
 
 export function UseChatTools() {
   const { addToolResult, handleInputChange, handleSubmit, input, messages } =
     useChat({
-      api: '/api/use-chat-tools',
+      api: "/api/use-chat-tools",
       maxSteps: 5,
 
       // run client-side tools that are automatically executed:
       async onToolCall({ toolCall }) {
-        if (toolCall.toolName === 'getLocation') {
+        if (toolCall.toolName === "getLocation") {
           const cities = [
-            'New York',
-            'Los Angeles',
-            'Chicago',
-            'San Francisco',
+            "New York",
+            "Los Angeles",
+            "Chicago",
+            "San Francisco",
           ];
           return cities[Math.floor(Math.random() * cities.length)];
         }
@@ -25,12 +25,12 @@ export function UseChatTools() {
   return (
     <div class="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       <For each={messages()} fallback={<div>No messages</div>}>
-        {message => (
+        {(message) => (
           <div class="whitespace-pre-wrap">
             <strong>{`${message.role}: `}</strong>
             {message.content}
             <For each={message.toolInvocations || []}>
-              {toolInvocation => (
+              {(toolInvocation) => (
                 <Show
                   fallback={
                     <Show
@@ -40,9 +40,9 @@ export function UseChatTools() {
                         </div>
                       }
                       keyed
-                      when={'result' in toolInvocation && toolInvocation}
+                      when={"result" in toolInvocation && toolInvocation}
                     >
-                      {toolInvocation => (
+                      {(toolInvocation) => (
                         <div class="text-gray-500">
                           Tool call {`${toolInvocation.toolName}: `}
                           {toolInvocation.result}
@@ -52,11 +52,11 @@ export function UseChatTools() {
                   }
                   keyed
                   when={
-                    toolInvocation.toolName === 'askForConfirmation' &&
+                    toolInvocation.toolName === "askForConfirmation" &&
                     toolInvocation
                   }
                 >
-                  {toolInvocation => (
+                  {(toolInvocation) => (
                     <div class="text-gray-500">
                       {toolInvocation.args.message}
                       <div class="flex gap-2">
@@ -67,7 +67,7 @@ export function UseChatTools() {
                                 class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
                                 onClick={() =>
                                   addToolResult({
-                                    result: 'Yes, confirmed.',
+                                    result: "Yes, confirmed.",
                                     toolCallId: toolInvocation.toolCallId,
                                   })
                                 }
@@ -78,7 +78,7 @@ export function UseChatTools() {
                                 class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700"
                                 onClick={() =>
                                   addToolResult({
-                                    result: 'No, denied',
+                                    result: "No, denied",
                                     toolCallId: toolInvocation.toolCallId,
                                   })
                                 }
@@ -88,9 +88,9 @@ export function UseChatTools() {
                             </>
                           }
                           keyed
-                          when={'result' in toolInvocation && toolInvocation}
+                          when={"result" in toolInvocation && toolInvocation}
                         >
-                          {toolInvocation => <b>{toolInvocation.result}</b>}
+                          {(toolInvocation) => <b>{toolInvocation.result}</b>}
                         </Show>
                       </div>
                     </div>

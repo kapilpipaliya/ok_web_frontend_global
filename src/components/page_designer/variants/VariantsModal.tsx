@@ -1,15 +1,12 @@
-
 import { klona } from "klona";
 import { createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import type {
-  FormStoreObject,
-} from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
-import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
@@ -28,7 +25,7 @@ const getMetaAttributes = (selectedVariant?: null | Vertex) => {
     metaAttribute = metaAttribute.attributes!.find((x) => x.key === "option")!;
   }
   if (!metaAttribute) {
-    console.error("Meta attribute not found")
+    console.error("Meta attribute not found");
   }
   return metaAttribute;
 };
@@ -44,9 +41,10 @@ export function VariantsModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
-  
+
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
@@ -55,7 +53,7 @@ export function VariantsModal(
     getMetaAttributes(props.selectedVariant),
   );
 
-  const [error, setError] = createSignal<null | string>(null);
+  const [error, _setError] = createSignal<null | string>(null);
 
   const onVariantsSubmit = () => {
     if (error()) {
@@ -75,7 +73,12 @@ export function VariantsModal(
 
   onCleanup(() => {
     if (revertChanges) {
-      revertTransactionUpToIndex(formStoreVertex()?.P.txnId, prevTxnIndex - 1, graph, setGraph);
+      revertTransactionUpToIndex(
+        formStoreVertex()?.P.txnId,
+        prevTxnIndex - 1,
+        graph,
+        setGraph,
+      );
     }
   });
 
@@ -102,21 +105,21 @@ export function VariantsModal(
                   >
                     {props.selectedVariant
                       ? `${props.selectedVariant.P.key} Variants`
-                      : "All Variants"} :
+                      : "All Variants"}{" "}
+                    :
                   </h3>
                   <div class="mt:0.5rem">
-
-                      <TableInputField
-                        data={
-                          props.selectedVariant
-                            ? props.selectedVariant
-                            : graph.vertexes[formStoreVertex()?.P.formDataId]
-                        }
-                        isNoPermissionCheck={true}
-                        isRealTime={false}
-                        meta={graph.vertexes[metaVertexId]}
-                        txnId={formStoreVertex()?.P.txnId}
-                      />
+                    <TableInputField
+                      data={
+                        props.selectedVariant
+                          ? props.selectedVariant
+                          : graph.vertexes[formStoreVertex()?.P.formDataId]
+                      }
+                      isNoPermissionCheck={true}
+                      isRealTime={false}
+                      meta={graph.vertexes[metaVertexId]}
+                      txnId={formStoreVertex()?.P.txnId}
+                    />
                   </div>
                 </div>
               </div>

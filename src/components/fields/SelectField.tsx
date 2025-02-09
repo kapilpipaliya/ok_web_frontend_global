@@ -22,7 +22,7 @@ import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 import { ensureArray } from "../../lib/data_structure/array/ensureArray";
 import { useFormContext } from "../form/context/FormContext";
@@ -112,16 +112,19 @@ export function SelectField(
         parsedOptions = getStaticOptions(memoizedOptions());
         setOptions(parsedOptions);
         return parsedOptions;
-      } else if (props.disabled) {
+      }
+      if (props.disabled) {
         parsedOptions = getSelectedOptions();
         setOptions(parsedOptions);
         return parsedOptions;
-      } else if (collection && meta().P.useLocalStorage) {
-        parsedOptions = evalExpression(collection, {
-          graph,
-          setGraph,
-          vertexes: [data()],
-        }) || [];
+      }
+      if (collection && meta().P.useLocalStorage) {
+        parsedOptions =
+          evalExpression(collection, {
+            graph,
+            setGraph,
+            vertexes: [data()],
+          }) || [];
         setOptions(parsedOptions);
         return parsedOptions;
       }
@@ -129,7 +132,7 @@ export function SelectField(
     if (parsedOptions.length) {
       return;
     }
-    
+
     if (collection) {
       runWithOwner(outerOwner, () => {
         setLoading(true);
@@ -238,15 +241,10 @@ export function SelectField(
         <For each={selectedValue(meta(), data(), graph)}>
           {(vertexId) => (
             <>
-              {
-                evalExpression(
-                  meta().P.displayExpr || `::'P.${IdAttr}'`,
-                  {
-                    graph,
-                    vertexes: [graph.vertexes[vertexId]],
-                  },
-                )
-              }
+              {evalExpression(meta().P.displayExpr || `::'P.${IdAttr}'`, {
+                graph,
+                vertexes: [graph.vertexes[vertexId]],
+              })}
             </>
           )}
         </For>

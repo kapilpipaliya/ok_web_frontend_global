@@ -1,5 +1,3 @@
-
-
 export async function handleDeleteEdge(
   deleteEdge: any,
   tx: any,

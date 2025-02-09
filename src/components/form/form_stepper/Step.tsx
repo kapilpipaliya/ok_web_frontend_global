@@ -7,7 +7,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { FormStoreObject } from "../context/FormContext";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import { deleteStep } from "./deleteStep";
 import { moveStep } from "./moveStep";
 
@@ -19,10 +19,15 @@ export function Step(
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex()?.P.formDataId!]),
+    getChildrenAttrs(
+      graph,
+      setGraph,
+      graph.vertexes[formStoreVertex()?.P.formDataId!],
+    ),
   );
 
   const handleDelete = (_e: MouseEvent) => {
@@ -73,7 +78,11 @@ export function Step(
     >
       <button
         class="flex align-items:center; gap:0.5rem; width:100%"
-        onClick={() => mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, { activeStepId: props.step.id })}
+        onClick={() =>
+          mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, {
+            activeStepId: props.step.id,
+          })
+        }
         type="button"
       >
         <span style="display:flex; align-items:center;">

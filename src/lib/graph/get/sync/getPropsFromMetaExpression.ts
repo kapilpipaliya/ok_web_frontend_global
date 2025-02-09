@@ -30,12 +30,10 @@ function getComponentProperties(
 ) {
   const metaData = metaRows.reduce(
     (acc, curr) => {
-      const key = evalExpression(
-        "->$0Name::'P.key'||::'P.key'",
-        {
-          graph,
-          setGraph,
-          vertexes: [curr],
+      const key = evalExpression("->$0Name::'P.key'||::'P.key'", {
+        graph,
+        setGraph,
+        vertexes: [curr],
       });
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;

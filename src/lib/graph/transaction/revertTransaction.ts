@@ -5,7 +5,11 @@ import type { GraphInterface } from "../graph";
 import { deleteVertex } from "../mutate/vertex";
 import { undo } from "./undo";
 
-export function revertTransaction(txnId: number, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) {
+export function revertTransaction(
+  txnId: number,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   if (!txnId) {
     return;
   }

@@ -28,7 +28,11 @@ export function createFormVertex(
   if (isRealTime) {
     txnId = generateNewTxnId(graph, setGraph);
   }
-  const newVertexObj = newVertex(generateNewVertexId(graph, setGraph), [label], properties || {});
+  const newVertexObj = newVertex(
+    generateNewVertexId(graph, setGraph),
+    [label],
+    properties || {},
+  );
   // TODO: Do Create Transformation for the vertex
   const addNewVertexResult = addNewVertex(txnId, newVertexObj, graph, setGraph);
   if (addNewVertexResult.error) {

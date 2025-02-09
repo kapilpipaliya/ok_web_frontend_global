@@ -9,7 +9,7 @@ import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 export function redo(
   txnId: number,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!redoAllowed(txnId, graph)) {
     return;
@@ -37,7 +37,7 @@ export function redo(
 
 export function redoAllowed(
   txnId: number,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): boolean {
   if (!txnId) {
     return false;
@@ -52,7 +52,7 @@ export function redoAllowed(
 export function saveUndoPoint(
   txnId: number,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!txnId) {
     return;
@@ -81,7 +81,7 @@ export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!txnId) {
     return;
@@ -120,13 +120,15 @@ export function transactionDetailAdd(
   existingTxnValue.steps.push(txnValue);
   existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {cloneProperties: false});
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {
+    cloneProperties: false,
+  });
 }
 
 export function undo(
   txnId: number,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!undoAllowed(txnId, graph)) {
     return;
@@ -151,7 +153,7 @@ export function undo(
 
 export function undoAllowed(
   txnId: number,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): boolean {
   if (!txnId) {
     return false;

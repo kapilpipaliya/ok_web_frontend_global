@@ -1,5 +1,3 @@
-
-
 export async function handleReplaceEdge(
   replaceEdge: any,
   tx: any,

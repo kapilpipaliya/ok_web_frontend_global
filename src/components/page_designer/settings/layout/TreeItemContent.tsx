@@ -21,7 +21,8 @@ export function TreeItemContent(
 ) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const _formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
@@ -32,8 +33,9 @@ export function TreeItemContent(
       vertexes: [props.metaVertex],
     })?.[0];
   });
-  const componentName = () => getComponentName(componentVertex(), props.metaVertex);
-  
+  const componentName = () =>
+    getComponentName(componentVertex(), props.metaVertex);
+
   return (
     <div
       classList={{

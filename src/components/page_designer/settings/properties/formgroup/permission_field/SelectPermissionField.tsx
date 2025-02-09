@@ -14,10 +14,11 @@ interface SelectPermissionFieldProps {
 }
 
 export function SelectPermissionField(props: SelectPermissionFieldProps) {
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const meta = {
     P: {
       class: "flex:1",

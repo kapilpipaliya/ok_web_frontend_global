@@ -1,5 +1,3 @@
-
-
 import { useNavigate } from "@solidjs/router";
 import { type JSX, Match, onMount, Switch } from "solid-js";
 
@@ -32,7 +30,11 @@ export function AuthenticateUser(props: Readonly<AuthenticateUserProps>) {
 
   return (
     <Switch>
-      <Match when={props.dontRedirectToLogin && getGlobalStore(graph)?.P.userRoles}>{props.children}</Match>
+      <Match
+        when={props.dontRedirectToLogin && getGlobalStore(graph)?.P.userRoles}
+      >
+        {props.children}
+      </Match>
       <Match when={!getMemberVertex(graph)?.id}>Loading</Match>
       <Match when={getMemberVertex(graph)?.id}>{props.children}</Match>
     </Switch>

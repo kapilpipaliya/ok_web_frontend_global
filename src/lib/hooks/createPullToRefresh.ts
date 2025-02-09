@@ -31,17 +31,25 @@ export function createPullToRefresh({
   const [isRefreshing, setIsRefreshing] = createSignal(false);
 
   const onPullStart = (event: TouchEvent) => {
-    if (isDisabled()) return;
+    if (isDisabled()) {
+      return;
+    }
 
     const touch = event.targetTouches[0];
-    if (touch) setPullStartPosition(touch.screenY);
+    if (touch) {
+      setPullStartPosition(touch.screenY);
+    }
   };
 
   const onPulling = (event: TouchEvent) => {
-    if (isDisabled()) return;
+    if (isDisabled()) {
+      return;
+    }
 
     const touch = event.targetTouches[0];
-    if (!touch) return;
+    if (!touch) {
+      return;
+    }
 
     const currentPullLength =
       pullStartPosition() < touch.screenY
@@ -57,14 +65,18 @@ export function createPullToRefresh({
   };
 
   const onEndPull = () => {
-    if (isDisabled()) return;
+    if (isDisabled()) {
+      return;
+    }
 
     const pullLength = pullPosition();
 
     setPullStartPosition(0);
     setPullPosition(0);
 
-    if (pullLength < refreshThreshold) return;
+    if (pullLength < refreshThreshold) {
+      return;
+    }
 
     setIsRefreshing(true);
     setTimeout(() => {
@@ -79,7 +91,9 @@ export function createPullToRefresh({
   };
 
   createEffect(() => {
-    if (typeof window === "undefined" || isDisabled()) return;
+    if (typeof window === "undefined" || isDisabled()) {
+      return;
+    }
 
     const ac = new AbortController();
     const options = {
@@ -99,8 +113,9 @@ export function createPullToRefresh({
       isValid(maximumPullLength, refreshThreshold) ||
       process.env.NODE_ENV === "production" ||
       isDisabled()
-    )
+    ) {
       return;
+    }
     console.warn(
       "usePullToRefresh",
       `'maximumPullLength' (currently ${maximumPullLength}) should be bigger or equal than 'refreshThreshold' (currently ${refreshThreshold})`,

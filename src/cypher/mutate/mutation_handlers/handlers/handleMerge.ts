@@ -1,5 +1,3 @@
-
-
 export async function handleMerge(
   merge: any,
   tx: any,

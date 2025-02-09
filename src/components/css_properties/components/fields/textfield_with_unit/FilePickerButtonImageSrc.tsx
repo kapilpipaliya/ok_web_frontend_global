@@ -2,7 +2,10 @@ import { createMemo, createSignal, type JSX } from "solid-js";
 
 import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
-import { type FormStoreObject, useFormContext } from "~/components/form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { evalExpression } from "~/lib/expression_eval";
@@ -31,10 +34,8 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
       return [];
     }
     return (
-      evalExpression(
-        `->$0Src`,
-        { graph, setGraph, vertexes: [props.meta] },
-      ) || []
+      evalExpression("->$0Src", { graph, setGraph, vertexes: [props.meta] }) ||
+      []
     );
   });
 

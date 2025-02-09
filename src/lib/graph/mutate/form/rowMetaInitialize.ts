@@ -42,7 +42,12 @@ export function createNewMetaInstance(
       tableMetaInstance.id,
       graph,
       setGraph,
-      { rows: { ...(rows ?? {}), [joinVertex.id]: metaInstanceResult.vertexId! } },
+      {
+        rows: {
+          ...(rows ?? {}),
+          [joinVertex.id]: metaInstanceResult.vertexId!,
+        },
+      },
       { cloneProperties: false },
     );
 
@@ -63,7 +68,7 @@ export function createNewMetaInstance(
       setGraph,
       { columns, metaTxnId },
     );
-    return metaInstanceResult.vertexId
+    return metaInstanceResult.vertexId;
   });
 }
 
@@ -79,7 +84,7 @@ export function rowMetaInitialize(
   const metaTxnId = generateNewTxnId(graph, setGraph);
   const rows = klona(tableMetaInstance?.P.rows || {});
 
-  if ((rows[joinVertex.id] && graph.vertexes[rows[joinVertex.id]])) {
+  if (rows[joinVertex.id] && graph.vertexes[rows[joinVertex.id]]) {
     updateExistingMetaInstance(
       graph,
       setGraph,

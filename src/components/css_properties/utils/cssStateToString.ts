@@ -51,7 +51,12 @@ export function cssStateToString(
                 selector || "Default",
                 key,
               );
-              stateValue = replacePlaceholderWithUrl(stateValue, edgeName, data, graph);
+              stateValue = replacePlaceholderWithUrl(
+                stateValue,
+                edgeName,
+                data,
+                graph,
+              );
             }
             return `${key}:${stateValue}${selector}`;
           })
@@ -75,17 +80,18 @@ export function replacePlaceholderWithUrl(
   if (!value.includes("$1")) {
     return value;
   }
-  
-  const files = evalExpression(`->${edgeName}`, {
-    graph,
-    setGraph: () => {},
-    vertexes: [data],
-  }) || [];
-  
+
+  const files =
+    evalExpression(`->${edgeName}`, {
+      graph,
+      setGraph: () => {},
+      vertexes: [data],
+    }) || [];
+
   if (files.length === 0) {
     return value;
   }
-  
+
   const file = files[0];
   return value.replaceAll("$1", getUrl(file));
 }

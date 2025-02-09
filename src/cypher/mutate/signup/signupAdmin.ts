@@ -25,7 +25,9 @@ export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
     username: data.username,
   });
 
-  const userDbSession = (await getDriver()).session({database: data.subDomain});
+  const userDbSession = (await getDriver()).session({
+    database: data.subDomain,
+  });
   await createUserInUserDB(
     userDbSession,
     {

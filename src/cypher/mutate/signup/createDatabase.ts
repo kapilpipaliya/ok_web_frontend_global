@@ -2,10 +2,7 @@ import type { Driver } from "neo4j-driver";
 
 import { getDriver } from "~/cypher/driver";
 
-export async function createDatabase(
-  subdomain: string,
-
-) {
+export async function createDatabase(subdomain: string) {
   let neo4JDriver: Driver | undefined = undefined;
   try {
     // Create a new database with the subdomain name

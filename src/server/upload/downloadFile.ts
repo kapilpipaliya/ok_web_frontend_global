@@ -30,7 +30,9 @@ export async function downloadFile(fileId: string, dbSession: Session) {
     });
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: `Error reading file from disk ${error.message}` }),
+      JSON.stringify({
+        error: `Error reading file from disk ${error.message}`,
+      }),
       {
         headers: { "Content-Type": "application/json" },
         status: 500,

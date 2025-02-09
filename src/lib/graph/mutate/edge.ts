@@ -6,7 +6,10 @@ import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 
 import { broadcastToAllChannels } from "~/lib/graph/mutate/channel";
 
-import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
+import {
+  getEdgeOldIdToNewIdMap,
+  getVertexOldIdToNewIdMap,
+} from "../get/sync/getGlobalStore";
 import { getLastTxnIndex } from "../transaction/getLastTxnIndex";
 import { transactionDetailAdd } from "../transaction/transactionDetailAdd";
 
@@ -16,14 +19,15 @@ export function addNewEdge(
   edge: Edge,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
 } {
   return untrack(() => {
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edge.id] || edge.id;
-    const actualStartVertexId = getVertexOldIdToNewIdMap(graph)[edge.S] || edge.S;
+    const actualStartVertexId =
+      getVertexOldIdToNewIdMap(graph)[edge.S] || edge.S;
     const actualEndVertexId = getVertexOldIdToNewIdMap(graph)[edge.E] || edge.E;
 
     if (!actualEdgeId) {
@@ -83,9 +87,13 @@ export function addNewEdge(
       },
       graph,
       setGraph,
-      options
+      options,
     );
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {addNewEdge: {edge, txnId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { addNewEdge: { edge, txnId } },
+    );
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -98,7 +106,7 @@ export function deleteEdge(
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -139,9 +147,13 @@ export function deleteEdge(
       },
       graph,
       setGraph,
-      options
+      options,
     );
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {deleteEdge: {edgeId, txnId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { deleteEdge: { edgeId, txnId } },
+    );
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -174,7 +186,7 @@ export function replaceEdgeEnd(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newEndVertexId: Id,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
@@ -212,9 +224,13 @@ export function replaceEdgeEnd(
       },
       graph,
       setGraph,
-      options
+      options,
     );
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {replaceEdgeEnd: {edgeId, newEndVertexId, txnId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { replaceEdgeEnd: { edgeId, newEndVertexId, txnId } },
+    );
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -228,7 +244,7 @@ export function replaceEdgeProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: any },
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
@@ -249,9 +265,13 @@ export function replaceEdgeProperties(
       },
       graph,
       setGraph,
-      options
+      options,
     );
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {replaceEdgeProperties: {edgeId, properties, txnId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { replaceEdgeProperties: { edgeId, properties, txnId } },
+    );
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -266,7 +286,7 @@ export function replaceEdgeStart(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   newStartVertexId: Id,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
@@ -304,9 +324,13 @@ export function replaceEdgeStart(
       },
       graph,
       setGraph,
-      options
+      options,
     );
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {replaceEdgeStart: {edgeId, newStartVertexId, txnId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { replaceEdgeStart: { edgeId, newStartVertexId, txnId } },
+    );
     return {
       error: false,
       txnDetailIndex: getLastTxnIndex(txnId, graph),
@@ -319,7 +343,7 @@ export function updateEdgeId(
   newEdgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ) {
   return untrack(() => {
     if (!graph.edges[oldEdgeId]) {
@@ -348,7 +372,11 @@ export function updateEdgeId(
     );
     // @ts-ignore
     setGraph("edges", oldEdgeId, undefined);
-    broadcastToAllChannels(graph.broadcastChannels, options?.skipPostMessage ?? "", {updateEdgeId: {newEdgeId, oldEdgeId}});
+    broadcastToAllChannels(
+      graph.broadcastChannels,
+      options?.skipPostMessage ?? "",
+      { updateEdgeId: { newEdgeId, oldEdgeId } },
+    );
     return { error: "" };
   });
 }

@@ -1,4 +1,3 @@
-
 import { parse } from "yaml";
 
 import type { ComponentNode } from "./ComponentTreeType";
@@ -19,7 +18,7 @@ export function getComponentTree(): ComponentNode[] {
   - ComponentChildren
   - Transition
   - TransitionGroup
-`
+`;
 
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));

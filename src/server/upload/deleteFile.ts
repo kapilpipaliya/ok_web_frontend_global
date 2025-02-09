@@ -29,9 +29,12 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
       },
     );
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: `Error deleting file ${error.message}` }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: `Error deleting file ${error.message}` }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
 }

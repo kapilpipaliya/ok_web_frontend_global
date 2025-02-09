@@ -15,9 +15,10 @@ import { generateTableInputMeta } from "../../rules/functions/generateTableInput
 
 export function Permission() {
   const [graph] = useGraph();
-  
+
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const uniqueConstrainsMetaAttribute = klona(
     FormMetaData.Form.attributes,
@@ -29,8 +30,6 @@ export function Permission() {
   const { metaVertexId } = generateTableInputMeta(
     uniqueConstrainsMetaAttribute,
   );
-
-  const repeaterStore = createStore({});
 
   return (
     <div class="mt:6">

@@ -19,7 +19,7 @@ import { ThemePreview } from "./theme_config/ThemePreview";
 
 export function SelectThemeMenu() {
   const [graph, setGraph] = useGraph();
-  const [selectedTheme, setSelectedTheme] = createSignal<Id>();
+  const [_selectedTheme, setSelectedTheme] = createSignal<Id>();
   const [loading, setLoading] = createSignal(true);
   const { showErrorToast, showSuccessToast } = useToast();
   const [error, setError] = createSignal<null | string>(null);
@@ -72,7 +72,7 @@ export function SelectThemeMenu() {
       themeId,
     );
 
-    const isSuccess = await handleDataSubmission(
+    const _isSuccess = await handleDataSubmission(
       newFormTxnId,
       graph,
       setGraph,
@@ -94,7 +94,7 @@ export function SelectThemeMenu() {
       <Show when={loading()}>
         <div>Loading...</div>
       </Show>
-      <Show when={!loading() && !error()}>
+      <Show when={!(loading() || error())}>
         <ul class="width:100%">
           <For each={graph.vertexLabelIdMap.Theme}>
             {(theme) => {

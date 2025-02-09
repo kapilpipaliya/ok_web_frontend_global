@@ -19,9 +19,10 @@ interface ClassesComponentProps {
 }
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
-  
+
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const _formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   // const getComponentName = () =>
   //   graph.vertexes[formStoreVertex().P.selectedComponent]?.P.key;
@@ -29,7 +30,8 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   // const checkIsFormField = () =>
   //   checkIsForm() && genericInputComponents.includes(getComponentName());
   const getClassVertices = () =>
-    props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class")) ?? [];
+    props.metaAttributes.filter((vertex) => vertex.P.key.endsWith("Class")) ??
+    [];
 
   const metaClasses = createMemo(() => [
     graph.vertexes[props.vertexIds.class],

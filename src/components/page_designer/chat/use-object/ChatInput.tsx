@@ -1,10 +1,10 @@
-import type { Message } from 'ai';
+import type { Message } from "ai";
 
-import { createSignal, For, type JSX, Match, Show, Switch } from 'solid-js';
+import { createSignal, For, type JSX, Match, Show, Switch } from "solid-js";
 
-import { DropdownMenu } from '~/components/styled/DropdownMenu';
-import { IconButton } from '~/components/styled/IconButton';
-import { TooltipWrapper } from '~/components/styled/TooltipWrapper';
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { IconButton } from "~/components/styled/IconButton";
+import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 
 interface ChatInputProps {
   chatMessages: Message[];
@@ -18,13 +18,16 @@ interface ChatInputProps {
   onExampleClick: (example: string) => void;
   onExamplesToggle: (show: boolean) => void;
   onFilesChange: (files: FileList | undefined) => void;
-  onInputChange: JSX.ChangeEventHandlerUnion<HTMLInputElement | HTMLTextAreaElement, Event>;
+  onInputChange: JSX.ChangeEventHandlerUnion<
+    HTMLInputElement | HTMLTextAreaElement,
+    Event
+  >;
   onSubmit: (e: SubmitEvent, model: string) => void;
   showExamples: () => boolean;
 }
 
 export function ChatInput(props: ChatInputProps) {
-  const [selectedModel, setSelectedModel] = createSignal<string>('gpt-4-turbo');
+  const [selectedModel, setSelectedModel] = createSignal<string>("gpt-4-turbo");
 
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
@@ -40,14 +43,14 @@ export function ChatInput(props: ChatInputProps) {
         <ModelSelector
           isLoading={props.isLoading}
           models={[
-            'o1',
-            'o1-mini',
-            'o1-preview',
-            'gpt-4o',
-            'gpt-4o-mini',
-            'gpt-4-turbo',
-            'gpt-4',
-            'gpt-3.5-turbo'
+            "o1",
+            "o1-mini",
+            "o1-preview",
+            "gpt-4o",
+            "gpt-4o-mini",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo",
           ]}
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
@@ -62,8 +65,12 @@ export function ChatInput(props: ChatInputProps) {
             disabled={props.isLoading()}
             onChange={props.onInputChange}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                if ((e.metaKey || e.ctrlKey) && !props.isLoading() && (e.target as HTMLTextAreaElement).value.trim()) {
+              if (e.key === "Enter") {
+                if (
+                  (e.metaKey || e.ctrlKey) &&
+                  !props.isLoading() &&
+                  (e.target as HTMLTextAreaElement).value.trim()
+                ) {
                   (props.onInputChange as any)(e);
                   handleSubmit(e as any);
                 } else {
@@ -105,7 +112,7 @@ export function ChatInput(props: ChatInputProps) {
           >
             <div class="display:flex flex-direction:column gap:4px padding:8px">
               <For each={props.examples}>
-                {example => (
+                {(example) => (
                   <button
                     class="text-align:left padding:8px background:rgb(243,244,246) border-radius:6px hover:background:rgb(229,231,235)"
                     onClick={() => props.onExampleClick(example)}
@@ -123,7 +130,11 @@ export function ChatInput(props: ChatInputProps) {
   );
 }
 
-function FileInput(props: { files: () => FileList | undefined; onFilesChange: (files: FileList | undefined) => void; ref: HTMLInputElement | undefined; }) {
+function FileInput(props: {
+  files: () => FileList | undefined;
+  onFilesChange: (files: FileList | undefined) => void;
+  ref: HTMLInputElement | undefined;
+}) {
   return (
     <div class="display:flex gap:8px">
       <IconButton
@@ -136,34 +147,38 @@ function FileInput(props: { files: () => FileList | undefined; onFilesChange: (f
       <input
         class="hidden"
         multiple
-        onChange={e => props.onFilesChange(e.currentTarget.files ?? undefined)}
+        onChange={(e) =>
+          props.onFilesChange(e.currentTarget.files ?? undefined)
+        }
         ref={props.ref}
         type="file"
       />
       <Show when={props.files()}>
         <div class="display:flex gap:8px margin-bottom:8px">
           <For each={Array.from(props.files()!)}>
-            {file => (
+            {(file) => (
               <div class="relative">
-                <Switch fallback={
-                  <div class="width:48px height:48px display:flex justify-content:center align-items:center background:rgb(243,244,246) border-radius:4px">
-                    <span class="font-size:24px">📄</span>
-                  </div>
-                }>
-                  <Match when={file.type.startsWith('image/')}>
+                <Switch
+                  fallback={
+                    <div class="width:48px height:48px display:flex justify-content:center align-items:center background:rgb(243,244,246) border-radius:4px">
+                      <span class="font-size:24px">📄</span>
+                    </div>
+                  }
+                >
+                  <Match when={file.type.startsWith("image/")}>
                     <img
                       alt={file.name}
                       class="width:48px height:48px object-fit:cover border-radius:4px"
                       src={URL.createObjectURL(file)}
                     />
                   </Match>
-                  <Match when={file.type.startsWith('video/')}>
+                  <Match when={file.type.startsWith("video/")}>
                     <video
                       class="width:48px height:48px object-fit:cover border-radius:4px"
                       src={URL.createObjectURL(file)}
                     />
                   </Match>
-                  <Match when={file.type.startsWith('audio/')}>
+                  <Match when={file.type.startsWith("audio/")}>
                     <div class="width:48px height:48px display:flex justify-content:center align-items:center background:rgb(243,244,246) border-radius:4px">
                       <span class="font-size:24px">🎵</span>
                     </div>
@@ -174,10 +189,14 @@ function FileInput(props: { files: () => FileList | undefined; onFilesChange: (f
                   onClick={() => {
                     const currentFiles = props.files();
                     if (currentFiles) {
-                      const newFiles = Array.from(currentFiles).filter(f => f !== file);
-                      props.onFilesChange(newFiles.length > 0 ? newFiles : undefined);
+                      const newFiles = Array.from(currentFiles).filter(
+                        (f) => f !== file,
+                      );
+                      props.onFilesChange(
+                        newFiles.length > 0 ? newFiles : undefined,
+                      );
                       if (newFiles.length === 0 && props.fileInputRef) {
-                        props.fileInputRef.value = '';
+                        props.fileInputRef.value = "";
                       }
                     }
                   }}
@@ -193,7 +212,10 @@ function FileInput(props: { files: () => FileList | undefined; onFilesChange: (f
   );
 }
 
-function MessagesCount(props: { chatMessages: Message[]; onClearMessages: () => void }) {
+function MessagesCount(props: {
+  chatMessages: Message[];
+  onClearMessages: () => void;
+}) {
   const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false);
   let deleteButtonRef: HTMLButtonElement;
 
@@ -257,7 +279,12 @@ function MessagesCount(props: { chatMessages: Message[]; onClearMessages: () => 
   );
 }
 
-function ModelSelector(props: { isLoading: () => boolean; models: string[]; selectedModel: () => string; setSelectedModel: (model: string) => void }) {
+function ModelSelector(props: {
+  isLoading: () => boolean;
+  models: string[];
+  selectedModel: () => string;
+  setSelectedModel: (model: string) => void;
+}) {
   return (
     <select
       class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px width:fit-content"
@@ -266,9 +293,7 @@ function ModelSelector(props: { isLoading: () => boolean; models: string[]; sele
       value={props.selectedModel()}
     >
       <For each={props.models}>
-        {model => (
-          <option value={model}>{model}</option>
-        )}
+        {(model) => <option value={model}>{model}</option>}
       </For>
     </select>
   );

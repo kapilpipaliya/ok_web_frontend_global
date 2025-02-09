@@ -21,7 +21,10 @@ import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 
-import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 
@@ -54,7 +57,8 @@ export function DisplayProperty(
 ) {
   const formId = useFormContext();
   const [graph, setGraph] = useGraph();
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
+  const formVertex = () =>
+    formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const metaVertex = createMemo(() => props.column);
   const outerOwner = getOwner();
 
@@ -68,10 +72,10 @@ export function DisplayProperty(
         on(
           () =>
             evalExpression(componentNameValue, {
-            graph,
-            setGraph,
-            vertexes: [props.joinVertex]
-          }),
+              graph,
+              setGraph,
+              vertexes: [props.joinVertex],
+            }),
           async (value) => {
             // to avoid error:  ReferenceError: Cannot access 'setComponentName' before initialization
             setTimeout(() => {
@@ -118,7 +122,7 @@ export function DisplayProperty(
     <>
       <Show when={componentName() === "Error"}>Error</Show>
       <DynamicComponent
-        // Dynamic component only supported on table 
+        // Dynamic component only supported on table
         componentName={componentName()}
         data={props.joinVertex}
         disabled={props.disabled()}

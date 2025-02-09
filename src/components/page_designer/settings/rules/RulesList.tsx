@@ -20,7 +20,8 @@ export function RulesList() {
     createSignal<null | Vertex>(null);
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const rules = createMemo(() => {
     if (formStoreVertex()?.P.formDataId) {
@@ -51,7 +52,7 @@ export function RulesList() {
       }
     }
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      multiHighlight: incomingIds
+      multiHighlight: incomingIds,
     });
   };
 
@@ -69,7 +70,7 @@ export function RulesList() {
 
   const unhighlightRule = () => {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      multiHighlight: []
+      multiHighlight: [],
     });
   };
 
@@ -81,13 +82,7 @@ export function RulesList() {
         vertexes: [rule],
       }) || [];
     for (const condition of conditions) {
-      deleteRow(
-        condition,
-        false,
-        graph,
-        setGraph,
-        formStoreVertex()?.P.txnId,
-      );
+      deleteRow(condition, false, graph, setGraph, formStoreVertex()?.P.txnId);
     }
   };
 

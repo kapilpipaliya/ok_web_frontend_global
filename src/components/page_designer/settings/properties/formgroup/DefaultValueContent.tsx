@@ -15,7 +15,8 @@ export function DefaultValueContent(
 ) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const _formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <DynamicComponent

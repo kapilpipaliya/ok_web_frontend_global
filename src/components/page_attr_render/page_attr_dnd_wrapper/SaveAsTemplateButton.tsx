@@ -15,7 +15,9 @@ export function SaveAsTemplateButton(props: {
   let saveAsTemplateRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [showTemplateMenu, setShowTemplateMenu] = createSignal(false);
-  const [saveAsLabel, setSaveAsLabel] = createSignal<"Component" | "Template">("Template");
+  const [saveAsLabel, setSaveAsLabel] = createSignal<"Component" | "Template">(
+    "Template",
+  );
 
   const handleMenuSelect = (label: "Component" | "Template") => {
     setSaveAsLabel(label);

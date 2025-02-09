@@ -32,9 +32,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { htmlTags } from "../../../../../lib/dom/htmlTags";
 import { PROPERTIES } from "../../../../styled/constants/constant";
-import {
-  useDesignerFormIdContext,
-} from "../../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
@@ -83,14 +81,17 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const vertexIds = createVertexIds();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
-  const propAttributes = createMemo(() =>
-    clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph) ?? [],
+  const propAttributes = createMemo(
+    () =>
+      clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph) ??
+      [],
   );
 
   onCleanup(() => {
@@ -108,7 +109,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For
-        each={moveClassToLast(propAttributes(), vertexIds, graph, formStoreVertex)}
+        each={moveClassToLast(
+          propAttributes(),
+          vertexIds,
+          graph,
+          formStoreVertex,
+        )}
       >
         {(meta) => (
           <PropertyField
@@ -166,114 +172,114 @@ function createVertices(
   const vertices: (Omit<Vertex, "IN" | "L" | "OUT"> & {
     attributes?: FieldAttribute[];
   })[] = [
-      {
-        id: vertexIds.key,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Unique Name",
-          key: uniqueNameKey,
-        },
+    {
+      id: vertexIds.key,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Unique Name",
+        key: uniqueNameKey,
       },
-      {
-        id: vertexIds.as,
-        P: {
-          componentName: "Select",
-          displayName: "As",
-          key: "as",
-          options: htmlTags.map((element) => ({ id: element, label: element })),
-          saveValue: true,
-        },
+    },
+    {
+      id: vertexIds.as,
+      P: {
+        componentName: "Select",
+        displayName: "As",
+        key: "as",
+        options: htmlTags.map((element) => ({ id: element, label: element })),
+        saveValue: true,
       },
-      {
-        id: vertexIds.perm,
-        P: { displayName: "Permission", key: "perm" },
+    },
+    {
+      id: vertexIds.perm,
+      P: { displayName: "Permission", key: "perm" },
+    },
+    {
+      id: vertexIds.calculatedValue,
+      P: {
+        componentName: "TextInput",
+        displayName: "Calculated Value Expr",
+        key: "calculatedValue",
       },
-      {
-        id: vertexIds.calculatedValue,
-        P: {
-          componentName: "TextInput",
-          displayName: "Calculated Value Expr",
-          key: "calculatedValue",
-        },
+    },
+    {
+      id: vertexIds.class,
+      P: { displayName: "Class", key: "class" },
+    },
+    {
+      id: vertexIds.errorClass,
+      P: { displayName: "Error Class", key: "errorClass" },
+    },
+    {
+      id: vertexIds.defaultValue,
+      P: { displayName: "Default Value", key: "defaultValue" },
+    },
+    {
+      id: vertexIds.required,
+      P: { displayName: "Required Expr", key: "required" },
+    },
+    {
+      id: vertexIds.hidden,
+      P: { displayName: "Hidden Expr", key: "hidden" },
+    },
+    {
+      id: vertexIds.disabled,
+      P: { displayName: "Disabled Expr", key: "disabled" },
+    },
+    {
+      id: vertexIds.thankYouPage,
+      P: { displayName: "Thank You Page", key: "thankYouPage" },
+    },
+    {
+      id: vertexIds.src,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Source",
+        key: "src",
       },
-      {
-        id: vertexIds.class,
-        P: { displayName: "Class", key: "class" },
+    },
+    // New vertices for icon, width, height, and attrName
+    {
+      id: vertexIds.icon,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Icon",
+        key: "icon",
       },
-      {
-        id: vertexIds.errorClass,
-        P: { displayName: "Error Class", key: "errorClass" },
+    },
+    {
+      id: vertexIds.width,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Width",
+        key: "width",
+        type: "number",
       },
-      {
-        id: vertexIds.defaultValue,
-        P: { displayName: "Default Value", key: "defaultValue" },
+    },
+    {
+      id: vertexIds.height,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Height",
+        key: "height",
+        type: "number",
       },
-      {
-        id: vertexIds.required,
-        P: { displayName: "Required Expr", key: "required" },
+    },
+    {
+      id: vertexIds.attrLabel,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Attribute Label",
+        key: "attrLabel",
       },
-      {
-        id: vertexIds.hidden,
-        P: { displayName: "Hidden Expr", key: "hidden" },
-      },
-      {
-        id: vertexIds.disabled,
-        P: { displayName: "Disabled Expr", key: "disabled" },
-      },
-      {
-        id: vertexIds.thankYouPage,
-        P: { displayName: "Thank You Page", key: "thankYouPage" },
-      },
-      {
-        id: vertexIds.src,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Source",
-          key: "src",
-        },
-      },
-      // New vertices for icon, width, height, and attrName
-      {
-        id: vertexIds.icon,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Icon",
-          key: "icon",
-        },
-      },
-      {
-        id: vertexIds.width,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Width",
-          key: "width",
-          type: "number",
-        },
-      },
-      {
-        id: vertexIds.height,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Height",
-          key: "height",
-          type: "number",
-        },
-      },
-      {
-        id: vertexIds.attrLabel,
-        P: {
-          class: PROPERTIES.Css.TextField,
-          componentName: "TextInput",
-          displayName: "Attribute Label",
-          key: "attrLabel",
-        },
-      },
-    ];
+    },
+  ];
   for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
     addNewVertex(txnId, newVertexInstance, graph, setGraph);
@@ -306,10 +312,12 @@ function moveClassToLast(
   graph: GraphInterface,
   formStoreVertex: Accessor<Vertex<FormStoreObject>>,
 ) {
-  const otherVertices = vertices?.filter(
-    (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
-  ) ?? [];
-  const componentName = graph.vertexes[formStoreVertex()?.P.selectedId].P.componentName;
+  const otherVertices =
+    vertices?.filter(
+      (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
+    ) ?? [];
+  const componentName =
+    graph.vertexes[formStoreVertex()?.P.selectedId].P.componentName;
   const isForm = formStoreVertex()?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
@@ -333,7 +341,13 @@ function moveClassToLast(
     graph.vertexes[vertexIds.hidden],
     graph.vertexes[vertexIds.disabled],
     ...(componentName === "Image" ? [graph.vertexes[vertexIds.src]] : []),
-    ...(componentName === "Icon" ? [graph.vertexes[vertexIds.icon], graph.vertexes[vertexIds.width], graph.vertexes[vertexIds.height]] : []),
+    ...(componentName === "Icon"
+      ? [
+          graph.vertexes[vertexIds.icon],
+          graph.vertexes[vertexIds.width],
+          graph.vertexes[vertexIds.height],
+        ]
+      : []),
     ...nonCssVertices,
   ];
 }
@@ -383,7 +397,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
           }
         >
           {/*Dont use expression builder for now*/}
-          <></>
+
           {/* <SelectRuleField
             meta={props.meta}
             selectedLayout={props.selectedLayout}

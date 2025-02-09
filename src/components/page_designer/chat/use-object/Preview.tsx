@@ -1,31 +1,44 @@
-import type { z } from 'zod';
+import type { z } from "zod";
 
-import { createSignal, For, onCleanup, Show } from 'solid-js';
-import { v7 as uuidv7 } from 'uuid';
+import { createSignal, For, onCleanup, Show } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
-import type { graphInterfaceSchema } from '~/routes/api/use-object/schema';
+import type { graphInterfaceSchema } from "~/routes/api/use-object/schema";
 
-import { IconButton } from '~/components/styled/IconButton';
-import { evalExpression } from '~/lib/expression_eval';
-import { useGraph, type Vertex } from '~/lib/graph/graph';
-import { addNewEdge } from '~/lib/graph/mutate/edge';
-import { setSelectionValue } from '~/lib/graph/mutate/setSelectionValue';
-import { addNewVertex } from '~/lib/graph/mutate/vertex';
-import { generateNewTxnId } from '~/lib/graph/transaction/generateNewTxnId';
-import { generateNewVertexId } from '~/lib/graph/transaction/generateNewVertexId';
-import { revertTransaction } from '~/lib/graph/transaction/revertTransaction';
-import { headerIconButtonClass, toolBarClass } from '~/pages/admin_layout/constant';
-import { PageViewWrapper } from '~/pages/PageViewWrapper';
+import { IconButton } from "~/components/styled/IconButton";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { addNewEdge } from "~/lib/graph/mutate/edge";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import {
+  headerIconButtonClass,
+  toolBarClass,
+} from "~/pages/admin_layout/constant";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { PageLayoutObject, useDesignerLayoutStore } from '../../context/LayoutContext';
-import { IFramePreview } from '../../layout/IFramePreview';
-import { insertAtPosition, insertComponents } from './functions/insertAtPosition';
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../context/LayoutContext";
+import { IFramePreview } from "../../layout/IFramePreview";
+import {
+  insertAtPosition,
+  insertComponents,
+} from "./functions/insertAtPosition";
 
-export function Preview(props: { message: Vertex; object: z.infer<typeof graphInterfaceSchema>; }) {
+export function Preview(props: {
+  message: Vertex;
+  object: z.infer<typeof graphInterfaceSchema>;
+}) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   // Store vertex IDs with no parents
   const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
   // Add all vertices with new IDs
@@ -40,8 +53,10 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
       OUT: {},
       P: {
         ...vertex.P,
-        ...(vertex.P.class && typeof vertex.P.class === 'object' ? { class: JSON.stringify(vertex.P.class) } : {})
-      }
+        ...(vertex.P.class && typeof vertex.P.class === "object"
+          ? { class: JSON.stringify(vertex.P.class) }
+          : {}),
+      },
     };
 
     addNewVertex(metaTxnId, newVertex, graph, setGraph);
@@ -58,7 +73,7 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
       id: newId,
       P: {},
       S: startId,
-      T: edge.T
+      T: edge.T,
     };
 
     addNewEdge(metaTxnId, newEdge, graph, setGraph);
@@ -71,8 +86,9 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
     parentMap.set(vertexIdMap.get(edge.E)!, true);
   }
 
-  const noParentIds = Array.from(vertexIdMap.values())
-    .filter(id => !parentMap.has(id));
+  const noParentIds = Array.from(vertexIdMap.values()).filter(
+    (id) => !parentMap.has(id),
+  );
   setRootVertexIds(noParentIds);
 
   // Create parent vertex and link children
@@ -80,17 +96,17 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
   const parentVertex = {
     id: parentId,
     IN: {},
-    L: ['Page'],
+    L: ["Page"],
     OUT: {},
-    P: { key: "Page" }
+    P: { key: "Page" },
   };
 
   addNewVertex(metaTxnId, parentVertex, graph, setGraph);
 
   // Link parent to root vertices
   // First handle vertices with Label "Attr"
-  const attrRootIds = rootVertexIds().filter(id =>
-    graph.vertexes[id].L.includes('Attr')
+  const attrRootIds = rootVertexIds().filter((id) =>
+    graph.vertexes[id].L.includes("Attr"),
   );
   if (attrRootIds.length > 0) {
     setSelectionValue(
@@ -99,13 +115,13 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
       graph,
       setGraph,
       { P: { type: "Attr" } } as unknown as Vertex,
-      attrRootIds
+      attrRootIds,
     );
   }
 
   // Then handle remaining vertices grouped by their labels
-  const remainingRootIds = rootVertexIds().filter(id =>
-    !graph.vertexes[id].L.includes('Attr')
+  const remainingRootIds = rootVertexIds().filter(
+    (id) => !graph.vertexes[id].L.includes("Attr"),
   );
 
   // Group remaining vertices by their first label
@@ -126,7 +142,7 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
       graph,
       setGraph,
       { P: { type: label } } as unknown as Vertex,
-      ids
+      ids,
     );
   }
 
@@ -136,7 +152,9 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
 
   const MainPreview = () => {
     const [isPreview, setIsPreview] = createSignal(true);
-    const [insertMode, setInsertMode] = createSignal<'after' | 'before' | 'center'>('after');
+    const [insertMode, setInsertMode] = createSignal<
+      "after" | "before" | "center"
+    >("after");
 
     const handleRefresh = () => {
       setIsPreview(false);
@@ -147,14 +165,26 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
 
     const formId = uuidv7();
     return (
-      <Show when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}>
+      <Show
+        when={
+          props.object.vertexes?.length > 0 &&
+          (
+            (evalExpression("->Attr", {
+              graph,
+              setGraph,
+              vertexes: [graph.vertexes[parentId]],
+            }) as Vertex[]) || []
+          ).length > 0
+        }
+      >
         <div class="display:none">
           <PageViewWrapper
             formDataId={parentId}
             hideSaveCancelButton
             isNoPermissionCheck={true}
             pageVertexName="Page"
-            uuid={formId} />
+            uuid={formId}
+          />
         </div>
 
         <Show when={graph.vertexes[formId]}>
@@ -168,7 +198,6 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
           <Show when={isPreview()}>
             <IFramePreview formStoreId={formId} noMinHeight />
           </Show>
-
 
           <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
             <div class="display:flex gap:8px">
@@ -184,21 +213,40 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
 
               <IconButton
                 class={`${headerIconButtonClass} cursor:not-allowed:disabled opacity:.5:disabled`}
-                disabled={layoutStoreVertex()?.P.formId === formId || !layoutStoreVertex()?.P.formId || !graph.vertexes[graph.vertexes[layoutStoreVertex()?.P.formId!]?.P.selectedId!]}
+                disabled={
+                  layoutStoreVertex()?.P.formId === formId ||
+                  !layoutStoreVertex()?.P.formId ||
+                  !graph.vertexes[
+                    graph.vertexes[layoutStoreVertex()?.P.formId!]?.P
+                      .selectedId!
+                  ]
+                }
                 icon="ph:plus-circle"
-                onClick={() => insertAtPosition(graph.vertexes[formId], insertMode(), graph, setGraph, layoutStoreVertex)}
+                onClick={() =>
+                  insertAtPosition(
+                    graph.vertexes[formId],
+                    insertMode(),
+                    graph,
+                    setGraph,
+                    layoutStoreVertex,
+                  )
+                }
                 title="Insert"
               />
             </div>
           </div>
-
         </Show>
       </Show>
-    )
-  }
+    );
+  };
 
   const ComponentPreview = () => {
-    const componentVertexes = () => evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || [];
+    const componentVertexes = () =>
+      (evalExpression("->Component", {
+        graph,
+        setGraph,
+        vertexes: [graph.vertexes[parentId]],
+      }) as Vertex[]) || [];
 
     return (
       <For each={componentVertexes()}>
@@ -236,9 +284,19 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
                 <div class="display:flex gap:8px margin-top:12px">
                   <IconButton
                     class={headerIconButtonClass}
-                    disabled={layoutStoreVertex()?.P.formId === formId || !layoutStoreVertex()?.P.formId}
+                    disabled={
+                      layoutStoreVertex()?.P.formId === formId ||
+                      !layoutStoreVertex()?.P.formId
+                    }
                     icon="ph:plus-circle"
-                    onClick={() => insertComponents([componentVertex], graph, setGraph, layoutStoreVertex)}
+                    onClick={() =>
+                      insertComponents(
+                        [componentVertex],
+                        graph,
+                        setGraph,
+                        layoutStoreVertex,
+                      )
+                    }
                     title="Insert Component"
                   />
                 </div>
@@ -248,12 +306,32 @@ export function Preview(props: { message: Vertex; object: z.infer<typeof graphIn
         }}
       </For>
     );
-  }
+  };
   return (
     <div>
       <Show
-        fallback={<div class="text-align:center padding:16px color:gray-600">No Preview Available</div>}
-        when={props.object.vertexes?.length > 0 && ((evalExpression("->Attr", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0 || (evalExpression("->Component", { graph, setGraph, vertexes: [graph.vertexes[parentId]] }) as Vertex[] || []).length > 0)}
+        fallback={
+          <div class="text-align:center padding:16px color:gray-600">
+            No Preview Available
+          </div>
+        }
+        when={
+          props.object.vertexes?.length > 0 &&
+          ((
+            (evalExpression("->Attr", {
+              graph,
+              setGraph,
+              vertexes: [graph.vertexes[parentId]],
+            }) as Vertex[]) || []
+          ).length > 0 ||
+            (
+              (evalExpression("->Component", {
+                graph,
+                setGraph,
+                vertexes: [graph.vertexes[parentId]],
+              }) as Vertex[]) || []
+            ).length > 0)
+        }
       >
         <MainPreview />
         <ComponentPreview />

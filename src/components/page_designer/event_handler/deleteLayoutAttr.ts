@@ -1,4 +1,4 @@
-import type { SetStoreFunction, } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
@@ -24,26 +24,30 @@ export function deleteLayoutAttr(
   key: string,
   showSuccessToast: (message: string) => void,
 ) {
-
-  if (
-    validateLayoutDeletion(
-      formStoreVertex,
-      layoutVertex,
-      graph,
-      setGraph,
-    )
-  ) {
+  if (validateLayoutDeletion(formStoreVertex, layoutVertex, graph, setGraph)) {
     return;
   }
 
   batch(() => {
     if (formStoreVertex?.P.selectedId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, {
-        selectedId: -1,
-      });
+      mergeVertexProperties<FormStoreObject>(
+        0,
+        formStoreVertex.id!,
+        graph,
+        setGraph,
+        {
+          selectedId: -1,
+        },
+      );
     }
     if (formStoreVertex?.P.hoverId === layoutVertex.id) {
-      mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { hoverId: -1 });
+      mergeVertexProperties<FormStoreObject>(
+        0,
+        formStoreVertex.id!,
+        graph,
+        setGraph,
+        { hoverId: -1 },
+      );
     }
   });
 
@@ -67,7 +71,13 @@ function validateLayoutDeletion(
   const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
 
   if (Object.keys(usedAttrsInRules).length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInRules });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreVertex.id!,
+      graph,
+      setGraph,
+      { usedAttrsInRules },
+    );
     return true;
   }
 
@@ -80,7 +90,13 @@ function validateLayoutDeletion(
   );
 
   if (usedAttrsInUniqueConstraints.length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInUniqueConstraints });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreVertex.id!,
+      graph,
+      setGraph,
+      { usedAttrsInUniqueConstraints },
+    );
     return true;
   }
 
@@ -93,7 +109,13 @@ function validateLayoutDeletion(
   );
 
   if (usedAttrsInNameKeys.length > 0) {
-    mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { usedAttrsInNameKeys });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreVertex.id!,
+      graph,
+      setGraph,
+      { usedAttrsInNameKeys },
+    );
     return true;
   }
 
@@ -113,7 +135,13 @@ function validateLayoutDeletion(
       );
 
       if (rootContainsFormAttrExcludingChild.length === 0) {
-        mergeVertexProperties<FormStoreObject>(0, formStoreVertex.id!, graph, setGraph, { shouldContainAtLeastOneForm: true });
+        mergeVertexProperties<FormStoreObject>(
+          0,
+          formStoreVertex.id!,
+          graph,
+          setGraph,
+          { shouldContainAtLeastOneForm: true },
+        );
         return true;
       }
     }

@@ -1,6 +1,3 @@
-
-
-export function getStringComponent(
-) {
+export function getStringComponent() {
   return "TextInput";
 }

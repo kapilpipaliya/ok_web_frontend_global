@@ -17,19 +17,23 @@ import type { GenericComponentProps } from "~/components/fields/FieldType";
 import { AddNewButton } from "~/components/grid/AddNewButton";
 import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
+import { STYLES } from "~/components/styled/constants/styles";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
-import { STYLES } from "~/components/styled/constants/styles";
 
 export function TableInputField(
   props: Readonly<
@@ -51,12 +55,17 @@ export function TableInputField(
 
   const metaVertexId = `${generateNewVertexId(graph, setGraph)}-meta`;
   const metaTxnId = generateNewTxnId(graph, setGraph);
-  addNewVertex(metaTxnId, newVertex(metaVertexId, ["TableMeta"], {rows: {}}), graph, setGraph);
+  addNewVertex(
+    metaTxnId,
+    newVertex(metaVertexId, ["TableMeta"], { rows: {} }),
+    graph,
+    setGraph,
+  );
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
-  }); 
-  
+  });
+
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   const tableColumnsTemplate = createMemo(() =>
@@ -118,13 +127,14 @@ export function TableInputField(
         {/* <Show when={props.isTableInside}> */}
         <AddNewButton
           onClick={() =>
-            runWithOwner(owner, () => insertNewRow(
-              props.txnId || 0,
-              meta()!,
-              data()!,
-              props.isRealTime ?? false,
-              graph,
-              setGraph,
+            runWithOwner(owner, () =>
+              insertNewRow(
+                props.txnId || 0,
+                meta()!,
+                data()!,
+                props.isRealTime ?? false,
+                graph,
+                setGraph,
               ),
             )
           }

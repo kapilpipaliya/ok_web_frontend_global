@@ -1,3 +1,3 @@
-import { Anchor as PopoverAnchor } from '@corvu/popover';
+import { Anchor as PopoverAnchor } from "@corvu/popover";
 
 export default PopoverAnchor;

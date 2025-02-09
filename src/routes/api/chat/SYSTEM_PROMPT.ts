@@ -215,9 +215,6 @@ only return the graph JSON, no other text or comments.`;
 //   - Connect "Attr" vertex to Component vertex with "AttrComp" edge
 //   - Omit componentName property
 
-
-
-
 // other improvements can be done in next release:
 // 1. find all global and page level component from the fronentend(using local data) with its variants and add to prompt 'we have following components with variants:'.
 //

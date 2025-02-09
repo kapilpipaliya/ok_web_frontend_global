@@ -10,10 +10,14 @@ import { DIMENSIONS, ResizableContainer } from "./ResizableDivView";
 export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
   const [view, setView] = createSignal(DIMENSIONS.desktop);
   const [graph, setGraph] = useGraph();
-  const viewVertexObject = createViewVertex({ view: "Desktop" }, graph, setGraph);
+  const viewVertexObject = createViewVertex(
+    { view: "Desktop" },
+    graph,
+    setGraph,
+  );
   onCleanup(() => {
     deleteVertex(0, viewVertexObject.id, graph, setGraph);
-  })
+  });
 
   return (
     <div class="flex ai:center bg:gray-100 flex:col min-h:100vh p:5|20">
@@ -37,9 +41,7 @@ export const PreviewPage = (props: Readonly<{ children: JSX.Element }>) => {
         </For>
       </div>
       <div class="flex ai:center h:full jc:center w:full">
-        <ResizableContainer
-          view={viewVertexObject.id}
-        >
+        <ResizableContainer view={viewVertexObject.id}>
           {props.children}
         </ResizableContainer>
       </div>

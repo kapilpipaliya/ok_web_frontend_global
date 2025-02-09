@@ -10,18 +10,23 @@ import {
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
+import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { GetInitialData } from "~/GetInitialData";
-import { GraphContext, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import {
+  GraphContext,
+  type Id,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
-import { STYLES } from "~/components/styled/constants/styles";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -34,7 +39,8 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   const [previewGraph, setPreviewGraph] = createAppState();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   // Fetch data function
   async function fetchData(): Promise<{

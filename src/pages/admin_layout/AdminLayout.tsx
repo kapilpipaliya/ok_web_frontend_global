@@ -1,10 +1,4 @@
-import { useLocation } from "@solidjs/router";
-import { createEffect, type JSX } from "solid-js";
-import { STYLES } from "~/components/styled/constants/styles";
-
-import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import type { JSX } from "solid-js";
 
 interface AdminLayoutProps {
   children?: JSX.Element;
@@ -37,13 +31,13 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
   // });
 
   return (
-      // <div
-        // class={`flex ${STYLES.overflow} flex:column`}
-      //   classList={{
-      //     "flex-grow:1": (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSideBarOpen || (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSubSideBarOpen,
-      //   }}
-      // >
-        <>{props.children}</>
-      // </div>
+    // <div
+    // class={`flex ${STYLES.overflow} flex:column`}
+    //   classList={{
+    //     "flex-grow:1": (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSideBarOpen || (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSubSideBarOpen,
+    //   }}
+    // >
+    <>{props.children}</>
+    // </div>
   );
 }

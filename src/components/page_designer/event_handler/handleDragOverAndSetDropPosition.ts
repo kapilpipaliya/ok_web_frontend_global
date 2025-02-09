@@ -12,7 +12,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,
   layoutStoreVertex: Vertex<PageLayoutObject>,
-  formStoreVertex: Vertex<FormStoreObject>,
+  _formStoreVertex: Vertex<FormStoreObject>,
   layoutVertex: Vertex,
   isDesignMode: boolean | undefined,
   collapsedKeys: Accessor<Id[]> | boolean,
@@ -29,7 +29,13 @@ export function handleDragOverAndSetDropPosition(
     | "right"
     | null;
   if (!position) {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id!, graph, setGraph, { activeItem: null, position: null });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreVertex.id!,
+      graph,
+      setGraph,
+      { activeItem: null, position: null },
+    );
     return;
   }
 
@@ -73,7 +79,16 @@ export function handleDragOverAndSetDropPosition(
     position = null;
   }
 
-  if (layoutStoreVertex.P.activeItem !== activeItem || layoutStoreVertex.P.position !== position) {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id!, graph, setGraph, { activeItem, position });
+  if (
+    layoutStoreVertex.P.activeItem !== activeItem ||
+    layoutStoreVertex.P.position !== position
+  ) {
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreVertex.id!,
+      graph,
+      setGraph,
+      { activeItem, position },
+    );
   }
 }

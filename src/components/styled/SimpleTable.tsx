@@ -1,4 +1,5 @@
 import type { JSX } from "solid-js";
+
 import { STYLES } from "./constants/styles";
 
 export function Table(

@@ -577,11 +577,11 @@ export function evalExpressionAsync(expression: string, context: object) {
 function getVertexBinOps(context: any): any {
   if (Array.isArray(context)) {
     return context[0] || {};
-  } else if (isObject(context)) {
-    return context;  
-  } else {
-    return {};
   }
+  if (isObject(context)) {
+    return context;
+  }
+  return {};
 }
 
 //
@@ -602,10 +602,10 @@ function getVertexBinOps(context: any): any {
 function getVertexUnOps(context: any): any {
   if (Array.isArray(context?.vertexes)) {
     return context.vertexes[0] || {};
-  } 
+  }
   if (isObject(context?.vertexes)) {
     return context.vertexes;
-  } 
+  }
   return context || {};
 }
 

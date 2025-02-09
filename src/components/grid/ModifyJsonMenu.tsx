@@ -18,21 +18,23 @@ export function ModifyJsonMenu(props: {
   onMouseLeave: () => void;
   parentRef: HTMLElement;
 }) {
-  const [jsonData, setJsonData] = createWritableMemo(() => JSON.stringify(props.item.P, null, 2));
+  const [jsonData, setJsonData] = createWritableMemo(() =>
+    JSON.stringify(props.item.P, null, 2),
+  );
   const [error, setError] = createSignal("");
   const [graph, setGraph] = useGraph();
   const { showSuccessToast, showWarningToast } = useToast();
 
   const [jsonInputRef, setJsonInputRef] = createSignal<HTMLInputElement>();
 
-  const updateVertexProperties = async (properties: { [key: string]: any; }) => {
+  const updateVertexProperties = async (properties: { [key: string]: any }) => {
     const newFormTxnId = generateNewTxnId(graph, setGraph);
     replaceVertexProperties(
       newFormTxnId,
       props.item.id,
       graph,
       setGraph,
-      properties
+      properties,
     );
 
     const data = commitTxn(newFormTxnId, graph);
@@ -56,7 +58,7 @@ export function ModifyJsonMenu(props: {
       const parsedData = JSON.parse(data);
       await updateVertexProperties(parsedData);
       props.onClose();
-    } catch (e) {
+    } catch (_e) {
       setError("Invalid JSON format.");
     }
   };
@@ -91,7 +93,8 @@ export function ModifyJsonMenu(props: {
             onChange={(e) => setJsonData(e.target.value)}
             placeholder="Enter JSON data here"
             ref={setJsonInputRef}
-            value={jsonData()} />
+            value={jsonData()}
+          />
         </div>
       </div>
       <Show when={error()}>
@@ -100,7 +103,8 @@ export function ModifyJsonMenu(props: {
 
       <DialogFooter
         disabled={!jsonData()}
-        onClick={() => modifyJson(jsonData())} />
+        onClick={() => modifyJson(jsonData())}
+      />
     </DropdownMenu>
   );
 }

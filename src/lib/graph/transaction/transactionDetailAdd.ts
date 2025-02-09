@@ -12,7 +12,7 @@ export function transactionDetailAdd(
   txnValue: TransactionValue,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string }
+  options?: { skipPostMessage?: string },
 ) {
   return untrack(() => {
     if (!txnId) {
@@ -25,7 +25,7 @@ export function transactionDetailAdd(
     let steps = [...existingTxnValue.steps];
     let undoStepIndexes = [...existingTxnValue.undoStepIndexes];
     let revertSteps = [...existingTxnValue.revertSteps];
-    
+
     const activeUndoIndex =
       existingTxnValue.activeUndoIndex ?? steps.length - 1;
 
@@ -53,9 +53,12 @@ export function transactionDetailAdd(
       activeUndoIndex: newActiveUndoIndex,
       revertSteps,
       steps,
-      undoStepIndexes
+      undoStepIndexes,
     };
 
-    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, { cloneProperties: false, skipPostMessage: options?.skipPostMessage });
+    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, newTxnValue, {
+      cloneProperties: false,
+      skipPostMessage: options?.skipPostMessage,
+    });
   });
 }

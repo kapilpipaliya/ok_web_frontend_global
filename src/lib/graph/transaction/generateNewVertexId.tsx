@@ -4,11 +4,16 @@ import type { GraphInterface } from "../graph";
 
 import { mergeVertexProperties } from "../mutate/vertex";
 
-export function generateNewVertexId(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>): string {
+export function generateNewVertexId(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+): string {
   const globalStoreId = "globalStoreId";
   const newVertexId = graph.vertexes[globalStoreId].P.newVertexId_ + 1;
 
-  mergeVertexProperties(0, globalStoreId, graph, setGraph, { newVertexId_: newVertexId });
+  mergeVertexProperties(0, globalStoreId, graph, setGraph, {
+    newVertexId_: newVertexId,
+  });
 
   return newVertexId.toString();
 }

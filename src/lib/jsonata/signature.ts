@@ -127,7 +127,8 @@ export function parseSignature(signature) {
       case "l": // not so sure about expecting null?
       case "n": // number
       case "o":
-      case "s": {// string
+      case "s": {
+        // string
         // object
         param.regex = "[" + symbol + "m]";
         param.type = symbol;

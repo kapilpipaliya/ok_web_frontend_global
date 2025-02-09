@@ -33,7 +33,7 @@ export async function fetchDataFromMG(
   } else {
     ({ dbSession, subDomain } = await getDBSessionForSubdomain(
       context.fetchTemplate
-        ? { url: "http://localhost/?fetchTemplate=true" } as Request
+        ? ({ url: "http://localhost/?fetchTemplate=true" } as Request)
         : undefined,
     ));
     context.dbSession = dbSession;
@@ -64,7 +64,12 @@ export async function fetchDataFromMG(
       result: mainResult,
     };
   } catch (error: any) {
-    console.error("Error in fetchDataFromMG:", expression.expression, error, error.cause);
+    console.error(
+      "Error in fetchDataFromMG:",
+      expression.expression,
+      error,
+      error.cause,
+    );
     return { error: error.message };
   }
 }

@@ -1,9 +1,9 @@
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
-import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
-import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
+import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
+import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { createEffect, createSignal, on, Show } from "solid-js";
-import { MonacoEditor } from 'solid-monaco';
+import { MonacoEditor } from "solid-monaco";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -26,12 +26,12 @@ import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 window.MonacoEnvironment = {
   getWorker(_moduleId: unknown, label: string) {
     switch (label) {
-      case 'css':
+      case "css":
         return new cssWorker();
-      case 'javascript':
-      case 'typescript':
+      case "javascript":
+      case "typescript":
         return new tsWorker();
-      case 'json':
+      case "json":
         return new jsonWorker();
       default:
         return new editorWorker();
@@ -44,13 +44,15 @@ export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
-  const selectedComp = () => evalExpression("->$0Comp", {
-    graph,
-    setGraph,
-    vertexes: [selectedAttr()],
-  })?.[0];
+  const selectedComp = () =>
+    evalExpression("->$0Comp", {
+      graph,
+      setGraph,
+      vertexes: [selectedAttr()],
+    })?.[0];
   const clearFileSelection = (meta: Vertex) => {
     const txnId = formStoreVertex()?.P.txnId;
     if (!txnId) {
@@ -97,7 +99,8 @@ export function PropertiesBody() {
   return (
     <Show
       when={
-        formStoreVertex()?.P.selectedId !== -1 && graph.vertexes[formStoreVertex()?.P.selectedId]
+        formStoreVertex()?.P.selectedId !== -1 &&
+        graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
       {/* <div class="flex gap:2 jc:start"> */}
@@ -109,7 +112,11 @@ export function PropertiesBody() {
       <JsonEditorFieldComponent />
       <FunctionEditor setPropertyValue={setPropertyValue} />
       <Show when={selectedAttr()?.P.componentName === "Component"}>
-        <ComponentVariantsInput compVertex={selectedComp()} dataVertex={graph.vertexes[formStoreVertex()?.P.selectedId]} setPropertyValue={setPropertyValue}/>
+        <ComponentVariantsInput
+          compVertex={selectedComp()}
+          dataVertex={graph.vertexes[formStoreVertex()?.P.selectedId]}
+          setPropertyValue={setPropertyValue}
+        />
       </Show>
       <FormGroupProperties
         metaAttributes={selectedComponentProperties() ?? []}
@@ -121,12 +128,16 @@ export function PropertiesBody() {
   );
 }
 
-function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) => void }) {
+function FunctionEditor(props: {
+  setPropertyValue: (meta: Vertex, value: any) => void;
+}) {
   const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
-  const getOtherProps = () => graph.vertexes[formStoreVertex()?.P.selectedId].P.props ?? "";
+  const getOtherProps = () =>
+    graph.vertexes[formStoreVertex()?.P.selectedId].P.props ?? "";
   const [editorValue, setEditorValue] = createSignal(getOtherProps());
   const [isModalOpen, setIsModalOpen] = createSignal(false);
 
@@ -154,7 +165,7 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         return;
       }
 
-      if (!value.includes('return {')) {
+      if (!value.includes("return {")) {
         throw new Error("Function must return an object");
       }
 
@@ -181,7 +192,6 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         throw new Error("Input is not a function");
       }
       */
-
     } catch (error) {
       console.error("Error evaluating function:", error);
       setIsFunctionValid(false);
@@ -225,7 +235,8 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
   return (
     <>
       <div class="mt:5">
-        <span class="flex ai:center">Props Function
+        <span class="flex ai:center">
+          Props Function
           <IconButton
             class="ml:6"
             icon="ph:arrow-square-out"
@@ -238,7 +249,11 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
         </span>
         <EditorContent height="200px" />
       </div>
-      <CustomModal open={isModalOpen} setOpen={setIsModalOpen} title="Edit Props Function" >
+      <CustomModal
+        open={isModalOpen}
+        setOpen={setIsModalOpen}
+        title="Edit Props Function"
+      >
         <div class="p:3 width:600px height:600px">
           <EditorContent height="560px" />
         </div>
@@ -250,7 +265,8 @@ function FunctionEditor(props: { setPropertyValue: (meta: Vertex, value: any) =>
 function JsonEditorFieldComponent() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isJsonValid, setIsJsonValid] = createSignal(true);
 
   const replacePropertyValue = (value: any) => {

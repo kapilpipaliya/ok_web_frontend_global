@@ -64,7 +64,11 @@ export function createMeta(
 ): { error: string; txnId?: number; vertex?: Vertex } {
   const { attributes, ...custom } = form;
   // save attributes to vertexes
-  const metaMainVertex = newVertex(generateNewVertexId(graph, setGraph), ["Temp"], custom);
+  const metaMainVertex = newVertex(
+    generateNewVertexId(graph, setGraph),
+    ["Temp"],
+    custom,
+  );
   const { error } = addNewVertex(metaTxnId, metaMainVertex, graph, setGraph);
   if (error) {
     console.error(error);

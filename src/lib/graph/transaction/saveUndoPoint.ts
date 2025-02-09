@@ -30,5 +30,7 @@ export function saveUndoPoint(
       txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
     }
   }
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
+    cloneProperties: false,
+  });
 }

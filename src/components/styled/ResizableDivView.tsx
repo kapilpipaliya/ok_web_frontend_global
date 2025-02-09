@@ -1,22 +1,40 @@
 import { createEffect, createSignal, type JSX, Show } from "solid-js";
 
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 
-import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../page_designer/context/LayoutContext";
 import { handleDrop } from "../page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
+import { STYLES } from "./constants/styles";
 import { ResizeOverlay } from "./ResizeOverlay";
 import { useToast } from "./Toast";
-import { STYLES } from "./constants/styles";
 
 export const DIMENSIONS = {
-  desktop: { height: "1200px", icon: "ph:desktop", id: "desktop", width: "1000px" },
-  mobile: { height: "570px", icon: "ph:device-mobile", id: "mobile", width: "360px" },
-  tablet: { height: "1026px", icon: "ph:device-tablet", id: "tablet", width: "768px" },
+  desktop: {
+    height: "1200px",
+    icon: "ph:desktop",
+    id: "desktop",
+    width: "1000px",
+  },
+  mobile: {
+    height: "570px",
+    icon: "ph:device-mobile",
+    id: "mobile",
+    width: "360px",
+  },
+  tablet: {
+    height: "1026px",
+    icon: "ph:device-tablet",
+    id: "tablet",
+    width: "768px",
+  },
 };
 
 export function ResizableContainer(
@@ -30,32 +48,41 @@ export function ResizableContainer(
 ) {
   const [width, setWidth] = createSignal(props.width || "");
   const [graph, setGraph] = useGraph();
-  const [height, setHeight] = createSignal(
-    props.height || ""
-  );
+  const [height, setHeight] = createSignal(props.height || "");
   const [containerRef, setContainerRef] = createSignal<HTMLDivElement>();
   const [resizing, setResizing] = createSignal(false);
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const { showErrorToast } = useToast();
 
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const viewVertex = () => graph.vertexes[props.view] as Vertex<{view: string}>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const viewVertex = () =>
+    graph.vertexes[props.view] as Vertex<{ view: string }>;
 
   createEffect(() => {
-    if (!props.width && !props.height) {
-      const dimension = DIMENSIONS[viewVertex()?.P.view?.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
+    if (!(props.width || props.height)) {
+      const dimension =
+        DIMENSIONS[
+          viewVertex()?.P.view?.toLowerCase() as keyof typeof DIMENSIONS
+        ] || DIMENSIONS.desktop;
       setWidth(dimension.width);
       setHeight(dimension.height);
     }
   });
 
-  const handlePointerDown = (e: PointerEvent, direction: "horizontal" | "vertical") => {
+  const handlePointerDown = (
+    e: PointerEvent,
+    direction: "horizontal" | "vertical",
+  ) => {
     e.preventDefault();
     const container = containerRef();
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     setResizing(true);
     const initialWidth = container.offsetWidth;
@@ -64,8 +91,10 @@ export function ResizableContainer(
     const startY = e.clientY;
 
     const handlePointerMove = (e: PointerEvent) => {
-      if (!resizing()) return;
-      
+      if (!resizing()) {
+        return;
+      }
+
       if (direction === "horizontal") {
         const newWidth = initialWidth + e.clientX - startX;
         setWidth(`${Math.max(50, newWidth)}px`);
@@ -88,7 +117,7 @@ export function ResizableContainer(
   };
 
   const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();  // Allow drop
+    e.preventDefault(); // Allow drop
     setIsDraggingOver(true);
   };
 
@@ -98,12 +127,25 @@ export function ResizableContainer(
 
   const handleDropEvent = async (e: DragEvent) => {
     setIsDraggingOver(false);
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, {
-      activeItem: formStoreVertex()?.P.formDataId,
-      position: "center"
-    });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId!,
+      graph,
+      setGraph,
+      {
+        activeItem: formStoreVertex()?.P.formDataId,
+        position: "center",
+      },
+    );
 
-    await handleDrop(e, layoutStoreVertex(), formStoreVertex(), graph, setGraph, showErrorToast);
+    await handleDrop(
+      e,
+      layoutStoreVertex(),
+      formStoreVertex(),
+      graph,
+      setGraph,
+      showErrorToast,
+    );
     resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
 
@@ -121,7 +163,7 @@ export function ResizableContainer(
         ref={setContainerRef}
         style={{
           height: height(),
-          width: width()
+          width: width(),
         }}
       >
         <div
@@ -131,7 +173,9 @@ export function ResizableContainer(
         {props.children}
         <div
           onPointerDown={(e) => handlePointerDown(e, "vertical")}
-          style={`width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
+          style={
+            "width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;"
+          }
         />
       </div>
 

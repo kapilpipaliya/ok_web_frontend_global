@@ -1,35 +1,49 @@
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
-import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { evalExpression } from "~/lib/expression_eval";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { parentComponentAttribute, parentTemplateAttribute } from "../base/Comp";
+import {
+  parentComponentAttribute,
+  parentTemplateAttribute,
+} from "../base/Comp";
 import { pageAttr } from "./pageAttr";
 
-export const wrapWithTitle = (title: string, required: boolean, children: any) => {
+export const wrapWithTitle = (
+  title: string,
+  required: boolean,
+  children: any,
+) => {
   return {
     as: "div",
     attributes: [
       {
-        attributes: required ? [{
-          class: "color:red",
-          componentName: "Text",
-          key: `required_${title}`,
-          text: " *",
-        }] : [],
+        attributes: required
+          ? [
+              {
+                class: "color:red",
+                componentName: "Text",
+                key: `required_${title}`,
+                text: " *",
+              },
+            ]
+          : [],
         class: "flex:.5",
         componentName: "Text",
         key: `title_${title}`,
-        text: title
+        text: title,
       },
       children,
     ],
     class: "flex ai:center gap:2 justify-content:space-between mt:6",
     componentName: "Box",
-    key: "box1"
-  }
+    key: "box1",
+  };
 };
 
 export const Page: IFormMetaData = {
@@ -38,11 +52,11 @@ export const Page: IFormMetaData = {
       as: "div",
       attributes: [
         wrapWithTitle("Title", false, {
-              class: `${PROPERTIES.Css.TextField} flex:1`,
-              componentName: "TextInput",
-              key: "title",
-              // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
-            }),
+          class: `${PROPERTIES.Css.TextField} flex:1`,
+          componentName: "TextInput",
+          key: "title",
+          // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
+        }),
         wrapWithTitle("Key", true, {
           class: `${PROPERTIES.Css.TextField} flex:1`,
           componentName: "TextInput",
@@ -158,8 +172,7 @@ export const Page: IFormMetaData = {
   title: "Page",
 };
 
-
-export const variantAttributes =  {
+export const variantAttributes = {
   attributes: [
     {
       class: PROPERTIES.Css.TextField,
@@ -171,11 +184,11 @@ export const variantAttributes =  {
       componentName: "Select",
       displayName: "Type",
       key: "type",
-      
+
       options: `boolean
 string`,
-// date
-// number
+      // date
+      // number
     },
     {
       as: "div",
@@ -185,11 +198,15 @@ string`,
           key: "defValue",
           // componentName: "::'P.type'",
           props: (options: FunctionArgumentType) => {
-            const type = options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
+            const type =
+              options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
-              class: type === "CheckBox" ? PROPERTIES.Css.CheckBox : PROPERTIES.Css.TextField,
+              class:
+                type === "CheckBox"
+                  ? PROPERTIES.Css.CheckBox
+                  : PROPERTIES.Css.TextField,
               componentName: type,
-            }
+            };
           },
         },
         {
@@ -198,7 +215,7 @@ string`,
               componentName: "Icon",
               icon: "ph:x",
               size: 16,
-            }
+            },
           ],
           class: "flex ai:center gap:2 color:red",
           componentName: "Button",
@@ -206,20 +223,29 @@ string`,
           props: (options: FunctionArgumentType) => {
             return {
               hidden: (options: FunctionArgumentType) => {
-                return options.data.P.defValue === undefined || options.data.P.defValue === null;
+                return (
+                  options.data.P.defValue === undefined ||
+                  options.data.P.defValue === null
+                );
               },
               onClick: () => {
-                mergeVertexProperties(options.txnId, options.data.id, options.graph, options.setGraph, {
-                  defValue: null
-                })
-              }
-            }
-          }
-        }
+                mergeVertexProperties(
+                  options.txnId,
+                  options.data.id,
+                  options.graph,
+                  options.setGraph,
+                  {
+                    defValue: null,
+                  },
+                );
+              },
+            };
+          },
+        },
       ],
       class: "flex ai:center gap:2",
       componentName: "Box",
-      displayName: "Default Value"
+      displayName: "Default Value",
     },
     // {
     //   // componentName: "::'P.type'",
@@ -237,7 +263,7 @@ string`,
           componentName: "TextInput",
           displayName: "Property Name",
           key: "key",
-        }, 
+        },
         {
           displayName: "Value",
           key: "value",
@@ -245,10 +271,10 @@ string`,
             const type = evalExpression("<-$0::'P.type'", {
               graph: options.graph,
               setGraph: options.setGraph,
-              vertexes: [options.data]
+              vertexes: [options.data],
             });
             return {
-              componentName: type === "boolean" ? "CheckBox" : "TextInput"
+              componentName: type === "boolean" ? "CheckBox" : "TextInput",
             };
           },
         },

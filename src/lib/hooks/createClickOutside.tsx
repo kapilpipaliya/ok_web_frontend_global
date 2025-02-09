@@ -16,7 +16,9 @@ export function createClickOutside(
   const handleClickOutside = (event: MouseEvent) => {
     if (
       activeClickOutside !==
-      getGlobalStore(graph).P.activeClickOutside[getGlobalStore(graph).P.activeClickOutside.length - 1]
+      getGlobalStore(graph).P.activeClickOutside[
+        getGlobalStore(graph).P.activeClickOutside.length - 1
+      ]
     ) {
       return;
     }

@@ -120,7 +120,7 @@ WHERE NOT EXISTS {
   MATCH (n)-[:ParentComponent]->()
 }
 RETURN n`;
-      params = { };
+      params = {};
     } else {
       const {
         filter,

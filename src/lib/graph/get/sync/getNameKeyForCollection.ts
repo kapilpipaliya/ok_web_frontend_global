@@ -1,7 +1,7 @@
 import type { Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-  
+
 import { evalExpression } from "~/lib/expression_eval";
 
 export function getNameKeyForCollection(

@@ -3,7 +3,7 @@ import { createSignal, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -20,7 +20,8 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [showInsideMenu, setShowInsideMenu] = createSignal(false);
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <>

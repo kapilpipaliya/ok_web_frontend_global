@@ -3,18 +3,32 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface } from "../graph";
 import type { TransactionValue } from "./TransactionType";
 
-import { getEdgeOldIdToNewIdMap, getVertexOldIdToNewIdMap } from "../get/sync/getGlobalStore";
-import { addNewEdge, deleteEdge, replaceEdgeEnd, replaceEdgeProperties, replaceEdgeStart, updateEdgeIdsToNew } from "../mutate/edge";
-import { addNewVertex, deleteVertex, mergeVertexProperties, replaceVertexProperties, updateVertexIdsToNew } from "../mutate/vertex";
-
+import {
+  getEdgeOldIdToNewIdMap,
+  getVertexOldIdToNewIdMap,
+} from "../get/sync/getGlobalStore";
+import {
+  addNewEdge,
+  deleteEdge,
+  replaceEdgeEnd,
+  replaceEdgeProperties,
+  replaceEdgeStart,
+  updateEdgeIdsToNew,
+} from "../mutate/edge";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  replaceVertexProperties,
+  updateVertexIdsToNew,
+} from "../mutate/vertex";
 
 export function redoTxn(
   txnDetail: TransactionValue,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
-
-  const {  data, id, originalData, ...actions } = txnDetail;
+  const { data, id, originalData, ...actions } = txnDetail;
 
   for (const action in actions) {
     if (actions.hasOwnProperty(action)) {
@@ -67,4 +81,3 @@ export function redoTxn(
     }
   }
 }
-

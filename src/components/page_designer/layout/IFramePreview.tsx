@@ -14,34 +14,44 @@ export const IFramePreview = (props: {
 
   const onLoad = () => {
     const channel = getChannel(props.formStoreId);
-    channel.onmessage = msg => handleChannelMessage(msg, graph, setGraph, props.formStoreId);
-    channel.postMessage(JSON.stringify({ graph: {...graph, broadcastChannels: []} }));
-  }
+    channel.onmessage = (msg) =>
+      handleChannelMessage(msg, graph, setGraph, props.formStoreId);
+    channel.postMessage(
+      JSON.stringify({ graph: { ...graph, broadcastChannels: [] } }),
+    );
+  };
 
-  setGraph("broadcastChannels", (channels) => channels.includes(props.formStoreId) ? channels : [...channels, props.formStoreId]);
+  setGraph("broadcastChannels", (channels) =>
+    channels.includes(props.formStoreId)
+      ? channels
+      : [...channels, props.formStoreId],
+  );
 
   onCleanup(() => {
-    setGraph("broadcastChannels", (channels) => channels.filter(id => id !== props.formStoreId));
+    setGraph("broadcastChannels", (channels) =>
+      channels.filter((id) => id !== props.formStoreId),
+    );
   });
 
   onMount(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'LOADED') {
+      if (event.data.type === "LOADED") {
         onLoad();
       }
     };
 
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
 
     onCleanup(() => {
-      console.log('cleanup');
-      window.removeEventListener('message', handleMessage);
+      window.removeEventListener("message", handleMessage);
     });
   });
-  return <iframe
-    allow="clipboard-read; clipboard-write"
-    name={props.formStoreId}
-    src={`${window.location.origin}/page_design_preview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}${props.noMinHeight ? '&noMinHeight=true' : ''}`}
-    style={{ border: "none", height: "100%", width: "100%" }}
-  />;
+  return (
+    <iframe
+      allow="clipboard-read; clipboard-write"
+      name={props.formStoreId}
+      src={`${window.location.origin}/page_design_preview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}${props.noMinHeight ? "&noMinHeight=true" : ""}`}
+      style={{ border: "none", height: "100%", width: "100%" }}
+    />
+  );
 };

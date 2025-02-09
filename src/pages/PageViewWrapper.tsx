@@ -1,47 +1,72 @@
-import {makeEventListener} from "@solid-primitives/event-listener";
-import {Meta, Title} from "@solidjs/meta";
-import {type BeforeLeaveEventArgs, useBeforeLeave} from "@solidjs/router";
-import {createEffect, createMemo, Match, on, onCleanup, onMount, Show, Switch, untrack,} from "solid-js";
-import {v7 as uuidv7} from "uuid";
+import { makeEventListener } from "@solid-primitives/event-listener";
+import { Meta, Title } from "@solidjs/meta";
+import { type BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
+import {
+  createEffect,
+  createMemo,
+  Match,
+  on,
+  onCleanup,
+  onMount,
+  Show,
+  Switch,
+  untrack,
+} from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
-import type {ServerResult} from "~/cypher/types/ServerResult";
-import type {IFormMetaData} from "~/lib/meta/FormMetadataType";
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {FormContext, type FormStoreObject, getInitialFormStore} from "~/components/form/context/FormContext";
-import {addFormInitialComponent} from "~/components/form/functions/addFormInitialComponent";
-import {getFormData} from "~/components/form/functions/getFormData";
-import {SaveCancelButton} from "~/components/form/SaveCancelButton";
+import {
+  FormContext,
+  type FormStoreObject,
+  getInitialFormStore,
+} from "~/components/form/context/FormContext";
+import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
+import { getFormData } from "~/components/form/functions/getFormData";
+import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { PageView } from "~/components/page_attr_render/PageView";
-import {getConfiguredPermissions, hasPermissions,} from "~/components/page_attr_render/permissions";
-import {usePreviewContext} from "~/components/page_designer/context/PreviewContext";
-import {generateFormMetaAttributes} from "~/components/page_designer/functions/generateFormMetaAttributes";
-import {PageDesignerLabels} from "~/components/page_designer/functions/PageDesignerLabels";
-import {getPageTitle} from "~/components/page_designer/layout/getPageTitle";
-import {DialogWithButtons} from "~/components/styled/DeleteDialog";
-import {PreviewPage} from "~/components/styled/PreviewPage";
-import {SimpleWarningAlert} from "~/components/styled/SimpleWarningAlert";
-import {fetchComponentData} from "~/cypher/get/fetchComponentData";
-import {fetchDataFromMG} from "~/cypher/get/fetchDataFromMG";
-import {isValidResponse} from "~/lib/api/isValidResponse";
-import {isObject} from "~/lib/data_structure/object/isObject";
-import {getEdgesFromRowsAttr} from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import {getGlobalStore} from "~/lib/graph/get/sync/getGlobalStore";
-import {type Id, useGraph, type Vertex} from "~/lib/graph/graph";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "~/components/page_attr_render/permissions";
+import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
+import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
+import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
+import { DialogWithButtons } from "~/components/styled/DeleteDialog";
+import { PreviewPage } from "~/components/styled/PreviewPage";
+import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
+import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { isValidResponse } from "~/lib/api/isValidResponse";
+import { isObject } from "~/lib/data_structure/object/isObject";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { createCompContextVertex } from "~/lib/graph/mutate/createCompContextVertex";
-import {createViewVertex} from "~/lib/graph/mutate/createViewVertex";
-import {createFormVertex} from "~/lib/graph/mutate/form/createForm";
-import {createMeta} from "~/lib/graph/mutate/form/createMeta";
-import {setGraphData} from "~/lib/graph/mutate/setGraphData";
+import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
+import { createMeta } from "~/lib/graph/mutate/form/createMeta";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import {addNewVertex, deleteVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
-import {isDisabledTxn} from "~/lib/graph/transaction/isDisabledTxn";
-import {revertTransaction} from "~/lib/graph/transaction/revertTransaction";
-import {saveStepIndex} from "~/lib/graph/transaction/saveStepIndex";
-import {saveUndoPoint} from "~/lib/graph/transaction/saveUndoPoint";
-import {setPreventUndoAtOrBeforeIndex} from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
-import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
-import {FormMetaData} from "~/lib/meta/formMetaData";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
+import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
+import {
+  parentComponentAttribute,
+  parentTemplateAttribute,
+} from "~/lib/meta/base/Comp";
+import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export function PageViewWrapper(
   props: Readonly<{
@@ -69,7 +94,11 @@ export function PageViewWrapper(
     props.dataId === "new" ? undefined : props.dataId,
   );
   const layoutStoreId = props.uuid ?? uuidv7();
-  const viewVertexObject = createViewVertex({view: "Desktop"}, graph, setGraph);
+  const viewVertexObject = createViewVertex(
+    { view: "Desktop" },
+    graph,
+    setGraph,
+  );
   const componentVertexObject = createCompContextVertex({}, graph, setGraph);
   const initialFormStore = getInitialFormStore(graph, setGraph);
   const pageFormVertexObject = newVertex(layoutStoreId, ["PageForm"], {
@@ -78,14 +107,21 @@ export function PageViewWrapper(
     formId: props.pageVertexName,
     id: id()!,
     openedViews: [viewVertexObject.id],
-    txnId: props.txnId ?? initialFormStore.txnId
+    txnId: props.txnId ?? initialFormStore.txnId,
   });
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
 
-  const formStore = () => graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;
+  const formStore = () =>
+    graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;
   const setFormStore = (key: string, value: any) => {
-    mergeVertexProperties<FormStoreObject>(0, pageFormVertexObject.id, graph, setGraph, { [key]: value });
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      pageFormVertexObject.id,
+      graph,
+      setGraph,
+      { [key]: value },
+    );
   };
 
   onCleanup(() => {
@@ -101,7 +137,7 @@ export function PageViewWrapper(
   // Note: onCleanUp will be called on reverse order of the cleanup functions
   onCleanup(() => {
     deleteVertex(0, pageFormVertexObject.id, graph, setGraph);
-  })
+  });
 
   let onConfirmExit: () => void;
   const metaTxnId = generateNewTxnId(graph, setGraph);
@@ -205,8 +241,15 @@ export function PageViewWrapper(
         return false;
       }
       metaDtaInitialize(data);
-      if (formStore()?.P.formMetaId && graph.vertexes[formStore().P.formMetaId!]!) {
-        form = generateFormMetaAttributes(graph, setGraph, graph.vertexes[formStore().P.formMetaId!]!);
+      if (
+        formStore()?.P.formMetaId &&
+        graph.vertexes[formStore().P.formMetaId!]!
+      ) {
+        form = generateFormMetaAttributes(
+          graph,
+          setGraph,
+          graph.vertexes[formStore().P.formMetaId!]!,
+        );
       }
     }
     setFormStore("formMetaData", form);
@@ -220,10 +263,10 @@ export function PageViewWrapper(
         if (PageDesignerLabels.includes(form.key) || form.key === "Component") {
           formToUse = {
             ...form,
-            attributes: form.attributes.map(attr => ({
+            attributes: form.attributes.map((attr) => ({
               ...attr,
-              attributes: attr.attributes?.filter(a => a.key !== "Attr")
-            }))
+              attributes: attr.attributes?.filter((a) => a.key !== "Attr"),
+            })),
           };
         }
         return createMeta(formToUse, metaTxnId, graph, setGraph);
@@ -258,7 +301,7 @@ export function PageViewWrapper(
       const { data, error } = await getFormData(
         graph,
         formStore().P.formMetaData!.attributes,
-        id()!
+        id()!,
       );
 
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
@@ -267,12 +310,12 @@ export function PageViewWrapper(
       }
 
       // Find all Component vertices from the loaded data
-      const componentVertices = Object.values(data!.graph!.vertexes).filter(v => 
-        v.L.includes("Component")
+      const componentVertices = Object.values(data!.graph!.vertexes).filter(
+        (v) => v.L.includes("Component"),
       );
 
       // Fetch data for all components
-      if (componentVertices.length > 0) {        
+      if (componentVertices.length > 0) {
         await fetchComponentData(componentVertices, graph, setGraph);
       }
 
@@ -284,7 +327,7 @@ export function PageViewWrapper(
   }
   onMount(async () => {
     setFormStore("mounted", true);
-    if (!await loadFormDesignerMetaData()) {
+    if (!(await loadFormDesignerMetaData())) {
       return;
     }
     if (
@@ -326,13 +369,20 @@ export function PageViewWrapper(
       //   });
       // }
       // Link to parent page
-      if (props.parentId && (props.pageVertexName === "Template" || props.pageVertexName === "Component")) {
+      if (
+        props.parentId &&
+        (props.pageVertexName === "Template" ||
+          props.pageVertexName === "Component")
+      ) {
         const parentComponentMetaVertex = {
           id: "",
           IN: {},
           L: [],
           OUT: {},
-          P: props.pageVertexName === "Template" ? parentTemplateAttribute : parentComponentAttribute,
+          P:
+            props.pageVertexName === "Template"
+              ? parentTemplateAttribute
+              : parentComponentAttribute,
         } as Vertex;
         setSelectionValue(
           formStore().P.txnId,
@@ -340,7 +390,7 @@ export function PageViewWrapper(
           graph,
           setGraph,
           parentComponentMetaVertex,
-          props.parentId
+          props.parentId,
         );
       }
 
@@ -360,7 +410,7 @@ export function PageViewWrapper(
       }
     }
     saveUndoPoint(formStore().P.txnId, graph, setGraph);
-    if (!props.parentId && !props.txnId) {
+    if (!(props.parentId || props.txnId)) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
     saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
@@ -411,7 +461,7 @@ export function PageViewWrapper(
       e.retry(true);
     };
   });
-  
+
   const beforeunload = (event: BeforeUnloadEvent) => {
     if (!isDisabledTxn(formStore().P.txnId, graph)) {
       event.preventDefault();
@@ -438,11 +488,17 @@ export function PageViewWrapper(
     <Show keyed when={formStore().P.count}>
       <Show when={props.enableSEO}>
         <Show when={graph.vertexes[formStore().P.formMetaId!]?.P.seoTitle}>
-          <Title>{getPageTitle(graph.vertexes[formStore().P.formMetaId!]!)}</Title>
+          <Title>
+            {getPageTitle(graph.vertexes[formStore().P.formMetaId!]!)}
+          </Title>
         </Show>
-        <Show when={graph.vertexes[formStore().P.formMetaId!]?.P.seoDescription}>
+        <Show
+          when={graph.vertexes[formStore().P.formMetaId!]?.P.seoDescription}
+        >
           <Meta
-            content={graph.vertexes[formStore().P.formMetaId!]!.P.seoDescription}
+            content={
+              graph.vertexes[formStore().P.formMetaId!]!.P.seoDescription
+            }
             name="description"
           />
         </Show>

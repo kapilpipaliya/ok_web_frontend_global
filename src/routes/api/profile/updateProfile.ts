@@ -63,9 +63,9 @@ export async function updateProfile(
   const user = result.records[0]?.get("u");
 
   // need to verify:
-  const dbSession2 = (
-    await getDriver()
-  ).session({database: user.properties.subDomain});
+  const dbSession2 = (await getDriver()).session({
+    database: user.properties.subDomain,
+  });
   await dbSession2.run(query, {
     email,
     profileImage,

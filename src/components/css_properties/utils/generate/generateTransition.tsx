@@ -9,11 +9,14 @@ export function generateTransition(
   transitions: TransitionAttributes[],
   isView?: boolean,
 ): string {
-  if (!transitions) return '';
+  if (!transitions) {
+    return "";
+  }
   const separator = isView ? " " : "|";
   const separator2 = isView ? ", " : ",";
 
-  return transitions.filter(transition => transition)
+  return transitions
+    .filter((transition) => transition)
     .map((transition) => {
       const {
         delay = "0s",

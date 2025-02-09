@@ -27,8 +27,6 @@ export async function getInitialData(dbSession: Session) {
     //   relationshipObj,
     // );
 
-
-
     // await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
     // await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
 
@@ -40,7 +38,12 @@ export async function getInitialData(dbSession: Session) {
     //   nodeObj,
     //   relationshipObj,
     // );
-    await fetchAndSaveFormMetaData("GlobalSetting", nodeObj, relationshipObj, dbSession);
+    await fetchAndSaveFormMetaData(
+      "GlobalSetting",
+      nodeObj,
+      relationshipObj,
+      dbSession,
+    );
   } catch (error: any) {
     return { error: error.message };
   }

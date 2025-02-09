@@ -2,11 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch, untrack } from "solid-js";
 
-import type {
-  GraphInterface,
-  Id,
-  Vertex,
-} from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -94,39 +90,41 @@ export function newRow(
   properties?: { [key: string]: any },
   inward?: boolean,
 ): { edgeId?: Id; error: boolean; vertexId?: Id } {
-  return untrack(() => batch(() => {
-    const vertexNew = newVertex(
-      generateNewVertexId(graph, setGraph),
-      [label || edgeType!],
-      properties,
-    );
-    const insertVertex = addNewVertex(txnId, vertexNew, graph, setGraph);
-    if (insertVertex.error) {
-      console.error(insertVertex.error.toString());
-      return {
-        error: true,
-      };
-    }
+  return untrack(() =>
+    batch(() => {
+      const vertexNew = newVertex(
+        generateNewVertexId(graph, setGraph),
+        [label || edgeType!],
+        properties,
+      );
+      const insertVertex = addNewVertex(txnId, vertexNew, graph, setGraph);
+      if (insertVertex.error) {
+        console.error(insertVertex.error.toString());
+        return {
+          error: true,
+        };
+      }
 
-    const edgeNew = newEdge(
-      generateNewVertexId(graph, setGraph),
-      edgeType || label!,
-      {},
-      inward ? vertexNew.id : parentVertex.id,
-      inward ? parentVertex.id : vertexNew.id,
-    );
-    const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
-    if (insertEdgeResult.error) {
-      console.error(insertEdgeResult.error.toString());
+      const edgeNew = newEdge(
+        generateNewVertexId(graph, setGraph),
+        edgeType || label!,
+        {},
+        inward ? vertexNew.id : parentVertex.id,
+        inward ? parentVertex.id : vertexNew.id,
+      );
+      const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
+      if (insertEdgeResult.error) {
+        console.error(insertEdgeResult.error.toString());
+        return {
+          error: true,
+          vertexId: vertexNew.id,
+        };
+      }
       return {
-        error: true,
+        edgeId: edgeNew.id,
+        error: false,
         vertexId: vertexNew.id,
       };
-    }
-    return {
-      edgeId: edgeNew.id,
-      error: false,
-      vertexId: vertexNew.id,
-    };
-  }));
+    }),
+  );
 }

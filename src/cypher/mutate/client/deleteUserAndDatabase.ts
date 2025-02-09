@@ -5,12 +5,12 @@ import { getSubDomain } from "~/server/getSubDomain";
 
 // unused function, To be used in the future
 // WIP
-export async function deleteUserAndDatabase(userName: string) {
+export async function deleteUserAndDatabase(_userName: string) {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
 
-  const dbSessionSource = (await getDriver()).session({database: subDomain});
+  const dbSessionSource = (await getDriver()).session({ database: subDomain });
   try {
     // Delete the Neo4j database named subDomain
     await dbSessionSource.run(`DROP DATABASE ${subDomain}`);

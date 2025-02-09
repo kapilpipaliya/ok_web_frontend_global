@@ -94,10 +94,7 @@ FormMetaData.Form = {
 
 export const ComponentLabel = "Component";
 FormMetaData.Component = {
-  attributes: [
-    ...FormMetaData.Page.attributes,
-    variantAttributes!,
-  ],
+  attributes: [...FormMetaData.Page.attributes, variantAttributes!],
   key: "Component",
   title: "Component",
 };

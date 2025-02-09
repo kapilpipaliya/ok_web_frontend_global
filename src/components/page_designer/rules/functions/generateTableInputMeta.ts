@@ -18,7 +18,7 @@ export function generateTableInputMeta(metaAttribute: FieldAttribute) {
     metaTxnId,
     newVertex(metaVertexId, ["Attr"], metaAttribute),
     graph,
-    setGraph
+    setGraph,
   );
   if (metaAttribute.attributes) {
     addMetaVertexes(
@@ -26,7 +26,7 @@ export function generateTableInputMeta(metaAttribute: FieldAttribute) {
       setGraph,
       metaTxnId,
       graph.vertexes[metaVertexId],
-      metaAttribute.attributes
+      metaAttribute.attributes,
     );
   }
   onCleanup(() => {

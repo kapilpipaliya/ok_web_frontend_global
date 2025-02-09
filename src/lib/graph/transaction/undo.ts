@@ -23,7 +23,9 @@ export function undo(
   const newUndoIndex =
     revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
-  const stepsToRedo = txnValue.steps.slice(newUndoIndex + 1, activeUndoIndex + 1).reverse();
+  const stepsToRedo = txnValue.steps
+    .slice(newUndoIndex + 1, activeUndoIndex + 1)
+    .reverse();
   for (const txn of stepsToRedo) {
     undoTxn(txn, graph, setGraph);
   }
@@ -37,7 +39,9 @@ export function undo(
     );
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
+    cloneProperties: false,
+  });
 }
 
 export function undoAllowed(

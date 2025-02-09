@@ -6,8 +6,11 @@ import { GraphContext, type GraphInterface } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 // Just for example, dont use it anywhere.
-export function TemplateRenderer(props: { context?: any, name: string }) {
-  const graph = useKeyedContext("templateGraph") as [GraphInterface, SetStoreFunction<GraphInterface>];
+export function TemplateRenderer(props: { context?: any; name: string }) {
+  const graph = useKeyedContext("templateGraph") as [
+    GraphInterface,
+    SetStoreFunction<GraphInterface>,
+  ];
   return (
     <GraphContext.Provider value={graph}>
       <PageViewWrapper

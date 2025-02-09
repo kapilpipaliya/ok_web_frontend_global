@@ -1,10 +1,5 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import {
-  createSignal,
-  onCleanup,
-  Show,
-  splitProps,
-} from "solid-js";
+import { createSignal, onCleanup, Show, splitProps } from "solid-js";
 
 import type {
   OptionType,
@@ -30,7 +25,7 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
       ""
     );
   }
-  const [local, others] = splitProps(props, [
+  const [local, _others] = splitProps(props, [
     "componentName",
     "onChange",
     "containerClass",

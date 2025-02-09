@@ -8,11 +8,12 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
@@ -38,7 +39,7 @@ export function LayoutTree() {
     //     ? [steps()[0]]
     //     : [];
     // }
-    
+
     return formStoreVertex()?.P.formDataId
       ? graph.vertexes[formStoreVertex()?.P.formDataId!]
         ? [graph.vertexes[formStoreVertex()?.P.formDataId!]]

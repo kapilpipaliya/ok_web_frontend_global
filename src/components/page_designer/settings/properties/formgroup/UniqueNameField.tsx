@@ -20,7 +20,8 @@ export function UniqueNameField(
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   function setUniqueNameValue(metaVertex: Vertex, data: string) {
     if (metaVertex.P.key === uniqueNameKey) {

@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { useGraph } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
 
@@ -14,20 +14,23 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const [graph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedLayoutId = createSelector(
+    () => formStoreVertex()?.P.selectedId,
+  );
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
 
   let popoverRef: HTMLDivElement | undefined;
   const useVisibilityObserver = createVisibilityObserver({ threshold: 0.8 });
-  const visible = useVisibilityObserver(() => popoverRef);
+  const _visible = useVisibilityObserver(() => popoverRef);
 
   return (
-    <div ref={popoverRef} >
+    <div ref={popoverRef}>
       <div
-        // classList={{ hidden: !visible() }}
-       >
+      // classList={{ hidden: !visible() }}
+      >
         <Switch>
           <Match when={isSelectedLayoutId(props.item.id)}>
             <SelectedAttrConfigPopOver item={props.item} />

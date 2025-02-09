@@ -15,19 +15,21 @@ export default function AdminDashboard() {
     setSelectedIndex(index);
   };
   const tabs = [
-    ...PageDesignerLabels.filter(label => label !== "CompExample").map((label) => ({
-      key: label,
-      label: toTitle(label.replace(/(\w+)(Page)$/, '$1')) + 's',
-    })),
+    ...PageDesignerLabels.filter((label) => label !== "CompExample").map(
+      (label) => ({
+        key: label,
+        label: toTitle(label.replace(/(\w+)(Page)$/, "$1")) + "s",
+      }),
+    ),
     {
-      key: "Component", 
+      key: "Component",
       label: "Components",
-    }
+    },
   ];
 
   return (
     <div>
-        <div class="flex gap:4 position:fixed right:1rem">
+      <div class="flex gap:4 position:fixed right:1rem">
         <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>
@@ -37,10 +39,7 @@ export default function AdminDashboard() {
         selectedIndex={selectedIndex()}
         tabs={tabs}
       />
-      <DataGrid
-        isShowPagination={true}
-        tableId={tabs[selectedIndex()].key}
-      />
+      <DataGrid isShowPagination={true} tableId={tabs[selectedIndex()].key} />
     </div>
   );
 }

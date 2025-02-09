@@ -3,13 +3,11 @@ import { klona } from "klona";
 import { createMemo, createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import type {
-  FormStoreObject,
-} from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
-import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
@@ -21,7 +19,10 @@ import { getConditionsExpression } from "./functions/getConditionsExpression";
 import { modifyFieldMetaAllFields } from "./functions/modifyFieldMetaAllFields";
 import { Overlay } from "./Overlay";
 
-const getMetaAttributes = (formStoreVertex: Vertex<FormStoreObject>, selectedRule?: null | Vertex) => {
+const getMetaAttributes = (
+  formStoreVertex: Vertex<FormStoreObject>,
+  selectedRule?: null | Vertex,
+) => {
   const [graph, setGraph] = useGraph();
 
   let metaAttribute = klona(
@@ -34,7 +35,12 @@ const getMetaAttributes = (formStoreVertex: Vertex<FormStoreObject>, selectedRul
           condAttribute.key === "leftField" ||
           condAttribute.key === "rightField"
         ) {
-          modifyFieldMetaAllFields(condAttribute, graph, setGraph, formStoreVertex);
+          modifyFieldMetaAllFields(
+            condAttribute,
+            graph,
+            setGraph,
+            formStoreVertex,
+          );
         }
       }
     }
@@ -56,9 +62,10 @@ export function RulesModal(
   const zIndex = useZIndex();
   const [graph, setGraph] = useGraph();
   createActiveClickOutside(graph, setGraph);
-  
+
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex =
     props.prevTxnIndex ?? getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
@@ -110,7 +117,12 @@ export function RulesModal(
 
   onCleanup(() => {
     if (revertChanges) {
-      revertTransactionUpToIndex(formStoreVertex()?.P.txnId, prevTxnIndex, graph, setGraph);
+      revertTransactionUpToIndex(
+        formStoreVertex()?.P.txnId,
+        prevTxnIndex,
+        graph,
+        setGraph,
+      );
     }
   });
 
@@ -141,18 +153,17 @@ export function RulesModal(
                     :
                   </h3>
                   <div class="mt:0.5rem">
-
-                      <TableInputField
-                        data={
-                          props.selectedRule
-                            ? props.selectedRule
-                            : graph.vertexes[formStoreVertex()?.P.formDataId]
-                        }
-                        isNoPermissionCheck={true}
-                        isRealTime={false}
-                        meta={graph.vertexes[metaVertexId]}
-                        txnId={formStoreVertex()?.P.txnId}
-                      />
+                    <TableInputField
+                      data={
+                        props.selectedRule
+                          ? props.selectedRule
+                          : graph.vertexes[formStoreVertex()?.P.formDataId]
+                      }
+                      isNoPermissionCheck={true}
+                      isRealTime={false}
+                      meta={graph.vertexes[metaVertexId]}
+                      txnId={formStoreVertex()?.P.txnId}
+                    />
                   </div>
                 </div>
               </div>

@@ -24,7 +24,8 @@ export function cloneLayoutAndChildren(
   const position = toExternalVertex ? "center" : "after";
 
   const toParentVertex =
-    toExternalVertex ?? evalExpression("<-Attr", {
+    toExternalVertex ??
+    evalExpression("<-Attr", {
       graph,
       vertexes: [toVertex],
     })?.[0];

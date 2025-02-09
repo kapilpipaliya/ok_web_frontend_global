@@ -58,7 +58,9 @@ export async function POST({ request }: APIEvent) {
 }
 
 async function authenticateSuperUser(superUser: Vertex, password: string) {
-  const superDbSession = (await getDriver()).session({database: SYSTEM_DB_NAME});
+  const superDbSession = (await getDriver()).session({
+    database: SYSTEM_DB_NAME,
+  });
 
   try {
     const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
@@ -67,7 +69,9 @@ async function authenticateSuperUser(superUser: Vertex, password: string) {
     });
 
     if (superDbResult.records.length === 0) {
-      throw new Error(`Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`);
+      throw new Error(
+        `Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`,
+      );
     }
     const user = convertNodeToJson(superDbResult.records[0].get("u"));
     return comparePassword(user, password);

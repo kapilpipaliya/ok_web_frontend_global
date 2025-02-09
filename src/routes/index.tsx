@@ -4,11 +4,11 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export default function Notfound() {
   return (
     <GetInitialData authenticate={true} dontRedirectToLogin={true}>
-        <PageViewWrapper
-          pageId={""}
-              pageVertexLabel={"Page"}
-              pageVertexName={"home"}
-        />
+      <PageViewWrapper
+        pageId={""}
+        pageVertexLabel={"Page"}
+        pageVertexName={"home"}
+      />
     </GetInitialData>
   );
 }

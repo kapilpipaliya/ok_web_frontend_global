@@ -7,12 +7,12 @@ export default function PageShareView() {
   const params = useParams();
 
   return (
-    <GetInitialData authenticate={true} dontRedirectToLogin={true}  >
+    <GetInitialData authenticate={true} dontRedirectToLogin={true}>
       <PageViewWrapper
         pageId={params.formId}
-          pageVertexLabel={params.entity}
-          pageVertexName={params.entityname}
-        />
+        pageVertexLabel={params.entity}
+        pageVertexName={params.entityname}
+      />
     </GetInitialData>
   );
 }

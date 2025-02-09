@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
 import { STYLES } from "~/components/styled/constants/styles";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { TooltipWrapper } from '~/components/styled/TooltipWrapper';
+import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 /*
 ┌───────────┐
 │Title x ?  │
@@ -50,6 +50,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
           <a
             class="flex ai:center"
             href={getUrl()}
+            rel="noreferrer"
             target="_blank"
           >
             <Icon height={14} icon="ph:info" noobserver width={14} />
@@ -85,10 +86,7 @@ export function InsertButtonsMenu(
       parentRef={props.parentRef}
       useSize={true}
     >
-      <ComponentList
-        edgeName="ParentComp"
-        rootExpression={`g:'Comp[Root]'`}
-      />
+      <ComponentList edgeName="ParentComp" rootExpression={`g:'Comp[Root]'`} />
     </DropdownMenu>
   );
 }

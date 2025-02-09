@@ -1,12 +1,12 @@
-import { For } from 'solid-js';
+import { For } from "solid-js";
 
-import type { Vertex } from '~/lib/graph/graph';
+import type { Vertex } from "~/lib/graph/graph";
 
-import { isObject } from '~/lib/data_structure/object/isObject';
+import { isObject } from "~/lib/data_structure/object/isObject";
 
-import type { DBMessage } from './types';
+import type { DBMessage } from "./types";
 
-import { Preview } from './Preview';
+import { Preview } from "./Preview";
 
 interface ChatResponseProps {
   message: Vertex<DBMessage>;
@@ -35,18 +35,19 @@ function ResponsePreview(props: { message: Vertex<DBMessage> }) {
     <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
       <div class="font-weight:500 margin-bottom:8px">Preview:</div>
       <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
-        <For each={(() => {
-          const parsed = JSON.parse(props.message.P.data || '[]');
-          return Array.isArray(parsed) ? parsed : (isObject(parsed) ? [parsed] : []);
-        })()}>
-          {(dataObj) => (
-            <Preview
-              message={props.message}
-              object={dataObj}
-            />
-          )}
+        <For
+          each={(() => {
+            const parsed = JSON.parse(props.message.P.data || "[]");
+            return Array.isArray(parsed)
+              ? parsed
+              : isObject(parsed)
+                ? [parsed]
+                : [];
+          })()}
+        >
+          {(dataObj) => <Preview message={props.message} object={dataObj} />}
         </For>
       </div>
     </div>
   );
-} 
+}

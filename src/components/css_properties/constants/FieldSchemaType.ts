@@ -165,7 +165,7 @@ export function createButtonGroupOptions(
 
 export const createGridOptions = (
   key: string,
-  label: string,
+  _label: string,
   children: GenericField[],
 ): BoxField => ({
   children,

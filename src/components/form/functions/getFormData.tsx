@@ -24,7 +24,7 @@ export const getFormData = async (
       outgoing,
     });
 
-    if (!isValidResponse(result) || !result.graph) {
+    if (!(isValidResponse(result) && result.graph)) {
       return { error: getErrorMessage(result) || "Error When Loading Form" };
     }
 

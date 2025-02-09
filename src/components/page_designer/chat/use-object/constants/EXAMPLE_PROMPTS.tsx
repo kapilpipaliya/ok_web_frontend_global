@@ -10,5 +10,5 @@ export const EXAMPLE_PROMPTS = [
   "Create a blog post layout with featured image",
   "Design a team members showcase section",
   "Generate a services showcase with icons",
-  "Create a portfolio grid with filtering options"
+  "Create a portfolio grid with filtering options",
 ];

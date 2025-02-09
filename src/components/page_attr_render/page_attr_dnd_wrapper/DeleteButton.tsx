@@ -4,7 +4,7 @@ import { deleteLayoutAttr } from "~/components/page_designer/event_handler/delet
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 
 export function DeleteButton(props: {
@@ -17,7 +17,8 @@ export function DeleteButton(props: {
   const { showSuccessToast } = useToast();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton

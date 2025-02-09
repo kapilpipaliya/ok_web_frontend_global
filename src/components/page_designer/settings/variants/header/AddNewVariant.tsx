@@ -12,7 +12,7 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
-import { useDesignerFormIdContext, } from "../../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
 import { CommonAddComponent } from "../../rules/CommonAddComponent";
 
@@ -21,7 +21,8 @@ export function AddNewVariant(
 ) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const prevTxnIndex = getLastTxnIndex(formStoreVertex()?.P.txnId, graph);
   const [selectedVariant, setSelectedVariant] = createSignal<Vertex>();

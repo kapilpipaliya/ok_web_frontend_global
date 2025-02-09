@@ -4,7 +4,11 @@ import { createEffect, createSignal, type JSX, onMount, Show } from "solid-js";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
+import {
+  type GlobalProperties,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
@@ -48,9 +52,11 @@ export function Sidebar() {
     const searchName = input.trim().toLowerCase();
     setIsSearchMode(searchName.length > 0);
 
-
     if (searchName.length > 0) {
-      const filteredData = filterNavData(getGlobalStore(graph).P.navigationData, searchName);
+      const filteredData = filterNavData(
+        getGlobalStore(graph).P.navigationData,
+        searchName,
+      );
       setSearchData(filteredData);
     } else {
       setSearchData(getGlobalStore(graph).P.navigationData);
@@ -108,11 +114,19 @@ export function Sidebar() {
     const path = location.pathname;
 
     if (path.includes("/admin")) {
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSideBarOpen: true });
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSubSideBarOpen: true });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+        isSideBarOpen: true,
+      });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+        isSubSideBarOpen: true,
+      });
     } else {
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSideBarOpen: false });
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isSubSideBarOpen: false });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+        isSideBarOpen: false,
+      });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+        isSubSideBarOpen: false,
+      });
     }
   };
 
@@ -147,18 +161,23 @@ export function Sidebar() {
       setGraphData(graph, setGraph, data.graph);
       setNavData(data.children[0].children);
       setSearchData(data.children[0].children);
-      mergeVertexProperties(0, "globalStoreId", graph, setGraph, { navigationData: data.children[0].children });
+      mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+        navigationData: data.children[0].children,
+      });
     }
   });
 
   const sidebarStyle = () => {
-    const globalStore = graph.vertexes["globalStoreId"] as Vertex<GlobalProperties>;
+    const globalStore = graph.vertexes
+      .globalStoreId as Vertex<GlobalProperties>;
     return {
       background: "#f4f4f4",
       "border-right": "1px solid lightgray",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",
       display: globalStore.P.isSideBarOpen ? "" : "none",
-      transform: globalStore.P.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
+      transform: globalStore.P.isSideBarOpen
+        ? "translateX(0)"
+        : "translateX(-100%)",
       transition: "transform 0.3s ease-in-out",
       // width: isCollapsed() ? "70px" : "310px",
     } as JSX.CSSProperties;

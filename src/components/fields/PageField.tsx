@@ -20,7 +20,7 @@ export function PageField(props: Readonly<GenericComponentProps>) {
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta;
-  const data = () => parentRenderContext()?.context.data;
+  const _data = () => parentRenderContext()?.context.data;
 
   return (
     <PageViewWrapper

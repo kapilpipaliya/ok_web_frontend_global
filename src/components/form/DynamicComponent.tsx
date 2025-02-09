@@ -16,7 +16,10 @@ import {
 import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import { PreviewContext, usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import {
+  PreviewContext,
+  usePreviewContext,
+} from "~/components/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
@@ -29,8 +32,12 @@ import {
 } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
-import type { ComponentNameType, FunctionArgumentType } from "./FieldSchemaType";
+import type {
+  ComponentNameType,
+  FunctionArgumentType,
+} from "./FieldSchemaType";
 
+import { Label } from "../css_properties/components/fields/Label";
 import { cssStateToString } from "../css_properties/utils/cssStateToString";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
@@ -46,7 +53,6 @@ import {
 } from "../page_attr_render/permissions";
 import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
 import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
-import { Label } from "../css_properties/components/fields/Label";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
@@ -69,7 +75,8 @@ export function DynamicComponent(
 ) {
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();
-  const formVertex = () => formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
+  const formVertex = () =>
+    formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const { showErrorToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
@@ -127,7 +134,12 @@ export function DynamicComponent(
   });
 
   const allConfiguredPermission = createLazyMemo(() =>
-    getConfiguredPermissions(getGlobalStore(graph).P.userRoles, props.meta, graph, setGraph),
+    getConfiguredPermissions(
+      getGlobalStore(graph).P.userRoles,
+      props.meta,
+      graph,
+      setGraph,
+    ),
   );
   const hasInsertPermission = createLazyMemo(() => {
     return (
@@ -161,24 +173,23 @@ export function DynamicComponent(
     graph.vertexes[formVertex()?.P.formMetaId!]?.P.isNoPermissionCheck ||
     previewStore.isDesignMode ||
     previewStore.isNoPermissionCheck;
-  const hasPermission = () =>
+  const _hasPermission = () =>
     hasInsertPermission() || hasViewPermission() || hasEditPermission();
   const hasNoPermission = () =>
     !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
   const isDisabledByPermissions = () => {
     if (isNoPermissionCheck()) {
-        return undefined;
-    // TODO: use correct permission for view, edit and insert, currently if any permission is true, it will return true
-    // } else if (props.isViewMode) {
-    //     return true;
-    // } else if (props.isEditMode) {
-    //     return hasEditPermission();
-    // } else if (props.isInsertMode) {
-    //     return hasInsertPermission();
-    } else {
-      const permission = hasInsertPermission() || hasEditPermission();
-      return permission ? undefined : true;
+      return undefined;
+      // TODO: use correct permission for view, edit and insert, currently if any permission is true, it will return true
+      // } else if (props.isViewMode) {
+      //     return true;
+      // } else if (props.isEditMode) {
+      //     return hasEditPermission();
+      // } else if (props.isInsertMode) {
+      //     return hasInsertPermission();
     }
+    const permission = hasInsertPermission() || hasEditPermission();
+    return permission ? undefined : true;
   };
 
   const functionProxy = (key: string) => {
@@ -253,7 +264,7 @@ export function DynamicComponent(
       get txnId() {
         return props.txnId!;
       },
-      zIndex
+      zIndex,
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
@@ -447,7 +458,6 @@ export function DynamicComponent(
     });
   };
 
-
   const getMetaProps = (
     meta: Record<string, any>,
     ignoreKeys: string[],
@@ -462,21 +472,20 @@ export function DynamicComponent(
 
         const value = meta[key];
         if (typeof value === "function") {
-          result[key] = (...args: unknown[]) =>
-            {
-              // Note: runWithOwner is breaking the reactivity of the function
-              // return runWithOwner(owner, () => {
-                try {
-                  const functionArgs = getFunctionArgumentWithValue();
-                  return (meta[key] as (...args: unknown[]) => unknown)(
-                    Object.assign(functionArgs, { args })
-                  );
-                } catch (error) {
-                  console.error(`Error executing function for key ${key}:`, error);
-                  return undefined;
-                }
-              // });
-            };
+          result[key] = (...args: unknown[]) => {
+            // Note: runWithOwner is breaking the reactivity of the function
+            // return runWithOwner(owner, () => {
+            try {
+              const functionArgs = getFunctionArgumentWithValue();
+              return (meta[key] as (...args: unknown[]) => unknown)(
+                Object.assign(functionArgs, { args }),
+              );
+            } catch (error) {
+              console.error(`Error executing function for key ${key}:`, error);
+              return undefined;
+            }
+            // });
+          };
         } else if (key.toLowerCase().endsWith("class")) {
           result[key] = cssStateToString(
             value,
@@ -501,12 +510,10 @@ export function DynamicComponent(
         const dynamicPropsObj =
           props.meta.P.props!(getFunctionArgumentWithValue()) || {};
         return getMetaProps(dynamicPropsObj, []);
-      } else if (typeof props.meta.P.props === "string") {
+      }
+      if (typeof props.meta.P.props === "string") {
         try {
-          const otherPropsFunction = new Function(
-            "args",
-            props.meta.P.props,
-          );
+          const otherPropsFunction = new Function("args", props.meta.P.props);
           const dynamicPropsObj =
             otherPropsFunction(getFunctionArgumentWithValue()) || {};
           return getMetaProps(dynamicPropsObj, []);
@@ -521,7 +528,7 @@ export function DynamicComponent(
       return {};
     }
   });
-  
+
   const componentName = createMemo(() => {
     try {
       if (dynamicProps().componentName) {
@@ -633,10 +640,14 @@ export function DynamicComponent(
 
   const previewStoreProxy = new Proxy(previewStore, {
     get(target, prop) {
-      if (prop === 'isDesignMode') return false;
-      if (prop === 'isDesignModePrev') return target.isDesignMode;
+      if (prop === "isDesignMode") {
+        return false;
+      }
+      if (prop === "isDesignModePrev") {
+        return target.isDesignMode;
+      }
       return target[prop as keyof typeof target];
-    }
+    },
   });
 
   const Content = () => (
@@ -699,7 +710,11 @@ export function DynamicComponent(
           <Show
             fallback={
               <Show when={props.meta.id}>
-                <PageAttrRender data={props.data} isNoPermissionCheck={isNoPermissionCheck()} metaVertex={props.meta} />
+                <PageAttrRender
+                  data={props.data}
+                  isNoPermissionCheck={isNoPermissionCheck()}
+                  metaVertex={props.meta}
+                />
               </Show>
             }
             // @ts-ignore
@@ -715,19 +730,19 @@ export function DynamicComponent(
   );
 
   const ContentWrapper = () => {
-    return <Switch>
-      <Match when={componentName() === "Component"}>
-        <PreviewContext.Provider
-          value={[previewStoreProxy, setPreviewStore]}
-        >
+    return (
+      <Switch>
+        <Match when={componentName() === "Component"}>
+          <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
+            <Content />
+          </PreviewContext.Provider>
+        </Match>
+        <Match when={true}>
           <Content />
-        </PreviewContext.Provider>
-      </Match>
-      <Match when={true}>
-        <Content />
-      </Match>
-    </Switch>
-  }
+        </Match>
+      </Switch>
+    );
+  };
 
   return (
     <>
@@ -750,7 +765,7 @@ export function DynamicComponent(
         <Switch>
           <Match when={!component()}>NO INPUT {componentName()}</Match>
           {/* @ts-ignore */}
-          <Match when={isHidden()}></Match>
+          <Match when={isHidden()} />
           <Match
             when={
               (componentName()?.startsWith("System") ||
@@ -780,7 +795,7 @@ export function DynamicComponent(
                 props.meta.P.validation?.required ||
                 expressionProperties().required
               }
-            //tooltip={(props.meta).P.tooltip}
+              //tooltip={(props.meta).P.tooltip}
             >
               <ContentWrapper />
             </Label>

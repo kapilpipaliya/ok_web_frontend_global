@@ -18,43 +18,58 @@ export function createAppState() {
     vertexLabelIdMap: {} as { [key: string]: Id[] },
   });
 
-  addNewVertex(0, {
-    id: "globalStoreId",
-    IN: {},
-    L: ["GlobalStore"],
-    OUT: {},
-    P: {
-      activeClickOutside: [],
-      componentIdMap: {},
-      globalThemeId: "",
-      initialDataFetchError: "",
-      isDevelopment: false,
-      isLoadingPage: false,
-      navBarHeight: 45,
-      navigationData: [],
-      newVertexId_: -500000,
-      txnId_: 0,
-      url: "",
-      userRoles: [],
-      userSettingId: "",
-    } as GlobalProperties
-  }, graph[0], graph[1]);
+  addNewVertex(
+    0,
+    {
+      id: "globalStoreId",
+      IN: {},
+      L: ["GlobalStore"],
+      OUT: {},
+      P: {
+        activeClickOutside: [],
+        componentIdMap: {},
+        globalThemeId: "",
+        initialDataFetchError: "",
+        isDevelopment: false,
+        isLoadingPage: false,
+        navBarHeight: 45,
+        navigationData: [],
+        newVertexId_: -500000,
+        txnId_: 0,
+        url: "",
+        userRoles: [],
+        userSettingId: "",
+      } as GlobalProperties,
+    },
+    graph[0],
+    graph[1],
+  );
 
-  addNewVertex(0, {
-    id: "vertexOldIdToNewIdMap",
-    IN: {},
-    L: ["vertexOldIdToNewIdMap"],
-    OUT: {},
-    P: {}
-  }, graph[0], graph[1]);
+  addNewVertex(
+    0,
+    {
+      id: "vertexOldIdToNewIdMap",
+      IN: {},
+      L: ["vertexOldIdToNewIdMap"],
+      OUT: {},
+      P: {},
+    },
+    graph[0],
+    graph[1],
+  );
 
-  addNewVertex(0, {
-    id: "edgeOldIdToNewIdMap",
-    IN: {},
-    L: ["edgeOldIdToNewIdMap"],
-    OUT: {},
-    P: {}
-  }, graph[0], graph[1]);
+  addNewVertex(
+    0,
+    {
+      id: "edgeOldIdToNewIdMap",
+      IN: {},
+      L: ["edgeOldIdToNewIdMap"],
+      OUT: {},
+      P: {},
+    },
+    graph[0],
+    graph[1],
+  );
 
   return graph;
 }

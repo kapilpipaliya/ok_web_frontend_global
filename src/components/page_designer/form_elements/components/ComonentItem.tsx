@@ -9,12 +9,20 @@ import { getDynamicComponent } from "~/components/form/functions/getDynamicCompo
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-import { type GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import {
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../../context/LayoutContext";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { TreeItemContainer } from "../../settings/layout/TreeItemContainer";
@@ -40,11 +48,13 @@ export function ComponentItem(
   const [graph, setGraph] = useGraph();
   const [isHovered, _setIsHovered] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
-  const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
+  const [_hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const _formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
@@ -96,7 +106,9 @@ export function ComponentItem(
   const onDragEnd = () => {
     resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
-  const children = createMemo(() => getCompChildren([props.child], props.edgeName, graph));
+  const children = createMemo(() =>
+    getCompChildren([props.child], props.edgeName, graph),
+  );
   return (
     <>
       <TreeItemContainer
@@ -109,10 +121,16 @@ export function ComponentItem(
         onDragEnd={onDragEnd}
         onDragStart={(e) => {
           // props.setPreviewPageId(null);
-          return onCompDragStart(e, graph, setGraph, props.child.id, layoutStoreVertex(), selectedComponents,
-            setSelectedComponents);
-        }
-        }
+          return onCompDragStart(
+            e,
+            graph,
+            setGraph,
+            props.child.id,
+            layoutStoreVertex(),
+            selectedComponents,
+            setSelectedComponents,
+          );
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         ref={menuRef!}
@@ -171,7 +189,14 @@ export function ComponentItem(
               <div class="margin-left:auto">
                 <IconButton
                   icon="ph:arrow-square-out"
-                  onClick={() => openInNewInternalTab(layoutStoreId, props.child, graph, setGraph)}
+                  onClick={() =>
+                    openInNewInternalTab(
+                      layoutStoreId,
+                      props.child,
+                      graph,
+                      setGraph,
+                    )
+                  }
                   size={18}
                 />
               </div>
@@ -179,9 +204,13 @@ export function ComponentItem(
           </div>
         </div>
       </TreeItemContainer>
-      <Show when={props.child.L[0] !== "Comp" && props.previewPageId === props.child.id}>
+      <Show
+        when={
+          props.child.L[0] !== "Comp" && props.previewPageId === props.child.id
+        }
+      >
         <DropdownMenu
-          offset={{crossAxis: 30}}
+          offset={{ crossAxis: 30 }}
           onClickOutside={() => props.setPreviewPageId(null)}
           onMouseLeave={(e) => {
             if (!menuRef?.contains(e.relatedTarget as Node)) {
@@ -192,13 +221,17 @@ export function ComponentItem(
           ref={setFloating}
         >
           {/* {toTitle(props.child.P.key)} Preview */}
-          <PreviewIsolated formId={props.child.id} graph={props.previewGraph} setGraph={props.setPreviewGraph} />
+          <PreviewIsolated
+            formId={props.child.id}
+            graph={props.previewGraph}
+            setGraph={props.setPreviewGraph}
+          />
         </DropdownMenu>
       </Show>
       <Show when={props.expandedKeys.includes(props.child.id)}>
         <ul class="pl:8 pt:5">
           <For each={children()}>
-            {(child) =>
+            {(child) => (
               <ComponentItem
                 child={child}
                 edgeName={props.edgeName}
@@ -210,11 +243,10 @@ export function ComponentItem(
                 setPreviewPageId={props.setPreviewPageId}
                 toggleExpand={props.toggleExpand}
               />
-            }
+            )}
           </For>
         </ul>
       </Show>
-
     </>
   );
 }

@@ -22,13 +22,15 @@ export function ModifyJsonButton(props: {
         onClick={() => setShowModal(true)}
         ref={(el) => (saveAsTemplateRef = el)}
         size={props.size}
-        title="Modify JSON" />
+        title="Modify JSON"
+      />
       <Show when={showModal()}>
         <ModifyJsonMenu
           item={props.item}
           onClose={() => setShowModal(false)}
           onMouseLeave={() => setShowModal(false)}
-          parentRef={saveAsTemplateRef!} />
+          parentRef={saveAsTemplateRef!}
+        />
       </Show>
     </>
   );

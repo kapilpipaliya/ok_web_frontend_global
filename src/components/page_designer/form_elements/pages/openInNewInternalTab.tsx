@@ -1,11 +1,18 @@
-import type {SetStoreFunction} from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import {v7 as uuidv7} from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
-import type {OpenFormInfo, PageLayoutObject} from "~/components/page_designer/context/LayoutContext";
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
+import type {
+  OpenFormInfo,
+  PageLayoutObject,
+} from "~/components/page_designer/context/LayoutContext";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
-import {addNewVertex, mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 
 export function openInNewInternalTab(
   layoutStoreId: Id,
@@ -15,12 +22,12 @@ export function openInNewInternalTab(
 ) {
   const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
   // Check if form with same label and dataId already exists
-  const exists = child.id !== "new" && layoutStore.openedFormIds.some(
-    formId => {
+  const exists =
+    child.id !== "new" &&
+    layoutStore.openedFormIds.some((formId) => {
       const form = graph.vertexes[formId].P as OpenFormInfo;
       return form.label === child.L[0] && form.dataId === child.id;
-    }
-  );
+    });
 
   if (exists) {
     // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
@@ -47,9 +54,9 @@ export function openInNewInternalTab(
       graph,
       setGraph,
       {
-        openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id]
+        openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id],
       },
-      {cloneProperties: false}
+      { cloneProperties: false },
     );
   }
 }

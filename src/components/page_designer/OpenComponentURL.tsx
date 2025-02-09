@@ -9,7 +9,7 @@ export function OpenComponentURL(
 ) {
   const [graph] = useGraph();
   const componentKey = () => props.meta.P.key.split(".")[0];
-  const componentVertex = () =>
+  const _componentVertex = () =>
     findVertexByLabelAndUniqueId(graph, "Comp", "key", componentKey());
 
   const componentUrl = createMemo(() => {

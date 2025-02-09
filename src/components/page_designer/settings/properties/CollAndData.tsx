@@ -18,14 +18,13 @@ import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { PROPERTIES } from "../../../styled/constants/constant";
-import {
-  useDesignerFormIdContext,
-} from "../../context/LayoutContext";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const { metaTxnId, metaVertexId } = initializeMetaVertex(graph, setGraph);
   const attributes = createFieldAttributes(graph, formStoreVertex);
@@ -43,11 +42,12 @@ export function CollAndData() {
   });
 
   const metaVertex = graph.vertexes[metaVertexId];
-  const collMetaVertex = evalExpression("->Attr", {
-    graph,
-    setGraph,
-    vertexes: [metaVertex],
-  }) ?? [];
+  const collMetaVertex =
+    evalExpression("->Attr", {
+      graph,
+      setGraph,
+      vertexes: [metaVertex],
+    }) ?? [];
   const onCollectionChange = handleCollectionChange(
     graph,
     setGraph,

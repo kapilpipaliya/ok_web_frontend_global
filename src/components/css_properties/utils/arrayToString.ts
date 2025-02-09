@@ -7,7 +7,9 @@ import { generateTransform } from "./generate/generateTransform";
 import { generateTransition } from "./generate/generateTransition";
 
 export function arrayToString(key: string, arr: any[]): string {
-  if (!arr) return '';
+  if (!arr) {
+    return "";
+  }
   if (key === "box-shadow") {
     return generateBoxShadow(arr);
   }
@@ -23,7 +25,8 @@ export function arrayToString(key: string, arr: any[]): string {
   if (key === "transform") {
     return generateTransform(arr);
   }
-  return arr.filter(item => item)
+  return arr
+    .filter((item) => item)
     .map((item) => {
       if (isObject(item)) {
         return Object.entries(item)

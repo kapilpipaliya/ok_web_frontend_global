@@ -5,13 +5,14 @@ export function ResizeOverlay() {
     <Portal>
       <div
         style={{
-          bottom: '0',
-          left: '0',
-          position: 'fixed',
-          right: '0',
-          top: '0',
-          'z-index': '9999'
-        }} />
+          bottom: "0",
+          left: "0",
+          position: "fixed",
+          right: "0",
+          top: "0",
+          "z-index": "9999",
+        }}
+      />
     </Portal>
   );
 }

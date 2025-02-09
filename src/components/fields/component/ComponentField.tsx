@@ -8,23 +8,31 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "../FieldType";
 
-import { RepeaterVertexContext, useRepeaterVertexContext } from "../../page_attr_render/context/PageAttrContext";
+import {
+  RepeaterVertexContext,
+  useRepeaterVertexContext,
+} from "../../page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "../../page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "../../page_attr_render/PageAttrRender";
-import { PreviewContext, usePreviewContext } from "../../page_designer/context/PreviewContext";
+import {
+  PreviewContext,
+  usePreviewContext,
+} from "../../page_designer/context/PreviewContext";
 import { getChildrenAttrs } from "../../page_designer/functions/getChildrenAttrs";
 import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 
-export function ComponentField(props: Readonly<GenericComponentProps & { componentId?: string }>) {
-  const [local, otherProps] = splitProps(props, [
+export function ComponentField(
+  props: Readonly<GenericComponentProps & { componentId?: string }>,
+) {
+  const [_local, otherProps] = splitProps(props, [
     "componentName",
     "onChange",
     "value",
     "isRealTime",
     "isTableInside",
     "txnId",
-    "componentId"
+    "componentId",
   ]);
 
   const [graph, setGraph] = useGraph();
@@ -40,30 +48,51 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
       return;
     }
     fetchComponentData([getCopmVertex()[0]], graph, setGraph);
-  }
+  };
 
-  const getCopmVertex = createMemo(() => meta() ? evalExpression("->$0Comp", { graph, setGraph, vertexes: [meta()] }) as Vertex[] || [] as Vertex[] : []);
+  const getCopmVertex = createMemo(() =>
+    meta()
+      ? (evalExpression("->$0Comp", {
+          graph,
+          setGraph,
+          vertexes: [meta()],
+        }) as Vertex[]) || ([] as Vertex[])
+      : [],
+  );
 
-  createEffect(on(getCopmVertex, (component, prevComponent) => {
-    if (component && JSON.parse(JSON.stringify(component)) !== JSON.parse(JSON.stringify(prevComponent || [])) && (component.length === 0 || getChildrenAttrs(graph, setGraph, component[0]).length === 0)) {
-      // Fetch attrs when no children found
-      // setGraph("url", "fetchAttrs", { id: meta.id });
-      fetchMetaData()
-    }
-  }));
+  createEffect(
+    on(getCopmVertex, (component, prevComponent) => {
+      if (
+        component &&
+        JSON.parse(JSON.stringify(component)) !==
+          JSON.parse(JSON.stringify(prevComponent || [])) &&
+        (component.length === 0 ||
+          getChildrenAttrs(graph, setGraph, component[0]).length === 0)
+      ) {
+        // Fetch attrs when no children found
+        // setGraph("url", "fetchAttrs", { id: meta.id });
+        fetchMetaData();
+      }
+    }),
+  );
 
   const previewStoreProxy = new Proxy(previewStore, {
     get(target, prop) {
       // @ts-expect-error ignore temporary key name
-      if (prop === 'isDesignMode') return target["isDesignModePrev"];
+      if (prop === "isDesignMode") {
+        return target.isDesignModePrev;
+      }
       return target[prop as keyof typeof target];
-    }
+    },
   });
 
   const ComponentWrapper = () => {
     const context = useRepeaterVertexContext();
     const values = createMemo(() => {
-      return {...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph), ...deNullify(otherProps)};
+      return {
+        ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),
+        ...deNullify(otherProps),
+      };
     });
 
     const repeaterStore = new Proxy(context, {
@@ -74,25 +103,31 @@ export function ComponentField(props: Readonly<GenericComponentProps & { compone
         return target[key];
       },
     });
-    return <RepeaterVertexContext.Provider value={repeaterStore}>
-      <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
-    </RepeaterVertexContext.Provider>
-  }
-  
+    return (
+      <RepeaterVertexContext.Provider value={repeaterStore}>
+        <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+      </RepeaterVertexContext.Provider>
+    );
+  };
+
   return (
     <>
       <Show when={getCopmVertex().length}>
-        <ComponentChildrenContext.Provider value={() => {
-          return <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
-            {props.children}
-          </PreviewContext.Provider>
-        }}>
+        <ComponentChildrenContext.Provider
+          value={() => {
+            return (
+              <PreviewContext.Provider
+                value={[previewStoreProxy, setPreviewStore]}
+              >
+                {props.children}
+              </PreviewContext.Provider>
+            );
+          }}
+        >
           <ComponentWrapper />
         </ComponentChildrenContext.Provider>
       </Show>
-      <Show when={!getCopmVertex().length}>
-        Error
-      </Show>
+      <Show when={!getCopmVertex().length}>Error</Show>
     </>
   );
 }

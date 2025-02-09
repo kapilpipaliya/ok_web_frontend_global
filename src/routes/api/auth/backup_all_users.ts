@@ -21,7 +21,7 @@ export async function GET({ request }: APIEvent) {
 
 export async function saveGraphToCypherQL() {
   const subDomain = "default"; // Adjust this as needed
-  const dbSession = (await getDriver()).session({database: subDomain});
+  const dbSession = (await getDriver()).session({ database: subDomain });
 
   try {
     const query = "MATCH (n) OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m";

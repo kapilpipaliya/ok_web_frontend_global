@@ -10,8 +10,7 @@ import { ComponentName } from "./ComponentName";
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
-  const getComponentName = () =>
-    getComponentLabel(graph, props.item);
+  const getComponentName = () => getComponentLabel(graph, props.item);
   return (
     <span class="position:relative ">
       <div

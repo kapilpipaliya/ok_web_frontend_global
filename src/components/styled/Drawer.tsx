@@ -61,7 +61,9 @@ export function Drawer(props: Readonly<DrawerProps>) {
   const handleEscClose = (event: KeyboardEvent) => {
     if (
       activeClickOutside !==
-      getGlobalStore(graph).P.activeClickOutside[getGlobalStore(graph).P.activeClickOutside.length - 1]
+      getGlobalStore(graph).P.activeClickOutside[
+        getGlobalStore(graph).P.activeClickOutside.length - 1
+      ]
     ) {
       return;
     }

@@ -2,7 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { createUniqueId, onCleanup } from "solid-js";
 
-import type { GlobalProperties, GraphInterface, Vertex } from "~/lib/graph/graph";
+import type {
+  GlobalProperties,
+  GraphInterface,
+  Vertex,
+} from "~/lib/graph/graph";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
@@ -13,7 +17,9 @@ export function createActiveClickOutside(
   const currentId = createUniqueId();
   const globalStoreId = "globalStoreId";
 
-  const currentActiveClickOutside = (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.activeClickOutside || [];
+  const currentActiveClickOutside =
+    (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P
+      .activeClickOutside || [];
   const newActiveClickOutside = [...currentActiveClickOutside, currentId];
 
   mergeVertexProperties(0, globalStoreId, graph, setGraph, {
@@ -21,8 +27,12 @@ export function createActiveClickOutside(
   });
 
   onCleanup(() => {
-    const currentActiveClickOutside = (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.activeClickOutside || [];
-    const updatedActiveClickOutside = currentActiveClickOutside.filter((id) => id !== currentId);
+    const currentActiveClickOutside =
+      (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P
+        .activeClickOutside || [];
+    const updatedActiveClickOutside = currentActiveClickOutside.filter(
+      (id) => id !== currentId,
+    );
     mergeVertexProperties(0, globalStoreId, graph, setGraph, {
       activeClickOutside: updatedActiveClickOutside,
     });

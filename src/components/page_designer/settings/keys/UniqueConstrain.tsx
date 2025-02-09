@@ -13,8 +13,9 @@ import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaA
 export function UniqueConstrains() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+
   const uniqueConstrainsMetaAttribute = klona(
     FormMetaData.Form.attributes,
   ).find((meta) => meta.key === "Unique")!;
@@ -33,13 +34,13 @@ export function UniqueConstrains() {
 
   return (
     <div class="mt:6">
-        <TableInputField
-          data={formStoreVertex()}
-          isNoPermissionCheck={true}
-          isRealTime={false}
-          meta={graph.vertexes[metaVertexId]}
-          txnId={formStoreVertex()?.P.txnId}
-        />
+      <TableInputField
+        data={formStoreVertex()}
+        isNoPermissionCheck={true}
+        isRealTime={false}
+        meta={graph.vertexes[metaVertexId]}
+        txnId={formStoreVertex()?.P.txnId}
+      />
     </div>
   );
 }

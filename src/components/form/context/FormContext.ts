@@ -3,16 +3,19 @@ import type { SetStoreFunction } from "solid-js/store";
 import { createContext, useContext } from "solid-js";
 
 import type { IDToRuleMap } from "~/components/page_designer/functions/generateFormMetaAttributes";
-import type { GraphInterface, Id, } from "~/lib/graph/graph";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import {generateNewTxnId} from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 
-export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+export function getInitialFormStore(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   return {
     ...InitialPermissions,
     componentValue: null as Id | null,
@@ -28,7 +31,7 @@ export function getInitialFormStore(graph: GraphInterface, setGraph: SetStoreFun
     isPreview: false,
     mounted: false,
     multiHighlight: [] as Array<Id | number>,
-    openedViews: [] as Array<Id>,
+    openedViews: [] as Id[],
 
     selectedId: -1 as Id | number,
     // check if at least one form in the layout tree when deleting a layout item, it display a dialog

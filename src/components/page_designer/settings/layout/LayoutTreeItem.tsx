@@ -1,4 +1,11 @@
-import { type Accessor, createMemo, createSelector, createSignal, For, Show } from "solid-js";
+import {
+  type Accessor,
+  createMemo,
+  createSelector,
+  createSignal,
+  For,
+  Show,
+} from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -12,7 +19,11 @@ import { useToast } from "~/components/styled/Toast";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
@@ -29,15 +40,21 @@ export function LayoutTreeItem(
 ) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const isSelectedLayoutId = createSelector(
+    () => formStoreVertex()?.P.selectedId,
+  );
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showErrorToast } = useToast();
-  const activeItemChanged = createSelector(() => layoutStoreVertex()?.P.activeItem);
+  const activeItemChanged = createSelector(
+    () => layoutStoreVertex()?.P.activeItem,
+  );
   const isActiveTargetItem = () => activeItemChanged(props.metaVertex.id);
 
   const children = createMemo(() =>
@@ -71,10 +88,16 @@ export function LayoutTreeItem(
   };
 
   const handleDragLeave = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId!, graph, setGraph, {
-      activeItem: null,
-      position: null
-    });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId!,
+      graph,
+      setGraph,
+      {
+        activeItem: null,
+        position: null,
+      },
+    );
   };
 
   const handleDropEvent = async (e: DragEvent) => {
@@ -90,20 +113,26 @@ export function LayoutTreeItem(
   };
 
   const handleClick = () => {
-    onLayoutItemClick(layoutStoreVertex(), formStoreVertex(), props.metaVertex.id, graph, setGraph);
+    onLayoutItemClick(
+      layoutStoreVertex(),
+      formStoreVertex(),
+      props.metaVertex.id,
+      graph,
+      setGraph,
+    );
   };
 
   const handleMouseOver = (e: MouseEvent) => {
     e.stopPropagation();
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: props.metaVertex.id
+      hoverId: props.metaVertex.id,
     });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
-      hoverId: -1
+      hoverId: -1,
     });
   };
 
@@ -150,7 +179,13 @@ export function LayoutTreeItem(
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOverEvent}
         onDragStart={(e) =>
-          handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.metaVertex)
+          handleDragStart(
+            e,
+            graph,
+            setGraph,
+            layoutStoreVertex(),
+            props.metaVertex,
+          )
         }
         onDrop={handleDropEvent}
         onMouseEnter={handleMouseOver}
@@ -167,10 +202,11 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
-        <Show
-          when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}
-        >
-          <AttrConfigIcons metaVertex={props.metaVertex} parentRef={parentRef()!} />
+        <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}>
+          <AttrConfigIcons
+            metaVertex={props.metaVertex}
+            parentRef={parentRef()!}
+          />
         </Show>
       </TreeItemContainer>
 

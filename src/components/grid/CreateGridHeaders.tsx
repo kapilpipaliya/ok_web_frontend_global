@@ -4,7 +4,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { createSignal, Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 
 import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/components/grid/functions/getTagValue";
@@ -22,18 +25,18 @@ import { IconButton } from "../styled/IconButton";
 import { TooltipWrapper } from "../styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
 
-function ImageWrapper(props: { alt?: string; class?: string; src: string; }) {
+function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
   return (
     <Show when={props.src}>
-      <img 
-        alt={props.alt || "Preview"} 
-        class={props.class}
-        src={props.src}
-      />
+      <img alt={props.alt || "Preview"} class={props.class} src={props.src} />
     </Show>
   );
 }
-const getPreviewVertex = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
+const getPreviewVertex = (
+  attribute: FieldAttribute,
+  data: Vertex,
+  graph: Store<GraphInterface>,
+) => {
   const vertexId = selectedValue(
     {
       P: attribute,
@@ -43,7 +46,11 @@ const getPreviewVertex = (attribute: FieldAttribute, data: Vertex, graph: Store<
   )?.[0];
   return vertexId ? graph.vertexes[vertexId] : undefined;
 };
-const getPreviewURL = (attribute: FieldAttribute, data: Vertex, graph: Store<GraphInterface>) => {
+const getPreviewURL = (
+  attribute: FieldAttribute,
+  data: Vertex,
+  graph: Store<GraphInterface>,
+) => {
   const vertex = getPreviewVertex(attribute, data, graph);
   if (vertex) {
     return getDownloadLink(vertex);
@@ -63,7 +70,10 @@ export function CreateGridHeaders(
 
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.componentName === "Table" || attribute.componentName === "DynamicTable") {
+    if (
+      attribute.componentName === "Table" ||
+      attribute.componentName === "DynamicTable"
+    ) {
       continue;
     }
     // @ts-expect-error ignore
@@ -72,22 +82,36 @@ export function CreateGridHeaders(
     column.cell = (info) => {
       return (
         <Switch>
-          <Match when={(PageDesignerLabels.includes(tableId) || tableId === "Component") && attribute.key === "Preview"}>
+          <Match
+            when={
+              (PageDesignerLabels.includes(tableId) ||
+                tableId === "Component") &&
+              attribute.key === "Preview"
+            }
+          >
             <TooltipWrapper
               content={
                 <div class={STYLES.tooltip.content}>
                   <Show when={info.getValue<string>()}>
-                    <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
+                    <div class={"f:14 font-weight:500"}>
+                      {info.getValue<string>()}
+                    </div>
                   </Show>
-                  {getPreviewVertex(attribute, info.row.original, graph)?.P.fileName}
-                  <ImageWrapper alt="Preview" src={getPreviewURL(attribute, info.row.original, graph)} />
+                  {
+                    getPreviewVertex(attribute, info.row.original, graph)?.P
+                      .fileName
+                  }
+                  <ImageWrapper
+                    alt="Preview"
+                    src={getPreviewURL(attribute, info.row.original, graph)}
+                  />
                 </div>
               }
               triggerAs="span"
               triggerClass="flex ai:center"
             >
               <span class="flex ai:center gap:8px">
-                <ImageWrapper 
+                <ImageWrapper
                   alt="Preview"
                   class="r:4px h:30px object-fit:cover"
                   src={getPreviewURL(attribute, info.row.original, graph)}
@@ -133,18 +157,21 @@ export function CreateGridHeaders(
               content={
                 <div class={STYLES.tooltip.content}>
                   <Show when={info.getValue<string>()}>
-                    <div class={"f:14 font-weight:500"}>{info.getValue<string>()}</div>
+                    <div class={"f:14 font-weight:500"}>
+                      {info.getValue<string>()}
+                    </div>
                   </Show>
                   {getDownloadLink(info.row.original)}
-                  <ImageWrapper src={getDownloadLink(info.row.original)} alt="File Preview" />
+                  <ImageWrapper
+                    alt="Preview"
+                    src={getDownloadLink(info.row.original)}
+                  />
                 </div>
               }
               triggerAs="span"
               triggerClass="flex ai:center"
             >
-              <span class="flex ai:center">
-                {info.getValue<string>()}
-              </span>
+              <span class="flex ai:center">{info.getValue<string>()}</span>
             </TooltipWrapper>
           </Match>
           <Match when={true}>{info.getValue<string>()}</Match>
@@ -154,9 +181,9 @@ export function CreateGridHeaders(
     column.header = (_info) =>
       capitalizeFirstLetter(
         attribute.title ||
-        attribute.label ||
-        attribute.displayName ||
-        attribute.key,
+          attribute.label ||
+          attribute.displayName ||
+          attribute.key,
       );
     column.footer = (_info) =>
       capitalizeFirstLetter(
@@ -238,7 +265,7 @@ export function CreateGridHeaders(
               iconClass="color:#3477CC"
               onClick={() => {
                 const newUrl = `/admin/${info.row.original.P.key}`;
-                window.open(newUrl, '_blank');
+                window.open(newUrl, "_blank");
               }}
               size={21}
             />

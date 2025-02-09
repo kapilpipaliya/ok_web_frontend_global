@@ -2,7 +2,12 @@ import { For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { type GraphInterface, type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { SimpleWithDismissButton } from "../../styled/SimpleModal";
@@ -35,7 +40,8 @@ export function DeleteAttributeDialog() {
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const nameKeyAttributes = () =>
     getAttributeNames(graph, formStoreVertex()?.P.usedAttrsInNameKeys);
@@ -87,8 +93,10 @@ export function DeleteAttributeDialog() {
                 <li>
                   The attribute {graph.vertexes[attr]?.P.key} is used in the
                   following rules:{" "}
-                  {formStoreVertex()?.P.usedAttrsInRules[attr]
-                    .map((rule) => graph.vertexes[rule]?.P.key)
+                  {formStoreVertex()
+                    ?.P.usedAttrsInRules[attr].map(
+                      (rule) => graph.vertexes[rule]?.P.key,
+                    )
                     .join(", ")}
                   .
                 </li>

@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 
-import { useGraph, } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -8,7 +8,7 @@ import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormConfig() {
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
 
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
@@ -18,7 +18,10 @@ export function FormConfig() {
       {(openedFormId) => (
         <div
           style={{
-            display: layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "block" : "none",
+            display:
+              layoutStore().formId === graph.vertexes[openedFormId].P.formId
+                ? "block"
+                : "none",
           }}
         >
           <PageViewWrapper

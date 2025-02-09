@@ -11,9 +11,12 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { parentComponentAttribute, parentTemplateAttribute } from "~/lib/meta/base/Comp";
+import {
+  parentComponentAttribute,
+  parentTemplateAttribute,
+} from "~/lib/meta/base/Comp";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import { DialogFooter } from "../../styled/dialog/DialogFooter";
 import { DialogHeader } from "../../styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
@@ -36,10 +39,11 @@ export function SaveAsTemplateMenu(
   const [error, setError] = createSignal("");
   const [saveInCurrentPage, setSaveInCurrentPage] = createSignal(false);
   const { showSuccessToast, showWarningToast } = useToast();
-  const label = () => (props.saveAsLabel).replace(/Page$/, "");
+  const label = () => props.saveAsLabel.replace(/Page$/, "");
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const saveTemplate = async () => {
     const newFormTxnId = generateNewTxnId(graph, setGraph);
@@ -65,10 +69,13 @@ export function SaveAsTemplateMenu(
       IN: {},
       L: [],
       OUT: {},
-      P: props.saveAsLabel === "Template" ? parentTemplateAttribute : parentComponentAttribute,
+      P:
+        props.saveAsLabel === "Template"
+          ? parentTemplateAttribute
+          : parentComponentAttribute,
     } as Vertex;
     if (saveInCurrentPage()) {
-      if(isNegative(formStoreVertex().P.formDataId)) {
+      if (isNegative(formStoreVertex().P.formDataId)) {
         showWarningToast("Please Save Parent Page first.");
         return;
       }
@@ -78,7 +85,7 @@ export function SaveAsTemplateMenu(
         graph,
         setGraph,
         parentComponentMetaVertex,
-        formStoreVertex().P.formDataId
+        formStoreVertex().P.formDataId,
       );
     }
     const data = commitTxn(newFormTxnId, graph);

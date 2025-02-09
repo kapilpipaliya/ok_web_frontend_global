@@ -1,5 +1,3 @@
-
-
 export async function handleDeleteVertex(
   deleteVertex: any,
   tx: any,

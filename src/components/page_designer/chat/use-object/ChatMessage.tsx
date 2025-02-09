@@ -1,11 +1,11 @@
-import { Icon } from '@iconify-icon/solid';
+import { Icon } from "@iconify-icon/solid";
 
-import type { Vertex } from '~/lib/graph/graph';
+import type { Vertex } from "~/lib/graph/graph";
 
-import { IconButton } from '~/components/styled/IconButton';
-import { headerIconButtonClass } from '~/pages/admin_layout/constant';
+import { IconButton } from "~/components/styled/IconButton";
+import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
-import type { DBMessage } from './types';
+import type { DBMessage } from "./types";
 
 interface ChatMessageProps {
   index: number;
@@ -16,7 +16,11 @@ interface ChatMessageProps {
 export function ChatMessage(props: ChatMessageProps) {
   return (
     <div class="padding:12px background:rgb(243,244,246) border-radius:6px margin-bottom:8px">
-      <MessageHeader index={props.index} message={props.message} onDelete={props.onDelete} />
+      <MessageHeader
+        index={props.index}
+        message={props.message}
+        onDelete={props.onDelete}
+      />
       <div>{props.message.P?.prompt}</div>
       {/* Commenting out file attachments for now
       // The file handling functionality can be revisited later when we have a proper solution for file storage.
@@ -40,7 +44,11 @@ export function ChatMessage(props: ChatMessageProps) {
   );
 }
 
-function MessageHeader(props: { index: number; message: Vertex<DBMessage>; onDelete: (message: Vertex) => void }) {
+function MessageHeader(props: {
+  index: number;
+  message: Vertex<DBMessage>;
+  onDelete: (message: Vertex) => void;
+}) {
   return (
     <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
       <div class="display:flex gap:8px align-items:center">
@@ -54,7 +62,10 @@ function MessageHeader(props: { index: number; message: Vertex<DBMessage>; onDel
           Model: {props.message.P?.model}
         </span>
         {props.message.P?.hasFile && (
-          <Icon class="font-size:12px color:rgb(107,114,128)" icon="ph:paperclip" />
+          <Icon
+            class="font-size:12px color:rgb(107,114,128)"
+            icon="ph:paperclip"
+          />
         )}
       </div>
       <IconButton
@@ -65,4 +76,4 @@ function MessageHeader(props: { index: number; message: Vertex<DBMessage>; onDel
       />
     </div>
   );
-} 
+}

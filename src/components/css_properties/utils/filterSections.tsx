@@ -36,7 +36,9 @@ export function filterSections(query: string) {
 }
 
 function shouldIncludeProperty(field: GenericField, query: string): boolean {
-  if (query === "") return true;
+  if (query === "") {
+    return true;
+  }
   if (
     field.componentName !== "box" &&
     field.label?.toLowerCase().includes(query.toLowerCase())

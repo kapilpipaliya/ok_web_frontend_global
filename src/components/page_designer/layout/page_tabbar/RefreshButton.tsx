@@ -10,4 +10,4 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
       title="Refresh Preview"
     />
   );
-} 
+}

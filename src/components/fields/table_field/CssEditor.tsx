@@ -20,7 +20,12 @@ export function CssEditor(
         onClick={() => setShowCssEditor(true)}
         type="button"
       >
-        <Icon height={20} icon="fluent:text-edit-style-20-filled" noobserver width={20} />
+        <Icon
+          height={20}
+          icon="fluent:text-edit-style-20-filled"
+          noobserver
+          width={20}
+        />
       </button>
       <Show when={showCssEditor()}>
         <ZIndex>

@@ -8,7 +8,7 @@ import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 export function updateSubmittedIndex(
   txnId: number,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!txnId) {
     return;
@@ -16,5 +16,7 @@ export function updateSubmittedIndex(
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   existingTxnValue.submittedIndex = existingTxnValue.activeUndoIndex;
   existingTxnValue.revertSteps = [];
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {cloneProperties: false});
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {
+    cloneProperties: false,
+  });
 }

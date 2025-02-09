@@ -26,7 +26,7 @@ export function AuthenticatedMenu(
       <li class="m:5|10 mt:5px">
         <a
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={`/admin/settings`}
+          href={"/admin/settings"}
           onclick={props.onClose}
         >
           Account Setting
@@ -44,10 +44,16 @@ export function AuthenticatedMenu(
       <hr class="color:rgb(223,223,223)" />
       <li class="m:5|10 mt:5px">
         <a
-            class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none cursor:pointer"
+          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none cursor:pointer"
           onclick={async () => {
             props.onClose();
-            mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { isLoadingPage: true });
+            mergeVertexProperties<GlobalProperties>(
+              0,
+              globalStoreId,
+              graph,
+              setGraph,
+              { isLoadingPage: true },
+            );
             await showLoadingToast({
               loadMessage: "Logging Out...",
               onSuccess: (value) => {
@@ -58,7 +64,13 @@ export function AuthenticatedMenu(
               promise: props.signOutCall(),
               successMessage: "Log Out Successfully",
             });
-            mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
+            mergeVertexProperties<GlobalProperties>(
+              0,
+              globalStoreId,
+              graph,
+              setGraph,
+              { isLoadingPage: false },
+            );
           }}
         >
           Sign Out

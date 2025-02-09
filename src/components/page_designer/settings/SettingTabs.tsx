@@ -1,16 +1,20 @@
-
 import { createMemo, For, type JSX, Show } from "solid-js";
 
-import { FormContext, type FormStoreObject } from "~/components/form/context/FormContext";
+import {
+  FormContext,
+  type FormStoreObject,
+} from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { DesignerFormIdContext, type PageLayoutObject, useDesignerLayoutStore } from "../context/LayoutContext";
-import { UlContainer } from "../form_elements/FormElementTabs";
 import {
-  TabsContainer,
-} from "../form_elements/TabsContainer";
+  DesignerFormIdContext,
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../context/LayoutContext";
+import { UlContainer } from "../form_elements/FormElementTabs";
+import { TabsContainer } from "../form_elements/TabsContainer";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
@@ -46,9 +50,11 @@ export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const layoutStore = () => (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
+  const layoutStore = () =>
+    (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
 
-  const formStoreVertex = () => graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
     const baseTabs = ["settings", "status", "layers"];
@@ -75,7 +81,15 @@ export function SettingTabs() {
           <TabButton
             data={data}
             isSelected={layoutStore().selectedTab === data}
-            onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { selectedTab: data })}
+            onClick={() =>
+              mergeVertexProperties<PageLayoutObject>(
+                0,
+                layoutStoreId,
+                graph,
+                setGraph,
+                { selectedTab: data },
+              )
+            }
           />
         )}
       </For>
@@ -117,12 +131,19 @@ export function SettingTabs() {
             </Show>
             {/* Keep Display:none to keep expanded state */}
             <div
-              classList={{ "display:none": layoutStore().selectedTab !== "layers" }}
+              classList={{
+                "display:none": layoutStore().selectedTab !== "layers",
+              }}
             >
               <LayoutTree />
             </div>
 
-            <Show when={graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] === "Form"}>
+            <Show
+              when={
+                graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] ===
+                "Form"
+              }
+            >
               <Show when={layoutStore().selectedTab === "Keys"}>
                 {/* <PrimaryKey /> */}
                 <NameKey />

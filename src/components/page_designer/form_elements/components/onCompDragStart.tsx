@@ -17,11 +17,17 @@ export function onCompDragStart(
 ) {
   e.stopPropagation();
 
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-    draggedVertexIds: [],
-  });
+  mergeVertexProperties<PageLayoutObject>(
+    0,
+    layoutStoreVertex.id,
+    graph,
+    setGraph,
+    {
+      draggedVertexIds: [],
+    },
+  );
   if (!graph.vertexes[childId]) {
-    console.error('Dragged vertex not found, this should not happen');
+    console.error("Dragged vertex not found, this should not happen");
     return;
   }
 
@@ -30,9 +36,18 @@ export function onCompDragStart(
       ? Array.from(selectedComponents())
       : [graph.vertexes[childId]];
 
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-    draggedVertexIds: [...layoutStoreVertex.P.draggedVertexIds, ...draggedItems.map(v => v.id)],
-  });
+  mergeVertexProperties<PageLayoutObject>(
+    0,
+    layoutStoreVertex.id,
+    graph,
+    setGraph,
+    {
+      draggedVertexIds: [
+        ...layoutStoreVertex.P.draggedVertexIds,
+        ...draggedItems.map((v) => v.id),
+      ],
+    },
+  );
 
   if (setSelectedComponents) {
     setSelectedComponents(() => new Set<Vertex>());

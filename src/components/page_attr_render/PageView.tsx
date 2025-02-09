@@ -14,7 +14,10 @@ import type { FormStoreObject } from "../form/context/FormContext";
 
 import { getComponentDefaultValues } from "../fields/component/functions/getComponentDefaultValues";
 import { useDesignerFormIdContext } from "../page_designer/context/LayoutContext";
-import { RepeaterVertexContext, useRepeaterVertexContext } from "./context/PageAttrContext";
+import {
+  RepeaterVertexContext,
+  useRepeaterVertexContext,
+} from "./context/PageAttrContext";
 
 export function PageView(
   props: Readonly<{
@@ -85,8 +88,13 @@ export function PageView(
 
     const values = createMemo(() => {
       const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-      const componentValue = formStore?.P.componentValue ? graph.vertexes[formStore.P.componentValue]?.P : {};
-      return {...getComponentDefaultValues(props.metaVertex!, graph, setGraph), ...deNullify(componentValue)};
+      const componentValue = formStore?.P.componentValue
+        ? graph.vertexes[formStore.P.componentValue]?.P
+        : {};
+      return {
+        ...getComponentDefaultValues(props.metaVertex!, graph, setGraph),
+        ...deNullify(componentValue),
+      };
     });
 
     const repeaterStore = new Proxy(context, {
@@ -97,10 +105,12 @@ export function PageView(
         return target[key];
       },
     });
-    return <RepeaterVertexContext.Provider value={repeaterStore}>
-      <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
-    </RepeaterVertexContext.Provider>
-  }
+    return (
+      <RepeaterVertexContext.Provider value={repeaterStore}>
+        <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+      </RepeaterVertexContext.Provider>
+    );
+  };
 
   return (
     <Show keyed when={props.metaVertex}>
@@ -112,7 +122,10 @@ export function PageView(
                 <ComponentWrapper />
               </Match>
               <Match when={true}>
-                <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+                <PageAttrRender
+                  data={props.data}
+                  metaVertex={props.metaVertex!}
+                />
               </Match>
             </Switch>
           </PreviewContext.Provider>

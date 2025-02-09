@@ -14,7 +14,8 @@ export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
 export function getInitialGridState(graph: GraphInterface) {
   return {
     allConfiguredPermission: (() => []) as Accessor<Vertex[]>,
-    cardSize: graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.cardSize || 3,
+    cardSize:
+      graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
     error: null as null | string,
     fetchTableData: (() => {}) as (
@@ -38,9 +39,8 @@ export function getInitialGridState(graph: GraphInterface) {
     isNoPermissionCheck: false,
     isSearching: false,
     isShowLoadMore: true,
-    layout: (graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.layout || "table") as
-      | "card"
-      | "table",
+    layout: (graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.layout ||
+      "table") as "card" | "table",
     metaVertex: null as null | Vertex,
     search: "",
     selectedRows: [] as Vertex[],

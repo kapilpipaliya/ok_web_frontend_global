@@ -4,13 +4,12 @@ import { Portal } from "solid-js/web";
 import { useZIndex, ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import { PreviewPage } from "~/components/styled/PreviewPage";
-import { useGraph, } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/graph";
 import { headerIconButtonClass } from "~/pages/admin_layout/constant";
 
 import { IFramePreview } from "../IFramePreview";
 
 export function PreviewButton(props: { formStoreId: string }) {
-  const [graph] = useGraph();
   const [isModalOpen, setIsModalOpen] = createSignal(false);
   const handleButtonClick = () => {
     setIsModalOpen(true);

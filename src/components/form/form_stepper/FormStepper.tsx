@@ -6,7 +6,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { FormStoreObject } from "../context/FormContext";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 import { addStepAfter } from "./addStepAfter";
 import { addStepBefore } from "./addStepBefore";
 import { Step } from "./Step";
@@ -14,7 +14,8 @@ import { Step } from "./Step";
 export function FormStepper() {
   const formStoreId = useDesignerFormIdContext();
   const [graph, setGraph] = useGraph();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const formDataId = () => formStoreVertex()?.P?.formDataId;
 
   const steps = createMemo<Vertex[]>(() =>

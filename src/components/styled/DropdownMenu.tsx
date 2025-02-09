@@ -60,13 +60,14 @@ export function DropdownMenu(
       <div
         aria-orientation="vertical"
         classList={{
-          [`${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem`]: props.applyDefaultStyles ?? true,
+          [`${borderClass} align-items:flex-start bg:white display:flex flex-direction:column gap:0.25rem min-width:12rem overflow-y:auto padding:0.25rem`]:
+            props.applyDefaultStyles ?? true,
           [`${local.class ?? ""}`]: true,
           [`left:${floatingState().x ?? 0}px`]: true,
           [`max-height:${floatingState().maxHeight ?? 100}px`]: props.useSize,
           [`position:${strategy()}`]: true,
           [`top:${floatingState().y ?? 0}px`]: true,
-          [`z-index:${zIndex}`]: true
+          [`z-index:${zIndex}`]: true,
         }}
         ref={(el) => {
           setFloating(el);

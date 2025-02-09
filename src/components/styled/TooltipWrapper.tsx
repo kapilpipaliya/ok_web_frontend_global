@@ -1,7 +1,8 @@
-import Tooltip from '@corvu/tooltip';
-import { JSX } from 'solid-js';
+import type { JSX } from "solid-js";
 
-import { STYLES } from './constants/styles';
+import Tooltip from "@corvu/tooltip";
+
+import { STYLES } from "./constants/styles";
 
 export function TooltipWrapper(props: {
   arrowClass?: string;
@@ -20,15 +21,18 @@ export function TooltipWrapper(props: {
       openDelay={200}
       placement="top"
     >
-      <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass}>{props.children}</Tooltip.Trigger>
+      <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass}>
+        {props.children}
+      </Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content class={`rounded-lg bg:rgb(243,244,246) px-3 py-2 font-medium ${STYLES.tooltip.animation}`}>
-          
-            {props.content}
-         
+        <Tooltip.Content
+          class={`rounded-lg bg:rgb(243,244,246) px-3 py-2 font-medium ${STYLES.tooltip.animation}`}
+        >
+          {props.content}
+
           <Tooltip.Arrow class={props.arrowClass} />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip>
   );
-} 
+}

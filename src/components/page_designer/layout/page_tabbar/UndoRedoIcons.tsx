@@ -9,7 +9,8 @@ import { undo, undoAllowed } from "~/lib/graph/transaction/undo";
 export function UndoRedoIcons(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
 
-  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   const icons = [
     {

@@ -1,9 +1,8 @@
 import type { JSX } from "solid-js";
 
-import { mergeRefs, } from "@solid-primitives/refs";
+import { mergeRefs } from "@solid-primitives/refs";
 import { useNavigate } from "@solidjs/router";
 import {
-  createEffect,
   createSignal,
   getOwner,
   runWithOwner,
@@ -25,7 +24,10 @@ import { createLongPress } from "~/lib/hooks/createLongPress";
 import type { FunctionArgumentType } from "../form/FieldSchemaType";
 import type { GenericComponentProps } from "./FieldType";
 
-import { type FormStoreObject, useFormContext } from "../form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "../form/context/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { useToast } from "../styled/Toast";
@@ -51,14 +53,16 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta!;
-  const data = () => parentRenderContext()?.context.data!;
+  const _data = () => parentRenderContext()?.context.data!;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const formId = useFormContext();
   const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
-  const [internalRef, setInternalRef] = createSignal<HTMLButtonElement | null>(null);
+  const [_internalRef, setInternalRef] = createSignal<HTMLButtonElement | null>(
+    null,
+  );
 
   const [local, others] = splitProps(props, [
     "as",
@@ -80,7 +84,14 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   ]);
 
   const onSubmit = async () => {
-    if (isAnyFieldInvalid(graph, setGraph, meta(), graph.vertexes[formVertex()!.P.formDataId!])) {
+    if (
+      isAnyFieldInvalid(
+        graph,
+        setGraph,
+        meta(),
+        graph.vertexes[formVertex()!.P.formDataId!],
+      )
+    ) {
       return;
     }
     const data = commitTxn(formVertex()!.P.txnId, graph);
@@ -104,7 +115,12 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     if (initialIndex === undefined) {
       return;
     }
-    revertTransactionUpToIndex(formVertex()!.P.txnId, initialIndex - 1, graph, setGraph);
+    revertTransactionUpToIndex(
+      formVertex()!.P.txnId,
+      initialIndex - 1,
+      graph,
+      setGraph,
+    );
   };
   const onClick = () => {
     runWithOwner(owner, () => {

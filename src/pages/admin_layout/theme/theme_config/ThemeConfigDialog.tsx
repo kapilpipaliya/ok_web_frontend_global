@@ -45,10 +45,16 @@ export function ThemeConfigDialog(
 
   const saveNewTheme = async () => {
     const newFormTxnId = generateNewTxnId(graph, setGraph);
-    const createResult = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
-      data: themeData(),
-      key: themeName(),
-    });
+    const createResult = createFormVertex(
+      graph,
+      setGraph,
+      newFormTxnId,
+      "Theme",
+      {
+        data: themeData(),
+        key: themeName(),
+      },
+    );
 
     if (createResult.error) {
       setError(createResult.error as string);

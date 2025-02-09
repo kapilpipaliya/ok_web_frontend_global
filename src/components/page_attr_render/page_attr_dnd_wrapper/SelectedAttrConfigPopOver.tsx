@@ -4,7 +4,10 @@ import { getComponentLabel } from "~/components/page_designer/functions/getCompo
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { type PageLayoutObject, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../page_designer/context/LayoutContext";
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";
@@ -24,11 +27,11 @@ export function SelectedAttrConfigPopOver(
   const zIndex = useZIndex();
 
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
   const [graph, setGraph] = useGraph();
-  const getComponentName = () =>
-    getComponentLabel(graph, props.item);
+  const getComponentName = () => getComponentLabel(graph, props.item);
 
   const iconSize = 20;
   return (
@@ -41,7 +44,9 @@ export function SelectedAttrConfigPopOver(
           draggable={true}
           icon="ph:dots-six-vertical-light"
           onClick={() => {}}
-          onDragStart={(e) => handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)}
+          onDragStart={(e) =>
+            handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)
+          }
           size={iconSize}
           title="Move"
         />
@@ -52,7 +57,12 @@ export function SelectedAttrConfigPopOver(
         <SaveAsTemplateButton item={props.item} size={iconSize} />
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
-        <DeleteButton class="color:red" componentName={getComponentName()!} item={props.item} size={iconSize} />
+        <DeleteButton
+          class="color:red"
+          componentName={getComponentName()!}
+          item={props.item}
+          size={iconSize}
+        />
       </div>
     </span>
   );

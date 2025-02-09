@@ -2,8 +2,8 @@ import type { JSX } from "solid-js";
 
 import { Popover } from "@kobalte/core/popover";
 
-import { IconButton } from "./IconButton";
 import { STYLES } from "./constants/styles";
+import { IconButton } from "./IconButton";
 
 export function CustomPopover(
   props: Readonly<{
@@ -30,7 +30,9 @@ export function CustomPopover(
           {props.trigger}
         </div>
       </Popover.Trigger>
-      <Popover.Content class={`background-color:white border-radius:0.25rem border:1px|solid|#e5e7eb max-height:90vh max-width:90vw ${STYLES.overflow} width:50vw z-index:10`}>
+      <Popover.Content
+        class={`background-color:white border-radius:0.25rem border:1px|solid|#e5e7eb max-height:90vh max-width:90vw ${STYLES.overflow} width:50vw z-index:10`}
+      >
         <div class="padding:1rem">
           {props.title && (
             <h3 class="font-size:1.125rem font-weight:700 margin-bottom:0.5rem">

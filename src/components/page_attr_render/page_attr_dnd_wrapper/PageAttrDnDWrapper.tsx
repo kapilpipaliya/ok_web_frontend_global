@@ -20,7 +20,11 @@ import { getChildrenAttrs } from "~/components/page_designer/functions/getChildr
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
-import { type PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../page_designer/context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../../page_designer/context/LayoutContext";
 import { useToast } from "../../styled/Toast";
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
@@ -32,10 +36,14 @@ interface PageAttrDnDWrapperProps {
 export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStoreVertex = () => graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const layoutStoreVertex = () =>
+    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const isSelectedLayoutId = createSelector(() => formStoreVertex()?.P.selectedId);
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const isSelectedLayoutId = createSelector(
+    () => formStoreVertex()?.P.selectedId,
+  );
   const [previewStore] = usePreviewContext();
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
   const { showErrorToast } = useToast();
@@ -49,18 +57,28 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
-    onLayoutItemClick(layoutStoreVertex(), formStoreVertex(), props.item.id, graph, setGraph);
+    onLayoutItemClick(
+      layoutStoreVertex(),
+      formStoreVertex(),
+      props.item.id,
+      graph,
+      setGraph,
+    );
   };
 
   // no need debounde, it is called too less
   const handleMouseEnter = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { hoverId: props.item.id });
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+      hoverId: props.item.id,
+    });
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, { hoverId: -1 });
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+      hoverId: -1,
+    });
   };
 
   // debounce is giving error, node not found when running element.currentTarget and we must need it
@@ -115,7 +133,10 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       }}
       style="display:contents;"
     >
-      <Show keyed when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}>
+      <Show
+        keyed
+        when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}
+      >
         {resolvedChildren()}
       </Show>
       <Show
@@ -131,7 +152,10 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
           reference={reference}
         />
       </Show>
-      <Show keyed when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}>
+      <Show
+        keyed
+        when={!formStoreVertex()?.P?.hiddenNodes.includes(props.item.id)}
+      >
         <BorderOverlay item={props.item} reference={reference} />
       </Show>
     </div>

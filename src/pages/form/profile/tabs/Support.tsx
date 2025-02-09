@@ -186,7 +186,12 @@ export const SupportTicketSection = (
                   class="flex background:#248A52 border-radius:10px border:none color:#fff cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
                   onClick={() => sendMessage(props.id)}
                 >
-                  <Icon height={22} icon={"fluent:send-48-filled"} noobserver width={22} />
+                  <Icon
+                    height={22}
+                    icon={"fluent:send-48-filled"}
+                    noobserver
+                    width={22}
+                  />
                 </div>
               </div>
             </div>

@@ -13,10 +13,16 @@ export function resetDragDropState(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   batch(() => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-      activeItem: null,
-      draggedVertexIds: [],
-      position: null,
-    });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreVertex.id,
+      graph,
+      setGraph,
+      {
+        activeItem: null,
+        draggedVertexIds: [],
+        position: null,
+      },
+    );
   });
 }

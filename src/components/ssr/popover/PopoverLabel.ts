@@ -1,3 +1,3 @@
-import { Label as PopoverLabel } from '@corvu/popover';
+import { Label as PopoverLabel } from "@corvu/popover";
 
 export default PopoverLabel;

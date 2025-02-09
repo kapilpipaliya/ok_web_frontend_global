@@ -1,3 +1,3 @@
-import Popover from '@corvu/popover';
+import Popover from "@corvu/popover";
 
 export default Popover;

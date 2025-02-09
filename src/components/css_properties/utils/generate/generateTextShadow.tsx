@@ -9,11 +9,14 @@ export function generateTextShadow(
   shadows: TextShadowAttributes[],
   isView?: boolean,
 ): string {
-  if (!shadows) return '';
+  if (!shadows) {
+    return "";
+  }
   const separator = isView ? " " : "|";
   const separator2 = isView ? ", " : ",";
 
-  return shadows.filter(shadow => shadow)
+  return shadows
+    .filter((shadow) => shadow)
     .map((shadow) => {
       const {
         "blur-radius": blurRadius = "0px",

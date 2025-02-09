@@ -4,12 +4,13 @@ import { cloneLayoutAndChildren } from "~/components/page_designer/functions/clo
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext, } from "../../page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
 
 export function DuplicateButton(props: { item: Vertex; size: number }) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
     <IconButton
@@ -26,7 +27,7 @@ export function DuplicateButton(props: { item: Vertex; size: number }) {
           graph,
           setGraph,
           graph.vertexes[formStoreVertex()?.P.formDataId!],
-        )
+        );
       }}
       size={props.size}
       title="Duplicate"

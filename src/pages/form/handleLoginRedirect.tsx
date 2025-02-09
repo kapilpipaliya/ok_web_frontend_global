@@ -4,7 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export function handleLoginRedirect(
   value: Vertex,
-  graph: GraphInterface,
+  _graph: GraphInterface,
   navigate: Navigator,
 ) {
   const urlParams = new URLSearchParams(window.location.search);

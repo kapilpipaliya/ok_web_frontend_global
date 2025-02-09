@@ -12,7 +12,10 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 import type { CSSStore } from "../context/CssEditorContext";
 
 import { ZIndex } from "../../fields/ZIndex";
-import { type FormStoreObject, useFormContext } from "../../form/context/FormContext";
+import {
+  type FormStoreObject,
+  useFormContext,
+} from "../../form/context/FormContext";
 import { DynamicComponent } from "../../form/DynamicComponent";
 import { DropdownMenu } from "../../styled/DropdownMenu";
 import { MultiSelectField } from "../../styled/MultiSelect";
@@ -26,7 +29,7 @@ import { ResetButton } from "./ResetButton";
 
 const defaultStateLabel = "Default";
 
-export function CSSPropertiesEditor(props: Readonly<{}>) {
+export function CSSPropertiesEditor() {
   const cssEditorProps = useCssEditorProps();
   const [graph, setGraph] = useGraph();
   const [state, setState] = useCssState();
@@ -121,11 +124,19 @@ export function CSSPropertiesEditor(props: Readonly<{}>) {
           selectionLimit={1}
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
-          <button class="ai:center d:inline-flex" onClick={removeState} title="Remove State">
+          <button
+            class="ai:center d:inline-flex"
+            onClick={removeState}
+            title="Remove State"
+          >
             <Icon height={21} icon="ph:minus" noobserver width={21} />
           </button>
         </Show>
-        <button class="ai:center d:inline-flex" onClick={handleAddNewClick} title="Add New State">
+        <button
+          class="ai:center d:inline-flex"
+          onClick={handleAddNewClick}
+          title="Add New State"
+        >
           <Icon height={21} icon="ph:plus" noobserver width={21} />
         </button>
         <IframeHelpDialog

@@ -5,7 +5,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { FilePickerButton } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { useDesignerFormIdContext, } from "~/components/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { evalExpression } from "~/lib/expression_eval";
@@ -25,7 +25,8 @@ export function HighlightSetValueContent(
   const [graph, setGraph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const selectedAttr = () => graph.vertexes[formStoreVertex().P.selectedId];
   const componentExample = createMemo(
@@ -62,11 +63,12 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedAttr()?.P.componentName === "Image" && props.meta.P.key === "src"
+              selectedAttr()?.P.componentName === "Image" &&
+              props.meta.P.key === "src"
             }
           >
             <div>
-              <div class={`flex gap:2`}>
+              <div class={"flex gap:2"}>
                 <DynamicComponent
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}
@@ -86,11 +88,12 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedAttr()?.P.componentName === "Icon" && props.meta.P.key === "icon"
+              selectedAttr()?.P.componentName === "Icon" &&
+              props.meta.P.key === "icon"
             }
           >
             <div>
-              <div class={`flex gap:2`}>
+              <div class={"flex gap:2"}>
                 <DynamicComponent
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}

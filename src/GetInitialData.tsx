@@ -1,5 +1,11 @@
 import { useNavigate } from "@solidjs/router";
-import { createSignal, Match, onMount, type ParentProps, Switch } from "solid-js";
+import {
+  createSignal,
+  Match,
+  onMount,
+  type ParentProps,
+  Switch,
+} from "solid-js";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/lib/graph/mutate/getInitialDataAndSetToGraph";
@@ -26,20 +32,26 @@ export function GetInitialData(props: GetInitialDataProps) {
       // Run both operations in parallel if authentication is needed
       await Promise.all([
         getInitialDataAndSetToGraph(graph),
-        props.authenticate 
+        props.authenticate
           ? loadUser(
               graph[0],
               graph[1],
               props.dontRedirectToLogin ? undefined : navigate,
-              showErrorToast
+              showErrorToast,
             )
-          : Promise.resolve()
+          : Promise.resolve(),
       ]);
     } catch (error: any) {
       const globalStoreId = "globalStoreId";
-      mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph[0], graph[1], { 
-        initialDataFetchError: `Failed to load initial data: ${error.message}` 
-      });
+      mergeVertexProperties<GlobalProperties>(
+        0,
+        globalStoreId,
+        graph[0],
+        graph[1],
+        {
+          initialDataFetchError: `Failed to load initial data: ${error.message}`,
+        },
+      );
     } finally {
       setInitialDataLoading(false);
     }
@@ -51,9 +63,18 @@ export function GetInitialData(props: GetInitialDataProps) {
         <LoaderNew />
       </Match>
       <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-        <div class="bg:red-50 p:1">{getGlobalStore(graph[0]).P.initialDataFetchError}</div>
+        <div class="bg:red-50 p:1">
+          {getGlobalStore(graph[0]).P.initialDataFetchError}
+        </div>
       </Match>
-      <Match when={!(initialDataLoading() || getGlobalStore(graph[0]).P.initialDataFetchError)}>
+      <Match
+        when={
+          !(
+            initialDataLoading() ||
+            getGlobalStore(graph[0]).P.initialDataFetchError
+          )
+        }
+      >
         {props.children}
       </Match>
     </Switch>

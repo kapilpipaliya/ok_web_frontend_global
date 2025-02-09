@@ -13,7 +13,8 @@ export function PageShare(props: { formStoreId: string }) {
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   const [error, setError] = createSignal("");
 
-  const formStoreVertex = () => graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () =>
+    graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   createEffect(() => {
     if (access() === "everyone") {

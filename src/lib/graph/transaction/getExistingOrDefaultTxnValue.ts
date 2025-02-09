@@ -15,5 +15,7 @@ export function getExistingOrDefaultTxnValue(
   }
   const txnVertex = graph.vertexes[`txn${txnId}`];
   // klona is performance heavy
-  return txnVertex ? klona(txnVertex.P) as TransactionDetail : getDefaultTxnValue();
+  return txnVertex
+    ? (klona(txnVertex.P) as TransactionDetail)
+    : getDefaultTxnValue();
 }

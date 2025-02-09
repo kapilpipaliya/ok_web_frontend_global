@@ -5,7 +5,7 @@ import { getMemberVertex } from "./getMemberVertex";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
-  const [graph, setGraph] = useGraph();
+  const [graph, _setGraph] = useGraph();
 
   const roleRows = evalExpression("->$0Role", {
     graph,

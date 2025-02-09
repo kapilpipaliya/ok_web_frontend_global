@@ -11,18 +11,18 @@ import { usePageRenderContext } from "../page_attr_render/context/PageRenderCont
 
 // HtmlField
 export function HtmlField(
-  props: JSX.HTMLAttributes<HTMLDivElement> & Readonly<GenericComponentProps> &
-    {
-    as?: string;
-    childrenBefore?: JSX.Element;
-    class?: string;
-    isViewMode?: boolean;
-    longPressDuration?: number;
-    onLongPress?: (event: Event) => void;
-    src?: string;
-    text?: string;
-    viewModeClass?: string;
-  },
+  props: JSX.HTMLAttributes<HTMLDivElement> &
+    Readonly<GenericComponentProps> & {
+      as?: string;
+      childrenBefore?: JSX.Element;
+      class?: string;
+      isViewMode?: boolean;
+      longPressDuration?: number;
+      onLongPress?: (event: Event) => void;
+      src?: string;
+      text?: string;
+      viewModeClass?: string;
+    },
 ) {
   const [graph] = useGraph();
   const parentItems = usePageRenderContext();
@@ -39,18 +39,19 @@ export function HtmlField(
     "children",
     "text",
     "childrenBefore",
-    "src"
+    "src",
   ]);
 
-
   const Content = () => {
-    return <>
-      <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-      {local.text}
-      {local.value}
-      <Show when={!local.childrenBefore}>{local.children}</Show>
-    </>
-  }
+    return (
+      <>
+        <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
+        {local.text}
+        {local.value}
+        <Show when={!local.childrenBefore}>{local.children}</Show>
+      </>
+    );
+  };
 
   return (
     <Switch>
@@ -60,8 +61,13 @@ export function HtmlField(
       <Match when={local.as === "img"}>
         <img
           loading="lazy"
-          {...others as JSX.ImgHTMLAttributes<HTMLImageElement>}
-          src={replacePlaceholderWithUrl(local.src ?? "", "$0Src", meta(), graph)}
+          {...(others as JSX.ImgHTMLAttributes<HTMLImageElement>)}
+          src={replacePlaceholderWithUrl(
+            local.src ?? "",
+            "$0Src",
+            meta(),
+            graph,
+          )}
         />
       </Match>
       <Match when={true}>

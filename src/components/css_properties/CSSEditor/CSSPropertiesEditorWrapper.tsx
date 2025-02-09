@@ -1,10 +1,6 @@
 import { MultiProvider } from "@solid-primitives/context";
 import { createEffect, createSignal, on } from "solid-js";
-import {
-  createStore,
-  reconcile,
-  type SetStoreFunction,
-} from "solid-js/store";
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 

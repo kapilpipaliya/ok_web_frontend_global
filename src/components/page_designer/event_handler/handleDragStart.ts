@@ -14,7 +14,16 @@ export function handleDragStart(
 ) {
   e.stopPropagation();
 
-  mergeVertexProperties<PageLayoutObject>(0, layoutStoreVertex.id, graph, setGraph, {
-    draggedVertexIds: [...(layoutStoreVertex?.P.draggedVertexIds || []), layoutVertex.id],
-  });
+  mergeVertexProperties<PageLayoutObject>(
+    0,
+    layoutStoreVertex.id,
+    graph,
+    setGraph,
+    {
+      draggedVertexIds: [
+        ...(layoutStoreVertex?.P.draggedVertexIds || []),
+        layoutVertex.id,
+      ],
+    },
+  );
 }

@@ -20,7 +20,8 @@ export async function handleDrop(
 ) {
   e.stopPropagation();
 
-  if (!layoutStoreVertex?.P.activeItem) { // layoutVertex
+  if (!layoutStoreVertex?.P.activeItem) {
+    // layoutVertex
     showErrorToast("Active item not found when dropping");
     return;
   }
@@ -57,7 +58,13 @@ export async function handleDrop(
       layoutStoreVertex?.P.position!,
     );
     if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
-      onLayoutItemClick(layoutStoreVertex, formStoreVertex, layoutId as string, graph, setGraph);
+      onLayoutItemClick(
+        layoutStoreVertex,
+        formStoreVertex,
+        layoutId as string,
+        graph,
+        setGraph,
+      );
     }
   }
 }

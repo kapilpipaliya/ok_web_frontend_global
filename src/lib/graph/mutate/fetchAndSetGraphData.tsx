@@ -4,7 +4,10 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { setGraphData, type UpdateOptions } from "~/lib/graph/mutate/setGraphData";
+import {
+  setGraphData,
+  type UpdateOptions,
+} from "~/lib/graph/mutate/setGraphData";
 
 import { getGlobalStore } from "../get/sync/getGlobalStore";
 
@@ -15,7 +18,7 @@ export async function fetchAndSetGraphData(
   context?: {
     [key: string]: any;
   },
-  options?: UpdateOptions
+  options?: UpdateOptions,
 ) {
   const result = await fetchDataFromMG(
     { expression, [getGlobalStore(graph).P.url]: true },

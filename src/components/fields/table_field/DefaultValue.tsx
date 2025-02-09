@@ -11,13 +11,11 @@ export function DefaultValue(
   const [graph, setGraph] = useGraph();
   return (
     <Show when={props.metaVertex.P.defaultValue}>
-      {
-        evalExpression(props.metaVertex.P.defaultValue, {
-          graph,
-          setGraph,
-          vertexes: [props.joinVertex],
-        })
-      }
+      {evalExpression(props.metaVertex.P.defaultValue, {
+        graph,
+        setGraph,
+        vertexes: [props.joinVertex],
+      })}
     </Show>
   );
 }

@@ -6,30 +6,32 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
-import { addNewVertex, mergeVertexProperties, replaceVertexProperties } from "./vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  replaceVertexProperties,
+} from "./vertex";
 
 export function handleUserData(
   data: { [key: string]: any },
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-) { 
+) {
   if (data.user) {
     saveUser(data.user, graph, setGraph);
   }
 
   if (data.userSetting) {
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, { userSettingId: data.userSetting.id });
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      userSettingId: data.userSetting.id,
+    });
     updateVertex(data.userSetting.id, data.userSetting, graph, setGraph);
   }
 
   if (data.roles) {
-    mergeVertexProperties(
-      0,
-      "globalStoreId",
-      graph,
-      setGraph,
-      { userRoles: data.roles.map((role: Vertex) => role.id) }
-    );
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      userRoles: data.roles.map((role: Vertex) => role.id),
+    });
     for (const role of data.roles) {
       updateVertex(role.id, role, graph, setGraph);
     }
@@ -42,7 +44,9 @@ export async function loadUser(
   navigate?: (path: string) => void,
   showErrorToast?: (message: string) => void,
 ): Promise<boolean> {
-  mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isLoadingPage: true });
+  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+    isLoadingPage: true,
+  });
 
   try {
     const data = await getAPI(API.getUserUrl);
@@ -62,7 +66,9 @@ export async function loadUser(
     }
     return false;
   } finally {
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, { isLoadingPage: false });
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      isLoadingPage: false,
+    });
   }
 }
 
@@ -71,13 +77,20 @@ export function saveUser(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (graph.vertexes["member"]) {
-    replaceVertexProperties(0, "member", graph, setGraph, user, {cloneProperties: false});
+  if (graph.vertexes.member) {
+    replaceVertexProperties(0, "member", graph, setGraph, user, {
+      cloneProperties: false,
+    });
   } else {
-    addNewVertex(0, {
-      ...user,
-      id: "member",
-      L: ["member"]
-    }, graph, setGraph);
+    addNewVertex(
+      0,
+      {
+        ...user,
+        id: "member",
+        L: ["member"],
+      },
+      graph,
+      setGraph,
+    );
   }
 }

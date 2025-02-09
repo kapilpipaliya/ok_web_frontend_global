@@ -20,9 +20,24 @@ export function SaveCancelButton(
   const formId = useFormContext();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const navigate = useNavigate();
-  const formStoreVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
-  const onSubmit = formSubmit(formStoreVertex, graph, setGraph, props.closePopUp ?? (() => {}), showErrorToast, showLoadingToast, showWarningToast);
-  const onCancel = formCancel(formStoreVertex, graph, setGraph, props.closePopUp ?? (() => {}), navigate);
+  const formStoreVertex = () =>
+    graph.vertexes[formId!] as Vertex<FormStoreObject>;
+  const onSubmit = formSubmit(
+    formStoreVertex,
+    graph,
+    setGraph,
+    props.closePopUp ?? (() => {}),
+    showErrorToast,
+    showLoadingToast,
+    showWarningToast,
+  );
+  const onCancel = formCancel(
+    formStoreVertex,
+    graph,
+    setGraph,
+    props.closePopUp ?? (() => {}),
+    navigate,
+  );
   return (
     <div
       class={`${props.buttonAlign ? `jc:${props.buttonAlign}` : "jc:start"} flex`}

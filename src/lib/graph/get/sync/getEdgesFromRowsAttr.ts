@@ -38,10 +38,12 @@ export function getEdgesFromRowsAttr(
           }); // `->$0${capitalizedName}`
         }
       } else if (
-        (attribute.componentName === "Table" ||
-          attribute.componentName === "DynamicTable")
+        attribute.componentName === "Table" ||
+        attribute.componentName === "DynamicTable"
       ) {
-        if (ignoreTables) continue;
+        if (ignoreTables) {
+          continue;
+        }
         const expression: NestedExpression = {
           expression: `->${getToEdge(
             { P: attribute } as unknown as Vertex,
@@ -56,8 +58,8 @@ export function getEdgesFromRowsAttr(
         }
         outgoing.push(expression);
       } else if (attribute.attributes) {
-          processAttributes(attribute.attributes);
-        }
+        processAttributes(attribute.attributes);
+      }
     }
   }
 

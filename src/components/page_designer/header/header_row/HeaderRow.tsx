@@ -1,5 +1,4 @@
-
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -7,21 +6,32 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
-import { type PageLayoutObject, useDesignerFormIdContext } from "../../context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+} from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { LeftIcons } from "../left/LeftIcons";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
 
-export function HeaderRow(props: {class?: string, style?: JSX.CSSProperties}) {
+export function HeaderRow(props: {
+  class?: string;
+  style?: JSX.CSSProperties;
+}) {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  const _layoutStore = () =>
+    graph.vertexes[layoutStoreId].P as PageLayoutObject;
   const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () => graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+  const _formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
-    <header class={`flex bg:#f3f3f4 jc:space-between r:7 ${props.class}`} style={props.style}>
+    <header
+      class={`flex bg:#f3f3f4 jc:space-between r:7 ${props.class}`}
+      style={props.style}
+    >
       <LeftIcons />
 
       <div class="flex ai:center gap:5">

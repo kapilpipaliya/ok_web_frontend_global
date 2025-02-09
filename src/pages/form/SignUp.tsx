@@ -57,16 +57,22 @@ export function SignUp(): JSX.Element {
       showErrorToast(passwordError);
     } else {
       const globalStoreId = "globalStoreId";
-      const globalStore = graph.vertexes[globalStoreId] as Vertex;
+      const _globalStore = graph.vertexes[globalStoreId] as Vertex;
 
-      mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: true });
+      mergeVertexProperties(0, globalStoreId, graph, setGraph, {
+        isLoadingPage: true,
+      });
       await showLoadingToast({
         loadMessage: "Registering User...",
         onError: () => {
-          mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
+          mergeVertexProperties(0, globalStoreId, graph, setGraph, {
+            isLoadingPage: false,
+          });
         },
         onSuccess: (value) => {
-          mergeVertexProperties(0, globalStoreId, graph, setGraph, { isLoadingPage: false });
+          mergeVertexProperties(0, globalStoreId, graph, setGraph, {
+            isLoadingPage: false,
+          });
           handleLoginRedirect(value as Vertex, graph, navigate);
         },
         promise: registerUserCall(formData),

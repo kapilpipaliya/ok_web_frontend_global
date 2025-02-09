@@ -7,9 +7,9 @@ import { getExistingOrDefaultTxnValue } from "./getExistingOrDefaultTxnValue";
 import { redoTxn } from "./redoTxn";
 
 export function redo(
-  txnId: number, 
+  txnId: number,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!redoAllowed(txnId, graph)) {
     return;
@@ -30,11 +30,16 @@ export function redo(
   }
 
   txnValue.activeUndoIndex = nextUndoIndex;
-  for (const step of txnValue.steps.slice(activeUndoIndex + 1, nextUndoIndex + 1)) {
+  for (const step of txnValue.steps.slice(
+    activeUndoIndex + 1,
+    nextUndoIndex + 1,
+  )) {
     redoTxn(step, graph, setGraph);
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {cloneProperties: false});
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
+    cloneProperties: false,
+  });
 }
 
 export function redoAllowed(

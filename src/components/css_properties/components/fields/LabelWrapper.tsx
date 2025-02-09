@@ -1,8 +1,6 @@
 import { createMemo } from "solid-js";
 
-import type {
-  GenericField,
-} from "../../constants/FieldSchemaType";
+import type { GenericField } from "../../constants/FieldSchemaType";
 
 import { ContainerLabel } from "./ContainerLabel";
 

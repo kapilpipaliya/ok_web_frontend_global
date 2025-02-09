@@ -55,7 +55,13 @@ export function setParentValue(
 
     const insertEdgeResult = addNewEdge(
       txnId,
-      newEdge(generateNewVertexId(graph, setGraph), type, {}, vertexId, vertex.id),
+      newEdge(
+        generateNewVertexId(graph, setGraph),
+        type,
+        {},
+        vertexId,
+        vertex.id,
+      ),
       graph,
       setGraph,
     );

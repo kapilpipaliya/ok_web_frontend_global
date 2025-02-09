@@ -1,9 +1,9 @@
-import type { APIHandler } from '@solidjs/start/server';
+import type { APIHandler } from "@solidjs/start/server";
 
-import { openai } from '@ai-sdk/openai';
-import { streamObject } from 'ai';
+import { openai } from "@ai-sdk/openai";
+import { streamObject } from "ai";
 
-import { graphInterfaceSchema } from './schema';
+import { graphInterfaceSchema } from "./schema";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -12,11 +12,11 @@ export const maxDuration = 30;
 // guidelines: https://cdn.openai.com/spec/model-spec-2024-05-08.html#follow-the-chain-of-command
 export const POST: APIHandler = async ({ request }) => {
   const context = await request.json();
-  
+
   const result = streamObject({
-      messages: [
-        {
-          content: `You are tasked with generating a graph structure for a Page Builder application Item tree. Follow these specifications carefully:
+    messages: [
+      {
+        content: `You are tasked with generating a graph structure for a Page Builder application Item tree. Follow these specifications carefully:
 
 Basic Structure:
 1. The graph consists of vertices (nodes) and edges (connections)
@@ -198,22 +198,29 @@ Important Guidelines:
 - Do not skip any vertexes or edges.
 
 The graph must be a directed acyclic graph (DAG) to prevent circular dependencies.`,
-          role: 'system'
-        },
-        // Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
-        // Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
-        {
-          content: context.prompt,
-          role: 'user'
-        }
-      ],
-      model: openai('gpt-4o'),
-      async onFinish({ error, experimental_providerMetadata, object, providerOptions, usage, warnings }) {
+        role: "system",
+      },
+      // Use responsive css states to adjust padding, text sizes, and spacing for mobile and desktop viewports.
+      // Reduce text sizes and padding on mobile while maintaining larger sizes on desktop screens using responsive css states.
+      {
+        content: context.prompt,
+        role: "user",
+      },
+    ],
+    model: openai("gpt-4o"),
+    async onFinish({
+      error,
+      experimental_providerMetadata,
+      object,
+      providerOptions,
+      usage,
+      warnings,
+    }) {
       // implement your own logic here, e.g. for storing messages
       // or recording token usage
     },
     schema: graphInterfaceSchema,
   });
 
-  return result.toTextStreamResponse(); 
+  return result.toTextStreamResponse();
 };
