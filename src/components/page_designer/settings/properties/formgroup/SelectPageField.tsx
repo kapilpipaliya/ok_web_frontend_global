@@ -30,7 +30,7 @@ export function SelectPageField(
           iconClass={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();
-            window.open(`/admin/ThankYouPage/${option.id}`, "_blank");
+            window.open(`/admin/Page/${option.id}`, "_blank");
           }}
           size={22}
         />
@@ -41,7 +41,7 @@ export function SelectPageField(
   const meta = {
     P: {
       class: "flex:1",
-      collection: `g:'ThankYouPage'`,
+      collection: `g:'Page'`,
       componentName: "Select",
       displayName: props.meta.P.displayName,
       key: props.meta.P.key,
@@ -65,7 +65,7 @@ export function SelectPageField(
 
   const AddNewPageButton = () => {
     const handleAddNewClick = () => {
-      window.open("/admin/ThankYouPage/new", "_blank");
+      window.open("/admin/Page/new", "_blank");
     };
     return (
       <IconButton

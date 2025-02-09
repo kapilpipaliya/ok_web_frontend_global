@@ -5,7 +5,6 @@ import { STYLES } from "~/components/styled/constants/styles";
 import { type GlobalProperties, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { isPageDesignerPath } from "~/lib/isPageDesignerPath";
 
 interface AdminLayoutProps {
   children?: JSX.Element;

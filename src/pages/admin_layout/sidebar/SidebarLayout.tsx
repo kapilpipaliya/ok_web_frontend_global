@@ -94,7 +94,7 @@ export function Sidebar() {
     "/admin/Role": "eos-icons:role-binding-outlined",
     "/admin/SimpleImport": "uil:import",
     "/admin/TemplatePage": "eos-icons:templates-outlined",
-    "/admin/ThankYouPage": "icon-park-outline:doc-success",
+    // "/admin/ThankYouPage": "icon-park-outline:doc-success",
     "/admin/User": "ci:users",
   };
 

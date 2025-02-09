@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const tabs = [
     ...PageDesignerLabels.filter(label => label !== "CompExample").map((label) => ({
       key: label,
-      label: toTitle(label) + 's',
+      label: toTitle(label.replace(/(\w+)(Page)$/, '$1')) + 's',
     })),
     {
       key: "Component", 

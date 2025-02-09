@@ -88,9 +88,7 @@ export function FormElementTabs() {
     { collection: "TemplatePage", title: "Templates" },
     { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },
-    { collection: "ThankYouPage", title: "Thank You" },
-    { collection: "ErrorPages", title: "Error Pages" },
-    { collection: "EmailTemplate", title: "Email Template" },
+    // { collection: "EmailTemplate", title: "Email Template" },
   ];
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 

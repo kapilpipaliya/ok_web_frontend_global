@@ -119,16 +119,16 @@ FormMetaData.CompExample = {
   title: "Comp Example",
 };
 
-FormMetaData.ThankYouPage = {
-  attributes: [...FormMetaData.Page.attributes],
-  key: "ThankYouPage",
-  title: "Thank You Page",
-};
-FormMetaData.ErrorPage = {
-  attributes: [...FormMetaData.Page.attributes],
-  key: "ErrorPage",
-  title: "Error Page",
-};
+// FormMetaData.ThankYouPage = {
+//   attributes: [...FormMetaData.Page.attributes],
+//   key: "ThankYouPage",
+//   title: "Thank You Page",
+// };
+// FormMetaData.ErrorPage = {
+//   attributes: [...FormMetaData.Page.attributes],
+//   key: "ErrorPage",
+//   title: "Error Page",
+// };
 FormMetaData.TemplatePage = {
   attributes: [...FormMetaData.Page.attributes],
   key: "TemplatePage",
