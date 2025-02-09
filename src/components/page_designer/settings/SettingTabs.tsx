@@ -10,7 +10,6 @@ import { DesignerFormIdContext, type PageLayoutObject, useDesignerLayoutStore } 
 import { UlContainer } from "../form_elements/FormElementTabs";
 import {
   TabsContainer,
-  TabStickyContainer,
 } from "../form_elements/TabsContainer";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
@@ -84,7 +83,7 @@ export function SettingTabs() {
   );
 
   const Tabs = () => (
-    <TabStickyContainer>
+    <>
       {/* <Icon
         class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
@@ -95,12 +94,14 @@ export function SettingTabs() {
       <TabsContainer>
         <TabList />
       </TabsContainer>
-    </TabStickyContainer>
+    </>
   );
 
   return (
-    <>
-      <Tabs />
+    <div class="flex flex:column h:100%">
+      <div class="bg:white">
+        <Tabs />
+      </div>
       <div
         class="p:5"
         classList={{ "display:none": layoutStore().selectedTab !== "settings" }}
@@ -148,6 +149,6 @@ export function SettingTabs() {
           </FormContext.Provider>
         </DesignerFormIdContext.Provider>
       </Show>
-    </>
+    </div>
   );
 }

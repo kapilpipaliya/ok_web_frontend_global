@@ -14,7 +14,7 @@ export function TextEditor(props: Readonly<TextAreaProps>) {
   return (
     <textarea
       {...props}
-      class={`c:black ${props.class || ""} b:1px|solid|#ccc m:5px min-h:5rem p:10px r:6px w:100%`}
+      class={`c:black ${props.class || ""} b:1px|solid|#ccc my:5px min-h:5rem p:6 r:6 w:100%`}
       onInput={(e) => {
         setText(e.target.value);
         props.onValueChange?.(e.target.value);

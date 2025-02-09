@@ -59,9 +59,24 @@ interface PanelProps {
   resizeKey?: string;
   resizePosition?: 'bottom' | 'left' | 'right' | 'top';
   style?: any;
+  title?: string;
 }
 
 const Panel: Component<PanelProps> = (props) => {
+  const Content = () => {
+    return (
+      <Show fallback={<div class={`${STYLES.overflow}`}>{props.children}</div>} when={props.title}>
+        <div class={'d:grid grid-template-rows:auto|1fr height:100%'}>
+          <div class="background:rgb(243,244,246) border-bottom:1px|solid|rgb(229,231,235) padding:4">
+            <h1 class="font-weight:600">{props.title}</h1>
+          </div>
+          <div class="overflow-y:auto">
+            {props.children}
+          </div>
+        </div>
+      </Show>
+    )
+  }
   return (
     <div
       class={`${STYLES.overflow}`}
@@ -71,7 +86,7 @@ const Panel: Component<PanelProps> = (props) => {
         'border': '1px solid #ccc',
         'display': 'grid',
         'grid-template-columns': props.resizePosition === 'left' ? '3px 1fr' : '1fr 3px',
-        'grid-template-rows': props.resizePosition === 'top' ? '3px 1fr' : '1fr',
+        'grid-template-rows': props.resizePosition === 'top' ? '3px 1fr' : '100%',
         height: '100%',
         ...props.style
       }}
@@ -86,9 +101,7 @@ const Panel: Component<PanelProps> = (props) => {
           resizeKey={props.resizeKey || ''}
         />
       </div>
-      <div class={`${STYLES.overflow}`}>
-        {props.children}
-      </div>
+      <Content />
       <div style={{ display: props.resizePosition !== 'left' && props.onResize ? 'block' : 'none' }}>
         <ResizeHandle
           activeResizeKey={props.activeResizeKey}
@@ -213,6 +226,7 @@ export function RenderMainContent() {
           ref={setRightPanel0Ref}
           resizeKey="rightWidth0"
           resizePosition="left"
+          title="AI Content Generator"
         >
           <UseObjectAIPanel />
         </Panel>
@@ -226,6 +240,7 @@ export function RenderMainContent() {
           ref={setRightPanel1Ref}
           resizeKey="rightWidth1"
           resizePosition="left"
+          title="Properties"
         >
           {/* <Show
             fallback={
@@ -239,7 +254,7 @@ export function RenderMainContent() {
               graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith("Attr")
             }
           > */}
-            <PropertiesContent />
+          <PropertiesContent />
           {/* </Show> */}
         </Panel>
       </div>

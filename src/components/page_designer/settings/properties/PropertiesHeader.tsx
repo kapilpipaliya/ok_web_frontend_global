@@ -4,6 +4,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 
+// depricated:
 export function PropertiesHeader() {
   const [graph] = useGraph();
 

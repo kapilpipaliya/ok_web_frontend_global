@@ -316,10 +316,10 @@ export function MultiSelectField(
       >
         <For each={selectedValue()}>
           {(tag) => (
-            <div class="c:#fff ai:center bg:#3377cc cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-              {props.renderLabel
+            <div class="c:#000 ai:center bg:#e0e0e0 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
+              <span class="white-space:nowrap">{props.renderLabel
                 ? props.renderLabel(tag, true)
-                : getOptionLabel(tag)}
+                : getOptionLabel(tag)}</span>
               <IconButton
                 icon="ic:round-close"
                 onClick={(e) => {
