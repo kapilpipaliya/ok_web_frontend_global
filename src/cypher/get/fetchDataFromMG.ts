@@ -13,7 +13,7 @@ import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,
-  context: ContextType & { fetchTemplate?: boolean } = {
+  context: ContextType & { adminui?: boolean } = {
     nodes: {} as { [key: string]: Vertex },
     relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,
@@ -24,16 +24,16 @@ export async function fetchDataFromMG(
   let dbSession: Session;
   let subDomain = "";
   // @ts-expect-error ignore
-  if (expression.fetchTemplate) {
-    context.fetchTemplate = true;
+  if (expression.adminui) {
+    context.adminui = true;
   }
 
   if (context.dbSession) {
     dbSession = context.dbSession;
   } else {
     ({ dbSession, subDomain } = await getDBSessionForSubdomain(
-      context.fetchTemplate
-        ? ({ url: "http://localhost/?fetchTemplate=true" } as Request)
+      context.adminui
+        ? ({ url: "http://localhost/?adminui=true" } as Request)
         : undefined,
     ));
     context.dbSession = dbSession;

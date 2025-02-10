@@ -27,7 +27,6 @@ export interface GlobalProperties {
   isLoadingPage?: boolean;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  navBarHeight: number;
   navigationData?: AnyObject[];
   newVertexId_: number;
   txnId_: number;

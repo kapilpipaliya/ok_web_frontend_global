@@ -20,3 +20,5 @@ Feature:
 - SiteTitle should be from global state, find all the place where 'EasyFormForge' is hardcoded and replace it with global state.
 - Make the email SMTP configured from global state.
 - fix fns isnt callable from props
+
+Make documentation like https://cim.refined.site/space/FAQ/1086955297/How+to+Configure+and+Create+User+Section

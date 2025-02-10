@@ -32,7 +32,6 @@ export function createAppState() {
         initialDataFetchError: "",
         isDevelopment: false,
         isLoadingPage: false,
-        navBarHeight: 45,
         navigationData: [],
         newVertexId_: -500000,
         txnId_: 0,
