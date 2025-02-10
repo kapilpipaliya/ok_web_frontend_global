@@ -60,6 +60,7 @@ export function HtmlField(
       </Match>
       <Match when={local.as === "img"}>
         <img
+          class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
           loading="lazy"
           {...(others as JSX.ImgHTMLAttributes<HTMLImageElement>)}
           src={replacePlaceholderWithUrl(

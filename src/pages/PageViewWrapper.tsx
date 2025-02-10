@@ -77,9 +77,11 @@ export function PageViewWrapper(
     expression?: string;
     formDataId?: Id;
     formId?: string;
+    formMetaId?: Id;
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
     isNoPermissionCheck?: boolean;
+    metaTxnId?: string;
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;
@@ -140,7 +142,7 @@ export function PageViewWrapper(
   });
 
   let onConfirmExit: () => void;
-  const metaTxnId = generateNewTxnId(graph, setGraph);
+  const metaTxnId = props.metaTxnId ?? generateNewTxnId(graph, setGraph);
 
   const [previewStore] = usePreviewContext();
 
@@ -168,9 +170,9 @@ export function PageViewWrapper(
   };
 
   function checkPermission(action: string) {
-    if (!formStore()?.P.formMetaData) {
-      return false;
-    }
+    // if (!formStore()?.P.formMetaData) {
+    //   return false;
+    // }
     return (
       isNoPermissionCheck() ||
       (action === "insert" &&
@@ -217,6 +219,10 @@ export function PageViewWrapper(
   async function loadFormDesignerMetaData(): Promise<boolean> {
     if (!formStore()) {
       return false;
+    }
+    if (props.formMetaId) {
+      setFormStore("formMetaId", props.formMetaId);
+      return true;
     }
     let form: IFormMetaData | null = null;
     if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
@@ -508,7 +514,7 @@ export function PageViewWrapper(
         <Match when={formStore().P.error}>
           <SimpleWarningAlert message={formStore().P.error} />
         </Match>
-        <Match when={formStore().P.formMetaData && authError()}>
+        <Match when={authError()}>
           <SimpleWarningAlert message={authError()} />
         </Match>
       </Switch>
@@ -529,33 +535,34 @@ export function PageViewWrapper(
       </Show> */}
       <Show when={graph.vertexes[formStore().P.formDataId!]}>
         <FormContext.Provider value={formStore().id}>
-          <Show
-            when={
+          <Switch>
+            <Match when={
               !authError() &&
               formStore().P.mounted &&
               graph.vertexes[formStore().P.formMetaId!]! &&
               (props.dataId && props.dataId !== "new"
                 ? graph.vertexes[formStore().P.formDataId!]
                 : true)
-            }
-          >
-            <Show
-              fallback={
-                <PreviewPage>
+            }>
+              <Switch>
+                <Match when={!formStore().P.isPreview}>
                   <Content />
-                </PreviewPage>
-              }
-              when={!formStore().P.isPreview}
-            >
-              <Content />
-            </Show>
-            <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
-              <SaveCancelButton
-                closePopUp={props.closePopUp}
-                disabled={isDisabledTxn(formStore().P.txnId, graph)}
-              />
-            </Show>
-          </Show>
+                </Match>
+                <Match when={formStore().P.isPreview}>
+                  <PreviewPage>
+                    <Content />
+                  </PreviewPage>
+                </Match>
+              </Switch>
+              
+              <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
+                <SaveCancelButton
+                  closePopUp={props.closePopUp}
+                  disabled={isDisabledTxn(formStore().P.txnId, graph)}
+                />
+              </Show>
+            </Match>
+          </Switch>
         </FormContext.Provider>
       </Show>
       <Show when={formStore().P.discardPopup}>

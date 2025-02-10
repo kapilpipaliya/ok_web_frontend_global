@@ -6,7 +6,7 @@ export interface FieldAttribute {
   // group?: string;
   dataType?: string;
   displayName?: string;
-  key: string;
+  key?: string;
 
   meta?: string;
   tab?: string;
@@ -18,6 +18,6 @@ export interface IFormMetaData {
   attributes: FieldAttribute[];
   isInlineEditable?: boolean;
   isRealTime?: boolean;
-  key: string; // required to create new vertex
-  title: string;
+  key?: string; // required to create new vertex
+  title?: string;
 }

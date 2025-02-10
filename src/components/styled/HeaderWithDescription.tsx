@@ -3,6 +3,7 @@ import type { JSX } from "solid-js";
 interface WithDescriptionProps {
   backgroundColor?: string;
   borderColor?: string;
+  class?: string;
   description?: string;
   descriptionColor?: string;
   paddingX?: string;
@@ -24,6 +25,7 @@ export function HeaderWithDescription(
         [`px:${props.paddingX || "1rem"}`]: true,
         [`py:${props.paddingY || "1.25rem"}`]: true,
         "border-bottom-width:1px": true,
+        [props.class || ""]: !!props.class,
       }}
     >
       <h3

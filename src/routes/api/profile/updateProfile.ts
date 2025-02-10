@@ -6,7 +6,6 @@ import { getHttpsSession } from "~/server/getHttpsSession";
 export async function updateProfile(
   payload: any,
   dbSession: Session,
-  _subdomain: string,
 ) {
   const { email, profileImage, userId, username, uuid } = payload;
 

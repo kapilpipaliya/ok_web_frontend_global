@@ -21,7 +21,6 @@ import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton"
 
 import { GeneralSection } from "./tabs/General";
 import { PasswordSection } from "./tabs/Password";
-import { CurrentPlan, PricingPlans } from "./tabs/Pricing";
 import { SupportTicketSection } from "./tabs/Support";
 
 interface ProfileData {
@@ -42,7 +41,6 @@ interface TabSectionProps {
 export function Settings(): JSX.Element {
   const [selectedTab, setSelectedTab] = createSignal<string>("General");
   const [isMainScreenLoad, setIsMainScreenLoad] = createSignal<boolean>(false);
-  const [plans, setPlans] = createSignal<any[]>([]);
   const [contactList, setContactList] = createSignal<any[]>([]);
   const [originalProfileData, setOriginalProfileData] =
     createStore<ProfileData>({});
@@ -56,11 +54,6 @@ export function Settings(): JSX.Element {
     uId: "",
     username: "",
   });
-
-  const _breadcrumbData = [
-    { href: "/admin", name: "Admin" },
-    { name: "Settings" },
-  ];
 
   const loadUserData = async () => {
     try {
@@ -102,21 +95,8 @@ export function Settings(): JSX.Element {
     });
   };
 
-  const loadPlans = async () => {
-    setIsMainScreenLoad(true);
-    untrack(async () => {
-      try {
-        const value = await postAPI(API.profileUrl, { panel: "pricing" });
-        setPlans(value.plans.length > 0 ? value.plans : []);
-      } finally {
-        setIsMainScreenLoad(false);
-      }
-    });
-  };
-
   // Load user data and plans when the component mounts
   loadUserData();
-  loadPlans();
 
   return (
     <>
@@ -142,10 +122,6 @@ export function Settings(): JSX.Element {
               setOriginalProfileData={setOriginalProfileData}
               setProfileData={setProfileData}
             />
-          </Match>
-          <Match when={selectedTab() === "Pricing"}>
-            <CurrentPlan />
-            <PricingPlans plans={plans} />
           </Match>
           <Match when={selectedTab() === "Password"}>
             <PasswordSection profileData={profileData} />
