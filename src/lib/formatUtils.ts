@@ -1,6 +1,6 @@
-import * as parserBabel from 'prettier/plugins/babel';
-import * as parserEstree from 'prettier/plugins/estree';
-import * as prettier from 'prettier/standalone';
+import * as parserBabel from "prettier/plugins/babel";
+import * as parserEstree from "prettier/plugins/estree";
+import * as prettier from "prettier/standalone";
 
 export async function formatJavaScriptCode(code: string): Promise<string> {
   try {

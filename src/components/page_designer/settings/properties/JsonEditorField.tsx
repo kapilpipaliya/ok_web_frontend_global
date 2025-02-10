@@ -1,11 +1,11 @@
-import {createEffect, createSignal, on} from "solid-js";
+import { createEffect, createSignal, on } from "solid-js";
 
-import type {FormStoreObject} from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import {JsonEditorField} from "~/components/fields/JsonEditorField";
-import {useDesignerFormIdContext} from "~/components/page_designer/context/LayoutContext";
-import {useGraph, type Vertex} from "~/lib/graph/graph";
-import {replaceVertexProperties} from "~/lib/graph/mutate/vertex";
+import { JsonEditorField } from "~/components/fields/JsonEditorField";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function JsonEditorFieldComponent() {
   const [graph, setGraph] = useGraph();
@@ -40,7 +40,7 @@ export function JsonEditorFieldComponent() {
           setIsJsonValid(true);
         }
       },
-      {defer: true},
+      { defer: true },
     ),
   );
 

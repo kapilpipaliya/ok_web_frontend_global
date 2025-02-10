@@ -1,19 +1,18 @@
+import { Show } from "solid-js";
 
-import {Show} from "solid-js";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import type {FormStoreObject} from "~/components/form/context/FormContext";
+import { setPropertyValueGlobal } from "~/components/page_designer/functions/setPropertyValueGlobal";
+import { FunctionEditor } from "~/components/page_designer/settings/properties/FunctionEditor";
+import { JsonEditorFieldComponent } from "~/components/page_designer/settings/properties/JsonEditorField";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
-import {setPropertyValueGlobal} from "~/components/page_designer/functions/setPropertyValueGlobal";
-import {FunctionEditor} from "~/components/page_designer/settings/properties/FunctionEditor";
-import {JsonEditorFieldComponent} from "~/components/page_designer/settings/properties/JsonEditorField";
-import {evalExpression} from "~/lib/expression_eval";
-import {useGraph, type Vertex} from "~/lib/graph/graph";
-import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
-
-import {useDesignerFormIdContext} from "../../context/LayoutContext";
-import {CollAndData} from "./CollAndData";
-import {ComponentVariantsInput} from "./ComponentVariantsInput";
-import {FormGroupProperties} from "./formgroup/FormGroupProperties";
+import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { CollAndData } from "./CollAndData";
+import { ComponentVariantsInput } from "./ComponentVariantsInput";
+import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -102,4 +101,3 @@ export function PropertiesBody() {
     </Show>
   );
 }
-

@@ -536,14 +536,16 @@ export function PageViewWrapper(
       <Show when={graph.vertexes[formStore().P.formDataId!]}>
         <FormContext.Provider value={formStore().id}>
           <Switch>
-            <Match when={
-              !authError() &&
-              formStore().P.mounted &&
-              graph.vertexes[formStore().P.formMetaId!]! &&
-              (props.dataId && props.dataId !== "new"
-                ? graph.vertexes[formStore().P.formDataId!]
-                : true)
-            }>
+            <Match
+              when={
+                !authError() &&
+                formStore().P.mounted &&
+                graph.vertexes[formStore().P.formMetaId!]! &&
+                (props.dataId && props.dataId !== "new"
+                  ? graph.vertexes[formStore().P.formDataId!]
+                  : true)
+              }
+            >
               <Switch>
                 <Match when={!formStore().P.isPreview}>
                   <Content />
@@ -554,7 +556,7 @@ export function PageViewWrapper(
                   </PreviewPage>
                 </Match>
               </Switch>
-              
+
               <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}

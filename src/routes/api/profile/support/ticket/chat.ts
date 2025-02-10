@@ -1,7 +1,8 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function POST({ request }: APIEvent) {
   const payload = await request.json();
@@ -24,4 +25,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

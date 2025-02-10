@@ -1,20 +1,20 @@
-import type * as Monaco from 'monaco-editor';
+import type * as Monaco from "monaco-editor";
 
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import {createEffect, createSignal, on} from "solid-js";
-import {MonacoEditor} from "solid-monaco";
+import { createEffect, createSignal, on } from "solid-js";
+import { MonacoEditor } from "solid-monaco";
 
-import type {FormStoreObject} from "~/components/form/context/FormContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import {useDesignerFormIdContext} from "~/components/page_designer/context/LayoutContext";
-import {PROPERTIES} from "~/components/styled/constants/constant";
-import {CustomModal} from "~/components/styled/CustomModal";
-import {IconButton} from "~/components/styled/IconButton";
-import { formatJavaScriptCode } from '~/lib/formatUtils';
-import {useGraph, Vertex} from "~/lib/graph/graph";
+import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
+import { PROPERTIES } from "~/components/styled/constants/constant";
+import { CustomModal } from "~/components/styled/CustomModal";
+import { IconButton } from "~/components/styled/IconButton";
+import { formatJavaScriptCode } from "~/lib/formatUtils";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 window.MonacoEnvironment = {
@@ -57,7 +57,7 @@ export function FunctionEditor(props: {
           setEditorValue(getOtherProps());
         }
       },
-      {defer: true},
+      { defer: true },
     ),
   );
 
@@ -66,7 +66,7 @@ export function FunctionEditor(props: {
       if (!value) {
         setIsFunctionValid(true);
         props.setPropertyValue(
-          {P: {key: "props"}} as unknown as Vertex,
+          { P: { key: "props" } } as unknown as Vertex,
           value,
         );
         return;
@@ -78,7 +78,7 @@ export function FunctionEditor(props: {
 
       setIsFunctionValid(true);
       props.setPropertyValue(
-        {P: {key: "props"}} as unknown as Vertex,
+        { P: { key: "props" } } as unknown as Vertex,
         value,
       );
 
@@ -133,9 +133,8 @@ export function FunctionEditor(props: {
         height={props.height ?? "200px"}
         language="javascript"
         onChange={(value) => setEditorValue(value)}
-        onMount={(editor, monaco) => {
+        onMount={(_editor, monaco) => {
           editorRef = monaco;
-          
         }}
         options={{
           autoIndent: "full",
@@ -146,16 +145,13 @@ export function FunctionEditor(props: {
           lineDecorationsWidth: 0,
           lineNumbers: "off",
           lineNumbersMinChars: 0,
-          minimap: {enabled: true},
+          minimap: { enabled: true },
           tabSize: 2,
         }}
         value={editorValue()}
       />
       <div class="flex gap:2 mt:2">
-        <button
-          class="px:3 py:1 bg:blue-60 fg:white r:1"
-          onClick={handleSave}
-        >
+        <button class="px:3 py:1 bg:blue-60 fg:white r:1" onClick={handleSave}>
           Submit
         </button>
         <button
@@ -185,7 +181,7 @@ export function FunctionEditor(props: {
             title="Edit Function in Modal"
           />
         </span>
-        <EditorContent height="200px"/>
+        <EditorContent height="200px" />
       </div>
       <CustomModal
         open={isModalOpen}
@@ -193,7 +189,7 @@ export function FunctionEditor(props: {
         title="Edit Props Function"
       >
         <div class="p:3 width:600px height:600px">
-          <EditorContent height="560px"/>
+          <EditorContent height="560px" />
         </div>
       </CustomModal>
     </>

@@ -15,9 +15,7 @@ export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
 
 async function determineSubDomain(url: URL): Promise<string> {
   const adminui = url.searchParams.get("adminui");
-  return adminui === "true"
-    ? "adminui"
-    : await getSubDomain(url.hostname);
+  return adminui === "true" ? "adminui" : await getSubDomain(url.hostname);
 }
 
 function getURL(request?: APIEvent["request"]): URL {

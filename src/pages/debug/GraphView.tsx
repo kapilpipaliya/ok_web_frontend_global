@@ -13,7 +13,7 @@ export function GraphView() {
   const GraphView = (props: Readonly<GraphViewProps>) => {
     const [json, setJson] = createSignal({});
     const mount = async (container: HTMLDivElement) => {
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = "https://unpkg.com/@memgraph/orb/dist/browser/orb.min.js";
       script.onload = () => {
         // const Orb = await import('@memgraph/orb/dist/index.js');

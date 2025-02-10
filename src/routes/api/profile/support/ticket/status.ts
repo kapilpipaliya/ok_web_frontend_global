@@ -20,4 +20,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

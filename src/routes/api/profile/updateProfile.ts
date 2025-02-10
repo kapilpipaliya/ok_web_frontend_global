@@ -3,10 +3,7 @@ import type { Session } from "neo4j-driver";
 import { getDriver } from "~/cypher/driver";
 import { getHttpsSession } from "~/server/getHttpsSession";
 
-export async function updateProfile(
-  payload: any,
-  dbSession: Session,
-) {
+export async function updateProfile(payload: any, dbSession: Session) {
   const { email, profileImage, userId, username, uuid } = payload;
 
   // Ensure user exists

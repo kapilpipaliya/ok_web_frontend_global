@@ -1,9 +1,10 @@
+import type { ParentProps } from "solid-js";
+
 import { createKeyedContext } from "@corvu/utils/create/keyedContext";
-import { ParentProps } from "solid-js";
 
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
-import { GlobalProperties, GraphContext } from "~/lib/graph/graph";
+import { type GlobalProperties, GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export const TemplateGraphProvider = (props: ParentProps) => {
@@ -19,9 +20,7 @@ export const TemplateGraphProvider = (props: ParentProps) => {
   return (
     <TemplateGraph.Provider value={graph}>
       <GraphContext.Provider value={graph}>
-        <GetInitialData authenticate={true}>
-          {props.children}
-        </GetInitialData>
+        <GetInitialData authenticate={true}>{props.children}</GetInitialData>
       </GraphContext.Provider>
     </TemplateGraph.Provider>
   );
