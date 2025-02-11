@@ -7,6 +7,8 @@ import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
+import { profileImage } from "../admin_layout/constant";
+
 const transferNodes = [
   { key: "Component", value: "Comp" },
   { key: "Data Type", value: "DataType" },
@@ -187,10 +189,7 @@ export function SyncData() {
                             <img
                               alt={"image"}
                               class="h:2.5rem object-fit:cover r:9999px w:2.5rem"
-                              src={
-                                user.P.profileImage ||
-                                "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-                              }
+                              src={user.P.profileImage || profileImage}
                             />
                             <div class="ml:13">
                               <div class="lh:1.5rem f:1rem font-weight:600">

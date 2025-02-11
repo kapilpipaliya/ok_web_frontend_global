@@ -81,7 +81,7 @@ export function PageViewWrapper(
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
     isNoPermissionCheck?: boolean;
-    metaTxnId?: string;
+    metaTxnId?: number;
     pageId?: string;
     pageVertexLabel?: string;
     pageVertexName?: string;

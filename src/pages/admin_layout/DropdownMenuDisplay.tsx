@@ -7,6 +7,7 @@ import { signOutCall } from "~/lib/api/service/user/signOutCall";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 
+import { profileImage } from "./constant";
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 
@@ -18,10 +19,6 @@ export function UserDropdownMenuDisplay(): JSX.Element {
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
-  const profileImage =
-    getMemberVertex(graph)?.P?.profileImage ||
-    "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_960_720.png";
 
   return (
     <>
@@ -41,7 +38,11 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             placement="bottom-end"
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">
-              <ProfileHeader profileImage={profileImage} />
+              <ProfileHeader
+                profileImage={
+                  getMemberVertex(graph)?.P?.profileImage || profileImage
+                }
+              />
               <hr class="color:rgb(223,223,223)" />
               <MenuItems onClose={handleClose} signOutCall={signOutCall} />
             </ul>

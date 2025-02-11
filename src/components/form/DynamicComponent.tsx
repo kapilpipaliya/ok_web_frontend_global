@@ -768,9 +768,7 @@ export function DynamicComponent(
           <Match when={isHidden()} />
           <Match
             when={
-              (componentName()?.startsWith("System") ||
-                componentName() === "Select" ||
-                componentName() === "MultiSelect") &&
+              componentName()?.startsWith("System") &&
               !props.noLabel &&
               !props.meta.P.noLabel
             }

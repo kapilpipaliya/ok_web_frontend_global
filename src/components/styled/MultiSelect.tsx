@@ -33,6 +33,7 @@ export type Option =
 export function MultiSelectField(
   props: Readonly<{
     childrenKey?: string;
+    class?: string;
     disable?: boolean;
     displayValueKey?: string;
     error?: string;
@@ -313,7 +314,7 @@ export function MultiSelectField(
 
   return (
     <div
-      class="pos:relative grid b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100%"
+      class={`pos:relative b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100% ${props.class}`}
       classList={{
         "b:1px|solid|#ff0000": !!props.error,
       }}
@@ -348,6 +349,7 @@ export function MultiSelectField(
           // @ts-expect-error disable lastpass
           AutoComplete="off"
           class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
+          data-lpignore="true"
           disabled={props.disable}
           // onBlur={() => {
           //   if (dropdownVisible()) {

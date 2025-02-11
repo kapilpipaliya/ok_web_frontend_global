@@ -15,6 +15,7 @@ import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
@@ -24,7 +25,6 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
-import { ensureArray } from "../../lib/data_structure/array/ensureArray";
 import { useFormContext } from "../form/context/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
 import { isStaticOptions } from "./utils/isStaticOptions";
@@ -35,6 +35,7 @@ import { setSelectValueHelper } from "./utils/setSelectValueHelper";
 export function SelectField(
   props: Readonly<
     GenericComponentProps & {
+      class?: string;
       componentName: string;
       data?: Vertex;
       isRealTime?: boolean;
@@ -253,6 +254,7 @@ export function SelectField(
     >
       <MultiSelectField
         childrenKey={meta().P.childrenKey}
+        class={props.class}
         disable={props.disabled}
         displayValueKey={
           meta().P.labelKey

@@ -1,18 +1,15 @@
 import { createSignal, For, Show } from "solid-js";
-import { v7 as uuidv7 } from "uuid";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
-import { createMeta } from "~/lib/graph/mutate/form/createMeta";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { profileImage } from "~/pages/admin_layout/constant";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
-import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { TemplateGraphProvider } from "~/pages/TemplateGraphProvider";
+import { SchemaRenderer } from "~/routes/admin/SchemaRenderer";
 
 export default function Settings() {
   return (
@@ -28,86 +25,96 @@ function EmailSettings() {
 function PasswordSettings() {
   return <div>PasswordSettings</div>;
 }
-
 function ProfileSettings() {
-  const [graph, setGraph] = useGraph();
-  const metaTxnId = generateNewTxnId(graph, setGraph);
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:150px|500px ai:center gap:8";
+  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
+
   const form = {
+    as: "div",
     attributes: [
       {
         as: "div",
         attributes: [
           {
+            class: LABEL_CLASS,
+            componentName: "Text",
+            text: "Profile Image",
+          },
+          {
             as: "img",
-            class: "cursor:pointer h:60px object-fit:cover r:50% w:60px",
+            class: "cursor:pointer h:60px object-fit:cover w:60px",
             componentName: "Box",
             key: "profileImage",
-            src: "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
+            src: profileImage,
           },
         ],
-        class: "flex m:10|0 mt:2rem",
+        class: GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: "color:dimgrey font-weight:500 font:15",
+            class: LABEL_CLASS,
             componentName: "Text",
-            key: "username",
             text: "Username",
             validation: { required: true },
           },
           {
+            class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "username",
             placeholder: "Username",
             validation: { required: true },
           },
         ],
+        class: GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: "color:dimgrey font-weight:500 font:15",
+            class: LABEL_CLASS,
             componentName: "Text",
             key: "emailLabel",
             text: "Email Address",
           },
           {
+            class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "email",
             placeholder: "Email Address",
             validation: { required: true },
           },
         ],
+        class: GRID_ITEM_CLASS,
         componentName: "Box",
       },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            class: "color:dimgrey font-weight:500 font:15",
-            componentName: "Box",
-            text: "Country",
-          },
-          {
-            class: "border:1px|solid|#ccc p:5|10 r:4",
-            componentName: "Select",
-            key: "country",
-            options: [
-              { text: "United States", value: "United States" },
-              { text: "Canada", value: "Canada" },
-              { text: "United Kingdom", value: "United Kingdom" },
-            ],
-          },
-        ],
-        class: "d:grid",
-        componentName: "Box",
-      },
+      // {
+      //   as: "div",
+      //   attributes: [
+      //     {
+      //       as: "span",
+      //       class: LABEL_CLASS,
+      //       componentName: "Box",
+      //       text: "Country"
+      //     },
+      //     {
+      //       class: "border:1px|solid|#ccc p:5|10 r:4",
+      //       componentName: "Select",
+      //       key: "country",
+      //       options: [
+      //         { text: "United States", value: "United States" },
+      //         { text: "Canada", value: "Canada" },
+      //         { text: "United Kingdom", value: "United Kingdom" },
+      //       ],
+      //     },
+      //   ],
+      //   class: GRID_ITEM_CLASS,
+      //   componentName: "Box",
+      // },
       {
         as: "div",
         attributes: [
@@ -116,11 +123,9 @@ function ProfileSettings() {
             class:
               "bg:primary fg:white p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
-            props: (_options: FunctionArgumentType) => {
-              return {
-                onClick: () => {},
-              };
-            },
+            props: () => ({
+              onClick: () => {},
+            }),
             text: "Save Changes",
           },
           {
@@ -131,39 +136,16 @@ function ProfileSettings() {
             text: "Cancel",
           },
         ],
-        class: "mt:24 flex justify-content:flex-end",
+        class: "mt:24 flex",
         componentName: "Box",
       },
     ],
-    class:
-      "grid@>lg gap:10 grid-template-columns:repeat(2,50%) justify-self:center p:10",
-    key: "Profile",
-  } as IFormMetaData;
-  const formMeta = createMeta(form, metaTxnId, graph, setGraph);
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["Profile"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
+    class: "p:10 grid gap:10",
+    componentName: "Box",
+  } as FieldAttribute;
   return (
     <div>
-      ProfileSettings
-      <PageViewWrapper
-        formDataId={formDataId}
-        formMetaId={formMeta.vertex?.id}
-        hideSaveCancelButton={true}
-        isNoPermissionCheck={true}
-        metaTxnId={metaTxnId}
-        pageVertexName="Profile"
-      />
+      <SchemaRenderer form={{ attributes: [form], key: "Profile" }} />
     </div>
   );
 }

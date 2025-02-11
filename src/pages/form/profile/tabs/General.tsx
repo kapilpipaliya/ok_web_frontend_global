@@ -10,6 +10,7 @@ import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { saveUser } from "~/lib/graph/mutate/loadUser";
 import { validateEmail } from "~/lib/validation/validateEmail";
+import { profileImage } from "~/pages/admin_layout/constant";
 
 type GeneralProps = {
   originalProfileData: { [key: string]: any };
@@ -113,9 +114,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>): JSX.Element => {
             country: "United States",
             email: user.P.email.toLowerCase(),
             id: user.id,
-            profileImage:
-              user.P.profileImage ??
-              "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
+            profileImage: user.P.profileImage ?? profileImage,
             uId: user.P.uId,
             username: user.P.username.toLowerCase(),
           });
@@ -153,10 +152,7 @@ export const GeneralSection = (props: Readonly<GeneralProps>): JSX.Element => {
           <div class="circle-avatar" onClick={handleAvatarClick}>
             <img
               alt="Avatar"
-              src={
-                props.profileData.profileImage ||
-                "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-              }
+              src={props.profileData.profileImage || profileImage}
               style={{
                 "border-radius": "50%",
                 cursor: "pointer",

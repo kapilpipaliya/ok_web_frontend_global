@@ -9,7 +9,7 @@ import { getDefaultTxnValue } from "./getDefaultTxnValue";
 export function generateNewTxnId(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-): string {
+): number {
   const globalStoreId = "globalStoreId";
   const txnId = graph.vertexes[globalStoreId].P.txnId_ + 1;
 

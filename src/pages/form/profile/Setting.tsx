@@ -16,6 +16,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
+import { profileImage } from "~/pages/admin_layout/constant";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
@@ -63,9 +64,7 @@ export function Settings(): JSX.Element {
         country: "United States",
         email: user.P.email,
         id: user.id,
-        profileImage:
-          user.P.profileImage ??
-          "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
+        profileImage: user.P.profileImage ?? profileImage,
         uId: user.P.uId,
         username: user.P.username,
       });

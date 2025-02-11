@@ -28,7 +28,7 @@ export function addMetaVertexes(
     // if (attribute?.props?.skip) {
     //   continue;
     // }
-    const attr = klona(attribute);
+    const { attributes, ...attr } = klona(attribute);
     // if(attribute.componentName === "DynamicTable") attribute.group = attribute.id;
     const addAttributeResult = newRow(
       graph,
