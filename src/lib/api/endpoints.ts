@@ -9,6 +9,7 @@ export const API = {
   replaceFileUrl: "/api/file/replace",
   signUpUrl: "/api/auth/signup",
   submitDataUrl: "/api/mutate/submit_data",
+  updateProfileImageUrl: "/api/profile/updateProfileImage",
   uploadFileUrl: "/api/file/upload",
 };
 
