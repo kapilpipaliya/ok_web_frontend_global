@@ -18,7 +18,6 @@ import { postAPI } from "~/lib/api/postApi";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
-import { PasswordSection } from "./tabs/Password";
 import { SupportTicketSection } from "./tabs/Support";
 
 interface ProfileData {
@@ -100,9 +99,6 @@ export function Settings(): JSX.Element {
         when={!isMainScreenLoad()}
       >
         <Switch>
-          <Match when={selectedTab() === "Password"}>
-            <PasswordSection profileData={profileData} />
-          </Match>
           <Match when={selectedTab() === "Support"}>
             <SupportTicketSection
               contactList={contactList}

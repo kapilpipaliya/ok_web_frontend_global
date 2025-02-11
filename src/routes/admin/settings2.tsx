@@ -5,6 +5,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 
+import { PasswordChangeForm } from "./PasswordChangeForm";
 import { ProfileSettings } from "./ProfileSettings";
 
 export default function Settings() {
@@ -16,9 +17,15 @@ export default function Settings() {
 function EmailSettings() {
   return <div>EmailSettings</div>;
 }
+
 function PasswordSettings() {
-  return <div>PasswordSettings</div>;
+  return (
+    <div>
+        <PasswordChangeForm />
+    </div>
+  );
 }
+
 function SettingsContent() {
   const [graph] = useGraph();
   const [selectedMenu, setSelectedMenu] = createSignal("profile");

@@ -1,4 +1,5 @@
 export const API = {
+  changePasswordUrl: "/api/profile/changePassword",
   downloadFileUrl: "/api/file/download",
   getInitialDataUrl: "/api/get/get_initial_data",
   getSubDomainInfo: "/api/get/get_sub_domain_info",
