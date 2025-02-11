@@ -27,6 +27,7 @@ interface SupportTicketSectionProps {
   setIsMainScreenLoad: SetStoreFunction<boolean>;
 }
 
+// depricated
 export const SupportTicketSection = (
   props: Readonly<SupportTicketSectionProps>,
 ): JSX.Element => {

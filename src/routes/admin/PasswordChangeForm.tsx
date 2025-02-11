@@ -18,7 +18,7 @@ import { SchemaRenderer } from "./SchemaRenderer";
 const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
 const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
 
-export function PasswordChangeForsm() {
+export function PasswordChangeForm() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
