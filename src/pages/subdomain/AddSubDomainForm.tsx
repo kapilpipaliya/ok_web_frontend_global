@@ -109,8 +109,8 @@ export const AddSubDomainForm: Component<Props> = (props) => {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "domain",
-            placeholder: "Enter domain",
-            validation: { required: true },
+            placeholder: "Enter domain (Optional) eg: example.com",
+            // validation: { required: true },
           },
         ],
         class: GRID_ITEM_CLASS,
@@ -131,7 +131,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
         </button>
     <CustomModal
       footer={(setOpen) => (
-        <div class="display:flex jc:flex-end p:3 gap:2 border-top:1px|solid|#eee">
+        <div class="display:flex jc:flex-end p:3 gap:6 border-top:1px|solid|#eee">
           <button
             class="bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb"
             onClick={() => setOpen(false)}

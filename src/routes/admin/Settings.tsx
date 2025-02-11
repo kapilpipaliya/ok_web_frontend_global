@@ -54,7 +54,7 @@ function SettingsContent() {
       // adminOnly: true,
       component: "SubDomainSettings",
       id: "subdomain",
-      label: "SubDomain Management",
+      label: "SubDomains",
     },
   ];
 

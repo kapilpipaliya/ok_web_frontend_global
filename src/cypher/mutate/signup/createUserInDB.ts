@@ -6,7 +6,7 @@ import { v7 as uuidv7 } from "uuid";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function createUserInSuperDB(
-  superTx: Transaction,
+  superTx: Session | Transaction,
   userData: {
     email: string;
     password: string;

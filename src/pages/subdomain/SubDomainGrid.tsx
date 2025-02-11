@@ -1,7 +1,10 @@
 import { DataGrid } from "~/components/grid/DataGrid";
+import { DataGridStore } from "~/components/grid/DataGridContext";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { IFormMetaData } from "~/lib/meta/FormMetadataType";
+
+import { AddSubDomainForm } from "./AddSubDomainForm";
 
 interface SubDomain {
   domain: string;
@@ -24,8 +27,8 @@ export const SubDomainGrid = () => {
         id: subdomain.name,
         P: {
           ...subdomain,
-          activity: subdomain.latestActivity ? 
-            `${subdomain.latestActivity.action} - ${subdomain.latestActivity.details}` : 
+          activity: subdomain.latestActivity ?
+            `${subdomain.latestActivity.action} - ${subdomain.latestActivity.details}` :
             'No activity'
         }
       }))
@@ -42,7 +45,7 @@ export const SubDomainGrid = () => {
       {
         componentName: "Text",
         displayName: "Domain",
-        key: "domain", 
+        key: "domain",
       },
       {
         componentName: "Text",
@@ -53,10 +56,19 @@ export const SubDomainGrid = () => {
     key: "subdomains",
     title: "Subdomains"
   };
+
+  let gridStore: DataGridStore;
+
   return (
     <DataGrid
+      CustomAddNewButton={() => <AddSubDomainForm onSuccess={() => {
+        gridStore?.[0].fetchTableData();
+      }} />}
       formSchema={SubDomain}
       getTableData={getTableData}
+      initializeGridStoreParent={(gridStore_) => {
+        gridStore = gridStore_;
+      }}
       isShowPagination={true}
       tableId="subdomains"
     />

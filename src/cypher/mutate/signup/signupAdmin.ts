@@ -1,5 +1,8 @@
-import type { Transaction } from "neo4j-driver";
+import type { Node, Session, Transaction } from "neo4j-driver";
 
+import type { Vertex } from "~/lib/graph/graph";
+
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
 
@@ -11,19 +14,28 @@ import { createUserInSuperDB, createUserInUserDB } from "./createUserInDB";
 import { insertComponents } from "./insertComponents";
 import { newAdminValidations } from "./newAdminValidations";
 
-export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
+export async function signupAdmin(tx: Session | Transaction, data: SignupRequestData) {
   // Check if the user already exists
-  await newAdminValidations(tx, data.username, data.email, data.subDomain);
+  if (!data.isSubDomainCreation) {
+    await newAdminValidations(tx, data.username, data.email, data.subDomain);
+  }
 
   await createDatabase(data.subDomain);
 
   // Create a new user in the database according to subDomain
-  const user = await createUserInSuperDB(tx, {
-    email: data.email,
-    password: data.password,
-    subDomain: [data.subDomain],
-    username: data.username,
-  });
+  let user: Vertex;
+  if (!data.isSubDomainCreation) {
+    user = await createUserInSuperDB(tx, {
+      email: data.email,
+      password: data.password,
+      subDomain: [data.subDomain],
+      username: data.username,
+    });
+  } else {
+    const query = `Match (u:User {uuid: $uuid}) RETURN u`;
+    const result = await tx.run(query, { uuid: data.uuid });
+    user = convertNodeToJson(result.records[0].get("u") as Node);
+  }
 
   const userDbSession = (await getDriver()).session({
     database: data.subDomain,

@@ -62,6 +62,25 @@ export async function findUserByEmail(
   };
 }
 
+export async function findUserByEmailSimple(dbSession: Session, email: null | string): Promise<null | Vertex> {
+  if (!email) {
+    return null;
+  }
+
+  const query = `
+    MATCH (u:User {email: $email})
+    RETURN u
+  `;
+
+  const result = await dbSession.run(query, { email });
+
+  if (result.records.length === 0) {
+    return null;
+  }
+
+  return convertNodeToJson(result.records[0].get("u") as Node);
+}
+
 async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
   const guestRole = await getGuestRole(dbSession);
   return {
