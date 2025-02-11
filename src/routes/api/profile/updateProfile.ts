@@ -1,10 +1,10 @@
 import type { Session } from "neo4j-driver";
 
-import { getDriver } from "~/cypher/driver";
+// import { getDriver } from "~/cypher/driver";
 import { getHttpsSession } from "~/server/getHttpsSession";
 
 export async function updateProfile(payload: any, dbSession: Session) {
-  const { email, profileImage, userId, username, uuid } = payload;
+  const { email, profileImage, username, uuid } = payload;
 
   // Ensure user exists
   const userExists = await dbSession.run(
@@ -15,28 +15,29 @@ export async function updateProfile(payload: any, dbSession: Session) {
     return { error: "User not exists", status: 404 };
   }
 
-  // Check if email and username already exists
-  if (email) {
+  const oldUser = userExists.records[0].get("u");
+
+  // Check if email and username already exists (excluding current user)
+  if (email && email !== oldUser.properties.email) {
     const emailExists = await dbSession.run(
-      "MATCH (u:User {email: $email}) RETURN u;",
-      { email },
+      "MATCH (u:User {email: $email}) WHERE u.uuid <> $uuid RETURN u;",
+      { email, uuid },
     );
     if (emailExists.records.length > 0) {
       return { error: "Email address already exists", status: 500 };
     }
   }
-  if (username) {
+  if (username && username !== oldUser.properties.username) {
     const usernameExists = await dbSession.run(
-      "MATCH (u:User {username: $username}) RETURN u;",
-      { username },
+      "MATCH (u:User {username: $username}) WHERE u.uuid <> $uuid RETURN u;",
+      { username, uuid },
     );
     if (usernameExists.records.length > 0) {
       return { error: "Username already exists", status: 500 };
     }
   }
 
-  // Update user profile
-  let query = "MATCH (u:User) WHERE u.uuid = $uuid SET ";
+  let basicQuery = "MATCH (u:User) WHERE u.uuid = $uuid ";
   const updates = [];
   if (email) {
     updates.push("u.email = $email");
@@ -44,31 +45,47 @@ export async function updateProfile(payload: any, dbSession: Session) {
   if (username) {
     updates.push("u.username = $username");
   }
-  if (profileImage) {
-    updates.push("u.profileImage = $profileImage");
+  
+  if (updates.length > 0) {
+    basicQuery += `SET ${updates.join(", ")}, u.updatedAt = localDateTime() RETURN u`;
+  } else {
+    basicQuery += "RETURN u";
   }
-  query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
-  const result = await dbSession.run(query, {
+  const basicResult = await dbSession.run(basicQuery, {
     email,
-    profileImage,
-    userId,
     username,
     uuid,
   });
-  const user = result.records[0]?.get("u");
 
-  // need to verify:
-  const dbSession2 = (await getDriver()).session({
-    database: user.properties.subDomain,
-  });
-  await dbSession2.run(query, {
-    email,
-    profileImage,
-    userId,
-    username,
-    uuid,
-  });
+  if (basicResult.records.length === 0) {
+    return { error: "Failed to update profile", status: 500 };
+  }
+
+  const user = basicResult.records[0].get("u");
+
+  // Handle profile image update in separate query
+  if (profileImage) {
+    await dbSession.run(
+      `MATCH (u:User {uuid: $uuid})
+       MATCH (f:File) WHERE elementId(f) = $profileImage
+       MERGE (u)-[:UserProfileImage]->(f)
+       RETURN u`,
+      { profileImage, uuid }
+    );
+  }
+
+  // Update in subdomain database
+  // const dbSession2 = (await getDriver()).session({
+  //   database: user.properties.subDomain,
+  // });
+
+  // // Update basic info in subdomain
+  // await dbSession2.run(basicQuery, {
+  //   email,
+  //   username,
+  //   uuid,
+  // });
 
   if (email) {
     const http_session = await getHttpsSession();

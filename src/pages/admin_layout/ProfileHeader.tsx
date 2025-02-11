@@ -1,6 +1,6 @@
 import { type JSX, Show } from "solid-js";
 
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getMemberVertex, getProfileImageUrl } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 export interface ProfileHeaderProps {
   profileImage: string;
@@ -14,8 +14,8 @@ export function ProfileHeader(
   return (
     <li class="flex mb:5px p:10px">
       <div
-        class="h:45 r:50% w:45"
-        style={`background-size:cover;background-image: url(${props.profileImage})`}
+        class="h:45 w:45"
+        style={`background-size:cover;background-image: url(${getProfileImageUrl(graph)})`}
       />
       <div class="ml:10 mr:1rem">
         <div class="f:15 font-weight:bold text-align:start">

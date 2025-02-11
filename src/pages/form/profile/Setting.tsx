@@ -14,13 +14,10 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { profileImage } from "~/pages/admin_layout/constant";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
-import { GeneralSection } from "./tabs/General";
 import { PasswordSection } from "./tabs/Password";
 import { SupportTicketSection } from "./tabs/Support";
 
@@ -58,17 +55,6 @@ export function Settings(): JSX.Element {
 
   const loadUserData = async () => {
     try {
-      const data = await getAPI(API.getUserUrl);
-      const user = data.user;
-      setProfileData({
-        country: "United States",
-        email: user.P.email,
-        id: user.id,
-        profileImage: user.P.profileImage ?? profileImage,
-        uId: user.P.uId,
-        username: user.P.username,
-      });
-
       loadContactData();
       setOriginalProfileData(profileData); // Set original data
       setIsMainScreenLoad(true);
@@ -114,14 +100,6 @@ export function Settings(): JSX.Element {
         when={!isMainScreenLoad()}
       >
         <Switch>
-          <Match when={selectedTab() === "General"}>
-            <GeneralSection
-              originalProfileData={originalProfileData}
-              profileData={profileData}
-              setOriginalProfileData={setOriginalProfileData}
-              setProfileData={setProfileData}
-            />
-          </Match>
           <Match when={selectedTab() === "Password"}>
             <PasswordSection profileData={profileData} />
           </Match>

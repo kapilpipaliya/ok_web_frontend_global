@@ -1,5 +1,18 @@
+import { evalExpression } from "~/lib/expression_eval";
+import { profileImage } from "~/pages/admin_layout/constant";
+import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
+
 import type { GraphInterface, Vertex } from "../../graph";
 
 export function getMemberVertex(graph: GraphInterface): Vertex {
   return graph.vertexes.member ?? ({ P: {} } as Vertex);
+}
+
+export function getProfileImageUrl(graph: GraphInterface): string {
+  const profileImageVertex = getProfileImageVertex(graph);
+  return getDownloadLink(profileImageVertex) || profileImage;
+}
+
+export function getProfileImageVertex(graph: GraphInterface): Vertex {
+  return evalExpression(`->UserProfileImage`, { graph, vertexes: [graph.vertexes.member] })?.[0] ?? ({ P: {} } as Vertex);
 }

@@ -6,6 +6,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
+import { setSelectionValue } from "./setSelectionValue";
 import {
   addNewVertex,
   mergeVertexProperties,
@@ -35,6 +36,25 @@ export function handleUserData(
     for (const role of data.roles) {
       updateVertex(role.id, role, graph, setGraph);
     }
+  }
+  if (data.user && data.profileImage) {
+    if (data.profileImage.id) {
+      if (!graph.vertexes[data.profileImage.id]) {
+        addNewVertex(
+          0,
+          data.profileImage,
+          graph,
+          setGraph,
+        );
+      }
+    }
+    setSelectionValue(0, graph.vertexes.member, graph, setGraph, {
+      id: "",
+      L: [],
+      P: {
+        type: "UserProfileImage",
+      },
+    } as unknown as Vertex, data.profileImage.id);
   }
 }
 

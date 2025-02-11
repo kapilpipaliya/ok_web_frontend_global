@@ -73,6 +73,7 @@ export function PageViewWrapper(
     closePopUp?: () => void;
     context?: any;
     dataId?: Id;
+    dontConfirmExit?: boolean;
     enableSEO?: boolean;
     expression?: string;
     formDataId?: Id;
@@ -452,6 +453,10 @@ export function PageViewWrapper(
 
   // Each open tab will be hidden and have its own useBeforeLeave callback
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (props.dontConfirmExit) {
+      // allow navigation
+      return;
+    }
     if (isDisabledTxn(formStore().P.txnId, graph)) {
       // allow navigation
       return;

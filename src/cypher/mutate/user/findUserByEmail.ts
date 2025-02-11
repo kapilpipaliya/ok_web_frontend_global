@@ -8,6 +8,7 @@ import { createUserSetting } from "./createUserSetting";
 
 interface UserResult {
   // globalTheme: null | Vertex;
+  profileImage: null | Vertex;
   roles: Vertex[];
   user: null | Vertex;
   userSetting: null | Vertex;
@@ -26,7 +27,8 @@ export async function findUserByEmail(
     WHERE u.email = $email OR u.username = $email
     OPTIONAL MATCH (u)-[:UserSetting]->(s:UserSetting)
     OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
-    RETURN u, s, collect(r) AS roles
+    OPTIONAL MATCH (u)-[:UserProfileImage]->(p:File)
+    RETURN u, s, collect(r) AS roles, p
   `;
 
   const result = await dbSession.run(query, { email });
@@ -44,12 +46,16 @@ export async function findUserByEmail(
   let userSetting = record.get("s")
     ? convertNodeToJson(record.get("s") as Node)
     : null;
+  const profileImage = record.get("p")
+    ? convertNodeToJson(record.get("p") as Node)
+    : null;
 
   if (user && !userSetting) {
     userSetting = (await createUserSetting(dbSession, user.id)) as Vertex;
   }
 
   return {
+    profileImage,
     roles,
     user,
     userSetting,
@@ -59,6 +65,7 @@ export async function findUserByEmail(
 async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
   const guestRole = await getGuestRole(dbSession);
   return {
+    profileImage: null,
     roles: [guestRole],
     user: null,
     userSetting: null,

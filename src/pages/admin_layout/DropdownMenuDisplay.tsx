@@ -4,10 +4,9 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
 import { signOutCall } from "~/lib/api/service/user/signOutCall";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getProfileImageUrl } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 
-import { profileImage } from "./constant";
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 
@@ -27,7 +26,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
         id="user-dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl!}
-        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${profileImage})`}
+        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${getProfileImageUrl(graph)})`}
       />
       <Show when={isOpen()}>
         <ZIndex>
@@ -39,9 +38,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">
               <ProfileHeader
-                profileImage={
-                  getMemberVertex(graph)?.P?.profileImage || profileImage
-                }
+                profileImage={getProfileImageUrl(graph)}
               />
               <hr class="color:rgb(223,223,223)" />
               <MenuItems onClose={handleClose} signOutCall={signOutCall} />
