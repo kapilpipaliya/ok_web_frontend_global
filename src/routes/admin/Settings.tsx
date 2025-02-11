@@ -4,6 +4,7 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 
 import { PasswordChangeForm } from "./PasswordChangeForm";
 import { ProfileSettings } from "./ProfileSettings";
@@ -49,6 +50,12 @@ function SettingsContent() {
       id: "email",
       label: "Email Settings",
     },
+    {
+      // adminOnly: true,
+      component: "SubDomainSettings",
+      id: "subdomain",
+      label: "SubDomain Management",
+    },
   ];
 
   return (
@@ -92,6 +99,9 @@ function SettingsContent() {
           </Show>
           <Show when={selectedMenu() === "email"}>
             <EmailSettings />
+          </Show>
+          <Show when={selectedMenu() === "subdomain"}>
+            <SubDomainSettings />
           </Show>
         </div>
       </div>

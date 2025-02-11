@@ -55,6 +55,7 @@ interface DataGridProps {
   }) => JSX.Element;
   enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
   enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
+  formSchema?: IFormMetaData;
   getTableData?: typeof defaultGetTableData;
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
@@ -153,6 +154,12 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   });
 
   const loadMetaData = async () => {
+    if (props.formSchema) {
+      setFormMetaData(props.formSchema);
+      setGridState("isNoPermissionCheck", true);
+      return;
+    }
+
     const form = FormMetaData[props.tableId] || FormMetaData.Form;
     const isDynamicForm =
       props.tableId !== "Form" && form === FormMetaData.Form;

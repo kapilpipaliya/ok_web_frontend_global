@@ -12,6 +12,12 @@ export const API = {
   submitDataUrl: "/api/mutate/submit_data",
   updateProfileImageUrl: "/api/profile/updateProfileImage",
   uploadFileUrl: "/api/file/upload",
+  // Subdomain management endpoints
+  getSubDomainsUrl: "/api/subdomain/list",
+  createSubDomainUrl: "/api/subdomain/create",
+  updateSubDomainUrl: "/api/subdomain/update",
+  deleteSubDomainUrl: "/api/subdomain/delete",
+  getSubDomainActivityUrl: "/api/subdomain/activity",
 };
 
 export function generate401RedirectUrl(pathname: string): string {
