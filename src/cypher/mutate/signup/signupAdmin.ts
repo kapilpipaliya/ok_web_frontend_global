@@ -32,6 +32,7 @@ export async function signupAdmin(tx: Transaction, data: SignupRequestData) {
     userDbSession,
     {
       email: data.email,
+      username: data.username,
       uuid: user.P.uuid,
     },
     true,

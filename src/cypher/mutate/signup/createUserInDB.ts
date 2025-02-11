@@ -58,9 +58,8 @@ export async function createUserInUserDB(
   params: { [key: string]: any },
   isSuper?: boolean,
 ) {
-  // Isnt superadmin username confusing?
   const createUserQuery2 = `CREATE (u:User {
-                username: 'superadmin',
+                username: $username,
                 uuid: $uuid,
                 email: $email,
                 isSuper: $isSuper,

@@ -212,7 +212,7 @@ export function ProfileSettings() {
                   return;
                 }
             
-                if (!validateEmail(user.P.email)) {
+                if (validateEmail(user.P.email)) {
                   showErrorToast("Please enter a valid email");
                   return;
                 }
