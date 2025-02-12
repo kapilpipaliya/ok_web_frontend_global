@@ -1,5 +1,6 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
@@ -30,15 +31,30 @@ export async function POST({ request }: APIEvent) {
   }
 
   try {
-    // Check if subdomain already exists
-    const existingDomain = await dbSession.run(
+    // Check if subdomain key already exists
+    const existingKey = await dbSession.run(
       `MATCH (s:SubDomain {key: $key}) RETURN s`,
       { key }
     );
 
-    if (existingDomain.records.length > 0) {
+    if (existingKey.records.length > 0) {
       return new Response(JSON.stringify({ 
         error: "Subdomain with this key already exists" 
+      }), {
+        headers: { "Content-Type": "application/json" },
+        status: 400
+      });
+    }
+
+    // Check if domain already exists
+    const existingDomain = await dbSession.run(
+      `MATCH (s:SubDomain {domain: $domain}) RETURN s`,
+      { domain }
+    );
+
+    if (existingDomain.records.length > 0) {
+      return new Response(JSON.stringify({ 
+        error: "Domain name is already taken" 
       }), {
         headers: { "Content-Type": "application/json" },
         status: 400
@@ -57,6 +73,9 @@ export async function POST({ request }: APIEvent) {
       { domain, key }
     );
 
+    // Convert node to JSON before using it
+    const newSubdomain = convertNodeToJson(result.records[0]?.get('s'));
+
     // Log activity
     await dbSession.run(
       `CREATE (a:Activity {
@@ -72,7 +91,15 @@ export async function POST({ request }: APIEvent) {
       }
     );
 
-    const newSubdomain = result.records[0]?.get('s').properties;
+    const createEdgeQuery = `
+      MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $key })
+      CREATE (u)-[:UserSubDomain]->(s);
+    `;
+    
+    await dbSession.run(createEdgeQuery, { 
+      key,
+      uuid: user.P.uuid 
+    });
 
     await signupAdmin(dbSession, {
       email: user.P.email,

@@ -1,3 +1,5 @@
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+
 export interface SignUpData {
   email: string;
   name: string;
@@ -14,6 +16,6 @@ export const signUpData: SignUpData = {
 export const superUserData = {
   email: "superuser@easyformforge.com",
   password: "kK11235813@",
-  subDomain: "super",
+  subDomain: SYSTEM_DB_NAME,
   username: "superuser"
 };

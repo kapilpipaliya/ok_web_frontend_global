@@ -1,6 +1,6 @@
-import { Show } from "solid-js";
+import { JSX, Show } from "solid-js";
 
-export function CardHeader(props: { imgSrc?: string; title: string }) {
+export function CardHeader(props: { children?: JSX.Element, imgSrc?: string; title?: string }) {
   return (
     <>
       <Show when={props.imgSrc}>
@@ -13,6 +13,7 @@ export function CardHeader(props: { imgSrc?: string; title: string }) {
       <div class="lh:1.25rem color:rgb(17,24,39) f:0.875rem font-weight:500 leading:1.5rem">
         {props.title}
       </div>
+      {props.children}
     </>
   );
 }

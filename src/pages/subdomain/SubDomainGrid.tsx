@@ -1,18 +1,23 @@
+import { CellContext } from "@tanstack/solid-table";
+
 import { DataGrid } from "~/components/grid/DataGrid";
 import { DataGridStore } from "~/components/grid/DataGridContext";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
+import { Vertex } from "~/lib/graph/graph";
 import { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { AddSubDomainForm } from "./AddSubDomainForm";
 
 interface SubDomain {
   domain: string;
-  latestActivity?: {
+  key: string;
+  name: string;
+  recentActivities: Array<Vertex<{
     action: string;
     details: string;
-  };
-  name: string;
+    timestamp: string;
+  }>>;
 }
 
 export const SubDomainGrid = () => {
@@ -23,26 +28,41 @@ export const SubDomainGrid = () => {
         edges: {},
         vertexes: {}
       },
-      result: data.subdomains.map((subdomain: SubDomain) => ({
-        id: subdomain.name,
+      result: data.subdomains.map((subdomain: Vertex<SubDomain>) => ({
+        ...subdomain,
         P: {
-          ...subdomain,
-          activity: subdomain.latestActivity ?
-            `${subdomain.latestActivity.action} - ${subdomain.latestActivity.details}` :
-            'No activity'
+          ...subdomain.P,
+          activity: subdomain.P.recentActivities?.length > 0 ?
+            `${subdomain.P.recentActivities[0].P.action}` :
+            'No activity',
+          recentActivities: subdomain.P.recentActivities
         }
       }))
     };
   };
 
+  const getSubdomainUrl = (key: string) => {
+    return `/api/auth/prepare-auto-login?subdomain=${key}`;
+  };
+
+  const getDomainUrl = (domain: string) => {
+    return `/api/auth/prepare-auto-login?domain=${domain}`;
+  };
+
   const SubDomain: IFormMetaData = {
     attributes: [
       {
+        cell: (info: CellContext<any, unknown>) => {
+          return <a class="color:primary text-decoration:none hover:text-decoration:underline" href={getSubdomainUrl(info.row.original.P.key)} target="_blank">{info.row.original.P.key}</a>;
+        },
         componentName: "Text",
         displayName: "Name",
-        key: "key",
+        key: "key"
       },
       {
+        cell: (info: CellContext<any, unknown>) => {
+          return <a class="color:primary text-decoration:none hover:text-decoration:underline" href={getDomainUrl(info.row.original.P.domain)} target="_blank">{info.row.original.P.domain}</a>;
+        },
         componentName: "Text",
         displayName: "Domain",
         key: "domain",

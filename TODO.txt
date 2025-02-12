@@ -22,3 +22,7 @@ Feature:
 - fix fns isnt callable from props
 
 Make documentation like https://cim.refined.site/space/FAQ/1086955297/How+to+Configure+and+Create+User+Section
+
+
+Remember to add appropriate indexes to the Neo4j database for the Token nodes if you expect high volume:
+CREATE INDEX token_hashed_token FOR (t:Token) ON (t.hashedToken);

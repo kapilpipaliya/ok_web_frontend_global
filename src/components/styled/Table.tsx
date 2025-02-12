@@ -182,7 +182,11 @@ export function CommonTable(props: Readonly<TableProps>) {
               {(row) => (
                 <CardContainer>
                   <CardHeaderContainer>
-                    <CardHeader title={row.P.key} />
+                    <CardHeader>
+                      <Content header={props.headers.find(
+                        (header) => header.key === "key",
+                      )!} row={row} />
+                    </CardHeader>
                     <Show
                       when={
                         isMultiRowSelectionEnabled(row) ||

@@ -79,7 +79,7 @@ export function CreateGridHeaders(
     // @ts-expect-error ignore
     column.accessorKey = `P.${attribute.key}`;
     column.id = attribute.key;
-    column.cell = (info) => {
+    column.cell = attribute.cell || ((info) => {
       return (
         <Switch>
           <Match
@@ -177,7 +177,7 @@ export function CreateGridHeaders(
           <Match when={true}>{info.getValue<string>()}</Match>
         </Switch>
       );
-    };
+    });
     column.header = (_info) =>
       capitalizeFirstLetter(
         attribute.title ||

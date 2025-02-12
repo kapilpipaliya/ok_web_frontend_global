@@ -17,11 +17,11 @@ export async function createUserInSuperDB(
   const uuid = uuidv7();
 
   const createUserQuery = `CREATE (u:User {
-            username: $username,
-            uuid: $uuid,
-            email: $email,
-            password: $password
-        }) SET u.createdAt = localDateTime() RETURN u;`;
+    username: $username,
+    uuid: $uuid,
+    email: $email,
+    password: $password
+  }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
     ...userData,
@@ -32,22 +32,7 @@ export async function createUserInSuperDB(
   const userNode = createUserResult.records[0].get("u");
 
   for (const subDomain of userData.subDomain) {
-    const createSubDomainQuery = `CREATE (s:SubDomain {
-            key: $subDomain
-        }) RETURN s;`;
-    const createSubDomainParams = {
-      subDomain,
-    };
-    const createSubDomainResult = await superTx.run(
-      createSubDomainQuery,
-      createSubDomainParams,
-    );
-    const _subDomainNode = createSubDomainResult.records[0].get("s");
-
-    const createEdgeQuery = `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $subDomain })
-                             CREATE (u)-[:UserSubDomain]->(s);`;
-    const createEdgeParams = { subDomain, uuid };
-    await superTx.run(createEdgeQuery, createEdgeParams);
+    await createAndLinkSubDomain(superTx, uuid, subDomain);
   }
 
   return convertNodeToJson(userNode);
@@ -70,4 +55,26 @@ export async function createUserInUserDB(
     isSuper: isSuper ?? null,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
+}
+
+async function createAndLinkSubDomain(
+  tx: Session | Transaction,
+  uuid: string,
+  subDomain: string
+) {
+  const createSubDomainQuery = `CREATE (s:SubDomain {
+    key: $subDomain
+  }) RETURN s;`;
+  
+  const createSubDomainResult = await tx.run(
+    createSubDomainQuery,
+    { subDomain }
+  );
+
+  const createEdgeQuery = `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $subDomain })
+                          CREATE (u)-[:UserSubDomain]->(s);`;
+  
+  await tx.run(createEdgeQuery, { subDomain, uuid });
+  
+  return createSubDomainResult.records[0].get("s");
 }
