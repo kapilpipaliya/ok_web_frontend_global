@@ -92,7 +92,7 @@ export const SectionList = (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
       <div class="flex jc:end mb:2 w:100%">
         <button
-          class="btn"
+          class="btn bg:primary color:base-200"
           onClick={toggleConfigured}
           title={
             showConfiguredOnly()

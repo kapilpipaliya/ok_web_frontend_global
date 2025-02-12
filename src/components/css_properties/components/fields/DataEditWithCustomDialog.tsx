@@ -44,7 +44,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   return (
     <div
       class={
-        "b:1px|solid|lightgray color:#333 my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
+        "b:1px|solid|secondary color:secondary my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
       }
     >
       <div

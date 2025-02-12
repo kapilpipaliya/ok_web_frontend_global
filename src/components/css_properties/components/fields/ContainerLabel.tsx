@@ -59,7 +59,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
       </Show>
       <Show when={props.showResetIcon ?? false}>
         <Icon
-          class="cursor:pointer fg:purple"
+          class="cursor:pointer fg:accent"
           height={26}
           icon="ph:x"
           noobserver

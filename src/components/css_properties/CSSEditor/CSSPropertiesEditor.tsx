@@ -148,13 +148,21 @@ export function CSSPropertiesEditor() {
         />
         <Show when={showDropdown()}>
           <ZIndex>
-            <DropdownMenu
-              class="r:5"
-              onClickOutside={() => setShowDropdown(false)}
-              parentRef={buttonRef!}
+            <div
+              class={
+                "b:1px|solid|secondary color:#333 my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
+              }
             >
-              <AddNewCssState onClose={() => setShowDropdown(false)} />
-            </DropdownMenu>
+              <div
+                class={`${
+                  (Object.keys(cssState[state()] || {}).length > 0
+                    ? "bb:1px|solid|secondary m:1 pb:5" 
+                    : "")
+                } flex ai:center jc:space-between mb:6px`}
+              >
+                <AddNewCssState onClose={() => setShowDropdown(false)} />
+              </div>
+            </div>
           </ZIndex>
         </Show>
       </div>

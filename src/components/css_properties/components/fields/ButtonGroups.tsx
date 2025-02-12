@@ -28,7 +28,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   };
 
   return (
-    <div class="flex border:1px|solid|rgb(211,211,211) box-shadow:0|0|0px|1px|rgba(0,0,0,0.06) box:border f:14px flex:wrap min-w:max r:0.3rem w:100%">
+    <div class="flex border:1px|solid|secondary box-shadow:0|0|0px|1px|secondary box:border f:14px flex:wrap min-w:max r:0.3rem w:100%">
       <For each={props.options}>
         {(option) => {
           return (
@@ -56,9 +56,9 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                   <span
                     class={`${
                       props.value === option.value
-                        ? "bb:1px|solid|rgb(0,0,255) fg:rgb(0,0,255)"
+                        ? "bb:1px|solid|primary fg:primary"
                         : ""
-                    } flex align-items:center border:none cursor:pointer jc:center p:4px text:rgb(128,128,128) transition:all|.15s|ease-in-out`}
+                    } flex align-items:center border:none cursor:pointer jc:center p:4px text:secondary transition:all|.15s|ease-in-out`}
                   >
                     {option.icon ? (
                       <Icon

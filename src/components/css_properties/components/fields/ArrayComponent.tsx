@@ -45,7 +45,7 @@ export function ArrayComponent(
               value={item.toString()}
             />
             <button
-              class="c:white rounded bg:red-50 px:8 py:4"
+              class="c:base-200 rounded bg:error px:8 py:4"
               onClick={() => removeItem(index())}
             >
               Remove
@@ -53,7 +53,10 @@ export function ArrayComponent(
           </div>
         )}
       </For>
-      <button class="c:white rounded bg:blue-50 px:8 py:4" onClick={addItem}>
+      <button
+        class="c:base-200 rounded bg:primary px:8 py:4"
+        onClick={addItem}
+      >
         Add Item
       </button>
     </div>
