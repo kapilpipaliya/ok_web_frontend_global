@@ -34,7 +34,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         }
         onClick={onAddNew}
       />
-      <div class="flex ai:center mb:10">
+      <div class="flex ai:center gap:8 mb:10">
         <SearchBar
           handleChange={props.onSearch}
           placeholder="Search Data..."
@@ -59,7 +59,6 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
             onInput={(e) =>
               setGridState("cardSize", Number(e.currentTarget.value))
             }
-            style={{ "margin-left": "10px" }}
             type="number"
             value={gridState.cardSize}
           />

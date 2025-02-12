@@ -17,11 +17,11 @@ export async function createUserInSuperDB(
   const uuid = uuidv7();
 
   const createUserQuery = `CREATE (u:User {
-    username: $username,
-    uuid: $uuid,
-    email: $email,
-    password: $password
-  }) SET u.createdAt = localDateTime() RETURN u;`;
+            username: $username,
+            uuid: $uuid,
+            email: $email,
+            password: $password
+        }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
     ...userData,

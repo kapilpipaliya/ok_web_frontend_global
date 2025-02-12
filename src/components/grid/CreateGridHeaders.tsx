@@ -65,6 +65,8 @@ export function CreateGridHeaders(
   setDeleteRowId: (id: Id) => void,
   navigate: (path: string) => void,
   tableId: string,
+  hideDeleteAction?: boolean,
+  hideEditJsonAction?: boolean
 ) {
   const tableColumns = [] as ColumnDef<any>[];
 
@@ -196,9 +198,7 @@ export function CreateGridHeaders(
     cell: (info) => {
       const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
-        <div
-          class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
-        >
+        <div class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}>
           <Show
             when={
               gridState.isNoPermissionCheck ||
@@ -242,8 +242,10 @@ export function CreateGridHeaders(
 
           <Show
             when={
-              gridState.isNoPermissionCheck ||
-              (!!gridState.formMetaData() && gridState.hasDeletePermission())
+              !hideDeleteAction && (
+                gridState.isNoPermissionCheck ||
+                (!!gridState.formMetaData() && gridState.hasDeletePermission())
+              )
             }
           >
             <IconButton
@@ -270,7 +272,7 @@ export function CreateGridHeaders(
               size={21}
             />
           </Show>
-          <Show when={!FormMetaData[tableId]}>
+          <Show when={!hideEditJsonAction && !FormMetaData[tableId]}>
             <ModifyJsonButton
               class="color:#FFA500"
               item={info.row.original}

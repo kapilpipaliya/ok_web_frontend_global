@@ -57,6 +57,8 @@ interface DataGridProps {
   enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
   formSchema?: IFormMetaData;
   getTableData?: typeof defaultGetTableData;
+  hideDeleteAction?: boolean;
+  hideEditJsonAction?: boolean;
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
   tableId: string;
@@ -262,6 +264,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       (id) => setGridState("deleteRowId", id),
       navigate,
       props.tableId,
+      props.hideDeleteAction,
+      props.hideEditJsonAction,
     );
 
     setGridState("tableStore", { data: nodes, tableColumns });
