@@ -1,5 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 
+import { IconButton } from "~/components/styled/IconButton";
+
 export function ImportExportButtons(
   props: Readonly<{ setPopup: (value: boolean) => void }>,
 ) {
@@ -9,14 +11,15 @@ export function ImportExportButtons(
         <Icon height={22} icon={"lets-icons:import"} noobserver width={22} />
         Import
       </button>
-      <button
-        class="flex b:blue"
+      <IconButton
+        class="flex b:primary"
+        icon="lets-icons:export"
         onClick={() => props.setPopup(true)}
+        size={22}
         type="button"
       >
-        <Icon height={22} icon={"lets-icons:export"} noobserver width={22} />
         Export
-      </button>
+      </IconButton>
     </div>
   );
 }

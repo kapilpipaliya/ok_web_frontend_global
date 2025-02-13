@@ -108,7 +108,7 @@ export function ProfileSettings() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:white p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: async () => {

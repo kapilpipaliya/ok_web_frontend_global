@@ -1,14 +1,11 @@
 import { createMemo, For } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
+import { themeConfig } from "~/cypher/get/themeConfig";
+
 export function ThemePreview(props: { item: Vertex }) {
   const themeData = createMemo(() => {
-    try {
-      return JSON.parse(props.item.P.data);
-    } catch (error) {
-      console.error("Failed to parse theme data:", error);
-      return { variables: {} };
-    }
+    return themeConfig(props.item);
   });
 
   const getColorClass = (color?: string | { "@light": string }) => {

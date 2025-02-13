@@ -99,7 +99,7 @@ export function SettingTabs() {
   const Tabs = () => (
     <>
       {/* <Icon
-        class="bg:white:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
+        class="bg:base-5:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
         icon={"iconamoon:close-duotone"}
         onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: false })}
@@ -113,7 +113,7 @@ export function SettingTabs() {
 
   return (
     <div class="flex flex:column h:100%">
-      <div class="bg:white">
+      <div class="bg:base-5">
         <Tabs />
       </div>
       <div

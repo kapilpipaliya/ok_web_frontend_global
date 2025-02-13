@@ -40,7 +40,7 @@ export function AttrConfigIcons(
       placement="right"
       useFlip={false}
     >
-      <div class="flex flex:col ai:center bg:white">
+      <div class="flex flex:col ai:center bg:base-5">
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <InsertButtons item={props.metaVertex} size={iconSize} />
         </Show>
@@ -52,7 +52,7 @@ export function AttrConfigIcons(
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
           <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
           <DeleteButton
-            class="color:red"
+            class="color:error"
             componentName={getComponent()!}
             item={props.metaVertex}
             size={iconSize}

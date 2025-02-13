@@ -1,9 +1,9 @@
 import { type JSX, Show, splitProps } from "solid-js";
 
 export const dialogOkButtonClass =
-  "lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:white display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem";
+  "lh:1.25rem  align-items:center  bg:indigo-60  bg:indigo-50:hover  border-radius:0.375rem box-shadow:0|1px|2px|0|rgba(0,0,0,0.05) color:base-5 display:inline-flex f:0.875rem  font:semibold  outline-color:indigo-50:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem";
 export const dialogCancelButtonClass =
-  "lh:1.25rem  align-items:center  bg:white  border-radius:0.375rem  border-width:1px  border-color:gray-30  color:gray-90  display:inline-flex  f:0.875rem  font:semibold  outline-color:gray-30:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem";
+  "lh:1.25rem  align-items:center  bg:base-5  border-radius:0.375rem  border-width:1px  border-color:gray-30  color:gray-90  display:inline-flex  f:0.875rem  font:semibold  outline-color:gray-30:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem";
 
 export function DialogFooter(
   props: JSX.IntrinsicElements["button"] & {

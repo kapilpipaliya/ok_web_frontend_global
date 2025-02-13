@@ -33,7 +33,7 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
           option={props.option}
         />
         <Icon
-          class="cursor:pointer fg:red mr:8"
+          class="cursor:pointer fg:error mr:8"
           icon="mdi:close"
           noobserver
           onClick={() => props.deleteOption(props.index())}

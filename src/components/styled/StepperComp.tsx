@@ -85,7 +85,7 @@ export const Stepper = () => {
               >
                 <span style="display:flex; align-items:center;">
                   <span
-                    style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${currentStep() === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+                    style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${currentStep() === step.id ? "background-color:rgb(37,99,235); color:base-5;" : ""}`}
                     title={step.label}
                   >
                     {step.icon}
@@ -100,11 +100,11 @@ export const Stepper = () => {
                     e.stopPropagation();
                     deleteStep(step.id);
                   }}
-                  style="margin-left:0.5rem; color:red; background:none; border:none; cursor:pointer;"
+                  style="margin-left:0.5rem; color:error; background:none; border:none; cursor:pointer;"
                 >
                   &times;
                 </button>
-                <span style="position:absolute; top:100%; left:50%; transform:translateX(-50%); display:none; padding:0.5rem; background:rgba(0, 0, 0, 0.75); color:white; border-radius:0.25rem; font-size:0.75rem; white-space:nowrap; pointer-events:none;">
+                <span style="position:absolute; top:100%; left:50%; transform:translateX(-50%); display:none; padding:0.5rem; background:rgba(0, 0, 0, 0.75); color:base-5; border-radius:0.25rem; font-size:0.75rem; white-space:nowrap; pointer-events:none;">
                   {step.label}
                 </span>
               </li>

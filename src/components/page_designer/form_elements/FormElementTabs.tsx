@@ -157,7 +157,7 @@ export function FormElementTabs() {
 
   return (
     <div class="flex flex:column h:100%">
-      <div class="bg:white">
+      <div class="bg:base-5">
         <TabsContainer>
           <TabList />
         </TabsContainer>

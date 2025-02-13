@@ -60,7 +60,7 @@ export function PageShare(props: { formStoreId: string }) {
 
   return (
     <div class="p:20px r:10px">
-      {error() && <div class="color:red mb:10px">{error()}</div>}
+      {error() && <div class="color:error mb:10px">{error()}</div>}
       <div class="flex mb:20px">
         <input
           class="bg:rgb(245,245,245) p:10 r:5|0|0|5 w:full"
@@ -88,7 +88,7 @@ export function PageShare(props: { formStoreId: string }) {
           <button
             class={
               access() === type
-                ? "bg:#554FDC border:none color:white cursor:pointer mr:10px p:10px|20px r:6px"
+                ? "bg:#554FDC border:none color:base-5 cursor:pointer mr:10px p:10px|20px r:6px"
                 : "bg:rgb(245,245,245) border:none cursor:pointer mr:10px p:10px|20px r:6px"
             }
             onClick={() => handleAccessChange(type)}

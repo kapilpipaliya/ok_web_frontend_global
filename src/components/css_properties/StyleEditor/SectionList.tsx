@@ -8,6 +8,8 @@ import {
   Show,
 } from "solid-js";
 
+import { IconButton } from "~/components/styled/IconButton";
+
 import type {
   CSSJSONSchemaSearchType,
   GenericField,
@@ -47,20 +49,15 @@ export const CollapsibleSection = (
         "r:5|5|0|0": props.index === 0 && props.sectionCount() > 1,
       }}
     >
-      <button
-        class="flex ai:center cursor:pointer w:full"
+      <IconButton
+        class="w:full"
+        icon="ph:caret-up"
+        iconClass={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
         onClick={() => setIsOpen(!isOpen())}
         type="button"
       >
-        <Icon
-          class={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
-          height={25}
-          icon="ph:caret-up"
-          noobserver
-          width={25}
-        />
         <span class="f:15 font-weight:600">{props.title}</span>
-      </button>
+      </IconButton>
       <Show when={isOpen()}>
         <hr class="color:#e1e1e1 m:2" />
         <For each={Object.entries(props.propertyFieldMap)}>
@@ -91,41 +88,33 @@ export const SectionList = (
   return (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
       <div class="flex jc:end mb:2 w:100%">
-        <button
-          class="btn bg:primary color:base-200"
+        <IconButton
+          icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
+          iconClass="transition:transform|0.2s|linear"
           onClick={toggleConfigured}
+          size={25}
           title={
             showConfiguredOnly()
               ? "Show all fields"
               : "Show configured fields only"
           }
-        >
-          <Icon
-            class="transition:transform|0.2s|linear"
-            height={25}
-            icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
-            noobserver
-            width={25}
-          />
-        </button>
-        <button class="btn ml:2" onClick={collapseAll} title="Collapse all">
-          <Icon
-            class="transition:transform|0.2s|linear"
-            height={25}
-            icon="ph:arrows-in"
-            noobserver
-            width={25}
-          />
-        </button>
-        <button class="btn ml:2" onClick={expandAll} title="Expand all">
-          <Icon
-            class="transition:transform|0.2s|linear"
-            height={25}
-            icon="ph:arrows-out"
-            noobserver
-            width={25}
-          />
-        </button>
+        />
+        <IconButton
+          class="ml:2"
+          icon="ph:arrows-in"
+          iconClass="transition:transform|0.2s|linear"
+          onClick={collapseAll}
+          size={25}
+          title="Collapse all"
+        />
+        <IconButton
+          class="ml:2"
+          icon="ph:arrows-out"
+          iconClass="transition:transform|0.2s|linear"
+          onClick={expandAll}
+          size={25}
+          title="Expand all"
+        />
       </div>
       <For each={Object.entries(props.filteredSections())} fallback={""}>
         {(section, index) => {

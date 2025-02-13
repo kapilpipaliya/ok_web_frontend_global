@@ -134,7 +134,7 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            class: "bg:secondary fg:white p:8|16 r:4 cursor:pointer border:none mr:auto",
+            class: "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
             componentName: "Box",
             props: () => ({
               onClick: () => setOpenDialog(true),
@@ -143,7 +143,7 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            class: "bg:primary fg:white p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: onSave,

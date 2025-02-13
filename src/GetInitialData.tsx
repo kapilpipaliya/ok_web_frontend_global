@@ -63,7 +63,7 @@ export function GetInitialData(props: GetInitialDataProps) {
         <LoaderNew />
       </Match>
       <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-        <div class="bg:red-50 p:1">
+        <div class="bg:error p:1">
           {getGlobalStore(graph[0]).P.initialDataFetchError}
         </div>
       </Match>

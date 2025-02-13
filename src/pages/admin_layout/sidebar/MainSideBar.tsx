@@ -26,7 +26,7 @@ export const MainSideBar = (props: Readonly<MainSideBarProps>) => {
               <a
                 class={`${
                   props.activeSection() === navNode.P.key
-                    ? "bg:white color:#37c"
+                    ? "bg:base-5 color:#37c"
                     : ""
                 } gap:10 `}
                 href={navNode.P.url}

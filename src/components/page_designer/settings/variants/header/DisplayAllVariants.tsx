@@ -12,7 +12,7 @@ export function DisplayAllVariants() {
   return (
     <>
       <button
-        class="bg:blue-50 color:white mb:2 p:2 r:5"
+        class="bg:primary color:base-5 mb:2 p:2 r:5"
         onClick={onDisplayAllVariants}
       >
         All Variants

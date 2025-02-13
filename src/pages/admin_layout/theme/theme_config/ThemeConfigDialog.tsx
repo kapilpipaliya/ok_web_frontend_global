@@ -16,6 +16,9 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
+import type * as Monaco from "monaco-editor";
+import { formatJavaScriptCode } from "~/lib/formatUtils";
 
 export function ThemeConfigDialog(
   props: Readonly<{
@@ -34,6 +37,7 @@ export function ThemeConfigDialog(
   const [themeName, setThemeName] = createSignal(
     props.item ? props.item.P.key : "New",
   );
+  let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
   const handleChange = (value: string) => {
     setThemeData(value);
@@ -41,6 +45,17 @@ export function ThemeConfigDialog(
 
   const handleNameChange = (value: string) => {
     setThemeName(value);
+  };
+
+  const formatCode = async () => {
+    if (editorRef) {
+      try {
+        const formatted = await formatJavaScriptCode(editorRef.getValue());
+        editorRef.setValue(formatted);
+      } catch (err) {
+        console.error("Formatting failed:", err);
+      }
+    }
   };
 
   const saveNewTheme = async () => {
@@ -127,11 +142,22 @@ export function ThemeConfigDialog(
           />
         </Show>
         <label>Theme Configuration</label>
-        <textarea
-          class={`${PROPERTIES.Css.TextField} h:400px`}
-          onInput={(e) => handleChange(e.target.value)}
-          value={themeData()}
-        />
+        <div class="flex flex:col gap:0.50rem">
+          <MonacoEditorWrapper
+            height="400px"
+            language="javascript"
+            onChange={handleChange}
+            onMount={(editor) => (editorRef = editor)}
+            value={themeData()}
+          />
+          <button
+            class="px:3 py:1 bg:gray-60 fg:base-5 r:1 self:end"
+            onClick={formatCode}
+            title="Format Code"
+          >
+            Format
+          </button>
+        </div>
       </div>
       <Show when={error()}>
         <div style={{ color: "red" }}>{error()}</div>

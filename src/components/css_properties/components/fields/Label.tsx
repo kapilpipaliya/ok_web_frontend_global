@@ -115,7 +115,7 @@ export function Label(
         >
           <span class={generateLabelClass()} {...restProps}>
             {local.label}
-            {local.required && <span class="color:red"> *</span>}
+            {local.required && <span class="color:error"> *</span>}
           </span>
           {resolvedChildren()}
         </Match>
@@ -127,7 +127,7 @@ export function Label(
           {resolvedChildren()}
           <span class={generateLabelClass()} {...restProps}>
             {local.label}
-            {local.required && <span class="color:red"> *</span>}
+            {local.required && <span class="color:error"> *</span>}
           </span>
         </Match>
       </Switch>

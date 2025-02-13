@@ -105,7 +105,7 @@ export const SortableRow = (
               />
             </Show>
             <IconButton
-              class="color:red cursor:pointer m:5px"
+              class="color:error cursor:pointer m:5px"
               icon="mingcute:delete-line"
               onClick={handleDeleteRow}
               size={20}

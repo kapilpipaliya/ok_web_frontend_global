@@ -26,7 +26,7 @@ export const wrapWithTitle = (
         attributes: required
           ? [
               {
-                class: "color:red",
+                class: "color:error",
                 componentName: "Text",
                 key: `required_${title}`,
                 text: " *",
@@ -217,7 +217,7 @@ string`,
               size: 16,
             },
           ],
-          class: "flex ai:center gap:2 color:red",
+          class: "flex ai:center gap:2 color:error",
           componentName: "Button",
           key: "button",
           props: (options: FunctionArgumentType) => {

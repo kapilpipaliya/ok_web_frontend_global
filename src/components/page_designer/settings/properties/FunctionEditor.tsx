@@ -1,38 +1,15 @@
 import type * as Monaco from "monaco-editor";
-
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { createEffect, createSignal, on } from "solid-js";
-import { MonacoEditor } from "solid-monaco";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-
 import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
+import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { formatJavaScriptCode } from "~/lib/formatUtils";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
-
-window.MonacoEnvironment = {
-  getWorker(_moduleId: unknown, label: string) {
-    switch (label) {
-      case "css":
-        return new cssWorker();
-      case "javascript":
-      case "typescript":
-        return new tsWorker();
-      case "json":
-        return new jsonWorker();
-      default:
-        return new editorWorker();
-    }
-  },
-  // onigasm,
-};
 
 export function FunctionEditor(props: {
   setPropertyValue: (meta: Vertex, value: unknown) => void;
@@ -128,41 +105,27 @@ export function FunctionEditor(props: {
 
   const EditorContent = (props: { height?: string }) => (
     <>
-      <MonacoEditor
-        class={`${PROPERTIES.Css.TextField} ${isFunctionValid() ? "" : "b:red-50"}`}
-        height={props.height ?? "200px"}
-        language="javascript"
+      <MonacoEditorWrapper
+        error={!isFunctionValid()}
+        height={props.height}
         onChange={(value) => setEditorValue(value)}
-        onMount={(_editor, monaco) => {
-          editorRef = monaco;
-        }}
-        options={{
-          autoIndent: "full",
-          folding: false,
-          formatOnPaste: true,
-          formatOnType: true,
-          glyphMargin: false,
-          lineDecorationsWidth: 0,
-          lineNumbers: "off",
-          lineNumbersMinChars: 0,
-          minimap: { enabled: true },
-          tabSize: 2,
-        }}
+        onMount={(editor) => (editorRef = editor)}
+        showMinimap={false}
         value={editorValue()}
       />
       <div class="flex gap:2 mt:2">
-        <button class="px:3 py:1 bg:blue-60 fg:white r:1" onClick={handleSave}>
+        <button class="px:3 py:1 bg:primary-60 fg:base-5 r:1" onClick={handleSave}>
           Submit
         </button>
         <button
-          class="px:3 py:1 bg:gray-60 fg:white r:1"
+          class="px:3 py:1 bg:gray-60 fg:base-5 r:1"
           onClick={formatCode}
           title="Format Code with Prettier"
         >
           Format
         </button>
       </div>
-      {!isFunctionValid() && <span class="fg:red-50">Invalid Function</span>}
+      {!isFunctionValid() && <span class="fg:error">Invalid Function</span>}
     </>
   );
 

@@ -103,5 +103,5 @@ function RenderButton(props: { label: string; onClick: () => void }) {
 }
 
 function RenderPreview(props: { class: string }) {
-  return <div class={`${props.class} bg:#fff h:20px mr:10 r:5 w:20px`} />;
+  return <div class={`${props.class} h:20px mr:10 r:5 w:20px`} />;
 }

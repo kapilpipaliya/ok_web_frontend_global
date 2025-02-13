@@ -107,7 +107,7 @@ export function Drawer(props: Readonly<DrawerProps>) {
   const ResizerBorder = (p: { children: JSX.Element }) => {
     return (
       <div
-        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:white border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
+        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:base-5 border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
         ref={setFloating}
       >
         {p.children}

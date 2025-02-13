@@ -31,7 +31,7 @@ export function CustomPopover(
         </div>
       </Popover.Trigger>
       <Popover.Content
-        class={`background-color:white border-radius:0.25rem border:1px|solid|#e5e7eb max-height:90vh max-width:90vw ${STYLES.overflow} width:50vw z-index:10`}
+        class={`background-color:base-5 border-radius:0.25rem border:1px|solid|#e5e7eb max-height:90vh max-width:90vw ${STYLES.overflow} width:50vw z-index:10`}
       >
         <div class="padding:1rem">
           {props.title && (

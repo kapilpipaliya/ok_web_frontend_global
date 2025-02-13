@@ -314,7 +314,7 @@ export function MultiSelectField(
 
   return (
     <div
-      class={`pos:relative b:1px|solid|#ccc bg:white p:0px|3px r:4px text-align:left w:100% ${props.class}`}
+      class={`pos:relative b:1px|solid|#ccc bg:base-5 p:0px|3px r:4px text-align:left w:100% ${props.class}`}
       classList={{
         "b:1px|solid|#ff0000": !!props.error,
       }}

@@ -58,7 +58,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
         <For each={breadcrumb()}>
           {(item, index) => (
             <button
-              class={`c:blue ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`}
+              class={`c:primary ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`}
               onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"
             >

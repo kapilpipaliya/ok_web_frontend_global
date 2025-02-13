@@ -124,7 +124,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
   return (
     <>
     <button
-          class="bg:primary fg:white p:8|16 r:4 cursor:pointer border:none"
+          class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
           onClick={() => setShowAddModal(true)}
         >
           Add New SubDomain
@@ -139,7 +139,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
             Cancel
           </button>
           <button
-            class="bg:primary fg:white p:8|16 r:4 cursor:pointer border:none"
+            class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
             disabled={isLoading()}
             onClick={handleSave}
           >

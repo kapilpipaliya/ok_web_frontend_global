@@ -51,14 +51,14 @@ export function JsonEditorFieldComponent() {
           placeholder="Enter value here"
           value={JSON.stringify(graph.vertexes[formStoreVertex()?.P.selectedId].P, null, 2)}
           onChange={(e) => replacePropertyValue(e.currentTarget.value)}
-          class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:red-50' : ''}`}
+          class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:error' : ''}`}
           style={{ height: "200px" }}
         /> */}
       <JsonEditorField
         json={graph.vertexes[formStoreVertex()?.P.selectedId].P}
         onChange={replacePropertyValue}
       />
-      {!isJsonValid() && <span class="fg:red-50">Invalid JSON</span>}
+      {!isJsonValid() && <span class="fg:error">Invalid JSON</span>}
     </label>
   );
 }

@@ -37,7 +37,7 @@ export function SelectedAttrConfigPopOver(
   return (
     <span class="position:relative">
       <div
-        class={`flex ai:center bg:rgb(37,99,235) bottom:100% color:white gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
+        class={`flex ai:center bg:primary bottom:100% color:base-5 gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
       >
         <IconButton
           class="cursor:grab"
@@ -58,7 +58,7 @@ export function SelectedAttrConfigPopOver(
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
         <DeleteButton
-          class="color:red"
+          class="color:error"
           componentName={getComponentName()!}
           item={props.item}
           size={iconSize}

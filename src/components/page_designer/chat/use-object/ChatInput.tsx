@@ -36,7 +36,7 @@ export function ChatInput(props: ChatInputProps) {
 
   return (
     <form
-      class="background:white border-top:1px|solid|rgb(229,231,235) p:4 mb:4"
+      class="background:base-5 border-top:1px|solid|rgb(229,231,235) p:4 mb:4"
       onSubmit={handleSubmit}
     >
       <div class="display:flex flex-direction:column gap:8px">
@@ -220,8 +220,8 @@ function MessagesCount(props: {
   let deleteButtonRef: HTMLButtonElement;
 
   return (
-    <div class="display:flex justify-content:space-between align-items:center">
-      <Show when={props.chatMessages.length > 0}>
+    <Show when={props.chatMessages.length > 0}>
+      <div class="display:flex justify-content:space-between align-items:center">
         <TooltipWrapper
           arrowClass="text:rgb(243,244,246)"
           content={
@@ -274,8 +274,8 @@ function MessagesCount(props: {
             </div>
           </DropdownMenu>
         </Show>
-      </Show>
-    </div>
+      </div>
+    </Show>
   );
 }
 

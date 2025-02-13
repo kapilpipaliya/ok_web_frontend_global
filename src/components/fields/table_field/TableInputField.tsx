@@ -176,7 +176,7 @@ export function TableInputField(
                             )}
                             {/* Add Proper Validation check */}
                             {attribute.P.validation?.required && (
-                              <span class="color:red"> *</span>
+                              <span class="color:error"> *</span>
                             )}
                           </th>
                         </Match>

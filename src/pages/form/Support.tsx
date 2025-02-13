@@ -120,7 +120,7 @@ export const SupportTicketSection = (
                   <div
                     class="border-radius:5px margin-bottom:5px padding:5px"
                     classList={{
-                      "color:#fff": true,
+                      "color:base-5": true,
                       "float:left text-align:left background:rgb(29|92|194|/|76%)":
                         !msg.personal,
                       "float:right text-align:right background:linear-gradient(120deg,#248A52,#257287)":
@@ -184,7 +184,7 @@ export const SupportTicketSection = (
                   value={inputMessage()}
                 />
                 <div
-                  class="flex background:#248A52 border-radius:10px border:none color:#fff cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
+                  class="flex background:#248A52 border-radius:10px border:none color:base-5 cursor:pointer font-size:10px jc:center padding:4px|6px position:absolute right:10px text-transform:uppercase top:5px"
                   onClick={() => sendMessage(props.id)}
                 >
                   <Icon

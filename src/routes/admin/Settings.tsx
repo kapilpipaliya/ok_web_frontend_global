@@ -79,7 +79,7 @@ function SettingsContent() {
                 <div
                   class={`p:12px cursor:pointer r:4px mb:8px ${
                     selectedMenu() === item.id
-                      ? "bg:secondary fg:white"
+                      ? "bg:secondary fg:base-5"
                       : "bg:#f3f4f6:hover fg:#374151"
                   }`}
                   onClick={() => setSelectedMenu(item.id)}

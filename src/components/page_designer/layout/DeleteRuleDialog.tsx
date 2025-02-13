@@ -113,7 +113,7 @@ export function DeleteAttributeDialog() {
           title="The following attributes are used in unique constraints:"
         />
         <Show when={formStoreVertex()?.P.shouldContainAtLeastOneForm}>
-          <div class="lh:1.25rem color:red f:0.875rem mt:0.5rem">
+          <div class="lh:1.25rem color:error f:0.875rem mt:0.5rem">
             Error: At least one form attribute should be present.
           </div>
         </Show>

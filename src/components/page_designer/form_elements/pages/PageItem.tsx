@@ -50,7 +50,7 @@ export function PageItem(
   let menuRef: HTMLDivElement;
 
   const baseStyle =
-    "align-items:center background-color:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
+    "align-items:center bg:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
 
   const hoverStyle =
     "background-color:#F2EDED box-shadow:4px|4px|4px cursor:move";

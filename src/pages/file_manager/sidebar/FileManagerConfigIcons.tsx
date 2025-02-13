@@ -185,7 +185,7 @@ export function FileManagerConfigIcons(
             title="Rename"
           />
           <IconButton
-            class="color:red cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            class="color:error cursor:pointer mr:5px opacity:.5 opacity:1:hover"
             icon="mdi:delete"
             iconClass="transition:0.5s|ease-in-out"
             onClick={() => {}}

@@ -115,7 +115,7 @@ export function ComponentVariantsInput(props: {
                   }
                 >
                   <IconButton
-                    class="color:red"
+                    class="color:error"
                     icon="ph:x"
                     onClick={() => props.setPropertyValue(variant, null)}
                     size={16}

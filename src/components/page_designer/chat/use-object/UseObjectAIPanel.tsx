@@ -20,6 +20,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./ChatResponse";
 import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
+import { getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -46,7 +47,7 @@ export function UseObjectAIPanel() {
   let examplesButtonRef: HTMLButtonElement | undefined;
   let fileInputRef: HTMLInputElement | undefined;
 
-  const globalTheme = themeConfig(graph);
+  const globalTheme = themeConfig(getGlobalThemeVertex(graph));
 
   // Add onMount to scroll to bottom initially
   onMount(() => {

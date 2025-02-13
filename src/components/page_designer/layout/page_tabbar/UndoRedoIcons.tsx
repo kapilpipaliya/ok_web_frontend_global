@@ -36,7 +36,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
               item.disabled()
                 ? "cursor:not-allowed opacity:.5"
                 : "hover:color:#000"
-            } flex ai:center b:1px|solid|lightgrey bg:white color:grey jc:center p:6 r:7`}
+            } flex ai:center b:1px|solid|lightgrey bg:base-5 color:grey jc:center p:6 r:7`}
             icon={item.icon}
             onClick={item.onClick}
             size={22}

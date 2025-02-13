@@ -290,7 +290,7 @@ export function SyncData() {
             Transfer nodes
           </h3>
           <button
-            class="bg:#37c f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
+            class="bg:primary f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
             onClick={() => {
               onClickTransfer(transferNodes.map((node) => node.value));
             }}
@@ -302,7 +302,7 @@ export function SyncData() {
           <For each={transferNodes}>
             {(node) => (
               <button
-                class="bg:#37c f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
+                class="bg:primary f:0.875rem font-weight:500  m:2 p:10 r:0.5rem"
                 onClick={() => {
                   onClickTransfer([node.value]);
                 }}

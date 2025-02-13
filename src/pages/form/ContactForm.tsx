@@ -69,7 +69,7 @@ export function ContactForm(): JSX.Element {
     <div class="flex @fade|.5s ai:center bg:cover bg:rgb(239,235,233) bg:url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais') flex:auto flex:column h:100vh jc:center">
       <img alt="logo" class="h:70px js:center mb:100px" src={logo} />
       <form
-        class="flex bg:white jc:center m:10px mb:5rem p:20px|30px r:10 shadow:0|4px|8px|rgba(0,0,0,0.1) w:inherit"
+        class="flex bg:base-5 jc:center m:10px mb:5rem p:20px|30px r:10 shadow:0|4px|8px|rgba(0,0,0,0.1) w:inherit"
         onSubmit={handleSubmit}
       >
         <div class="flex d:none@<md jc:center w:-webkit-fill-available">
@@ -126,7 +126,7 @@ export function ContactForm(): JSX.Element {
           />
 
           <button
-            class="bg:rgb(226,65,74) border:none color:white cursor:pointer p:10px r:4px w:100%"
+            class="bg:rgb(226,65,74) border:none color:base-5 cursor:pointer p:10px r:4px w:100%"
             type="submit"
           >
             Send Message

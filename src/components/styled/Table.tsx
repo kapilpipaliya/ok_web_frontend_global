@@ -303,7 +303,7 @@ function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
   return (
     <div class="display:flex justify-content:end padding:5px|10px">
       <button
-        class="bg:blue-50 br:5px cursor:pointer p:10px text:white"
+        class="bg:primary br:5px cursor:pointer p:10px text:base-5"
         onClick={props.onClick}
       >
         Load More
@@ -342,7 +342,7 @@ function TableBody(
             when={props.enableMultiRowSelection || props.enableRowSelection}
           >
             <TableBodyCell
-              class={props.selectedRows.includes(row) ? "bg:blue-20" : ""}
+              class={props.selectedRows.includes(row) ? "bg:primary-20" : ""}
               index={index()}
             >
               <Show
@@ -361,7 +361,7 @@ function TableBody(
           <For each={props.headers}>
             {(header: any) => (
               <TableBodyCell
-                class={props.selectedRows.includes(row) ? "bg:blue-20" : ""}
+                class={props.selectedRows.includes(row) ? "bg:primary-20" : ""}
                 index={index()}
               >
                 <Content header={header} row={row} />

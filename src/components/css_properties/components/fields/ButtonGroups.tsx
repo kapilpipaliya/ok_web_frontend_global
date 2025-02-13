@@ -76,7 +76,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                   <TooltipContent class="rounded-lg bg-corvu-100 px-3 py-2 font-medium corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1">
                     <div
                       class={
-                        "center bg:#333 color:#fff f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
+                        "center bg:#333 color:white f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1"
                       }
                     >
                       {option.tooltip ?? option.value}

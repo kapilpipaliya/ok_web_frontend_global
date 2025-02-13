@@ -119,7 +119,7 @@ export function Login(): JSX.Element {
         <div class="text-align:-webkit-center">
           <img
             alt="logo"
-            class="@fade|.5s bg:white p:2 r:10"
+            class="@fade|.5s bg:base-5 p:2 r:10"
             src={formData().profileImage}
             style={{ height: "130px", "justify-self": "center" }}
           />
@@ -144,7 +144,7 @@ function LoginForm(props: Readonly<LoginFormProps>): JSX.Element {
   const subTitle = "";
   return (
     <form
-      class="bg:white jc:center m:10px mb:5rem r:10 w:inherit"
+      class="bg:base-5 jc:center m:10px mb:5rem r:10 w:inherit"
       style={{
         "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
         display: "flex",

@@ -39,7 +39,7 @@ export function PreviewButton(props: { formStoreId: string }) {
         <div
           class={`flex ai:center bg:rgba(0,0,0,0.5) h:full jc:center left:0 position:fixed top:0 w:full z-index:${zIndex}`}
         >
-          <div class="bg:white h:full p:4 position:relative w:full">
+          <div class="bg:base-5 h:full p:4 position:relative w:full">
             <IconButton
               class="bg:transparent border:none cursor:pointer position:absolute right:10px top:10px"
               icon="ph:x"

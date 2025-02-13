@@ -1,9 +1,9 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-
+import { variables } from '@master/css'
 import "~/base.css";
-
+console.log(variables)
 import { createSignal, Show, Suspense } from "solid-js";
 
 import { createAppState } from "~/createAppState";
@@ -13,6 +13,7 @@ import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
 import { themeConfig } from "./cypher/get/themeConfig";
 import { GraphContext } from "./lib/graph/graph";
+import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -23,7 +24,7 @@ export default function App() {
     <Router
       root={(props) => {
         return (
-          <CSSRuntimeProvider config={themeConfig(graph[0])}>
+          <CSSRuntimeProvider config={themeConfig(getGlobalThemeVertex(graph[0]))}>
             <GraphContext.Provider value={graph}>
               <MetaProvider>
                 <Suspense fallback={<LoaderNew />}>

@@ -44,8 +44,8 @@ export function UploadVideo() {
         onChange={handleUpload}
         type="file"
       />
-      {uploading() && <p class="color:blue">Uploading...</p>}
-      {error() && <p class="color:red">{error()}</p>}
+      {uploading() && <p class="color:primary">Uploading...</p>}
+      {error() && <p class="color:error">{error()}</p>}
       {videoUrl() && (
         <video class="height:auto width:100%" controls src={videoUrl()} />
       )}

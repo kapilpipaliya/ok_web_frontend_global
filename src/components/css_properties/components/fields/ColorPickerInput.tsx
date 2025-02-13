@@ -19,7 +19,7 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
       class={`${props.isLabelOnTop ? "" : "max-w:50% w:50%"} flex ai:center b:1px|solid|secondary p:5 r:5`}
     >
       <label // NOSONAR
-        class={`b:1px|solid|secondary bg:${props.value || "base-200"} cursor:pointer h:25px mr:10 r:5 w:30px`}
+        class={`b:1px|solid|secondary bg:${props.value || "base-5"} cursor:pointer h:25px mr:10 r:5 w:30px`}
         onClick={() => inputRef?.click()}
       >
         <input

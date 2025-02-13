@@ -181,7 +181,7 @@ export function ComponentItem(
               />
             </Show>
             <span
-              class={`${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? "color:red" : ""} font-size:14px`}
+              class={`${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? "color:error" : ""} font-size:14px`}
             >
               {props.child?.P.label || props.child?.P.key}
             </span>

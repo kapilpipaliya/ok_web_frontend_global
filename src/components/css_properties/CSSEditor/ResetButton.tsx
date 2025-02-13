@@ -11,7 +11,7 @@ export function ResetButton(props: Readonly<{ onReset: () => void }>) {
     <Show when={Object.entries(filterTruthyCSSStore(cssState)).length}>
       <div class="d:flex jc:end">
         <IconButton
-          class="bg:red-50 bg:red-70:hover color:white gap:10px px:16px py:8px r:6 transition:background-color|200ms"
+          class="bg:error bg:error-70:hover color:base-5 gap:10px px:16px py:8px r:6 transition:background-color|200ms"
           icon="mdi:close"
           onClick={() => {
             setCssState(reconcile({ "": {} }));

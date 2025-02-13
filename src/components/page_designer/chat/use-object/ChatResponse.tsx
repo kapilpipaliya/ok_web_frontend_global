@@ -14,7 +14,7 @@ interface ChatResponseProps {
 
 export function ChatResponse(props: ChatResponseProps) {
   return (
-    <div class="padding:12px background:white border:1px|solid|rgb(229,231,235) border-radius:6px">
+    <div class="padding:12px border:1px|solid|secondary-20 border-radius:6px">
       <ResponseContent response={props.message.P.response} />
       <ResponsePreview message={props.message} />
     </div>

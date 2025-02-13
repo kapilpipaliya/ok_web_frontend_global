@@ -98,7 +98,7 @@ export function ForgotPassword(): JSX.Element {
       />
       <Switch>
         <Match when={isLoading()}>
-          <div class="bg:white p:5rem r:10">
+          <div class="bg:base-5 p:5rem r:10">
             <div>Loading</div>
           </div>
         </Match>
@@ -245,7 +245,7 @@ export function ForgotPassword(): JSX.Element {
 function Form(props: Readonly<FormProps>): JSX.Element {
   return (
     <form
-      class="@fade|.5s bg:white mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
+      class="@fade|.5s bg:base-5 mb:5rem r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl"
       onSubmit={props.onSubmit}
       style={{
         "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",

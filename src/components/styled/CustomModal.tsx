@@ -34,7 +34,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       : createSignal(false);
 
   const modalContainerClass = `position:fixed top:0 left:0 width:100% height:100% display:flex jc:center ai:center z-index:${zIndex} background-color:rgba(0,0,0,0.5)`;
-  const modalClass = "position:relative background-color:white";
+  const modalClass = "position:relative background-color:base-5";
 
   const Content = () => {
     const [floating, setFloating] = createSignal<HTMLElement | undefined>();

@@ -40,7 +40,7 @@ export function CssPropertyRowSettings(
 
   return (
     <Show when={props.openMenu[0]()}>
-      <div class={"b:1px|solid|#ccc bg:#fff p:6 r:4"}>
+      <div class={"b:1px|solid|#ccc p:6 r:4"}>
         <Header />
 
         <For each={props.meta.children || []}>

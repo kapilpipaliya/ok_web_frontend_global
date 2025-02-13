@@ -41,7 +41,7 @@ export function useToast() {
   function showCustomToast(message: string, showDismiss: boolean) {
     toast.custom(
       (t) => (
-        <div class="background-color:white border-radius:10px box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06) font-weight:500 padding:0.75rem|3rem|0.75rem|1.5rem position:relative">
+        <div class="background-color:base-5 border-radius:10px box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06) font-weight:500 padding:0.75rem|3rem|0.75rem|1.5rem position:relative">
           <div class="flex ai:center jc:center">
             <div>{message}</div>
             <Show when={showDismiss}>
@@ -141,12 +141,12 @@ export function useToast() {
           >
             <div class="display:flex gap:8px">
               <div class="display:flex flex-direction:column flex:1">
-                <div class="color:white font-weight:medium">{title}</div>
+                <div class="color:base-5 font-weight:medium">{title}</div>
                 <div class="color:#ecfeff font-size:13px">{subtitle}</div>
               </div>
               <div class="items-center flex">
                 <button
-                  class="background-color:#0e7490 border-radius:6px color:white font-size:13px font-weight:500 height:80% letter-spacing:0.025em padding:14px"
+                  class="background-color:#0e7490 border-radius:6px color:base-5 font-size:13px font-weight:500 height:80% letter-spacing:0.025em padding:14px"
                   onClick={() => toast.dismiss(t.id)}
                   onMouseOut={() => (this.style.backgroundColor = "#0e7490")}
                   onMouseOver={() =>
@@ -158,7 +158,7 @@ export function useToast() {
               </div>
               <div class="items-center flex">
                 <button
-                  class="align-items:center background-color:rgba(14,116,144,0.4) border-radius:6px color:white display:flex font-size:24px height:80% letter-spacing:0.025em padding:10px position:relative"
+                  class="align-items:center background-color:rgba(14,116,144,0.4) border-radius:6px color:base-5 display:flex font-size:24px height:80% letter-spacing:0.025em padding:10px position:relative"
                   onClick={() => toast.dismiss(t.id)}
                   onMouseOut={() =>
                     (this.style.backgroundColor = "rgba(14,116,144,0.4)")

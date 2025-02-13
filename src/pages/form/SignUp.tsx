@@ -104,7 +104,7 @@ export function SignUp(): JSX.Element {
         style={{ "justify-self": "center" }}
       />
       <form
-        class="bg:white jc:center m:10px mb:5rem r:10"
+        class="bg:base-5 jc:center m:10px mb:5rem r:10"
         style={{
           "box-shadow": "0 4px 8px rgba(0,0,0,0.1)",
           display: "flex",
