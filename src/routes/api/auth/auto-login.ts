@@ -9,18 +9,17 @@ import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function GET({ request }: APIEvent) {
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  
   try {
     const url = new URL(request.url);
     const token = url.searchParams.get("token");
 
     if (!token) {
-      return new Response(
-        JSON.stringify({ error: "Invalid or missing token" }),
-        {
-          headers: { "Content-Type": "application/json" },
-          status: 400,
-        }
-      );
+      return new Response(JSON.stringify({ error: "Invalid or missing token" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 400,
+      });
     }
 
     // Validate and consume the token
@@ -34,7 +33,6 @@ export async function GET({ request }: APIEvent) {
     }
 
     const { email } = decodeUserData(userData);
-    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
     const existingUser = await findUserByEmailSimple(dbSession, email);
 
     if (!existingUser) {
@@ -52,15 +50,13 @@ export async function GET({ request }: APIEvent) {
       status: 302,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : "An unknown error occurred"
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
+  } finally {
+    await dbSession.close();
   }
 }

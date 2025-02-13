@@ -20,7 +20,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     if (user.isSuper) {
-      throw new Error("Super users cannot change their password through this interface");
+      throw new Error("Super user password changes not allowed through this interface");
     }
 
     // Verify current password
@@ -40,14 +40,16 @@ export async function POST({ request }: APIEvent) {
     );
 
     return new Response(JSON.stringify({ success: true }), {
-      status: 200,
+      headers: { "Content-Type": "application/json" },
+      status: 200
     });
+
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "An unknown error occurred" 
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : "An unknown error occurred"
     }), {
       headers: { "Content-Type": "application/json" },
-      status: 500 
+      status: 500
     });
   } finally {
     await dbSession.close();

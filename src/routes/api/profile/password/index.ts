@@ -3,36 +3,43 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function POST({ request }: APIEvent) {
-  const payload = await request.json();
+  const { currentPassword, newPassword, username } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const { currentPassword, newPassword, username } = payload;
+    const findUserResult = await dbSession.run(
+      "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u",
+      { password: currentPassword, username }
+    );
 
-    const findUserQuery =
-      "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
-    const findUserResult = await dbSession.run(findUserQuery, {
-      password: currentPassword,
-      username: username,
-    });
     if (findUserResult.records.length === 0) {
-      return { error: "Current Password is not valid" };
+      return new Response(JSON.stringify({ error: "Current password is invalid" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 400
+      });
     }
 
-    const query =
-      "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
-    const result = await dbSession.run(query, {
-      password: newPassword,
-      username: username,
-    });
-    if (result.records.length === 0) {
-      return { error: "Failed to update password" };
+    const updateResult = await dbSession.run(
+      "MATCH (u:User {username: $username}) SET u.password = $password RETURN u",
+      { password: newPassword, username }
+    );
+
+    if (updateResult.records.length === 0) {
+      throw new Error("Failed to update password");
     }
-    return {
-      message: "Password updated successfully",
-    };
-  } catch (error: any) {
-    return new Response(error.message, { status: 500 });
+
+    return new Response(JSON.stringify({ message: "Password updated successfully" }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200
+    });
+
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : "An unknown error occurred"
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500
+    });
   } finally {
     await dbSession.close();
   }

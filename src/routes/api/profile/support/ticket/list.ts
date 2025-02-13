@@ -3,26 +3,35 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function POST({ request }: APIEvent) {
-  const payload = await request.json();
+  const { email } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const { email } = payload;
+    const result = await dbSession.run(
+      "MATCH (n:Support {email: $email}) RETURN n ORDER BY n.createdAt DESC",
+      { email }
+    );
 
-    const query = "MATCH (n:Support {email: $email}) RETURN n;";
-    const result = await dbSession.run(query, { email });
-
-    const data = result.records.map((r) => {
-      const data = r.get("n").properties;
-      data.id = r.get("n").elementId;
-      return data;
+    const tickets = result.records.map(record => {
+      const node = record.get("n");
+      return {
+        ...node.properties,
+        id: node.elementId
+      };
     });
 
-    return {
-      contact: data,
-    };
-  } catch (error: any) {
-    return new Response(error.message, { status: 500 });
+    return new Response(JSON.stringify({ tickets }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200
+    });
+
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : "An unknown error occurred"
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500
+    });
   } finally {
     await dbSession.close();
   }
