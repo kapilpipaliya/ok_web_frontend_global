@@ -1,5 +1,6 @@
 import type * as Monaco from "monaco-editor";
 
+import { clientOnly } from "@solidjs/start";
 import { createSignal, Show } from "solid-js";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
@@ -10,7 +11,6 @@ import {
 } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -29,6 +29,9 @@ export function ThemeConfigDialog(
     parentRef: HTMLElement;
   }>,
 ) {
+  const MonacoEditorWrapper = clientOnly(
+    () => import("~/components/styled/MonacoEditorWrapper"),
+  );
   const [graph, setGraph] = useGraph();
   const { showSuccessToast, showWarningToast } = useToast();
   const [error, setError] = createSignal("");

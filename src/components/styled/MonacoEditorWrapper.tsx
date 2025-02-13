@@ -62,4 +62,5 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       value={props.value}
     />
   );
-} 
+}
+export default MonacoEditorWrapper;
