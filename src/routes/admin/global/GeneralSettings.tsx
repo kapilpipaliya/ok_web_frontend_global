@@ -3,9 +3,11 @@ import { v7 as uuidv7 } from "uuid";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
+import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function GeneralSettings() {
@@ -81,7 +83,7 @@ export function GeneralSettings() {
             props: () => ({
               onClick: async () => {
                 const settings = graph.vertexes[formDataId];
-                const response = await postAPI(API.updateGlobalSettingsUrl, settings.P);
+                const response = await postAPI(API.updateGeneralSettingsUrl, settings.P);
                 if (response.error) {
                   showErrorToast(response.error);
                 } else {
@@ -99,6 +101,21 @@ export function GeneralSettings() {
     class: "p:10 grid gap:10",
     componentName: "Box",
   };
+
+  // Add loadSettingsData function
+  const loadSettingsData = async () => {
+    try {
+      const data = await getAPI(API.getGeneralSettingsUrl);
+      if (data.settings?.P) {
+        replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
+      }
+    } catch (err) {
+      showErrorToast((err as Error).message);
+    }
+  };
+
+  // Load settings data when component mounts
+  loadSettingsData();
 
   return (
     <SchemaRenderer form={{ attributes: [form], key: "GeneralSettings" }} formDataId={formDataId} />

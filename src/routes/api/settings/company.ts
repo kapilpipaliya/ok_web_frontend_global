@@ -1,10 +1,22 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+import { checkAdminRole } from "~/server/checkAdminRole";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 
 export async function POST({ request }: APIEvent) {
+  const isAdmin = await checkAdminRole(request);
+  
+  if (!isAdmin) {
+    return new Response(JSON.stringify({
+      error: "Unauthorized. Admin access required."
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 403
+    });
+  }
+
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
   const email = await getUserEmailFromSession();
@@ -12,7 +24,7 @@ export async function POST({ request }: APIEvent) {
   try {
     const result = await dbSession.run(
       `MATCH (s:CompanySetting) 
-       SET s.company = $settings,
+       SET s += $settings,
            s.updatedAt = datetime() 
        RETURN s.key as key`,
       { settings }
@@ -24,10 +36,10 @@ export async function POST({ request }: APIEvent) {
       const createResult = await dbSession.run(
         `CREATE (s:CompanySetting {
           key: $key,
-          company: $settings,
           createdAt: datetime(),
           updatedAt: datetime()
         })
+        SET s += $settings
         RETURN s.key as key`,
         { key: newKey, settings }
       );

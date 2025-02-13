@@ -1,36 +1,46 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+import { checkAdminRole } from "~/server/checkAdminRole";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 
 export async function POST({ request }: APIEvent) {
+  const isAdmin = await checkAdminRole(request);
+  
+  if (!isAdmin) {
+    return new Response(JSON.stringify({
+      error: "Unauthorized. Admin access required."
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 403
+    });
+  }
+
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
   const email = await getUserEmailFromSession();
 
   try {
+    const newKey = `global_setting_${Date.now()}`;
+    // TODO: Is it good to directly update without find the existing one?
     const result = await dbSession.run(
       `MATCH (s:GlobalSetting)
        SET s += $settings,
            s.updatedAt = datetime()
        RETURN s.key as key`,
-      { settings }
+      { settings: settings }
     );
 
     let settingsKey: string;
     if (result.records.length === 0) {
-      const newKey = `global_setting_${Date.now()}`;
       const createResult = await dbSession.run(
         `CREATE (s:GlobalSetting {
           key: $key,
-          settings: $settings,
           createdAt: datetime(),
           updatedAt: datetime()
         })
-         SET s += $settings,
-             s.createdAt = datetime(),
-             s.updatedAt = datetime()
+         SET s += $settings
          RETURN s.key as key`,
         { key: newKey, settings }
       );

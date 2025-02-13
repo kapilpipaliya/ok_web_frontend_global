@@ -3,6 +3,10 @@ export const API = {
   createSubDomainUrl: "/api/subdomain/create",
   deleteSubDomainUrl: "/api/subdomain/delete",
   downloadFileUrl: "/api/file/download",
+  // Global Settings endpoints
+  getCompanySettingsUrl: "/api/settings/company/get",
+  getEmailSettingsUrl: "/api/settings/email/get",
+  getGeneralSettingsUrl: "/api/settings/general/get",
   getInitialDataUrl: "/api/get/get_initial_data",
   getSubDomainActivityUrl: "/api/subdomain/activity",
   // Subdomain management endpoints
@@ -14,15 +18,14 @@ export const API = {
   replaceFileUrl: "/api/file/replace",
   signUpUrl: "/api/auth/signup",
   submitDataUrl: "/api/mutate/submit_data",
+
+  testEmailSettingsUrl: "/api/settings/email/test",
+  updateCompanySettingsUrl: "/api/settings/company", 
+  updateEmailSettingsUrl: "/api/settings/email",
+  updateGeneralSettingsUrl: "/api/settings/general",
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",
-
-  // New Global Settings endpoints
-  updateGeneralSettingsUrl: "/api/settings/general",
-  updateCompanySettingsUrl: "/api/settings/company", 
-  updateEmailSettingsUrl: "/api/settings/email",
-  testEmailSettingsUrl: "/api/settings/email/test",
 };
 
 export function generate401RedirectUrl(pathname: string): string {

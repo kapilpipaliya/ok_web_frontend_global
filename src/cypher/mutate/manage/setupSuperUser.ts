@@ -39,6 +39,11 @@ export async function setupSuperUser(): Promise<{
       }
 
       await createRootFolder(dbSession, user.P.uuid);
+      const addUserToAdminRoleQuery = `
+        MATCH (u:User {uuid: $uuid}), (r:Role {key: 'Admin'})
+        CREATE (u)-[:UserHasRole]->(r)
+      `;
+      await dbSession.run(addUserToAdminRoleQuery, { uuid: user.P.uuid });
 
       const response = await insertComponents(dbSession);
       if (!response.success) {

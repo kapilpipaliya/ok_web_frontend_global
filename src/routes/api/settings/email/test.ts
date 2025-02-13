@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+import { checkAdminRole } from "~/server/checkAdminRole";
 
 import type { SMTPSettings } from "~/lib/email/types";
 
@@ -8,6 +9,17 @@ import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 
 export async function POST({ request }: APIEvent) {
+  const isAdmin = await checkAdminRole(request);
+  
+  if (!isAdmin) {
+    return new Response(JSON.stringify({
+      error: "Unauthorized. Admin access required."
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 403
+    });
+  }
+
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json() as SMTPSettings;
   const email = await getUserEmailFromSession();

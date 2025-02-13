@@ -3,9 +3,11 @@ import { v7 as uuidv7 } from "uuid";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
+import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function CompanySettings() {
@@ -27,6 +29,19 @@ export function CompanySettings() {
     graph,
     setGraph,
   );
+
+  const loadSettingsData = async () => {
+    try {
+      const data = await getAPI(API.getCompanySettingsUrl);
+      if (data.settings?.P) {
+        replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
+      }
+    } catch (err) {
+      showErrorToast((err as Error).message);
+    }
+  };
+
+  loadSettingsData();
 
   const form = {
     as: "div",
@@ -113,17 +128,21 @@ export function CompanySettings() {
             componentName: "Box",
             props: () => ({
               onClick: async () => {
-                const settings = graph.vertexes[formDataId];
-                const response = await postAPI(API.updateCompanySettingsUrl, settings.P);
-                if (response.error) {
-                  showErrorToast(response.error);
-                } else {
-                  showSuccessToast("Company details updated successfully");
+                try {
+                  const settings = graph.vertexes[formDataId];
+                  const response = await postAPI(API.updateCompanySettingsUrl, settings.P);
+                  if (response.error) {
+                    showErrorToast(response.error);
+                  } else {
+                    showSuccessToast("Company details updated successfully");
+                  }
+                } catch (error) {
+                  showErrorToast((error as Error).message);
                 }
               },
             }),
             text: "Save Changes",
-          },
+          }
         ],
         class: "mt:24",
         componentName: "Box",

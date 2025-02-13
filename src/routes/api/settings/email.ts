@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+import { checkAdminRole } from "~/server/checkAdminRole";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
@@ -6,24 +7,36 @@ import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 import { sendEmail } from "~/server/sendEmail";
 
 export async function POST({ request }: APIEvent) {
+  const isAdmin = await checkAdminRole(request);
+  
+  if (!isAdmin) {
+    return new Response(JSON.stringify({
+      error: "Unauthorized. Admin access required."
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 403
+    });
+  }
+
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
   const email = await getUserEmailFromSession();
 
   try {
     // Test email sending with the new settings
-    await sendEmail(settings.testEmail, {
-      subject: "Test Email Settings",
-      customHtml: `
-        <h1>Test Email</h1>
-        <p>This is a test email to verify your email settings.</p>
-        <p>If you received this email, your email settings are working correctly.</p>
-      `
-    });
+    // TODO: temporary comment out
+    // await sendEmail(settings.testEmail, {
+    //   customHtml: `
+    //     <h1>Test Email</h1>
+    //     <p>This is a test email to verify your email settings.</p>
+    //     <p>If you received this email, your email settings are working correctly.</p>
+    //   `,
+    //   subject: "Test Email Settings"
+    // });
 
     const result = await dbSession.run(
       `MATCH (s:EmailSetting) 
-       SET s.email = $settings,
+       SET s += $settings,
            s.updatedAt = datetime() 
        RETURN s.key as key`,
       { settings }
@@ -35,10 +48,10 @@ export async function POST({ request }: APIEvent) {
       const createResult = await dbSession.run(
         `CREATE (s:EmailSetting {
           key: $key,
-          email: $settings,
           createdAt: datetime(),
           updatedAt: datetime()
         })
+        SET s += $settings
         RETURN id(s) as id`,
         { key: newKey, settings }
       );

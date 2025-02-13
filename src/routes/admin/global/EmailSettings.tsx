@@ -3,9 +3,11 @@ import { v7 as uuidv7 } from "uuid";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
+import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function EmailSettings() {
@@ -27,6 +29,19 @@ export function EmailSettings() {
     graph,
     setGraph,
   );
+
+  const loadSettingsData = async () => {
+    try {
+      const data = await getAPI(API.getEmailSettingsUrl);
+      if (data.settings?.P) {
+        replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
+      }
+    } catch (err) {
+      showErrorToast((err as Error).message);
+    }
+  };
+
+  loadSettingsData();
 
   const form = {
     as: "div",
