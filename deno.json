@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "@razr/crypto": "jsr:@razr/crypto@^0.0.1"
-  }
-}

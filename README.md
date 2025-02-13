@@ -283,3 +283,10 @@ return {
 we dont need to create saprate meta for repeated component, we can handle logic with other props functions.
 
 dont change opacity:.5 opacity:1:hover, use color instead.
+
+
+Deno crypto module:
+An Introduction to the Deno Crypto Module
+https://friendlyuser.github.io/posts/tech/2023/An_Introduction_to_the_Deno_Crypto_Module/
+which hashing algorithm is right for you?
+https://stytch.com/blog/argon2-vs-bcrypt-vs-scrypt/

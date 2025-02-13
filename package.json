@@ -29,6 +29,7 @@
     "@orbit/memory": "^0.17.2",
     "@orbit/record-cache": "^0.17.2",
     "@orbit/records": "^0.17.0",
+    "@razr/crypto": "npm:@jsr/razr__crypto@^0.0.1",
     "@solid-aria/primitives": "^0.4.0",
     "@solid-bricks/barcode": "^1.0.1",
     "@solid-primitives/autofocus": "^0.1.0",

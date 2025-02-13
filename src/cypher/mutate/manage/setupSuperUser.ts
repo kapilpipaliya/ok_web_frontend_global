@@ -13,9 +13,9 @@ export async function setupSuperUser(): Promise<{
   user?: any;
 }> {
   const driver = await getDriver();
-  const dbSession = driver.session();
+  const systemDbSession = driver.session();
   try {
-    const result = await dbSession.run("SHOW DATABASES");
+    const result = await systemDbSession.run("SHOW DATABASES");
     const superDatabase = result.records.find(
       (record) => record.get("name") === SYSTEM_DB_NAME,
     );
@@ -57,8 +57,8 @@ export async function setupSuperUser(): Promise<{
     }
   } catch (error) {
     console.error(`Error setting up ${SYSTEM_DB_NAME} user:`, error);
-    return { error: `Failed to setup ${SYSTEM_DB_NAME} user`, status: 500 };
+    return { error: `Failed to setup ${SYSTEM_DB_NAME} user: ${error.message}`, status: 500 };
   } finally {
-    await dbSession.close();
+    await systemDbSession.close();
   }
 }
