@@ -4,6 +4,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { getSubDomainInfo } from "~/cypher/get/getSubDomainInfo";
 
+// unused
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 

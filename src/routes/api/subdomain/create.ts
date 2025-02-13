@@ -1,5 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { Session } from "neo4j-driver";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
@@ -8,124 +10,99 @@ import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { domain, key } = await request.json();
-  const email = await getUserEmailFromSession();
-
-  if (!email) {
-    return new Response(JSON.stringify({ 
-      error: "Unauthorized" 
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 401
-    });
-  }
   const { dbSession } = await getDBSessionForSubdomain(request);
-  const user = await findUserByEmailSimple(dbSession, email);
-
-  if (!user) {
-    return new Response(JSON.stringify({ 
-      error: "Unauthorized" 
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 401
-    });
-  }
-
+  
   try {
-    // Check if subdomain key already exists
-    const existingKey = await dbSession.run(
-      `MATCH (s:SubDomain {key: $key}) RETURN s`,
-      { key }
-    );
-
-    if (existingKey.records.length > 0) {
-      return new Response(JSON.stringify({ 
-        error: "Subdomain with this key already exists" 
-      }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-      });
-    }
-
-    // Check if domain already exists
-    const existingDomain = await dbSession.run(
-      `MATCH (s:SubDomain {domain: $domain}) RETURN s`,
-      { domain }
-    );
-
-    if (existingDomain.records.length > 0) {
-      return new Response(JSON.stringify({ 
-        error: "Domain name is already taken" 
-      }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-      });
-    }
-
-    // Create new subdomain
-    const result = await dbSession.run(
-      `CREATE (s:SubDomain {
-        key: $key,
-        domain: $domain,
-        status: "active",
-        createdAt: datetime(),
-        lastModified: datetime()
-      }) RETURN s`,
-      { domain, key }
-    );
-
-    // Convert node to JSON before using it
-    const newSubdomain = convertNodeToJson(result.records[0]?.get('s'));
-
-    // Log activity
-    await dbSession.run(
-      `CREATE (a:Activity {
-        action: "create",
-        entityType: "SubDomain",
-        entityId: $key,
-        timestamp: datetime(),
-        details: $details
-      })`,
-      { 
-        details: `Created subdomain ${key} with domain ${domain}`,
-        key
-      }
-    );
-
-    const createEdgeQuery = `
-      MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $key })
-      CREATE (u)-[:UserSubDomain]->(s);
-    `;
-    
-    await dbSession.run(createEdgeQuery, { 
-      key,
-      uuid: user.P.uuid 
-    });
-
+    const user = await validateUser(await getUserEmailFromSession(), dbSession);
+    await checkExistingDomain(dbSession, key, domain);
+    const newSubdomain = await createSubdomain(dbSession, key, domain);
+    await createActivityLog(dbSession, key, domain);
+    await createUserSubdomainRelation(dbSession, key, user.P.uuid);
+    // @ts-expect-error ignore
     await signupAdmin(dbSession, {
-      email: user.P.email,
+      ...user.P,
       isSubDomainCreation: true,
       password: "",
       subDomain: key,
-      username: user.P.username,
-      uuid: user.P.uuid
     });
 
-    return new Response(JSON.stringify({ 
-      subdomain: newSubdomain,
-      success: true
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200
-    });
+    return { subdomain: newSubdomain, success: true };
 
   } catch (error) {
     return new Response(JSON.stringify({ 
       error: error instanceof Error ? error.message : "An unknown error occurred" 
     }), {
       headers: { "Content-Type": "application/json" },
-      status: 500
+      status: error instanceof Error && error.message === "Unauthorized" ? 401 : 500
     });
   } finally {
     await dbSession.close();
   }
-} 
+}
+
+async function checkExistingDomain(dbSession: Session, key: string, domain: string) {
+  const existingKey = await dbSession.run(
+    `MATCH (s:SubDomain {key: $key}) RETURN s`,
+    { key }
+  );
+  if (existingKey.records.length > 0) {
+    throw new Error("Subdomain with this key already exists");
+  }
+
+  const existingDomain = await dbSession.run(
+    `MATCH (s:SubDomain {domain: $domain}) RETURN s`,
+    { domain }
+  );
+  if (existingDomain.records.length > 0) {
+    throw new Error("Domain name is already taken");
+  }
+}
+
+async function createActivityLog(dbSession: Session, key: string, domain: string) {
+  await dbSession.run(
+    `CREATE (a:Activity {
+      action: "create",
+      entityType: "SubDomain",
+      entityId: $key,
+      timestamp: datetime(),
+      details: $details
+    })`,
+    { 
+      details: `Created subdomain ${key} with domain ${domain}`,
+      key
+    }
+  );
+}
+
+async function createSubdomain(dbSession: Session, key: string, domain: string) {
+  const result = await dbSession.run(
+    `CREATE (s:SubDomain {
+      key: $key,
+      domain: $domain,
+      status: "active",
+      createdAt: datetime(),
+      lastModified: datetime()
+    }) RETURN s`,
+    { domain, key }
+  );
+  return convertNodeToJson(result.records[0]?.get('s'));
+}
+
+async function createUserSubdomainRelation(dbSession: Session, key: string, userUuid: string) {
+  await dbSession.run(
+    `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $key })
+     CREATE (u)-[:UserSubDomain]->(s)`,
+    { key, uuid: userUuid }
+  );
+}
+
+async function validateUser(email: null | string, dbSession: Session) {
+  if (!email) {
+    throw new Error("Unauthorized");
+  }
+  const user = await findUserByEmailSimple(dbSession, email);
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
