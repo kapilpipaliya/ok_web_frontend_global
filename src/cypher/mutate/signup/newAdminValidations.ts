@@ -1,4 +1,4 @@
-import type { Session, Transaction } from "neo4j-driver-core";
+import type { Session, Transaction } from "neo4j-driver";
 
 export async function newAdminValidations(
   txOrSession: Session | Transaction,

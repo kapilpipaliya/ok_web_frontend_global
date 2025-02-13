@@ -2,6 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { hashPassword } from "~/lib/auth/password";
 
 export async function createSuperUser(
   email: string,
@@ -22,10 +23,15 @@ export async function createSuperUser(
     if (checkUserResult.records.length > 0) {
       return { error: "User with the same username already exists." };
     }
+
+    // Hash password before saving
+    const { hashedPassword, salt } = await hashPassword(password);
+
     const query = `
       CREATE (u:User {
         email: $email,
-        password: $password,
+        password: $hashedPassword,
+        salt: $salt,
         username: $username,
         uuid: randomUUID()
       })
@@ -37,7 +43,8 @@ export async function createSuperUser(
     `;
     const result = await superDbSession.run(query, {
       email,
-      password,
+      hashedPassword,
+      salt,
       systemDbName: SYSTEM_DB_NAME,
       username,
     });

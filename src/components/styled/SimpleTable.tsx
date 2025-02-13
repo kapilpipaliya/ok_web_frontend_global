@@ -38,7 +38,7 @@ export function TableBodyCell(
 
 export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
   return (
-    <div class="bg:primary border:1px|solid|#347fdd color:base-5 font-weight:600 p:10px text-align:center">
+    <div class="bg:primary-50 border:1px|solid|#347fdd color:base-5 font-weight:600 p:10px text-align:center">
       {props.children}
     </div>
   );

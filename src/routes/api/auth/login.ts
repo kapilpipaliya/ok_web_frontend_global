@@ -7,6 +7,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { verifyPassword } from "~/lib/auth/password";
 
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
@@ -105,8 +106,9 @@ async function authenticateUser(
   }
 }
 
-function comparePassword(user: Vertex, password: string) {
-  if (user.P.password !== password) {
+async function comparePassword(user: Vertex, password: string) {
+  const isValid = await verifyPassword(password, user.P.password, user.P.salt);
+  if (!isValid) {
     throw new Error("Unauthorized: Incorrect email, username, or password.");
   }
 

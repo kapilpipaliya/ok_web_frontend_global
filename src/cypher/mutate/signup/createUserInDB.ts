@@ -4,6 +4,7 @@ import type { Transaction } from "neo4j-driver";
 import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { hashPassword } from "~/lib/auth/password";
 
 export async function createUserInSuperDB(
   superTx: Session | Transaction,
@@ -15,16 +16,22 @@ export async function createUserInSuperDB(
   },
 ) {
   const uuid = uuidv7();
+  
+  // Hash password before saving
+  const { hashedPassword, salt } = await hashPassword(userData.password);
 
   const createUserQuery = `CREATE (u:User {
             username: $username,
             uuid: $uuid,
             email: $email,
-            password: $password
+            password: $hashedPassword,
+            salt: $salt
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
     ...userData,
+    hashedPassword,
+    salt,
     uuid,
   };
 
@@ -40,19 +47,32 @@ export async function createUserInSuperDB(
 
 export async function createUserInUserDB(
   sessionOrTx: Session | Transaction,
-  params: { [key: string]: any },
+  params: Record<string, unknown>,
   isSuper?: boolean,
 ) {
+  // If password is provided, hash it
+  let hashedPassword, salt;
+  if (typeof params.password === 'string' && !isSuper) {
+    const hashResult = await hashPassword(params.password);
+    hashedPassword = hashResult.hashedPassword;
+    salt = hashResult.salt;
+  }
+
   const createUserQuery2 = `CREATE (u:User {
                 username: $username,
                 uuid: $uuid,
                 email: $email,
+                password: $hashedPassword,
+                salt: $salt,
                 isSuper: $isSuper,
                 avatar: ''
             }) SET u.createdAt = localDateTime() RETURN u;`;
+
   const createUserResult = await sessionOrTx.run(createUserQuery2, {
     ...params,
+    hashedPassword,
     isSuper: isSuper ?? null,
+    salt,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }
