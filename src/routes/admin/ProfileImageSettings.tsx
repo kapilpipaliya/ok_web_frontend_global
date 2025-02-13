@@ -14,7 +14,7 @@ import { getMemberVertex, getProfileImageVertex } from "~/lib/graph/get/sync/get
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { profileImage } from "~/pages/admin_layout/constant";
+import { profileImage } from "~/pages/admin_layout/constants/constant";
 
 import { SchemaRenderer } from "./SchemaRenderer";
 

@@ -20,10 +20,11 @@ export async function handleDataSubmission(
   const commitData = commitTxn(newFormTxnId, graph);
 
   if (!commitData) {
-    showErrorToast(
-      options.commitErrorMessage || "Failed to commit transaction",
-    );
     return false;
+    // showErrorToast(
+    //   options.commitErrorMessage || "Failed to commit transaction",
+    // );
+    // return false;
   }
   try {
     await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);

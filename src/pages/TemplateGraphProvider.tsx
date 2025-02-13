@@ -1,11 +1,15 @@
 import type { ParentProps } from "solid-js";
+import type { SetStoreFunction } from "solid-js/store";
 
 import { createKeyedContext } from "@corvu/utils/create/keyedContext";
+import { useKeyedContext } from "@corvu/utils/create/keyedContext";
 
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
 import { type GlobalProperties, GraphContext } from "~/lib/graph/graph";
+import { type GraphInterface } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export const TemplateGraphProvider = (props: ParentProps) => {
   const graph = createAppState();
@@ -25,3 +29,23 @@ export const TemplateGraphProvider = (props: ParentProps) => {
     </TemplateGraph.Provider>
   );
 };
+
+// Just for example, dont use it anywhere.
+export function TemplateRenderer(props: { context?: any; name: string }) {
+  const graph = useKeyedContext("templateGraph") as [
+    GraphInterface,
+    SetStoreFunction<GraphInterface>,
+  ];
+  return (
+    <GraphContext.Provider value={graph}>
+      <PageViewWrapper
+        context={props.context}
+        hideSaveCancelButton={true}
+        isNoPermissionCheck={true}
+        pageId={"new"}
+        pageVertexLabel={"Page"}
+        pageVertexName={props.name}
+      />
+    </GraphContext.Provider>
+  );
+}

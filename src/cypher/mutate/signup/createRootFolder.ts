@@ -1,6 +1,6 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import { getDefaultTheme } from "~/pages/admin_layout/getDefaultTheme";
+import { getDefaultTheme } from "~/lib/theme/getDefaultTheme";
 
 export async function addAdminRoleToUser(
   sessionOrTx: Session | Transaction,

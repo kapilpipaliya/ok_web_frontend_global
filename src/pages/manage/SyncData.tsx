@@ -7,14 +7,13 @@ import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
-import { profileImage } from "../admin_layout/constant";
+import { profileImage } from "../admin_layout/constants/constant";
 
 const transferNodes = [
   { key: "Component", value: "Comp" },
-  { key: "Data Type", value: "DataType" },
-  { key: "Navigation", value: "Nav" },
 ];
 
+// Depricated
 export function SyncData() {
   const { showLoadingToast } = useToast();
   const [users, setUsers] = createSignal([] as Vertex[]);
