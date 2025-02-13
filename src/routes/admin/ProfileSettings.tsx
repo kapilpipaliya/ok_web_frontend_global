@@ -173,7 +173,7 @@ export function ProfileSettings() {
 
       // Create profile image vertex and edge if exists
       if (data.profileImage) {
-        if (!data.profileImage.id) {
+        if (!graph.vertexes[data.profileImage.id]) {
           addNewVertex(
             0,
             data.profileImage,

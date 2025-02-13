@@ -40,7 +40,7 @@ export function ProfileImageSettings() {
     setGraph,
   );
   const profileImageVertexCopy = getProfileImageVertex(graph);
-  if (profileImageVertexCopy.id) {
+  if (profileImageVertexCopy?.id) {
     setSelectionValue(
       0,
       graph.vertexes[formDataId],

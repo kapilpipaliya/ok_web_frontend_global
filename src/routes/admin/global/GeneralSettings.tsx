@@ -7,8 +7,10 @@ import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 import { SchemaRenderer } from "../SchemaRenderer";
+import { CompanyLogoSettings } from "./CompanyLogoSettings";
 
 export function GeneralSettings() {
   const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
@@ -109,6 +111,26 @@ export function GeneralSettings() {
       if (data.settings?.P) {
         replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
       }
+
+      // Create company logo vertex and edge if exists
+      if (data.companyLogo) {
+        if (!graph.vertexes[data.companyLogo.id]) {
+          addNewVertex(
+            0,
+            data.companyLogo,
+            graph,
+            setGraph,
+          );
+        }
+        setSelectionValue(
+          0,
+          graph.vertexes[formDataId],
+          graph,
+          setGraph,
+          { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyLogo" } },
+          data.companyLogo.id
+        );
+      }
     } catch (err) {
       showErrorToast((err as Error).message);
     }
@@ -118,6 +140,10 @@ export function GeneralSettings() {
   loadSettingsData();
 
   return (
-    <SchemaRenderer form={{ attributes: [form], key: "GeneralSettings" }} formDataId={formDataId} />
+    <div>
+      <SchemaRenderer form={{ attributes: [form], key: "GeneralSettings" }} formDataId={formDataId} />
+      <hr class="my-8 border-t border-gray-200" />
+      <CompanyLogoSettings />
+    </div>
   );
 } 

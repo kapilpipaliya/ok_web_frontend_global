@@ -1,8 +1,17 @@
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { evalExpression } from "~/lib/expression_eval";
-import { profileImage } from "~/pages/admin_layout/constants/constant";
+import { defaultLogo, profileImage } from "~/pages/admin_layout/constants/constant";
 
 import type { GraphInterface, Vertex } from "../../graph";
+
+export function getCompanyLogoUrl(graph: GraphInterface): string {
+  const companyLogoVertex = getCompanyLogoVertex(graph);
+  return getDownloadLink(companyLogoVertex) || defaultLogo;
+}
+
+export function getCompanyLogoVertex(graph: GraphInterface): undefined | Vertex {
+  return evalExpression(`->CompanyLogo`, { graph, vertexes: [graph.vertexes[graph.vertexLabelIdMap.GlobalSetting?.[0]]] })?.[0];
+}
 
 export function getMemberVertex(graph: GraphInterface): Vertex {
   return graph.vertexes.member ?? ({ P: {} } as Vertex);

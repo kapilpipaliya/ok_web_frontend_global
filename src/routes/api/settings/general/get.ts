@@ -21,13 +21,16 @@ export async function GET({ request }: APIEvent) {
   try {
     const result = await dbSession.run(
       `MATCH (s:GlobalSetting)
-       RETURN s as settings`
+       OPTIONAL MATCH (s)-[:CompanyLogo]->(logo:File)
+       RETURN s as settings, logo as companyLogo`
     );
 
     const node = result.records[0]?.get('settings');
+    const logoNode = result.records[0]?.get('companyLogo');
     const settings = node ? convertNodeToJson(node) : null;
+    const companyLogo = logoNode ? convertNodeToJson(logoNode) : null;
 
-    return { settings };
+    return { companyLogo, settings };
 
   } catch (error) {
     return new Response(JSON.stringify({

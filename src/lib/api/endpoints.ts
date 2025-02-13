@@ -26,6 +26,7 @@ export const API = {
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",
+  updateCompanyLogoUrl: "/api/settings/updateCompanyLogo",
 };
 
 export function generate401RedirectUrl(pathname: string): string {

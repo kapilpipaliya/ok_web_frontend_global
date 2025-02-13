@@ -6,6 +6,8 @@ import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { fetchFromMGAndSaveToArray } from "./fetchFromMGAndSaveToArray";
+
 // exporting this function breaks the api
 export async function getInitialData(dbSession: Session) {
   const nodeObj: Record<string, Vertex> = {};
@@ -30,20 +32,21 @@ export async function getInitialData(dbSession: Session) {
     // await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
     // await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
 
-    // Not needed
-    // await fetchFromMGAndSaveToArray(
-    //   dbSession,
-    //   "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
-    //   {},
-    //   nodeObj,
-    //   relationshipObj,
-    // );
-    await fetchAndSaveFormMetaData(
-      "GlobalSetting",
+
+    await fetchFromMGAndSaveToArray(
+      dbSession,
+      "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",
+      {},
       nodeObj,
       relationshipObj,
-      dbSession,
     );
+    // load global setting and theme
+    // await fetchAndSaveFormMetaData(
+    //   "GlobalSetting",
+    //   nodeObj,
+    //   relationshipObj,
+    //   dbSession,
+    // );
   } catch (error: any) {
     return { error: error.message };
   }

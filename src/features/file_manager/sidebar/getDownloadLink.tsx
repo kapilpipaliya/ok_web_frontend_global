@@ -1,6 +1,6 @@
 import type { Vertex } from "~/lib/graph/graph";
 
-export const getDownloadLink = (metaVertex: Vertex) => {
+export const getDownloadLink = (metaVertex?: Vertex) => {
   if (!metaVertex) {
     return "";
   }

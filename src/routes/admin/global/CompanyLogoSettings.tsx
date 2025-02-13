@@ -1,0 +1,179 @@
+import { createMemo, createSignal } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
+
+import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
+
+import { FilePickerModal } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerModal";
+import { useToast } from "~/components/styled/Toast";
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph } from "~/lib/graph/graph";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { defaultLogo } from "~/pages/admin_layout/constants/constant";
+
+import { SchemaRenderer } from "../SchemaRenderer";
+import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getMemberVertex";
+export function CompanyLogoSettings() {
+  const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";
+  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
+  const [openDialog, setOpenDialog] = createSignal(false);
+  const [graph, setGraph] = useGraph();
+  const { showErrorToast, showSuccessToast } = useToast();
+  let fileManagerStore: FileManagerObject;
+
+  const formDataId = uuidv7();
+  addNewVertex(
+    0,
+    {
+      id: formDataId,
+      IN: {},
+      L: ["GlobalSetting"],
+      OUT: {},
+      P: {},
+    },
+    graph,
+    setGraph,
+  );
+  const companyLogoVertexCopy = getCompanyLogoVertex(graph);
+  if (companyLogoVertexCopy?.id) {
+    setSelectionValue(
+      0,
+      graph.vertexes[formDataId],
+      graph,
+      setGraph,
+      { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyLogo" } },
+      companyLogoVertexCopy.id
+    );
+  }
+
+  const onFileSelected = () => {
+    const selectedFile = fileManagerStore.gridStore?.[0].selectedRows[0];
+    if (!selectedFile) {
+      showErrorToast("Please select a file");
+      return;
+    }
+
+    const selectedFileMetaVertex = {
+      id: "",
+      IN: {},
+      L: [],
+      OUT: {},
+      P: {
+        type: "CompanyLogo",
+      },
+    };
+
+    setSelectionValue(
+      0,
+      graph.vertexes[formDataId],
+      graph,
+      setGraph,
+      selectedFileMetaVertex,
+      selectedFile.id,
+    );
+
+    setOpenDialog(false);
+  };
+
+  const onSave = async () => {
+    const selectedFile = companyLogoVertex()[0];
+    if (!selectedFile) {
+      showErrorToast("Please select a company logo first");
+      return;
+    }
+
+    const response = await postAPI(API.updateCompanyLogoUrl, {
+      logoImage: selectedFile.id,
+    });
+
+    if (response.error) {
+      showErrorToast(response.error);
+    } else {
+      showSuccessToast("Company logo updated successfully");
+    }
+  };
+
+  const setFileManagerStore = (fileManagerStore_: FileManagerObject) => {
+    fileManagerStore = fileManagerStore_;
+  };
+
+  const form = {
+    as: "div",
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            class: LABEL_CLASS,
+            componentName: "Text",
+            text: "Company Logo",
+          },
+          {
+            as: "img",
+            class: "cursor:pointer h:60px object-fit:cover",
+            componentName: "Box",
+            key: "companyLogo",
+            props: () => {
+              const selectedFile = companyLogoVertex()[0];
+              return ({
+                onClick: () => setOpenDialog(true),
+                src: getDownloadLink(selectedFile) || defaultLogo,
+              });
+            },
+          },
+          {
+            as: "div",
+            componentName: "Box"
+          },
+          {
+            as: "button",
+            class: "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
+            componentName: "Box",
+            props: () => ({
+              onClick: () => setOpenDialog(true),
+            }),
+            text: "Change Company Logo",
+          },
+          {
+            as: "button",
+            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            componentName: "Box",
+            props: () => ({
+              onClick: onSave,
+            }),
+            text: "Save Changes",
+          },
+        ],
+        class: GRID_ITEM_CLASS,
+        componentName: "Box",
+      },
+    ],
+    class: "p:10 grid gap:10",
+    componentName: "Box",
+  };
+
+  const companyLogoVertex = createMemo(() => {
+    return (
+      evalExpression(
+        `->CompanyLogo`,
+        { graph, setGraph, vertexes: [graph.vertexes[formDataId]] },
+      ) || []
+    );
+  });
+
+  return (
+    <div>
+      <SchemaRenderer form={{ attributes: [form], key: "CompanyLogo" }} formDataId={formDataId} />
+      <FilePickerModal
+        onFileSelected={onFileSelected}
+        open={openDialog}
+        selectedFileVertex={companyLogoVertex()}
+        setFileManagerStore={setFileManagerStore}
+        setOpen={setOpenDialog}
+      />
+    </div>
+  );
+} 
