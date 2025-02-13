@@ -67,6 +67,7 @@ import {
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { SiteTitle } from "~/components/SiteTitle";
 
 export function PageViewWrapper(
   props: Readonly<{
@@ -499,9 +500,9 @@ export function PageViewWrapper(
     <Show keyed when={formStore().P.count}>
       <Show when={props.enableSEO}>
         <Show when={graph.vertexes[formStore().P.formMetaId!]?.P.seoTitle}>
-          <Title>
+          <SiteTitle>
             {getPageTitle(graph.vertexes[formStore().P.formMetaId!]!)}
-          </Title>
+          </SiteTitle>
         </Show>
         <Show
           when={graph.vertexes[formStore().P.formMetaId!]?.P.seoDescription}

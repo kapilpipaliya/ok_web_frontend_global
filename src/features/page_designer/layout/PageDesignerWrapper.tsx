@@ -31,6 +31,7 @@ import {
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getPageTitle } from "./getPageTitle";
+import { SiteTitle } from "~/components/SiteTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -178,9 +179,9 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <Title>
+        <SiteTitle>
           {getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}
-        </Title>
+        </SiteTitle>
         <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",

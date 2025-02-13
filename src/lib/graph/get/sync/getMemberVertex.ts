@@ -4,13 +4,14 @@ import { defaultLogo, profileImage } from "~/pages/admin_layout/constants/consta
 
 import type { GraphInterface, Vertex } from "../../graph";
 
+import { getGlobalSettingVertex } from "./getGlobalThemeVertex";
 export function getCompanyLogoUrl(graph: GraphInterface): string {
   const companyLogoVertex = getCompanyLogoVertex(graph);
   return getDownloadLink(companyLogoVertex) || defaultLogo;
 }
 
 export function getCompanyLogoVertex(graph: GraphInterface): undefined | Vertex {
-  return evalExpression(`->CompanyLogo`, { graph, vertexes: [graph.vertexes[graph.vertexLabelIdMap.GlobalSetting?.[0]]] })?.[0];
+  return evalExpression(`->CompanyLogo`, { graph, vertexes: [getGlobalSettingVertex(graph)] })?.[0];
 }
 
 export function getMemberVertex(graph: GraphInterface): Vertex {
