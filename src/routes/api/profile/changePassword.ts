@@ -45,11 +45,11 @@ export async function POST({ request }: APIEvent) {
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : "An unknown error occurred" 
     }), {
       headers: { "Content-Type": "application/json" },
-      status: 500
+      status: 500 
     });
   } finally {
     await dbSession.close();
