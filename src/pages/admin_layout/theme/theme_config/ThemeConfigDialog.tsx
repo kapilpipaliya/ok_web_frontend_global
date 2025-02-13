@@ -1,3 +1,5 @@
+import type * as Monaco from "monaco-editor";
+
 import { createSignal, Show } from "solid-js";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
@@ -8,17 +10,16 @@ import {
 } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
+import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
-import type * as Monaco from "monaco-editor";
-import { formatJavaScriptCode } from "~/lib/formatUtils";
 
 export function ThemeConfigDialog(
   props: Readonly<{

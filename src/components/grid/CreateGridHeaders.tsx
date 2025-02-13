@@ -12,14 +12,14 @@ import type {
 import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/components/grid/functions/getTagValue";
 import { QuickEditModal } from "~/components/grid/QuickEditModal";
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
+import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
 
 import type { DataGridState } from "./DataGridContext";
 
 import { selectedValue } from "../fields/utils/selectedValue";
-import { PageDesignerLabels } from "../page_designer/functions/PageDesignerLabels";
 import { STYLES } from "../styled/constants/styles";
 import { IconButton } from "../styled/IconButton";
 import { TooltipWrapper } from "../styled/TooltipWrapper";

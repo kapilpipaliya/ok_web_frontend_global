@@ -1,6 +1,11 @@
 import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
 
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
+import {
+  PreviewContext,
+  usePreviewContext,
+} from "~/features/page_designer/context/PreviewContext";
+import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { evalExpression } from "~/lib/expression_eval";
@@ -14,11 +19,6 @@ import {
 } from "../../page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "../../page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "../../page_attr_render/PageAttrRender";
-import {
-  PreviewContext,
-  usePreviewContext,
-} from "../../page_designer/context/PreviewContext";
-import { getChildrenAttrs } from "../../page_designer/functions/getChildrenAttrs";
 import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 

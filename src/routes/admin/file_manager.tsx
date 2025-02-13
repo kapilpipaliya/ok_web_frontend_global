@@ -1,4 +1,4 @@
-import FileManager from "~/pages/file_manager/FileManager";
+import FileManager from "~/features/file_manager/FileManager";
 
 export default function FileManagerPage() {
   return (

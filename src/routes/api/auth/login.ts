@@ -9,7 +9,7 @@ import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { updateSession } from "../../../cypher/mutate/signup/updateSession";
-import { updateRedirectUrl } from "./updateRedirectUrl";
+import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (request.headers.get("content-type")?.includes("application/json")) {

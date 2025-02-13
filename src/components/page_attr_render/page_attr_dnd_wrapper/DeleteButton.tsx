@@ -1,11 +1,10 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
 import { IconButton } from "~/components/styled/IconButton";
+import { useToast } from "~/components/styled/Toast";
+import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import { deleteLayoutAttr } from "~/features/page_designer/event_handler/deleteLayoutAttr";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-
-import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
-import { useToast } from "../../styled/Toast";
 
 export function DeleteButton(props: {
   class?: string;

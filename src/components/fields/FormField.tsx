@@ -4,7 +4,8 @@ import { v7 as uuidv7 } from "uuid";
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
+import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
@@ -24,7 +25,6 @@ import {
 } from "../form/context/FormContext";
 import { getFormData } from "../form/functions/getFormData";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
-import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(

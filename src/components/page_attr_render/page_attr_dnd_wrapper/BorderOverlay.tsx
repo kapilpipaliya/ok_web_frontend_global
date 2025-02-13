@@ -14,19 +14,17 @@ import { createStore } from "solid-js/store";
 import { Portal } from "solid-js/web";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
-import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
-import { useGraph } from "~/lib/graph/graph";
-
-import type { PageLayoutObject } from "../../page_designer/context/LayoutContext";
-
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
-} from "../../page_designer/context/LayoutContext";
-import { getDnDBoxShadowArgs } from "../../page_designer/functions/getDnDBoxShadowArgs";
+} from "~/features/page_designer/context/LayoutContext";
+import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
+import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/getDnDBoxShadowArgs";
+import { useGraph } from "~/lib/graph/graph";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,

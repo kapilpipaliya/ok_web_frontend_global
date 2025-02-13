@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { sortChildren } from "~/components/page_designer/functions/sortChildren";
+import { sortChildren } from "~/features/page_designer/functions/sortChildren";
 
 import type { FormStoreObject } from "../context/FormContext";
 

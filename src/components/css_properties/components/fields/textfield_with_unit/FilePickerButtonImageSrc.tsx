@@ -1,6 +1,6 @@
 import { createMemo, createSignal, type JSX } from "solid-js";
 
-import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
+import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 
 import {
   type FormStoreObject,

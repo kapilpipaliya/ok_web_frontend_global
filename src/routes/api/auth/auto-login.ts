@@ -6,7 +6,7 @@ import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 
-import { updateRedirectUrl } from "./updateRedirectUrl";
+import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function GET({ request }: APIEvent) {
   try {

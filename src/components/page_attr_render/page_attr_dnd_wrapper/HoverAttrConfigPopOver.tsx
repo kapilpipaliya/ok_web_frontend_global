@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 
 import { useZIndex } from "~/components/fields/ZIndex";
-import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
+import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 

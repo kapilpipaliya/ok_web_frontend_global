@@ -1,0 +1,62 @@
+import type { SetStoreFunction } from "solid-js/store";
+
+import { v7 as uuidv7 } from "uuid";
+
+import type {
+  OpenFormInfo,
+  PageLayoutObject,
+} from "~/features/page_designer/context/LayoutContext";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
+
+export function openInNewInternalTab(
+  layoutStoreId: Id,
+  child: Vertex,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
+  const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  // Check if form with same label and dataId already exists
+  const exists =
+    child.id !== "new" &&
+    layoutStore.openedFormIds.some((formId) => {
+      const form = graph.vertexes[formId].P as OpenFormInfo;
+      return form.label === child.L[0] && form.dataId === child.id;
+    });
+
+  if (exists) {
+    // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
+    // if (openFormId) {
+    //   mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+    //     formId: graph.vertexes[openFormId].P.formId
+    //   });
+    // }
+  } else {
+    const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
+      dataId: child.id,
+      formDataId: child.P.formDataId,
+      formId: uuidv7(),
+      label: child.L[0],
+      mainPanel: layoutStore.mainPanel[0],
+      parentId: child.P.parentId,
+      txnId: child.P.txnId,
+    });
+    addNewVertex(0, newOpenVertex, graph, setGraph);
+    // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      {
+        openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id],
+      },
+      { cloneProperties: false },
+    );
+  }
+}

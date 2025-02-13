@@ -2,8 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addComponentAttrInPage } from "~/components/page_designer/functions/drop/addComponentAttrInForm";
-import { sortChildren } from "~/components/page_designer/functions/sortChildren";
+import { addComponentAttrInPage } from "~/features/page_designer/functions/drop/addComponentAttrInForm";
+import { sortChildren } from "~/features/page_designer/functions/sortChildren";
 
 import type { FormStoreObject } from "../context/FormContext";
 

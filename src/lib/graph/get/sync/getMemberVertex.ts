@@ -1,6 +1,6 @@
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { evalExpression } from "~/lib/expression_eval";
 import { profileImage } from "~/pages/admin_layout/constant";
-import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
 
 import type { GraphInterface, Vertex } from "../../graph";
 

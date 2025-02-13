@@ -2,8 +2,14 @@ import { createSignal, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { cloneLayoutAndChildren } from "~/components/page_designer/functions/cloneLayoutAndChildren";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { useToast } from "~/components/styled/Toast";
 import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
+import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import { cloneLayoutAndChildren } from "~/features/page_designer/functions/cloneLayoutAndChildren";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -15,13 +21,6 @@ import {
   parentComponentAttribute,
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
-
-import { useDesignerFormIdContext } from "../../page_designer/context/LayoutContext";
-import { DialogFooter } from "../../styled/dialog/DialogFooter";
-import { DialogHeader } from "../../styled/dialog/DialogHeader";
-import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
-import { DropdownMenu } from "../../styled/DropdownMenu";
-import { useToast } from "../../styled/Toast";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{

@@ -9,7 +9,7 @@ import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequ
 
 import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../../cypher/mutate/signup/signupUser";
-import { updateRedirectUrl } from "./updateRedirectUrl";
+import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (request.headers.get("content-type")?.includes("application/json")) {

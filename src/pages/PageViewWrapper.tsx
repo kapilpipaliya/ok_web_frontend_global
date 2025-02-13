@@ -30,15 +30,15 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/components/page_attr_render/permissions";
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
-import { generateFormMetaAttributes } from "~/components/page_designer/functions/generateFormMetaAttributes";
-import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
-import { getPageTitle } from "~/components/page_designer/layout/getPageTitle";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
+import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
+import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
+import { getPageTitle } from "~/features/page_designer/layout/getPageTitle";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";

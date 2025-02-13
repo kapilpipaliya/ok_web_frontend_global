@@ -2,8 +2,8 @@ import { toTitle } from "case-switcher-js";
 import { createSignal } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
-import { PageDesignerLabels } from "~/components/page_designer/functions/PageDesignerLabels";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
+import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 
 import { UserDropdownMenuDisplay } from "../admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "../admin_layout/theme/SelectThemeButton";

@@ -8,9 +8,9 @@ import {
   DesignerLayoutStoreContext,
   type PageLayoutObject,
   useDesignerLayoutStore,
-} from "~/components/page_designer/context/LayoutContext";
-import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
-import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
+} from "~/features/page_designer/context/LayoutContext";
+import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
+import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { getChannel, handleChannelMessage } from "~/lib/graph/mutate/channel";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";

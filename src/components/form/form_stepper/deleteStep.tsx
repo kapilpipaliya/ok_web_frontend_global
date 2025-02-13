@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { deleteLayoutAttr } from "~/components/page_designer/event_handler/deleteLayoutAttr";
+import { deleteLayoutAttr } from "~/features/page_designer/event_handler/deleteLayoutAttr";
 
 import type { FormStoreObject } from "../context/FormContext";
 

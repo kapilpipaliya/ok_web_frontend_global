@@ -1,6 +1,7 @@
 import { createMemo, For } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
+
 import { themeConfig } from "~/cypher/get/themeConfig";
 
 export function ThemePreview(props: { item: Vertex }) {

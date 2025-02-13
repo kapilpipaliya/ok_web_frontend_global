@@ -19,7 +19,9 @@ import { Dynamic } from "solid-js/web";
 import {
   PreviewContext,
   usePreviewContext,
-} from "~/components/page_designer/context/PreviewContext";
+} from "~/features/page_designer/context/PreviewContext";
+import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { evaluateRule } from "~/features/page_designer/rules/functions/evaluateRule";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
@@ -51,8 +53,6 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "../page_attr_render/permissions";
-import { getComponentLabel } from "../page_designer/functions/getComponentLabel";
-import { evaluateRule } from "../page_designer/rules/functions/evaluateRule";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";

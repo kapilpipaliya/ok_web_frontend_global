@@ -11,7 +11,8 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
+import { isAnyFieldInvalid } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -29,7 +30,6 @@ import {
   useFormContext,
 } from "../form/context/FormContext";
 import { usePageRenderContext } from "../page_attr_render/context/PageRenderContext";
-import { isAnyFieldInvalid } from "../page_designer/functions/generateFormMetaAttributes";
 import { useToast } from "../styled/Toast";
 
 interface ButtonProps

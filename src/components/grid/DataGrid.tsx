@@ -21,6 +21,7 @@ import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { CommonTable } from "~/components/styled/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
@@ -36,7 +37,6 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "../page_attr_render/permissions";
-import { generateFormMetaAttributes } from "../page_designer/functions/generateFormMetaAttributes";
 import { CreateGridHeaders } from "./CreateGridHeaders";
 import {
   DataGridProvider,

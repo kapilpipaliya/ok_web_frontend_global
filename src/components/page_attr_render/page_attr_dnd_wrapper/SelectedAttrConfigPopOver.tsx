@@ -1,13 +1,13 @@
 import { useZIndex } from "~/components/fields/ZIndex";
-import { handleDragStart } from "~/components/page_designer/event_handler/handleDragStart";
-import { getComponentLabel } from "~/components/page_designer/functions/getComponentLabel";
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
-} from "../../page_designer/context/LayoutContext";
+} from "~/features/page_designer/context/LayoutContext";
+import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
+import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";
 import { DuplicateButton } from "./DuplicateButton";

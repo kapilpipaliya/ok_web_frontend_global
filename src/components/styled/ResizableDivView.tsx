@@ -1,17 +1,17 @@
 import { createEffect, createSignal, type JSX, Show } from "solid-js";
 
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "~/features/page_designer/context/LayoutContext";
+import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
+import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 
-import {
-  type PageLayoutObject,
-  useDesignerFormIdContext,
-  useDesignerLayoutStore,
-} from "../page_designer/context/LayoutContext";
-import { handleDrop } from "../page_designer/event_handler/handleDrop";
-import { resetDragDropState } from "../page_designer/event_handler/resetDragDropState";
 import { STYLES } from "./constants/styles";
 import { ResizeOverlay } from "./ResizeOverlay";
 import { useToast } from "./Toast";

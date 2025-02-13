@@ -9,23 +9,23 @@ import {
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { usePreviewContext } from "~/components/page_designer/context/PreviewContext";
-import { handleDragLeave } from "~/components/page_designer/event_handler/handleDragLeave";
-import { handleDragOver } from "~/components/page_designer/event_handler/handleDragOver";
-import { handleDrop } from "~/components/page_designer/event_handler/handleDrop";
-import { onLayoutItemClick } from "~/components/page_designer/event_handler/onLayoutItemClick";
-import { resetDragDropState } from "~/components/page_designer/event_handler/resetDragDropState";
-import { getBoundingRectChildren } from "~/components/page_designer/functions/getBoundingRectChildren";
-import { getChildrenAttrs } from "~/components/page_designer/functions/getChildrenAttrs";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-
+import { useToast } from "~/components/styled/Toast";
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,
   useDesignerLayoutStore,
-} from "../../page_designer/context/LayoutContext";
-import { useToast } from "../../styled/Toast";
+} from "~/features/page_designer/context/LayoutContext";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
+import { handleDragLeave } from "~/features/page_designer/event_handler/handleDragLeave";
+import { handleDragOver } from "~/features/page_designer/event_handler/handleDragOver";
+import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
+import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
+import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
+import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
+import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";
 

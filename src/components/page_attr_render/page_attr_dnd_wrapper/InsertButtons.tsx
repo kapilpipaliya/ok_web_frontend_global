@@ -3,11 +3,11 @@ import { createSignal, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useDesignerFormIdContext } from "~/components/page_designer/context/LayoutContext";
-import { ComponentList } from "~/components/page_designer/form_elements/components/ComponentList";
-import { handleDropAtPosition } from "~/components/page_designer/functions/handleDropAtPosition";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
+import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
 import { useGraph } from "~/lib/graph/graph";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {

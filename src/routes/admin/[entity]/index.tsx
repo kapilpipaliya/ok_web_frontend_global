@@ -2,9 +2,9 @@ import { useParams } from "@solidjs/router";
 import { Match, Switch } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
+import FileManager from "~/features/file_manager/FileManager";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
-import FileManager from "~/pages/file_manager/FileManager";
 
 export default function TablePage() {
   const params = useParams();

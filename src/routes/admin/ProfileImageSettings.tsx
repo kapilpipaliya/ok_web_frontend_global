@@ -1,11 +1,12 @@
 import { createMemo, createSignal } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
+import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
-import type { FileManagerObject } from "~/pages/file_manager/FileManagerContext";
 
 import { FilePickerModal } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerModal";
 import { useToast } from "~/components/styled/Toast";
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
@@ -14,7 +15,6 @@ import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { profileImage } from "~/pages/admin_layout/constant";
-import { getDownloadLink } from "~/pages/file_manager/sidebar/getDownloadLink";
 
 import { SchemaRenderer } from "./SchemaRenderer";
 
