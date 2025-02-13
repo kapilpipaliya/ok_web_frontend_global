@@ -17,7 +17,7 @@ interface TreeOptions {
   nameExpr?: (child: Vertex) => string;
 }
 
-export async function getTreeDataMGCall(
+export async function getTreeDataAPICall(
   treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
   options: TreeOptions = {},

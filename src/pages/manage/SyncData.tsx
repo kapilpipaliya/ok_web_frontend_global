@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { Breadcrumb } from "~/components/styled/Breadcrumb";
 import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { syncNodesMGCall } from "~/cypher/mutate/sync";
+import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import { profileImage } from "../admin_layout/constant";
 
@@ -28,7 +28,7 @@ export function SyncData() {
   });
 
   async function migrateNodes(element: Vertex, node: any) {
-    const result = await syncNodesMGCall({
+    const result = await syncNodesAPICall({
       nodesToTransfer: node,
       subDomain: element.P.subDomain,
     });

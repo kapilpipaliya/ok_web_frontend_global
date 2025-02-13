@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
-import { syncNodesMGCall } from "~/cypher/mutate/sync";
+import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import type { SignupRequestData } from "./SignupRequestData";
 
@@ -56,7 +56,7 @@ export async function signupAdmin(tx: Session | Transaction, data: SignupRequest
 
   await insertComponents(userDbSession);
 
-  syncNodesMGCall({
+  syncNodesAPICall({
     // This is not syncing Root to child relationship.
     nodesToTransfer: ["Comp"], // "DataType", "Nav"
     subDomain: data.subDomain,

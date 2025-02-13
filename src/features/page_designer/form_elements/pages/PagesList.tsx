@@ -14,7 +14,7 @@ import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
-import { getTreeDataMGCall } from "~/cypher/get/client/getTreeDataMGCall";
+import { getTreeDataAPICall } from "~/cypher/get/client/getTreeDataAPICall";
 import { GetInitialData } from "~/GetInitialData";
 import {
   GraphContext,
@@ -49,7 +49,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
     graph?: any;
   }> {
     try {
-      const data = await getTreeDataMGCall({
+      const data = await getTreeDataAPICall({
         collection: `g:'${props.coll}'`,
       });
       return { data: data, graph: data.graph };

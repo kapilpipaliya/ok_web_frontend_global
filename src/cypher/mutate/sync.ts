@@ -4,7 +4,7 @@ import { SYSTEM_DB_NAME } from "../boltConstant";
 import { getDriver } from "../driver";
 
 // Main function to initiate the migration process.
-export async function syncNodesMGCall(args: {
+export async function syncNodesAPICall(args: {
   nodesToTransfer: string[];
   subDomain: string;
 }) {

@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function POST({ request }: APIEvent) {
@@ -13,7 +13,7 @@ export async function POST({ request }: APIEvent) {
     const query = "MATCH (v) WHERE elementId(v) = $id RETURN v";
     const result = await dbSession.run(query, { id: parentVertexId });
 
-    const messagesResult = await getSelectionOptionsMGCall(
+    const messagesResult = await getSelectionOptionsAPICall(
       [convertNodeToJson(result.records[0].get("v"))],
       "->SupportUser",
       undefined,

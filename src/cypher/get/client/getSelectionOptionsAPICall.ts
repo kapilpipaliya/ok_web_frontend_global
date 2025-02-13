@@ -10,7 +10,7 @@ import { retryTransaction } from "../../mutate/mutation_handlers/retryTransactio
 import { getSelectionOptionsBase } from "../getSelectionOptionsBase";
 import { handleMutationData } from "../handleMutationData";
 
-export async function getSelectionOptionsMGCall(
+export async function getSelectionOptionsAPICall(
   vertex: Vertex[],
   collection: string,
   mutationData?: any,
@@ -34,7 +34,7 @@ export async function getSelectionOptionsMGCall(
       return await getSelectionOptionsBase(vertex, collection, tx);
     }, maxRetries ?? 10);
   } catch (e: any) {
-    console.error("getSelectionOptionsMGCall", e, vertex, collection);
+    console.error("getSelectionOptionsAPICall", e, vertex, collection);
     return { error: e.message };
   }
 }

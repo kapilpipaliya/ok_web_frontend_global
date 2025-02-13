@@ -7,7 +7,7 @@ import { retryTransaction } from "~/cypher/mutate/mutation_handlers/retryTransac
 import { getSelectionOptionsBase } from "../getSelectionOptionsBase";
 import { handleMutationData } from "../handleMutationData";
 
-export async function getPropsFromMetaExpressionMGCall(
+export async function getPropsFromMetaExpressionAPICall(
   metaVertex: Vertex,
   data: Vertex[],
   mutationData?: any,
@@ -29,11 +29,11 @@ export async function getPropsFromMetaExpressionMGCall(
         tx,
       );
       const metaRowsResult = (metaRows.result as Vertex[]) || [];
-      return await getComponentPropertiesMGCall(metaRowsResult, tx);
+      return await getComponentPropertiesAPICall(metaRowsResult, tx);
     }, maxRetries);
   } catch (error) {
     console.error(
-      "Error in getPropsFromMetaExpressionMGCall:",
+      "Error in getPropsFromMetaExpressionAPICall:",
       error,
       metaVertex,
       data,
@@ -42,7 +42,7 @@ export async function getPropsFromMetaExpressionMGCall(
   }
 }
 
-async function getComponentPropertiesMGCall(
+async function getComponentPropertiesAPICall(
   metaRows: Vertex[],
   tx: Transaction,
 ): Promise<{ [key: string]: any }> {

@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
 
 export async function supportTicket(
   data: any,
@@ -80,7 +80,7 @@ export async function supportTicket(
         const query = "MATCH (v) WHERE elementId(v) = $id RETURN v";
         const result = await dbSession.run(query, { id: parentVertexId });
 
-        const messagesResult = await getSelectionOptionsMGCall(
+        const messagesResult = await getSelectionOptionsAPICall(
           [convertNodeToJson(result.records[0].get("v"))],
           "->SupportUser",
           undefined,
@@ -90,7 +90,7 @@ export async function supportTicket(
       }
       case "send": {
         // deleted this function intentionally, use mutation handler instead
-        /*const data = await newRowMGCall(
+        /*const data = await newRowAPICall(
           parentVertexId,
           "SupportUser",
           "",
@@ -108,7 +108,7 @@ export async function supportTicket(
   ) {
     const { id } = payload;
     // deleted this function intentionally, use mutation handler instead
-    /*await deleteVertexMGCall(id);
+    /*await deleteVertexAPICall(id);
     return {
       message: "Support Ticket deleted successfully",
     };*/

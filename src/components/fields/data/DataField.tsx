@@ -2,7 +2,7 @@ import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import { useRepeaterVertexContext } from "~/components/page_attr_render/context/PageAttrContext";
 import { getCollection } from "~/components/page_attr_render/utils/getCollection";
-import { getSelectionOptionsMGCall } from "~/cypher/get/client/getSelectionOptionsMGCall";
+import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -32,7 +32,7 @@ export const DataField = (props: {
     setIsFetching(true);
     setErrorMessage("");
 
-    const result = await getSelectionOptionsMGCall([data()], expression);
+    const result = await getSelectionOptionsAPICall([data()], expression);
 
     if (isValidResponse(result)) {
       setGraphData(graph, setGraph, result.graph!, true);
