@@ -6,6 +6,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 
+import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 import { PasswordChangeForm } from "./PasswordChangeForm";
 import { ProfileSettings } from "./ProfileSettings";
 
@@ -13,8 +14,6 @@ import { ProfileSettings } from "./ProfileSettings";
 export default function UserSettings() {
   const [graph] = useGraph();
   const [selectedMenu, setSelectedMenu] = createSignal("profile");
-
-  const isAdmin = () => getGlobalStore(graph).P.userRoles.includes("admin");
 
   const menuItems = [
     {
@@ -29,15 +28,9 @@ export default function UserSettings() {
     },
     {
       adminOnly: true,
-      component: "EmailSettings",
-      id: "email",
-      label: "Email Settings",
-    },
-    {
-      // adminOnly: true,
       component: "SubDomainSettings",
       id: "subdomain",
-      label: "SubDomains",
+      label: "Projects",
     },
   ];
 
@@ -58,7 +51,7 @@ export default function UserSettings() {
         <div>
           <For each={menuItems}>
             {(item) => (
-              <Show when={!item.adminOnly || isAdmin()}>
+              <Show when={!item.adminOnly || isAdminRole(graph)}>
                 <div
                   class={`p:12px cursor:pointer r:4px mb:8px ${
                     selectedMenu() === item.id
@@ -80,9 +73,6 @@ export default function UserSettings() {
           <Show when={selectedMenu() === "password"}>
             <PasswordSettings />
           </Show>
-          <Show when={selectedMenu() === "email"}>
-            <EmailSettings />
-          </Show>
           <Show when={selectedMenu() === "subdomain"}>
             <SubDomainSettings />
           </Show>
@@ -90,10 +80,6 @@ export default function UserSettings() {
       </div>
     </div>
   );
-}
-
-function EmailSettings() {
-  return <div>EmailSettings</div>;
 }
 
 function PasswordSettings() {

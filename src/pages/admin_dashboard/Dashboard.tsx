@@ -30,7 +30,6 @@ export default function AdminDashboard() {
   return (
     <div>
       <div class="flex gap:4 position:fixed right:1rem">
-        <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>
       <TabsWithUnderline

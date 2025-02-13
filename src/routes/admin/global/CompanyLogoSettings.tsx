@@ -9,13 +9,13 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
+import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { defaultLogo } from "~/pages/admin_layout/constants/constant";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getMemberVertex";
 export function CompanyLogoSettings() {
   const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";

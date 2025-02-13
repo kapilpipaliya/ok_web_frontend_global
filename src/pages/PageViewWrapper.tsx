@@ -30,6 +30,7 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/components/page_attr_render/permissions";
+import { SiteTitle } from "~/components/SiteTitle";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
@@ -67,7 +68,6 @@ import {
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import { SiteTitle } from "~/components/SiteTitle";
 
 export function PageViewWrapper(
   props: Readonly<{

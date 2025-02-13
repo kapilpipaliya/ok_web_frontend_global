@@ -20,13 +20,13 @@ export const API = {
   submitDataUrl: "/api/mutate/submit_data",
 
   testEmailSettingsUrl: "/api/settings/email/test",
-  updateCompanySettingsUrl: "/api/settings/company", 
+  updateCompanyLogoUrl: "/api/settings/updateCompanyLogo", 
+  updateCompanySettingsUrl: "/api/settings/company",
   updateEmailSettingsUrl: "/api/settings/email",
   updateGeneralSettingsUrl: "/api/settings/general",
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",
-  updateCompanyLogoUrl: "/api/settings/updateCompanyLogo",
 };
 
 export function generate401RedirectUrl(pathname: string): string {

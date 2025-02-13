@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { checkAdminRole } from "~/server/checkAdminRole";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { checkAdminRole } from "~/server/checkAdminRole";
 
 export async function GET({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);

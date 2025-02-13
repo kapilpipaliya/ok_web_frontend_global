@@ -6,8 +6,8 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";

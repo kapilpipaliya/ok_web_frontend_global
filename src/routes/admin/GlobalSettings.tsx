@@ -1,11 +1,11 @@
 import { createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
 
+import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 import { CompanySettings } from "./global/CompanySettings";
 import { EmailSettings } from "./global/EmailSettings";
 import { GeneralSettings } from "./global/GeneralSettings";
@@ -13,8 +13,6 @@ import { GeneralSettings } from "./global/GeneralSettings";
 export default function GlobalSettings() {
   const [graph] = useGraph();
   const [selectedMenu, setSelectedMenu] = createSignal("general");
-
-  const isAdmin = () => getGlobalStore(graph).P.userRoles?.some(role => graph.vertexes[role].P.key === "Admin");
 
   const menuItems = [
     {
@@ -56,7 +54,7 @@ export default function GlobalSettings() {
         <div>
           <For each={menuItems}>
             {(item) => (
-              <Show when={isAdmin()}>
+              <Show when={isAdminRole(graph)}>
                 <div
                   class={`p:12px cursor:pointer r:4px mb:8px ${
                     selectedMenu() === item.id

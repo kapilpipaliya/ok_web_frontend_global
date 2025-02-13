@@ -4,14 +4,12 @@ import { Match, Switch } from "solid-js";
 import { DataGrid } from "~/components/grid/DataGrid";
 import FileManager from "~/features/file_manager/FileManager";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
-import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
 export default function TablePage() {
   const params = useParams();
   return (
     <>
       <div class="flex gap:4 ml:auto">
-        <SelectThemeButton />
         <UserDropdownMenuDisplay />
       </div>
       <Switch>

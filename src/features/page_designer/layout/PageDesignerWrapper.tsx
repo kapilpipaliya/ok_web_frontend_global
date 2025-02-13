@@ -12,6 +12,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { getTableData } from "~/components/grid/functions/getTableData";
+import { SiteTitle } from "~/components/SiteTitle";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
@@ -31,7 +32,6 @@ import {
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getPageTitle } from "./getPageTitle";
-import { SiteTitle } from "~/components/SiteTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
