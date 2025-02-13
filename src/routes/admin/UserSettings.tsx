@@ -9,25 +9,8 @@ import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 import { PasswordChangeForm } from "./PasswordChangeForm";
 import { ProfileSettings } from "./ProfileSettings";
 
-export default function Settings() {
-  return (
-      <SettingsContent />
-  );
-}
 
-function EmailSettings() {
-  return <div>EmailSettings</div>;
-}
-
-function PasswordSettings() {
-  return (
-    <div>
-        <PasswordChangeForm />
-    </div>
-  );
-}
-
-function SettingsContent() {
+export default function UserSettings() {
   const [graph] = useGraph();
   const [selectedMenu, setSelectedMenu] = createSignal("profile");
 
@@ -105,6 +88,18 @@ function SettingsContent() {
           </Show>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EmailSettings() {
+  return <div>EmailSettings</div>;
+}
+
+function PasswordSettings() {
+  return (
+    <div>
+        <PasswordChangeForm />
     </div>
   );
 }

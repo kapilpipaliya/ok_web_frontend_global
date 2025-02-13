@@ -8,6 +8,8 @@ import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
 
+import { createActivityLog } from "../activity/createActivityLog";
+
 export async function POST({ request }: APIEvent) {
   const { domain, key } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -16,7 +18,7 @@ export async function POST({ request }: APIEvent) {
     const user = await validateUser(await getUserEmailFromSession(), dbSession);
     await checkExistingDomain(dbSession, key, domain);
     const newSubdomain = await createSubdomain(dbSession, key, domain);
-    await createActivityLog(dbSession, key, domain);
+    await createActivityLog(dbSession, "SESSION_CREATE", "SubDomain", newSubdomain.id, user.P.email, `Created subdomain ${key} with domain ${domain}`);
     await createUserSubdomainRelation(dbSession, key, user.P.uuid);
     // @ts-expect-error ignore
     await signupAdmin(dbSession, {
@@ -56,22 +58,6 @@ async function checkExistingDomain(dbSession: Session, key: string, domain: stri
   if (existingDomain.records.length > 0) {
     throw new Error("Domain name is already taken");
   }
-}
-
-async function createActivityLog(dbSession: Session, key: string, domain: string) {
-  await dbSession.run(
-    `CREATE (a:Activity {
-      action: "create",
-      entityType: "SubDomain",
-      entityId: $key,
-      timestamp: datetime(),
-      details: $details
-    })`,
-    { 
-      details: `Created subdomain ${key} with domain ${domain}`,
-      key
-    }
-  );
 }
 
 async function createSubdomain(dbSession: Session, key: string, domain: string) {

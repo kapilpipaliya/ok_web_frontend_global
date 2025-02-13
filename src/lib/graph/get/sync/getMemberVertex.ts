@@ -13,6 +13,6 @@ export function getProfileImageUrl(graph: GraphInterface): string {
   return getDownloadLink(profileImageVertex) || profileImage;
 }
 
-export function getProfileImageVertex(graph: GraphInterface): Vertex {
-  return evalExpression(`->UserProfileImage`, { graph, vertexes: [graph.vertexes.member] })?.[0] ?? ({ P: {} } as Vertex);
+export function getProfileImageVertex(graph: GraphInterface): Vertex | undefined {
+  return evalExpression(`->UserProfileImage`, { graph, vertexes: [graph.vertexes.member] })?.[0];
 }

@@ -26,10 +26,17 @@ export function AuthenticatedMenu(
       <li class="m:5|10 mt:5px">
         <a
           class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={"/admin/settings"}
+          href={"/admin/GlobalSettings"}
           onclick={props.onClose}
         >
-          Account Setting
+          Global Settings
+        </a>
+        <a
+          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
+          href={"/admin/UserSettings"}
+          onclick={props.onClose}
+        >
+          User Settings
         </a>
       </li>
       <li class="m:5|10 mt:5px">

@@ -17,6 +17,12 @@ export const API = {
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",
+
+  // New Global Settings endpoints
+  updateGeneralSettingsUrl: "/api/settings/general",
+  updateCompanySettingsUrl: "/api/settings/company", 
+  updateEmailSettingsUrl: "/api/settings/email",
+  testEmailSettingsUrl: "/api/settings/email/test",
 };
 
 export function generate401RedirectUrl(pathname: string): string {

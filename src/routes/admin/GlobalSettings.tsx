@@ -2,60 +2,41 @@ import { createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
-import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 
-import { PasswordChangeForm } from "./PasswordChangeForm";
-import { ProfileSettings } from "./ProfileSettings";
+import { CompanySettings } from "./global/CompanySettings";
+import { EmailSettings } from "./global/EmailSettings";
+import { GeneralSettings } from "./global/GeneralSettings";
 
-export default function Settings() {
-  return (
-      <SettingsContent />
-  );
-}
-
-function EmailSettings() {
-  return <div>EmailSettings</div>;
-}
-
-function PasswordSettings() {
-  return (
-    <div>
-        <PasswordChangeForm />
-    </div>
-  );
-}
-
-function SettingsContent() {
+export default function GlobalSettings() {
   const [graph] = useGraph();
-  const [selectedMenu, setSelectedMenu] = createSignal("profile");
+  const [selectedMenu, setSelectedMenu] = createSignal("general");
 
-  const isAdmin = () => getGlobalStore(graph).P.userRoles.includes("admin");
+  const isAdmin = () => getGlobalStore(graph).P.userRoles?.some(role => graph.vertexes[role].P.key === "Admin");
 
   const menuItems = [
     {
-      component: "ProfileSettings",
-      id: "profile",
-      label: "Profile",
+      component: "GeneralSettings",
+      id: "general",
+      label: "General",
     },
     {
-      component: "PasswordSettings",
-      id: "password",
-      label: "Change Password",
+      component: "CompanySettings",
+      id: "company",
+      label: "Company Details",
     },
     {
-      adminOnly: true,
       component: "EmailSettings",
       id: "email",
       label: "Email Settings",
     },
     {
-      // adminOnly: true,
-      component: "SubDomainSettings",
-      id: "subdomain",
-      label: "SubDomains",
-    },
+      component: "ThemeSettings",
+      id: "theme",
+      label: "Theme Settings",
+    }
   ];
 
   return (
@@ -63,8 +44,8 @@ function SettingsContent() {
       <div class="display:flex">
         <HeaderWithDescription
           class="flex:1"
-          description="Manage your account settings and preferences."
-          title="Account Settings"
+          description="Manage global application settings"
+          title="Global Settings"
         />
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
@@ -75,7 +56,7 @@ function SettingsContent() {
         <div>
           <For each={menuItems}>
             {(item) => (
-              <Show when={!item.adminOnly || isAdmin()}>
+              <Show when={isAdmin()}>
                 <div
                   class={`p:12px cursor:pointer r:4px mb:8px ${
                     selectedMenu() === item.id
@@ -91,20 +72,24 @@ function SettingsContent() {
           </For>
         </div>
         <div class="flex:1 p:6">
-          <Show when={selectedMenu() === "profile"}>
-            <ProfileSettings />
+          <Show when={selectedMenu() === "general"}>
+            <GeneralSettings />
           </Show>
-          <Show when={selectedMenu() === "password"}>
-            <PasswordSettings />
+          <Show when={selectedMenu() === "company"}>
+            <CompanySettings />
           </Show>
           <Show when={selectedMenu() === "email"}>
             <EmailSettings />
           </Show>
-          <Show when={selectedMenu() === "subdomain"}>
-            <SubDomainSettings />
+          <Show when={selectedMenu() === "theme"}>
+            <ThemeSettings />
           </Show>
         </div>
       </div>
     </div>
   );
 }
+
+function ThemeSettings() {
+  return <div>Theme Settings</div>;
+} 

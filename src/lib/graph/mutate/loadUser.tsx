@@ -30,6 +30,7 @@ export function handleUserData(
   }
 
   if (data.roles) {
+    // To speed up we save userRoles in globalStoreId, if cause problems add edges to roles
     mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
       userRoles: data.roles.map((role: Vertex) => role.id),
     });
