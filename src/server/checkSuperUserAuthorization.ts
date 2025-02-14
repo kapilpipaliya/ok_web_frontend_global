@@ -19,7 +19,7 @@ export async function checkSuperUserAuthorization(
         error: `Access Denied: You do not have permission to ${isMutate ? "make changes" : "view information"} in this area.`,
       };
     }
-    const { user } = await findUserByEmail(dbSession, email);
+    const { user } = await findUserByEmail(dbSession, email, subDomain);
     if (user?.P.username !== superUserData.username) {
       return {
         error: `Access Denied: You do not have permission to ${isMutate ? "make changes" : "view information"} in this area.`,

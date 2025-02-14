@@ -17,6 +17,7 @@ interface UserResult {
 export async function findUserByEmail(
   dbSession: Session,
   email?: null | string,
+  subDomain?: null | string,
 ): Promise<UserResult> {
   if (!email) {
     return getGuestOnlyResult(dbSession);
@@ -53,6 +54,7 @@ export async function findUserByEmail(
   if (user && !userSetting) {
     userSetting = (await createUserSetting(dbSession, user.id)) as Vertex;
   }
+  user.P.subDomain = subDomain;
 
   return {
     profileImage,

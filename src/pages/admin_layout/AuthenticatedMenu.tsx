@@ -1,10 +1,12 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
+import { For, Show } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
 import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -21,33 +23,31 @@ export function AuthenticatedMenu(
   const { showLoadingToast } = useToast();
   const globalStoreId = "globalStoreId";
 
+  const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
+
+  const menuItems = () => isSystemSubDomain()
+    ? [{ href: "/admin/Projects", label: "Projects" }]
+    : [
+        { href: "/admin/GlobalSettings", label: "Global Settings" },
+        { href: "/admin/UserSettings", label: "User Settings" },
+        { href: "/contact-us", label: "Help" },
+      ];
+
   return (
     <>
-      <li class="m:5|10 mt:5px">
-        <a
-          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={"/admin/GlobalSettings"}
-          onclick={props.onClose}
-        >
-          Global Settings
-        </a>
-        <a
-          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href={"/admin/UserSettings"}
-          onclick={props.onClose}
-        >
-          User Settings
-        </a>
-      </li>
-      <li class="m:5|10 mt:5px">
-        <a
-          class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
-          href="/contact-us"
-          onclick={props.onClose}
-        >
-          Help
-        </a>
-      </li>
+      <For each={menuItems()}>
+        {(item) => (
+          <li class="m:5|10 mt:5px">
+            <a
+              class="flex ai:center bg:rgb(241,241,241):hover color:#333 p:5px|7px r:5|5|5|5 text-decoration:none"
+              href={item.href}
+              onclick={props.onClose}
+            >
+              {item.label}
+            </a>
+          </li>
+        )}
+      </For>
       <hr class="color:rgb(223,223,223)" />
       <li class="m:5|10 mt:5px">
         <a

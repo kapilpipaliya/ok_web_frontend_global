@@ -6,7 +6,7 @@ import { findUserByEmail } from "../../../cypher/mutate/user/findUserByEmail";
 import { getUserEmailFromSession } from "../../../server/getUserEmailFromSession";
 
 export async function GET({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
     const email = await getUserEmailFromSession();
     // if (!email) {
@@ -17,7 +17,7 @@ export async function GET({ request }: APIEvent) {
     //     { status: 401 },
     //   );
     // }
-    const data = await findUserByEmail(dbSession, email);
+    const data = await findUserByEmail(dbSession, email, subDomain);
 
     if (!data.user) {
       return data;
