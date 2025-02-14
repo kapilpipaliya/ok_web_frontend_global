@@ -33,14 +33,14 @@ export const LeftIcons = () => {
 
   return (
     <div class="flex ai:center">
-      <IconButton
+      {/* <IconButton
         class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer jc:center r:5|5|5|5"
         icon="ph:arrow-left"
         iconClass={"color:secondary color:black:hover"}
         onClick={handleBackClick}
         size={30}
         title="Back"
-      />
+      /> */}
       <IconButton
         class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer jc:center r:5|5|5|5"
         icon="ph:house"

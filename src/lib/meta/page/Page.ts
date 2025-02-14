@@ -51,6 +51,16 @@ export const Page: IFormMetaData = {
     {
       as: "div",
       attributes: [
+        {
+          collection: "g:'File'",
+          componentName: "Select",
+          // hidden: true,
+          key: "Preview",
+          label: "File",
+          labelKey: "::'P.fileName'",
+          title: "Preview",
+          // type: "Preview",
+        },
         wrapWithTitle("Title", false, {
           class: `${PROPERTIES.Css.TextField} flex:1`,
           componentName: "TextInput",
@@ -103,6 +113,7 @@ export const Page: IFormMetaData = {
         // },
         wrapWithTitle("Public", false, {
           componentName: "CheckBox",
+          hideInGrid: true,
           key: "public",
         }),
         /*{ componentName: "CheckBox", key: "isRealTime" },
@@ -132,35 +143,29 @@ export const Page: IFormMetaData = {
         },
         {
           ...parentComponentAttribute,
+          hideInGrid: true,
           inward: true,
         },
         {
           ...parentTemplateAttribute,
+          hideInGrid: true,
           inward: true,
         },
         {
           collection: "->$0Perm",
           componentName: "MultiSelect",
           hidden: true,
+          hideInGrid: true,
           key: "globalPerm",
         },
         {
           collection: "->ChatHistory",
           componentName: "MultiSelect",
           hidden: true,
+          hideInGrid: true,
           key: "ChatHistory",
           label: "ChatHistory",
           type: "ChatHistory",
-        },
-        {
-          collection: "g:'File'",
-          componentName: "Select",
-          // hidden: true,
-          key: "Preview",
-          label: "File",
-          labelKey: "::'P.fileName'",
-          title: "Preview",
-          // type: "Preview",
         },
       ],
       class: "d:flex flex:col gap:8",

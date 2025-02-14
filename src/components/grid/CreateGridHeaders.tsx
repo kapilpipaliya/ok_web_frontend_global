@@ -73,6 +73,7 @@ export function CreateGridHeaders(
   for (const attribute of formNew.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
     if (
+      attribute.hideInGrid ||
       attribute.componentName === "Table" ||
       attribute.componentName === "DynamicTable"
     ) {

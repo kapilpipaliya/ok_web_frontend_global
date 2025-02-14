@@ -72,6 +72,7 @@ FormMetaData.Form = {
       collection: "g:'FormCategory'",
       componentName: "Select",
       displayName: "Form Category",
+      hideInGrid: true,
       inward: true,
       key: "form",
       parentLabel: "FormCategory",

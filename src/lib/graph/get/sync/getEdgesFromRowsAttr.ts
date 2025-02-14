@@ -18,6 +18,9 @@ export function getEdgesFromRowsAttr(
 
   function processAttributes(attributes: FieldAttribute[]) {
     for (const attribute of attributes) {
+      if (ignoreTables && attribute.hideInGrid) {
+        continue;
+      }
       if (
         attribute.componentName === "Select" ||
         attribute.componentName === "MultiSelect"
