@@ -60,7 +60,7 @@ export function SelectThemeMenu() {
       IN: {},
       L: [],
       OUT: {},
-      P: themeMetaAttribute,
+      P: {type: "GlobalSettingTheme"},
     } as Vertex;
 
     setSelectionValue(
@@ -103,8 +103,8 @@ export function SelectThemeMenu() {
               return (
                 <li
                   class={`${
-                    isSelected() ? "bg:beryl-45" : ""
-                  } flex ai:center bg:lightblue:hover jc:space-between p:0.25rem`}
+                    isSelected() ? "bg:primary-30" : ""
+                  } flex ai:center bg:primary-20:hover jc:space-between p:0.25rem cursor:pointer`}
                   onClick={() => handleThemeSelect(theme)}
                 >
                   <span>

@@ -164,7 +164,7 @@ export function ThemeConfigDialog(
         </div>
       </div>
       <Show when={error()}>
-        <div style={{ color: "red" }}>{error()}</div>
+        <div class="bg:error">{error()}</div>
       </Show>
       <DialogFooter>
         <button class={dialogOkButtonClass} onClick={handleSave} type="button">

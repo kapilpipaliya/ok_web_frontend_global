@@ -11,7 +11,7 @@ export const API = {
   getSubDomainActivityUrl: "/api/subdomain/activity",
   // Subdomain management endpoints
   getSubDomainsUrl: "/api/subdomain/list",
-  getUserUrl: "/api/auth/GetUser",
+  getUserUrl: "/api/auth/getUser",
   loginUrl: "/api/auth/login",
   logOutUrl: "/api/auth/logout",
   profileUrl: "/api/auth/updateProfile",

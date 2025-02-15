@@ -94,12 +94,12 @@ export async function loadUser(
 }
 
 export function saveUser(
-  user: any,
+  user: Vertex,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (graph.vertexes.member) {
-    replaceVertexProperties(0, "member", graph, setGraph, user, {
+    replaceVertexProperties(0, "member", graph, setGraph, user.P, {
       cloneProperties: false,
     });
   } else {
