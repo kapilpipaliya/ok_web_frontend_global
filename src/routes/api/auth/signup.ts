@@ -10,6 +10,7 @@ import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequ
 import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../../cypher/mutate/signup/signupUser";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
+import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 
 export async function POST({ request }: APIEvent) {
   if (request.headers.get("content-type")?.includes("application/json")) {
@@ -17,7 +18,18 @@ export async function POST({ request }: APIEvent) {
     const data: SignupRequestData = await request.json();
     const tx = dbSession.beginTransaction();
     try {
-      return await handleSignup(data, tx, subDomain);
+      const user = await handleSignup(data, tx, subDomain);
+      
+      // Send confirmation email
+      if (user?.id) {
+        await sendConfirmationEmail(
+          data.email,
+          data.username,
+          request
+        );
+      }
+      
+      return user;
     } finally {
       await dbSession.close();
     }

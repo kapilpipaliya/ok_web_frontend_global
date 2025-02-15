@@ -25,7 +25,8 @@ export async function createUserInSuperDB(
             uuid: $uuid,
             email: $email,
             password: $hashedPassword,
-            salt: $salt
+            salt: $salt,
+            emailConfirmed: false
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
@@ -65,7 +66,8 @@ export async function createUserInUserDB(
                 password: $hashedPassword,
                 salt: $salt,
                 isSuper: $isSuper,
-                avatar: ''
+                avatar: '',
+                emailConfirmed: false
             }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserResult = await sessionOrTx.run(createUserQuery2, {

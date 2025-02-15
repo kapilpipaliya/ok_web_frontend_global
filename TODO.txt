@@ -40,3 +40,8 @@ Warning The following packages contained npm lifecycle scripts (preinstall/insta
 ┠─ This may cause the packages to not work correctly.
 ┖─ To run lifecycle scripts, use the `--allow-scripts` flag with `deno install`:
    deno install --allow-scripts=npm:@biomejs/biome@1.9.4,npm:@parcel/watcher@2.5.1,npm:core-js@3.40.0
+
+
+Optional tasks:
+- Contact us form convert to FormSchema.
+- display loader on signup and login.

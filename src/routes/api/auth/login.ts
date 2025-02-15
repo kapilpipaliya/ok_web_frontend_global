@@ -96,6 +96,10 @@ async function authenticateUser(
 
     const user = convertNodeToJson(result.records[0].get("u"));
 
+    if (!user.P.emailConfirmed) {
+      throw new Error("Please confirm your email address before logging in.");
+    }
+
     // when system user, check password from system db
     if (user.P.isSuper) {
       return await authenticateSuperUser(user, password);
