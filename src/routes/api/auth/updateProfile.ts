@@ -1,7 +1,8 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { updateProfile } from "~/routes/api/profile/updateProfile";
+
+import { updateProfile } from "./functions/updateProfile";
 
 export async function POST({ request }: APIEvent) {
   const payload = await request.json();

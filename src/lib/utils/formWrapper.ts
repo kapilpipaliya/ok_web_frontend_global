@@ -1,7 +1,7 @@
 type FormSchema = {
-  as: string;
+  as?: string;
   attributes: any[];
-  class: string;
+  class?: string;
   componentName: string;
 };
 
