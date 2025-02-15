@@ -5,7 +5,7 @@ import { DataGrid } from "~/components/grid/DataGrid";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 
-import { UserDropdownMenuDisplay } from "../admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "../auth_menu/DropdownMenuDisplay";
 import { SelectThemeButton } from "../admin_layout/theme/SelectThemeButton";
 
 export default function AdminDashboard() {

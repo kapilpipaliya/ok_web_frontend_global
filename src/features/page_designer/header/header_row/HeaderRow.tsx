@@ -3,7 +3,7 @@ import type { JSX } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SelectThemeButton } from "~/pages/admin_layout/theme/SelectThemeButton";
 
 import {

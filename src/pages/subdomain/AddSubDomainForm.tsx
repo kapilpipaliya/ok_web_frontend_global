@@ -11,7 +11,7 @@ import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
-import { SchemaRenderer } from "../../routes/admin/SchemaRenderer";
+import { SchemaRenderer } from "../SchemaRenderer";
 
 const GRID_ITEM_CLASS = "grid grid-template-columns:150px|400px ai:center gap:8";
 const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";

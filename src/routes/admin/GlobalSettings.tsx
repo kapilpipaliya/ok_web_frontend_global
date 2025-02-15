@@ -3,12 +3,12 @@ import { createSignal, For, Show } from "solid-js";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
 import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
-import { CompanySettings } from "./global/CompanySettings";
-import { EmailSettings } from "./global/EmailSettings";
-import { GeneralSettings } from "./global/GeneralSettings";
+import { CompanySettings } from "../../pages/system/CompanySettings";
+import { EmailSettings } from "../../pages/system/EmailSettings";
+import { GeneralSettings } from "../../pages/system/GeneralSettings";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();

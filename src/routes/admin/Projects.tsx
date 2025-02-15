@@ -1,5 +1,5 @@
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 
 export default function Projects() {

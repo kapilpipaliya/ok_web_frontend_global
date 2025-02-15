@@ -10,7 +10,7 @@ import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/sendEmail";
 
-import { SchemaRenderer } from "../../routes/admin/SchemaRenderer";
+import { SchemaRenderer } from "../SchemaRenderer";
 import { GRID_ITEM_CLASS } from "./constants/constant";
 import { LABEL_CLASS } from "./constants/constant";
 import { FORM_GRID_CLASS, FORM_CLASS } from "./constants/constant";

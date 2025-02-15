@@ -13,7 +13,7 @@ import { GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
-import { SchemaRenderer } from "./SchemaRenderer";
+import { SchemaRenderer } from "../SchemaRenderer";
 
 const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
 const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";

@@ -3,12 +3,12 @@ import { createSignal, For, Show } from "solid-js";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
-import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 
-import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
-import { PasswordChangeForm } from "./PasswordChangeForm";
-import { ProfileSettings } from "./ProfileSettings";
+import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
+import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 
 export default function UserSettings() {

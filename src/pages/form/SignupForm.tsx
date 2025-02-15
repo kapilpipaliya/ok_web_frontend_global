@@ -13,7 +13,7 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/form/handleLoginRedirect";
 
-import { SchemaRenderer } from "../../routes/admin/SchemaRenderer";
+import { SchemaRenderer } from "../SchemaRenderer";
 import { FORM_CLASS, FORM_GRID_CLASS, GRID_ITEM_CLASS, LABEL_CLASS } from "./constants/constant";
 
 export function SignupForm() {

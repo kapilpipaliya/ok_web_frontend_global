@@ -12,8 +12,8 @@ import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
+import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
-import { SchemaRenderer } from "./SchemaRenderer";
 
 export function ProfileSettings() {
   const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";

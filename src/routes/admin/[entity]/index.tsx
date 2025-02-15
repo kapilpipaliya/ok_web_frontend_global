@@ -3,7 +3,7 @@ import { Match, Switch } from "solid-js";
 
 import { DataGrid } from "~/components/grid/DataGrid";
 import FileManager from "~/features/file_manager/FileManager";
-import { UserDropdownMenuDisplay } from "~/pages/admin_layout/DropdownMenuDisplay";
+import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
 export default function TablePage() {
   const params = useParams();
