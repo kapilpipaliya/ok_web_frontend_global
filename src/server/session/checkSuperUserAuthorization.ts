@@ -2,8 +2,8 @@ import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 
-import { superUserData } from "../../tests/auth/data/signUpData";
-import { findUserByEmail } from "../cypher/mutate/user/findUserByEmail";
+import { superUserData } from "../../../tests/auth/data/signUpData";
+import { findUserByEmail } from "../../cypher/mutate/user/findUserByEmail";
 import { getUserEmailFromSession } from "./getUserEmailFromSession";
 
 export async function checkSuperUserAuthorization(

@@ -1,4 +1,4 @@
-import { getHttpsSession } from "~/server/getHttpsSession";
+import { getHttpsSession } from "~/server/session/getHttpsSession";
 
 export async function getUserEmailFromSession(): Promise<null | string> {
   const httpSession = await getHttpsSession();

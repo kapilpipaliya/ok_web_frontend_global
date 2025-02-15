@@ -1,7 +1,7 @@
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 
-import { getHttpsSession } from "~/server/getHttpsSession";
+import { getHttpsSession } from "~/server/session/getHttpsSession";
 
 import { generate401RedirectUrl } from "./lib/api/endpoints";
 

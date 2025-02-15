@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/driver";
-import { getSubDomain } from "~/server/getSubDomain";
+import { getSubDomain } from "~/server/session/getSubDomain";
 
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();

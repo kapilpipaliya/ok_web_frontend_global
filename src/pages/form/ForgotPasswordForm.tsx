@@ -8,7 +8,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import { sendEmail } from "~/server/sendEmail";
+import { sendEmail } from "~/server/email/sendEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { GRID_ITEM_CLASS } from "./constants/constant";

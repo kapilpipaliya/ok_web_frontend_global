@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
-import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
+import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
 
 export async function GET({ request }: APIEvent) {
   try {

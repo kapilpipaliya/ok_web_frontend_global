@@ -4,7 +4,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
-import { checkSuperUserAuthorization } from "~/server/checkSuperUserAuthorization";
+import { checkSuperUserAuthorization } from "~/server/session/checkSuperUserAuthorization";
 
 import type { ContextType } from "../types/ContextType";
 import type { NestedExpression } from "../types/NestedExpression";

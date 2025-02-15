@@ -9,7 +9,7 @@ import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { verifyPassword } from "~/lib/auth/password";
 
-import { updateSession } from "../../../cypher/mutate/signup/updateSession";
+import { updateSession } from "~/server/session/updateSession";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {

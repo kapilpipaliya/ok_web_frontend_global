@@ -1,4 +1,4 @@
-import { logout } from "../../../server/logout";
+import { logout } from "../../../server/session/logout";
 
 export async function POST() {
   try {

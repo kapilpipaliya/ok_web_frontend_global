@@ -6,7 +6,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
-import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
+import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
 
 import { createActivityLog } from "../activity/createActivityLog";
 

@@ -4,7 +4,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 
 import { handleError } from "../../../lib/handleError";
-import { checkSuperUserAuthorization } from "../../../server/checkSuperUserAuthorization";
+import { checkSuperUserAuthorization } from "../../../server/session/checkSuperUserAuthorization";
 
 export async function POST({ request }: APIEvent) {
   let data;

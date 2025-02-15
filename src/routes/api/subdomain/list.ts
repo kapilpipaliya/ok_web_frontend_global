@@ -4,7 +4,7 @@ import { Node } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
+import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
 
 export async function GET({ request }: APIEvent) {
   const email = await getUserEmailFromSession();

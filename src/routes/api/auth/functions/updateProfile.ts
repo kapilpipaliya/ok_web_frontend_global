@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDriver } from "~/cypher/driver";
-import { getHttpsSession } from "~/server/getHttpsSession";
+import { getHttpsSession } from "~/server/session/getHttpsSession";
 
 type ProfilePayload = {
   email?: string;

@@ -3,7 +3,7 @@ import type { Transaction } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { updateSession } from "~/cypher/mutate/signup/updateSession";
+import { updateSession } from "~/server/session/updateSession";
 
 import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequestData";
 

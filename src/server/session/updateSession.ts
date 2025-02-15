@@ -1,6 +1,6 @@
 import type { Vertex } from "~/lib/graph/graph";
 
-import { getHttpsSession } from "~/server/getHttpsSession";
+import { getHttpsSession } from "~/server/session/getHttpsSession";
 
 export async function updateSession(createUserResult: Vertex) {
   const http_session = await getHttpsSession();

@@ -2,8 +2,8 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
-import { checkAdminRole } from "~/server/checkAdminRole";
-import { getUserEmailFromSession } from "~/server/getUserEmailFromSession";
+import { checkAdminRole } from "~/server/session/checkAdminRole";
+import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);

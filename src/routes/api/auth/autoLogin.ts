@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { updateSession } from "~/cypher/mutate/signup/updateSession";
+import { updateSession } from "~/server/session/updateSession";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
