@@ -1,6 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-// import bcrypt from "bcryptjs";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 

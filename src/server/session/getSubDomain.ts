@@ -6,8 +6,11 @@ import { getDriver } from "~/cypher/driver";
 export async function getSubDomain(host: string) {
   const { domain, subdomain } = tld.parse(host);
 
+  // If domain is null, set it to "super"
+  const effectiveDomain = domain || "localhost";
+
   // If it matches the current domain from env, use system subdomain
-  if ((domain || "localhost") === process.env.DOMAIN) {
+  if (effectiveDomain === process.env.DOMAIN) {
     if (!subdomain || subdomain === "www" || subdomain === "system") {
       return SYSTEM_DB_NAME;
     }
@@ -23,7 +26,7 @@ export async function getSubDomain(host: string) {
         MATCH (s:SubDomain {domain: $domain})
         RETURN s.key as subdomain
       `;
-      const result = await dbSession.run(query, { domain });
+      const result = await dbSession.run(query, { domain: effectiveDomain });
 
       if (result.records.length > 0) {
         return result.records[0].get("subdomain");

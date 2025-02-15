@@ -1,16 +1,18 @@
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
+import { hashPassword } from "~/lib/auth/password";
+import { Vertex } from "~/lib/graph/graph";
 
 import { superUserData } from "../../../../tests/auth/data/signUpData";
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
-import { createSuperUser } from "../user/createSuperUser";
 
 export async function setupSuperUser(): Promise<{
   error?: string;
   status: number;
-  user?: any;
+  user?: null | Vertex;
 }> {
   const driver = await getDriver();
   const systemDbSession = driver.session();
@@ -27,16 +29,56 @@ export async function setupSuperUser(): Promise<{
     const driver = await getDriver();
     const dbSession = driver.session({ database: SYSTEM_DB_NAME });
     try {
-      const user = await createSuperUser(
-        superUserData.email,
-        superUserData.username,
-        superUserData.password,
-        dbSession,
-      );
+      // Check if a user with the same username already exists
+      const checkUserQuery = `
+        MATCH (u:User { username: $username })
+        RETURN u
+      `;
+      const checkUserResult = await dbSession.run(checkUserQuery, {
+        username: superUserData.username,
+      });
 
-      if ("error" in user) {
-        return { error: user.error, status: 400 };
+      if (checkUserResult.records.length > 0) {
+        return { error: "User with the same username already exists.", status: 400, user: null };
       }
+
+      // Hash password before saving
+      const { hashedPassword, salt } = await hashPassword(superUserData.password);
+
+      const createUserQuery = `
+        CREATE (u:User {
+          email: $email,
+          password: $hashedPassword,
+          salt: $salt,
+          username: $username,
+          uuid: randomUUID()
+        })
+        CREATE (s:SubDomain {
+          key: $systemDbName
+        })
+        CREATE (u)-[:UserSubDomain]->(s)
+        RETURN u, s
+      `;
+      
+      const createUserResult = await dbSession.run(createUserQuery, {
+        email: superUserData.email,
+        hashedPassword,
+        salt,
+        systemDbName: SYSTEM_DB_NAME,
+        username: superUserData.username,
+      });
+
+      if (createUserResult.records.length === 0) {
+        return { error: `Failed to create ${SYSTEM_DB_NAME} user.`, status: 500, user: null };
+      }
+
+      const user = convertNodeToJson(createUserResult.records[0].get("u"));
+
+      const setEmailConfirmedQuery = `
+        MATCH (u:User {uuid: $uuid})
+        SET u.emailConfirmed = true
+      `;
+      await dbSession.run(setEmailConfirmedQuery, { uuid: user.P.uuid });
 
       await createRootFolder(dbSession, user.P.uuid);
       const addUserToAdminRoleQuery = `
@@ -47,7 +89,7 @@ export async function setupSuperUser(): Promise<{
 
       const response = await insertComponents(dbSession);
       if (!response.success) {
-        return { error: "Failed to insert component tree", status: 500 };
+        return { error: "Failed to insert component tree", status: 500, user: null };
       }
 
       return { status: 200, user };
@@ -56,6 +98,7 @@ export async function setupSuperUser(): Promise<{
       return {
         error: `Failed to create ${SYSTEM_DB_NAME} user`,
         status: 500,
+        user: null
       };
     } finally {
       await dbSession.close();
@@ -63,8 +106,9 @@ export async function setupSuperUser(): Promise<{
   } catch (error) {
     console.error(`Error setting up ${SYSTEM_DB_NAME} user:`, error);
     return {
-      error: `Failed to setup ${SYSTEM_DB_NAME} user: ${error.message}`,
+      error: `Failed to setup ${SYSTEM_DB_NAME} user: ${(error as Error).message}`,
       status: 500,
+      user: null
     };
   } finally {
     await systemDbSession.close();
