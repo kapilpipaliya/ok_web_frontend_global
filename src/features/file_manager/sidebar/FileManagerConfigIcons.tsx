@@ -123,7 +123,7 @@ export function FileManagerConfigIcons(
         </Show>
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mdi:settings"
+          icon="ph:gear"
           iconClass="transition:0.5s|ease-in-out"
           onClick={() => setIsEditModalOpen(true)}
           size={18}
@@ -131,7 +131,7 @@ export function FileManagerConfigIcons(
         />
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mdi:folder-plus"
+          icon="ph:folder-plus"
           iconClass="transition:0.5s|ease-in-out"
           onClick={(e) =>
             openDialog(
@@ -147,7 +147,7 @@ export function FileManagerConfigIcons(
         />
         <IconButton
           class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-          icon="mdi:file-plus"
+          icon="ph:file-plus"
           iconClass="transition:0.5s|ease-in-out"
           onClick={(e) =>
             openDialog(
@@ -170,7 +170,7 @@ export function FileManagerConfigIcons(
         >
           <IconButton
             class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-            icon="mdi:rename-box"
+            icon="ph:textbox"
             iconClass="transition:0.5s|ease-in-out"
             onClick={(e) =>
               openDialog(
@@ -186,7 +186,7 @@ export function FileManagerConfigIcons(
           />
           <IconButton
             class="color:error cursor:pointer mr:5px opacity:.5 opacity:1:hover"
-            icon="mdi:delete"
+            icon="ph:trash"
             iconClass="transition:0.5s|ease-in-out"
             onClick={() => {}}
             size={18}

@@ -203,8 +203,8 @@ export function ForgotPasswordForm() {
                           componentName: "Icon",
                           props: () => ({
                             icon: showPassword.newPassword
-                              ? "iconamoon:eye-light"
-                              : "iconamoon:eye-off",
+                              ? "ph:eye"
+                              : "ph:eye-slash",
                             onClick: () =>
                               setShowPassword(
                                 "newPassword",
@@ -254,8 +254,8 @@ export function ForgotPasswordForm() {
                           componentName: "Icon",
                           props: () => ({
                             icon: showPassword.confirmPassword
-                              ? "iconamoon:eye-light"
-                              : "iconamoon:eye-off",
+                              ? "ph:eye"
+                              : "ph:eye-slash",
                             onClick: () =>
                               setShowPassword(
                                 "confirmPassword",

@@ -612,7 +612,7 @@ export default class JsxParser {
         this.props.txnId,
         { P: { key: "icon" } } as any,
         graph.vertexes[rowId],
-        `'${"mdi:hamburger-menu".replaceAll("'", "\\'")}'`,
+        `'${"ph:hamburger".replaceAll("'", "\\'")}'`,
       );
       return;
     }

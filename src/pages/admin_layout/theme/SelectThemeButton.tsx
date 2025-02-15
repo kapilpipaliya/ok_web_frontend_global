@@ -14,7 +14,7 @@ export function SelectThemeButton() {
     <>
       <IconButton
         class={headerIconButtonClass}
-        icon="mdi:paint-outline"
+        icon="ph:paint-bucket"
         onClick={() => setIsThemeOptionsOpen(true)}
         ref={setButtonRef}
         size={22}

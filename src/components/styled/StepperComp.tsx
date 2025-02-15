@@ -70,7 +70,7 @@ export const Stepper = () => {
             <>
               <Icon
                 height={20}
-                icon="mdi:plus"
+                icon="ph:plus"
                 noobserver
                 onClick={(e) => {
                   e.stopPropagation();
@@ -111,7 +111,7 @@ export const Stepper = () => {
               <Show when={index() === steps().length - 1}>
                 <Icon
                   height={20}
-                  icon="mdi:plus"
+                  icon="ph:plus"
                   noobserver
                   onClick={(e) => {
                     e.stopPropagation();

@@ -110,7 +110,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     <>
       <IconButton
         class={selectedFileVertex()?.length > 0 ? "color:green" : ""}
-        icon={"solar:gallery-linear"}
+        icon={"ph:image-square"}
         onClick={() => setOpenDialog(true)}
         size={16}
       />

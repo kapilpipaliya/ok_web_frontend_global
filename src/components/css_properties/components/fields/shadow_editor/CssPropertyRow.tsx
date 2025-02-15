@@ -21,7 +21,7 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
       <div class="flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:6 r:4">
         <Icon
           class="cursor:pointer mr:8"
-          icon="icon-park-outline:more-one"
+          icon="ph:dots-three-outline-fill"
           noobserver
           onClick={() => openMenu[1](true)}
         />
@@ -34,7 +34,7 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
         />
         <Icon
           class="cursor:pointer fg:error mr:8"
-          icon="mdi:close"
+          icon="ph:x-circle"
           noobserver
           onClick={() => props.deleteOption(props.index())}
         />

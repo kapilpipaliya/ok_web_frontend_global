@@ -165,7 +165,7 @@ export function PageItem(
         <div class="font-size:14px">{toTitle(props.child.key)}</div>
         <div class="margin-left:auto">
           <IconButton
-            icon="mdi:open-in-new"
+            icon="ph:arrow-square-out"
             onClick={openInNewInternalTabClick}
             size={18}
           />

@@ -138,8 +138,8 @@ function createPasswordField(
                 componentName: "Icon",
                 props: () => ({
                   icon: showPassword[key]
-                    ? "iconamoon:eye-light"
-                    : "iconamoon:eye-off",
+                    ? "ph:eye"
+                    : "ph:eye-slash",
                   onClick: () => setShowPassword(key, !showPassword[key]),
                 }),
               },

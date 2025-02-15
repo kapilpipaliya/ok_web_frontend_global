@@ -137,7 +137,7 @@ export function RulesList() {
             <div class="flex gap:2">
               <IconButton
                 class="cursor:pointer opacity:.5 opacity:1:hover"
-                icon="mingcute:settings-5-line"
+                icon="ph:gear"
                 onClick={() => openRuleSettings(rule)}
                 size={22}
                 title="Edit Rule"

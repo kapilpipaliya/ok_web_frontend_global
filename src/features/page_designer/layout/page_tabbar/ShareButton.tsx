@@ -12,7 +12,7 @@ export function ShareButton(props: { formStoreId: string }) {
     <>
       <IconButton
         class={headerIconButtonClass}
-        icon="basil:share-box-outline"
+        icon="ph:share-network"
         onClick={() => setOpenDialog(true)}
         title="Share"
       />

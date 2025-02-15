@@ -141,7 +141,7 @@ export function VariantsList() {
             <div class="flex gap:2">
               <IconButton
                 class="cursor:pointer opacity:.5 opacity:1:hover"
-                icon="mingcute:settings-5-line"
+                icon="ph:gear"
                 onClick={() => openVariantSettings(variant)}
                 size={22}
                 title="Edit Variant"

@@ -52,7 +52,7 @@ export function FormStepper() {
             <Icon
               class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
               height={20}
-              icon="mdi:plus"
+              icon="ph:plus"
               noobserver
               onClick={(e) => handleAddStepBefore(e, step)}
               width={20}
@@ -62,7 +62,7 @@ export function FormStepper() {
               <Icon
                 class="cursor-pointer color:rgb(37,99,235) px:0 py:5px"
                 height={20}
-                icon="mdi:plus"
+                icon="ph:plus"
                 noobserver
                 onClick={(e) => handleAddStepAfter(e, step)}
                 width={20}

@@ -70,14 +70,14 @@ export function PageShare(props: { formStoreId: string }) {
         />
         <IconButton
           class="border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
-          icon="mdi:external-link"
+          icon="ph:arrow-square-out"
           onClick={previewLink}
           size={24}
           title="Preview link"
         />
         <IconButton
           class="border-l:1px_solid_#ddd bg:rgb(245,245,245) border:none cursor:pointer p:10 r:0|5|5|0"
-          icon="mdi:clipboard-outline"
+          icon="ph:clipboard"
           onClick={copyToClipboard}
           size={24}
           title={showCopiedTooltip() ? "Copied" : "Click to copy"}

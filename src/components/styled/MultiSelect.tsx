@@ -267,8 +267,8 @@ export function MultiSelectField(
               <Icon
                 icon={
                   isExpanded()
-                    ? "icon-park-solid:down-one"
-                    : "icon-park-solid:right-one"
+                    ? "ph:caret-down-bold"
+                    : "ph:caret-right-bold"
                 }
                 noobserver
               />
@@ -332,13 +332,13 @@ export function MultiSelectField(
                   : getOptionLabel(tag)}
               </span>
               <IconButton
-                icon="ic:round-close"
+                icon="ph:x"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopImmediatePropagation();
                   return handleRemoveTag(getOptionValue(tag));
                 }}
-                size={21}
+                size={16}
               />
             </div>
           )}

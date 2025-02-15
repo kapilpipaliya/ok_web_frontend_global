@@ -6,7 +6,7 @@ export function IncrementButton(
   return (
     <IconButton
       class="bg:transparent border:none cursor:ns-resize"
-      icon={"gg:scroll-v"}
+      icon={"ph:arrows-vertical"}
       onMouseDown={props.downIncrement}
       size={16}
     />

@@ -26,8 +26,8 @@ export const MiddleSectionButtons = () => {
           }}
           icon={
             section === "Build"
-              ? "material-symbols-light:build-circle-outline-rounded"
-              : "solar:settings-linear"
+              ? "ph:hammer"
+              : "ph:gear"
           }
           onclick={() =>
             mergeVertexProperties<PageLayoutObject>(

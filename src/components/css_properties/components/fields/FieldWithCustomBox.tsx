@@ -58,13 +58,13 @@ export const FieldWithCustomBox = (
           }}
           options={[
             {
-              icon: "radix-icons:box",
+              icon: "ph:rectangle",
               key: "allCustom",
               tooltip: "All",
               value: "all",
             },
             {
-              icon: "lucide:box-select",
+              icon: "ph:rectangle-dashed",
               key: "customIcon",
               tooltip: "Custom",
               value: "custom",

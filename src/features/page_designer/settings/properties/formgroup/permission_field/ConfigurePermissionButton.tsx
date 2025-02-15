@@ -16,7 +16,7 @@ export function ConfigurePermissionButton(props: { title: string }) {
     <>
       <IconButton
         class={"opacity:.5 opacity:1:hover"}
-        icon={"mingcute:settings-5-line"}
+        icon={"ph:gear"}
         onClick={handleAddNewClick}
         size={22}
         title={props.title}

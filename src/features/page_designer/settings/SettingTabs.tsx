@@ -101,7 +101,7 @@ export function SettingTabs() {
       {/* <Icon
         class="bg:base-5:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
         height={30}
-        icon={"iconamoon:close-duotone"}
+        icon={"ph:x-bold"}
         onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: false })}
         width={30}
       /> */}

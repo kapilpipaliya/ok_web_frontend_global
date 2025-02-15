@@ -93,10 +93,11 @@ const DropdownButton = (props: DropdownButtonProps) => (
       <span class="arrow" />
     </button>
     <Icon
-      height={22}
-      icon={"teenyicons:down-small-outline"}
+      height={16}
+      icon={"ph:caret-down"}
       noobserver
-      width={22}
+      style={{ transform: props.isActive ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+      width={16}
     />
   </div>
 );

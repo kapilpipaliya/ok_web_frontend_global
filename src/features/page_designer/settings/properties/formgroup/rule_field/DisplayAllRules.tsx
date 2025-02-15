@@ -16,7 +16,7 @@ export function DisplayAllRules() {
     <>
       <IconButton
         class={"opacity:.5 opacity:1:hover"}
-        icon={"mingcute:settings-5-line"}
+        icon={"ph:gear"}
         onClick={onDisplayAllRules}
         size={22}
       />

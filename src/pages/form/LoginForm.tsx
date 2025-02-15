@@ -131,8 +131,8 @@ export function LoginForm() {
                     componentName: "Icon",
                     props: () => ({
                       icon: showPassword.password
-                        ? "iconamoon:eye-light"
-                        : "iconamoon:eye-off",
+                        ? "ph:eye"
+                        : "ph:eye-slash",
                       onClick: () =>
                         setShowPassword("password", !showPassword.password),
                     }),

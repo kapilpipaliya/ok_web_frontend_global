@@ -98,7 +98,7 @@ export const SortableRow = (
             <Show when={expandVertex()}>
               <IconButton
                 class="cursor:pointer"
-                icon={expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}
+                icon={expanded() ? "ph:caret-right" : "ph:caret-down"}
                 iconClass="transition:transform|2s|ease-in-out"
                 onClick={toggleExpanded}
                 size={20}

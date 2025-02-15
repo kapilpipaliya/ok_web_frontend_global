@@ -9,7 +9,7 @@ export function OpenComponentSettings(
     <Icon
       class={`${props.class ?? ""}`}
       height={21}
-      icon={"solar:settings-linear"}
+      icon={"ph:gear"}
       noobserver
       onClick={() => {
         const currentURL = window.location.href;

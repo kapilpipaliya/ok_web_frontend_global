@@ -43,7 +43,7 @@ export function CustomPopover(
         </div>
         <IconButton
           class="background:none border:none cursor:pointer font-size:1.5rem line-height:1 margin-right:0.25rem margin-top:0.25rem position:absolute right:1rem top:1rem"
-          icon="ic:round-close"
+          icon="ph:x-circle"
           onClick={() => props.setIsOpen(false)}
         />
       </Popover.Content>

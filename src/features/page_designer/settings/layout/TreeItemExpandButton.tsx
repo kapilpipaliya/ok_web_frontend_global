@@ -15,7 +15,7 @@ export function TreeItemExpandButton(
   return (
     <Show when={props.hasChildren}>
       <IconButton
-        icon={props.isCollapsed ? "mingcute:right-fill" : "mingcute:down-fill"}
+        icon={props.isCollapsed ? "ph:caret-right" : "ph:caret-down"}
         iconClassList={{
           "mx:4px": true,
           // "transform:rotate(0deg)": props.isCollapsed,

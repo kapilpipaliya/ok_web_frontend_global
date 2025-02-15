@@ -38,7 +38,7 @@ export function SelectPermField(
         <span>{option.P.key}</span>
         <IconButton
           class="center-content flex"
-          icon={"mingcute:settings-5-line"}
+          icon={"ph:gear"}
           iconClass={"opacity:.5 opacity:1:hover"}
           onClick={(e) => {
             e.stopPropagation();

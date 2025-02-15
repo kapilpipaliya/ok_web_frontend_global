@@ -12,7 +12,7 @@ export function ResetButton(props: Readonly<{ onReset: () => void }>) {
       <div class="d:flex jc:end">
         <IconButton
           class="bg:error bg:error-70:hover color:base-5 gap:10px px:16px py:8px r:6 transition:background-color|200ms"
-          icon="mdi:close"
+          icon="ph:x"
           onClick={() => {
             setCssState(reconcile({ "": {} }));
             props.onReset();
