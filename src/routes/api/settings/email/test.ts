@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { sendTestEmail } from "~/lib/email/sendTestEmail";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json() as SMTPSettings;
-  const email = await getUserEmailFromSession();
+  const user = await getUserFromSession();
 
   try {
     // Send test email using the provided SMTP settings
@@ -33,7 +33,7 @@ export async function POST({ request }: APIEvent) {
       "TEST_EMAIL_SETTINGS",
       "EmailSetting",
       "email",
-      email ?? "",
+      user?.P?.email ?? "",
       `Tested email settings with SMTP host: ${settings.smtpHost}`
     );
 

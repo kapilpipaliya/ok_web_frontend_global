@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
-import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
   try {
@@ -22,8 +22,8 @@ export async function GET({ request }: APIEvent) {
     }
 
     const { dbSession } = await getDBSessionForSubdomain(request);
-    const email = await getUserEmailFromSession();
-    const existingUser = await findUserByEmailSimple(dbSession, email);
+    const user = await getUserFromSession();
+    const existingUser = await findUserByEmailSimple(dbSession, user?.P?.email);
 
     if (!existingUser || !existingUser.P.email || !existingUser.P.username || !existingUser.P.uuid) {
       return new Response(JSON.stringify({ error: "Missing user data" }), {

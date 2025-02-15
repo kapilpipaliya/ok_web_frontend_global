@@ -3,8 +3,8 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
 import { sendEmail } from "~/server/email/sendEmail";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
@@ -20,7 +20,7 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
-  const email = await getUserEmailFromSession();
+  const user = await getUserFromSession();
 
   try {
     // Test email sending with the new settings
@@ -65,7 +65,7 @@ export async function POST({ request }: APIEvent) {
       "UPDATE_EMAIL_SETTINGS",
       "EmailSetting",
       settingsKey,
-      email ?? "",
+      user?.P.email ?? "",
       "Updated email settings"
     );
 

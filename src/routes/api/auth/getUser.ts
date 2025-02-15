@@ -3,12 +3,12 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 import { findUserByEmail } from "~/cypher/mutate/user/findUserByEmail";
-import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    const email = await getUserEmailFromSession();
+    const user = await getUserFromSession();
     // if (!email) {
     //   return new Response(
     //     JSON.stringify({
@@ -17,7 +17,7 @@ export async function GET({ request }: APIEvent) {
     //     { status: 401 },
     //   );
     // }
-    const data = await findUserByEmail(dbSession, email, subDomain);
+    const data = await findUserByEmail(dbSession, user?.P?.email, subDomain);
 
     if (!data.user) {
       return data;

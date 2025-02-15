@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { getUserEmailFromSession } from "~/server/session/getUserEmailFromSession";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
@@ -19,7 +19,7 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
-  const email = await getUserEmailFromSession();
+  const user = await getUserFromSession();
 
   try {
     // First check if GlobalSetting exists
@@ -61,7 +61,7 @@ export async function POST({ request }: APIEvent) {
       "UPDATE_GLOBAL_SETTING",
       "GlobalSetting",
       settingsKey,
-      email ?? "",
+      user?.P?.email ?? "",
       "Updated global settings"
     );
 

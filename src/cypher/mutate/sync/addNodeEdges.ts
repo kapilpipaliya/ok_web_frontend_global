@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { findOrCreateNodeAndUpdateProperties } from "~/cypher/mutate/sync/findOrCreateNodeAndUpdateProperties";
-import { getChildrenOrParentVertex } from "~/cypher/mutate/sync/getChildrenOrParentVertex";
+import { getChildrenOrParentVertex } from "~/cypher/get/getChildrenOrParentVertex";
 
 import { globalCollections } from "./constants/globalCollections";
 
