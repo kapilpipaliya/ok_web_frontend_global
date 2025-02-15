@@ -10,18 +10,21 @@ import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
-  
+
   if (!isAdmin) {
-    return new Response(JSON.stringify({
-      error: "Unauthorized. Admin access required."
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 403
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Unauthorized. Admin access required.",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 403,
+      },
+    );
   }
 
   const { dbSession } = await getDBSessionForSubdomain(request);
-  const settings = await request.json() as SMTPSettings;
+  const settings = (await request.json()) as SMTPSettings;
   const user = await getUserFromSession(request);
 
   try {
@@ -34,22 +37,25 @@ export async function POST({ request }: APIEvent) {
       "EmailSetting",
       "email",
       user?.P?.email ?? "",
-      `Tested email settings with SMTP host: ${settings.smtpHost}`
+      `Tested email settings with SMTP host: ${settings.smtpHost}`,
     );
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
-      status: 200
+      status: 200,
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }
-} 
+}

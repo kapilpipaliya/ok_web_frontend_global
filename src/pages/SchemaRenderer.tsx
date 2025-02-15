@@ -5,7 +5,10 @@ import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-export function SchemaRenderer(props: { form: IFormMetaData, formDataId: string }) {
+export function SchemaRenderer(props: {
+  form: IFormMetaData;
+  formDataId: string;
+}) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
 

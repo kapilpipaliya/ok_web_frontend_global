@@ -3,6 +3,7 @@ import type { Transaction } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { updateSession } from "~/server/session/updateSession";
 
 import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequestData";
@@ -10,7 +11,6 @@ import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequ
 import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
 import { signupUser } from "../../../cypher/mutate/signup/signupUser";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
-import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 
 export async function POST({ request }: APIEvent) {
   if (request.headers.get("content-type")?.includes("application/json")) {
@@ -19,16 +19,12 @@ export async function POST({ request }: APIEvent) {
     const tx = dbSession.beginTransaction();
     try {
       const user = await handleSignup(data, tx, subDomain);
-      
+
       // Send confirmation email
       if (user?.id) {
-        await sendConfirmationEmail(
-          data.email,
-          data.username,
-          request
-        );
+        await sendConfirmationEmail(data.email, data.username, request);
       }
-      
+
       return user;
     } finally {
       await dbSession.close();

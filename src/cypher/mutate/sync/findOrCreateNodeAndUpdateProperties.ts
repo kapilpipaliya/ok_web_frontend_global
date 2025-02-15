@@ -3,8 +3,8 @@ import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { createNode } from "~/cypher/mutate/sync/createNode";
 import { findExistingNode } from "~/cypher/get/findExistingNode";
+import { createNode } from "~/cypher/mutate/sync/createNode";
 import { updateNodeProperties } from "~/cypher/mutate/sync/updateNodeProperties";
 
 export async function findOrCreateNodeAndUpdateProperties(

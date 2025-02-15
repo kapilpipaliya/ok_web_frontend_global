@@ -5,7 +5,5 @@ interface SystemLayoutProps {
 }
 
 export function SystemLayout(props: Readonly<SystemLayoutProps>): JSX.Element {
-  return (
-    <>{props.children}</>
-  );
+  return <>{props.children}</>;
 }

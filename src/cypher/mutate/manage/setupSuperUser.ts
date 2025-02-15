@@ -62,7 +62,10 @@ export async function setupSuperUser(): Promise<{
     }
   } catch (error) {
     console.error(`Error setting up ${SYSTEM_DB_NAME} user:`, error);
-    return { error: `Failed to setup ${SYSTEM_DB_NAME} user: ${error.message}`, status: 500 };
+    return {
+      error: `Failed to setup ${SYSTEM_DB_NAME} user: ${error.message}`,
+      status: 500,
+    };
   } finally {
     await systemDbSession.close();
   }

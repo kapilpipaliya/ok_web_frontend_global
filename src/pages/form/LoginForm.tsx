@@ -14,7 +14,7 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/form/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { FORM_CLASS, GRID_ITEM_CLASS, LABEL_CLASS, FORM_GRID_CLASS } from "./constants/constant";
+import { FORM_CLASS, FORM_GRID_CLASS, LABEL_CLASS } from "./constants/constant";
 
 export function LoginForm() {
   const [graph, setGraph] = useGraph();
@@ -130,19 +130,22 @@ export function LoginForm() {
                   {
                     componentName: "Icon",
                     props: () => ({
-                      icon: showPassword.password ? "iconamoon:eye-light" : "iconamoon:eye-off",
-                      onClick: () => setShowPassword("password", !showPassword.password)
-                    })
-                  }
+                      icon: showPassword.password
+                        ? "iconamoon:eye-light"
+                        : "iconamoon:eye-off",
+                      onClick: () =>
+                        setShowPassword("password", !showPassword.password),
+                    }),
+                  },
                 ],
-                class: "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                componentName: "Box"
-              }
+                class:
+                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                componentName: "Box",
+              },
             ],
             class: "position:rel",
-            componentName: "Box"
+            componentName: "Box",
           },
-
         ],
         class: FORM_GRID_CLASS,
         componentName: "Box",
@@ -152,7 +155,8 @@ export function LoginForm() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
             componentName: "Box",
             props: () => ({
               onClick: async () => {
@@ -209,9 +213,9 @@ export function LoginForm() {
   };
 
   return (
-    <SchemaRenderer 
-      form={{ attributes: [wrapFormInCard(form)], key: "Login" }} 
-      formDataId={formDataId} 
+    <SchemaRenderer
+      form={{ attributes: [wrapFormInCard(form)], key: "Login" }}
+      formDataId={formDataId}
     />
   );
-} 
+}

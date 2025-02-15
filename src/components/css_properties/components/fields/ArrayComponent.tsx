@@ -53,10 +53,7 @@ export function ArrayComponent(
           </div>
         )}
       </For>
-      <button
-        class="c:white rounded bg:primary px:8 py:4"
-        onClick={addItem}
-      >
+      <button class="c:white rounded bg:primary px:8 py:4" onClick={addItem}>
         Add Item
       </button>
     </div>

@@ -10,7 +10,10 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { getMemberVertex, getProfileImageVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import {
+  getMemberVertex,
+  getProfileImageVertex,
+} from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
@@ -19,7 +22,8 @@ import { profileImage } from "~/pages/admin_layout/constants/constant";
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function ProfileImageSettings() {
-  const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:150px|500px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
@@ -47,7 +51,7 @@ export function ProfileImageSettings() {
       graph,
       setGraph,
       { id: "", IN: {}, L: [], OUT: {}, P: { type: "UserProfileImage" } },
-      profileImageVertexCopy.id
+      profileImageVertexCopy.id,
     );
   }
 
@@ -122,19 +126,20 @@ export function ProfileImageSettings() {
             key: "profileImage",
             props: () => {
               const selectedFile = profileImageVertex()[0];
-              return ({
+              return {
                 onClick: () => setOpenDialog(true),
                 src: getDownloadLink(selectedFile) || profileImage,
-              });
+              };
             },
           },
           {
             as: "div",
-            componentName: "Box"
+            componentName: "Box",
           },
           {
             as: "button",
-            class: "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
+            class:
+              "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
             componentName: "Box",
             props: () => ({
               onClick: () => setOpenDialog(true),
@@ -143,7 +148,8 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: onSave,
@@ -161,16 +167,20 @@ export function ProfileImageSettings() {
 
   const profileImageVertex = createMemo(() => {
     return (
-      evalExpression(
-        `->$0ProfileImage`,
-        { graph, setGraph, vertexes: [graph.vertexes[formDataId]] },
-      ) || []
+      evalExpression("->$0ProfileImage", {
+        graph,
+        setGraph,
+        vertexes: [graph.vertexes[formDataId]],
+      }) || []
     );
   });
 
   return (
     <div>
-      <SchemaRenderer form={{ attributes: [form], key: "ProfileImage" }} formDataId={formDataId} />
+      <SchemaRenderer
+        form={{ attributes: [form], key: "ProfileImage" }}
+        formDataId={formDataId}
+      />
       <FilePickerModal
         onFileSelected={onFileSelected}
         open={openDialog}

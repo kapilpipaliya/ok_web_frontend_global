@@ -19,4 +19,4 @@ export const wrapFormInCard = (formSchema: FormSchema) => {
     class: "min-height:100vh bg:base-10 p:24 display:flex ai:center jc:center",
     componentName: "Box",
   };
-}; 
+};

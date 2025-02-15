@@ -5,7 +5,6 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { InitialPermissions } from "~/components/page_attr_render/InitialPermissions";
 
-
 export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
 
 type PreviewStore = ReturnType<typeof createStore<PreviewStoreObject>>;

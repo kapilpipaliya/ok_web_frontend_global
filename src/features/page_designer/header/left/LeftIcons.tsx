@@ -23,7 +23,7 @@ export const LeftIcons = () => {
   const _formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
-  const handleBackClick = () => {
+  const _handleBackClick = () => {
     if (window.history.length > 1) {
       window.history.back();
     } else {

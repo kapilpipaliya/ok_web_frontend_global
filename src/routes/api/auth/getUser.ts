@@ -1,7 +1,6 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-
 import { findUserByEmail } from "~/cypher/mutate/user/findUserByEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 

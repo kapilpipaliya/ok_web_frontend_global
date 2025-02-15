@@ -16,7 +16,7 @@ export async function createUserInSuperDB(
   },
 ) {
   const uuid = uuidv7();
-  
+
   // Hash password before saving
   const { hashedPassword, salt } = await hashPassword(userData.password);
 
@@ -52,8 +52,9 @@ export async function createUserInUserDB(
   isSuper?: boolean,
 ) {
   // If password is provided, hash it
-  let hashedPassword, salt;
-  if (typeof params.password === 'string' && !isSuper) {
+  let hashedPassword;
+  let salt;
+  if (typeof params.password === "string" && !isSuper) {
     const hashResult = await hashPassword(params.password);
     hashedPassword = hashResult.hashedPassword;
     salt = hashResult.salt;
@@ -82,21 +83,20 @@ export async function createUserInUserDB(
 async function createAndLinkSubDomain(
   tx: Session | Transaction,
   uuid: string,
-  subDomain: string
+  subDomain: string,
 ) {
   const createSubDomainQuery = `CREATE (s:SubDomain {
     key: $subDomain
   }) RETURN s;`;
-  
-  const createSubDomainResult = await tx.run(
-    createSubDomainQuery,
-    { subDomain }
-  );
+
+  const createSubDomainResult = await tx.run(createSubDomainQuery, {
+    subDomain,
+  });
 
   const createEdgeQuery = `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $subDomain })
                           CREATE (u)-[:UserSubDomain]->(s);`;
-  
+
   await tx.run(createEdgeQuery, { subDomain, uuid });
-  
+
   return createSubDomainResult.records[0].get("s");
 }

@@ -9,14 +9,18 @@ import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
 
 export function ProfileSettings() {
-  const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:150px|500px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -34,7 +38,6 @@ export function ProfileSettings() {
     graph,
     setGraph,
   );
-
 
   const form = {
     as: "div",
@@ -108,7 +111,8 @@ export function ProfileSettings() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: async () => {
@@ -119,17 +123,17 @@ export function ProfileSettings() {
                   showErrorToast("Please enter username");
                   return;
                 }
-            
+
                 if (!user.P.email.trim()) {
                   showErrorToast("Please enter email");
                   return;
                 }
-            
+
                 if (validateEmail(user.P.email)) {
                   showErrorToast("Please enter a valid email");
                   return;
                 }
-                
+
                 const payload = {
                   email: user.P.email,
                   username: user.P.username,
@@ -174,12 +178,7 @@ export function ProfileSettings() {
       // Create profile image vertex and edge if exists
       if (data.profileImage) {
         if (!graph.vertexes[data.profileImage.id]) {
-          addNewVertex(
-            0,
-            data.profileImage,
-            graph,
-            setGraph,
-          );
+          addNewVertex(0, data.profileImage, graph, setGraph);
         }
         setSelectionValue(
           0,
@@ -187,10 +186,9 @@ export function ProfileSettings() {
           graph,
           setGraph,
           { id: "", IN: {}, L: [], OUT: {}, P: { type: "UserProfileImage" } },
-          data.profileImage.id
+          data.profileImage.id,
         );
       }
-
     } catch (err) {
       showErrorToast((err as Error).message);
     }
@@ -200,7 +198,10 @@ export function ProfileSettings() {
 
   return (
     <div>
-      <SchemaRenderer form={{ attributes: [form], key: "Profile" }} formDataId={formDataId} />
+      <SchemaRenderer
+        form={{ attributes: [form], key: "Profile" }}
+        formDataId={formDataId}
+      />
       <hr class="my-8 border-t border-gray-200" />
       <ProfileImageSettings />
     </div>

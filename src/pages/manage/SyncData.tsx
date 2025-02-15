@@ -9,9 +9,7 @@ import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import { profileImage } from "../admin_layout/constants/constant";
 
-const transferNodes = [
-  { key: "Component", value: "Comp" },
-];
+const transferNodes = [{ key: "Component", value: "Comp" }];
 
 // Depricated
 export function SyncData() {

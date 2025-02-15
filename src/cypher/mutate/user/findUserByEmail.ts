@@ -64,7 +64,10 @@ export async function findUserByEmail(
   };
 }
 
-export async function findUserByEmailSimple(dbSession: Session, email: null | string): Promise<null | Vertex> {
+export async function findUserByEmailSimple(
+  dbSession: Session,
+  email: null | string,
+): Promise<null | Vertex> {
   if (!email) {
     return null;
   }

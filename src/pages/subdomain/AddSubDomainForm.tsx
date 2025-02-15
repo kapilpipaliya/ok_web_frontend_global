@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { type Component, createSignal } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
@@ -13,7 +13,8 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 
-const GRID_ITEM_CLASS = "grid grid-template-columns:150px|400px ai:center gap:8";
+const GRID_ITEM_CLASS =
+  "grid grid-template-columns:150px|400px ai:center gap:8";
 const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
 
 interface Props {
@@ -123,39 +124,39 @@ export const AddSubDomainForm: Component<Props> = (props) => {
 
   return (
     <>
-    <button
-          class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
-          onClick={() => setShowAddModal(true)}
-        >
-          Add New SubDomain
-        </button>
-    <CustomModal
-      footer={(setOpen) => (
-        <div class="display:flex jc:flex-end p:3 gap:6 border-top:1px|solid|#eee">
-          <button
-            class="bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb"
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </button>
-          <button
-            class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
-            disabled={isLoading()}
-            onClick={handleSave}
-          >
-            {isLoading() ? "Saving..." : "Save"}
-          </button>
-        </div>
-      )}
-      open={showAddModal}
-      setOpen={setShowAddModal}
-      title="Add New SubDomain"
-    >
-      <SchemaRenderer 
-        form={{ attributes: [subDomainForm], key: "SubDomain" }} 
-        formDataId={formDataId} 
-      />
-    </CustomModal>
+      <button
+        class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
+        onClick={() => setShowAddModal(true)}
+      >
+        Add New SubDomain
+      </button>
+      <CustomModal
+        footer={(setOpen) => (
+          <div class="display:flex jc:flex-end p:3 gap:6 border-top:1px|solid|#eee">
+            <button
+              class="bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              class="bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none"
+              disabled={isLoading()}
+              onClick={handleSave}
+            >
+              {isLoading() ? "Saving..." : "Save"}
+            </button>
+          </div>
+        )}
+        open={showAddModal}
+        setOpen={setShowAddModal}
+        title="Add New SubDomain"
+      >
+        <SchemaRenderer
+          form={{ attributes: [subDomainForm], key: "SubDomain" }}
+          formDataId={formDataId}
+        />
+      </CustomModal>
     </>
   );
-}; 
+};

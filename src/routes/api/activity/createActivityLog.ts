@@ -1,4 +1,4 @@
-import { Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
 export async function createActivityLog(
   dbSession: Session,
@@ -6,7 +6,7 @@ export async function createActivityLog(
   entityType: string,
   entityId: string,
   updatedBy: string,
-  details?: string
+  details?: string,
 ) {
   await dbSession.run(
     `CREATE (a:Activity {
@@ -22,7 +22,7 @@ export async function createActivityLog(
       details: details ?? null,
       entityId,
       entityType,
-      updatedBy
-    }
+      updatedBy,
+    },
   );
 }

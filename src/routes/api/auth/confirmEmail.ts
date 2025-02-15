@@ -1,20 +1,24 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
-  
+
   try {
     const url = new URL(request.url);
     const token = url.searchParams.get("token");
 
     if (!token) {
-      return new Response(JSON.stringify({ error: "Invalid or missing token" }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400,
-      });
+      return new Response(
+        JSON.stringify({ error: "Invalid or missing token" }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 400,
+        },
+      );
     }
 
     // Validate and consume the token
@@ -33,7 +37,7 @@ export async function GET({ request }: APIEvent) {
       `MATCH (u:User {email: $email})
        SET u.emailConfirmed = true
        RETURN u`,
-      { email }
+      { email },
     );
 
     if (result.records.length === 0) {
@@ -48,15 +52,18 @@ export async function GET({ request }: APIEvent) {
       headers: { Location: "/auth/login?message=email_confirmed" },
       status: 302,
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }
-} 
+}

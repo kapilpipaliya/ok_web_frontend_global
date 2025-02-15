@@ -7,14 +7,17 @@ import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
-  
+
   if (!isAdmin) {
-    return new Response(JSON.stringify({
-      error: "Unauthorized. Admin access required."
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 403
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Unauthorized. Admin access required.",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 403,
+      },
+    );
   }
 
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -25,11 +28,11 @@ export async function POST({ request }: APIEvent) {
     // First check if GlobalSetting exists
     const checkResult = await dbSession.run(
       `MATCH (s:GlobalSetting) 
-       RETURN s.key as key`
+       RETURN s.key as key`,
     );
 
     let settingsKey: string;
-    
+
     if (checkResult.records.length === 0) {
       // Create new GlobalSetting if none exists
       const newKey = `global_setting_${Date.now()}`;
@@ -41,9 +44,9 @@ export async function POST({ request }: APIEvent) {
         })
         SET s += $settings
         RETURN s.key as key`,
-        { key: newKey, settings }
+        { key: newKey, settings },
       );
-      settingsKey = createResult.records[0].get('key');
+      settingsKey = createResult.records[0].get("key");
     } else {
       // Update existing GlobalSetting
       const result = await dbSession.run(
@@ -51,9 +54,9 @@ export async function POST({ request }: APIEvent) {
          SET s += $settings,
              s.updatedAt = datetime()
          RETURN s.key as key`,
-        { settings: settings }
+        { settings: settings },
       );
-      settingsKey = result.records[0].get('key');
+      settingsKey = result.records[0].get("key");
     }
 
     await createActivityLog(
@@ -62,21 +65,24 @@ export async function POST({ request }: APIEvent) {
       "GlobalSetting",
       settingsKey,
       user?.P?.email ?? "",
-      "Updated global settings"
+      "Updated global settings",
     );
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
-      status: 200
+      status: 200,
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }

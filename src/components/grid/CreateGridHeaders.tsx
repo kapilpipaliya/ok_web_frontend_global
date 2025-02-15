@@ -66,7 +66,7 @@ export function CreateGridHeaders(
   navigate: (path: string) => void,
   tableId: string,
   hideDeleteAction?: boolean,
-  hideEditJsonAction?: boolean
+  hideEditJsonAction?: boolean,
 ) {
   const tableColumns = [] as ColumnDef<any>[];
 
@@ -82,105 +82,107 @@ export function CreateGridHeaders(
     // @ts-expect-error ignore
     column.accessorKey = `P.${attribute.key}`;
     column.id = attribute.key;
-    column.cell = attribute.cell || ((info) => {
-      return (
-        <Switch>
-          <Match
-            when={
-              (PageDesignerLabels.includes(tableId) ||
-                tableId === "Component") &&
-              attribute.key === "Preview"
-            }
-          >
-            <TooltipWrapper
-              content={
-                <div class={STYLES.tooltip.content}>
-                  <Show when={info.getValue<string>()}>
-                    <div class={"f:14 font-weight:500"}>
-                      {info.getValue<string>()}
-                    </div>
-                  </Show>
-                  {
-                    getPreviewVertex(attribute, info.row.original, graph)?.P
-                      .fileName
-                  }
+    column.cell =
+      attribute.cell ||
+      ((info) => {
+        return (
+          <Switch>
+            <Match
+              when={
+                (PageDesignerLabels.includes(tableId) ||
+                  tableId === "Component") &&
+                attribute.key === "Preview"
+              }
+            >
+              <TooltipWrapper
+                content={
+                  <div class={STYLES.tooltip.content}>
+                    <Show when={info.getValue<string>()}>
+                      <div class={"f:14 font-weight:500"}>
+                        {info.getValue<string>()}
+                      </div>
+                    </Show>
+                    {
+                      getPreviewVertex(attribute, info.row.original, graph)?.P
+                        .fileName
+                    }
+                    <ImageWrapper
+                      alt="Preview"
+                      src={getPreviewURL(attribute, info.row.original, graph)}
+                    />
+                  </div>
+                }
+                triggerAs="span"
+                triggerClass="flex ai:center"
+              >
+                <span class="flex ai:center gap:8px">
                   <ImageWrapper
                     alt="Preview"
+                    class="r:4px h:30px object-fit:cover"
                     src={getPreviewURL(attribute, info.row.original, graph)}
                   />
-                </div>
-              }
-              triggerAs="span"
-              triggerClass="flex ai:center"
+                </span>
+              </TooltipWrapper>
+            </Match>
+            <Match
+              when={attribute.componentName === "Select" && !attribute.options}
             >
-              <span class="flex ai:center gap:8px">
-                <ImageWrapper
-                  alt="Preview"
-                  class="r:4px h:30px object-fit:cover"
-                  src={getPreviewURL(attribute, info.row.original, graph)}
-                />
+              {getSelectNameValue({
+                attribute: attribute,
+                graph: graph,
+                info: info,
+                setGraph: setGraph,
+              })}
+            </Match>
+
+            <Match
+              when={
+                attribute.componentName === "MultiSelect" && !attribute.options
+              }
+            >
+              {getTagValue({
+                attribute: attribute,
+                graph: graph,
+                info: info,
+                setGraph: setGraph,
+              })}
+            </Match>
+
+            <Match when={typeof info.getValue() === "boolean"}>
+              <span>
+                {info.getValue() === true
+                  ? "Yes"
+                  : info.getValue() === false
+                    ? "No"
+                    : ""}
               </span>
-            </TooltipWrapper>
-          </Match>
-          <Match
-            when={attribute.componentName === "Select" && !attribute.options}
-          >
-            {getSelectNameValue({
-              attribute: attribute,
-              graph: graph,
-              info: info,
-              setGraph: setGraph,
-            })}
-          </Match>
-
-          <Match
-            when={
-              attribute.componentName === "MultiSelect" && !attribute.options
-            }
-          >
-            {getTagValue({
-              attribute: attribute,
-              graph: graph,
-              info: info,
-              setGraph: setGraph,
-            })}
-          </Match>
-
-          <Match when={typeof info.getValue() === "boolean"}>
-            <span>
-              {info.getValue() === true
-                ? "Yes"
-                : info.getValue() === false
-                  ? "No"
-                  : ""}
-            </span>
-          </Match>
-          <Match when={tableId === "File" && attribute.key === "fileName"}>
-            <TooltipWrapper
-              content={
-                <div class={STYLES.tooltip.content}>
-                  <Show when={info.getValue<string>()}>
-                    <div class={"f:14 font-weight:500"}>
-                      {info.getValue<string>()}
-                    </div>
-                  </Show>
-                  {getDownloadLink(info.row.original)}
-                  <ImageWrapper
-                    alt="Preview"
-                    src={getDownloadLink(info.row.original)}
-                  />
-                </div>
-              }
-              triggerAs="span"
-              triggerClass="flex ai:center"
-            >
-              <span class="flex ai:center">{info.getValue<string>()}</span>
-            </TooltipWrapper>
-          </Match>
-          <Match when={true}>{info.getValue<string>()}</Match>
-        </Switch>
-      );
-    });
+            </Match>
+            <Match when={tableId === "File" && attribute.key === "fileName"}>
+              <TooltipWrapper
+                content={
+                  <div class={STYLES.tooltip.content}>
+                    <Show when={info.getValue<string>()}>
+                      <div class={"f:14 font-weight:500"}>
+                        {info.getValue<string>()}
+                      </div>
+                    </Show>
+                    {getDownloadLink(info.row.original)}
+                    <ImageWrapper
+                      alt="Preview"
+                      src={getDownloadLink(info.row.original)}
+                    />
+                  </div>
+                }
+                triggerAs="span"
+                triggerClass="flex ai:center"
+              >
+                <span class="flex ai:center">{info.getValue<string>()}</span>
+              </TooltipWrapper>
+            </Match>
+            <Match when={true}>{info.getValue<string>()}</Match>
+          </Switch>
+        );
+      });
     column.header = (_info) =>
       capitalizeFirstLetter(
         attribute.title ||
@@ -199,7 +201,9 @@ export function CreateGridHeaders(
     cell: (info) => {
       const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
-        <div class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}>
+        <div
+          class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
+        >
           <Show
             when={
               gridState.isNoPermissionCheck ||
@@ -243,10 +247,9 @@ export function CreateGridHeaders(
 
           <Show
             when={
-              !hideDeleteAction && (
-                gridState.isNoPermissionCheck ||
-                (!!gridState.formMetaData() && gridState.hasDeletePermission())
-              )
+              !hideDeleteAction &&
+              (gridState.isNoPermissionCheck ||
+                (!!gridState.formMetaData() && gridState.hasDeletePermission()))
             }
           >
             <IconButton
@@ -273,7 +276,7 @@ export function CreateGridHeaders(
               size={21}
             />
           </Show>
-          <Show when={!hideEditJsonAction && !FormMetaData[tableId]}>
+          <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
             <ModifyJsonButton
               class="color:#FFA500"
               item={info.row.original}

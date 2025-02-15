@@ -183,9 +183,12 @@ export function CommonTable(props: Readonly<TableProps>) {
                 <CardContainer>
                   <CardHeaderContainer>
                     <CardHeader>
-                      <Content header={props.headers.find(
-                        (header) => header.key === "key",
-                      )!} row={row} />
+                      <Content
+                        header={
+                          props.headers.find((header) => header.key === "key")!
+                        }
+                        row={row}
+                      />
                     </CardHeader>
                     <Show
                       when={

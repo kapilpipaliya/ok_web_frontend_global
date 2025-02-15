@@ -3,19 +3,21 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { sendEmail } from "~/server/email/sendEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const isAdmin = await checkAdminRole(request);
-  
+
   if (!isAdmin) {
-    return new Response(JSON.stringify({
-      error: "Unauthorized. Admin access required."
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 403
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Unauthorized. Admin access required.",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 403,
+      },
+    );
   }
 
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -39,7 +41,7 @@ export async function POST({ request }: APIEvent) {
        SET s += $settings,
            s.updatedAt = datetime() 
        RETURN s.key as key`,
-      { settings }
+      { settings },
     );
 
     let settingsKey: string;
@@ -53,11 +55,11 @@ export async function POST({ request }: APIEvent) {
         })
         SET s += $settings
         RETURN id(s) as id`,
-        { key: newKey, settings }
+        { key: newKey, settings },
       );
-      settingsKey = createResult.records[0].get('key');
+      settingsKey = createResult.records[0].get("key");
     } else {
-      settingsKey = result.records[0].get('key');
+      settingsKey = result.records[0].get("key");
     }
 
     await createActivityLog(
@@ -66,22 +68,25 @@ export async function POST({ request }: APIEvent) {
       "EmailSetting",
       settingsKey,
       user?.P.email ?? "",
-      "Updated email settings"
+      "Updated email settings",
     );
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
-      status: 200
+      status: 200,
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -25,7 +25,7 @@ export async function sendEmail(to: string, template: EmailTemplate) {
   });
 
   let htmlContent: string;
-  
+
   if (template.customHtml) {
     htmlContent = template.customHtml;
   } else {
@@ -33,7 +33,7 @@ export async function sendEmail(to: string, template: EmailTemplate) {
     const __dirname = path.dirname(__filename);
     const htmlTemplatePath = path.resolve(
       __dirname,
-      "../../assets/html/emailTemplate.html"
+      "../../assets/html/emailTemplate.html",
     );
     htmlContent = fs.readFileSync(htmlTemplatePath, "utf8");
 
@@ -43,7 +43,7 @@ export async function sendEmail(to: string, template: EmailTemplate) {
     }
     htmlContent = htmlContent.replace(
       /{{date}}/g,
-      new Date().toLocaleDateString()
+      new Date().toLocaleDateString(),
     );
     if (template.otp) {
       htmlContent = htmlContent.replace(/{{otp}}/g, template.otp);

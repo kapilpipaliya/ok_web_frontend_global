@@ -11,10 +11,8 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/email/sendEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { GRID_ITEM_CLASS } from "./constants/constant";
 import { LABEL_CLASS } from "./constants/constant";
-import { FORM_GRID_CLASS, FORM_CLASS } from "./constants/constant";
-
+import { FORM_CLASS, FORM_GRID_CLASS } from "./constants/constant";
 
 export function ForgotPasswordForm() {
   const [graph, setGraph] = useGraph();
@@ -59,8 +57,8 @@ export function ForgotPasswordForm() {
   };
 
   const handlePasswordResetSubmit = (formData: any) => {
-    const { newPassword, confirmPassword } = formData.P;
-    
+    const { confirmPassword, newPassword } = formData.P;
+
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");
       return;
@@ -104,7 +102,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: () => ({
                     onClick: async () => {
@@ -153,7 +152,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: () => ({
                     onClick: () => {
@@ -202,18 +202,25 @@ export function ForgotPasswordForm() {
                         {
                           componentName: "Icon",
                           props: () => ({
-                            icon: showPassword.newPassword ? "iconamoon:eye-light" : "iconamoon:eye-off",
-                            onClick: () => setShowPassword("newPassword", !showPassword.newPassword)
-                          })
-                        }
+                            icon: showPassword.newPassword
+                              ? "iconamoon:eye-light"
+                              : "iconamoon:eye-off",
+                            onClick: () =>
+                              setShowPassword(
+                                "newPassword",
+                                !showPassword.newPassword,
+                              ),
+                          }),
+                        },
                       ],
-                      class: "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                      componentName: "Box"
-                    }
+                      class:
+                        "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                      componentName: "Box",
+                    },
                   ],
                   class: "position:rel",
-                  componentName: "Box"
-                }
+                  componentName: "Box",
+                },
               ],
               class: FORM_GRID_CLASS,
               componentName: "Box",
@@ -234,7 +241,9 @@ export function ForgotPasswordForm() {
                       componentName: "TextInput",
                       key: "confirmPassword",
                       props: () => ({
-                        type: showPassword.confirmPassword ? "text" : "password",
+                        type: showPassword.confirmPassword
+                          ? "text"
+                          : "password",
                       }),
                       validation: { required: true },
                     },
@@ -244,18 +253,25 @@ export function ForgotPasswordForm() {
                         {
                           componentName: "Icon",
                           props: () => ({
-                            icon: showPassword.confirmPassword ? "iconamoon:eye-light" : "iconamoon:eye-off",
-                            onClick: () => setShowPassword("confirmPassword", !showPassword.confirmPassword)
-                          })
-                        }
+                            icon: showPassword.confirmPassword
+                              ? "iconamoon:eye-light"
+                              : "iconamoon:eye-off",
+                            onClick: () =>
+                              setShowPassword(
+                                "confirmPassword",
+                                !showPassword.confirmPassword,
+                              ),
+                          }),
+                        },
                       ],
-                      class: "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                      componentName: "Box"
-                    }
+                      class:
+                        "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                      componentName: "Box",
+                    },
                   ],
                   class: "position:rel",
-                  componentName: "Box"
-                }
+                  componentName: "Box",
+                },
               ],
               class: FORM_GRID_CLASS,
               componentName: "Box",
@@ -265,7 +281,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: () => ({
                     onClick: () => {
@@ -297,4 +314,4 @@ export function ForgotPasswordForm() {
       formDataId={formDataId}
     />
   );
-} 
+}

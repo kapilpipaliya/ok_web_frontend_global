@@ -5,7 +5,7 @@ import { getDriver } from "~/cypher/driver";
 
 export async function getSubDomain(host: string) {
   const { domain, subdomain } = tld.parse(host);
-  
+
   // If it matches the current domain from env, use system subdomain
   if ((domain || "localhost") === process.env.DOMAIN) {
     if (!subdomain || subdomain === "www" || subdomain === "system") {
@@ -24,9 +24,9 @@ export async function getSubDomain(host: string) {
         RETURN s.key as subdomain
       `;
       const result = await dbSession.run(query, { domain });
-      
+
       if (result.records.length > 0) {
-        return result.records[0].get('subdomain');
+        return result.records[0].get("subdomain");
       }
     } catch (error) {
       console.error("Error looking up domain:", error);

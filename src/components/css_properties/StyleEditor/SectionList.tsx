@@ -1,4 +1,3 @@
-import { Icon } from "@iconify-icon/solid";
 import {
   type Accessor,
   createEffect,

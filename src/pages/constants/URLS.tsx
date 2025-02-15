@@ -4,9 +4,9 @@ export const URLS = {
     CONTACT: "/contact-us",
     GLOBAL_SETTINGS: "/admin/GlobalSettings",
     LOGIN: "/auth/login",
-    USER_SETTINGS: "/admin/UserSettings"
+    USER_SETTINGS: "/admin/UserSettings",
   },
   SYSTEM: {
-    PROJECTS: "/system/projects"
-  }
+    PROJECTS: "/system/projects",
+  },
 } as const;

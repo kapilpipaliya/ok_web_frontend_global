@@ -6,4 +6,4 @@ export function VersionDisplay() {
       {APP_NAME} v{APP_VERSION}
     </div>
   );
-} 
+}

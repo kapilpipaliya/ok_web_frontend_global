@@ -1,21 +1,24 @@
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes } from "node:crypto";
 
-import { getDBSessionForSubdomain } from '~/cypher/get/getSessionForSubdomain';
-import { 
-  deleteExpiredTokens, 
-  getAndConsumeToken, 
-  saveToken 
-} from '~/cypher/mutate/token/tokenOperations';
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import {
+  deleteExpiredTokens,
+  getAndConsumeToken,
+  saveToken,
+} from "~/cypher/mutate/token/tokenOperations";
 
 const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-export async function generateSecureToken(data: string, request: Request): Promise<string> {
+export async function generateSecureToken(
+  data: string,
+  request: Request,
+): Promise<string> {
   // Create a random token
-  const randomToken = randomBytes(32).toString('hex');
-  
+  const randomToken = randomBytes(32).toString("hex");
+
   // Hash the token for storage
-  const hashedToken = createHash('sha256').update(randomToken).digest('hex');
-  
+  const hashedToken = createHash("sha256").update(randomToken).digest("hex");
+
   // Store the token in database
   const { dbSession } = await getDBSessionForSubdomain(request);
   await saveToken(dbSession, hashedToken, data);
@@ -26,9 +29,12 @@ export async function generateSecureToken(data: string, request: Request): Promi
   return randomToken;
 }
 
-export async function validateAndConsumeToken(token: string, request: Request): Promise<null | string> {
-  const hashedToken = createHash('sha256').update(token).digest('hex');
-  
+export async function validateAndConsumeToken(
+  token: string,
+  request: Request,
+): Promise<null | string> {
+  const hashedToken = createHash("sha256").update(token).digest("hex");
+
   const { dbSession } = await getDBSessionForSubdomain(request);
   const tokenData = await getAndConsumeToken(dbSession, hashedToken);
 
@@ -47,4 +53,4 @@ export async function validateAndConsumeToken(token: string, request: Request): 
 async function cleanupOldTokens(request: Request): Promise<void> {
   const { dbSession } = await getDBSessionForSubdomain(request);
   await deleteExpiredTokens(dbSession, TOKEN_EXPIRY);
-} 
+}

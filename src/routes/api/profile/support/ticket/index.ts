@@ -16,21 +16,27 @@ export async function POST({ request }: APIEvent) {
         status: "pending",
         createdAt: datetime()
       }) RETURN n`,
-      { email, key, message, subject }
+      { email, key, message, subject },
     );
 
-    return new Response(JSON.stringify({ message: "Support ticket created successfully" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 201
-    });
-
+    return new Response(
+      JSON.stringify({ message: "Support ticket created successfully" }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 201,
+      },
+    );
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }

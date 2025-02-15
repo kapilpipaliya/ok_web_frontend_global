@@ -1,4 +1,4 @@
-import { createStore, SetStoreFunction, Store } from "solid-js/store";
+import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
@@ -9,13 +9,14 @@ import { API } from "~/lib/api/endpoints";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
-import { GraphInterface, useGraph, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 
-const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
+const GRID_ITEM_CLASS =
+  "grid grid-template-columns:200px|400px ai:center gap:8";
 const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
 
 export function PasswordChangeForm() {
@@ -45,21 +46,42 @@ export function PasswordChangeForm() {
   const form = {
     as: "div",
     attributes: [
-      createPasswordField("Current Password", "currentPassword", showPassword, setShowPassword),
-      createPasswordField("New Password", "newPassword", showPassword, setShowPassword),
-      createPasswordField("Confirm New Password", "confirmPassword", showPassword, setShowPassword),
+      createPasswordField(
+        "Current Password",
+        "currentPassword",
+        showPassword,
+        setShowPassword,
+      ),
+      createPasswordField(
+        "New Password",
+        "newPassword",
+        showPassword,
+        setShowPassword,
+      ),
+      createPasswordField(
+        "Confirm New Password",
+        "confirmPassword",
+        showPassword,
+        setShowPassword,
+      ),
       {
         as: "div",
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: async () => {
                 const formData = graph.vertexes[formDataId];
                 if (validateFormData(formData, showErrorToast)) {
-                  await handlePasswordChange(formData, graph, showErrorToast, showSuccessToast);
+                  await handlePasswordChange(
+                    formData,
+                    graph,
+                    showErrorToast,
+                    showSuccessToast,
+                  );
                 }
               },
             }),
@@ -75,11 +97,19 @@ export function PasswordChangeForm() {
   } as FieldAttribute;
 
   return (
-    <SchemaRenderer form={{ attributes: [form], key: "PasswordChange" }} formDataId={formDataId} />
+    <SchemaRenderer
+      form={{ attributes: [form], key: "PasswordChange" }}
+      formDataId={formDataId}
+    />
   );
 }
 
-function createPasswordField(label: string, key: string, showPassword: Store<{ [key: string]: boolean }>, setShowPassword: SetStoreFunction<{ [key: string]: boolean }>) {
+function createPasswordField(
+  label: string,
+  key: string,
+  showPassword: Store<{ [key: string]: boolean }>,
+  setShowPassword: SetStoreFunction<{ [key: string]: boolean }>,
+) {
   return {
     as: "div",
     attributes: [
@@ -107,30 +137,38 @@ function createPasswordField(label: string, key: string, showPassword: Store<{ [
               {
                 componentName: "Icon",
                 props: () => ({
-                  icon: showPassword[key] ? "iconamoon:eye-light" : "iconamoon:eye-off",
-                  onClick: () => setShowPassword(key, !showPassword[key])
-                })
-              }
+                  icon: showPassword[key]
+                    ? "iconamoon:eye-light"
+                    : "iconamoon:eye-off",
+                  onClick: () => setShowPassword(key, !showPassword[key]),
+                }),
+              },
             ],
-            class: "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-            componentName: "Box"
-          }
+            class:
+              "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+            componentName: "Box",
+          },
         ],
         class: "position:rel",
-        componentName: "Box"
-      }
+        componentName: "Box",
+      },
     ],
     class: GRID_ITEM_CLASS,
     componentName: "Box",
   };
 }
 
-async function handlePasswordChange(formData: Vertex, graph: GraphInterface, showErrorToast: (msg: string) => void, showSuccessToast: (msg: string) => void) {
+async function handlePasswordChange(
+  formData: Vertex,
+  graph: GraphInterface,
+  showErrorToast: (msg: string) => void,
+  showSuccessToast: (msg: string) => void,
+) {
   try {
     const response = await postAPI(API.changePasswordUrl, {
       currentPassword: formData.P.currentPassword,
       newPassword: formData.P.newPassword,
-      uuid: getMemberVertex(graph)?.P.uuid
+      uuid: getMemberVertex(graph)?.P.uuid,
     });
 
     if (response.error) {
@@ -143,7 +181,10 @@ async function handlePasswordChange(formData: Vertex, graph: GraphInterface, sho
   }
 }
 
-function validateFormData(formData: Vertex, showErrorToast: (msg: string) => void) {
+function validateFormData(
+  formData: Vertex,
+  showErrorToast: (msg: string) => void,
+) {
   const { confirmPassword, currentPassword, newPassword } = formData.P;
 
   if (!currentPassword?.trim()) {

@@ -1,15 +1,12 @@
 import { createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
-
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
-
 
 export default function UserSettings() {
   const [graph] = useGraph();
@@ -85,7 +82,7 @@ export default function UserSettings() {
 function PasswordSettings() {
   return (
     <div>
-        <PasswordChangeForm />
+      <PasswordChangeForm />
     </div>
   );
 }

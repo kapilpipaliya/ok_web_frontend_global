@@ -4,7 +4,6 @@ import { createEffect, createSignal, on } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
@@ -116,7 +115,10 @@ export function FunctionEditor(props: {
         value={editorValue()}
       />
       <div class="flex gap:2 mt:2">
-        <button class="px:3 py:1 bg:primary-60 fg:base-5 r:1" onClick={handleSave}>
+        <button
+          class="px:3 py:1 bg:primary-60 fg:base-5 r:1"
+          onClick={handleSave}
+        >
           Submit
         </button>
         <button

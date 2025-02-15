@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, splitProps } from "solid-js";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
-
 export function SearchBar(
   props: Readonly<
     JSX.InputHTMLAttributes<HTMLInputElement> & {

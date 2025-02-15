@@ -1,15 +1,16 @@
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
+
 import { sendEmail } from "./sendEmail"; // You'll need to implement this
 
 export async function sendConfirmationEmail(
   email: string,
   username: string,
-  request: Request
+  request: Request,
 ) {
   const userData = encodeUserData({ email, username });
   const token = await generateSecureToken(userData, request);
-  
+
   const confirmationUrl = new URL("/api/auth/confirm-email", request.url);
   confirmationUrl.searchParams.set("token", token);
 
@@ -22,8 +23,8 @@ export async function sendConfirmationEmail(
   `;
 
   await sendEmail({
-    to: email,
-    subject: "Confirm Your Email Address",
     html: emailContent,
+    subject: "Confirm Your Email Address",
+    to: email,
   });
-} 
+}

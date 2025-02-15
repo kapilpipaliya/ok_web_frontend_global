@@ -14,7 +14,10 @@ import { createUserInSuperDB, createUserInUserDB } from "./createUserInDB";
 import { insertComponents } from "./insertComponents";
 import { newAdminValidations } from "./newAdminValidations";
 
-export async function signupAdmin(tx: Session | Transaction, data: SignupRequestData) {
+export async function signupAdmin(
+  tx: Session | Transaction,
+  data: SignupRequestData,
+) {
   // Check if the user already exists
   if (!data.isSubDomainCreation) {
     await newAdminValidations(tx, data.username, data.email, data.subDomain);
@@ -24,17 +27,17 @@ export async function signupAdmin(tx: Session | Transaction, data: SignupRequest
 
   // Create a new user in the database according to subDomain
   let user: Vertex;
-  if (!data.isSubDomainCreation) {
+  if (data.isSubDomainCreation) {
+    const query = "Match (u:User {uuid: $uuid}) RETURN u";
+    const result = await tx.run(query, { uuid: data.uuid });
+    user = convertNodeToJson(result.records[0].get("u") as Node);
+  } else {
     user = await createUserInSuperDB(tx, {
       email: data.email,
       password: data.password,
       subDomain: [data.subDomain],
       username: data.username,
     });
-  } else {
-    const query = `Match (u:User {uuid: $uuid}) RETURN u`;
-    const result = await tx.run(query, { uuid: data.uuid });
-    user = convertNodeToJson(result.records[0].get("u") as Node);
   }
 
   const userDbSession = (await getDriver()).session({

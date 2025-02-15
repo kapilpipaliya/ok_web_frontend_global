@@ -6,4 +6,4 @@ export function SubDomainSettings() {
       <SubDomainGrid />
     </div>
   );
-} 
+}

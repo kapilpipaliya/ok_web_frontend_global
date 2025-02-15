@@ -1,7 +1,6 @@
 import { createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
@@ -34,7 +33,7 @@ export default function GlobalSettings() {
       component: "ThemeSettings",
       id: "theme",
       label: "Theme Settings",
-    }
+    },
   ];
 
   return (
@@ -90,4 +89,4 @@ export default function GlobalSettings() {
 
 function ThemeSettings() {
   return <div>Theme Settings</div>;
-} 
+}

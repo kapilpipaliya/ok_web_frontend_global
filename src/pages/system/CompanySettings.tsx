@@ -6,12 +6,16 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function CompanySettings() {
-  const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:200px|400px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -34,7 +38,13 @@ export function CompanySettings() {
     try {
       const data = await getAPI(API.getCompanySettingsUrl);
       if (data.settings?.P) {
-        replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
+        replaceVertexProperties(
+          0,
+          formDataId,
+          graph,
+          setGraph,
+          data.settings.P,
+        );
       }
     } catch (err) {
       showErrorToast((err as Error).message);
@@ -124,13 +134,17 @@ export function CompanySettings() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: async () => {
                 try {
                   const settings = graph.vertexes[formDataId];
-                  const response = await postAPI(API.updateCompanySettingsUrl, settings.P);
+                  const response = await postAPI(
+                    API.updateCompanySettingsUrl,
+                    settings.P,
+                  );
                   if (response.error) {
                     showErrorToast(response.error);
                   } else {
@@ -142,7 +156,7 @@ export function CompanySettings() {
               },
             }),
             text: "Save Changes",
-          }
+          },
         ],
         class: "mt:24",
         componentName: "Box",
@@ -153,6 +167,9 @@ export function CompanySettings() {
   };
 
   return (
-    <SchemaRenderer form={{ attributes: [form], key: "CompanySettings" }} formDataId={formDataId} />
+    <SchemaRenderer
+      form={{ attributes: [form], key: "CompanySettings" }}
+      formDataId={formDataId}
+    />
   );
-} 
+}

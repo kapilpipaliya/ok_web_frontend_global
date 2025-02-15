@@ -1,6 +1,5 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
-import { Title } from "@solidjs/meta";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { openDB } from "idb";

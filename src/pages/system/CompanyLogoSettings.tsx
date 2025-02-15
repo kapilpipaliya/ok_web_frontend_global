@@ -17,7 +17,8 @@ import { defaultLogo } from "~/pages/admin_layout/constants/constant";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 export function CompanyLogoSettings() {
-  const GRID_ITEM_CLASS = "grid grid-template-columns:150px|500px ai:center gap:8";
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:150px|500px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
@@ -45,7 +46,7 @@ export function CompanyLogoSettings() {
       graph,
       setGraph,
       { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyLogo" } },
-      companyLogoVertexCopy.id
+      companyLogoVertexCopy.id,
     );
   }
 
@@ -118,19 +119,20 @@ export function CompanyLogoSettings() {
             key: "companyLogo",
             props: () => {
               const selectedFile = companyLogoVertex()[0];
-              return ({
+              return {
                 onClick: () => setOpenDialog(true),
                 src: getDownloadLink(selectedFile) || defaultLogo,
-              });
+              };
             },
           },
           {
             as: "div",
-            componentName: "Box"
+            componentName: "Box",
           },
           {
             as: "button",
-            class: "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
+            class:
+              "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
             componentName: "Box",
             props: () => ({
               onClick: () => setOpenDialog(true),
@@ -139,7 +141,8 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: onSave,
@@ -157,16 +160,20 @@ export function CompanyLogoSettings() {
 
   const companyLogoVertex = createMemo(() => {
     return (
-      evalExpression(
-        `->CompanyLogo`,
-        { graph, setGraph, vertexes: [graph.vertexes[formDataId]] },
-      ) || []
+      evalExpression("->CompanyLogo", {
+        graph,
+        setGraph,
+        vertexes: [graph.vertexes[formDataId]],
+      }) || []
     );
   });
 
   return (
     <div>
-      <SchemaRenderer form={{ attributes: [form], key: "CompanyLogo" }} formDataId={formDataId} />
+      <SchemaRenderer
+        form={{ attributes: [form], key: "CompanyLogo" }}
+        formDataId={formDataId}
+      />
       <FilePickerModal
         onFileSelected={onFileSelected}
         open={openDialog}
@@ -176,4 +183,4 @@ export function CompanyLogoSettings() {
       />
     </div>
   );
-} 
+}

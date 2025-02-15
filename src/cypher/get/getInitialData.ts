@@ -32,7 +32,6 @@ export async function getInitialData(dbSession: Session) {
     // await fetchAndSaveFormMetaData("Comp", nodeObj, relationshipObj, dbSession);
     // await fetchAndSaveFormMetaData("CompExample", nodeObj, relationshipObj, dbSession);
 
-
     await fetchFromMGAndSaveToArray(
       dbSession,
       "MATCH (n:GlobalSetting)  OPTIONAL MATCH (n)-[r]->(m) RETURN n, r, m",

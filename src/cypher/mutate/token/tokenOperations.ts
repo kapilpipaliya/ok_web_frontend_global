@@ -9,7 +9,7 @@ interface TokenData {
 
 export async function deleteExpiredTokens(
   session: Session,
-  expiryTime: number
+  expiryTime: number,
 ): Promise<void> {
   const query = `
     MATCH (t:Token)
@@ -18,13 +18,13 @@ export async function deleteExpiredTokens(
   `;
 
   await session.run(query, {
-    expiryTime: Date.now() - expiryTime
+    expiryTime: Date.now() - expiryTime,
   });
 }
 
 export async function getAndConsumeToken(
   session: Session,
-  hashedToken: string
+  hashedToken: string,
 ): Promise<null | TokenData> {
   const query = `
     MATCH (t:Token {hashedToken: $hashedToken})
@@ -37,14 +37,14 @@ export async function getAndConsumeToken(
     return null;
   }
 
-  const token = result.records[0].get('t').properties;
+  const token = result.records[0].get("t").properties;
   return token as TokenData;
 }
 
 export async function saveToken(
   session: Session,
   hashedToken: string,
-  data: string
+  data: string,
 ): Promise<void> {
   const query = `
     CREATE (t:Token {
@@ -58,6 +58,6 @@ export async function saveToken(
   await session.run(query, {
     createdAt: Date.now(),
     data,
-    hashedToken
+    hashedToken,
   });
-} 
+}

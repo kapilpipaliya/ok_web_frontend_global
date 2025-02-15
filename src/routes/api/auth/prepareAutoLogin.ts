@@ -13,29 +13,34 @@ export async function GET({ request }: APIEvent) {
     const url = new URL(request.url);
     const targetSubdomain = url.searchParams.get("subdomain");
     const targetDomain = url.searchParams.get("domain");
-    
-    if (!targetSubdomain && !targetDomain) {
-      return new Response(JSON.stringify({ error: "Missing subdomain or domain parameter" }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-      });
+
+    if (!(targetSubdomain || targetDomain)) {
+      return new Response(
+        JSON.stringify({ error: "Missing subdomain or domain parameter" }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 400,
+        },
+      );
     }
 
     const { dbSession } = await getDBSessionForSubdomain(request);
     const user = await getUserFromSession(request);
     const existingUser = await findUserByEmailSimple(dbSession, user?.P?.email);
 
-    if (!existingUser || !existingUser.P.email || !existingUser.P.username || !existingUser.P.uuid) {
+    if (
+      !(existingUser?.P.email && existingUser.P.username && existingUser.P.uuid)
+    ) {
       return new Response(JSON.stringify({ error: "Missing user data" }), {
         headers: { "Content-Type": "application/json" },
-        status: 400
+        status: 400,
       });
     }
 
-    const userData = encodeUserData({ 
-      email: existingUser.P.email, 
-      username: existingUser.P.username, 
-      uuid: existingUser.P.uuid 
+    const userData = encodeUserData({
+      email: existingUser.P.email,
+      username: existingUser.P.username,
+      uuid: existingUser.P.uuid,
     });
 
     // Generate a secure token instead of passing user data directly
@@ -45,7 +50,7 @@ export async function GET({ request }: APIEvent) {
     const host = request.headers.get("host") || "";
     const parsedDomain = parse(host);
     const protocol = url.protocol;
-    
+
     let autoLoginUrl;
     if (host.includes("localhost")) {
       // For localhost, use port if present
@@ -62,14 +67,18 @@ export async function GET({ request }: APIEvent) {
 
     return new Response(null, {
       headers: { Location: autoLoginUrl },
-      status: 302
+      status: 302,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "An unknown error occurred" 
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
-} 
+}

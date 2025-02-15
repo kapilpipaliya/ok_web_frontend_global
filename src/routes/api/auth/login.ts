@@ -8,32 +8,38 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { verifyPassword } from "~/lib/auth/password";
-
 import { updateSession } from "~/server/session/updateSession";
+
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
-    return new Response(JSON.stringify({
-      error: "Invalid content type. Expected application/json"
-    }), { 
-      headers: { "Content-Type": "application/json" },
-      status: 415 
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Invalid content type. Expected application/json",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 415,
+      },
+    );
   }
 
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
-  
+
   try {
     const { email, password } = await request.json();
 
     if (!(email && password)) {
-      return new Response(JSON.stringify({
-        error: "Email or password is missing"
-      }), {
-        headers: { "Content-Type": "application/json" },
-        status: 400
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Email or password is missing",
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 400,
+        },
+      );
     }
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
@@ -41,16 +47,18 @@ export async function POST({ request }: APIEvent) {
 
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
-    
-    return user;
 
+    return user;
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "Unknown error"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }

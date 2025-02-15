@@ -13,7 +13,7 @@ export async function POST({ request }: APIEvent) {
 
     // First ensure GlobalSetting exists
     const existingGlobalSetting = await dbSession.run(
-      `MATCH (g:GlobalSetting) RETURN g`
+      "MATCH (g:GlobalSetting) RETURN g",
     );
 
     if (existingGlobalSetting.records.length === 0) {
@@ -23,7 +23,7 @@ export async function POST({ request }: APIEvent) {
           createdAt: datetime(),
           updatedAt: datetime()
         })`,
-        { key: `global_setting_${Date.now()}` }
+        { key: `global_setting_${Date.now()}` },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST({ request }: APIEvent) {
       `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
        WHERE elementId(f) = $logoImage
        RETURN r`,
-      { logoImage }
+      { logoImage },
     );
 
     // If relationship exists, delete other relationships and return
@@ -41,7 +41,7 @@ export async function POST({ request }: APIEvent) {
         `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
          WHERE elementId(f) <> $logoImage
          DELETE r`,
-        { logoImage }
+        { logoImage },
       );
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
@@ -51,7 +51,7 @@ export async function POST({ request }: APIEvent) {
     // Delete all existing CompanyLogo relationships
     await dbSession.run(
       `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
-       DELETE r`
+       DELETE r`,
     );
 
     // Create new relationship
@@ -60,10 +60,10 @@ export async function POST({ request }: APIEvent) {
        MATCH (f:File) WHERE elementId(f) = $logoImage
        MERGE (g)-[:CompanyLogo]->(f)
        RETURN g, f`,
-      { logoImage }
+      { logoImage },
     );
 
-    if (!result.records[0]?.get('g') || !result.records[0]?.get('f')) {
+    if (!(result.records[0]?.get("g") && result.records[0]?.get("f"))) {
       throw new Error("GlobalSetting or file not found");
     }
 
@@ -78,4 +78,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

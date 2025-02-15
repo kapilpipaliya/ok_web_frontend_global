@@ -37,9 +37,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             placement="bottom-end"
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">
-              <ProfileHeader
-                profileImage={getProfileImageUrl(graph)}
-              />
+              <ProfileHeader profileImage={getProfileImageUrl(graph)} />
               <hr class="color:rgb(223,223,223)" />
               <MenuItems onClose={handleClose} signOutCall={signOutCall} />
             </ul>

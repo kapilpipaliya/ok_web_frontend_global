@@ -7,13 +7,17 @@ import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
 
 export function GeneralSettings() {
-  const GRID_ITEM_CLASS = "grid grid-template-columns:200px|400px ai:center gap:8";
+  const GRID_ITEM_CLASS =
+    "grid grid-template-columns:200px|400px ai:center gap:8";
   const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -80,12 +84,16 @@ export function GeneralSettings() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
             componentName: "Box",
             props: () => ({
               onClick: async () => {
                 const settings = graph.vertexes[formDataId];
-                const response = await postAPI(API.updateGeneralSettingsUrl, settings.P);
+                const response = await postAPI(
+                  API.updateGeneralSettingsUrl,
+                  settings.P,
+                );
                 if (response.error) {
                   showErrorToast(response.error);
                 } else {
@@ -109,18 +117,19 @@ export function GeneralSettings() {
     try {
       const data = await getAPI(API.getGeneralSettingsUrl);
       if (data.settings?.P) {
-        replaceVertexProperties(0, formDataId, graph, setGraph, data.settings.P);
+        replaceVertexProperties(
+          0,
+          formDataId,
+          graph,
+          setGraph,
+          data.settings.P,
+        );
       }
 
       // Create company logo vertex and edge if exists
       if (data.companyLogo) {
         if (!graph.vertexes[data.companyLogo.id]) {
-          addNewVertex(
-            0,
-            data.companyLogo,
-            graph,
-            setGraph,
-          );
+          addNewVertex(0, data.companyLogo, graph, setGraph);
         }
         setSelectionValue(
           0,
@@ -128,7 +137,7 @@ export function GeneralSettings() {
           graph,
           setGraph,
           { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyLogo" } },
-          data.companyLogo.id
+          data.companyLogo.id,
         );
       }
     } catch (err) {
@@ -141,9 +150,12 @@ export function GeneralSettings() {
 
   return (
     <div>
-      <SchemaRenderer form={{ attributes: [form], key: "GeneralSettings" }} formDataId={formDataId} />
+      <SchemaRenderer
+        form={{ attributes: [form], key: "GeneralSettings" }}
+        formDataId={formDataId}
+      />
       <hr class="my-8 border-t border-gray-200" />
       <CompanyLogoSettings />
     </div>
   );
-} 
+}

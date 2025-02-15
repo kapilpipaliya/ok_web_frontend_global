@@ -23,7 +23,9 @@ export default function App() {
     <Router
       root={(props) => {
         return (
-          <CSSRuntimeProvider config={themeConfig(getGlobalThemeVertex(graph[0]))}>
+          <CSSRuntimeProvider
+            config={themeConfig(getGlobalThemeVertex(graph[0]))}
+          >
             <GraphContext.Provider value={graph}>
               <MetaProvider>
                 <Suspense fallback={<LoaderNew />}>

@@ -17,7 +17,6 @@ import {
   useFormContext,
 } from "../../form/context/FormContext";
 import { DynamicComponent } from "../../form/DynamicComponent";
-import { DropdownMenu } from "../../styled/DropdownMenu";
 import { MultiSelectField } from "../../styled/MultiSelect";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
@@ -155,9 +154,9 @@ export function CSSPropertiesEditor() {
             >
               <div
                 class={`${
-                  (Object.keys(cssState[state()] || {}).length > 0
-                    ? "bb:1px|solid|secondary m:1 pb:5" 
-                    : "")
+                  Object.keys(cssState[state()] || {}).length > 0
+                    ? "bb:1px|solid|secondary m:1 pb:5"
+                    : ""
                 } flex ai:center jc:space-between mb:6px`}
               >
                 <AddNewCssState onClose={() => setShowDropdown(false)} />

@@ -16,7 +16,7 @@ export async function POST({ request }: APIEvent) {
       `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
        WHERE elementId(f) = $profileImage
        RETURN r`,
-      { profileImage, uuid }
+      { profileImage, uuid },
     );
 
     // If relationship exists, delete other relationships and return
@@ -25,7 +25,7 @@ export async function POST({ request }: APIEvent) {
         `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
          WHERE elementId(f) <> $profileImage
          DELETE r`,
-        { profileImage, uuid }
+        { profileImage, uuid },
       );
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
@@ -36,7 +36,7 @@ export async function POST({ request }: APIEvent) {
     await dbSession.run(
       `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
        DELETE r`,
-      { uuid }
+      { uuid },
     );
 
     // Create new relationship
@@ -45,10 +45,10 @@ export async function POST({ request }: APIEvent) {
        MATCH (f:File) WHERE elementId(f) = $profileImage
        MERGE (u)-[:UserProfileImage]->(f)
        RETURN u, f`,
-      { profileImage, uuid }
+      { profileImage, uuid },
     );
 
-    if (!result.records[0]?.get('u') || !result.records[0]?.get('f')) {
+    if (!(result.records[0]?.get("u") && result.records[0]?.get("f"))) {
       throw new Error("User or file not found");
     }
 

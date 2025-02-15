@@ -4,10 +4,11 @@ import type { SetStoreFunction } from "solid-js/store";
 import { createKeyedContext } from "@corvu/utils/create/keyedContext";
 import { useKeyedContext } from "@corvu/utils/create/keyedContext";
 
+import type { GraphInterface } from "~/lib/graph/graph";
+
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
 import { type GlobalProperties, GraphContext } from "~/lib/graph/graph";
-import { type GraphInterface } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 

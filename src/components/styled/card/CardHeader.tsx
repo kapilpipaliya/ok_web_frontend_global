@@ -1,6 +1,10 @@
-import { JSX, Show } from "solid-js";
+import { type JSX, Show } from "solid-js";
 
-export function CardHeader(props: { children?: JSX.Element, imgSrc?: string; title?: string }) {
+export function CardHeader(props: {
+  children?: JSX.Element;
+  imgSrc?: string;
+  title?: string;
+}) {
   return (
     <>
       <Show when={props.imgSrc}>

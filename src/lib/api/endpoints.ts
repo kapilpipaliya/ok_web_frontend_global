@@ -20,7 +20,7 @@ export const API = {
   submitDataUrl: "/api/mutate/submitData",
 
   testEmailSettingsUrl: "/api/settings/email/test",
-  updateCompanyLogoUrl: "/api/settings/updateCompanyLogo", 
+  updateCompanyLogoUrl: "/api/settings/updateCompanyLogo",
   updateCompanySettingsUrl: "/api/settings/company",
   updateEmailSettingsUrl: "/api/settings/email",
   updateGeneralSettingsUrl: "/api/settings/general",

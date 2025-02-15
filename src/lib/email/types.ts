@@ -4,4 +4,4 @@ export interface SMTPSettings {
   smtpPassword: string;
   smtpPort: number;
   smtpUsername: string;
-} 
+}

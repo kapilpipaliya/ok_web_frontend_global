@@ -60,7 +60,7 @@ export function SelectThemeMenu() {
       IN: {},
       L: [],
       OUT: {},
-      P: {type: "GlobalSettingTheme"},
+      P: { type: "GlobalSettingTheme" },
     } as Vertex;
 
     setSelectionValue(

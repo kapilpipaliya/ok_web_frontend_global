@@ -16,7 +16,7 @@ export default createMiddleware({
 
       // Check if the request URL path is in the list of public paths
       if (url.pathname.includes("/system")) {
-        if (!isSuperSubDomain || !sessionUser) {
+        if (!(isSuperSubDomain && sessionUser)) {
           // Redirect to the login page if not authorized
           return redirect(generate401RedirectUrl(url.pathname));
         }

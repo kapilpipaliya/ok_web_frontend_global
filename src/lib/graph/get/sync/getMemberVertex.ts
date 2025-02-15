@@ -1,6 +1,9 @@
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { evalExpression } from "~/lib/expression_eval";
-import { defaultLogo, profileImage } from "~/pages/admin_layout/constants/constant";
+import {
+  defaultLogo,
+  profileImage,
+} from "~/pages/admin_layout/constants/constant";
 
 import type { GraphInterface, Vertex } from "../../graph";
 
@@ -10,8 +13,13 @@ export function getCompanyLogoUrl(graph: GraphInterface): string {
   return getDownloadLink(companyLogoVertex) || defaultLogo;
 }
 
-export function getCompanyLogoVertex(graph: GraphInterface): undefined | Vertex {
-  return evalExpression(`->CompanyLogo`, { graph, vertexes: [getGlobalSettingVertex(graph)] })?.[0];
+export function getCompanyLogoVertex(
+  graph: GraphInterface,
+): undefined | Vertex {
+  return evalExpression("->CompanyLogo", {
+    graph,
+    vertexes: [getGlobalSettingVertex(graph)],
+  })?.[0];
 }
 
 export function getMemberVertex(graph: GraphInterface): Vertex {
@@ -23,6 +31,11 @@ export function getProfileImageUrl(graph: GraphInterface): string {
   return getDownloadLink(profileImageVertex) || profileImage;
 }
 
-export function getProfileImageVertex(graph: GraphInterface): undefined | Vertex {
-  return evalExpression(`->UserProfileImage`, { graph, vertexes: [graph.vertexes.member] })?.[0];
+export function getProfileImageVertex(
+  graph: GraphInterface,
+): undefined | Vertex {
+  return evalExpression("->UserProfileImage", {
+    graph,
+    vertexes: [graph.vertexes.member],
+  })?.[0];
 }

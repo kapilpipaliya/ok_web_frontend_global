@@ -10,11 +10,17 @@ type ProfilePayload = {
   uuid: string;
 };
 
-export async function updateProfile(payload: ProfilePayload, dbSession: Session, subDomain: string) {
+export async function updateProfile(
+  payload: ProfilePayload,
+  dbSession: Session,
+  subDomain: string,
+) {
   const { email, username, uuid } = payload;
 
   const userValidation = await validateUser(dbSession, uuid);
-  if ('error' in userValidation) return userValidation;
+  if ("error" in userValidation) {
+    return userValidation;
+  }
   const oldUser = userValidation.user;
 
   const basicQuery = await buildUpdateQuery(email, username);
@@ -23,25 +29,35 @@ export async function updateProfile(payload: ProfilePayload, dbSession: Session,
     const subDomainsResult = await dbSession.run(
       `MATCH (u:User {uuid: $uuid})-[:UserSubDomain]->(s:SubDomain)
        RETURN s.key as subdomain`,
-      { uuid }
+      { uuid },
     );
 
     const driver = await getDriver();
-    const validationSessions = subDomainsResult.records.map(record => 
-      driver.session({ database: record.get("subdomain") })
+    const validationSessions = subDomainsResult.records.map((record) =>
+      driver.session({ database: record.get("subdomain") }),
     );
 
     try {
       // Validate in super DB
       if (email && email !== oldUser.properties.email) {
-        const emailExists = await validateField(dbSession, 'email', email, uuid);
+        const emailExists = await validateField(
+          dbSession,
+          "email",
+          email,
+          uuid,
+        );
         if (emailExists) {
           throw new Error("Email address already exists in super database");
         }
       }
-      
+
       if (username && username !== oldUser.properties.username) {
-        const usernameExists = await validateField(dbSession, 'username', username, uuid);
+        const usernameExists = await validateField(
+          dbSession,
+          "username",
+          username,
+          uuid,
+        );
         if (usernameExists) {
           throw new Error("Username already exists in super database");
         }
@@ -50,16 +66,26 @@ export async function updateProfile(payload: ProfilePayload, dbSession: Session,
       // Validate in all subdomains
       for (const session of validationSessions) {
         if (email && email !== oldUser.properties.email) {
-          const emailExists = await validateField(session, 'email', email, uuid);
+          const emailExists = await validateField(
+            session,
+            "email",
+            email,
+            uuid,
+          );
           if (emailExists) {
-            throw new Error(`Email address already exists in subdomain`);
+            throw new Error("Email address already exists in subdomain");
           }
         }
-        
+
         if (username && username !== oldUser.properties.username) {
-          const usernameExists = await validateField(session, 'username', username, uuid);
+          const usernameExists = await validateField(
+            session,
+            "username",
+            username,
+            uuid,
+          );
           if (usernameExists) {
-            throw new Error(`Username already exists in subdomain`);
+            throw new Error("Username already exists in subdomain");
           }
         }
       }
@@ -67,9 +93,9 @@ export async function updateProfile(payload: ProfilePayload, dbSession: Session,
       // Perform updates
       const updatePromises = [
         dbSession.run(basicQuery, { email, username, uuid }),
-        ...validationSessions.map(session => 
-          session.run(basicQuery, { email, username, uuid })
-        )
+        ...validationSessions.map((session) =>
+          session.run(basicQuery, { email, username, uuid }),
+        ),
       ];
 
       const results = await Promise.all(updatePromises);
@@ -86,30 +112,40 @@ export async function updateProfile(payload: ProfilePayload, dbSession: Session,
       }
 
       return { message: "Profile updated successfully", user: user.properties };
-
     } catch (err) {
-      return { error: err instanceof Error ? err.message : "Failed to update profile", status: 500 };
+      return {
+        error: err instanceof Error ? err.message : "Failed to update profile",
+        status: 500,
+      };
     } finally {
-      await Promise.all(validationSessions.map(session => session.close()));
+      await Promise.all(validationSessions.map((session) => session.close()));
     }
-
   } else {
     // Single subdomain update
     if (email && email !== oldUser.properties.email) {
-      const emailExists = await validateField(dbSession, 'email', email, uuid);
+      const emailExists = await validateField(dbSession, "email", email, uuid);
       if (emailExists) {
         return { error: "Email address already exists", status: 500 };
       }
     }
-    
+
     if (username && username !== oldUser.properties.username) {
-      const usernameExists = await validateField(dbSession, 'username', username, uuid);
+      const usernameExists = await validateField(
+        dbSession,
+        "username",
+        username,
+        uuid,
+      );
       if (usernameExists) {
         return { error: "Username already exists", status: 500 };
       }
     }
 
-    const basicResult = await dbSession.run(basicQuery, { email, username, uuid });
+    const basicResult = await dbSession.run(basicQuery, {
+      email,
+      username,
+      uuid,
+    });
 
     if (basicResult.records.length === 0) {
       return { error: "Failed to update profile", status: 500 };
@@ -128,9 +164,13 @@ export async function updateProfile(payload: ProfilePayload, dbSession: Session,
 async function buildUpdateQuery(email?: string, username?: string) {
   let basicQuery = "MATCH (u:User) WHERE u.uuid = $uuid ";
   const updates = [];
-  if (email) updates.push("u.email = $email");
-  if (username) updates.push("u.username = $username");
-  
+  if (email) {
+    updates.push("u.email = $email");
+  }
+  if (username) {
+    updates.push("u.username = $username");
+  }
+
   if (updates.length > 0) {
     basicQuery += `SET ${updates.join(", ")}, u.updatedAt = localDateTime() RETURN u`;
   } else {
@@ -139,7 +179,7 @@ async function buildUpdateQuery(email?: string, username?: string) {
   return basicQuery;
 }
 
-async function updateHttpSession(email: string, user: any) {
+async function updateHttpSession(_email: string, user: any) {
   const http_session = await getHttpsSession();
   await http_session.update((oldData) => ({
     ...oldData,
@@ -147,7 +187,12 @@ async function updateHttpSession(email: string, user: any) {
   }));
 }
 
-async function validateField(session: Session, field: string, value: string, uuid: string) {
+async function validateField(
+  session: Session,
+  field: string,
+  value: string,
+  uuid: string,
+) {
   const exists = await session.run(
     `MATCH (u:User {${field}: $value}) WHERE u.uuid <> $uuid RETURN u;`,
     { uuid, value },
@@ -166,7 +211,10 @@ async function validateUser(dbSession: Session, uuid: string) {
 
   const user = userExists.records[0].get("u");
   if (user.properties.isSuper) {
-    return { error: "Super Admin cannot update profile in subdomain", status: 404 };
+    return {
+      error: "Super Admin cannot update profile in subdomain",
+      status: 404,
+    };
   }
 
   return { user };

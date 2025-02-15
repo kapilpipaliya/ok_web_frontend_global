@@ -9,29 +9,32 @@ export async function POST({ request }: APIEvent) {
   try {
     const result = await dbSession.run(
       "MATCH (n:Support {email: $email}) RETURN n ORDER BY n.createdAt DESC",
-      { email }
+      { email },
     );
 
-    const tickets = result.records.map(record => {
+    const tickets = result.records.map((record) => {
       const node = record.get("n");
       return {
         ...node.properties,
-        id: node.elementId
+        id: node.elementId,
       };
     });
 
     return new Response(JSON.stringify({ tickets }), {
       headers: { "Content-Type": "application/json" },
-      status: 200
+      status: 200,
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "An unknown error occurred"
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   } finally {
     await dbSession.close();
   }

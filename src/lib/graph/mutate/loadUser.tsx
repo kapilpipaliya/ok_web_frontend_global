@@ -41,21 +41,23 @@ export function handleUserData(
   if (data.user && data.profileImage) {
     if (data.profileImage.id) {
       if (!graph.vertexes[data.profileImage.id]) {
-        addNewVertex(
-          0,
-          data.profileImage,
-          graph,
-          setGraph,
-        );
+        addNewVertex(0, data.profileImage, graph, setGraph);
       }
     }
-    setSelectionValue(0, graph.vertexes.member, graph, setGraph, {
-      id: "",
-      L: [],
-      P: {
-        type: "UserProfileImage",
-      },
-    } as unknown as Vertex, data.profileImage.id);
+    setSelectionValue(
+      0,
+      graph.vertexes.member,
+      graph,
+      setGraph,
+      {
+        id: "",
+        L: [],
+        P: {
+          type: "UserProfileImage",
+        },
+      } as unknown as Vertex,
+      data.profileImage.id,
+    );
   }
 }
 

@@ -23,15 +23,17 @@ export function AuthenticatedMenu(
   const { showLoadingToast } = useToast();
   const globalStoreId = "globalStoreId";
 
-  const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
+  const isSystemSubDomain = () =>
+    getMemberVertex(graph).P.subDomain === "super";
 
-  const menuItems = () => isSystemSubDomain()
-    ? [{ href: URLS.SYSTEM.PROJECTS, label: "Projects" }]
-    : [
-        { href: URLS.ADMIN.GLOBAL_SETTINGS, label: "Global Settings" },
-        { href: URLS.ADMIN.USER_SETTINGS, label: "User Settings" },
-        { href: URLS.ADMIN.CONTACT, label: "Help" },
-      ];
+  const menuItems = () =>
+    isSystemSubDomain()
+      ? [{ href: URLS.SYSTEM.PROJECTS, label: "Projects" }]
+      : [
+          { href: URLS.ADMIN.GLOBAL_SETTINGS, label: "Global Settings" },
+          { href: URLS.ADMIN.USER_SETTINGS, label: "User Settings" },
+          { href: URLS.ADMIN.CONTACT, label: "Help" },
+        ];
 
   return (
     <>

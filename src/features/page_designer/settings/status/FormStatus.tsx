@@ -11,7 +11,6 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
-
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
 
