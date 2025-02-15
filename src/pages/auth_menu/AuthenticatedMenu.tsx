@@ -1,18 +1,18 @@
 import type { JSX } from "solid-js";
 
 import { useNavigate } from "@solidjs/router";
-import { For, Show } from "solid-js";
+import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+
+import { URLS } from "../constants/URLS";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
-  signOutCall: () => Promise<{
-    [key: string]: any;
-  }>;
+  signOutCall: () => Promise<Record<string, unknown>>;
 }
 
 export function AuthenticatedMenu(
@@ -26,11 +26,11 @@ export function AuthenticatedMenu(
   const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
 
   const menuItems = () => isSystemSubDomain()
-    ? [{ href: "/admin/Projects", label: "Projects" }]
+    ? [{ href: URLS.SYSTEM.PROJECTS, label: "Projects" }]
     : [
-        { href: "/admin/GlobalSettings", label: "Global Settings" },
-        { href: "/admin/UserSettings", label: "User Settings" },
-        { href: "/contact-us", label: "Help" },
+        { href: URLS.ADMIN.GLOBAL_SETTINGS, label: "Global Settings" },
+        { href: URLS.ADMIN.USER_SETTINGS, label: "User Settings" },
+        { href: URLS.ADMIN.CONTACT, label: "Help" },
       ];
 
   return (
@@ -65,7 +65,7 @@ export function AuthenticatedMenu(
               loadMessage: "Logging Out...",
               onSuccess: (value) => {
                 if (value != null && value.message !== null) {
-                  navigate("/auth/login");
+                  navigate(URLS.ADMIN.LOGIN);
                 }
               },
               promise: props.signOutCall(),

@@ -1,9 +1,9 @@
-import { Session } from "neo4j-driver";
 import tld from "tldts";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { getDriver } from "~/cypher/driver";
 
-export async function getSubDomain(host: string, dbSession?: Session) {
+export async function getSubDomain(host: string) {
   const { domain, subdomain } = tld.parse(host);
   
   // If it matches the current domain from env, use system subdomain
@@ -15,6 +15,8 @@ export async function getSubDomain(host: string, dbSession?: Session) {
   }
 
   // Otherwise look up the domain in SubDomain vertex
+  const driver = await getDriver();
+  const dbSession = driver.session({ database: SYSTEM_DB_NAME });
   if (dbSession) {
     try {
       const query = `
