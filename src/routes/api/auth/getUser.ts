@@ -8,7 +8,7 @@ import { getUserFromSession } from "~/server/session/getUserFromSession";
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    const user = await getUserFromSession();
+    const user = await getUserFromSession(request);
     // if (!email) {
     //   return new Response(
     //     JSON.stringify({

@@ -13,7 +13,7 @@ export async function checkSuperUserAuthorization(
 ) {
   if (subDomain === SYSTEM_DB_NAME) {
     return null; // return null because now email is not required
-    const sessionUser = await getUserFromSession();
+    const sessionUser = await getUserFromSession(request);
     if (!sessionUser) {
       return {
         error: `Access Denied: You do not have permission to ${isMutate ? "make changes" : "view information"} in this area.`,

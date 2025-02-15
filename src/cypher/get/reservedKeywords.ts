@@ -66,9 +66,12 @@ export const reservedKeywords = {
     "SCALAR",
   ],
   added: ["key", "id", "type", "label"],
-  added2: Object.keys(FormMetaData),
 };
 export function isReservedKeyword(key: string) {
+  const formMetaDataKeys = Object.keys(FormMetaData);
+  if (formMetaDataKeys.includes(key)) {
+    return true;
+  }
   for (const category in reservedKeywords) {
     if (
       reservedKeywords[category as keyof typeof reservedKeywords].includes(

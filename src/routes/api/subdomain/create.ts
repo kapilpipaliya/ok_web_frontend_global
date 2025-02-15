@@ -15,7 +15,7 @@ export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   
   try {
-    const user = await validateUser((await getUserFromSession())?.P.email, dbSession);
+    const user = await validateUser((await getUserFromSession(request))?.P.email, dbSession);
     await checkExistingDomain(dbSession, key, domain);
     const newSubdomain = await createSubdomain(dbSession, key, domain);
     await createActivityLog(dbSession, "SESSION_CREATE", "SubDomain", newSubdomain.id, user.P.email, `Created subdomain ${key} with domain ${domain}`);

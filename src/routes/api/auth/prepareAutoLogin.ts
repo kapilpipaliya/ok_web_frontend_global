@@ -22,7 +22,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     const { dbSession } = await getDBSessionForSubdomain(request);
-    const user = await getUserFromSession();
+    const user = await getUserFromSession(request);
     const existingUser = await findUserByEmailSimple(dbSession, user?.P?.email);
 
     if (!existingUser || !existingUser.P.email || !existingUser.P.username || !existingUser.P.uuid) {

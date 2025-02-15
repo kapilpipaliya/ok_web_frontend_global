@@ -4,7 +4,7 @@ import { getUserFromSession } from "./getUserFromSession";
 
 export async function checkAdminRole(request: Request): Promise<boolean> {
   const { dbSession } = await getDBSessionForSubdomain(request);
-  const user = await getUserFromSession();
+  const user = await getUserFromSession(request);
 
   try {
     if (!user?.id) return false;

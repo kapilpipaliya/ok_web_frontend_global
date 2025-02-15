@@ -20,7 +20,7 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json();
-  const user = await getUserFromSession();
+  const user = await getUserFromSession(request);
 
   try {
     // Test email sending with the new settings

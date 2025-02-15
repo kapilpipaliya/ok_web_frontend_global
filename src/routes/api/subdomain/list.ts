@@ -7,7 +7,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
-  const user = await getUserFromSession();
+  const user = await getUserFromSession(request);
   
   if (!user || !user.P?.email) {
     return new Response(JSON.stringify({ 

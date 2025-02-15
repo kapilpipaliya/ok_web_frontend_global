@@ -6,7 +6,6 @@ import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 
 import { UserDropdownMenuDisplay } from "../auth_menu/DropdownMenuDisplay";
-import { SelectThemeButton } from "../admin_layout/theme/SelectThemeButton";
 
 export default function AdminDashboard() {
   const [selectedIndex, setSelectedIndex] = createSignal(0);

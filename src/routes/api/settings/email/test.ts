@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
 
   const { dbSession } = await getDBSessionForSubdomain(request);
   const settings = await request.json() as SMTPSettings;
-  const user = await getUserFromSession();
+  const user = await getUserFromSession(request);
 
   try {
     // Send test email using the provided SMTP settings
