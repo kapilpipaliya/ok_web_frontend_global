@@ -1,11 +1,11 @@
 import { SiteTitle } from "~/components/SiteTitle";
-import { Login } from "~/pages/form/Login";
+import { LoginForm } from "~/pages/form/LoginForm";
 
 export default function logIn() {
   return (
     <>
       <SiteTitle>Login</SiteTitle>
-      <Login />
+      <LoginForm />
     </>
   );
 }

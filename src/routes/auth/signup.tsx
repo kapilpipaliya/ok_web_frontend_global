@@ -1,11 +1,11 @@
 import { SiteTitle } from "~/components/SiteTitle";
-import { SignUp } from "~/pages/form/SignUp";
+import { SignupForm } from "~/pages/form/SignupForm";
 
 export default function signUp() {
   return (
     <>
       <SiteTitle>Sign Up</SiteTitle>
-      <SignUp />
+      <SignupForm />
     </>
   );
 }
