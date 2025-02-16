@@ -4,13 +4,15 @@ export async function saveFileMetadataToNeo4j(
   dbSession: Session,
   properties: Record<string, any>,
   fileId?: string,
+  vertexLabel?: string,
 ) {
   try {
     let query;
+    const label = vertexLabel || "File";
     if (fileId) {
       // Update existing file node
       query = `
-        MATCH (f:File)
+        MATCH (f:${label})
         WHERE elementId(f) = $fileId 
         SET f = $properties
         RETURN f
@@ -19,7 +21,7 @@ export async function saveFileMetadataToNeo4j(
       return result.records[0];
     }
     // Create new file node
-    query = "CREATE (f:File) SET f = $properties RETURN f";
+    query = `CREATE (f:${label}) SET f = $properties RETURN f`;
     const result = await dbSession.run(query, { properties });
     return result.records[0];
   } catch (error) {

@@ -12,7 +12,7 @@ import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
 import { getBaseDir } from "./getBaseDir";
 
 export async function uploadFiles(
-  data: MultiPartData[],
+  data: (MultiPartData & { label?: string })[],
   subDomain: string,
   neo4jSession: Session,
 ) {
@@ -25,16 +25,20 @@ export async function uploadFiles(
 
   const fileNodes = await Promise.all(
     data.map(async (file) => {
-      if (!file?.filename) {
+      if (!file) {
         return null;
       }
-      const { ext, name } = path.parse(file.filename);
+      const { data, filename, name: _, type, ...others } = file;
+      if (!filename) {
+        return null;
+      }
+      const { ext, name } = path.parse(filename);
       const timestamp = currentDate.replace(/[:.]/g, "-"); // Replace colons and dots with dashes for filename
       const newFilename = `${name}_${timestamp}${ext}`;
-      const filePath = saveFileToDisk(userDir, newFilename, file.data);
-      const fileSize = file.data.length;
-      const mimeType = file.type;
-      const checksum = calculateChecksum(file.data);
+      const filePath = saveFileToDisk(userDir, newFilename, data);
+      const fileSize = data.length;
+      const mimeType = type;
+      const checksum = calculateChecksum(data);
 
       const metadata = {
         checksum,
@@ -43,12 +47,12 @@ export async function uploadFiles(
         // fileId,
         fileSize,
         mimeType,
-        originalFileName: file.filename,
+        originalFileName: filename,
         subDomain,
         // username,
       };
 
-      return await saveFileMetadataToNeo4j(neo4jSession, metadata);
+      return await saveFileMetadataToNeo4j(neo4jSession, metadata, undefined, others.label);
     }),
   );
 
