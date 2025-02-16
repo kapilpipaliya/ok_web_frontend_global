@@ -114,7 +114,8 @@
     "vanilla-jsoneditor": "^2.4.0",
     "vinxi": "^0.5.3",
     "yaml": "^2.7.0",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "playwright": "^1.50.1"
   },
   "engines": {
     "node": ">=18"
