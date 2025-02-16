@@ -3,12 +3,11 @@ import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
+import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 import { createActivityLog } from "../activity/createActivityLog";
-
 export async function POST({ request }: APIEvent) {
   const { domain, key } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -30,9 +29,8 @@ export async function POST({ request }: APIEvent) {
     );
     await createUserSubdomainRelation(dbSession, key, user.P.uuid);
     // @ts-expect-error ignore
-    await signupAdmin(dbSession, {
+    await subdomainRegister(dbSession, {
       ...user.P,
-      isSubDomainCreation: true,
       password: "",
       subDomain: key,
     });

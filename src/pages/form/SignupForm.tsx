@@ -39,12 +39,7 @@ export function SignupForm() {
   );
 
   const validateFormData = (formData: any) => {
-    const { email, password, subDomain, username } = formData.P;
-
-    if (!subDomain?.trim()) {
-      showErrorToast("Enter subdomain");
-      return false;
-    }
+    const { email, password, username } = formData.P;
 
     const usernameError = validateUsername(username);
     if (usernameError) {
@@ -102,17 +97,6 @@ export function SignupForm() {
       {
         as: "div",
         attributes: [
-          {
-            class: LABEL_CLASS,
-            componentName: "Text",
-            text: "Subdomain",
-          },
-          {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            key: "subDomain",
-            validation: { required: true },
-          },
           {
             class: LABEL_CLASS,
             componentName: "Text",

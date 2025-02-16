@@ -4,7 +4,6 @@ export async function newAdminValidations(
   txOrSession: Session | Transaction,
   username: string,
   email: string,
-  subDomain: string,
 ) {
   const checkIfExists = async (
     label: string,
@@ -15,10 +14,6 @@ export async function newAdminValidations(
     const result = await txOrSession.run(query, { value });
     return result.records.length > 0;
   };
-
-  if (subDomain && (await checkIfExists("SubDomain", "key", subDomain))) {
-    throw new Error("Sub Domain already exists");
-  }
 
   if (username && (await checkIfExists("User", "username", username))) {
     throw new Error("Username already exists");

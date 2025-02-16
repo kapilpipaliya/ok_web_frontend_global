@@ -7,7 +7,7 @@ import { newAdminValidations } from "./newAdminValidations";
 
 export async function signupUser(tx: Transaction, data: SignupRequestData) {
   // Check if the user already exists
-  await newAdminValidations(tx, data.username, data.email, data.subDomain);
+  await newAdminValidations(tx, data.username, data.email);
 
   // Create a new user in the user's database
   const user = await createUserInUserDB(tx, {
