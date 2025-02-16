@@ -22,7 +22,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Validate and consume the token
-    const userData = await validateAndConsumeToken(token, request);
+    const userData = await validateAndConsumeToken(token, dbSession);
     if (!userData) {
       return new Response(null, {
         headers: { Location: "/auth/login?error=invalid_token" },

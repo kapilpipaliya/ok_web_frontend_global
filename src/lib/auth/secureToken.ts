@@ -1,6 +1,6 @@
+import { Session } from "neo4j-driver";
 import { createHash, randomBytes } from "node:crypto";
 
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import {
   deleteExpiredTokens,
   getAndConsumeToken,
@@ -11,7 +11,7 @@ const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 export async function generateSecureToken(
   data: string,
-  request: Request,
+  dbSession: Session,
 ): Promise<string> {
   // Create a random token
   const randomToken = randomBytes(32).toString("hex");
@@ -20,22 +20,20 @@ export async function generateSecureToken(
   const hashedToken = createHash("sha256").update(randomToken).digest("hex");
 
   // Store the token in database
-  const { dbSession } = await getDBSessionForSubdomain(request);
   await saveToken(dbSession, hashedToken, data);
 
   // Clean up old tokens periodically
-  await cleanupOldTokens(request);
+  await cleanupOldTokens(dbSession);
 
   return randomToken;
 }
 
 export async function validateAndConsumeToken(
   token: string,
-  request: Request,
+  dbSession: Session,
 ): Promise<null | string> {
   const hashedToken = createHash("sha256").update(token).digest("hex");
 
-  const { dbSession } = await getDBSessionForSubdomain(request);
   const tokenData = await getAndConsumeToken(dbSession, hashedToken);
 
   if (!tokenData) {
@@ -50,7 +48,6 @@ export async function validateAndConsumeToken(
   return tokenData.data;
 }
 
-async function cleanupOldTokens(request: Request): Promise<void> {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+async function cleanupOldTokens(dbSession: Session): Promise<void> {
   await deleteExpiredTokens(dbSession, TOKEN_EXPIRY);
 }

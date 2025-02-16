@@ -1,3 +1,4 @@
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
 
@@ -9,7 +10,8 @@ export async function sendConfirmationEmail(
   request: Request,
 ) {
   const userData = encodeUserData({ email, username });
-  const token = await generateSecureToken(userData, request);
+  const { dbSession } = await getDBSessionForSubdomain(request);
+  const token = await generateSecureToken(userData, dbSession);
 
   const confirmationUrl = new URL("/api/auth/confirm-email", request.url);
   confirmationUrl.searchParams.set("token", token);

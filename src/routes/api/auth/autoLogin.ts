@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
@@ -14,6 +14,15 @@ export async function GET({ request }: APIEvent) {
   try {
     const url = new URL(request.url);
     const token = url.searchParams.get("token");
+    const redirectUrl = url.searchParams.get("redirect");
+
+    // Get all query parameters except token and redirect
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of url.searchParams.entries()) {
+      if (key !== 'token' && key !== 'redirect') {
+        queryParams.append(key, value);
+      }
+    }
 
     if (!token) {
       return new Response(
@@ -26,7 +35,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Validate and consume the token
-    const userData = await validateAndConsumeToken(token, request);
+    const userData = await validateAndConsumeToken(token, dbSession);
     if (!userData) {
       // "Invalid or expired token"
       return new Response(null, {
@@ -45,7 +54,7 @@ export async function GET({ request }: APIEvent) {
       });
     }
 
-    updateRedirectUrl(existingUser, subDomain);
+    updateRedirectUrl(existingUser, subDomain, redirectUrl, queryParams);
     await updateSession(existingUser);
 
     return new Response(null, {
