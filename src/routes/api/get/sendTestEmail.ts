@@ -1,12 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, UserData } from "~/lib/auth/userDataEncoder";
 import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   // const { email } = await request.json(); // Extract email from request body
@@ -34,12 +34,12 @@ export async function GET({ request }: APIEvent) {
     }
 
     const fileVertex = result.result![0];
-    // await sendEmailWithAttachment({
-    //   emailSubject: "Test Email With Attachment",
-    //   emailTo: "kapil.pipaliya@gmail.com",
-    //   fileVertex,
-    //   subDomain
-    // });
+    await sendEmailWithAttachment({
+      emailSubject: "Test Email With Attachment",
+      emailTo: "kapil.pipaliya@gmail.com",
+      fileVertex,
+      subDomain
+    });
     return new Response(JSON.stringify({ 
       message: "Test email sent successfully",
       result: result.result 

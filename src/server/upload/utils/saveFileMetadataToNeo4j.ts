@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
-
+import type { Transaction } from "neo4j-driver";
 export async function saveFileMetadataToNeo4j(
-  dbSession: Session,
+  dbSession: Session | Transaction,
   properties: Record<string, any>,
   fileId?: string,
   vertexLabel?: string,

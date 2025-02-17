@@ -3,10 +3,14 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
+import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
+
+import { EMAIL_TEMPLATES } from "./constants/constants";
 
 export async function POST({ request }: APIEvent) {
   const { currentPassword, newPassword, uuid } = await request.json();
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const userResult = await dbSession.run(
@@ -47,6 +51,26 @@ export async function POST({ request }: APIEvent) {
            u.salt = $salt`,
       { hashedPassword, salt, uuid: user.uuid },
     );
+
+    const result = await renderPageAsMHtml({
+      neo4jSession: dbSession,
+      pageName: EMAIL_TEMPLATES.PASSWORD_CHANGED,
+      queryParams: {
+        changeTime: new Date().toISOString(),
+        username: user.username
+      },
+      subDomain,
+    });
+
+    if (result.success && result.result) {
+      const fileVertex = result.result[0];
+      await sendEmailWithAttachment({
+        emailSubject: "Your Password Has Been Changed",
+        emailTo: user.email,
+        fileVertex,
+        subDomain
+      });
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },

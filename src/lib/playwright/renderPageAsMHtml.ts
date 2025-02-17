@@ -1,4 +1,6 @@
-import { Session } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
+
 import { BrowserContext, chromium, Page } from "playwright";
 
 import { isDev } from "~/routes/constants/constants";
@@ -17,7 +19,7 @@ interface RenderResult {
 }
 
 interface SendPageOptions {
-  neo4jSession: Session;
+  neo4jSession: Session | Transaction;
   pageName: string;
   queryParams?: Record<string, string>;
   secureToken?: string;

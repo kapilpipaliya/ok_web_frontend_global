@@ -1,8 +1,9 @@
 import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
-import { getHttpsSession } from "~/server/session/getHttpsSession";
+import { updateSession } from "~/server/session/updateSession";
 
 type ProfilePayload = {
   email?: string;
@@ -105,13 +106,13 @@ export async function updateProfile(
         throw new Error("Failed to update profile");
       }
 
-      const user = mainResult.records[0].get("u");
+      const user = convertNodeToJson(mainResult.records[0].get("u"));
 
       if (email) {
-        await updateHttpSession(email, user);
+        await updateSession(user);
       }
 
-      return { message: "Profile updated successfully", user: user.properties };
+      return { message: "Profile updated successfully", user: user };
     } catch (err) {
       return {
         error: err instanceof Error ? err.message : "Failed to update profile",
@@ -151,13 +152,13 @@ export async function updateProfile(
       return { error: "Failed to update profile", status: 500 };
     }
 
-    const user = basicResult.records[0].get("u");
+    const user = convertNodeToJson(basicResult.records[0].get("u"));
 
     if (email) {
-      await updateHttpSession(email, user);
+      await updateSession(user);
     }
 
-    return { message: "Profile updated successfully", user: user.properties };
+    return { message: "Profile updated successfully", user: user };
   }
 }
 
@@ -177,14 +178,6 @@ async function buildUpdateQuery(email?: string, username?: string) {
     basicQuery += "RETURN u";
   }
   return basicQuery;
-}
-
-async function updateHttpSession(_email: string, user: any) {
-  const http_session = await getHttpsSession();
-  await http_session.update((oldData) => ({
-    ...oldData,
-    email: user.properties.email,
-  }));
 }
 
 async function validateField(

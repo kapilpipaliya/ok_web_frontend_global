@@ -1,3 +1,4 @@
+import type { Transaction } from "neo4j-driver";
 import type { Session } from "neo4j-driver";
 import type { MultiPartData } from "vinxi/runtime/http-types";
 
@@ -14,7 +15,7 @@ import { getBaseDir } from "./getBaseDir";
 export async function uploadFiles(
   data: (MultiPartData & { label?: string })[],
   subDomain: string,
-  neo4jSession: Session,
+  neo4jSession: Session | Transaction,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");

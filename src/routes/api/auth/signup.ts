@@ -9,10 +9,12 @@ import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
+import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { updateSession } from "~/server/session/updateSession";
 
+import { EMAIL_TEMPLATES } from "./constants/constants";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
-
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
     throw new APIError("Invalid content type. Expected application/json", 415);
@@ -54,10 +56,36 @@ async function handleSignup(
       user = await signupUser(tx, data);
     }
 
+    if (!('id' in user)) {
+      throw new Error('User creation failed');
+    }
+
     await tx.commit();
     await updateSession(user);
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
+
+    const result = await renderPageAsMHtml({
+      neo4jSession: tx,
+      pageName: EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
+      queryParams: {
+        email: data.email,
+        username: data.username
+      },
+      subDomain,
+    });
+
+    if (!result.success || !result.result) {
+      throw new APIError(result.error || 'Failed to render confirmation email', 500);
+    }
+
+    const fileVertex = result.result[0];
+    await sendEmailWithAttachment({
+      emailSubject: "Welcome to Our Platform - Please Confirm Your Email",
+      emailTo: data.email,
+      fileVertex,
+      subDomain
+    });
 
     return user;
   } catch (error) {
