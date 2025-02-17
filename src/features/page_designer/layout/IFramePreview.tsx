@@ -50,7 +50,7 @@ export const IFramePreview = (props: {
     <iframe
       allow="clipboard-read; clipboard-write"
       name={props.formStoreId}
-      src={`${window.location.origin}/page_design_preview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}${props.noMinHeight ? "&noMinHeight=true" : ""}`}
+      src={`${window.location.origin}/PageDesignPreview?layoutStoreId=${layoutStoreId}&formStoreId=${props.formStoreId}${props.noMinHeight ? "&noMinHeight=true" : ""}`}
       style={{ border: "none", height: "100%", width: "100%" }}
     />
   );
