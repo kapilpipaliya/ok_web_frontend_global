@@ -34,6 +34,7 @@ export async function GET({ request }: APIEvent) {
       //   emailSubject: "Test Email With Attachment",
       //   emailTo: "kapil.pipaliya@gmail.com",
       //   fileVertex,
+      //   subDomain
       // });
       return new Response("Test email sent successfully" + JSON.stringify(result.result), {
         // headers: { "Content-Type": "application/json" },

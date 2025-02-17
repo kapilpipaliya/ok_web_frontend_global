@@ -153,6 +153,22 @@ export function EmailSettings() {
         as: "div",
         attributes: [
           {
+            class: LABEL_CLASS,
+            componentName: "Text",
+            text: "Use Secure Connection",
+          },
+          {
+            componentName: "Checkbox",
+            key: "secure",
+          },
+        ],
+        class: GRID_ITEM_CLASS,
+        componentName: "Box",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
             as: "button",
             class:
               "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
