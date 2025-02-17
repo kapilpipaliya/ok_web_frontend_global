@@ -16,8 +16,8 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 
-import { DialogHeader } from "../../styled/dialog/DialogHeader";
-import { DialogSubTitle } from "../../styled/dialog/DialogSubTitle";
+import { DialogHeader } from "../../../components/styled/dialog/DialogHeader";
+import { DialogSubTitle } from "../../../components/styled/dialog/DialogSubTitle";
 
 export function ImportMenu(
   props: Readonly<{

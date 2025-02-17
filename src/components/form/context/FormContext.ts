@@ -8,7 +8,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
-import { InitialPermissions } from "../../page_attr_render/InitialPermissions";
+import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 

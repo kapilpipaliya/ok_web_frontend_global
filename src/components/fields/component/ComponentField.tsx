@@ -16,9 +16,9 @@ import type { GenericComponentProps } from "../FieldType";
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
-} from "../../page_attr_render/context/PageAttrContext";
-import { usePageRenderContext } from "../../page_attr_render/context/PageRenderContext";
-import { PageAttrRender } from "../../page_attr_render/PageAttrRender";
+} from "~/features/page_attr_render/context/PageAttrContext";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 

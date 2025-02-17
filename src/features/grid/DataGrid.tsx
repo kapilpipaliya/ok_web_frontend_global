@@ -36,7 +36,7 @@ import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInpu
 import {
   getConfiguredPermissions,
   hasPermissions,
-} from "../page_attr_render/permissions";
+} from "~/features/page_attr_render/permissions";
 import { CreateGridHeaders } from "./CreateGridHeaders";
 import {
   DataGridProvider,

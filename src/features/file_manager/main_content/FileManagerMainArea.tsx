@@ -1,6 +1,6 @@
 import { createEffect, createMemo, createSignal, For } from "solid-js";
 
-import { DataGrid } from "~/components/grid/DataGrid";
+import { DataGrid } from "~/features/grid/DataGrid";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 

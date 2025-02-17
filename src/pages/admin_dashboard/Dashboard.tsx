@@ -1,7 +1,7 @@
 import { toTitle } from "case-switcher-js";
 import { createSignal } from "solid-js";
 
-import { DataGrid } from "~/components/grid/DataGrid";
+import { DataGrid } from "~/features/grid/DataGrid";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 

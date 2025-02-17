@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
-import { useRepeaterVertexContext } from "~/components/page_attr_render/context/PageAttrContext";
-import { getCollection } from "~/components/page_attr_render/utils/getCollection";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
+import { getCollection } from "~/features/page_attr_render/utils/getCollection";
 import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
@@ -10,7 +10,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
-import { usePageRenderContext } from "../../page_attr_render/context/PageRenderContext";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { RepeaterInternal } from "./RepeaterInternal";
 
 export const DataField = (props: {

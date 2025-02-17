@@ -1,9 +1,7 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { Login } from "./auth/Login";
 import { Perm } from "./auth/Perm";
 import { Role } from "./auth/Role";
-import { SignUp } from "./auth/SignUp";
 import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
 import { CompCategory } from "./base/CompCategory";
@@ -41,9 +39,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   Folder: Folder,
   FormCategory: FormCategory,
   GlobalSetting: GlobalSetting,
-  LogIn: Login,
   Page: Page,
-  SignUp: SignUp,
 };
 for (const key in FormMetaData) {
   // @ts-expect-error ignore

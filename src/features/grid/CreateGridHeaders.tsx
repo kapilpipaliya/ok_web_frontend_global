@@ -9,9 +9,9 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { getSelectNameValue } from "~/components/grid/functions/getSelectNameValue";
-import { getTagValue } from "~/components/grid/functions/getTagValue";
-import { QuickEditModal } from "~/components/grid/QuickEditModal";
+import { getSelectNameValue } from "~/features/grid/functions/getSelectNameValue";
+import { getTagValue } from "~/features/grid/functions/getTagValue";
+import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
@@ -19,10 +19,10 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import type { DataGridState } from "./DataGridContext";
 
-import { selectedValue } from "../fields/utils/selectedValue";
-import { STYLES } from "../styled/constants/styles";
-import { IconButton } from "../styled/IconButton";
-import { TooltipWrapper } from "../styled/TooltipWrapper";
+import { selectedValue } from "../../components/fields/utils/selectedValue";
+import { STYLES } from "../../components/styled/constants/styles";
+import { IconButton } from "../../components/styled/IconButton";
+import { TooltipWrapper } from "../../components/styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
 
 function ImageWrapper(props: { alt?: string; class?: string; src: string }) {

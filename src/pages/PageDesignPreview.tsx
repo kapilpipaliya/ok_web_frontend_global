@@ -2,7 +2,7 @@ import { createSignal, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { PageView } from "~/components/page_attr_render/PageView";
+import { PageView } from "~/features/page_attr_render/PageView";
 import {
   DesignerFormIdContext,
   DesignerLayoutStoreContext,

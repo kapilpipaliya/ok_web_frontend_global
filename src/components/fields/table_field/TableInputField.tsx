@@ -14,9 +14,9 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
-import { AddNewButton } from "~/components/grid/AddNewButton";
-import { usePageRenderContext } from "~/components/page_attr_render/context/PageRenderContext";
-import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
+import { AddNewButton } from "~/features/grid/AddNewButton";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
 import { STYLES } from "~/components/styled/constants/styles";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";

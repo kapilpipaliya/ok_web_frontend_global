@@ -1,13 +1,19 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import type { SMTPSettings } from "~/lib/email/types";
-
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { sendTestEmail } from "~/lib/email/sendTestEmail";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
+
+export interface SMTPSettings {
+  fromEmail: string;
+  smtpHost: string;
+  smtpPassword: string;
+  smtpPort: number;
+  smtpUsername: string;
+}
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);

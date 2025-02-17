@@ -1,8 +1,8 @@
 import { createMemo, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { getDataVertex } from "~/components/page_attr_render/utils/getDataVertex";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
   PreviewContext,
@@ -11,9 +11,9 @@ import {
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
-import type { FormStoreObject } from "../form/context/FormContext";
+import type { FormStoreObject } from "../../components/form/context/FormContext";
 
-import { getComponentDefaultValues } from "../fields/component/functions/getComponentDefaultValues";
+import { getComponentDefaultValues } from "../../components/fields/component/functions/getComponentDefaultValues";
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,

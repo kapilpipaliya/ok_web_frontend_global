@@ -3,7 +3,7 @@ import { createStore } from "solid-js/store";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { InitialPermissions } from "~/components/page_attr_render/InitialPermissions";
+import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 
 export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
 

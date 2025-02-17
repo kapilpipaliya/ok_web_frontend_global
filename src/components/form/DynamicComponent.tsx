@@ -43,16 +43,16 @@ import { Label } from "../css_properties/components/fields/Label";
 import { cssStateToString } from "../css_properties/utils/cssStateToString";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
-import { useRepeaterVertexContext } from "../page_attr_render/context/PageAttrContext";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
-} from "../page_attr_render/context/PageRenderContext";
-import { PageAttrRender } from "../page_attr_render/PageAttrRender";
+} from "~/features/page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
   getConfiguredPermissions,
   hasPermissions,
-} from "../page_attr_render/permissions";
+} from "~/features/page_attr_render/permissions";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";

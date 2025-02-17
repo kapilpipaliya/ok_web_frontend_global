@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { Match, Switch } from "solid-js";
 
-import { DataGrid } from "~/components/grid/DataGrid";
+import { DataGrid } from "~/features/grid/DataGrid";
 import FileManager from "~/features/file_manager/FileManager";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 

@@ -1,10 +1,10 @@
 import type { CellContext } from "@tanstack/solid-table";
 
-import type { DataGridStore } from "~/components/grid/DataGridContext";
+import type { DataGridStore } from "~/features/grid/DataGridContext";
 import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DataGrid } from "~/components/grid/DataGrid";
+import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 

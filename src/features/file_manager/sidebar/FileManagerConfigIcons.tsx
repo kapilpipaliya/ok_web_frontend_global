@@ -3,7 +3,7 @@ import { createStore } from "solid-js/store";
 
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { QuickEditModal } from "~/components/grid/QuickEditModal";
+import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";

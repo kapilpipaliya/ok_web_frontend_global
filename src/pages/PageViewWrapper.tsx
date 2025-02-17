@@ -25,11 +25,11 @@ import {
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { getFormData } from "~/components/form/functions/getFormData";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
-import { PageView } from "~/components/page_attr_render/PageView";
+import { PageView } from "~/features/page_attr_render/PageView";
 import {
   getConfiguredPermissions,
   hasPermissions,
-} from "~/components/page_attr_render/permissions";
+} from "~/features/page_attr_render/permissions";
 import { SiteTitle } from "~/components/SiteTitle";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";

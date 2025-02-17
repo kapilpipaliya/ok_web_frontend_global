@@ -4,7 +4,7 @@ import { useParams } from "@solidjs/router";
 import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
-import type { DataGridStore } from "~/components/grid/DataGridContext";
+import type { DataGridStore } from "~/features/grid/DataGridContext";
 import type { MongoFilter } from "~/cypher/get/evaluate/mongoToCypher";
 
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";

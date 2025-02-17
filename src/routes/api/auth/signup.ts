@@ -28,6 +28,7 @@ export async function POST({ request }: APIEvent) {
     const user = await handleSignup(data, tx, subDomain);
 
     if (user?.id) {
+      // TODO: do not send duplicate email, use mhtml email only. TEST the confirmation email is working.
       await sendConfirmationEmail(data.email, data.username, request);
     }
 

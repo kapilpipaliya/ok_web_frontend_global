@@ -2,7 +2,7 @@ import type { Setter } from "solid-js";
 
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import { CustomModal } from "../styled/CustomModal";
+import { CustomModal } from "../../components/styled/CustomModal";
 
 export const QuickEditModal = (p: {
   disabled?: boolean;
