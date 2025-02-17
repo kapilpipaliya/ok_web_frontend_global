@@ -7,7 +7,6 @@ export async function resetPasswordCall(passwordData: any, profileData: any) {
   return await postAPI(API.profileUrl, {
     currentPassword: passwordData.currentPassword,
     newPassword: passwordData.newPassword,
-    panel: "password",
     username: profileData.username,
   });
 }

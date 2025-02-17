@@ -1,6 +1,5 @@
 Follow Guidelines:
 - write own components and documentation
-- support for custom condition in rules.
 
 Bugs:
 - Drag Over is not as fast as pineGrow
@@ -10,15 +9,10 @@ Bugs:
 - The selcted component menu and hover menu should be different color.
 -     "padding": "0.5rem 1rem", not working.
 
-
 Feature:
-- save and load Chat History
-
 
 -Improve:
 - remove genericInputComponents
-- SiteTitle should be from global state, find all the place where 'EasyFormForge' is hardcoded and replace it with global state.
-- Make the email SMTP configured from global state.
 - fix fns isnt callable from props
 
 Make documentation like https://cim.refined.site/space/FAQ/1086955297/How+to+Configure+and+Create+User+Section
@@ -26,21 +20,6 @@ Make documentation like https://cim.refined.site/space/FAQ/1086955297/How+to+Con
 
 Remember to add appropriate indexes to the Neo4j database for the Token nodes if you expect high volume:
 CREATE INDEX token_hashed_token FOR (t:Token) ON (t.hashedToken);
-
-fix warnings when deno install:
-Warning The following packages are deprecated:
-┠─ npm:@eslint/js@10.0.0 (This version should not be used.)
-┠─ npm:glob@7.2.3 (Glob versions prior to v9 are no longer supported)
-┖─ npm:inflight@1.0.6 (This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.)
-Warning The following packages contained npm lifecycle scripts (preinstall/install/postinstall) that were not executed:
-┠─ npm:@biomejs/biome@1.9.4
-┠─ npm:@parcel/watcher@2.5.1
-┠─ npm:core-js@3.40.0
-┃
-┠─ This may cause the packages to not work correctly.
-┖─ To run lifecycle scripts, use the `--allow-scripts` flag with `deno install`:
-   deno install --allow-scripts=npm:@biomejs/biome@1.9.4,npm:@parcel/watcher@2.5.1,npm:core-js@3.40.0
-
 
 Optional tasks:
 - Contact us form convert to FormSchema.
