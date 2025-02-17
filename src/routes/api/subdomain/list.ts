@@ -1,28 +1,20 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Node } from "neo4j-driver";
 
+import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
-  const user = await getUserFromSession(request);
-
-  if (!user?.P?.email) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 401,
-      },
-    );
-  }
-
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
+    const user = await getUserFromSession(request);
+    if (!user?.P?.email) {
+      throw new APIError("Unauthorized", 401);
+    }
+
     // Get subdomains for current user with their latest activity
     const result = await dbSession.run(
       `
@@ -65,16 +57,7 @@ export async function GET({ request }: APIEvent) {
       },
     );
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

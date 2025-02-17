@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 
 export async function POST({ request }: APIEvent) {
@@ -16,12 +17,13 @@ export async function POST({ request }: APIEvent) {
     const user = userResult.records[0]?.get("u").properties;
 
     if (!user) {
-      throw new Error("User not found");
+      throw new APIError("User not found", 404);
     }
 
     if (user.isSuper) {
-      throw new Error(
+      throw new APIError(
         "Super user password changes not allowed through this interface",
+        403
       );
     }
 
@@ -32,7 +34,7 @@ export async function POST({ request }: APIEvent) {
       user.salt,
     );
     if (!isValidPassword) {
-      throw new Error("Current password is incorrect");
+      throw new APIError("Current password is incorrect", 401);
     }
 
     // Hash new password
@@ -51,16 +53,7 @@ export async function POST({ request }: APIEvent) {
       status: 200,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

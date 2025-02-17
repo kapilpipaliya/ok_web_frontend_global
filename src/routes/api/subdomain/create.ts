@@ -6,13 +6,14 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
-  const { domain, key } = await request.json();
-  const { dbSession } = await getDBSessionForSubdomain(request);
-
   try {
+    const { domain, key } = await request.json();
+    const { dbSession } = await getDBSessionForSubdomain(request);
+
     const user = await validateUser(
       (await getUserFromSession(request))?.P.email,
       dbSession,
@@ -37,19 +38,7 @@ export async function POST({ request }: APIEvent) {
 
     return { subdomain: newSubdomain, success: true };
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status:
-          error instanceof Error && error.message === "Unauthorized"
-            ? 401
-            : 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
@@ -65,7 +54,7 @@ async function checkExistingDomain(
     { key },
   );
   if (existingKey.records.length > 0) {
-    throw new Error("Subdomain with this key already exists");
+    throw new APIError("Subdomain with this key already exists", 400);
   }
 
   const existingDomain = await dbSession.run(
@@ -73,7 +62,7 @@ async function checkExistingDomain(
     { domain },
   );
   if (existingDomain.records.length > 0) {
-    throw new Error("Domain name is already taken");
+    throw new APIError("Domain name is already taken", 400);
   }
 }
 
@@ -109,11 +98,11 @@ async function createUserSubdomainRelation(
 
 async function validateUser(email: null | string, dbSession: Session) {
   if (!email) {
-    throw new Error("Unauthorized");
+    throw new APIError("Unauthorized", 401);
   }
   const user = await findUserByEmailSimple(dbSession, email);
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new APIError("Unauthorized", 401);
   }
   return user;
 }

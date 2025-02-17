@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function POST({ request }: APIEvent) {
   const { profileImage, uuid } = await request.json();
@@ -8,7 +9,7 @@ export async function POST({ request }: APIEvent) {
 
   try {
     if (!profileImage) {
-      throw new Error("Profile image is required");
+      throw new APIError("Profile image is required", 400);
     }
 
     // First check if the relationship already exists
@@ -49,17 +50,14 @@ export async function POST({ request }: APIEvent) {
     );
 
     if (!(result.records[0]?.get("u") && result.records[0]?.get("f"))) {
-      throw new Error("User or file not found");
+      throw new APIError("User or file not found", 404);
     }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      return new Response(error.message, { status: 500 });
-    }
-    return new Response("An unknown error occurred", { status: 500 });
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

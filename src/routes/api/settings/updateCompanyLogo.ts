@@ -1,14 +1,15 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 
 export async function POST({ request }: APIEvent) {
-  const { logoImage } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
+    const { logoImage } = await request.json();
     if (!logoImage) {
-      throw new Error("Company logo is required");
+      throw new APIError("Company logo is required", 400);
     }
 
     // First ensure GlobalSetting exists
@@ -64,17 +65,14 @@ export async function POST({ request }: APIEvent) {
     );
 
     if (!(result.records[0]?.get("g") && result.records[0]?.get("f"))) {
-      throw new Error("GlobalSetting or file not found");
+      throw new APIError("GlobalSetting or file not found", 404);
     }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      return new Response(error.message, { status: 500 });
-    }
-    return new Response("An unknown error occurred", { status: 500 });
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

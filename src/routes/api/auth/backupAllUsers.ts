@@ -6,6 +6,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/driver";
 import { getSubDomain } from "~/server/session/getSubDomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();
@@ -14,8 +15,7 @@ export async function GET({ request }: APIEvent) {
   try {
     return saveGraphToCypherQL();
   } catch (error) {
-    console.error("Failed to backup all users", error);
-    return new Response("Internal Server Error", { status: 500 });
+    return handleAPIError(error);
   }
 }
 
@@ -28,7 +28,7 @@ export async function saveGraphToCypherQL() {
     const result = await dbSession.run(query);
 
     if (result.records.length === 0) {
-      throw new Error("No nodes or relationships found in the database.");
+      throw new APIError("No nodes or relationships found in the database.", 404);
     }
 
     const nodes = new Set<Node>();
@@ -70,7 +70,7 @@ export async function saveGraphToCypherQL() {
       );
     });
   } catch (error) {
-    console.error("Error saving graph to CypherQL:", error);
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

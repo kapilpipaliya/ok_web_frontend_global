@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 
@@ -12,13 +13,7 @@ export async function GET({ request }: APIEvent) {
     const token = url.searchParams.get("token");
 
     if (!token) {
-      return new Response(
-        JSON.stringify({ error: "Invalid or missing token" }),
-        {
-          headers: { "Content-Type": "application/json" },
-          status: 400,
-        },
-      );
+      throw new APIError("Invalid or missing token", 400);
     }
 
     // Validate and consume the token
@@ -53,16 +48,7 @@ export async function GET({ request }: APIEvent) {
       status: 302,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

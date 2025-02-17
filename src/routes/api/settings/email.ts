@@ -1,30 +1,23 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
-  const isAdmin = await checkAdminRole(request);
-
-  if (!isAdmin) {
-    return new Response(
-      JSON.stringify({
-        error: "Unauthorized. Admin access required.",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 403,
-      },
-    );
-  }
-
   const { dbSession } = await getDBSessionForSubdomain(request);
-  const settings = await request.json();
-  const user = await getUserFromSession(request);
 
   try {
+    const isAdmin = await checkAdminRole(request);
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
+
+    const settings = await request.json();
+    const user = await getUserFromSession(request);
+
     // Test email sending with the new settings
     // TODO: temporary comment out
     // await sendEmail(settings.testEmail, {
@@ -76,16 +69,7 @@ export async function POST({ request }: APIEvent) {
       status: 200,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

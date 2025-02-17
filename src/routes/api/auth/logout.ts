@@ -1,12 +1,13 @@
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { logout } from "../../../server/session/logout";
 
 export async function POST() {
   try {
     await logout();
     return {
-      message: "Logout successfully",
+      message: "Logout successful",
     };
-  } catch (_error) {
-    return new Response("Internal Server Error", { status: 500 });
+  } catch (error) {
+    return handleAPIError(new APIError("Failed to logout", 500));
   }
 }

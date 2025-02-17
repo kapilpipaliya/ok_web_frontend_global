@@ -63,8 +63,9 @@ async function authenticateSuperUser(superUser: Vertex, password: string) {
     });
 
     if (superDbResult.records.length === 0) {
-      throw new Error(
+      throw new APIError(
         `Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`,
+        401
       );
     }
     const user = convertNodeToJson(superDbResult.records[0].get("u"));
@@ -86,13 +87,13 @@ async function authenticateUser(
     const result = await dbSession.run(query, { emailOrUsername });
 
     if (result.records.length === 0) {
-      throw new Error("Not Authorized Email or Username.");
+      throw new APIError("Not Authorized Email or Username.", 401);
     }
 
     const user = convertNodeToJson(result.records[0].get("u"));
 
     if (!user.P.emailConfirmed) {
-      throw new Error("Please confirm your email address before logging in.");
+      throw new APIError("Please confirm your email address before logging in.", 403);
     }
 
     // when system user, check password from system db
@@ -108,7 +109,7 @@ async function authenticateUser(
 async function comparePassword(user: Vertex, password: string) {
   const isValid = await verifyPassword(password, user.P.password, user.P.salt);
   if (!isValid) {
-    throw new Error("Unauthorized: Incorrect email, username, or password.");
+    throw new APIError("Unauthorized: Incorrect email, username, or password.", 401);
   }
 
   return user;

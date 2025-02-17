@@ -8,6 +8,7 @@ import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   try {
@@ -44,16 +45,7 @@ export async function GET({ request }: APIEvent) {
       status: 302,
     });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   }
 }
 
@@ -84,7 +76,7 @@ function validateRequest(url: URL) {
   const targetDomain = url.searchParams.get("domain");
 
   if (!(targetSubdomain || targetDomain)) {
-    throw new Error("Missing subdomain or domain parameter");
+    throw new APIError("Missing subdomain or domain parameter", 400);
   }
 
   return { targetDomain, targetSubdomain };
@@ -92,7 +84,7 @@ function validateRequest(url: URL) {
 
 function validateUser(user?: null | Vertex) {
   if (!user || !(user.P.email && user.P.username && user.P.uuid)) {
-    throw new Error("Missing user data");
+    throw new APIError("Missing user data", 401);
   }
   return user;
 }
