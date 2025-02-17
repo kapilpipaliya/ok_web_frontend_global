@@ -11,8 +11,7 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { sendEmail } from "~/server/email/sendEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { LABEL_CLASS } from "./constants/constant";
-import { FORM_CLASS, FORM_GRID_CLASS } from "./constants/constant";
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 
 export function ForgotPasswordForm() {
   const [graph, setGraph] = useGraph();
@@ -83,7 +82,7 @@ export function ForgotPasswordForm() {
               as: "div",
               attributes: [
                 {
-                  class: LABEL_CLASS,
+                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
                   componentName: "Text",
                   text: "Email",
                 },
@@ -94,7 +93,7 @@ export function ForgotPasswordForm() {
                   validation: { required: true },
                 },
               ],
-              class: FORM_GRID_CLASS,
+              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
               componentName: "Box",
             },
             {
@@ -118,7 +117,7 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
           ],
-          class: FORM_CLASS,
+          class: SETTINGS_CONSTANTS.FORM_CLASS,
           componentName: "Box",
         };
 
@@ -130,7 +129,7 @@ export function ForgotPasswordForm() {
               as: "div",
               attributes: [
                 {
-                  class: LABEL_CLASS,
+                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
                   componentName: "Text",
                   text: "One Time Password (OTP)",
                 },
@@ -144,7 +143,7 @@ export function ForgotPasswordForm() {
                   validation: { required: true },
                 },
               ],
-              class: FORM_GRID_CLASS,
+              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
               componentName: "Box",
             },
             {
@@ -168,7 +167,7 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
           ],
-          class: FORM_CLASS,
+          class: SETTINGS_CONSTANTS.FORM_CLASS,
           componentName: "Box",
         };
 
@@ -180,7 +179,7 @@ export function ForgotPasswordForm() {
               as: "div",
               attributes: [
                 {
-                  class: LABEL_CLASS,
+                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
                   componentName: "Text",
                   text: "New Password",
                 },
@@ -222,14 +221,14 @@ export function ForgotPasswordForm() {
                   componentName: "Box",
                 },
               ],
-              class: FORM_GRID_CLASS,
+              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
               componentName: "Box",
             },
             {
               as: "div",
               attributes: [
                 {
-                  class: LABEL_CLASS,
+                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
                   componentName: "Text",
                   text: "Confirm Password",
                 },
@@ -273,7 +272,7 @@ export function ForgotPasswordForm() {
                   componentName: "Box",
                 },
               ],
-              class: FORM_GRID_CLASS,
+              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
               componentName: "Box",
             },
             {
@@ -297,7 +296,7 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
           ],
-          class: FORM_CLASS,
+          class: SETTINGS_CONSTANTS.FORM_CLASS,
           componentName: "Box",
         };
     }

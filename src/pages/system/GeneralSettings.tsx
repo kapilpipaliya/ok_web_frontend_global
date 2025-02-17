@@ -14,11 +14,9 @@ import {
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function GeneralSettings() {
-  const GRID_ITEM_CLASS =
-    "grid grid-template-columns:200px|400px ai:center gap:8";
-  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -43,7 +41,7 @@ export function GeneralSettings() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Application Name",
           },
@@ -54,14 +52,14 @@ export function GeneralSettings() {
             placeholder: "Enter application name",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Default Language",
           },
@@ -76,7 +74,7 @@ export function GeneralSettings() {
             ],
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
@@ -84,8 +82,7 @@ export function GeneralSettings() {
         attributes: [
           {
             as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
               onClick: async () => {
@@ -108,7 +105,7 @@ export function GeneralSettings() {
         componentName: "Box",
       },
     ],
-    class: "p:10 grid gap:10",
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   };
 
@@ -154,7 +151,7 @@ export function GeneralSettings() {
         form={{ attributes: [form], key: "GeneralSettings" }}
         formDataId={formDataId}
       />
-      <hr class="my-8 border-t border-gray-200" />
+      <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
       <CompanyLogoSettings />
     </div>
   );

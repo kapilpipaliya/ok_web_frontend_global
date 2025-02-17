@@ -12,11 +12,9 @@ import {
 } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 
 export function CompanySettings() {
-  const GRID_ITEM_CLASS =
-    "grid grid-template-columns:200px|400px ai:center gap:8";
-  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -60,7 +58,7 @@ export function CompanySettings() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Company Name",
           },
@@ -71,14 +69,14 @@ export function CompanySettings() {
             placeholder: "Enter company name",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Address",
           },
@@ -89,14 +87,14 @@ export function CompanySettings() {
             placeholder: "Enter company address",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Contact Email",
           },
@@ -108,14 +106,14 @@ export function CompanySettings() {
             type: "email",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Phone",
           },
@@ -126,7 +124,7 @@ export function CompanySettings() {
             placeholder: "Enter phone number",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
       },
       {
@@ -134,8 +132,7 @@ export function CompanySettings() {
         attributes: [
           {
             as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
               onClick: async () => {
@@ -162,7 +159,7 @@ export function CompanySettings() {
         componentName: "Box",
       },
     ],
-    class: "p:10 grid gap:10",
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   };
 

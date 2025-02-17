@@ -14,7 +14,7 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/form/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { FORM_CLASS, FORM_GRID_CLASS, LABEL_CLASS } from "./constants/constant";
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 
 export function SignupForm() {
   const [graph, setGraph] = useGraph();
@@ -98,7 +98,7 @@ export function SignupForm() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Username",
           },
@@ -109,7 +109,7 @@ export function SignupForm() {
             validation: { required: true },
           },
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Email",
           },
@@ -120,7 +120,7 @@ export function SignupForm() {
             validation: { required: true },
           },
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Password",
           },
@@ -159,7 +159,7 @@ export function SignupForm() {
             componentName: "Box",
           },
         ],
-        class: FORM_GRID_CLASS,
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",
       },
       {
@@ -204,7 +204,7 @@ export function SignupForm() {
         componentName: "Box",
       },
     ],
-    class: FORM_CLASS,
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   };
 

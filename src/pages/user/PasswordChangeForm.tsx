@@ -14,10 +14,7 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-
-const GRID_ITEM_CLASS =
-  "grid grid-template-columns:200px|400px ai:center gap:8";
-const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function PasswordChangeForm() {
   const [graph, setGraph] = useGraph();
@@ -92,7 +89,7 @@ export function PasswordChangeForm() {
         componentName: "Box",
       },
     ],
-    class: "p:10 grid gap:10",
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   } as FieldAttribute;
 
@@ -114,7 +111,7 @@ function createPasswordField(
     as: "div",
     attributes: [
       {
-        class: LABEL_CLASS,
+        class: SETTINGS_CONSTANTS.LABEL_CLASS,
         componentName: "Text",
         text: label,
       },
@@ -153,7 +150,7 @@ function createPasswordField(
         componentName: "Box",
       },
     ],
-    class: GRID_ITEM_CLASS,
+    class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
     componentName: "Box",
   };
 }

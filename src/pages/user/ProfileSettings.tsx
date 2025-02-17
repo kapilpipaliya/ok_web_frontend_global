@@ -17,11 +17,9 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ProfileSettings() {
-  const GRID_ITEM_CLASS =
-    "grid grid-template-columns:150px|500px ai:center gap:8";
-  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -46,7 +44,7 @@ export function ProfileSettings() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Username",
             validation: { required: true },
@@ -59,14 +57,14 @@ export function ProfileSettings() {
             validation: { required: true },
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
         componentName: "Box",
       },
       {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             key: "emailLabel",
             text: "Email Address",
@@ -80,7 +78,7 @@ export function ProfileSettings() {
             validation: { required: true }, // TODO: Add email validation
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
         componentName: "Box",
       },
       // {
@@ -111,8 +109,7 @@ export function ProfileSettings() {
         attributes: [
           {
             as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
               onClick: async () => {
@@ -163,7 +160,7 @@ export function ProfileSettings() {
         componentName: "Box",
       },
     ],
-    class: "p:10 grid gap:10",
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   } as FieldAttribute;
 
@@ -202,7 +199,7 @@ export function ProfileSettings() {
         form={{ attributes: [form], key: "Profile" }}
         formDataId={formDataId}
       />
-      <hr class="my-8 border-t border-gray-200" />
+      <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
       <ProfileImageSettings />
     </div>
   );

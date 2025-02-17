@@ -16,10 +16,9 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { defaultLogo } from "~/pages/admin_layout/constants/constant";
 
 import { SchemaRenderer } from "../SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+
 export function CompanyLogoSettings() {
-  const GRID_ITEM_CLASS =
-    "grid grid-template-columns:150px|500px ai:center gap:8";
-  const LABEL_CLASS = "color:dimgrey font-weight:500 font:15";
   const [openDialog, setOpenDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -108,7 +107,7 @@ export function CompanyLogoSettings() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Company Logo",
           },
@@ -131,8 +130,7 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            class:
-              "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:auto",
+            class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
             componentName: "Box",
             props: () => ({
               onClick: () => setOpenDialog(true),
@@ -141,8 +139,7 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
               onClick: onSave,
@@ -150,11 +147,11 @@ export function CompanyLogoSettings() {
             text: "Save Changes",
           },
         ],
-        class: GRID_ITEM_CLASS,
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
         componentName: "Box",
       },
     ],
-    class: "p:10 grid gap:10",
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   };
 

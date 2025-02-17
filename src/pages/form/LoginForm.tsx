@@ -14,7 +14,7 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/form/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { FORM_CLASS, FORM_GRID_CLASS, LABEL_CLASS } from "./constants/constant";
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 
 export function LoginForm() {
   const [graph, setGraph] = useGraph();
@@ -97,7 +97,7 @@ export function LoginForm() {
         as: "div",
         attributes: [
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Username/Email",
           },
@@ -108,7 +108,7 @@ export function LoginForm() {
             validation: { required: true },
           },
           {
-            class: LABEL_CLASS,
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
             text: "Password",
           },
@@ -147,7 +147,7 @@ export function LoginForm() {
             componentName: "Box",
           },
         ],
-        class: FORM_GRID_CLASS,
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",
       },
       {
@@ -208,7 +208,7 @@ export function LoginForm() {
         componentName: "Box",
       },
     ],
-    class: FORM_CLASS,
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
   };
 
