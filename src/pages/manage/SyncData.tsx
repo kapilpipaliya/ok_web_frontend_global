@@ -7,7 +7,7 @@ import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
-import { profileImage } from "../admin_layout/constants/constant";
+import { profileImage } from "../constants/constant";
 
 const transferNodes = [{ key: "Component", value: "Comp" }];
 

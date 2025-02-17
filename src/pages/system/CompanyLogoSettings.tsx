@@ -13,7 +13,7 @@ import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { defaultLogo } from "~/pages/admin_layout/constants/constant";
+import { defaultLogo } from "~/pages/constants/constant";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";

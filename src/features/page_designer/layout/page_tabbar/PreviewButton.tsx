@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web";
 import { useZIndex, ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import { PreviewPage } from "~/components/styled/PreviewPage";
-import { headerIconButtonClass } from "~/pages/admin_layout/constants/constant";
+import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import { IFramePreview } from "../IFramePreview";
 

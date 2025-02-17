@@ -6,7 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import {
   headerIconButtonClass,
   toolBarClass,
-} from "~/pages/admin_layout/constants/constant";
+} from "~/pages/constants/constant";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { PreviewButton } from "../page_tabbar/PreviewButton";

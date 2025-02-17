@@ -3,7 +3,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import {
   defaultLogo,
   profileImage,
-} from "~/pages/admin_layout/constants/constant";
+} from "~/pages/constants/constant";
 
 import type { GraphInterface, Vertex } from "../../graph";
 

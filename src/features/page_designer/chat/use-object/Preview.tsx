@@ -17,7 +17,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import {
   headerIconButtonClass,
   toolBarClass,
-} from "~/pages/admin_layout/constants/constant";
+} from "~/pages/constants/constant";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import {

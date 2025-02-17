@@ -1,5 +1,5 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/admin_layout/constants/constant";
+import { headerIconButtonClass } from "~/pages/constants/constant";
 
 export function RefreshButton(props: { handleRefresh: () => void }) {
   return (
