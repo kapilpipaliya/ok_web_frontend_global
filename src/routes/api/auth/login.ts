@@ -7,22 +7,16 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
 import { updateSession } from "~/server/session/updateSession";
 
+import { createActivityLog } from "../activity/createActivityLog";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
-    return new Response(
-      JSON.stringify({
-        error: "Invalid content type. Expected application/json",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 415,
-      },
-    );
+    throw new APIError("Invalid content type. Expected application/json", 415);
   }
 
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -31,34 +25,27 @@ export async function POST({ request }: APIEvent) {
     const { email, password } = await request.json();
 
     if (!(email && password)) {
-      return new Response(
-        JSON.stringify({
-          error: "Email or password is missing",
-        }),
-        {
-          headers: { "Content-Type": "application/json" },
-          status: 400,
-        },
-      );
+      throw new APIError("Email or password is missing", 400);
     }
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
     await updateSession(user);
 
+    await createActivityLog(
+      dbSession,
+      'login',
+      'User',
+      user.P.uuid,
+      user.P.email,
+      'User logged in successfully'
+    );
+
     delete user.P.password;
-    updateRedirectUrl(user, subDomain);
+    updateRedirectUrl(user, subDomain!);
 
     return user;
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
