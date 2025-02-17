@@ -1,9 +1,9 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
+import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 
 import "~/base.css";
-import { createSignal, Show, Suspense } from "solid-js";
+import { Show, Suspense } from "solid-js";
 
 import { createAppState } from "~/createAppState";
 
@@ -16,12 +16,12 @@ import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
-  const loadingSite = createSignal(false);
   const graph = createAppState();
 
   return (
     <Router
       root={(props) => {
+        const location = useLocation();
         return (
           <CSSRuntimeProvider
             config={themeConfig(getGlobalThemeVertex(graph[0]))}
@@ -35,10 +35,8 @@ export default function App() {
                   {props.children}
                   {/* </ErrorBoundary> */}
                 </Suspense>
-                <Show fallback={<Toaster />} when={loadingSite[0]()}>
-                  <div class="fixed flex ai:center bg:rgba(0,0,0,0.5) h:100% jc:center left:0 top:0 w:100% z:9999">
-                    <Toaster />
-                  </div>
+                <Show when={!location.pathname.startsWith("/email-templates")}>
+                  <Toaster />
                 </Show>
               </MetaProvider>
             </GraphContext.Provider>

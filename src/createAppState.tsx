@@ -27,7 +27,6 @@ export function createAppState() {
       OUT: {},
       P: {
         activeClickOutside: [],
-        componentIdMap: {},
         globalThemeId: "",
         initialDataFetchError: "",
         isDevelopment: false,

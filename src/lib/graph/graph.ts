@@ -20,7 +20,6 @@ export type EdgeMap = { [key: string]: Edge };
 
 export interface GlobalProperties {
   activeClickOutside: string[];
-  componentIdMap: { [key: string]: string };
   globalThemeId: Id;
   initialDataFetchError: string;
   isDevelopment: boolean;

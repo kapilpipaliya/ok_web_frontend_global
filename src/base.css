@@ -421,6 +421,7 @@ Make elements with the HTML hidden attribute stay hidden by default.
   display: none;
 }
 
+/* https://github.com/elite174/solid-simple-popover/tree/master?tab=readme-ov-file */
 [popover] {
   margin: 0;
   background-color: transparent;
