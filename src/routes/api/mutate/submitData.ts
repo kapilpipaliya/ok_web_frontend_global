@@ -2,23 +2,16 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
-import { handleError } from "../../../lib/handleError";
 import { checkSuperUserAuthorization } from "../../../server/session/checkSuperUserAuthorization";
 
 export async function POST({ request }: APIEvent) {
-  let data;
-  if (request.headers.get("content-type")?.includes("application/json")) {
-    data = await request.json();
-  } else {
-    return new Response(
-      JSON.stringify({
-        error: "Invalid content type. Expected application/json",
-      }),
-      { status: 415 },
-    );
+  if (!request.headers.get("content-type")?.includes("application/json")) {
+    throw new APIError("Invalid content type. Expected application/json", 415);
   }
 
+  const data = await request.json();
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   // - Authorization -
@@ -29,25 +22,24 @@ export async function POST({ request }: APIEvent) {
       true,
     );
     if (authorizationError) {
-      await dbSession.close();
-      return authorizationError;
+      throw new APIError("Authorization failed", 403);
     }
-  } catch (authError) {
-    await dbSession.close();
-    return await handleError("Authorization failed:", authError);
-  }
-  // - End of Authorization -
-
-  const tx = dbSession.beginTransaction();
-  try {
-    const res = await mutateData(data, tx);
-    await tx.commit();
-    return res;
+    // - End of Authorization -
+    const tx = dbSession.beginTransaction();
+    try {
+      const res = await mutateData(data, tx);
+      await tx.commit();
+      return res;
+    } catch (error: unknown) {
+      await tx.rollback();
+      throw error;
+    } finally {
+      await tx.close();
+    }
   } catch (error: unknown) {
-    await tx.rollback();
-    return await handleError("Transaction failed:", error);
+    // "Transaction failed: "
+    return handleAPIError(error);
   } finally {
-    await tx.close();
     await dbSession.close();
   }
 }

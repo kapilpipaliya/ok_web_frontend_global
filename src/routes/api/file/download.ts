@@ -4,6 +4,7 @@ import type { HTTPEvent } from "vinxi/runtime/http-types";
 import { getQuery } from "vinxi/http";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { downloadFile } from "~/server/upload/downloadFile";
 
 export async function GET({ request }: APIEvent, event: HTTPEvent) {
@@ -11,15 +12,14 @@ export async function GET({ request }: APIEvent, event: HTTPEvent) {
   const fileId = query.fileId;
   const { dbSession } = await getDBSessionForSubdomain(request);
 
-  if (!fileId) {
-    return new Response(JSON.stringify({ error: "File ID is required" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 400,
-    });
-  }
-
   try {
+    if (!fileId) {
+      throw new APIError("File ID is required", 400);
+    }
+
     return await downloadFile(fileId as string, dbSession);
+  } catch (error) {
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

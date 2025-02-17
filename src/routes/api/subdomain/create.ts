@@ -3,11 +3,11 @@ import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
-import { createActivityLog } from "../activity/createActivityLog";
 export async function POST({ request }: APIEvent) {
   const { domain, key } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);

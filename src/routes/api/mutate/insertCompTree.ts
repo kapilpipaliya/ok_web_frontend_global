@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { insertComponents } from "~/cypher/mutate/signup/insertComponents";
 
@@ -9,20 +9,15 @@ export async function GET({ request }: APIEvent) {
     const response = await insertComponents(dbSession);
 
     if (!response.success) {
-      return new Response(
-        JSON.stringify({
-          error: "Failed to insert component tree",
-        }),
-        { status: 500 },
-      );
+      throw new APIError("Failed to insert component tree", 500);
     }
 
-    return { success: true };
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error: unknown) {
-    return new Response(
-      error instanceof Error ? error.message : "Unknown error",
-      { status: 500 },
-    );
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

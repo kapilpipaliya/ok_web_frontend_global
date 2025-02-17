@@ -3,8 +3,8 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import type { SMTPSettings } from "~/lib/email/types";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { sendTestEmail } from "~/lib/email/sendTestEmail";
-import { createActivityLog } from "~/routes/api/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 

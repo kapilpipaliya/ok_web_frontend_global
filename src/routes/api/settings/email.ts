@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { createActivityLog } from "~/routes/api/activity/createActivityLog";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 

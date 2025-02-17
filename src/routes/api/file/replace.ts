@@ -5,6 +5,7 @@ import { readMultipartFormData } from "vinxi/http";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { replaceFiles } from "~/server/upload/replaceFiles";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function PUT({ request }: APIEvent, event: HTTPEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -13,9 +14,11 @@ export async function PUT({ request }: APIEvent, event: HTTPEvent) {
     const data = await readMultipartFormData(event);
 
     if (!data || data.length === 0) {
-      return { error: "No file data available" };
+      throw new APIError("No file data available", 400);
     }
     return await replaceFiles(request, data, dbSession, subDomain);
+  } catch (error) {
+    return handleAPIError(error);
   } finally {
     await dbSession.close();
   }

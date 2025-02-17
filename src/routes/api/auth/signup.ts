@@ -1,41 +1,42 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Transaction } from "neo4j-driver";
 
+import type { SignupRequestData } from "~/cypher/mutate/signup/SignupRequestData";
+
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
+import { signupUser } from "~/cypher/mutate/signup/signupUser";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { updateSession } from "~/server/session/updateSession";
 
-import type { SignupRequestData } from "../../../cypher/mutate/signup/SignupRequestData";
-
-import { signupAdmin } from "../../../cypher/mutate/signup/signupAdmin";
-import { signupUser } from "../../../cypher/mutate/signup/signupUser";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
-  if (request.headers.get("content-type")?.includes("application/json")) {
-    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  if (!request.headers.get("content-type")?.includes("application/json")) {
+    throw new APIError("Invalid content type. Expected application/json", 415);
+  }
+
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const tx = dbSession.beginTransaction();
+
+  try {
     const data: SignupRequestData = await request.json();
-    const tx = dbSession.beginTransaction();
-    try {
-      const user = await handleSignup(data, tx, subDomain);
+    const user = await handleSignup(data, tx, subDomain);
 
-      // Send confirmation email
-      if (user?.id) {
-        await sendConfirmationEmail(data.email, data.username, request);
-      }
-
-      return user;
-    } finally {
-      await dbSession.close();
+    if (user?.id) {
+      await sendConfirmationEmail(data.email, data.username, request);
     }
-  } else {
-    return new Response(
-      JSON.stringify({
-        error: "Invalid content type. Expected application/json",
-      }),
-      { status: 415 },
-    );
+
+    await tx.commit();
+    return user;
+  } catch (error) {
+    await tx.rollback();
+    return handleAPIError(error);
+  } finally {
+    await tx.close();
+    await dbSession.close();
   }
 }
 

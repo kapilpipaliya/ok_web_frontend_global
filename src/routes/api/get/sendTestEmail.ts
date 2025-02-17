@@ -6,7 +6,7 @@ import { encodeUserData, UserData } from "~/lib/auth/userDataEncoder";
 import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
-// New function to handle sending a test email
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   // const { email } = await request.json(); // Extract email from request body
@@ -28,28 +28,26 @@ export async function GET({ request }: APIEvent) {
       secureToken,
       subDomain,
     });
-    if (result.success) {
-      const fileVertex = result.result![0];
-      // await sendEmailWithAttachment({
-      //   emailSubject: "Test Email With Attachment",
-      //   emailTo: "kapil.pipaliya@gmail.com",
-      //   fileVertex,
-      //   subDomain
-      // });
-      return new Response("Test email sent successfully" + JSON.stringify(result.result), {
-        // headers: { "Content-Type": "application/json" },
-        status: 200,
-      });
-    } else {
-      return new Response(`Internal Server Error: ${result.error}`, {
-        // headers: { "Content-Type": "application/json" },
-        status: 500,
-      });
+    
+    if (!result.success) {
+      throw new APIError(result.error || 'Failed to render page', 500);
     }
-  } catch (error: any) {
-    return new Response(`Internal Server Error: ${error.message}`, {
-      // headers: { "Content-Type": "application/json" },
-      status: 500,
+
+    const fileVertex = result.result![0];
+    // await sendEmailWithAttachment({
+    //   emailSubject: "Test Email With Attachment",
+    //   emailTo: "kapil.pipaliya@gmail.com",
+    //   fileVertex,
+    //   subDomain
+    // });
+    return new Response(JSON.stringify({ 
+      message: "Test email sent successfully",
+      result: result.result 
+    }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
     });
+  } catch (error: unknown) {
+    return handleAPIError(error);
   }
 }

@@ -1,20 +1,21 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { setupSuperUser } from "~/cypher/mutate/manage/setupSuperUser";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   try {
     const { error, status, user } = await setupSuperUser();
 
     if (error) {
-      return new Response(JSON.stringify({ error }), { status });
+      throw new APIError(error, status);
     }
 
-    return new Response(JSON.stringify(user), { status });
+    return new Response(JSON.stringify(user), {
+      headers: { "Content-Type": "application/json" },
+      status,
+    });
   } catch (error: unknown) {
-    return new Response(
-      error instanceof Error ? error.message : "Unknown error",
-      { status: 500 },
-    );
+    return handleAPIError(error);
   }
 }
