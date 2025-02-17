@@ -5,9 +5,9 @@ import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
 import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
-import { CompanySettings } from "../../pages/system/CompanySettings";
-import { EmailSettings } from "../../pages/system/EmailSettings";
-import { GeneralSettings } from "../../pages/system/GeneralSettings";
+import { CompanySettings } from "~/pages/global/CompanySettings";
+import { EmailSettings } from "~/pages/global/EmailSettings";
+import { GeneralSettings } from "~/pages/global/GeneralSettings";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();
