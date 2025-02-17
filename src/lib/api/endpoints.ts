@@ -21,9 +21,9 @@ export const API = {
 
   testEmailSettingsUrl: "/api/settings/email/test",
   updateCompanyLogoUrl: "/api/settings/updateCompanyLogo",
-  updateCompanySettingsUrl: "/api/settings/company",
-  updateEmailSettingsUrl: "/api/settings/email",
-  updateGeneralSettingsUrl: "/api/settings/general",
+  updateCompanySettingsUrl: "/api/settings/company/update",
+  updateEmailSettingsUrl: "/api/settings/email/update",
+  updateGeneralSettingsUrl: "/api/settings/general/update",
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",

@@ -28,7 +28,7 @@ export async function POST({ request }: APIEvent) {
 
     if (checkResult.records.length === 0) {
       // Create new GlobalSetting if none exists
-      const newKey = `global_setting_${Date.now()}`;
+      const newKey = 'Default'; // `global_setting_${Date.now()}`;
       const createResult = await dbSession.run(
         `CREATE (s:GlobalSetting {
           key: $key,

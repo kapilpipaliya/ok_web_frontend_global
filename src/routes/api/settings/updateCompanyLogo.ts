@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -24,7 +24,7 @@ export async function POST({ request }: APIEvent) {
           createdAt: datetime(),
           updatedAt: datetime()
         })`,
-        { key: `global_setting_${Date.now()}` },
+        { key: `Default` },
       );
     }
 
