@@ -32,7 +32,6 @@ export async function POST({ request }: APIEvent) {
     }
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
-    await updateSession(user);
 
     await createActivityLog(
       dbSession,
@@ -42,7 +41,7 @@ export async function POST({ request }: APIEvent) {
       user.P.email,
       'User logged in successfully'
     );
-
+    await updateSession(user);
     delete user.P.password;
     updateRedirectUrl(user, subDomain!);
 
@@ -104,7 +103,6 @@ async function authenticateUser(
   _subDomain: string,
   dbSession: Session,
 ) {
-  try {
     const query =
       "MATCH (u:User) WHERE u.email = $emailOrUsername OR u.username = $emailOrUsername RETURN u";
     const result = await dbSession.run(query, { emailOrUsername });
@@ -124,9 +122,6 @@ async function authenticateUser(
       return await authenticateSuperUser(user, password);
     }
     return comparePassword(user, password);
-  } finally {
-    await dbSession.close();
-  }
 }
 
 async function comparePassword(user: Vertex, password: string) {

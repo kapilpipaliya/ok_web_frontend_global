@@ -128,3 +128,8 @@ FormMetaData.TemplatePage = {
   key: "TemplatePage",
   title: "Templates",
 };
+FormMetaData.EmailTemplate = {
+  attributes: [...FormMetaData.Page.attributes],
+  key: "EmailTemplate",
+  title: "Email Template",
+};

@@ -1,21 +1,21 @@
-import { useSearchParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export default function EmailTemplate() {
   const [searchParams] = useSearchParams();
-  const [graph] = useGraph();
-
+  const params = useParams();
   return (
-    <div>
-      <h1>Email Template</h1>
-      <div>
-        {JSON.stringify(searchParams)}
-      </div>
-      <div>
-        {JSON.stringify(getMemberVertex(graph))}
-      </div>
-    </div>
+    <PageViewWrapper
+      dontConfirmExit={true}
+      hideSaveCancelButton={true}
+      isNoPermissionCheck={true}
+      pageId={""}
+      pageVertexLabel={"EmailTemplate"}
+      pageVertexName={params.template as string}
+    />
+
   );
 } 
