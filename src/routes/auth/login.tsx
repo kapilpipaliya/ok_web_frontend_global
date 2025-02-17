@@ -1,5 +1,5 @@
 import { SiteTitle } from "~/components/SiteTitle";
-import { LoginForm } from "~/pages/form/LoginForm";
+import { LoginForm } from "~/pages/auth/LoginForm";
 
 export default function logIn() {
   return (

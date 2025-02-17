@@ -4,19 +4,19 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import { signInCall } from "~/lib/api/service/user/signInCall";
+import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
-import { handleLoginRedirect } from "~/pages/form/handleLoginRedirect";
+import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
 
-export function LoginForm() {
+export function SignupForm() {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -30,7 +30,7 @@ export function LoginForm() {
     {
       id: formDataId,
       IN: {},
-      L: ["Login"],
+      L: ["Signup"],
       OUT: {},
       P: {},
     },
@@ -39,20 +39,18 @@ export function LoginForm() {
   );
 
   const validateFormData = (formData: any) => {
-    const { email, password } = formData.P;
+    const { email, password, username } = formData.P;
 
-    if (email.includes("@")) {
-      const emailError = validateEmail(email);
-      if (emailError) {
-        showErrorToast("Enter valid email or username");
-        return false;
-      }
-    } else {
-      const usernameError = validateUsername(email);
-      if (usernameError) {
-        showErrorToast("Enter valid email or username");
-        return false;
-      }
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      showErrorToast(usernameError);
+      return false;
+    }
+
+    const emailError = validateEmail(email);
+    if (emailError) {
+      showErrorToast(emailError);
+      return false;
     }
 
     const passwordError = validatePassword(password);
@@ -72,7 +70,7 @@ export function LoginForm() {
       });
 
       await showLoadingToast({
-        loadMessage: "Logging In...",
+        loadMessage: "Registering User...",
         onError: () => {
           mergeVertexProperties(0, globalStoreId, graph, setGraph, {
             isLoadingPage: false,
@@ -84,8 +82,11 @@ export function LoginForm() {
           });
           handleLoginRedirect(value, graph, navigate);
         },
-        promise: signInCall(() => ({ ...formData.P, loginType: "login" })),
-        successMessage: "Logged In Successfully",
+        promise: registerUserCall(() => ({
+          ...formData.P,
+          loginType: "signup",
+        })),
+        successMessage: "Registered Successfully",
       });
     }
   };
@@ -99,7 +100,18 @@ export function LoginForm() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "Username/Email",
+            text: "Username",
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "username",
+            validation: { required: true },
+          },
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "Email",
           },
           {
             class: PROPERTIES.Css.TextField,
@@ -164,7 +176,7 @@ export function LoginForm() {
                 await handleSubmit(formData);
               },
             }),
-            text: "Log In",
+            text: "Sign Up",
           },
         ],
         class: "",
@@ -174,34 +186,18 @@ export function LoginForm() {
         as: "div",
         attributes: [
           {
-            as: "a",
-            class: "color:primary text-decoration:none",
-            componentName: "Box",
-            props: () => ({
-              href: "/auth/forgotPassword",
-            }),
-            text: "Forgot Password?",
-          },
-        ],
-        class: "text-align:center",
-        componentName: "Box",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
             class: "color:grey",
             componentName: "Text",
-            text: "Don't have an account? ",
+            text: "Already have an account? ",
           },
           {
             as: "a",
             class: "color:primary text-decoration:none font-weight:bold",
             componentName: "Box",
             props: () => ({
-              href: "/auth/signup",
+              href: "/auth/login",
             }),
-            text: "Sign Up",
+            text: "Sign In",
           },
         ],
         class: "text-align:center",
@@ -214,7 +210,7 @@ export function LoginForm() {
 
   return (
     <SchemaRenderer
-      form={{ attributes: [wrapFormInCard(form)], key: "Login" }}
+      form={{ attributes: [wrapFormInCard(form)], key: "Signup" }}
       formDataId={formDataId}
     />
   );
