@@ -17,15 +17,25 @@ import {
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { deleteSupportTicketCall } from "~/lib/api/service/support/deleteSupportTicketCall";
-import { getChatsSupportCall } from "~/lib/api/service/support/getChatsSupportCall";
-import { sendChatsSupportCall } from "~/lib/api/service/support/sendChatsSupportCall";
 
 interface SupportTicketSectionProps {
   contactList: any[];
   setContactList: SetStoreFunction<any[]>;
   setIsMainScreenLoad: SetStoreFunction<boolean>;
 }
+
+// export async function sendChatsSupportCall(
+//   parentVertexId: any,
+//   newMessage: any,
+// ) {
+//   return await postAPI(API.profileUrl, {
+//     action: "chat",
+//     newMessage,
+//     panel: "supportTicket",
+//     parentVertexId,
+//     subAction: "send",
+//   });
+// }
 
 // depricated
 export const SupportTicketSection = (
@@ -45,7 +55,13 @@ export const SupportTicketSection = (
       };
 
       try {
-        await sendChatsSupportCall(parentVertexId, newMessage);
+        await postAPI(API.profileUrl, {
+          action: "chat",
+          newMessage,
+          panel: "supportTicket",
+          parentVertexId,
+          subAction: "send",
+        });
         setMessages([...messages(), newMessage]);
         setInputMessage("");
         setTimeout(fakeReply, 1000);
@@ -76,7 +92,12 @@ export const SupportTicketSection = (
     let messageContainer: HTMLDivElement;
 
     const getMessages = async () => {
-      const message = await getChatsSupportCall(props.id);
+      const message = await postAPI(API.profileUrl, {
+        action: "chat",
+        panel: "supportTicket",
+        parentVertexId: props.id,
+        subAction: "get",
+      });
       setMessages(
         message.vertexes.length > 0
           ? message.vertexes.map((v: any) => v.properties)
@@ -217,7 +238,11 @@ export const SupportTicketSection = (
         const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
-      promise: deleteSupportTicketCall(id),
+      promise: postAPI(API.profileUrl, {
+        action: "delete",
+        id,
+        panel: "supportTicket",
+      }),
       successMessage: "Support ticket deleted successfully",
     });
     props.setIsMainScreenLoad(false);

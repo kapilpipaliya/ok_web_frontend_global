@@ -21,7 +21,6 @@ export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {
     >
       <AuthenticatedMenu
         onClose={props.onClose}
-        signOutCall={props.signOutCall}
       />
     </Show>
   );

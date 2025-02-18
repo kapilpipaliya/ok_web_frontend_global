@@ -4,7 +4,6 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import { signInCall } from "~/lib/api/service/user/signInCall";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
@@ -15,6 +14,8 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
+import {postAPI} from "~/lib/api/postApi";
+import {API} from "~/lib/api/endpoints";
 
 export function LoginForm() {
   const [graph, setGraph] = useGraph();
@@ -84,7 +85,10 @@ export function LoginForm() {
           });
           handleLoginRedirect(value, graph, navigate);
         },
-        promise: signInCall(() => ({ ...formData.P, loginType: "login" })),
+        promise: postAPI(API.loginUrl, {
+          email: formData().email.toLowerCase(),
+          password: formData().password,
+        }),
         successMessage: "Logged In Successfully",
       });
     }

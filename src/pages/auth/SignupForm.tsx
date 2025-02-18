@@ -4,8 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import { registerUserCall } from "~/lib/api/service/user/registerUserCall";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
@@ -15,6 +14,8 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
+import {postAPI} from "~/lib/api/postApi";
+import {API} from "~/lib/api/endpoints";
 
 export function SignupForm() {
   const [graph, setGraph] = useGraph();
@@ -62,7 +63,7 @@ export function SignupForm() {
     return true;
   };
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: Vertex) => {
     if (validateFormData(formData)) {
       const globalStoreId = "globalStoreId";
       mergeVertexProperties(0, globalStoreId, graph, setGraph, {
@@ -82,9 +83,11 @@ export function SignupForm() {
           });
           handleLoginRedirect(value, graph, navigate);
         },
-        promise: registerUserCall(() => ({
-          ...formData.P,
-          loginType: "signup",
+        promise: (postAPI(API.signUpUrl, {
+          email: formData.P.email.toLowerCase(),
+          password: formData.P.password,
+          subDomain: formData.P.subDomain,
+          username: formData.P.username.toLowerCase(),
         })),
         successMessage: "Registered Successfully",
       });

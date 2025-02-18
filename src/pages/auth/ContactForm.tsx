@@ -3,8 +3,9 @@ import { createSignal, type JSX } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/styled/Toast";
-import { contactUsCall } from "~/lib/api/service/support/contactUsCall";
 import { validateEmail } from "~/lib/validation/validateEmail";
+import {postAPI} from "~/lib/api/postApi";
+import {API} from "~/lib/api/endpoints";
 
 interface FormHeaderProps {
   subtitle: string;
@@ -58,7 +59,15 @@ export function ContactForm(): JSX.Element {
         onSuccess: () => {
           navigate("/");
         },
-        promise: contactUsCall(formData),
+        promise: postAPI(API.profileUrl, {
+          action: "create",
+          email: formData().email.toLowerCase(),
+          message: formData().message,
+          name: formData().name,
+          panel: "supportTicket",
+          subject: formData().subject,
+          uId: formData().uId,
+        }),
         successMessage: "Message Sent Successfully",
       });
       setLoadingSite(false);

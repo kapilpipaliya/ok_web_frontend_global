@@ -9,10 +9,11 @@ import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { URLS } from "../constants/URLS";
+import {postAPI} from "~/lib/api/postApi";
+import {API} from "~/lib/api/endpoints";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
-  signOutCall: () => Promise<Record<string, unknown>>;
 }
 
 export function AuthenticatedMenu(
@@ -70,7 +71,7 @@ export function AuthenticatedMenu(
                   navigate(URLS.ADMIN.LOGIN);
                 }
               },
-              promise: props.signOutCall(),
+              promise: postAPI(API.logOutUrl, {}),
               successMessage: "Log Out Successfully",
             });
             mergeVertexProperties<GlobalProperties>(
