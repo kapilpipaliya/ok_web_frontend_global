@@ -5,7 +5,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { deleteTxnId } from "~/lib/graph/transaction/deleteTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { removeLastPathSegment } from "~/lib/url/removeLastPathSegment";
 
 export function formCancel(
   formStoreVertex: () => Vertex<FormStoreObject>,
@@ -30,4 +29,11 @@ export function formCancel(
       navigateToParentRoute();
     }
   };
+}
+
+function removeLastPathSegment() {
+  const pathname = window.location.pathname;
+  const segments = pathname.split("/");
+  segments.pop();
+  return segments.join("/");
 }
