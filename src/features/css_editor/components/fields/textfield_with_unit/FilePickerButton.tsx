@@ -1,12 +1,12 @@
 import { createMemo, createSignal, type JSX } from "solid-js";
 
-import type { TextFieldOptionsField } from "~/components/css_properties/constants/FieldSchemaType";
+import type { TextFieldOptionsField } from "~/features/css_editor/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 
-import { useCssEditorProps } from "~/components/css_properties/context/CSSEditorPropsContext";
-import { useCssState } from "~/components/css_properties/context/CssStateContext";
-import { useRenderContext } from "~/components/css_properties/context/RenderContext";
-import { getCssSelectedFileEdgeName } from "~/components/css_properties/utils/getCssSelectedFileEdgeName";
+import { useCssEditorProps } from "~/features/css_editor/context/CSSEditorPropsContext";
+import { useCssState } from "~/features/css_editor/context/CssStateContext";
+import { useRenderContext } from "~/features/css_editor/context/RenderContext";
+import { getCssSelectedFileEdgeName } from "~/features/css_editor/utils/getCssSelectedFileEdgeName";
 import {
   type FormStoreObject,
   useFormContext,

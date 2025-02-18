@@ -1,7 +1,7 @@
 import { Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { IconButton } from "../../styled/IconButton";
+import { IconButton } from "../../../components/styled/IconButton";
 import { type CSSStore, useCssEditor } from "../context/CssEditorContext";
 
 export function ResetButton(props: Readonly<{ onReset: () => void }>) {

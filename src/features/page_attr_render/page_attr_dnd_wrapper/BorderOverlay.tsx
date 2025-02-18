@@ -17,7 +17,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { generateBoxShadow } from "~/components/css_properties/utils/generate/generateBoxShadow";
+import { generateBoxShadow } from "~/features/css_editor/utils/generate/generateBoxShadow";
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,

@@ -2,8 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
-import { TextEditor } from "~/components/css_properties/CSSEditor/TextEditor";
-import { StyleEditor } from "~/components/css_properties/StyleEditor/StyleEditor";
+import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
+import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -11,13 +11,13 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 
-import { ZIndex } from "../../fields/ZIndex";
+import { ZIndex } from "../../../components/fields/ZIndex";
 import {
   type FormStoreObject,
   useFormContext,
-} from "../../form/context/FormContext";
-import { DynamicComponent } from "../../form/DynamicComponent";
-import { MultiSelectField } from "../../styled/MultiSelect";
+} from "../../../components/form/context/FormContext";
+import { DynamicComponent } from "../../../components/form/DynamicComponent";
+import { MultiSelectField } from "../../../components/styled/MultiSelect";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
 import { useCssState } from "../context/CssStateContext";

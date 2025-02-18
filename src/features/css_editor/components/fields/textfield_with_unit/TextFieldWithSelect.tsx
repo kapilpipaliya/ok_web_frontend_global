@@ -4,9 +4,9 @@ import { createSignal, onCleanup, Show, splitProps } from "solid-js";
 import type {
   OptionType,
   TextFieldOptionsField,
-} from "~/components/css_properties/constants/FieldSchemaType";
+} from "~/features/css_editor/constants/FieldSchemaType";
 
-import { sizeTypes } from "~/components/css_properties/constants/csseditor_constants";
+import { sizeTypes } from "~/features/css_editor/constants/csseditor_constants";
 
 import { getValueWithoutUnits } from "../../../../../lib/data_structure/number/getValueWithoutUnits";
 import { FilePickerButton } from "./FilePickerButton";

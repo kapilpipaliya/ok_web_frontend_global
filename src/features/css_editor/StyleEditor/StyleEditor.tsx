@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 
-import { SearchBar } from "../StyleEditor/SearchBar";
-import { SectionList } from "../StyleEditor/SectionList";
+import { SearchBar } from "./SearchBar";
+import { SectionList } from "./SectionList";
 import { filterSections } from "../utils/filterSections";
 
 export function StyleEditor() {

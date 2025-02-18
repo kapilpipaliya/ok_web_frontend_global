@@ -6,7 +6,7 @@ import { useGraph } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "./FieldType";
 
-import { replacePlaceholderWithUrl } from "../css_properties/utils/cssStateToString";
+import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 
 // HtmlField

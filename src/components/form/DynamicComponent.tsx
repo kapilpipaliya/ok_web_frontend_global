@@ -39,8 +39,8 @@ import type {
   FunctionArgumentType,
 } from "./FieldSchemaType";
 
-import { Label } from "../css_properties/components/fields/Label";
-import { cssStateToString } from "../css_properties/utils/cssStateToString";
+import { Label } from "~/features/css_editor/components/fields/Label";
+import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";

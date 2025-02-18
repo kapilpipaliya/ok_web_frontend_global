@@ -72,9 +72,9 @@ Tooltip.Trigger = clientOnly(
 import { Match, Portal, Show, Switch } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
-import { componentMap } from "~/components/css_properties/components/componentMap";
-import { CheckboxField } from "~/components/css_properties/components/fields/CheckboxField";
-import { TextAreaField } from "~/components/css_properties/components/fields/TextArea";
+import { componentMap } from "~/features/css_editor/components/componentMap";
+import { CheckboxField } from "~/features/css_editor/components/fields/CheckboxField";
+import { TextAreaField } from "~/features/css_editor/components/fields/TextArea";
 import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { DataField } from "~/components/fields/data/DataField";

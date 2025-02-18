@@ -9,7 +9,7 @@ import {
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { SearchBar } from "~/components/css_properties/StyleEditor/SearchBar";
+import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";

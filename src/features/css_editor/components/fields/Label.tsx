@@ -13,7 +13,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import {
   type FormStoreObject,
   useFormContext,
-} from "../../../form/context/FormContext";
+} from "../../../../components/form/context/FormContext";
 
 interface LabeledFieldProps {
   children: JSX.Element;

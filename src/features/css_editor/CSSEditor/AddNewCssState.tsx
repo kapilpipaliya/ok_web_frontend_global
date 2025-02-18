@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
-import { cssSelectorTree } from "~/components/css_properties/constants/StateSelector";
+import { cssSelectorTree } from "~/features/css_editor/constants/StateSelector";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 
-import { PROPERTIES } from "../../styled/constants/constant";
+import { PROPERTIES } from "../../../components/styled/constants/constant";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
 

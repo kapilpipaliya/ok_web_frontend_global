@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 
-import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
+import { DynamicCSSComponent } from "~/features/css_editor/components/DynamicCssComponent";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type {

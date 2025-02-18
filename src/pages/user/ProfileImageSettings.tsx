@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FilePickerModal } from "~/components/css_properties/components/fields/textfield_with_unit/FilePickerModal";
+import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { useToast } from "~/components/styled/Toast";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";

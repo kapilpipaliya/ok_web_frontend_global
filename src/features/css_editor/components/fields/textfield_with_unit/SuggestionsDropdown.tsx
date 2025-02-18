@@ -3,7 +3,7 @@ import { type Accessor, For, Show } from "solid-js";
 import type {
   AnotherOption,
   OptionType,
-} from "~/components/css_properties/constants/FieldSchemaType";
+} from "~/features/css_editor/constants/FieldSchemaType";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";

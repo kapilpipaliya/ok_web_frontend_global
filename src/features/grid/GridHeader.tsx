@@ -4,7 +4,7 @@ import { Dynamic } from "solid-js/web";
 
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { SearchBar } from "../../components/css_properties/StyleEditor/SearchBar";
+import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { IconButton } from "../../components/styled/IconButton";
 import { AddNewButton } from "./AddNewButton";
 import { useDataGridContext } from "./DataGridContext";
