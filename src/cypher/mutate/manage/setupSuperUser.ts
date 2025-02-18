@@ -5,9 +5,16 @@ import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
 import { Vertex } from "~/lib/graph/graph";
 
-import { superUserData } from "../../../../tests/auth/data/signUpData";
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+
+export const superUserData = {
+  email: "superuser@easyformforge.com",
+  password: "kK11235813@",
+  subDomain: SYSTEM_DB_NAME,
+  username: "superuser"
+};
 
 export async function setupSuperUser(): Promise<{
   error?: string;

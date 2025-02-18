@@ -1,27 +1,16 @@
-import { expect, test } from '@playwright/test';
+import { expect } from 'playwright/test';
 
-import { getDriver } from "~/cypher/driver";
-import { removeDockerComposeDirectory } from '~/server/docker_compose/remove';
+import { getDriver } from '~/cypher/driver';
 
-import { signUpData } from '../data/signUpData';
-test.describe('remove admin', () => {
-  test.afterEach(async () => {
-  });
-
-  test('remove admin and container', async () => {
-    await removeAdmin();
-    await removeDockerComposeDirectory(signUpData.subDomain);
-  });
-});
-
-export async function removeAdmin() {
-  const dbSession = (await getDriver()).session({database: "super"});
+// Not used in the project yet.
+export async function removeAdmin(subDomain: string) {
+  const dbSession = (await getDriver()).session({ database: "super" });
   const getSubDomainQuery = `MATCH (s:SubDomain { key: $subDomain })-[:UserSubDomain]-(u:User)
-        RETURN u`
+        RETURN u`;
   try {
     const getUser = await dbSession.run(
       getSubDomainQuery,
-      { subDomain: signUpData.subDomain }
+      { subDomain: subDomain }
     );
     expect(getUser.records.length).toBe(1);
 
@@ -49,7 +38,7 @@ export async function removeAdmin() {
     `;
     await dbSession.run(
       deleteEdgeQuery,
-      { id: user.identity, subDomain: signUpData.subDomain }
+      { id: user.identity, subDomain: subDomain }
     );
 
     // Delete the User
@@ -72,16 +61,16 @@ export async function removeAdmin() {
     `;
     await dbSession.run(
       deleteSubDomainQuery,
-      { subDomain: signUpData.subDomain }
+      { subDomain: subDomain }
     );
 
     // Verify the subDomain was removed
     const verifyResult = await dbSession.run(
       getSubDomainQuery,
-      { subDomain: signUpData.subDomain }
+      { subDomain: subDomain }
     );
 
-    expect(verifyResult.records.length).toBe(0);  // Expect no results, indicating subDomain was removed
+    expect(verifyResult.records.length).toBe(0); // Expect no results, indicating subDomain was removed
   } finally {
     await dbSession.close();
   }
