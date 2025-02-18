@@ -16,9 +16,14 @@ export const API = {
   logOutUrl: "/api/auth/logout",
   profileUrl: "/api/auth/updateProfile",
   replaceFileUrl: "/api/file/replace",
+  role: {
+    createRoleUrl: "/api/roles/create",
+    deleteRoleUrl: "/api/roles/delete",
+    getRolesUrl: "/api/roles/list",
+    updateRoleUrl: "/api/roles/update",
+  },
   signUpUrl: "/api/auth/signup",
   submitDataUrl: "/api/mutate/submitData",
-
   testEmailSettingsUrl: "/api/settings/email/test",
   updateCompanyLogoUrl: "/api/settings/updateCompanyLogo",
   updateCompanySettingsUrl: "/api/settings/company/update",
@@ -27,6 +32,12 @@ export const API = {
   updateProfileImageUrl: "/api/auth/updateProfileImage",
   updateSubDomainUrl: "/api/subdomain/update",
   uploadFileUrl: "/api/file/upload",
+  user: {
+    deleteUserUrl: "/api/users/delete",
+    getUsersListUrl: "/api/users/list",
+    inviteUserUrl: "/api/users/invite",
+    updateUserRoleUrl: "/api/users/updateRole",
+  },
 };
 
 export function generate401RedirectUrl(pathname: string): string {

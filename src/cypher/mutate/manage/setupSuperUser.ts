@@ -7,7 +7,6 @@ import { Vertex } from "~/lib/graph/graph";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",

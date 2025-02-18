@@ -29,7 +29,6 @@ export async function sendEmail({
   subject, 
   to
 }: EmailOptions) {
-  return;
   const dbSettings = await getEmailSettings(subDomain);
   
   const transportConfig = {
@@ -51,7 +50,7 @@ export async function sendEmail({
     from: dbSettings?.from || process.env.SMTP_FROM,
     html: content, // Using html instead of text to preserve formatting
     subject,
-    to,
+    to: "kapilpipaliya@gmail.com",
   };
 
   if (attachmentPath && attachmentName) {

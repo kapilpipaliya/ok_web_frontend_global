@@ -4,7 +4,9 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import { useGraph } from "~/lib/graph/graph";
+import {API} from "~/lib/api/endpoints";
+import {postAPI} from "~/lib/api/postApi";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
@@ -14,8 +16,6 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
-import {postAPI} from "~/lib/api/postApi";
-import {API} from "~/lib/api/endpoints";
 
 export function LoginForm() {
   const [graph, setGraph] = useGraph();
@@ -65,7 +65,7 @@ export function LoginForm() {
     return true;
   };
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: Vertex) => {
     if (validateFormData(formData)) {
       const globalStoreId = "globalStoreId";
       mergeVertexProperties(0, globalStoreId, graph, setGraph, {
@@ -86,8 +86,8 @@ export function LoginForm() {
           handleLoginRedirect(value, graph, navigate);
         },
         promise: postAPI(API.loginUrl, {
-          email: formData().email.toLowerCase(),
-          password: formData().password,
+          email: formData.P.email.toLowerCase(),
+          password: formData.P.password,
         }),
         successMessage: "Logged In Successfully",
       });

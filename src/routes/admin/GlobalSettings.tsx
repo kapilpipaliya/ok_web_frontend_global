@@ -8,6 +8,8 @@ import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 import { CompanySettings } from "~/pages/global/CompanySettings";
 import { EmailSettings } from "~/pages/global/EmailSettings";
 import { GeneralSettings } from "~/pages/global/GeneralSettings";
+import { RoleSettings } from "~/pages/global/RoleSettings";
+import { UserManagement } from "~/pages/global/UserManagement";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();
@@ -33,6 +35,16 @@ export default function GlobalSettings() {
       component: "ThemeSettings",
       id: "theme",
       label: "Theme Settings",
+    },
+    {
+      component: "RoleSettings",
+      id: "roles",
+      label: "Roles",
+    },
+    {
+      component: "UserManagement",
+      id: "users",
+      label: "Users",
     },
   ];
 
@@ -80,6 +92,12 @@ export default function GlobalSettings() {
           </Show>
           <Show when={selectedMenu() === "theme"}>
             <ThemeSettings />
+          </Show>
+          <Show when={selectedMenu() === "roles"}>
+            <RoleSettings />
+          </Show>
+          <Show when={selectedMenu() === "users"}>
+            <UserManagement />
           </Show>
         </div>
       </div>
