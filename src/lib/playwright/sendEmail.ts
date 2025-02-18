@@ -29,6 +29,7 @@ export async function sendEmail({
   subject, 
   to
 }: EmailOptions) {
+  return;
   const dbSettings = await getEmailSettings(subDomain);
   
   const transportConfig = {
