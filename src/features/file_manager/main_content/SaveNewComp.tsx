@@ -28,11 +28,13 @@ export function SaveNewComp(
     saveAsLabel?: "Comp" | "Perm";
   }>,
 ) {
-  let nameInputRef: HTMLInputElement;
+  let nameInputRef!: HTMLInputElement;
+  let descriptionInputRef!: HTMLInputElement;
   const [graph, setGraph] = useGraph();
   const [fileManagerStore] = useFileManagerStore();
 
   const [componentName, setComponentName] = createSignal("");
+  const [description, setDescription] = createSignal("");
   const [error, setError] = createSignal("");
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -50,6 +52,7 @@ export function SaveNewComp(
       props.saveAsLabel || "Comp",
       {
         key: componentName(),
+        ...(props.saveAsLabel === "Perm" ? { description: description() } : {}),
       },
     );
     const dataVertex = createResult.vertex!;
@@ -83,7 +86,7 @@ export function SaveNewComp(
       if (!result.error) {
         fileManagerStore.gridStore?.[0].fetchTableData();
       }
-    } catch (_error: any) {
+    } catch (error) {
       showErrorToast(`An error occurred while uploading the ${label()}`);
       return;
     }
@@ -122,25 +125,47 @@ export function SaveNewComp(
         prompted to change it.
       </DialogSubTitle>
 
-      <div>
-        <label
-          class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
-          for="templateName"
-        >
-          {label()} Name
-        </label>
-        <div class="mt:2">
-          <input
-            class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
-            id="templateName"
-            onChange={(e) => setComponentName(e.target.value)}
-            placeholder={`New ${label()} Name`}
-            ref={nameInputRef!}
-            type="text"
-            value={componentName()}
-          />
+      <div class="flex flex:column gap:.5rem">
+        <div>
+          <label
+            class="lh:1.25rem color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
+            for="templateName"
+          >
+            {label()} Name
+          </label>
+          <div class="mt:2">
+            <input
+              class="lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
+              id="templateName"
+              onChange={(e) => setComponentName(e.target.value)}
+              placeholder={`New ${label()} Name`}
+              ref={nameInputRef}
+              type="text"
+              value={componentName()}
+            />
+          </div>
+        </div>
+        <div>
+          <label
+            class="lh:1.25rem color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
+            for="description"
+          >
+            Description
+          </label>
+          <div class="mt:2">
+            <input
+              class="lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
+              id="description"
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Permission description"
+              ref={descriptionInputRef}
+              type="text"
+              value={description()}
+            />
+          </div>
         </div>
       </div>
+
       <Show when={error()}>
         <div class="fg:error">{error()}</div>
       </Show>

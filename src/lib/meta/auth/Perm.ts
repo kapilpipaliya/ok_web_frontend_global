@@ -4,6 +4,10 @@ export const Perm = {
       componentName: "TextInput",
       key: "key",
     },
+    {
+      componentName: "TextInput",
+      key: "description",
+    }
   ],
   isInlineEditable: true,
   key: "Perm",
