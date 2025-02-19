@@ -1,8 +1,12 @@
 import { DataGrid } from "~/features/grid/DataGrid";
+import { DataGridStore } from "~/features/grid/DataGridContext";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
+import { AddRoleForm } from "./AddRoleForm";
+
 export function RoleSettings() {
+  let gridStore: DataGridStore;
   const getTableData = async () => {
     const data = await getAPI(API.role.getRolesUrl);
     return {
@@ -19,7 +23,7 @@ export function RoleSettings() {
       {
         componentName: "Text",
         displayName: "Name",
-        key: "name",
+        key: "key",
       },
       {
         componentName: "Text",
@@ -38,8 +42,18 @@ export function RoleSettings() {
 
   return (
     <DataGrid
+      CustomAddNewButton={() => (
+        <AddRoleForm
+          onSuccess={() => {
+            gridStore?.[0].fetchTableData();
+          }}
+        />
+      )}
       formSchema={RoleSchema}
       getTableData={getTableData}
+      initializeGridStoreParent={(gridStore_) => {
+        gridStore = gridStore_;
+      }}
       isShowPagination={true}
       tableId="roles"
     />

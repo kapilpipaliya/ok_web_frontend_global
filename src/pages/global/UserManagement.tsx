@@ -1,8 +1,12 @@
 import { DataGrid } from "~/features/grid/DataGrid";
+import { DataGridStore } from "~/features/grid/DataGridContext";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
+import { AddUserForm } from "./AddUserForm";
+
 export function UserManagement() {
+  let gridStore: DataGridStore;
   const getTableData = async () => {
     const data = await getAPI(API.user.getUsersListUrl);
     return {
@@ -52,8 +56,18 @@ export function UserManagement() {
 
   return (
     <DataGrid
+      CustomAddNewButton={() => (
+        <AddUserForm
+          onSuccess={() => {
+            gridStore?.[0].fetchTableData();
+          }}
+        />
+      )}
       formSchema={UserSchema}
       getTableData={getTableData}
+      initializeGridStoreParent={(gridStore_) => {
+        gridStore = gridStore_;
+      }}
       isShowPagination={true}
       tableId="users"
     />

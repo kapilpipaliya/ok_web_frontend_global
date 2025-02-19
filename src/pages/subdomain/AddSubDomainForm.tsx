@@ -1,4 +1,4 @@
-import { type Component, createSignal } from "solid-js";
+import { type Component } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
@@ -9,7 +9,7 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
@@ -38,16 +38,21 @@ export const AddSubDomainForm: Component<Props> = (props) => {
     setGraph,
   );
 
-  const handleSave = async (options: FunctionArgumentType) => {
-    const formData = graph.vertexes[formDataId];
+  const validateForm = (formData: Vertex) => {
     if (!formData.P.key?.trim()) {
       showErrorToast("Please enter subdomain name");
-      return;
+      return false;
     }
     if (!formData.P.domain?.trim()) {
       showErrorToast("Please enter domain");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleSave = async (options: FunctionArgumentType) => {
+    const formData = graph.vertexes[formDataId];
+    if (!validateForm(formData)) return;
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
@@ -161,6 +166,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
     componentName: "Box",
   };
+
   const schema: FieldAttribute = {
     attributes: [
       {
@@ -206,14 +212,12 @@ export const AddSubDomainForm: Component<Props> = (props) => {
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: () => {
-      return {
-        data: createStore({
-          isLoading: false,
-          showModal: false,
-        }),
-      }
-    },
+    props: () => ({
+      data: createStore({
+        isLoading: false,
+        showModal: false,
+      }),
+    }),
   };
 
   return (

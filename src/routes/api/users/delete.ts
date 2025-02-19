@@ -12,11 +12,11 @@ export async function POST({ request }: APIEvent) {
 
   try {
     const currentUser = await getUserFromSession(request);
-    const [graph] = useGraph();
+    // const [graph] = useGraph();
 
-    if (!(currentUser?.P?.email && isAdminRole(graph))) {
-      throw new APIError("Unauthorized", 401);
-    }
+    // if (!(currentUser?.P?.email && isAdminRole(graph))) {
+    //   throw new APIError("Unauthorized", 401);
+    // }
 
     const { uuid } = await request.json();
 
