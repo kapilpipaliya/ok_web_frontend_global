@@ -1,5 +1,7 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
+import { v7 as uuidv7 } from "uuid";
 
+import { PROPERTIES } from "~/components/styled/constants/constant";
 import {
   dialogCancelButtonClass,
   DialogFooter,
@@ -14,9 +16,13 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useFileManagerStore } from "../FileManagerContext";
 
@@ -28,22 +34,33 @@ export function SaveNewComp(
     saveAsLabel?: "Comp" | "Perm";
   }>,
 ) {
-  let nameInputRef!: HTMLInputElement;
-  let descriptionInputRef!: HTMLInputElement;
   const [graph, setGraph] = useGraph();
   const [fileManagerStore] = useFileManagerStore();
-
-  const [componentName, setComponentName] = createSignal("");
-  const [description, setDescription] = createSignal("");
   const [error, setError] = createSignal("");
   const { showErrorToast, showSuccessToast } = useToast();
 
   const label = () => props.saveAsLabel === "Perm" ? "Permission" : "Component";
 
+  const formDataId = uuidv7();
+  addNewVertex(
+    0,
+    {
+      id: formDataId,
+      IN: {},
+      L: [props.saveAsLabel || "Comp"],
+      OUT: {},
+      P: {},
+    },
+    graph,
+    setGraph,
+  );
+
   const saveComponent = async () => {
     const currentItem = fileManagerStore.selectedItem;
 
     const newFormTxnId = generateNewTxnId(graph, setGraph);
+
+    const formVertex = graph.vertexes[formDataId];
 
     const createResult = createFormVertex(
       graph,
@@ -51,8 +68,8 @@ export function SaveNewComp(
       newFormTxnId,
       props.saveAsLabel || "Comp",
       {
-        key: componentName(),
-        ...(props.saveAsLabel === "Perm" ? { description: description() } : {}),
+        description: formVertex.P.description,
+        key: formVertex.P.key,
       },
     );
     const dataVertex = createResult.vertex!;
@@ -86,21 +103,22 @@ export function SaveNewComp(
       if (!result.error) {
         fileManagerStore.gridStore?.[0].fetchTableData();
       }
-    } catch (error) {
+    } catch (err) {
       showErrorToast(`An error occurred while uploading the ${label()}`);
       return;
     }
     showSuccessToast(`${label()} uploaded successfully`);
   };
 
-  const saveAsTemplate = async (key: string) => {
-    if (!componentName()) {
+  const saveAsTemplate = async () => {
+    const formVertex = graph.vertexes[formDataId];
+    if (!formVertex.P.key) {
       setError("Please enter a name");
       return;
     }
     const res = await checkUniqueConstrains({
       L: [props.saveAsLabel || "Comp"],
-      P: { key },
+      P: { key: formVertex.P.key },
     } as unknown as Vertex);
     if (res.error) {
       setError(res.error);
@@ -109,9 +127,51 @@ export function SaveNewComp(
     saveComponent();
   };
 
-  onMount(() => {
-    nameInputRef.focus();
-  });
+  const form = {
+    as: "div",
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: `${label()} Name`,
+            validation: { required: true },
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "key",
+            placeholder: `New ${label()} Name`,
+            validation: { required: true },
+          },
+        ],
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        componentName: "Box",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "Description",
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "description",
+            placeholder: "description",
+          },
+        ],
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        componentName: "Box",
+      },
+    ],
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    componentName: "Box",
+  } as FieldAttribute;
 
   return (
     <DropdownMenu
@@ -125,46 +185,10 @@ export function SaveNewComp(
         prompted to change it.
       </DialogSubTitle>
 
-      <div class="flex flex:column gap:.5rem">
-        <div>
-          <label
-            class="lh:1.25rem color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
-            for="templateName"
-          >
-            {label()} Name
-          </label>
-          <div class="mt:2">
-            <input
-              class="lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
-              id="templateName"
-              onChange={(e) => setComponentName(e.target.value)}
-              placeholder={`New ${label()} Name`}
-              ref={nameInputRef}
-              type="text"
-              value={componentName()}
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            class="lh:1.25rem color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
-            for="description"
-          >
-            Description
-          </label>
-          <div class="mt:2">
-            <input
-              class="lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
-              id="description"
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Permission description"
-              ref={descriptionInputRef}
-              type="text"
-              value={description()}
-            />
-          </div>
-        </div>
-      </div>
+      <SchemaRenderer
+        form={{ attributes: [form], key: "Profile" }}
+        formDataId={formDataId}
+      />
 
       <Show when={error()}>
         <div class="fg:error">{error()}</div>
@@ -173,8 +197,7 @@ export function SaveNewComp(
       <DialogFooter>
         <button
           class={dialogOkButtonClass}
-          // disabled={!componentName()}
-          onClick={() => saveAsTemplate(componentName())}
+          onClick={saveAsTemplate}
           type="button"
         >
           Save
