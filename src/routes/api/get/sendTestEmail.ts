@@ -4,7 +4,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
-import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
@@ -20,7 +20,7 @@ export async function GET({ request }: APIEvent) {
     : undefined;
 
   try {
-    const result = await renderPageAsMHtml({
+    const result = await renderPageAsHtml({
       neo4jSession: dbSession,
       pageName: "test",
       queryParams: {
